@@ -32,6 +32,7 @@ export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
   'refreshPaused',
   'refreshInterval',
   'environment',
+  'serviceGroup',
 ];
 
 /**

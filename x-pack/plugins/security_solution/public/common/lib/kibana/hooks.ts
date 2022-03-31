@@ -157,8 +157,8 @@ export const useGetUserCasesPermissions = () => {
 
   useEffect(() => {
     setCasesPermissions({
-      crud: !!uiCapabilities[CASES_FEATURE_ID].crud_cases,
-      read: !!uiCapabilities[CASES_FEATURE_ID].read_cases,
+      crud: !!uiCapabilities[CASES_FEATURE_ID]?.crud_cases,
+      read: !!uiCapabilities[CASES_FEATURE_ID]?.read_cases,
     });
   }, [uiCapabilities]);
 

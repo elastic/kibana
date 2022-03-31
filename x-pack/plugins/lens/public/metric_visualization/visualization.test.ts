@@ -6,7 +6,7 @@
  */
 
 import { getMetricVisualization } from './visualization';
-import { MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
@@ -269,6 +269,8 @@ describe('metric_visualization', () => {
             dataType: 'number',
             isBucketed: false,
             label: 'shazm',
+            isStaticValue: false,
+            hasTimeShift: false,
           };
         },
       };
@@ -284,27 +286,93 @@ describe('metric_visualization', () => {
           "chain": Array [
             Object {
               "arguments": Object {
-                "accessor": Array [
-                  "a",
+                "autoScale": Array [
+                  true,
+                ],
+                "colorFullBackground": Array [
+                  true,
                 ],
                 "colorMode": Array [
                   "None",
                 ],
-                "description": Array [
-                  "",
+                "font": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "align": Array [
+                            "center",
+                          ],
+                          "lHeight": Array [
+                            127.5,
+                          ],
+                          "size": Array [
+                            85,
+                          ],
+                          "sizeUnit": Array [
+                            "px",
+                          ],
+                          "weight": Array [
+                            "600",
+                          ],
+                        },
+                        "function": "font",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
-                "metricTitle": Array [
-                  "shazm",
+                "labelFont": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "align": Array [
+                            "center",
+                          ],
+                          "lHeight": Array [
+                            40.5,
+                          ],
+                          "size": Array [
+                            27,
+                          ],
+                          "sizeUnit": Array [
+                            "px",
+                          ],
+                        },
+                        "function": "font",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
-                "mode": Array [
-                  "full",
+                "labelPosition": Array [
+                  "bottom",
+                ],
+                "metric": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "accessor": Array [
+                            "a",
+                          ],
+                        },
+                        "function": "visdimension",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "palette": Array [],
-                "title": Array [
-                  "",
+                "showLabels": Array [
+                  true,
                 ],
               },
-              "function": "lens_metric_chart",
+              "function": "metricVis",
               "type": "function",
             },
           ],

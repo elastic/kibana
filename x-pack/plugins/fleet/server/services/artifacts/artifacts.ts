@@ -48,7 +48,7 @@ export const getArtifact = async (
     });
 
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return esSearchHitToArtifact(esData.body);
+    return esSearchHitToArtifact(esData);
   } catch (e) {
     if (isElasticsearchItemNotFoundError(e)) {
       return;
@@ -107,6 +107,8 @@ export const listArtifacts = async (
       from: (page - 1) * perPage,
       ignore_unavailable: true,
       size: perPage,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
       body: {
         sort: [{ [sortField]: { order: sortOrder } }],
       },
@@ -114,11 +116,10 @@ export const listArtifacts = async (
 
     return {
       // @ts-expect-error @elastic/elasticsearch _source is optional
-      items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
+      items: searchResult.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
-      // @ts-expect-error doesn't handle total as number
-      total: searchResult.body.hits.total.value,
+      total: searchResult.hits.total as number,
     };
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);

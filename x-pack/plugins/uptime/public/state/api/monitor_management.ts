@@ -10,21 +10,28 @@ import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResultCodec,
   MonitorManagementListResult,
+  MonitorManagementEnablementResultCodec,
+  MonitorManagementEnablementResult,
   ServiceLocations,
   SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
   ServiceLocationsApiResponseCodec,
   ServiceLocationErrors,
+  ThrottlingOptions,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import {
+  DecryptedSyntheticsMonitorSavedObject,
+  SyntheticsServiceAllowed,
+} from '../../../common/types';
 import { apiService } from './utils';
 
 export const setMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id?: string;
-}): Promise<ServiceLocationErrors> => {
+}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
@@ -32,7 +39,11 @@ export const setMonitor = async ({
   }
 };
 
-export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
+export const getMonitor = async ({
+  id,
+}: {
+  id: string;
+}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
 
@@ -50,13 +61,16 @@ export const fetchMonitorManagementList = async (
   );
 };
 
-export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
-  const { locations } = await apiService.get(
+export const fetchServiceLocations = async (): Promise<{
+  throttling: ThrottlingOptions | undefined;
+  locations: ServiceLocations;
+}> => {
+  const { throttling, locations } = await apiService.get(
     API_URLS.SERVICE_LOCATIONS,
     undefined,
     ServiceLocationsApiResponseCodec
   );
-  return locations;
+  return { throttling, locations };
 };
 
 export const runOnceMonitor = async ({
@@ -77,4 +91,25 @@ export interface TestNowResponse {
 
 export const testNowMonitor = async (configId: string): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
+};
+
+export const fetchGetSyntheticsEnablement =
+  async (): Promise<MonitorManagementEnablementResult> => {
+    return await apiService.get(
+      API_URLS.SYNTHETICS_ENABLEMENT,
+      undefined,
+      MonitorManagementEnablementResultCodec
+    );
+  };
+
+export const fetchDisableSynthetics = async (): Promise<void> => {
+  return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
+};
+
+export const fetchEnableSynthetics = async (): Promise<void> => {
+  return await apiService.post(API_URLS.SYNTHETICS_ENABLEMENT);
+};
+
+export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {
+  return await apiService.get(API_URLS.SERVICE_ALLOWED);
 };

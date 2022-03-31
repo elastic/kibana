@@ -18,7 +18,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions
 import { createKibanaContextForPlugin } from '../hooks/use_kibana';
 import { InfraClientStartDeps } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
+import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
 export const CommonInfraProviders: React.FC<{
@@ -43,11 +43,18 @@ export const CommonInfraProviders: React.FC<{
   );
 };
 
-export const CoreProviders: React.FC<{
+export interface CoreProvidersProps {
   core: CoreStart;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
-}> = ({ children, core, plugins, theme$ }) => {
+}
+
+export const CoreProviders: React.FC<CoreProvidersProps> = ({
+  children,
+  core,
+  plugins,
+  theme$,
+}) => {
   const { Provider: KibanaContextProviderForPlugin } = useMemo(
     () => createKibanaContextForPlugin(core, plugins),
     [core, plugins]

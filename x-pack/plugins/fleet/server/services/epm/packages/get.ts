@@ -21,7 +21,7 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { IngestManagerError } from '../../../errors';
+import { IngestManagerError, PackageNotFoundError } from '../../../errors';
 import { appContextService } from '../../';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -106,7 +106,7 @@ export async function getPackageInfoFromRegistry(options: {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackage(pkgName),
+    Registry.fetchFindLatestPackageOrThrow(pkgName),
   ]);
 
   // If no package version is provided, use the installed version in the response
@@ -143,18 +143,19 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
+
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackage(pkgName),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName),
   ]);
 
-  // If no package version is provided, use the installed version in the response
-  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
-
-  // If no installed version of the given package exists, default to the latest version of the package
-  if (!responsePkgVersion) {
-    responsePkgVersion = latestPackage.version;
+  if (!savedObject && !latestPackage) {
+    throw new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
   }
+
+  // If no package version is provided, use the installed version in the response, fallback to package from registry
+  const responsePkgVersion =
+    pkgVersion ?? savedObject?.attributes.install_version ?? latestPackage!.version;
 
   const getPackageRes = await getPackageFromSource({
     pkgName,
@@ -166,7 +167,7 @@ export async function getPackageInfo(options: {
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
-    latestVersion: latestPackage.version,
+    latestVersion: latestPackage?.version ?? responsePkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     removable: true,

@@ -64,6 +64,11 @@ describe('findThresholdSignals', () => {
                   field: '@timestamp',
                 },
               },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
+                },
+              },
             },
           },
         },
@@ -98,6 +103,11 @@ describe('findThresholdSignals', () => {
             aggs: {
               max_timestamp: {
                 max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
                   field: '@timestamp',
                 },
               },
@@ -143,6 +153,11 @@ describe('findThresholdSignals', () => {
                 aggs: {
                   max_timestamp: {
                     max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
                       field: '@timestamp',
                     },
                   },
@@ -212,6 +227,11 @@ describe('findThresholdSignals', () => {
                       field: '@timestamp',
                     },
                   },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
+                    },
+                  },
                 },
               },
             },
@@ -270,6 +290,11 @@ describe('findThresholdSignals', () => {
               },
               max_timestamp: {
                 max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
                   field: '@timestamp',
                 },
               },

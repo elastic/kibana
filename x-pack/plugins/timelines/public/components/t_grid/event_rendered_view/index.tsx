@@ -127,7 +127,7 @@ const EventRenderedViewComponent = ({
               {leadingControlColumns.length > 0
                 ? leadingControlColumns.map((action) => {
                     const getActions = action.rowCellRender as (
-                      props: EuiDataGridCellValueElementProps
+                      props: Omit<EuiDataGridCellValueElementProps, 'colIndex'>
                     ) => React.ReactNode;
                     return getActions({
                       columnId: 'actions',
@@ -228,7 +228,7 @@ const EventRenderedViewComponent = ({
       pageSize,
       totalItemCount,
       pageSizeOptions,
-      hidePerPageOptions: false,
+      showPerPageOptions: true,
     }),
     [pageIndex, pageSize, pageSizeOptions, totalItemCount]
   );

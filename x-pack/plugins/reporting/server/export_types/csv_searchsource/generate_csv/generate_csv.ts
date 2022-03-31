@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
-import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from 'kibana/server';
 import type { IScopedSearchClient } from 'src/plugins/data/server';
 import type { Datatable } from 'src/plugins/expressions/server';
 import type { Writable } from 'stream';
@@ -30,11 +30,16 @@ import type {
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
+import {
+  AuthenticationExpiredError,
+  ReportingError,
+  UnknownError,
+} from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import type { LevelLogger } from '../../../lib';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
+import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
 interface Clients {
@@ -59,7 +64,7 @@ export class CsvGenerator {
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
-    private logger: LevelLogger,
+    private logger: Logger,
     private stream: Writable
   ) {}
 
@@ -86,13 +91,11 @@ export class CsvGenerator {
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
     this.logger.debug(`executing scroll request`);
-    const results = (
-      await this.clients.es.asCurrentUser.scroll({
-        scroll: scrollSettings.duration,
-        scroll_id: scrollId,
-      })
-    ).body;
-    return results;
+
+    return await this.clients.es.asCurrentUser.scroll({
+      scroll: scrollSettings.duration,
+      scroll_id: scrollId,
+    });
   }
 
   /*
@@ -257,6 +260,7 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
+    let reportingError: undefined | ReportingError;
 
     const index = searchSource.getField('index');
 
@@ -311,7 +315,7 @@ export class CsvGenerator {
         }
 
         if (!results) {
-          this.logger.warning(`Search results are undefined!`);
+          this.logger.warn(`Search results are undefined!`);
           break;
         }
 
@@ -360,16 +364,19 @@ export class CsvGenerator {
 
       // Add warnings to be logged
       if (this.csvContainsFormulas && escapeFormulaValues) {
-        warnings.push(
-          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
-            defaultMessage: 'CSV may contain formulas whose values have been escaped',
-          })
-        );
+        warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
       this.logger.error(err);
       if (err instanceof KbnServerError && err.errBody) {
         throw JSON.stringify(err.errBody.error);
+      }
+
+      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
+        reportingError = new AuthenticationExpiredError();
+        warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+      } else {
+        throw new UnknownError(err.message);
       }
     } finally {
       // clear scrollID
@@ -388,7 +395,7 @@ export class CsvGenerator {
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
-      this.logger.warning(
+      this.logger.warn(
         `ES scroll returned fewer total hits than expected! ` +
           `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
       );
@@ -398,7 +405,11 @@ export class CsvGenerator {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
+      metrics: {
+        csv: { rows: this.csvRowCount },
+      },
       warnings,
+      error_code: reportingError?.code,
     };
   }
 }

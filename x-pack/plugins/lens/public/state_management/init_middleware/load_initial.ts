@@ -9,7 +9,7 @@ import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initEmpty, LensStoreDeps } from '..';
-import { getPreloadedState } from '../lens_slice';
+import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
@@ -49,16 +49,17 @@ export const getPersisted = async ({
     const sharingSavedObjectProps = metaInfo?.sharingSavedObjectProps;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
       const newPath = lensServices.http.basePath.prepend(
         `${getEditPath(newObjectId)}${history.location.search}`
       );
-      await spaces.ui.redirectLegacyUrl(
-        newPath,
-        i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
+      await spaces.ui.redirectLegacyUrl({
+        path: newPath,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+        objectNoun: i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
           defaultMessage: 'Lens visualization',
-        })
-      );
+        }),
+      });
     }
     doc = {
       ...initialInput,
@@ -93,7 +94,8 @@ export function loadInitial(
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
-  }
+  },
+  autoApplyDisabled: boolean
 ) {
   const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
@@ -129,6 +131,9 @@ export function loadInitial(
             initialContext,
           })
         );
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
       })
       .catch((e: { message: string }) => {
         notifications.toasts.addDanger({
@@ -209,6 +214,10 @@ export function loadInitial(
                   isLoading: false,
                 })
               );
+
+              if (autoApplyDisabled) {
+                store.dispatch(disableAutoApply());
+              }
             })
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({

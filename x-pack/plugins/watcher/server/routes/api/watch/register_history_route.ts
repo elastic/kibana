@@ -45,7 +45,7 @@ function fetchHistoryItems(dataClient: IScopedClusterClient, watchId: any, start
 
   return dataClient.asCurrentUser
     .search(params)
-    .then((response) => fetchAllFromScroll(response.body, dataClient));
+    .then((response) => fetchAllFromScroll(response, dataClient));
 }
 
 export function registerHistoryRoute({

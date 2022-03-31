@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
 import type { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { isNumericFieldForDatatable, MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
+import { isNumericFieldForDatatable } from '../../common/expressions';
 import {
   applyPaletteParams,
   CustomizablePalette,

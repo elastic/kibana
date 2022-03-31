@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'global_dashboard_read',
           'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
         ],
-        false
+        { skipBrowserRefresh: true }
       );
     });
 

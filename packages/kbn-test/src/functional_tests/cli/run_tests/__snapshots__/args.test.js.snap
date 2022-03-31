@@ -26,7 +26,8 @@ Options:
   --verbose                      Log everything. 
   --debug                        Run in debug mode. 
   --quiet                        Only log errors. 
-  --silent                       Log nothing."
+  --silent                       Log nothing. 
+  --dry-run                      Report tests without executing them."
 `;
 
 exports[`process options for run tests CLI accepts boolean value for updateBaselines 1`] = `

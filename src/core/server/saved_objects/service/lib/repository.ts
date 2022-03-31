@@ -392,8 +392,8 @@ export class SavedObjectsRepository {
 
     const { body, statusCode, headers } =
       id && overwrite
-        ? await this.client.index(requestParams)
-        : await this.client.create(requestParams);
+        ? await this.client.index(requestParams, { meta: true })
+        : await this.client.create(requestParams, { meta: true });
 
     // throw if we can't verify a 404 response is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -602,7 +602,7 @@ export class SavedObjectsRepository {
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const rawResponse = Object.values(bulkResponse?.body.items[esRequestIndex] ?? {})[0] as any;
+        const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
 
         const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
         if (error) {
@@ -672,7 +672,7 @@ export class SavedObjectsRepository {
               docs: bulkGetDocs,
             },
           },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         )
       : undefined;
     // throw if we can't verify a 404 response is from Elasticsearch
@@ -764,7 +764,7 @@ export class SavedObjectsRepository {
         ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
         refresh,
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
 
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -865,7 +865,7 @@ export class SavedObjectsRepository {
           }),
         },
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     // throw if we can't verify a 404 response is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -1019,6 +1019,7 @@ export class SavedObjectsRepository {
       esOptions,
       {
         ignore: [404],
+        meta: true,
       }
     );
     if (statusCode === 404) {
@@ -1128,7 +1129,7 @@ export class SavedObjectsRepository {
               docs: bulkGetDocs,
             },
           },
-          { ignore: [404] }
+          { ignore: [404], meta: true }
         )
       : undefined;
     // fail fast if we can't verify a 404 is from Elasticsearch
@@ -1237,7 +1238,7 @@ export class SavedObjectsRepository {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     const indexNotFound = statusCode === 404;
     // check if we have the elasticsearch header when index is not found and, if we do, ensure it is from Elasticsearch
@@ -1368,8 +1369,8 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body } = await this.client
-      .update<SavedObjectsRawDocSource>({
+    const body = await this.client
+      .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
@@ -1556,6 +1557,7 @@ export class SavedObjectsRepository {
           },
           {
             ignore: [404],
+            meta: true,
           }
         )
       : undefined;
@@ -1655,7 +1657,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex] ?? {};
+        const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
         const rawResponse = Object.values(response)[0] as any;
 
         const error = getBulkOperationError(type, id, rawResponse);
@@ -1734,7 +1736,7 @@ export class SavedObjectsRepository {
           }),
         },
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
     // fail fast if we can't verify a 404 is from Elasticsearch
     if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
@@ -1923,7 +1925,7 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const { body } = await this.client.update<SavedObjectsRawDocSource>({
+    const body = await this.client.update<unknown, unknown, SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
@@ -2028,6 +2030,7 @@ export class SavedObjectsRepository {
 
     const { body, statusCode, headers } = await this.client.openPointInTime(esOptions, {
       ignore: [404],
+      meta: true,
     });
 
     if (statusCode === 404) {
@@ -2088,11 +2091,9 @@ export class SavedObjectsRepository {
     id: string,
     options?: SavedObjectsClosePointInTimeOptions
   ): Promise<SavedObjectsClosePointInTimeResponse> {
-    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+    return await this.client.closePointInTime({
       body: { id },
     });
-
-    return body;
   }
 
   /**
@@ -2213,6 +2214,7 @@ export class SavedObjectsRepository {
       },
       {
         ignore: [404],
+        meta: true,
       }
     );
 

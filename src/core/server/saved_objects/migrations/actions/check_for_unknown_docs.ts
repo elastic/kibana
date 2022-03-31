@@ -56,8 +56,8 @@ export const checkForUnknownDocs =
           query,
         },
       })
-      .then((response) => {
-        const { hits } = response.body.hits;
+      .then((body) => {
+        const { hits } = body.hits;
         if (hits.length) {
           return Either.left({
             type: 'unknown_docs_found' as const,

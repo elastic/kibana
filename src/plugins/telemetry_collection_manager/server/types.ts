@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  ElasticsearchClient,
-  Logger,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPlugin } from './plugin';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { TelemetryCollectionManagerPlugin } from './plugin';
 
 export interface TelemetryCollectionManagerPluginSetup {
   setCollectionStrategy: <T extends BasicStatsPayload>(
@@ -36,7 +31,6 @@ export interface TelemetryOptInStats {
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
   refreshCache?: boolean;
-  request?: KibanaRequest;
 }
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
@@ -45,7 +39,6 @@ export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
 
 export interface UnencryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: true;
-  request: KibanaRequest;
 }
 
 export interface ClusterDetails {
@@ -56,7 +49,6 @@ export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
-  kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
   refreshCache: boolean;
 }
 

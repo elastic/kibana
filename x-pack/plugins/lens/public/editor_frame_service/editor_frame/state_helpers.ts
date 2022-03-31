@@ -17,6 +17,7 @@ import {
   Visualization,
   VisualizationDimensionGroupConfig,
   VisualizationMap,
+  VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
@@ -35,7 +36,7 @@ export async function initializeDatasources(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   options?: InitializationOptions
 ) {
   const states: DatasourceStates = {};

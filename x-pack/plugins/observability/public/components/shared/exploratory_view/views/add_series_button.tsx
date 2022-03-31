@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { SeriesUrl, BuilderItem } from '../types';
 import { getSeriesToEdit } from '../series_editor/series_editor';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
 
@@ -21,13 +21,13 @@ export function AddSeriesButton() {
   const addSeriesButtonRef = useRef<HTMLButtonElement>(null);
   const { getSeries, allSeries, setSeries, reportType } = useSeriesStorage();
 
-  const { loading, indexPatterns } = useAppIndexPatternContext();
+  const { loading, dataViews } = useAppDataViewContext();
 
   const { reportConfigMap } = useExploratoryView();
 
   useEffect(() => {
-    setEditorItems(getSeriesToEdit({ allSeries, indexPatterns, reportType, reportConfigMap }));
-  }, [allSeries, getSeries, indexPatterns, loading, reportConfigMap, reportType]);
+    setEditorItems(getSeriesToEdit({ allSeries, dataViews, reportType, reportConfigMap }));
+  }, [allSeries, getSeries, dataViews, loading, reportConfigMap, reportType]);
 
   const addSeries = () => {
     const prevSeries = allSeries?.[0];

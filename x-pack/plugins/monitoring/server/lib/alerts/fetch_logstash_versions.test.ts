@@ -6,8 +6,6 @@
  */
 
 import { fetchLogstashVersions } from './fetch_logstash_versions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
@@ -35,9 +33,9 @@ describe('fetchLogstashVersions', () => {
   const size = 10;
 
   it('fetch as expected', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           index: {
             buckets: [
@@ -76,7 +74,7 @@ describe('fetchLogstashVersions', () => {
             ],
           },
         },
-      })
+      }
     );
 
     const result = await fetchLogstashVersions(esClient, clusters, size);
@@ -92,7 +90,7 @@ describe('fetchLogstashVersions', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchLogstashVersions(esClient, clusters, size);
     expect(params).toStrictEqual({
@@ -109,6 +107,7 @@ describe('fetchLogstashVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'logstash_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'logstash.node_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -148,7 +147,7 @@ describe('fetchLogstashVersions', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     await fetchLogstashVersions(esClient, clusters, size);
     // @ts-ignore

@@ -407,6 +407,7 @@ function decodeUiFilters(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function setupUXRequest<TParams extends SetupUXRequestParams>(
   resources: APMRouteHandlerResources & { params: TParams }
 ) {

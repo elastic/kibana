@@ -165,7 +165,7 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const { body: putReadonly } = await esClient.indices.putSettings({
+    const putReadonly = await esClient.indices.putSettings({
       index: indexName,
       body: { blocks: { write: true } },
     });
@@ -210,7 +210,7 @@ export const reindexServiceFactory = (
       }
     }
 
-    if (createIndex && !createIndex?.body?.acknowledged) {
+    if (createIndex && !createIndex?.acknowledged) {
       throw error.cannotCreateIndex(`Index could not be created: ${newIndexName}`);
     }
 
@@ -240,7 +240,7 @@ export const reindexServiceFactory = (
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
-    const { body: startReindexResponse } = await esClient.reindex({
+    const startReindexResponse = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
       body: {
@@ -273,7 +273,7 @@ export const reindexServiceFactory = (
     const taskId = reindexOp.attributes.reindexTaskId!;
 
     // Check reindexing task progress
-    const { body: taskResponse } = await esClient.tasks.get({
+    const taskResponse = await esClient.tasks.get({
       task_id: taskId,
       wait_for_completion: false,
     });
@@ -293,12 +293,8 @@ export const reindexServiceFactory = (
       // Do any other cleanup work necessary
       reindexOp = await cleanupChanges(reindexOp);
     } else {
-      // Check that it reindexed all documents
-      const {
-        body: { count },
-      } = await esClient.count({ index: reindexOp.attributes.indexName });
-
-      if (taskResponse.task.status!.created < count) {
+      // Check that no failures occurred
+      if (taskResponse.response?.failures?.length) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
@@ -312,7 +308,7 @@ export const reindexServiceFactory = (
     }
 
     // Delete the task from ES .tasks index
-    const { body: deleteTaskResp } = await esClient.delete({
+    const deleteTaskResp = await esClient.delete({
       index: '.tasks',
       id: taskId,
     });
@@ -325,7 +321,7 @@ export const reindexServiceFactory = (
   };
 
   const getIndexAliases = async (indexName: string) => {
-    const { body: response } = await esClient.indices.getAlias({
+    const response = await esClient.indices.getAlias({
       index: indexName,
     });
 
@@ -345,7 +341,7 @@ export const reindexServiceFactory = (
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
-    const { body: aliasResponse } = await esClient.indices.updateAliases({
+    const aliasResponse = await esClient.indices.updateAliases({
       body: {
         actions: [
           { add: { index: newIndexName, alias: indexName } },
@@ -412,7 +408,7 @@ export const reindexServiceFactory = (
         ],
       } as any;
 
-      const { body: resp } = await esClient.security.hasPrivileges({
+      const resp = await esClient.security.hasPrivileges({
         body,
       });
 
@@ -438,7 +434,7 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
-      const { body: indexExists } = await esClient.indices.exists({ index: indexName });
+      const indexExists = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
@@ -618,7 +614,7 @@ export const reindexServiceFactory = (
         );
       }
 
-      const { body: resp } = await esClient.tasks.cancel({
+      const resp = await esClient.tasks.cancel({
         task_id: reindexOp.attributes.reindexTaskId!,
       });
 

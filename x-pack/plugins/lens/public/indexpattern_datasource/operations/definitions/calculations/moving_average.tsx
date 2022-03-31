@@ -92,12 +92,10 @@ export const movingAverageOperation: OperationDefinition<
       window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
     });
   },
-  buildColumn: (
-    { referenceIds, previousColumn, layer },
-    columnParams = { window: WINDOW_DEFAULT_VALUE }
-  ) => {
+  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
-    const { window = WINDOW_DEFAULT_VALUE } = columnParams;
+    const window = columnParams?.window ?? WINDOW_DEFAULT_VALUE;
+
     return {
       label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',

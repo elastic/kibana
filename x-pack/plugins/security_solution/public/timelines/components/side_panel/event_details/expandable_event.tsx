@@ -23,9 +23,8 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
-
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { HostRisk } from '../../../../risk_score/containers';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -41,6 +40,7 @@ interface Props {
   timelineId: string;
   hostRisk: HostRisk | null;
   handleOnEventClosed: HandleOnEventClosed;
+  isReadOnly?: boolean;
 }
 
 interface ExpandableEventTitleProps {
@@ -110,6 +110,7 @@ export const ExpandableEvent = React.memo<Props>(
     hostRisk,
     rawEventData,
     handleOnEventClosed,
+    isReadOnly,
   }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -134,6 +135,7 @@ export const ExpandableEvent = React.memo<Props>(
             timelineTabType={timelineTabType}
             hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
+            isReadOnly={isReadOnly}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

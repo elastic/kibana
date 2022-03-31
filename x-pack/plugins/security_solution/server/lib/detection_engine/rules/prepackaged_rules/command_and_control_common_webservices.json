@@ -5,9 +5,7 @@
   "description": "Adversaries may implement command and control communications that use common web services in order to hide their activity. This attack technique is typically targeted to an organization and uses web services common to the victim network which allows the adversary to blend into legitimate traffic. activity. These popular services are typically targeted since they have most likely been used before a compromise and allow adversaries to blend in the network.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -69,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 7
 }

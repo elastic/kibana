@@ -68,7 +68,7 @@ export async function getPolicyLevelUsage(
     index: '.fleet-agents',
     ignore_unavailable: true,
   });
-  const policied = agentResponse.body.aggregations?.policied;
+  const policied = agentResponse.aggregations?.policied;
   if (policied && typeof policied.doc_count === 'number') {
     result.agent_info = {
       enrolled: policied.doc_count,
@@ -116,7 +116,7 @@ export async function getLiveQueryUsage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const { body: metricResponse } = await esClient.search<
+  const metricResponse = await esClient.search<
     unknown,
     {
       queries: AggregationsSingleBucketAggregateBase;
@@ -206,7 +206,7 @@ export function extractBeatUsageMetrics(
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
-  const { body: metricResponse } = await esClient.search<unknown, BeatUsageAggs>({
+  const metricResponse = await esClient.search<unknown, BeatUsageAggs>({
     body: {
       size: 0,
       aggs: {

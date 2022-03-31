@@ -1,0 +1,5 @@
+module.exports = {
+  preset: <%- js(pkg.web ? '@kbn/test' : '@kbn/test/jest_node') %>,
+  rootDir: '../..',
+  roots: [<%- js(`<rootDir>/${pkg.normalizedRepoRelativeDir}`) %>],
+};

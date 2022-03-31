@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
+import {
+  ON_PREM_REPOSITORY_TYPES,
+  MODULE_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+} from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
@@ -61,9 +65,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         },
       };
 
-      clusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockRepositoryEsResponse });
-      getLifecycleFn.mockResolvedValue({ body: mockPolicyEsResponse });
+      clusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+      getRepoFn.mockResolvedValue(mockRepositoryEsResponse);
+      getLifecycleFn.mockResolvedValue(mockPolicyEsResponse);
 
       const expectedResponse = {
         repositories: [
@@ -96,9 +100,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         },
       };
 
-      clusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockRepositoryEsResponse });
-      getLifecycleFn.mockResolvedValue({ body: mockPolicyEsResponse });
+      clusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+      getRepoFn.mockResolvedValue(mockRepositoryEsResponse);
+      getLifecycleFn.mockResolvedValue(mockPolicyEsResponse);
 
       const expectedResponse = {
         repositories: [],
@@ -112,7 +116,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should throw if ES error', async () => {
-      clusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      clusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
       getRepoFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
@@ -135,9 +139,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         [name]: { type: '', settings: {} },
       };
 
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockEsResponse });
-      getSnapshotFn.mockResolvedValue({ body: {} });
+      getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+      getRepoFn.mockResolvedValue(mockEsResponse);
+      getSnapshotFn.mockResolvedValue({});
 
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
@@ -149,9 +153,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should return empty repository object if not returned from ES', async () => {
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getRepoFn.mockResolvedValue({ body: {} });
-      getSnapshotFn.mockResolvedValue({ body: {} });
+      getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+      getRepoFn.mockResolvedValue({});
+      getSnapshotFn.mockResolvedValue({});
 
       const expectedResponse = {
         repository: {},
@@ -169,9 +173,9 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         snapshots: [{ repository: name }, { repository: name }],
       };
 
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockEsResponse });
-      getSnapshotFn.mockResolvedValue({ body: mockEsSnapshotResponse });
+      getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+      getRepoFn.mockResolvedValue(mockEsResponse);
+      getSnapshotFn.mockResolvedValue(mockEsSnapshotResponse);
 
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
@@ -189,8 +193,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         [name]: { type: '', settings: {} },
       };
 
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockEsResponse });
+      getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+      getRepoFn.mockResolvedValue(mockEsResponse);
       getSnapshotFn.mockRejectedValueOnce(new Error('snapshot error'));
 
       const expectedResponse = {
@@ -205,7 +209,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should throw if ES error', async () => {
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
 
       getRepoFn.mockRejectedValue(new Error());
 
@@ -226,7 +230,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return repository verification response if returned from ES', async () => {
       const mockEsResponse = { nodes: {} };
-      verifyRepoFn.mockResolvedValue({ body: mockEsResponse });
+      verifyRepoFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = {
         verification: { valid: true, response: mockEsResponse },
@@ -253,52 +257,59 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       path: addBasePath('repository_types'),
     };
 
-    it('returns default types if no repository plugins returned from ES', async () => {
-      nodesInfoFn.mockResolvedValue({ body: { nodes: { testNodeId: { plugins: [] } } } });
+    // TODO add Cloud specific tests for repo types
+    describe('on prem', () => {
+      it('returns module types and on-prem types if no repository plugins returned from ES', async () => {
+        nodesInfoFn.mockResolvedValue({ nodes: { testNodeId: { plugins: [] } } });
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
-    });
+        const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
 
-    it('returns default types with any repository plugins returned from ES', async () => {
-      const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
-      const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
+      it('returns module types and on-prem types with any repository plugins returned from ES', async () => {
+        const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
+        const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
 
-      const mockEsResponse = {
-        nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
-      };
-      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
+        const mockEsResponse = {
+          nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
+        };
+        nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, ...pluginTypes];
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
-    });
+        const expectedResponse = [
+          ...MODULE_REPOSITORY_TYPES,
+          ...ON_PREM_REPOSITORY_TYPES,
+          ...pluginTypes,
+        ];
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
 
-    it(`doesn't return non-repository plugins returned from ES`, async () => {
-      const pluginNames = ['foo-plugin', 'bar-plugin'];
-      const mockEsResponse = {
-        nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
-      };
-      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
+      it(`doesn't return non-repository plugins returned from ES`, async () => {
+        const pluginNames = ['foo-plugin', 'bar-plugin'];
+        const mockEsResponse = {
+          nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
+        };
+        nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+        const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
-    });
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
 
-    it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
-      const dataNodePlugins = ['repository-hdfs'];
-      const masterNodePlugins: string[] = [];
-      const mockEsResponse = {
-        nodes: {
-          dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
-          masterNode: { plugins: [...masterNodePlugins.map((key) => ({ name: key }))] },
-        },
-      };
-      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
+      it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
+        const dataNodePlugins = ['repository-hdfs'];
+        const masterNodePlugins: string[] = [];
+        const mockEsResponse = {
+          nodes: {
+            dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
+            masterNode: { plugins: [...masterNodePlugins.map((key) => ({ name: key }))] },
+          },
+        };
+        nodesInfoFn.mockResolvedValue(mockEsResponse);
 
-      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
+        const expectedResponse = [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
-      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+        await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+      });
     });
 
     it('should throw if ES error', async () => {
@@ -323,8 +334,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      getRepoFn.mockResolvedValue({ body: {} });
-      createRepoFn.mockResolvedValue({ body: mockEsResponse });
+      getRepoFn.mockResolvedValue({});
+      createRepoFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = { ...mockEsResponse };
 
@@ -332,14 +343,14 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should return error if repository with the same name already exists', async () => {
-      getRepoFn.mockResolvedValue({ body: { [name]: {} } });
+      getRepoFn.mockResolvedValue({ [name]: {} });
       const response = await router.runRequest(mockRequest);
       expect(response.status).toBe(409);
     });
 
     it('should throw if ES error', async () => {
       const error = new Error('Oh no!');
-      getRepoFn.mockResolvedValue({ body: {} });
+      getRepoFn.mockResolvedValue({});
       createRepoFn.mockRejectedValue(error);
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
@@ -361,8 +372,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      getRepoFn.mockResolvedValue({ body: { [name]: {} } });
-      createRepoFn.mockResolvedValue({ body: mockEsResponse });
+      getRepoFn.mockResolvedValue({ [name]: {} });
+      createRepoFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = mockEsResponse;
 
@@ -387,8 +398,8 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should return successful ES responses', async () => {
       const mockEsResponse = { acknowledged: true };
-      deleteRepoFn.mockResolvedValueOnce({ body: mockEsResponse });
-      deleteRepoFn.mockResolvedValueOnce({ body: mockEsResponse });
+      deleteRepoFn.mockResolvedValueOnce(mockEsResponse);
+      deleteRepoFn.mockResolvedValueOnce(mockEsResponse);
 
       const expectedResponse = { itemsDeleted: names, errors: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
@@ -419,7 +430,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       mockEsError.response = '{}';
       mockEsError.statusCode = 500;
       const mockEsResponse = { acknowledged: true };
-      const responses = [Promise.reject(mockEsError), Promise.resolve({ body: mockEsResponse })];
+      const responses = [Promise.reject(mockEsError), Promise.resolve(mockEsResponse)];
 
       deleteRepoFn.mockImplementation(() => responses.shift());
 

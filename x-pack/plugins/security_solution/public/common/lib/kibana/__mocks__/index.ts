@@ -18,6 +18,7 @@ import {
   createWithKibanaMock,
 } from '../kibana_react.mock';
 import { APP_UI_ID } from '../../../../../common/constants';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
 
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
@@ -28,6 +29,7 @@ export const useKibana = jest.fn().mockReturnValue({
       get: jest.fn(),
       set: jest.fn(),
     },
+    cases: mockCasesContract(),
     data: {
       ...mockStartServicesMock.data,
       search: {

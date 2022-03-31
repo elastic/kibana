@@ -144,6 +144,20 @@ but in some cases you might need to search on dates. Include the date range in q
 @timestamp < "2021"
 -------------------
 
+KQL supports date math expressions.
+
+[source,yaml]
+-------------------
+@timestamp < now-1d
+-------------------
+
+[source,yaml]
+-------------------
+updated_at > 2022-02-17||+1M/d
+-------------------
+
+Check the
+{ref}/common-options.html#date-math[date math documentation] for more examples.
 
 [discrete]
 === Exist queries

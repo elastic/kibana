@@ -266,7 +266,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('select swim lane tile');
       const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
       const sampleCell1 = cells[11];
-      const sampleCell2 = cells[12];
+      const sampleCell2 = cells[cells.length - 1];
       await ml.swimLane.selectCells(overallSwimLaneTestSubj, {
         x1: sampleCell1.x + cellSize,
         y1: sampleCell1.y + cellSize,
@@ -281,6 +281,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // clickFitToData only works with displayed legend
       await maps.openLegend();
       await maps.clickFitToData();
+      await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await maps.closeLegend();
 
       await mlScreenshots.takeScreenshot(

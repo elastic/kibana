@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
@@ -49,7 +49,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 actions: [
                   {
@@ -99,6 +99,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
+              expect(updatedAlert.snooze_end_time).to.eql(undefined);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -117,7 +118,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
@@ -155,6 +156,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
+              expect(updatedAlert.snooze_end_time).to.eql(undefined);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -173,7 +175,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
@@ -222,6 +224,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
+              expect(updatedAlert.snooze_end_time).to.eql(undefined);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -240,7 +243,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
@@ -289,6 +292,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
+              expect(updatedAlert.snooze_end_time).to.eql(undefined);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,

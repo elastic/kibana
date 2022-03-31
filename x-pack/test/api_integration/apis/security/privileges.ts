@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
+            generalCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],

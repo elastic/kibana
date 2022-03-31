@@ -21,8 +21,6 @@ Review important information about the {kib} 8.0.0 releases.
 [[release-notes-8.0.0]]
 == {kib} 8.0.0
 
-coming::[8.0.0]
-
 Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] to complete the upgrade.
 
 [float]
@@ -77,6 +75,34 @@ Before you upgrade to 8.0.0, remove `monitoring.cluster_alerts.allowedSpaces` fr
 To review the deprecations in previous versions, refer to the following:
 
 <<deprecations-8.0.0-rc1,8.0.0-rc1>> | <<deprecations-8.0.0-alpha1,8.0.0-alpha1>>
+
+[float]
+[[known-issue-8.0.0]]
+=== Known issue
+
+[discrete]
+[[known-issue-123550]]
+.Importing and copying saved objects causes weak links to break
+[%collapsible]
+====
+*Details* +
+{kib} supports weak links in some saved objects. For example, a dashboard may include a Markdown panel that contains a relative URL to
+another dashboard. Weak links are defined by free text, _not_ the saved object's relationships, and can break if **both** of the following
+conditions are true:
+
+* You are importing saved objects into multiple spaces, _OR_ you are copying saved objects into another space
+* Before you upgraded to 8.0.0, the saved objects did not already exist in the destinations
+
+In 8.0.0 and later, weak links break because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>.
+This applies to both the UI and the API.
+This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-issue}123550[#123550].
+
+*Impact* +
+Saved objects in 7.x that are migrated during upgrade are **not** impacted.
+Only _new_ saved objects that are imported or copied _multiple times_ (causing object IDs to change) are impacted.
+If you are impacted, you can re-import or re-copy your saved objects after the fix is
+implemented to preserve the weak links.
+====
 
 [float]
 [[features-8.0.0]]
@@ -153,7 +179,7 @@ To review the breaking changes in previous versions, refer to the following:
 
 <<breaking-changes-8.0.0-rc1,8.0.0-rc1>> | <<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
 <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
- 
+
 [float]
 [[features-8.0.0-rc2]]
 === Features

@@ -14,6 +14,7 @@ import {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
+  GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
@@ -32,6 +33,7 @@ import {
   getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
+  getAgentDataHandler,
 } from './handlers';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
@@ -140,6 +142,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     getAgentStatusForAgentPolicyHandler
+  );
+  // Agent data
+  router.get(
+    {
+      path: AGENT_API_ROUTES.DATA_PATTERN,
+      validate: GetAgentDataRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentDataHandler
   );
 
   // upgrade agent

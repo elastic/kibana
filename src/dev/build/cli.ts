@@ -39,6 +39,7 @@ if (showHelp) {
         --rpm                   {dim Only build the rpm packages}
         --deb                   {dim Only build the deb packages}
         --docker-images         {dim Only build the Docker images}
+        --docker-cross-compile  {dim Produce arm64 and amd64 Docker images}
         --docker-contexts       {dim Only build the Docker build contexts}
         --skip-docker-ubi       {dim Don't build the docker ubi image}
         --skip-docker-ubuntu    {dim Don't build the docker ubuntu image}
@@ -47,6 +48,7 @@ if (showHelp) {
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
         --no-debug              {dim Turn off debug logging}
+        --epr-registry          {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
     `) + '\n'
   );
   process.exit(1);

@@ -336,6 +336,10 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
+                "operationType": "normalize_by_unit",
+                "type": "fullReference",
+              },
+              Object {
                 "field": "bytes",
                 "operationType": "min",
                 "type": "field",
@@ -377,6 +381,30 @@ describe('getOperationTypesForField', () => {
               Object {
                 "operationType": "formula",
                 "type": "managedReference",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "date",
+              "isBucketed": false,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "field": "timestamp",
+                "operationType": "min",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "max",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "last_value",
+                "type": "field",
               },
             ],
           },

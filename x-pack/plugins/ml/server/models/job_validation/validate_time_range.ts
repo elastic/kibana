@@ -32,7 +32,7 @@ export async function isValidTimeField({ asCurrentUser }: IScopedClusterClient, 
   const timeField = job.data_description.time_field!;
 
   // check if time_field is of type 'date' or 'date_nanos'
-  const { body: fieldCaps } = await asCurrentUser.fieldCaps({
+  const fieldCaps = await asCurrentUser.fieldCaps({
     index,
     fields: [timeField],
   });

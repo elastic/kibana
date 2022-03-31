@@ -43,7 +43,7 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases: casesUi } = useKibana().services;
+  const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
@@ -98,18 +98,11 @@ const CaseContainerComponent: React.FC = () => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {casesUi.getCases({
+        {cases.ui.getCases({
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            metrics: [
-              'alerts.count',
-              'alerts.users',
-              'alerts.hosts',
-              'actions.isolateHost',
-              'connectors',
-              'lifespan',
-            ],
+            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
           },
           refreshRef,
           onComponentInitialized,

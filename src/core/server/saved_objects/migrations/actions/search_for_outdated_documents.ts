@@ -73,7 +73,7 @@ export const searchForOutdatedDocuments =
         ],
       })
       .then((res) =>
-        Either.right({ outdatedDocuments: (res.body.hits?.hits as SavedObjectsRawDoc[]) ?? [] })
+        Either.right({ outdatedDocuments: (res.hits?.hits as SavedObjectsRawDoc[]) ?? [] })
       )
       .catch(catchRetryableEsClientErrors);
   };

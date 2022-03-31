@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { tap } from 'rxjs/operators';
 import { omit } from 'lodash';
-import { IndexPatternsService } from '../../../../../../data/server';
+import type { Observable } from 'rxjs';
+import { DataViewsService } from '../../../../../../data_views/common';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -27,6 +27,12 @@ export interface EsSearchRequest {
   };
 }
 
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+}
+
 export abstract class AbstractSearchStrategy {
   async search(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -36,6 +42,10 @@ export abstract class AbstractSearchStrategy {
     indexType?: string
   ) {
     const requests: any[] = [];
+
+    // User may abort the request without waiting for the results
+    // we need to handle this scenario by aborting underlying server requests
+    const abortSignal = getRequestAbortedSignal(req.events.aborted$);
 
     esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
       const startTime = Date.now();
@@ -49,7 +59,7 @@ export abstract class AbstractSearchStrategy {
                 index,
               },
             },
-            req.body.searchSession
+            { ...req.body.searchSession, abortSignal }
           )
           .pipe(
             tap((data) => {
@@ -80,7 +90,7 @@ export abstract class AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     capabilities?: unknown,
     options?: Partial<{
       type: string;

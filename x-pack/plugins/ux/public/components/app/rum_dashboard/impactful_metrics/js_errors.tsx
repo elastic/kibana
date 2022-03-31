@@ -32,7 +32,7 @@ interface JSErrorItem {
 }
 
 export function JSErrors() {
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, serviceName, searchTerm } = urlParams;
 
@@ -56,7 +56,9 @@ export function JSErrors() {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uxUiFilters, pagination, searchTerm]
+    // `rangeId` acts as a cache buster for stable ranges like "Today"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [start, end, serviceName, uxUiFilters, pagination, searchTerm, rangeId]
   );
 
   const {

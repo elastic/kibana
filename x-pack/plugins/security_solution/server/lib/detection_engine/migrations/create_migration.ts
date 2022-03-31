@@ -48,7 +48,7 @@ export const createMigration = async ({
 
   const { size, ...reindexQueryOptions } = reindexOptions;
 
-  const response = await esClient.reindex<{ task: string }>({
+  const response = await esClient.reindex({
     body: {
       dest: { index: migrationIndex },
       source: { index, size },
@@ -97,7 +97,7 @@ export const createMigration = async ({
   return {
     destinationIndex: migrationIndex,
     sourceIndex: index,
-    taskId: String(response.body.task),
+    taskId: String(response.task),
     version,
   };
 };

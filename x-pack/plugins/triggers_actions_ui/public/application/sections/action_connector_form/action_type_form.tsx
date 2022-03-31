@@ -28,7 +28,7 @@ import { partition } from 'lodash';
 import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
-  AlertAction,
+  RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
@@ -43,7 +43,7 @@ import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 import { ConnectorsSelection } from './connectors_selection';
 
 export type ActionTypeFormProps = {
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   actionConnector: ActionConnector;
   index: number;
   onAddConnector: () => void;
@@ -346,7 +346,7 @@ function getAvailableActionVariables(
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionVariables,
-    actionGroup?.omitOptionalMessageVariables
+    actionGroup?.omitMessageVariables
   );
 
   // partition deprecated items so they show up last

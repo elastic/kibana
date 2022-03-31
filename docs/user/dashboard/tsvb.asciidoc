@@ -192,6 +192,30 @@ For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
 ====
 
 [discrete]
+[[how-do-i-base-drilldowns-on-data]]
+.*How do I base drilldown URLs on my data?*
+[%collapsible]
+====
+
+You can build drilldown URLs dynamically with your visualization data.
+
+Do this by adding the `{{key}}` placeholder to your URL
+
+For example `https://example.org/{{key}}`
+
+This instructs TSVB to substitute the value from your visualization wherever it sees `{{key}}`.
+
+If your data contain reserved or invalid URL characters such as "#" or "&", you should apply a transform to URL-encode the key like this `{{encodeURIComponent key}}`. If you are dynamically constructing a drilldown to another location in Kibana (for example, clicking a table row takes to you a value-scoped saved search), you will likely want to Rison-encode your key as it may contain invalid Rison characters. (https://github.com/Nanonid/rison#rison---compact-data-in-uris[Rison] is the serialization format many parts of Kibana use to store information in their URL.)
+
+For example: `discover#/view/0ac50180-82d9-11ec-9f4a-55de56b00cc0?_a=(filters:!((query:(match_phrase:(foo.keyword:{{rison key}})))))`
+
+If both conditions apply, you can cover all cases by applying both transforms: `{{encodeURIComponent (rison key)}}`.
+
+Technical note: TSVB uses https://handlebarsjs.com/[Handlebars] to perform these interpolations. `rison` and `encodeURIComponent` are custom Handlebars helpers provided by Kibana.
+
+====
+
+[discrete]
 [[why-is-my-tsvb-visualiztion-missing-data]]
 .*Why is my TSVB visualization missing data?*
 [%collapsible]
@@ -252,20 +276,4 @@ For other types of month over month calculations, use <<timelion, *Timelion*>> o
 
 Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
 *TSVB* requires that the duration is pre-calculated.
-====
-
-[discrete]
-[group-on-multiple-fields]
-.*How do I group on multiple fields?*
-[%collapsible]
-====
-
-To group with multiple fields, create runtime fields in the {data-source} you are visualizing.
-
-. Create a runtime field. Refer to <<managing-data-views, Manage data views>> for more information.
-+
-[role="screenshot"]
-image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
-
-. Create a *TSVB* visualization and group by this field.
 ====

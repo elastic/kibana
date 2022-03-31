@@ -22,11 +22,47 @@ export type { QueryDslQueryContainer };
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-export interface RuntimeField {
+
+export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+
+export interface RuntimeFieldBase {
   type: RuntimeType;
   script?: {
     source: string;
   };
+}
+
+/**
+ * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
+ */
+export interface RuntimeFieldSpec extends RuntimeFieldBase {
+  fields?: Record<
+    string,
+    {
+      // It is not recursive, we can't create a composite inside a composite.
+      type: RuntimeTypeExceptComposite;
+    }
+  >;
+}
+
+export interface FieldConfiguration {
+  format?: SerializedFieldFormat | null;
+  customLabel?: string;
+  popularity?: number;
+}
+
+/**
+ * This is the RuntimeField interface enhanced with Data view field
+ * configuration: field format definition, customLabel or popularity.
+ *
+ * @see {@link RuntimeField}
+ */
+export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
+  fields?: Record<string, RuntimeFieldSubField>;
+}
+
+export interface RuntimeFieldSubField extends FieldConfiguration {
+  type: RuntimeTypeExceptComposite;
 }
 
 /**
@@ -216,7 +252,7 @@ export interface FieldSpec extends DataViewFieldBase {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
-  runtimeField?: RuntimeField;
+  runtimeField?: RuntimeFieldSpec;
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
@@ -244,11 +280,18 @@ export interface DataViewSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, RuntimeField>;
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  namespaces?: string[];
 }
 
 export interface SourceFilter {
   value: string;
+}
+
+export interface HasDataService {
+  hasESData: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
+  hasDataView: () => Promise<boolean>;
 }

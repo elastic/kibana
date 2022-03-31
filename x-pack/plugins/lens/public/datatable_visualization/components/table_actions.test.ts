@@ -82,7 +82,6 @@ describe('Table actions', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       });
     });
 
@@ -102,7 +101,6 @@ describe('Table actions', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
       });
     });
 
@@ -122,7 +120,6 @@ describe('Table actions', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       });
     });
 
@@ -142,7 +139,6 @@ describe('Table actions', () => {
           },
         ],
         negate: true,
-        timeFieldName: undefined,
       });
     });
   });
@@ -173,7 +169,6 @@ describe('Table actions', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       });
     });
 
@@ -202,7 +197,6 @@ describe('Table actions', () => {
           },
         ],
         negate: true,
-        timeFieldName: undefined,
       });
     });
 
@@ -274,7 +268,6 @@ describe('Table actions', () => {
           },
         ],
         negate: false,
-        timeFieldName: undefined,
       });
     });
   });

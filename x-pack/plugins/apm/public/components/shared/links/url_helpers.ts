@@ -88,13 +88,14 @@ export interface APMQueryParams {
   percentile?: 50 | 75 | 90 | 95 | 99;
   latencyAggregationType?: string;
   comparisonEnabled?: boolean;
-  comparisonType?: string;
+  offset?: string;
   transactionResult?: string;
   host?: string;
   containerId?: string;
   podName?: string;
   agentName?: string;
   serviceVersion?: string;
+  serviceGroup?: string;
 }
 
 // forces every value of T[K] to be type: string

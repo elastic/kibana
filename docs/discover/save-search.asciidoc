@@ -7,10 +7,10 @@ Saved searches are good for adding search results to a dashboard,
 and can also serve as a foundation for building visualizations.
 
 A saved search stores the query text, filters, and
-current view of *Discover*&mdash;the columns selected in the document table,
+current view of *Discover*, including the columns selected in the document table,
 the sort order, and the {data-source}.
 Saved searches are different from <<save-load-delete-query,saved queries>>, which
-are primarily used for storing query text and are available in any app with a query bar.
+are for storing query text and are available in any app with a query bar.
 
 [role="xpack"]
 [[discover-read-only-access]]

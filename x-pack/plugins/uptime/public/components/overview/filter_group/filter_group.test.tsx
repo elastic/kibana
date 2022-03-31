@@ -22,14 +22,14 @@ describe('FilterGroup', () => {
       values: [],
       loading: true,
     });
-    const { getByLabelText, getByText } = render(<FilterGroup />);
+    const { getByLabelText, getAllByText } = render(<FilterGroup />);
 
     await waitFor(() => {
       const popoverButton = getByLabelText(popoverButtonLabel);
       fireEvent.click(popoverButton);
     });
     await waitFor(() => {
-      expect(getByText('Loading options'));
+      expect(getAllByText('Loading options')).toHaveLength(2);
     });
   });
 

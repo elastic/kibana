@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('creation_index_pattern', function () {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/126812
+  describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -588,8 +589,8 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();

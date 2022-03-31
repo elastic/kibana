@@ -58,6 +58,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // after saving a new dashboard, the app state must be removed
+      await await PageObjects.dashboard.expectAppStateRemovedFromURL();
+
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 2);

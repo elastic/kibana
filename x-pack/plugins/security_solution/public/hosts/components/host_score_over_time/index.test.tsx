@@ -9,9 +9,9 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { HostRiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useHostRiskScore } from '../../../risk_score/containers';
 
-jest.mock('../../containers/host_risk_score');
+jest.mock('../../../risk_score/containers');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {

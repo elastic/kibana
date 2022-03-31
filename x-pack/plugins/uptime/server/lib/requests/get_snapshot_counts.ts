@@ -108,7 +108,12 @@ const statusCountBody = (filters: ESFilter[], context: QueryContext) => {
 
           String status = doc["summary.down"][0] > 0 ? "d" : "u";
           String timeAndStatus = doc["@timestamp"][0].toInstant().toEpochMilli().toString() + status;
-          state.locStatus[idLoc] = timeAndStatus;
+          if(state.locStatus[idLoc] == null){
+            state.locStatus[idLoc] = timeAndStatus;
+          }else if(timeAndStatus.compareTo(state.locStatus[idLoc]) > 0){
+            state.locStatus[idLoc] = timeAndStatus;
+          }
+
           state.totalDocs++;
         `,
           combine_script: `

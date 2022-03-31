@@ -104,11 +104,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "transaction.type": "request",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -174,11 +169,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "serviceName",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.type": "request",
             },
           },
           Object {

@@ -11,6 +11,7 @@ import { FtrService } from '../ftr_provider_context';
 export class FieldEditorService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -50,12 +51,16 @@ export class FieldEditorService extends FtrService {
   }
 
   public async confirmSave() {
-    await this.testSubjects.setValue('saveModalConfirmText', 'change');
-    await this.testSubjects.click('confirmModalConfirmButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('saveModalConfirmText', 'change');
+      await this.testSubjects.clickWhenNotDisabled('confirmModalConfirmButton', { timeout: 1000 });
+    });
   }
 
   public async confirmDelete() {
-    await this.testSubjects.setValue('deleteModalConfirmText', 'remove');
-    await this.testSubjects.click('confirmModalConfirmButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('deleteModalConfirmText', 'remove');
+      await this.testSubjects.clickWhenNotDisabled('confirmModalConfirmButton', { timeout: 1000 });
+    });
   }
 }

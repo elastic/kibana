@@ -128,7 +128,6 @@ export function onPremInstructions({
                       'processor.event': ['error', 'transaction', 'metric'],
                     },
                   },
-                  { range: { 'observer.version_major': { gte: 7 } } },
                 ],
               },
             },

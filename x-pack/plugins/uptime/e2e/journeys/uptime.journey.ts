@@ -6,11 +6,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from './utils';
-
-export const byTestId = (testId: string) => {
-  return `[data-test-subj=${testId}]`;
-};
+import { byTestId, waitForLoadingToFinish } from './utils';
 
 journey('uptime', ({ page, params }) => {
   before(async () => {

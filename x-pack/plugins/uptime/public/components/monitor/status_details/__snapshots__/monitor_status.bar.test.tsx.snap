@@ -43,25 +43,9 @@ Array [
     </dt>
     <dd
       class="euiDescriptionList__description c1"
+      data-test-subj="monitor-page-url"
     >
-      <a
-        aria-label="Monitor URL link"
-        class="euiLink euiLink--primary"
-        href=""
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <span
-          aria-label="External link"
-          class="euiLink__externalIcon"
-          data-euiicon-type="popout"
-        />
-        <span
-          class="euiScreenReaderOnly"
-        >
-          (opens in a new tab or window)
-        </span>
-      </a>
+      --
     </dd>
     <dt
       class="euiDescriptionList__title c0"
@@ -88,10 +72,11 @@ Array [
       >
         Set tags
         <span
-          aria-label="External link"
           class="euiLink__externalIcon"
           data-euiicon-type="popout"
-        />
+        >
+          External link
+        </span>
         <span
           class="euiScreenReaderOnly"
         >

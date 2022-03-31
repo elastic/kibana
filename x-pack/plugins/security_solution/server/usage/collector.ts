@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { CollectorDependencies } from './types';
-import { fetchDetectionsMetrics } from './detections';
-import { SAVED_OBJECT_TYPES } from '../../../cases/common/constants';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
+import type { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
+import type { CollectorDependencies } from './types';
+import { getDetectionsMetrics } from './detections/get_metrics';
+import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
+
 export interface UsageData {
   detectionMetrics: {};
 }
 
-export async function getInternalSavedObjectsClient(core: CoreSetup) {
-  return core.getStartServices().then(async ([coreStart]) => {
-    // note: we include the "cases" and "alert" hidden types here otherwise we would not be able to query them. If at some point cases and alert is not considered a hidden type this can be removed
-    return coreStart.savedObjects.createInternalRepository([
-      'alert',
-      legacyRuleActionsSavedObjectType,
-      ...SAVED_OBJECT_TYPES,
-    ]);
-  });
-}
-
 export const registerCollector: RegisterCollector = ({
   core,
-  kibanaIndex,
+  eventLogIndex,
   signalsIndex,
   ml,
   usageCollection,
+  logger,
 }) => {
   if (!usageCollection) {
+    logger.debug('Usage collection is undefined, therefore returning early without registering it');
     return;
   }
 
@@ -320,6 +309,1604 @@ export const registerCollector: RegisterCollector = ({
               },
             },
           },
+          detection_rule_status: {
+            all_rules: {
+              eql: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threat_match: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              machine_learning: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              query: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              saved_query: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threshold: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              total: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of succeeded rules' },
+                },
+              },
+            },
+            elastic_rules: {
+              eql: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threat_match: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              machine_learning: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              query: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              saved_query: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threshold: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              total: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of succeeded rules' },
+                },
+              },
+            },
+            custom_rules: {
+              eql: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threat_match: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              machine_learning: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              query: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              saved_query: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              threshold: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                top_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                top_partial_failures: {
+                  type: 'array',
+                  items: {
+                    message: {
+                      type: 'keyword',
+                      _meta: { description: 'Failed rule message' },
+                    },
+                    count: {
+                      type: 'long',
+                      _meta: { description: 'Number of times the message occurred' },
+                    },
+                  },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of successful rules' },
+                },
+                index_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                search_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_duration: {
+                  max: {
+                    type: 'float',
+                    _meta: { description: 'The max duration' },
+                  },
+                  avg: {
+                    type: 'float',
+                    _meta: { description: 'The avg duration' },
+                  },
+                  min: {
+                    type: 'float',
+                    _meta: { description: 'The min duration' },
+                  },
+                },
+                gap_count: {
+                  type: 'long',
+                  _meta: { description: 'The count of gaps' },
+                },
+              },
+              total: {
+                failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of failed rules' },
+                },
+                partial_failures: {
+                  type: 'long',
+                  _meta: { description: 'The number of partial failure rules' },
+                },
+                succeeded: {
+                  type: 'long',
+                  _meta: { description: 'The number of succeeded rules' },
+                },
+              },
+            },
+          },
         },
         ml_jobs: {
           ml_job_usage: {
@@ -525,12 +2112,17 @@ export const registerCollector: RegisterCollector = ({
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
-      const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
-      const soClient = internalSavedObjectsClient as unknown as SavedObjectsClientContract;
-
+      const savedObjectsClient = await getInternalSavedObjectsClient(core);
+      const detectionMetrics = await getDetectionsMetrics({
+        eventLogIndex,
+        signalsIndex,
+        esClient,
+        savedObjectsClient,
+        logger,
+        mlClient: ml,
+      });
       return {
-        detectionMetrics:
-          (await fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, soClient, ml)) || {},
+        detectionMetrics: detectionMetrics || {},
       };
     },
   });

@@ -13,7 +13,6 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "cancelAlertsOnRuleTimeout": true,
-        "defaultRuleTaskTimeout": "5m",
         "healthCheck": Object {
           "interval": "60m",
         },
@@ -22,6 +21,17 @@ describe('config validation', () => {
           "removalDelay": "1h",
         },
         "maxEphemeralActionsPerAlert": 10,
+        "rules": Object {
+          "execution": Object {
+            "actions": Object {
+              "max": 100000,
+            },
+          },
+          "minimumScheduleInterval": Object {
+            "enforce": false,
+            "value": "1m",
+          },
+        },
       }
     `);
   });

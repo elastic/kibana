@@ -33,6 +33,14 @@ const ACTIVE_STATUSES = [
   CrawlerStatus.Canceling,
 ];
 
+export interface CrawlRequestOverrides {
+  domain_allowlist?: string[];
+  max_crawl_depth?: number;
+  seed_urls?: string[];
+  sitemap_urls?: string[];
+  sitemap_discovery_disabled?: boolean;
+}
+
 export interface CrawlerValues {
   events: CrawlEvent[];
   dataLoading: boolean;
@@ -49,7 +57,7 @@ interface CrawlerActions {
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   onReceiveCrawlerData(data: CrawlerData): { data: CrawlerData };
   onStartCrawlRequestComplete(): void;
-  startCrawl(overrides?: object): { overrides?: object };
+  startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
   stopCrawl(): void;
 }
 

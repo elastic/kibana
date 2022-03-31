@@ -7,9 +7,18 @@ exports[`GaugeComponent renders the chart 1`] = `
   <Settings
     ariaUseDefaultSummary={true}
     debugState={false}
-    theme={Object {}}
+    theme={
+      Array [
+        Object {
+          "background": Object {
+            "color": "transparent",
+          },
+        },
+        Object {},
+      ]
+    }
   />
-  <Component
+  <Goal
     actual={3}
     bandFillColor={[Function]}
     bands={
@@ -32,6 +41,7 @@ exports[`GaugeComponent renders the chart 1`] = `
         4,
       ]
     }
+    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

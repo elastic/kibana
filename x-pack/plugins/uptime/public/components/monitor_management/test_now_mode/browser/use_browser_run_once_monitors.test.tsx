@@ -34,6 +34,7 @@ describe('useBrowserRunOnceMonitors', function () {
       data: undefined,
       journeyStarted: false,
       loading: true,
+      stepsLoading: true,
       stepEnds: [],
       stepListData: undefined,
       summaryDoc: undefined,

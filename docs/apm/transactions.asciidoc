@@ -151,7 +151,7 @@ Learn more about a trace sample in the *Metadata* tab:
 * User - Requires additional configuration, but allows you to see which user experienced the current transaction.
 
 TIP: All of this data is stored in documents in Elasticsearch.
-This means you can select "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.
+This means you can select "Actions - View transaction in Discover" to see the actual Elasticsearch document under the discover tab.
 
 *Trace sample logs*
 

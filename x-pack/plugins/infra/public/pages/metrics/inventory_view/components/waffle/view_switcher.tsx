@@ -37,8 +37,8 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
         defaultMessage: 'Switch between table and map view',
       })}
       options={buttons}
-      color="primary"
-      buttonSize="m"
+      color="text"
+      buttonSize="s"
       idSelected={view}
       onChange={onChange}
       isIconOnly

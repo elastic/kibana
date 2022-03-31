@@ -25,20 +25,21 @@ import { isSuperuser } from './is_superuser';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { getLatestApmPackage } from './get_latest_apm_package';
 
 const hasFleetDataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/has_data',
+  endpoint: 'GET /internal/apm/fleet/has_apm_policies',
   options: { tags: [] },
-  handler: async ({ core, plugins }): Promise<{ hasData: boolean }> => {
+  handler: async ({ core, plugins }): Promise<{ hasApmPolicies: boolean }> => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
-      return { hasData: false };
+      return { hasApmPolicies: false };
     }
     const packagePolicies = await getApmPackgePolicies({
       core,
       fleetPluginStart,
     });
-    return { hasData: packagePolicies.total > 0 };
+    return { hasApmPolicies: packagePolicies.total > 0 };
   },
 });
 
@@ -105,16 +106,25 @@ const fleetAgentsRoute = createApmServerRoute({
     return {
       cloudStandaloneSetup,
       isFleetEnabled: true,
-      fleetAgents: fleetAgents.map((agent) => {
-        const packagePolicy = policiesGroupedById[agent.id];
-        const packagePolicyVars = packagePolicy.inputs[0]?.vars;
-        return {
-          id: agent.id,
-          name: agent.name,
-          apmServerUrl: packagePolicyVars?.url?.value,
-          secretToken: packagePolicyVars?.secret_token?.value,
-        };
-      }),
+      fleetAgents: fleetAgents.map(
+        (
+          agent
+        ): {
+          id: string;
+          name: string;
+          apmServerUrl: string | undefined;
+          secretToken: string | undefined;
+        } => {
+          const packagePolicy = policiesGroupedById[agent.id];
+          const packagePolicyVars = packagePolicy.inputs[0]?.vars;
+          return {
+            id: agent.id,
+            name: agent.name,
+            apmServerUrl: packagePolicyVars?.url?.value,
+            secretToken: packagePolicyVars?.secret_token?.value,
+          };
+        }
+      ),
     };
   },
 });
@@ -168,6 +178,7 @@ const getMigrationCheckRoute = createApmServerRoute({
       | import('./../../../../fleet/common/index').PackagePolicy
       | undefined;
     has_apm_integrations: boolean;
+    latest_apm_package_version: string;
   }> => {
     const { core, plugins, context, config, request } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
@@ -191,6 +202,10 @@ const getMigrationCheckRoute = createApmServerRoute({
       core,
       fleetPluginStart,
     });
+    const latestApmPackage = await getLatestApmPackage({
+      fleetPluginStart,
+      request,
+    });
     return {
       has_cloud_agent_policy: !!cloudAgentPolicy,
       has_cloud_apm_package_policy: !!apmPackagePolicy,
@@ -198,6 +213,7 @@ const getMigrationCheckRoute = createApmServerRoute({
       has_required_role: hasRequiredRole,
       cloud_apm_package_policy: apmPackagePolicy,
       has_apm_integrations: packagePolicies.total > 0,
+      latest_apm_package_version: latestApmPackage.package.version,
     };
   },
 });
@@ -210,8 +226,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   ): Promise<{
     cloudApmPackagePolicy: import('./../../../../fleet/common/index').PackagePolicy;
   }> => {
-    const { plugins, context, config, request, logger, kibanaVersion } =
-      resources;
+    const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
@@ -238,7 +253,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       esClient,
       logger,
       setup,
-      kibanaVersion,
+      request,
     });
 
     return { cloudApmPackagePolicy };

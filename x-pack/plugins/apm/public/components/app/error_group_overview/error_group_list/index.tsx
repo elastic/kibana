@@ -13,15 +13,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { APMQueryParams } from '../../../shared/links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -60,6 +59,7 @@ type ErrorGroupDetailedStatistics =
 interface Props {
   mainStatistics: ErrorGroupItem[];
   serviceName: string;
+  detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
 }
@@ -67,10 +67,11 @@ interface Props {
 function ErrorGroupList({
   mainStatistics,
   serviceName,
+  detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
 }: Props) {
-  const { urlParams } = useLegacyUrlParams();
+  const { query } = useApmParams('/services/{serviceName}/errors');
 
   const columns = useMemo(() => {
     return [
@@ -119,12 +120,10 @@ function ErrorGroupList({
             <ErrorLink
               title={type}
               serviceName={serviceName}
-              query={
-                {
-                  ...urlParams,
-                  kuery: `error.exception.type:"${type}"`,
-                } as APMQueryParams
-              }
+              query={{
+                ...query,
+                kuery: `error.exception.type:"${type}"`,
+              }}
             >
               {type}
             </ErrorLink>
@@ -213,6 +212,7 @@ function ErrorGroupList({
           return (
             <SparkPlot
               color={currentPeriodColor}
+              isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
                 'xpack.apm.serviceOveriew.errorsTableOccurrences',
@@ -232,7 +232,13 @@ function ErrorGroupList({
         },
       },
     ] as Array<ITableColumn<ErrorGroupItem>>;
-  }, [serviceName, urlParams, detailedStatistics, comparisonEnabled]);
+  }, [
+    serviceName,
+    query,
+    detailedStatistics,
+    comparisonEnabled,
+    detailedStatisticsLoading,
+  ]);
 
   return (
     <ManagedTable

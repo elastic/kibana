@@ -10,6 +10,12 @@ import semver from 'semver';
 import LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import {
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
@@ -23,11 +29,9 @@ import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
-  getEndpointEventFiltersList,
   getEndpointExceptionList,
-  getEndpointTrustedAppsList,
-  getHostIsolationExceptionsList,
   Manifest,
+  ArtifactListId,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -43,6 +47,11 @@ import { EndpointError } from '../../../../../common/endpoint/errors';
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
   policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]>;
+}
+
+interface BuildArtifactsForOsOptions {
+  listId: ArtifactListId;
+  name: string;
 }
 
 const iterateArtifactsBuildResult = async (
@@ -133,7 +142,11 @@ export class ManifestManager {
    */
   protected async buildExceptionListArtifact(os: string): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
-      await getEndpointExceptionList(this.exceptionListClient, this.schemaVersion, os),
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
+        os,
+      }),
       this.schemaVersion,
       os,
       ArtifactConstants.GLOBAL_ALLOWLIST_NAME
@@ -167,14 +180,29 @@ export class ManifestManager {
 
   /**
    * Builds an artifact (one per supported OS) based on the current state of the
-   * Trusted Apps list (which uses the `exception-list-agnostic` SO type)
+   * artifacts list (Trusted Apps, Host Iso. Exceptions, Event Filters, Blocklists)
+   * (which uses the `exception-list-agnostic` SO type)
    */
-  protected async buildTrustedAppsArtifact(os: string, policyId?: string) {
+  protected async buildArtifactsForOs({
+    listId,
+    name,
+    os,
+    policyId,
+  }: {
+    os: string;
+    policyId?: string;
+  } & BuildArtifactsForOsOptions): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
-      await getEndpointTrustedAppsList(this.exceptionListClient, this.schemaVersion, os, policyId),
+      await getEndpointExceptionList({
+        elClient: this.exceptionListClient,
+        schemaVersion: this.schemaVersion,
+        os,
+        policyId,
+        listId,
+      }),
       this.schemaVersion,
       os,
-      ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME
+      name
     );
   }
 
@@ -185,9 +213,13 @@ export class ManifestManager {
   protected async buildTrustedAppsArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME,
+    };
 
     for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildTrustedAppsArtifact(os));
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
     await iterateAllListItems(
@@ -195,7 +227,9 @@ export class ManifestManager {
       async (policyId) => {
         for (const os of ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS) {
           policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(await this.buildTrustedAppsArtifact(os, policyId));
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
+          );
         }
       }
     );
@@ -211,9 +245,13 @@ export class ManifestManager {
   protected async buildEventFiltersArtifacts(): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME,
+    };
 
     for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildEventFiltersForOs(os));
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
     await iterateAllListItems(
@@ -221,38 +259,8 @@ export class ManifestManager {
       async (policyId) => {
         for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
           policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(await this.buildEventFiltersForOs(os, policyId));
-        }
-      }
-    );
-
-    return { defaultArtifacts, policySpecificArtifacts };
-  }
-
-  protected async buildEventFiltersForOs(os: string, policyId?: string) {
-    return buildArtifact(
-      await getEndpointEventFiltersList(this.exceptionListClient, this.schemaVersion, os, policyId),
-      this.schemaVersion,
-      os,
-      ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME
-    );
-  }
-
-  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
-    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
-
-    for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildHostIsolationExceptionForOs(os));
-    }
-
-    await iterateAllListItems(
-      (page) => this.listEndpointPolicyIds(page),
-      async (policyId) => {
-        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
           policySpecificArtifacts[policyId].push(
-            await this.buildHostIsolationExceptionForOs(os, policyId)
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
           );
         }
       }
@@ -261,21 +269,69 @@ export class ManifestManager {
     return { defaultArtifacts, policySpecificArtifacts };
   }
 
-  protected async buildHostIsolationExceptionForOs(
-    os: string,
-    policyId?: string
-  ): Promise<InternalArtifactCompleteSchema> {
-    return buildArtifact(
-      await getHostIsolationExceptionsList(
-        this.exceptionListClient,
-        this.schemaVersion,
-        os,
-        policyId
-      ),
-      this.schemaVersion,
-      os,
-      ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME
+  /**
+   * Builds an array of Blocklist entries (one per supported OS) based on the current state of the
+   * Blocklist list
+   * @protected
+   */
+  protected async buildBlocklistArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_BLOCKLISTS_NAME,
+    };
+
+    for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_EVENT_FILTERS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
+          );
+        }
+      }
     );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
+   * Builds an array of endpoint host isolation exception (one per supported OS) based on the current state of the
+   * Host Isolation Exception List
+   * @returns
+   */
+
+  protected async buildHostIsolationExceptionsArtifacts(): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      name: ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME,
+    };
+
+    for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    }
+
+    await iterateAllListItems(
+      (page) => this.listEndpointPolicyIds(page),
+      async (policyId) => {
+        for (const os of ArtifactConstants.SUPPORTED_HOST_ISOLATION_EXCEPTIONS_OPERATING_SYSTEMS) {
+          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+          policySpecificArtifacts[policyId].push(
+            await this.buildArtifactsForOs({ os, policyId, ...buildArtifactsForOsOptions })
+          );
+        }
+      }
+    );
+
+    return { defaultArtifacts, policySpecificArtifacts };
   }
 
   /**
@@ -413,7 +469,7 @@ export class ManifestManager {
    * Builds a new manifest based on the current user exception list.
    *
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
-   * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
+   * @returns {Promise<Manifest>} A new Manifest object representing the current exception list.
    */
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
@@ -423,6 +479,7 @@ export class ManifestManager {
       this.buildTrustedAppsArtifacts(),
       this.buildEventFiltersArtifacts(),
       this.buildHostIsolationExceptionsArtifacts(),
+      this.buildBlocklistArtifacts(),
     ]);
 
     const manifest = new Manifest({

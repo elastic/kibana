@@ -22,7 +22,7 @@ export const register = (deps: RouteDependencies): void => {
   const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
       const { client: clusterClient } = ctx.core.elasticsearch;
-      const { body: clusterSettings } = await clusterClient.asCurrentUser.cluster.getSettings();
+      const clusterSettings = await clusterClient.asCurrentUser.cluster.getSettings();
 
       const transientClusterNames = Object.keys(
         get(clusterSettings, 'transient.cluster.remote') || {}
@@ -31,7 +31,7 @@ export const register = (deps: RouteDependencies): void => {
         get(clusterSettings, 'persistent.cluster.remote') || {}
       );
 
-      const { body: clustersByName } = await clusterClient.asCurrentUser.cluster.remoteInfo();
+      const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
       const body = clusterNames.map((clusterName: string): any => {

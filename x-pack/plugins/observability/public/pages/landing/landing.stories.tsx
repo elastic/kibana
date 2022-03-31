@@ -23,24 +23,22 @@ export default {
         chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
         uiSettings: { get: () => true },
         observability: { ObservabilityPageTemplate: EuiPageTemplate },
+        http: {
+          basePath: {
+            prepend: () => '',
+          },
+        },
+        docLinks: {
+          links: {
+            observability: {
+              guide: 'alink',
+            },
+          },
+        },
       } as unknown as Partial<CoreStart>);
 
       const pluginContextValue = {
         appMountParameters: { setHeaderActionMenu: () => {} },
-        core: {
-          http: {
-            basePath: {
-              prepend: () => '',
-            },
-          },
-          docLinks: {
-            links: {
-              observability: {
-                guide: 'alink',
-              },
-            },
-          },
-        },
         ObservabilityPageTemplate: EuiPageTemplate,
       } as unknown as PluginContextValue;
 

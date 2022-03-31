@@ -7,8 +7,12 @@
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-
-import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import { SavedObject } from 'src/plugins/data/public';
+import { ISearchSource } from 'src/plugins/data/public';
+import {
+  DataViewAttributes,
+  DataViewSavedObjectConflictError,
+} from '../../../../data_views/public';
 import {
   SavedSearch,
   getSavedSearch,
@@ -19,11 +23,11 @@ import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pat
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
-import { DataViewSavedObjectConflictError } from '../../../../data_views/common';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
+import { useExecutionContext } from '../../../../kibana_react/public';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -45,10 +49,16 @@ export function DiscoverMainRoute() {
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
-  const [indexPatternList, setIndexPatternList] = useState<
-    Array<SavedObject<IndexPatternAttributes>>
-  >([]);
+  const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
+    []
+  );
   const { id } = useParams<DiscoverLandingParams>();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: id || 'new',
+  });
 
   const navigateToOverview = useCallback(() => {
     core.application.navigateToApp('kibanaOverview', { path: '#' });
@@ -73,9 +83,9 @@ export function DiscoverMainRoute() {
         await checkForDataViews();
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
-        const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
+        const ip = await loadIndexPattern(index || '', data.dataViews, config);
 
-        const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
+        const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
         const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
 
         setIndexPatternList(ipList);
@@ -147,7 +157,7 @@ export function DiscoverMainRoute() {
     chrome.recentlyAccessed,
     config,
     core.application.navigateToApp,
-    data.indexPatterns,
+    data.dataViews,
     history,
     id,
     services,

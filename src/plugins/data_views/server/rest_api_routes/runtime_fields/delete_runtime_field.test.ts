@@ -19,11 +19,7 @@ describe('delete runtime field', () => {
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
-          fields: {
-            getByName: jest.fn().mockReturnValueOnce({
-              runtimeField: {},
-            }),
-          },
+          getRuntimeField: jest.fn().mockReturnValueOnce({}),
         } as unknown as DataView)
     );
 

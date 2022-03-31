@@ -196,6 +196,11 @@ export const renderAllSeries = (
                 area: {
                   ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
                 },
+                fit: {
+                  area: {
+                    ...(type === ChartType.Line ? { opacity: 0 } : { opacity: fillOpacity }),
+                  },
+                },
                 line: {
                   strokeWidth,
                   visible: drawLinesBetweenPoints,

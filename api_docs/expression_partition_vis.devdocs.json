@@ -1,0 +1,1409 @@
+{
+  "id": "expressionPartitionVis",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-public.ExpressionPartitionVisPluginSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionPartitionVisPluginSetup",
+        "description": [],
+        "signature": [
+          "void"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-public.ExpressionPartitionVisPluginStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionPartitionVisPluginStart",
+        "description": [],
+        "signature": [
+          "void"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionPartitionVis",
+      "id": "def-server.ExpressionPartitionVisPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionPartitionVisPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/chart_expressions/expression_partition_vis/server/types.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.mosaicVisFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "mosaicVisFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.MosaicVisExpressionFunctionDefinition",
+            "text": "MosaicVisExpressionFunctionDefinition"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/mosaic_vis_function.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.partitionLabelsFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "partitionLabelsFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"partitionLabels\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | null, ",
+          "PartitionLabelsArguments",
+          ", ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.ExpressionValuePartitionLabels",
+            "text": "ExpressionValuePartitionLabels"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/partition_labels_function.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.pieVisFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "pieVisFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.PieVisExpressionFunctionDefinition",
+            "text": "PieVisExpressionFunctionDefinition"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/pie_vis_function.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.treemapVisFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "treemapVisFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.TreemapVisExpressionFunctionDefinition",
+            "text": "TreemapVisExpressionFunctionDefinition"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/treemap_vis_function.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.waffleVisFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "waffleVisFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.WaffleVisExpressionFunctionDefinition",
+            "text": "WaffleVisExpressionFunctionDefinition"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/expression_functions/waffle_vis_function.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.Dimension",
+        "type": "Interface",
+        "tags": [],
+        "label": "Dimension",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.Dimension.accessor",
+            "type": "number",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.Dimension.format",
+            "type": "Object",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "signature": [
+              "{ id?: string | undefined; params?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<object> | undefined; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.Dimensions",
+        "type": "Interface",
+        "tags": [],
+        "label": "Dimensions",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.Dimensions.metric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "metric",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.Dimensions.buckets",
+            "type": "Array",
+            "tags": [],
+            "label": "buckets",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.Dimensions.splitRow",
+            "type": "Array",
+            "tags": [],
+            "label": "splitRow",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.Dimensions.splitColumn",
+            "type": "Array",
+            "tags": [],
+            "label": "splitColumn",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.LabelsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "LabelsParams",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.show",
+            "type": "boolean",
+            "tags": [],
+            "label": "show",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.position",
+            "type": "Enum",
+            "tags": [],
+            "label": "position",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.LabelPositions",
+                "text": "LabelPositions"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.values",
+            "type": "boolean",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.valuesFormat",
+            "type": "Enum",
+            "tags": [],
+            "label": "valuesFormat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.ValueFormats",
+                "text": "ValueFormats"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.percentDecimals",
+            "type": "number",
+            "tags": [],
+            "label": "percentDecimals",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.truncate",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "truncate",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "visTypePie",
+                "path": "src/plugins/vis_types/pie/public/to_ast.ts"
+              },
+              {
+                "plugin": "visTypePie",
+                "path": "src/plugins/vis_types/pie/public/editor/components/pie.tsx"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.LabelsParams.last_level",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "last_level",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "visTypePie",
+                "path": "src/plugins/vis_types/pie/public/to_ast.ts"
+              },
+              {
+                "plugin": "visTypePie",
+                "path": "src/plugins/vis_types/pie/public/editor/components/pie.tsx"
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.MosaicVisConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MosaicVisConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.MosaicVisConfig",
+            "text": "MosaicVisConfig"
+          },
+          " extends VisCommonConfig"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.MosaicVisConfig.buckets",
+            "type": "Array",
+            "tags": [],
+            "label": "buckets",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.MosaicVisConfig.nestedLegend",
+            "type": "boolean",
+            "tags": [],
+            "label": "nestedLegend",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PartitionVisParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "PartitionVisParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.PartitionVisParams",
+            "text": "PartitionVisParams"
+          },
+          " extends VisCommonParams"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.dimensions",
+            "type": "Object",
+            "tags": [],
+            "label": "dimensions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.Dimensions",
+                "text": "Dimensions"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.labels",
+            "type": "Object",
+            "tags": [],
+            "label": "labels",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.LabelsParams",
+                "text": "LabelsParams"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
+              "<{ [key: string]: unknown; }>"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.isDonut",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDonut",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.showValuesInLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showValuesInLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.respectSourceOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "respectSourceOrder",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.emptySizeRatio",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptySizeRatio",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.EmptySizeRatios",
+                "text": "EmptySizeRatios"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.startFromSecondLargestSlice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startFromSecondLargestSlice",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.distinctColors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "distinctColors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.nestedLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PieVisConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "PieVisConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.PieVisConfig",
+            "text": "PieVisConfig"
+          },
+          " extends VisCommonConfig"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.buckets",
+            "type": "Array",
+            "tags": [],
+            "label": "buckets",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.isDonut",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDonut",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.emptySizeRatio",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptySizeRatio",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionPartitionVis",
+                "scope": "common",
+                "docId": "kibExpressionPartitionVisPluginApi",
+                "section": "def-common.EmptySizeRatios",
+                "text": "EmptySizeRatios"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.respectSourceOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "respectSourceOrder",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.startFromSecondLargestSlice",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startFromSecondLargestSlice",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.distinctColors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "distinctColors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PieVisConfig.nestedLegend",
+            "type": "boolean",
+            "tags": [],
+            "label": "nestedLegend",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.TreemapVisConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TreemapVisConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.TreemapVisConfig",
+            "text": "TreemapVisConfig"
+          },
+          " extends VisCommonConfig"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.TreemapVisConfig.buckets",
+            "type": "Array",
+            "tags": [],
+            "label": "buckets",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.TreemapVisConfig.nestedLegend",
+            "type": "boolean",
+            "tags": [],
+            "label": "nestedLegend",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.WaffleVisConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "WaffleVisConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.WaffleVisConfig",
+            "text": "WaffleVisConfig"
+          },
+          " extends VisCommonConfig"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.WaffleVisConfig.bucket",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "bucket",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.WaffleVisConfig.showValuesInLegend",
+            "type": "boolean",
+            "tags": [],
+            "label": "showValuesInLegend",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.EmptySizeRatios",
+        "type": "Enum",
+        "tags": [],
+        "label": "EmptySizeRatios",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.LabelPositions",
+        "type": "Enum",
+        "tags": [],
+        "label": "LabelPositions",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.LegendDisplay",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegendDisplay",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.ValueFormats",
+        "type": "Enum",
+        "tags": [],
+        "label": "ValueFormats",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.ExpressionValuePartitionLabels",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionValuePartitionLabels",
+        "description": [],
+        "signature": [
+          "{ type: \"partitionLabelsValue\"; } & { show: boolean; position: ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.LabelPositions",
+            "text": "LabelPositions"
+          },
+          "; values: boolean; valuesFormat: ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.ValueFormats",
+            "text": "ValueFormats"
+          },
+          "; percentDecimals: number; truncate?: number | null | undefined; last_level?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.MOSAIC_VIS_EXPRESSION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOSAIC_VIS_EXPRESSION_NAME",
+        "description": [],
+        "signature": [
+          "\"mosaicVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.MosaicVisExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "MosaicVisExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"mosaicVis\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.MosaicVisConfig",
+            "text": "MosaicVisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          "RenderValue",
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PARTITION_LABELS_FUNCTION",
+        "type": "string",
+        "tags": [],
+        "label": "PARTITION_LABELS_FUNCTION",
+        "description": [],
+        "signature": [
+          "\"partitionLabels\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PARTITION_LABELS_VALUE",
+        "type": "string",
+        "tags": [],
+        "label": "PARTITION_LABELS_VALUE",
+        "description": [],
+        "signature": [
+          "\"partitionLabelsValue\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PIE_VIS_EXPRESSION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PIE_VIS_EXPRESSION_NAME",
+        "description": [],
+        "signature": [
+          "\"pieVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PieVisExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "PieVisExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"pieVis\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.PieVisConfig",
+            "text": "PieVisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          "RenderValue",
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"expressionPartitionVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"expressionPartitionVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.TREEMAP_VIS_EXPRESSION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "TREEMAP_VIS_EXPRESSION_NAME",
+        "description": [],
+        "signature": [
+          "\"treemapVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.TreemapVisExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "TreemapVisExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"treemapVis\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.TreemapVisConfig",
+            "text": "TreemapVisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          "RenderValue",
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.WAFFLE_VIS_EXPRESSION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "WAFFLE_VIS_EXPRESSION_NAME",
+        "description": [],
+        "signature": [
+          "\"waffleVis\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.WaffleVisExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "WaffleVisExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"waffleVis\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionPartitionVis",
+            "scope": "common",
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.WaffleVisConfig",
+            "text": "WaffleVisConfig"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          "RenderValue",
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

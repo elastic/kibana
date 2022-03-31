@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiCode,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCode, EuiDescribedFormGroup, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -28,8 +18,7 @@ export const IndexNamesConfigurationPanel: React.FC<{
   isLoading: boolean;
   isReadOnly: boolean;
   indexNamesFormElement: FormElement<LogIndexNameReference, FormValidationError>;
-  onSwitchToIndexPatternReference: () => void;
-}> = ({ isLoading, isReadOnly, indexNamesFormElement, onSwitchToIndexPatternReference }) => {
+}> = ({ isLoading, isReadOnly, indexNamesFormElement }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_name' });
   useTrackPageview({
     app: 'infra_logs',
@@ -39,29 +28,6 @@ export const IndexNamesConfigurationPanel: React.FC<{
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.indicesSectionTitle"
-            defaultMessage="Indices"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiCallOut title={indexPatternInformationCalloutTitle} iconType="wrench">
-        <FormattedMessage
-          tagName="p"
-          id="xpack.infra.logSourceConfiguration.indexPatternInformationCalloutDescription"
-          defaultMessage="The Logs UI can now integrate with data views to configure the used indices."
-        />
-        <EuiButton onClick={onSwitchToIndexPatternReference}>
-          <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.switchToDataViewReferenceButtonLabel"
-            defaultMessage="Use data views"
-          />
-        </EuiButton>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
           <h4>
@@ -117,11 +83,4 @@ const getIndexNamesInputFieldProps = getInputFieldProps<LogIndexNameReference>(
     indexName: value,
   }),
   ({ indexName }) => indexName
-);
-
-const indexPatternInformationCalloutTitle = i18n.translate(
-  'xpack.infra.logSourceConfiguration.indexPatternInformationCalloutTitle',
-  {
-    defaultMessage: 'New configuration option',
-  }
 );

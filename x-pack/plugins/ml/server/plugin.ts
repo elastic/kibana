@@ -62,6 +62,7 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { FieldFormatsStart } from '../../../../src/plugins/field_formats/server';
+import { SavedObjectsSyncService } from './saved_objects/sync_task';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -81,11 +82,13 @@ export class MlServerPlugin
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
+  private savedObjectsSyncService: SavedObjectsSyncService;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
+    this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -141,6 +144,12 @@ export class MlServerPlugin
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
     setupSavedObjects(coreSetup.savedObjects);
+    this.savedObjectsSyncService.registerSyncTask(
+      plugins.taskManager,
+      plugins.security,
+      this.spacesPlugin !== undefined,
+      () => this.isMlReady
+    );
 
     const { getInternalSavedObjectsClient, getMlSavedObjectsClient } = savedObjectClientsFactory(
       () => this.savedObjectsStart
@@ -255,6 +264,7 @@ export class MlServerPlugin
     initializeJobs().finally(() => {
       this.setMlReady();
     });
+    this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
   }
 
   public stop() {

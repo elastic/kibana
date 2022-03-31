@@ -12,20 +12,24 @@ import * as observabilityPublic from '../../../../observability/public';
 import '../../lib/__mocks__/use_composite_image.mock';
 import { mockRef } from '../../lib/__mocks__/screenshot_ref.mock';
 
-jest.mock('../../../../observability/public', () => {
-  const originalModule = jest.requireActual('../../../../observability/public');
-
-  return {
-    ...originalModule,
-    useFetcher: jest.fn().mockReturnValue({ data: null, status: 'success' }),
-  };
-});
+jest.mock('../../../../observability/public');
 
 jest.mock('react-use/lib/useIntersection', () => () => ({
   isIntersecting: true,
 }));
 
 describe('StepScreenshotDisplayProps', () => {
+  beforeAll(() => {
+    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+      data: null,
+      status: observabilityPublic.FETCH_STATUS.SUCCESS,
+      refetch: () => {},
+    });
+  });
+
+  afterAll(() => {
+    (observabilityPublic.useFetcher as any).mockClear();
+  });
   it('displays screenshot thumbnail when present', () => {
     const { getByAltText } = render(
       <StepScreenshotDisplay

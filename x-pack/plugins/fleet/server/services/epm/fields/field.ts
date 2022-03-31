@@ -7,7 +7,7 @@
 
 import { safeLoad } from 'js-yaml';
 
-import type { InstallablePackage } from '../../../types';
+import type { PackageInfo } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
@@ -35,6 +35,7 @@ export interface Field {
   include_in_parent?: boolean;
   include_in_root?: boolean;
   null_value?: string;
+  dimension?: boolean;
 
   // Meta fields
   metric_type?: string;
@@ -261,7 +262,7 @@ const isFields = (path: string) => {
  */
 
 export const loadFieldsFromYaml = async (
-  pkg: InstallablePackage,
+  pkg: PackageInfo,
   datasetName?: string
 ): Promise<Field[]> => {
   // Fetch all field definition files

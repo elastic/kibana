@@ -450,19 +450,27 @@ export class VisualBuilderPageObject extends FtrService {
     return await tableView.getVisibleText();
   }
 
+  private async switchTab(visType: string, tab: string) {
+    const testSubj = `${visType}Editor${tab}Btn`;
+    await this.retry.try(async () => {
+      await this.testSubjects.click(testSubj);
+      await this.header.waitUntilLoadingHasFinished();
+      if (!(await (await this.testSubjects.find(testSubj)).elementHasClass('euiTab-isSelected'))) {
+        throw new Error('tab not active');
+      }
+    });
+  }
+
   public async clickPanelOptions(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorPanelOptionsBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'PanelOptions');
   }
 
   public async clickDataTab(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorDataBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'Data');
   }
 
   public async clickAnnotationsTab() {
-    await this.testSubjects.click('timeSeriesEditorAnnotationsBtn');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab('timeSeries', 'Annotations');
   }
 
   public async clickAnnotationsAddDataSourceButton() {
@@ -794,9 +802,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
+    const groupBy = await this.testSubjects.find('groupBySelect');
     return await this.comboBox.isOptionSelected(groupBy, value);
   }
 

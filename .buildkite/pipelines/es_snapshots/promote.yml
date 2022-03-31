@@ -10,3 +10,5 @@ steps:
         required: true
   - label: Promote Snapshot
     command: .buildkite/scripts/steps/es_snapshots/promote.sh
+    agents:
+      queue: kibana-default

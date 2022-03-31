@@ -50,8 +50,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import deepmerge from 'deepmerge';
 
-import ECSSchema from '../../common/schemas/ecs/v1.12.1.json';
-import osquerySchema from '../../common/schemas/osquery/v5.0.1.json';
+import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import {
@@ -586,33 +586,36 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
     const editForm = !!defaultValue;
     const multipleValuesField = useRef(false);
     const currentFormData = useRef(defaultValue);
-    const formSchema = {
-      key: {
-        type: FIELD_TYPES.COMBO_BOX,
-        fieldsToValidateOnChange: ['result.value'],
-        validations: [
-          {
-            validator: getEcsFieldValidator(editForm),
-          },
-        ],
-      },
-      result: {
-        type: {
-          defaultValue: OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value,
+    const formSchema = useMemo(
+      () => ({
+        key: {
           type: FIELD_TYPES.COMBO_BOX,
-          fieldsToValidateOnChange: ['result.value'],
-        },
-        value: {
-          type: FIELD_TYPES.COMBO_BOX,
-          fieldsToValidateOnChange: ['key'],
+          fieldsToValidateOnChange: ['result.value', 'key'],
           validations: [
             {
-              validator: getOsqueryResultFieldValidator(osquerySchemaOptions, editForm),
+              validator: getEcsFieldValidator(editForm),
             },
           ],
         },
-      },
-    };
+        result: {
+          type: {
+            defaultValue: OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value,
+            type: FIELD_TYPES.COMBO_BOX,
+            fieldsToValidateOnChange: ['result.value'],
+          },
+          value: {
+            type: FIELD_TYPES.COMBO_BOX,
+            fieldsToValidateOnChange: ['key'],
+            validations: [
+              {
+                validator: getOsqueryResultFieldValidator(osquerySchemaOptions, editForm),
+              },
+            ],
+          },
+        },
+      }),
+      [editForm, osquerySchemaOptions]
+    );
 
     const { form } = useForm({
       // @ts-expect-error update types
@@ -635,7 +638,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
 
     const handleSubmit = useCallback(async () => {
       validate();
-      validateFields(['result.value']);
+      validateFields(['result.value', 'key']);
       const { data, isValid } = await submit();
 
       if (isValid) {
@@ -1008,6 +1011,14 @@ export const ECSMappingEditorField = React.memo(
         );
       });
     }, [query]);
+
+    useEffect(() => {
+      Object.keys(formRefs.current).forEach((key) => {
+        if (!value[key]) {
+          delete formRefs.current[key];
+        }
+      });
+    }, [value]);
 
     const handleAddRow = useCallback(
       (newRow) => {

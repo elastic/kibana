@@ -7,19 +7,9 @@
 
 import type { CoreSetup } from 'kibana/server';
 import {
-  pie,
-  xyChart,
   counterRate,
-  metricChart,
-  yAxisConfig,
-  layerConfig,
   formatColumn,
-  legendConfig,
   renameColumns,
-  gridlinesConfig,
-  datatableColumn,
-  tickLabelsConfig,
-  axisTitlesVisibilityConfig,
   getTimeScale,
   getDatatable,
   lensMultitable,
@@ -36,19 +26,9 @@ export const setupExpressions = (
   [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
-    pie,
-    xyChart,
     counterRate,
-    metricChart,
-    yAxisConfig,
-    layerConfig,
     formatColumn,
-    legendConfig,
     renameColumns,
-    gridlinesConfig,
-    datatableColumn,
-    tickLabelsConfig,
-    axisTitlesVisibilityConfig,
     getDatatable(getFormatFactory(core)),
     getTimeScale(getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));

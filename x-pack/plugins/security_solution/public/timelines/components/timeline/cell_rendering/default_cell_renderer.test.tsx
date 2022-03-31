@@ -34,6 +34,7 @@ describe('DefaultCellRenderer', () => {
   const isExpanded = true;
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 3;
+  const colIndex = 0;
   const setCellProps = jest.fn();
   const timelineId = 'test';
   const ecsData = {} as Ecs;
@@ -66,6 +67,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
             />
@@ -100,6 +102,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
               truncate={truncate}
@@ -148,6 +151,7 @@ describe('DefaultCellRenderer', () => {
               isExpanded={isExpanded}
               linkValues={linkValues}
               rowIndex={rowIndex}
+              colIndex={colIndex}
               setCellProps={setCellProps}
               timelineId={timelineId}
             />
@@ -196,6 +200,7 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
               timelineId={'timeline-1-query'}
             />
@@ -229,6 +234,7 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
               timelineId={'timeline-1-query'}
             />
@@ -263,6 +269,7 @@ describe('host link rendering', () => {
               isTimeline={isTimeline}
               linkValues={[]}
               rowIndex={3}
+              colIndex={0}
               setCellProps={jest.fn()}
               timelineId={'timeline-1-query'}
             />

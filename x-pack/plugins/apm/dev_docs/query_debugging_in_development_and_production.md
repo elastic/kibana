@@ -1,20 +1,20 @@
 # Query Debugging
 
-When debugging an issue with the APM UI it can be very helpful to see the exact Elasticsearch queries and responses that was made for a given API request. 
+When debugging an issue with the APM UI it can be very helpful to see the exact Elasticsearch queries and responses that was made for a given API request.
 To enable debugging of Elasticsearch queries in APM UI do the following:
 
-1. Go to "Stack Management" 
+1. Go to "Stack Management"
 2. Under "Kibana" on the left-hand side, select "Advanced Settings"
 3. Search for "Observability"
 4. Enable "Inspect ES queries" setting
 5. Click "Save"
 
-When you navigate back to APM UI you can now inspect Elasticsearch queries by opening your browser's Developer Tools and selecting an api request to APM's api. 
+When you navigate back to APM UI you can now inspect Elasticsearch queries by opening your browser's Developer Tools and selecting an api request to APM's api.
 There will be an `_inspect` key containing every Elasticsearch query made during that request including both requests and responses to and from Elasticsearch.
 
 ![image](https://user-images.githubusercontent.com/209966/140500012-b075adf0-8401-40fd-99f8-85b68711de17.png)
 
-## Example 
+## Example
 
 When "Inspect ES queries" are enabed all API calls to the APM API will be include the query param `_inspect=true`. For the environments API the request / response will be:
 
@@ -24,11 +24,7 @@ GET /internal/apm/environments?start=<start>&end=<end>&_inspect=true
 
 ```json
 {
-  "environments": [
-    "production",
-    "testing",
-    "ENVIRONMENT_NOT_DEFINED"
-  ],
+  "environments": ["production", "testing", "ENVIRONMENT_NOT_DEFINED"],
   "_inspect": [
     {
       "id": "get_environments (/internal/apm/environments)",
@@ -48,18 +44,7 @@ GET /internal/apm/environments?start=<start>&end=<end>&_inspect=true
               },
               {
                 "terms": {
-                  "processor.event": [
-                    "transaction",
-                    "metric",
-                    "error"
-                  ]
-                }
-              },
-              {
-                "range": {
-                  "observer.version_major": {
-                    "gte": 7
-                  }
+                  "processor.event": ["transaction", "metric", "error"]
                 }
               }
             ]

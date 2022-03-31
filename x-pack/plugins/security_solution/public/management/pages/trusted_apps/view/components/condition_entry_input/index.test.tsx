@@ -8,11 +8,8 @@
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { keys } from 'lodash';
-import {
-  ConditionEntry,
-  ConditionEntryField,
-  OperatingSystem,
-} from '../../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
 import { ConditionEntryInput } from '.';
 import { EuiSuperSelectProps } from '@elastic/eui';
@@ -21,7 +18,7 @@ let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
 let onVisitedMock: jest.Mock;
 
-const baseEntry: Readonly<ConditionEntry> = {
+const baseEntry: Readonly<TrustedAppConditionEntry> = {
   field: ConditionEntryField.HASH,
   type: 'match',
   operator: 'included',
@@ -39,7 +36,7 @@ describe('Condition entry input', () => {
     subject: string,
     os: OperatingSystem = OperatingSystem.WINDOWS,
     isRemoveDisabled: boolean = false,
-    entry: ConditionEntry = baseEntry
+    entry: TrustedAppConditionEntry = baseEntry
   ) => (
     <ConditionEntryInput
       os={os}
@@ -53,6 +50,7 @@ describe('Condition entry input', () => {
     />
   );
 
+  // @ts-ignore
   it.each(keys(ConditionEntryField).map((k) => [k]))(
     'should call on change for field input with value %s',
     (field) => {

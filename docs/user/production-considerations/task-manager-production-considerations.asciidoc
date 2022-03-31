@@ -101,7 +101,7 @@ Scaling {kib} instances horizontally requires a higher degree of coordination, w
 A recommended strategy is to follow these steps:
 
 1. Produce a <<task-manager-rough-throughput-estimation,rough throughput estimate>> as a guide to provisioning as many {kib} instances as needed. Include any growth in tasks that you predict experiencing in the near future, and a buffer to better address ad-hoc tasks.
-2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughtput to handle the scheduled workload>>.
+2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughput to handle the scheduled workload>>.
 3. If the throughput is insufficient, and {kib} instances exhibit low resource usage, incrementally scale vertically while <<kibana-page,monitoring>> the impact of these changes.
 4. If the throughput is insufficient, and {kib} instances are exhibiting high resource usage, incrementally scale horizontally by provisioning new {kib} instances and reassess.
 

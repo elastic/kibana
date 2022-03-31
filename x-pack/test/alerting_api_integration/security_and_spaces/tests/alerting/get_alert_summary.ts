@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import {
   getUrlPrefix,
   ObjectRemover,
-  getTestAlertData,
+  getTestRuleData,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
@@ -34,7 +34,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
@@ -98,7 +98,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
@@ -154,7 +154,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 

@@ -108,7 +108,7 @@ const breadcrumbGetters: {
       text: policyName,
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle', {
+      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle', {
         defaultMessage: 'Upgrade integration ',
       }),
     },

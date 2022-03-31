@@ -29,7 +29,12 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
-import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
+import {
+  apmIndices,
+  apmTelemetry,
+  apmServerSettings,
+  apmServiceGroups,
+} from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -48,6 +53,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
 export class APMPlugin
   implements
@@ -74,6 +80,7 @@ export class APMPlugin
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
+    core.savedObjects.registerType(apmServiceGroups);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
@@ -187,6 +194,7 @@ export class APMPlugin
         ml: plugins.ml,
         config$,
         logger: this.logger!.get('rule'),
+        basePath: core.http.basePath,
       });
     }
 
@@ -245,6 +253,11 @@ export class APMPlugin
     createApmCustomLinkIndex({
       client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
+      logger: this.logger,
+    });
+
+    migrateLegacyAPMIndicesToSpaceAware({
+      coreStart: core,
       logger: this.logger,
     });
   }

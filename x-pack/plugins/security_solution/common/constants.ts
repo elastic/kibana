@@ -79,7 +79,6 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  authentications = 'authentications',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
@@ -89,42 +88,53 @@ export enum SecurityPageName {
   caseConfigure = 'cases_configure',
   caseCreate = 'cases_create',
   detections = 'detections',
+  detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
-  hostIsolationExceptions = 'host_isolation_exceptions',
-  events = 'events',
   exceptions = 'exceptions',
   explore = 'explore',
+  hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
+  hostsEvents = 'hosts-events',
+  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
+  landing = 'get_started',
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
   networkExternalAlerts = 'network-external_alerts',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
+  overview = 'overview',
+  policies = 'policy',
+  rules = 'rules',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
-  overview = 'overview',
-  policies = 'policies',
-  rules = 'rules',
   trustedApps = 'trusted_apps',
-  ueba = 'ueba',
   uncommonProcesses = 'uncommon_processes',
+  users = 'users',
+  usersAuthentications = 'users-authentications',
+  usersAnomalies = 'users-anomalies',
+  usersRisk = 'users-risk',
+  sessions = 'sessions',
+  usersEvents = 'users-events',
+  usersExternalAlerts = 'users-external_alerts',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
+export const LANDING_PATH = '/get_started' as const;
+export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
-export const UEBA_PATH = '/ueba' as const;
+export const USERS_PATH = '/users' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
@@ -136,6 +146,8 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
+export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
+export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
@@ -143,7 +155,7 @@ export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
 export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
-export const APP_UEBA_PATH = `${APP_PATH}${UEBA_PATH}` as const;
+export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
@@ -167,13 +179,11 @@ export const DEFAULT_INDEX_PATTERN = [
   'winlogbeat-*',
 ];
 
-export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
-  // TODO: Steph/ueba TEMP for testing UEBA data
-  'ml_host_risk_score_*',
-];
-
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
+
+/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
+export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
@@ -290,6 +300,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+export const DETECTION_RESPONSE_METRICS_API_URL = '/api/detection_response_metrics' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -369,6 +380,8 @@ export const ELASTIC_NAME = 'estc' as const;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
+export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
+
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -423,5 +436,14 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
+/**
+ * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ *
+ * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
+ * we will need to update this constant with the corresponding version.
+ */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
   'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';

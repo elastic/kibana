@@ -57,8 +57,8 @@ const Popover = React.memo<UtilityBarActionProps>(
             iconSide={iconSide}
             iconSize={iconSize}
             iconType={iconType}
-            onClick={handleLinkIconClick}
             disabled={disabled}
+            onClick={handleLinkIconClick}
           >
             {children}
           </LinkIcon>
@@ -101,8 +101,14 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
   }) => {
     if (inProgress) {
       return (
-        <BarAction data-test-subj={dataTestSubj}>
-          <LoadingButtonEmpty size="xs" className="eui-alignTop" isLoading iconSide="right">
+        <BarAction>
+          <LoadingButtonEmpty
+            data-test-subj={`${dataTestSubj}-progress`}
+            size="xs"
+            className="eui-alignTop"
+            isLoading
+            iconSide="right"
+          >
             {children}
           </LoadingButtonEmpty>
         </BarAction>
@@ -113,7 +119,6 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       <BarAction data-test-subj={dataTestSubj}>
         {popoverContent ? (
           <Popover
-            onClick={onClick}
             dataTestSubj={`${dataTestSubj}-popover`}
             disabled={disabled}
             color={color}
@@ -123,6 +128,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
             ownFocus={ownFocus}
             popoverPanelPaddingSize={popoverPanelPaddingSize}
             popoverContent={popoverContent}
+            onClick={onClick}
           >
             {children}
           </Popover>

@@ -89,7 +89,6 @@ async function findSupportedBasicLicenseCluster(
  * are also flagged as supported in this method.
  */
 export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
-  const config = req.server.config();
   const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
   const flagAllSupported = (clusters: ElasticsearchModifiedSource[]) => {
     clusters.forEach((cluster) => {
@@ -129,7 +128,7 @@ export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
 
       // if all linked are basic licenses
       if (linkedClusterCount === basicLicenseCount) {
-        const kibanaUuid = config.get('server.uuid') as string;
+        const kibanaUuid = req.server.instanceUuid;
         return await findSupportedBasicLicenseCluster(req, clusters, ccs, kibanaUuid, serverLog);
       }
 

@@ -10,6 +10,7 @@ import {
   config as ElasticsearchBaseConfig,
   ElasticsearchConfig,
 } from '../../../../src/core/server/';
+import { MonitoringConfigSchema } from './types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -31,6 +32,9 @@ export const configSchema = schema.object({
     }),
     logs: schema.object({
       index: schema.string({ defaultValue: 'filebeat-*' }),
+    }),
+    metricbeat: schema.object({
+      index: schema.string({ defaultValue: 'metricbeat-*' }),
     }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
@@ -79,7 +83,7 @@ export const configSchema = schema.object({
 });
 
 export class MonitoringElasticsearchConfig extends ElasticsearchConfig {
-  public readonly logFetchCount?: number;
+  public readonly logFetchCount: number;
 
   constructor(rawConfig: TypeOf<typeof monitoringElasticsearchConfigSchema>) {
     super(rawConfig as ElasticsearchConfigType);
@@ -87,8 +91,25 @@ export class MonitoringElasticsearchConfig extends ElasticsearchConfig {
   }
 }
 
-export type MonitoringConfig = ReturnType<typeof createConfig>;
-export function createConfig(config: TypeOf<typeof configSchema>) {
+// Build MonitoringConfig type based on MonitoringConfigSchema (config input) but with ui.elasticsearch as a MonitoringElasticsearchConfig (instantiated class)
+type MonitoringConfigTypeOverriddenUI = Omit<MonitoringConfigSchema, 'ui'>;
+
+interface MonitoringConfigTypeOverriddenUIElasticsearch
+  extends Omit<MonitoringConfigSchema['ui'], 'elasticsearch'> {
+  elasticsearch: MonitoringElasticsearchConfig;
+}
+
+/**
+ * A functional representation of the `monitoring.*` configuration tree passed in from kibana.yml
+ */
+export interface MonitoringConfig extends MonitoringConfigTypeOverriddenUI {
+  /**
+   * A functional representation of the `monitoring.ui.*` configuration tree passed in from kibana.yml
+   */
+  ui: MonitoringConfigTypeOverriddenUIElasticsearch;
+}
+
+export function createConfig(config: MonitoringConfigSchema): MonitoringConfig {
   return {
     ...config,
     ui: {

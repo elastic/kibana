@@ -10,12 +10,14 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../../typings/**/*",
     "*.ts"
   ],
   "references": [
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../charts/tsconfig.json" },
     { "path": "../../data/tsconfig.json" },
+    { "path": "../../data_views/tsconfig.json" },
     { "path": "../../expressions/tsconfig.json" },
     { "path": "../../visualizations/tsconfig.json" },
     { "path": "../../dashboard/tsconfig.json" },

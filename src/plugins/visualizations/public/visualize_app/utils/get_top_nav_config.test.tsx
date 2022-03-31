@@ -81,6 +81,149 @@ describe('getTopNavConfig', () => {
     },
     share,
   };
+  test('returns correct links if the save visualize capabilities are set to false', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+    const novizSaveServices = {
+      ...services,
+      visualizeCapabilities: {
+        save: false,
+      },
+    };
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: 'dashboards',
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      novizSaveServices as unknown as VisualizeServices
+    );
+
+    expect(topNavLinks).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "Open Inspector for visualization",
+          "disableButton": [Function],
+          "id": "inspector",
+          "label": "inspect",
+          "run": undefined,
+          "testId": "openInspectorButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Share Visualization",
+          "disableButton": false,
+          "id": "share",
+          "label": "share",
+          "run": [Function],
+          "testId": "shareTopNavButton",
+        },
+        Object {
+          "description": "Return to the last app without saving changes",
+          "emphasize": false,
+          "id": "cancel",
+          "label": "Cancel",
+          "run": [Function],
+          "testId": "visualizeCancelAndReturnButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Finish editing visualization and return to the last app",
+          "disableButton": false,
+          "emphasize": true,
+          "iconType": "checkInCircleFilled",
+          "id": "saveAndReturn",
+          "label": "Save and return",
+          "run": [Function],
+          "testId": "visualizesaveAndReturnButton",
+          "tooltip": [Function],
+        },
+      ]
+    `);
+  });
+  test('returns correct links if the originating app is undefined', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: undefined,
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+      } as unknown as TopNavConfigParams,
+      services as unknown as VisualizeServices
+    );
+
+    expect(topNavLinks).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "Open Inspector for visualization",
+          "disableButton": [Function],
+          "id": "inspector",
+          "label": "inspect",
+          "run": undefined,
+          "testId": "openInspectorButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Share Visualization",
+          "disableButton": false,
+          "id": "share",
+          "label": "share",
+          "run": [Function],
+          "testId": "shareTopNavButton",
+        },
+        Object {
+          "description": "Save Visualization",
+          "disableButton": false,
+          "emphasize": true,
+          "iconType": "save",
+          "id": "save",
+          "label": "Save",
+          "run": [Function],
+          "testId": "visualizeSaveButton",
+          "tooltip": [Function],
+        },
+      ]
+    `);
+  });
   test('returns correct links for by reference visualization', () => {
     const vis = {
       savedVis: {
@@ -232,6 +375,149 @@ describe('getTopNavConfig', () => {
           "iconType": undefined,
           "id": "save",
           "label": "Save to library",
+          "run": [Function],
+          "testId": "visualizeSaveButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Finish editing visualization and return to the last app",
+          "disableButton": false,
+          "emphasize": true,
+          "iconType": "checkInCircleFilled",
+          "id": "saveAndReturn",
+          "label": "Save and return",
+          "run": [Function],
+          "testId": "visualizesaveAndReturnButton",
+          "tooltip": [Function],
+        },
+      ]
+    `);
+  });
+
+  test('returns correct for visualization that allows editing in Lens editor', () => {
+    const vis = {
+      savedVis: {
+        id: 'test',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'alias_id',
+        },
+      },
+      vis: {
+        type: {
+          title: 'TSVB',
+        },
+      },
+    } as VisualizeEditorVisInstance;
+    const topNavLinks = getTopNavConfig(
+      {
+        hasUnsavedChanges: false,
+        setHasUnsavedChanges: jest.fn(),
+        hasUnappliedChanges: false,
+        onOpenInspector: jest.fn(),
+        originatingApp: 'dashboards',
+        setOriginatingApp: jest.fn(),
+        visInstance: vis,
+        stateContainer,
+        visualizationIdFromUrl: undefined,
+        stateTransfer: createEmbeddableStateTransferMock(),
+        editInLensConfig: {
+          layers: {
+            '0': {
+              indexPatternId: 'test-id',
+              timeFieldName: 'timefield-1',
+              chartType: 'area',
+              axisPosition: 'left',
+              palette: {
+                name: 'default',
+                type: 'palette',
+              },
+              metrics: [
+                {
+                  agg: 'count',
+                  isFullReference: false,
+                  fieldName: 'document',
+                  params: {},
+                  color: '#68BC00',
+                },
+              ],
+              timeInterval: 'auto',
+            },
+          },
+          configuration: {
+            fill: 0.5,
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: 1,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+            extents: {
+              yLeftExtent: {
+                mode: 'full',
+              },
+              yRightExtent: {
+                mode: 'full',
+              },
+            },
+          },
+        },
+        displayEditInLensItem: true,
+        hideLensBadge: false,
+      } as unknown as TopNavConfigParams,
+      services as unknown as VisualizeServices
+    );
+
+    expect(topNavLinks).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "className": "visNavItem__goToLens",
+          "description": "Go to Lens with your current configuration",
+          "disableButton": false,
+          "emphasize": false,
+          "id": "goToLens",
+          "label": "Edit visualization in Lens",
+          "run": [Function],
+          "testId": "visualizeEditInLensButton",
+        },
+        Object {
+          "description": "Open Inspector for visualization",
+          "disableButton": [Function],
+          "id": "inspector",
+          "label": "inspect",
+          "run": undefined,
+          "testId": "openInspectorButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Share Visualization",
+          "disableButton": false,
+          "id": "share",
+          "label": "share",
+          "run": [Function],
+          "testId": "shareTopNavButton",
+        },
+        Object {
+          "description": "Return to the last app without saving changes",
+          "emphasize": false,
+          "id": "cancel",
+          "label": "Cancel",
+          "run": [Function],
+          "testId": "visualizeCancelAndReturnButton",
+          "tooltip": [Function],
+        },
+        Object {
+          "description": "Save Visualization",
+          "disableButton": false,
+          "emphasize": false,
+          "iconType": undefined,
+          "id": "save",
+          "label": "Save as",
           "run": [Function],
           "testId": "visualizeSaveButton",
           "tooltip": [Function],

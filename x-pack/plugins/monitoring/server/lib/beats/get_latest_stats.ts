@@ -72,7 +72,7 @@ export function handleResponse(response?: BeatsElasticsearchResponse) {
 export function getLatestStats(req: LegacyRequest, beatsIndexPattern: string, clusterUuid: string) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in getBeats');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const lastDayFilter = { range: { timestamp: { gte: 'now-1d/d', lte: 'now/d' } } };
   const beatUuidAgg = {
     // size of these buckets determines actual # of beats in each kind of aggregation
@@ -80,7 +80,7 @@ export function getLatestStats(req: LegacyRequest, beatsIndexPattern: string, cl
       uuids: {
         terms: {
           field: 'beats_stats.beat.uuid',
-          size: config.get('monitoring.ui.max_bucket_size'),
+          size: config.ui.max_bucket_size,
         },
       },
     },

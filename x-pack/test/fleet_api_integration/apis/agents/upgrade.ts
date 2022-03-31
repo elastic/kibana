@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
+import { testUsers } from '../test_users';
 
 const makeSnapshotVersion = (version: string) => {
   return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
@@ -22,6 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet upgrade', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -254,6 +256,28 @@ export default function (providerContext: FtrProviderContext) {
 
         const agent1data = await supertest.get(`/api/fleet/agents/agent1`);
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('should respond 403 if user lacks fleet all permissions', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertestWithoutAuth
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .send({
+            version: kibanaVersion,
+          })
+          .expect(403);
       });
     });
 

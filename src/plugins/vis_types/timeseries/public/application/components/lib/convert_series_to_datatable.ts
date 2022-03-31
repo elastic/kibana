@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
 import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
+import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
-import { getDataStart } from '../../../services';
+import { getDataStart, getDataViewsStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import type { TSVBTables } from './types';
 
@@ -32,7 +33,7 @@ interface TSVBColumns {
 
 export const addMetaToColumns = (
   columns: TSVBColumns[],
-  indexPattern: IndexPattern
+  indexPattern: DataView
 ): DatatableColumn[] => {
   return columns.map((column) => {
     const field = indexPattern.getFieldByName(column.name);
@@ -85,17 +86,17 @@ const hasSeriesAgg = (metrics: Metric[]) => {
 export const convertSeriesToDataTable = async (
   model: TimeseriesVisParams,
   series: PanelData[],
-  initialIndexPattern: IndexPattern
+  initialIndexPattern: DataView
 ) => {
   const tables: TSVBTables = {};
-  const { indexPatterns } = getDataStart();
+  const dataViews = getDataViewsStart();
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
     let usedIndexPattern = initialIndexPattern;
     // The user can overwrite the index pattern of a layer.
     // In that case, the index pattern should be fetched again.
     if (layer.override_index_pattern) {
-      const { indexPattern } = await fetchIndexPattern(layer.series_index_pattern, indexPatterns);
+      const { indexPattern } = await fetchIndexPattern(layer.series_index_pattern, dataViews);
       if (indexPattern) {
         usedIndexPattern = indexPattern;
       }
@@ -131,7 +132,7 @@ export const convertSeriesToDataTable = async (
         id++;
         columns.push({
           id,
-          name: layer.terms_field || '',
+          name: getMultiFieldLabel(getFieldsForTerms(layer.terms_field)),
           isMetric: false,
           type: BUCKET_TYPES.TERMS,
         });
@@ -154,7 +155,7 @@ export const convertSeriesToDataTable = async (
         const row: DatatableRow = [rowData[0], rowData[1]];
         // If the layer is split by terms aggregation, the data array should also contain the split value.
         if (isGroupedByTerms || filtersColumn) {
-          row.push(seriesPerLayer[j].label);
+          row.push([seriesPerLayer[j].label].flat()[0]);
         }
         return row;
       });

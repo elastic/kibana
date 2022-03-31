@@ -39,7 +39,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/jest_integration/jest-preset.js',
+  'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -61,15 +61,15 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
 
-  // Bundled package names typically use a format like ${pkgName}-${pkgVersion}, so don't lint them
-  'x-pack/plugins/fleet/server/bundled_packages/**/*',
-
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
 
   // Buildkite
   '.buildkite/**/*',
+
+  // generator templates use weird filenames based on the requirements for the files they're generating
+  'packages/kbn-generate/templates/**/*',
 ];
 
 /**
@@ -146,10 +146,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
+  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/formats/pdf/pdf_maker/assets/img/logo-grey.png',
 ];

@@ -17,10 +17,12 @@ export type {
   ErrorThatHandlesItsOwnResponse,
   ElasticsearchError,
 } from './errors';
-export { AlertTypeDisabledError, isErrorThatHandlesItsOwnResponse } from './errors';
+export { AlertTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
 export {
   executionStatusFromState,
   executionStatusFromError,
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
+export { getRecoveredAlerts } from './get_recovered_alerts';
+export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';

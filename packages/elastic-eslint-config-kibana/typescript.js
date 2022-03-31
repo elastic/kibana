@@ -168,6 +168,22 @@ module.exports = {
               selector: 'enum',
               format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
             },
+            // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
+            // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
+            {
+              selector: [
+                'classProperty',
+                'objectLiteralProperty',
+                'typeProperty',
+                'classMethod',
+                'objectLiteralMethod',
+                'typeMethod',
+                'accessor',
+                'enumMember'
+              ],
+              format: null,
+              modifiers: ['requiresQuotes']
+            }
           ],
           '@typescript-eslint/explicit-member-accessibility': ['error',
             {

@@ -98,7 +98,7 @@ async function getUsersDeprecations(
 
   let users: SecurityGetUserResponse;
   try {
-    users = (await client.security.getUser()).body;
+    users = await client.security.getUser();
   } catch (err) {
     const { logger } = reportingCore.getPluginSetupDeps();
     if (deprecations.getErrorStatusCode(err) === 403) {
@@ -185,7 +185,7 @@ async function getRoleMappingsDeprecations(
 
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
-    roleMappings = (await client.security.getRoleMapping()).body;
+    roleMappings = await client.security.getRoleMapping();
   } catch (err) {
     const { logger } = reportingCore.getPluginSetupDeps();
     if (deprecations.getErrorStatusCode(err) === 403) {

@@ -14,7 +14,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SetAppSearchChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchPageTemplate } from '../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { AppSearchPageTemplate } from './page_template';
@@ -27,7 +27,7 @@ describe('AppSearchPageTemplate', () => {
       </AppSearchPageTemplate>
     );
 
-    expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplate);
+    expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
     expect(wrapper.prop('solutionNav')).toEqual({ name: 'App Search', items: [] });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
@@ -35,7 +35,9 @@ describe('AppSearchPageTemplate', () => {
   describe('page chrome', () => {
     it('takes a breadcrumb array & renders a product-specific page chrome', () => {
       const wrapper = shallow(<AppSearchPageTemplate pageChrome={['Some page']} />);
-      const setPageChrome = wrapper.find(EnterpriseSearchPageTemplate).prop('setPageChrome') as any;
+      const setPageChrome = wrapper
+        .find(EnterpriseSearchPageTemplateWrapper)
+        .prop('setPageChrome') as any;
 
       expect(setPageChrome.type).toEqual(SetAppSearchChrome);
       expect(setPageChrome.props.trail).toEqual(['Some page']);
@@ -51,7 +53,7 @@ describe('AppSearchPageTemplate', () => {
     });
   });
 
-  it('passes down any ...pageTemplateProps that EnterpriseSearchPageTemplate accepts', () => {
+  it('passes down any ...pageTemplateProps that EnterpriseSearchPageTemplateWrapper accepts', () => {
     const wrapper = shallow(
       <AppSearchPageTemplate
         pageHeader={{ pageTitle: 'hello world' }}
@@ -60,10 +62,10 @@ describe('AppSearchPageTemplate', () => {
       />
     );
 
-    expect(wrapper.find(EnterpriseSearchPageTemplate).prop('pageHeader')!.pageTitle).toEqual(
+    expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('pageHeader')!.pageTitle).toEqual(
       'hello world'
     );
-    expect(wrapper.find(EnterpriseSearchPageTemplate).prop('isLoading')).toEqual(false);
-    expect(wrapper.find(EnterpriseSearchPageTemplate).prop('emptyState')).toEqual(<div />);
+    expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('isLoading')).toEqual(false);
+    expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('emptyState')).toEqual(<div />);
   });
 });

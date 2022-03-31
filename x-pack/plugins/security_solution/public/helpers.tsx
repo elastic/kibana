@@ -16,7 +16,6 @@ import {
   APP_UI_ID,
   EXCEPTIONS_PATH,
   RULES_PATH,
-  UEBA_PATH,
   SERVER_APP_ID,
   CASES_FEATURE_ID,
   OVERVIEW_PATH,
@@ -148,7 +147,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 };
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T> | TimelineEqlResponse,
+  response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
@@ -158,7 +157,7 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
 
 export const isDetectionsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
-    path: `(${ALERTS_PATH}|${RULES_PATH}|${UEBA_PATH}|${EXCEPTIONS_PATH})`,
+    path: `(${ALERTS_PATH}|${RULES_PATH}|${EXCEPTIONS_PATH})`,
     strict: false,
   });
 };

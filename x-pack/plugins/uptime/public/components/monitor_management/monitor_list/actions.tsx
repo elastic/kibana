@@ -5,56 +5,40 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import moment from 'moment';
 import { UptimeSettingsContext } from '../../../contexts';
-import { useFetcher, FETCH_STATUS } from '../../../../../observability/public';
-import { deleteMonitor } from '../../../state/api';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { DeleteMonitor } from './delete_monitor';
+import { InlineError } from './inline_error';
+import { MonitorManagementListResult, Ping } from '../../../../common/runtime_types';
 
 interface Props {
   id: string;
+  name: string;
   isDisabled?: boolean;
   onUpdate: () => void;
+  errorSummaries?: Ping[];
+  monitors: MonitorManagementListResult['monitors'];
 }
 
-export const Actions = ({ id, onUpdate, isDisabled }: Props) => {
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monitors }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const { notifications } = useKibana();
+  let errorSummary = errorSummaries?.find((summary) => summary.config_id === id);
 
-  const { status } = useFetcher(() => {
-    if (isDeleting) {
-      return deleteMonitor({ id });
+  const monitor = monitors.find((monitorT) => monitorT.id === id);
+
+  if (errorSummary && monitor) {
+    const summaryIsBeforeUpdate = moment(monitor.updated_at).isBefore(
+      moment(errorSummary.timestamp)
+    );
+    if (!summaryIsBeforeUpdate) {
+      errorSummary = undefined;
     }
-  }, [id, isDeleting]);
+  }
 
-  // TODO: add popup to confirm deletion
-  const handleDelete = () => {
-    setIsDeleting(true);
-  };
-
-  useEffect(() => {
-    if (status === FETCH_STATUS.SUCCESS || status === FETCH_STATUS.FAILURE) {
-      setIsDeleting(false);
-    }
-    if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: <p data-test-subj="uptimeDeleteMonitorFailure">{MONITOR_DELETE_FAILURE_LABEL}</p>,
-        toastLifeTimeMs: 3000,
-      });
-    } else if (status === FETCH_STATUS.SUCCESS) {
-      onUpdate();
-      notifications.toasts.success({
-        title: <p data-test-subj="uptimeDeleteMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>,
-        toastLifeTimeMs: 3000,
-      });
-    }
-  }, [setIsDeleting, onUpdate, notifications.toasts, status]);
-
-  // TODO: Add popovers to icons
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
@@ -67,18 +51,13 @@ export const Actions = ({ id, onUpdate, isDisabled }: Props) => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {status === FETCH_STATUS.LOADING ? (
-          <EuiLoadingSpinner size="m" aria-label={MONITOR_DELETE_LOADING_LABEL} />
-        ) : (
-          <EuiButtonIcon
-            isDisabled={isDisabled}
-            iconType="trash"
-            onClick={handleDelete}
-            aria-label={DELETE_MONITOR_LABEL}
-            data-test-subj="monitorManagementDeleteMonitor"
-          />
-        )}
+        <DeleteMonitor onUpdate={onUpdate} name={name} id={id} isDisabled={isDisabled} />
       </EuiFlexItem>
+      {errorSummary && (
+        <EuiFlexItem>
+          <InlineError errorSummary={errorSummary} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -86,29 +65,3 @@ export const Actions = ({ id, onUpdate, isDisabled }: Props) => {
 const EDIT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLabel', {
   defaultMessage: 'Edit monitor',
 });
-
-const DELETE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.deleteMonitorLabel', {
-  defaultMessage: 'Delete monitor',
-});
-
-const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorDeleteSuccessMessage',
-  {
-    defaultMessage: 'Monitor deleted successfully.',
-  }
-);
-
-// TODO: Discuss error states with product
-const MONITOR_DELETE_FAILURE_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorDeleteFailureMessage',
-  {
-    defaultMessage: 'Monitor was unable to be deleted. Please try again later.',
-  }
-);
-
-const MONITOR_DELETE_LOADING_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorDeleteLoadingMessage',
-  {
-    defaultMessage: 'Deleting monitor...',
-  }
-);

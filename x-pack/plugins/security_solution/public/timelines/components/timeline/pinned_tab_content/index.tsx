@@ -119,12 +119,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     docValueFields,
+    dataViewId,
     loading: loadingSourcerer,
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -187,6 +188,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       endDate: '',
       id: `pinned-${timelineId}`,
       indexNames: selectedPatterns,
+      dataViewId,
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,

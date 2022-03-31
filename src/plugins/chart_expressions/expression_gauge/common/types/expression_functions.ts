@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '../../../../expressions';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -19,27 +21,33 @@ import {
   GaugeTicksPositions,
   GaugeLabelMajorModes,
   GaugeColorModes,
+  GaugeCentralMajorModes,
 } from '../constants';
 import { CustomPaletteParams } from '.';
 
-export type GaugeType = 'gauge';
-export type GaugeColorMode = keyof typeof GaugeColorModes;
-export type GaugeShape = keyof typeof GaugeShapes;
-export type GaugeLabelMajorMode = keyof typeof GaugeLabelMajorModes;
-export type GaugeTicksPosition = keyof typeof GaugeTicksPositions;
+export type GaugeColorMode = $Values<typeof GaugeColorModes>;
+export type GaugeShape = $Values<typeof GaugeShapes>;
+export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
+export type GaugeCentralMajorMode = $Values<typeof GaugeCentralMajorModes>;
+export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface GaugeState {
-  metricAccessor?: string;
-  minAccessor?: string;
-  maxAccessor?: string;
-  goalAccessor?: string;
+  metric?: string | ExpressionValueVisDimension;
+  min?: string | ExpressionValueVisDimension;
+  max?: string | ExpressionValueVisDimension;
+  goal?: string | ExpressionValueVisDimension;
   ticksPosition: GaugeTicksPosition;
   labelMajorMode: GaugeLabelMajorMode;
   labelMajor?: string;
   labelMinor?: string;
+  centralMajorMode?: GaugeCentralMajorMode;
+  centralMajor?: string;
   colorMode?: GaugeColorMode;
   palette?: PaletteOutput<CustomPaletteParams>;
   shape: GaugeShape;
+  /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
+  percentageMode?: boolean;
+  commonLabel?: string;
 }
 
 export type GaugeArguments = GaugeState & {
@@ -68,3 +76,10 @@ export type GaugeExpressionFunctionDefinition = ExpressionFunctionDefinition<
   GaugeArguments,
   ExpressionValueRender<GaugeExpressionProps>
 >;
+
+export interface Accessors {
+  min?: string;
+  max?: string;
+  metric?: string;
+  goal?: string;
+}

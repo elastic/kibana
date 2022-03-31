@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from 'kibana/server';
 import { ReportingCore } from '../..';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlockedHeaders, generatePngObservable } from '../../export_types/common';
+import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
 
@@ -24,9 +24,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       path: `${API_DIAGNOSE_URL}/screenshot`,
       validate: {},
     },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, _context, request, res) => {
       const config = reporting.getConfig();
-      const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [
         config.kbnConfig.get('server', 'basePath'),
         config.get('kibanaServer', 'protocol'),
@@ -51,19 +50,9 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      const conditionalHeaders = {
-        headers: omitBlockedHeaders(decryptedHeaders),
-        conditions: {
-          hostname,
-          port: +port,
-          basePath,
-          protocol,
-        },
-      };
-
       return generatePngObservable(reporting, logger, {
-        conditionalHeaders,
         layout,
+        request,
         browserTimezone: 'America/Los_Angeles',
         urls: [hashUrl],
       })

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
 import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
@@ -17,6 +16,7 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
+import { decodeMvtResponseBody } from '../../common/mvt_request_body';
 import { getEsTile } from './get_tile';
 import { getEsGridTile } from './get_grid_tile';
 
@@ -57,8 +57,6 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
       const gzippedTile = await getEsTile({
         url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
@@ -69,7 +67,7 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
         abortController,
       });
 
@@ -90,7 +88,7 @@ export function initMVTRoutes({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
-          requestType: schema.string(),
+          renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
         }),
@@ -105,8 +103,6 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
       const gzipTileStream = await getEsGridTile({
         url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
@@ -117,8 +113,8 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
-        requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
+        renderAs: query.renderAs as RENDER_AS,
         gridPrecision: parseInt(query.gridPrecision, 10),
         abortController,
       });
