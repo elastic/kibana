@@ -18,7 +18,7 @@ describe('Users risk tab', () => {
   });
 
   it(`renders users risk tab`, () => {
-    cy.get(RISK_SCORE_TAB).click();
+    cy.get(RISK_SCORE_TAB).click({ force: true });
 
     cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
   });

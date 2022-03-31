@@ -17,7 +17,7 @@ describe('Users Events tab', () => {
   });
 
   it(`renders events tab`, () => {
-    cy.get(EVENTS_TAB).click();
+    cy.get(EVENTS_TAB).click({ force: true });
 
     cy.get(EVENTS_TAB_CONTENT).should('exist');
   });

@@ -18,7 +18,7 @@ describe('Users anomalies tab', () => {
   });
 
   it(`renders anomalies tab`, () => {
-    cy.get(ANOMALIES_TAB).click();
+    cy.get(ANOMALIES_TAB).click({ force: true });
 
     cy.get(ANOMALIES_TAB_CONTENT).should('exist');
   });

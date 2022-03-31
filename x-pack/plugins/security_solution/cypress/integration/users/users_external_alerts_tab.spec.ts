@@ -21,7 +21,7 @@ describe('Users external alerts tab', () => {
   });
 
   it(`renders external alerts tab`, () => {
-    cy.get(EXTERNAL_ALERTS_TAB).click();
+    cy.get(EXTERNAL_ALERTS_TAB).click({ force: true });
 
     cy.get(EXTERNAL_ALERTS_TAB_CONTENT).should('exist');
   });
