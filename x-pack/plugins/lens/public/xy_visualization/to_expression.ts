@@ -30,8 +30,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { defaultAnnotationLabel } from './annotations/config_panel';
-import { getUniqueLabels } from './annotations/helpers';
+import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (

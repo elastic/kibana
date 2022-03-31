@@ -68,8 +68,9 @@ import {
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
-import { AnnotationsPanel, defaultAnnotationLabel } from './annotations/config_panel';
+import { defaultAnnotationLabel } from './annotations/helpers';
 
 export const getXyVisualization = ({
   paletteService,

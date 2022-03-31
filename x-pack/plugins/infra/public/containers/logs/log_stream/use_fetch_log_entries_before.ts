@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
-import { JsonObject } from '@kbn/utility-types';
 import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
-import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryBeforeCursor } from '../../../../common/log_entry';
+import { LogViewColumnConfiguration } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
@@ -37,7 +37,7 @@ export const useLogEntriesBeforeRequest = ({
   sourceId,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
@@ -109,7 +109,7 @@ export const useFetchLogEntriesBefore = ({
   sourceId,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
