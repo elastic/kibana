@@ -222,6 +222,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}
+          displayCreateCaseButton={isSelectorView}
+          onCreateCasePressed={onRowClick}
         />
         <CasesTable
           columns={columns}
