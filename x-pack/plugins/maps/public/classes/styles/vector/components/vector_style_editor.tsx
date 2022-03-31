@@ -33,6 +33,7 @@ import { createStyleFieldsHelper, StyleField, StyleFieldsHelper } from '../style
 import {
   ColorDynamicOptions,
   ColorStaticOptions,
+  CustomIcon,
   DynamicStylePropertyOptions,
   IconDynamicOptions,
   IconStaticOptions,
@@ -62,11 +63,13 @@ interface Props {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   onIsTimeAwareChange: (isTimeAware: boolean) => void;
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
   hasBorder: boolean;
   styleProperties: StyleProperties;
   isTimeAware: boolean;
   showIsTimeAware: boolean;
+  customIcons: CustomIcon[];
 }
 
 interface State {
@@ -392,8 +395,10 @@ export class VectorStyleEditor extends Component<Props, State> {
           <VectorStyleIconEditor
             disabled={!hasMarkerOrIcon}
             disabledBy={VECTOR_STYLES.ICON_SIZE}
+            customIcons={this.props.customIcons}
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
+            onCustomIconsChange={this.props.onCustomIconsChange}
             styleProperty={
               this.props.styleProperties[VECTOR_STYLES.ICON] as IStyleProperty<
                 IconDynamicOptions | IconStaticOptions

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFieldSearchProps,
@@ -15,13 +17,12 @@ import {
   EuiTextColor,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
-import { CspPageTemplate } from '../../components/page_template';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
 import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS } from './translations';
 import {

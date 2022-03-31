@@ -22,7 +22,7 @@ export function registerManagementSection(
   return management.sections.section.insightsAndAlerting.registerApp({
     id: 'jobsListLink',
     title: i18n.translate('xpack.ml.management.jobsListTitle', {
-      defaultMessage: 'Machine Learning Jobs',
+      defaultMessage: 'Machine Learning',
     }),
     order: 2,
     async mount(params: ManagementAppMountParams) {
