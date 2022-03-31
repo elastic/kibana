@@ -7,26 +7,13 @@
 
 import React from 'react';
 import { capitalize } from 'lodash';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { EuiBasicTable, EuiBasicTableColumn, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { HeaderSection } from '../../../common/components/header_section';
+import { HeaderSection } from '../../../../common/components/header_section';
 
-import { InspectButtonContainer } from '../../../common/components/inspect';
+import { SEVERITY_COLOR } from '../util';
 import { RuleAlertsItem, useRuleAlertsItems } from './rule_alerts_items';
-
-const getSeverityHealthColor = (severity: Severity) => {
-  switch (severity) {
-    case 'low':
-      return 'success';
-    case 'medium':
-      return 'medium';
-    case 'high':
-      return 'high';
-    case 'critical':
-      return 'danger';
-  }
-};
 
 const tableColumns: Array<EuiBasicTableColumn<RuleAlertsItem>> = [
   {
@@ -67,7 +54,7 @@ const tableColumns: Array<EuiBasicTableColumn<RuleAlertsItem>> = [
     field: 'severity',
     name: 'Severity', // TODO
     render: (severity: Severity) => (
-      <EuiHealth color={getSeverityHealthColor(severity)}>{capitalize(severity)}</EuiHealth>
+      <EuiHealth color={SEVERITY_COLOR[severity]}>{capitalize(severity)}</EuiHealth>
     ),
   },
 ];
@@ -80,23 +67,21 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   const { items, isLoading, queryId } = useRuleAlertsItems({ signalIndexName });
 
   return (
-    <InspectButtonContainer>
-      <EuiPanel hasBorder data-test-subj="RuleAlertsTablePanel">
-        <HeaderSection
-          id={queryId}
-          title={'Open alerts by Rule' /* TODO */}
-          titleSize="s"
-          hideSubtitle
-        />
-        <EuiBasicTable
-          data-test-subj="RuleAlertsTable"
-          columns={tableColumns}
-          items={items}
-          loading={isLoading}
-          noItemsMessage={<>{'No alerts found'}</> /** TODO */}
-        />
-      </EuiPanel>
-    </InspectButtonContainer>
+    <EuiPanel hasBorder data-test-subj="ruleAlertsTablePanel">
+      <HeaderSection
+        id={queryId}
+        title={'Open alerts by Rule' /* TODO */}
+        titleSize="s"
+        hideSubtitle
+      />
+      <EuiBasicTable
+        data-test-subj="ruleAlertsTable"
+        columns={tableColumns}
+        items={items}
+        loading={isLoading}
+        noItemsMessage={<>{'No alerts found'}</> /** TODO */}
+      />
+    </EuiPanel>
   );
 });
 RuleAlertsTable.displayName = 'RuleAlertsTable';

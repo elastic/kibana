@@ -8,9 +8,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import uuid from 'uuid';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
 
 // Formatted item result
 export interface RuleAlertsItem {
@@ -22,7 +22,7 @@ export interface RuleAlertsItem {
 }
 
 // Raw aggregation response
-export interface SeverityRuleAlertsAggsResponse {
+interface SeverityRuleAlertsAggsResponse {
   alertsByRule: {
     buckets?: Array<{
       key: string;
@@ -47,9 +47,7 @@ export interface SeverityRuleAlertsAggsResponse {
   };
 }
 
-export const DETECTION_RESPONSE_RULE_ALERTS_ID = 'detection-response-rule-alerts-id';
-
-export const getSeverityRuleAlertsQuery = ({ from, to }: { from: string; to: string }) => ({
+const getSeverityRuleAlertsQuery = ({ from, to }: { from: string; to: string }) => ({
   size: 0,
   query: {
     bool: {
@@ -87,7 +85,7 @@ export const getSeverityRuleAlertsQuery = ({ from, to }: { from: string; to: str
   },
 });
 
-export const getRuleAlertsItemsFromAggs = (
+const getRuleAlertsItemsFromAggs = (
   aggregations?: SeverityRuleAlertsAggsResponse
 ): RuleAlertsItem[] => {
   const buckets = aggregations?.alertsByRule.buckets ?? [];
@@ -102,6 +100,8 @@ export const getRuleAlertsItemsFromAggs = (
     };
   });
 };
+
+const DETECTION_RESPONSE_RULE_ALERTS_ID = 'detection-response-rule-alerts-id';
 
 export const useRuleAlertsItems = ({ signalIndexName }: { signalIndexName: string | null }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
