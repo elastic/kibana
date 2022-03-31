@@ -118,7 +118,7 @@ const getSavedObjectTypes = (
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
-        ssl: { type: 'flattened', index: false },
+        ssl: { type: 'binary' },
       },
     },
     migrations: {
@@ -310,5 +310,10 @@ export function registerSavedObjects(
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
+  encryptedSavedObjects.registerType({
+    type: OUTPUT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['ssl']),
+    attributesToExcludeFromAAD: new Set([]),
+  });
   // Encrypted saved objects
 }

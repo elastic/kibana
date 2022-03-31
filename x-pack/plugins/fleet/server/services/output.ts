@@ -45,10 +45,11 @@ export function outputIdToUuid(id: string) {
 }
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
-  const { output_id: outputId, ...atributes } = so.attributes;
+  const { output_id: outputId, ssl, ...atributes } = so.attributes;
   return {
     id: outputId ?? so.id,
     ...atributes,
+    ...(ssl ? JSON.parse(ssl as string) : {}),
   };
 }
 
@@ -202,6 +203,10 @@ class OutputService {
       data.output_id = options?.id;
     }
 
+    if (data.ssl) {
+      data.ssl = JSON.stringify(data.ssl);
+    }
+
     const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id: options?.id ? outputIdToUuid(options.id) : undefined,
@@ -254,7 +259,9 @@ class OutputService {
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const outputSO = await appContextService
+      .getEncryptedSavedObjects()
+      .getDecryptedAsInternalUser<SavedObjectAttribute>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -329,6 +336,11 @@ class OutputService {
         // remove logstash specific field
         updateData.ssl = null;
       }
+    }
+
+    if (updateData.ssl) {
+      // @ts-expect-error
+      updateData.ssl = JSON.stringify(updateData.ssl);
     }
 
     // ensure only default output exists
