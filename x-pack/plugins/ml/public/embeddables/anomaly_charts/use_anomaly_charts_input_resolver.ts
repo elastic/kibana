@@ -52,7 +52,7 @@ export function useAnomalyChartsInputResolver(
   ] = services;
   const { timefilter } = dataServices.query.timefilter;
 
-  const [chartsData, setChartsData] = useState<ExplorerChartsData>();
+  const [chartsData, setChartsData] = useState<any>();
   const [error, setError] = useState<Error | null>();
   const [isLoading, setIsLoading] = useState(false);
 
