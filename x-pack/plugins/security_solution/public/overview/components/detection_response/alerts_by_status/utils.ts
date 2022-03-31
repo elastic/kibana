@@ -8,7 +8,9 @@
 import {
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
+  STATUS_CRITICAL_LABEL,
   STATUS_HIGH_LABEL,
+  STATUS_IN_PROGRESS,
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
   STATUS_OPEN,
@@ -25,6 +27,7 @@ import {
 } from './types';
 
 const label = {
+  critical: STATUS_CRITICAL_LABEL,
   high: STATUS_HIGH_LABEL,
   medium: STATUS_MEDIUM_LABEL,
   low: STATUS_LOW_LABEL,
@@ -34,16 +37,18 @@ const status = {
   open: STATUS_OPEN,
   acknowledged: STATUS_ACKNOWLEDGED,
   closed: STATUS_CLOSED,
+  'in-progress': STATUS_IN_PROGRESS,
 };
 
 const links = {
   open: null,
   acknowledged: null,
   closed: null,
+  'in-progress': null,
 };
 
 const statusSequence: StatusSequence[] = ['open', 'acknowledged', 'closed'];
-const severitySequence: SeveritySequence[] = ['high', 'medium', 'low'];
+const severitySequence: SeveritySequence[] = ['critical', 'high', 'medium', 'low'];
 
 type SortSeverityBuckets = (
   buckets: SeverityBucket[],

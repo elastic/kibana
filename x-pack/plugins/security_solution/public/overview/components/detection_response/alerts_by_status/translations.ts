@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const STATUS_CRITICAL_LABEL = i18n.translate(
+  'xpack.securitySolution.responseOps.donut.criticalLabel',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+
 export const STATUS_HIGH_LABEL = i18n.translate(
   'xpack.securitySolution.responseOps.donut.highLabel',
   {
@@ -43,5 +50,12 @@ export const STATUS_CLOSED = i18n.translate(
   'xpack.securitySolution.responseOps.donut.title.closed',
   {
     defaultMessage: 'Closed',
+  }
+);
+
+export const STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.responseOps.donut.title.inProgress',
+  {
+    defaultMessage: 'In progress',
   }
 );

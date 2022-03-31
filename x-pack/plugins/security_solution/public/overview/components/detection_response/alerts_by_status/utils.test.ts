@@ -67,6 +67,10 @@ describe('sortSeverityBuckets', () => {
     );
     expect(results).toEqual([
       {
+        key: 'critical',
+        doc_count: 0,
+      },
+      {
         key: 'high',
         doc_count: 4,
       },

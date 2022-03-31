@@ -17,7 +17,7 @@ import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DonutChartEmpty } from './donutchart_empty';
-import { ParsedSeverityBucket } from '../../../overview/components/alerts_by_status/types';
+import { ParsedSeverityBucket } from '../../../overview/components/detection_response/alerts_by_status/types';
 
 export const NO_LEGEND_DATA: LegendItem[] = [];
 

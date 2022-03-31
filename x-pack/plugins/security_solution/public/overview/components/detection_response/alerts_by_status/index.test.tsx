@@ -8,13 +8,13 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsByStatus } from '.';
 import { parsedMockAlertsData } from './mock_data';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
-import { CASES_FEATURE_ID } from '../../../../common/constants';
-import { TestProviders } from '../../../common/mock/test_providers';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
+import { CASES_FEATURE_ID } from '../../../../../common/constants';
+import { TestProviders } from '../../../../common/mock/test_providers';
 
-jest.mock('../../../common/lib/kibana/kibana_react');
-jest.mock('../../../common/components/charts/draggable_legend', () => {
+jest.mock('../../../../common/lib/kibana/kibana_react');
+jest.mock('../../../../common/components/charts/draggable_legend', () => {
   return {
     DraggableLegend: jest.fn((props) => <div data-test-subj="legend" {...props} />),
   };

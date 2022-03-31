@@ -115,6 +115,13 @@ export const parsedMockAlertsData: ParsedStatusBucket[] = [
     },
     buckets: [
       {
+        group: 'open',
+        key: 'critical',
+        label: 'Critical',
+        status: 'Open',
+        value: 0,
+      },
+      {
         label: 'High',
         status: 'Open',
         value: 5027,
@@ -143,6 +150,13 @@ export const parsedMockAlertsData: ParsedStatusBucket[] = [
     link: null,
     doc_count: 0,
     buckets: [
+      {
+        group: 'acknowledged',
+        key: 'critical',
+        label: 'Critical',
+        status: 'Acknowledged',
+        value: 0,
+      },
       {
         label: 'High',
         status: 'Acknowledged',
@@ -186,6 +200,13 @@ export const parsedMockAlertsData: ParsedStatusBucket[] = [
       ],
     },
     buckets: [
+      {
+        group: 'closed',
+        key: 'critical',
+        label: 'Critical',
+        status: 'Closed',
+        value: 0,
+      },
       {
         label: 'High',
         status: 'Closed',

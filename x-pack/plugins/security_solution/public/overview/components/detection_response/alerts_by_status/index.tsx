@@ -10,23 +10,23 @@ import React, { useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import classnames from 'classnames';
 import uuid from 'uuid';
-import { DonutChart, NO_LEGEND_DATA } from '../../../common/components/charts/donutchart';
-import { APP_ID } from '../../../../common/constants';
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { HeaderSection } from '../../../common/components/header_section';
-import { HoverVisibilityContainer } from '../../../common/components/hover_visibility_container';
-import { MatrixLoader } from '../../../common/components/matrix_histogram/matrix_loader';
-import { Panel } from '../../../common/components/panel';
+import { DonutChart, NO_LEGEND_DATA } from '../../../../common/components/charts/donutchart';
+import { APP_ID } from '../../../../../common/constants';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { HeaderSection } from '../../../../common/components/header_section';
+import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
+import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
+import { Panel } from '../../../../common/components/panel';
 import {
   HISTOGRAM_ACTIONS_BUTTON_CLASS,
   VisualizationActions,
-} from '../../../common/components/visualization_actions';
-import { VisualizationActionsProps } from '../../../common/components/visualization_actions/types';
+} from '../../../../common/components/visualization_actions';
+import { VisualizationActionsProps } from '../../../../common/components/visualization_actions/types';
 import { ViewDetailsButton, ViewDetailsButtonProps } from './view_details_button';
-import { LegendItem } from '../../../common/components/charts/draggable_legend_item';
-import { ThemeContext } from '../../../common/components/charts/donut_theme_context';
-import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
-import { DraggableLegend } from '../../../common/components/charts/draggable_legend';
+import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
+import { ThemeContext } from '../../../../common/components/charts/donut_theme_context';
+import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
+import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
 import { ParsedStatusBucket } from './types';
 
 const HistogramPanel = styled(Panel)<{ height?: number }>`

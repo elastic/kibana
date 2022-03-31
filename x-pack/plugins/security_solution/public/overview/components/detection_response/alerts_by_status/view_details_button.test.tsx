@@ -7,11 +7,11 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { TestProviders } from '../../../common/mock/test_providers';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { TestProviders } from '../../../../common/mock/test_providers';
 import { ViewDetailsButton } from './view_details_button';
 
-jest.mock('../../../common/lib/kibana/kibana_react');
+jest.mock('../../../../common/lib/kibana/kibana_react');
 
 describe('ViewDetailsButton', () => {
   beforeEach(() => {

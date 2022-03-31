@@ -5,19 +5,16 @@
  * 2.0.
  */
 
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+
 export enum SeverityEnum {
+  critical = 'Critical',
   high = 'High',
   medium = 'Medium',
   low = 'Low',
 }
 
-export enum StatusEnum {
-  open = 'Open',
-  acknowledged = 'Acknowledged',
-  closed = 'Closed',
-}
-
-export type StatusSequence = keyof typeof StatusEnum;
+export type StatusSequence = Status;
 export type SeveritySequence = keyof typeof SeverityEnum;
 
 export interface StatusBySeverity {

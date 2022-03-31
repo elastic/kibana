@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Partition, Settings } from '@elastic/charts';
-import { parsedMockAlertsData } from '../../../overview/components/alerts_by_status/mock_data';
+import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
 import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
