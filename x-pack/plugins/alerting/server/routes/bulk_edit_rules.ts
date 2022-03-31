@@ -18,10 +18,10 @@ const ruleActionSchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
-const editActionsSchema = schema.arrayOf(
+const operationsSchema = schema.arrayOf(
   schema.oneOf([
     schema.object({
-      action: schema.oneOf([
+      operation: schema.oneOf([
         schema.literal('add'),
         schema.literal('delete'),
         schema.literal('set'),
@@ -30,7 +30,7 @@ const editActionsSchema = schema.arrayOf(
       value: schema.arrayOf(schema.string()),
     }),
     schema.object({
-      action: schema.oneOf([schema.literal('add'), schema.literal('set')]),
+      operation: schema.oneOf([schema.literal('add'), schema.literal('set')]),
       field: schema.literal('actions'),
       value: schema.arrayOf(ruleActionSchema),
     }),
@@ -40,7 +40,7 @@ const editActionsSchema = schema.arrayOf(
 const bodySchema = schema.object({
   filter: schema.maybe(schema.string()),
   ids: schema.maybe(schema.arrayOf(schema.string())),
-  editActions: editActionsSchema,
+  operations: operationsSchema,
 });
 
 interface BuildBulkEditRulesRouteParams {
@@ -60,12 +60,12 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
-        const { filter, editActions, ids } = req.body;
+        const { filter, operations, ids } = req.body;
 
         const bulkEditResults = await rulesClient.bulkEdit({
           filter,
           ids: ids as string[],
-          editActions,
+          operations,
         });
         return res.ok({
           body: { ...bulkEditResults, rules: bulkEditResults.rules.map(rewriteRule) },

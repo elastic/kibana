@@ -214,32 +214,32 @@ export interface FindOptions extends IndexType {
 
 type BulkEditFields = keyof Pick<Rule, 'actions' | 'schedule' | 'tags' | 'throttle' | 'notifyWhen'>;
 
-export type BulkEditActionRule =
+export type BulkEditOperation =
   | {
-      action: 'add' | 'delete' | 'set';
+      operation: 'add' | 'delete' | 'set';
       field: Extract<BulkEditFields, 'tags'>;
       value: string[];
     }
   | {
-      action: 'add' | 'set';
+      operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
     };
 
 // schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
 // | {
-//     action: 'set';
-//     field: Extract<BulkEditActionRuleFields, 'schedule'>;
+//     operation: 'set';
+//     field: Extract<BulkEditFields, 'schedule'>;
 //     value: Rule['schedule'];
 //   }
 // | {
-//     action: 'set';
-//     field: Extract<BulkEditActionRuleFields, 'throttle'>;
+//     operation: 'set';
+//     field: Extract<BulkEditFields, 'throttle'>;
 //     value: Rule['throttle'];
 //   }
 // | {
-//     action: 'set';
-//     field: Extract<BulkEditActionRuleFields, 'notifyWhen'>;
+//     operation: 'set';
+//     field: Extract<BulkEditFields, 'notifyWhen'>;
 //     value: Rule['notifyWhen'];
 //   };
 
@@ -247,13 +247,13 @@ type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Pro
 
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter: string | KueryNode;
-  editActions: BulkEditActionRule[];
+  operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
 }
 
 export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
   ids: string[];
-  editActions: BulkEditActionRule[];
+  operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
 }
 
@@ -1368,7 +1368,7 @@ export class RulesClient {
     }
 
     const filter = ids ? this.convertIdsToFilterQuery(ids) : queryFilter;
-    const { editActions, paramsModifier } = options;
+    const { operations, paramsModifier } = options;
 
     let authorizationTuple;
     try {
@@ -1473,14 +1473,14 @@ export class RulesClient {
                 rule.references || []
               ),
             };
-            for (const editAction of editActions) {
-              switch (editAction.field) {
+            for (const operation of operations) {
+              switch (operation.field) {
                 case 'actions':
-                  await this.validateActions(ruleType, editAction.value);
-                  ruleActions = this.applyBulkEditAction(editAction, ruleActions);
+                  await this.validateActions(ruleType, operation.value);
+                  ruleActions = this.applyBulkEditOperation(operation, ruleActions);
                   break;
                 default:
-                  attributes = this.applyBulkEditAction(editAction, attributes);
+                  attributes = this.applyBulkEditOperation(operation, attributes);
               }
             }
 
@@ -2690,7 +2690,7 @@ export class RulesClient {
     return alertAttributes;
   }
 
-  private applyBulkEditAction<R extends object>(action: BulkEditActionRule, rule: R) {
+  private applyBulkEditOperation<R extends object>(operation: BulkEditOperation, rule: R) {
     const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
       Array.from(new Set([...arr, ...items]));
 
@@ -2699,23 +2699,35 @@ export class RulesClient {
       return arr.filter((item) => !itemsSet.has(item));
     };
 
-    switch (action.action) {
+    switch (operation.operation) {
       case 'set':
-        set(rule, action.field, action.value);
+        set(rule, operation.field, operation.value);
         break;
 
       case 'add':
         // typescript complains on set value typings
-        if (action.field === 'actions') {
-          set(rule, action.field, addItemsToArray(get(rule, action.field) ?? [], action.value));
+        if (operation.field === 'actions') {
+          set(
+            rule,
+            operation.field,
+            addItemsToArray(get(rule, operation.field) ?? [], operation.value)
+          );
         } else {
-          set(rule, action.field, addItemsToArray(get(rule, action.field) ?? [], action.value));
+          set(
+            rule,
+            operation.field,
+            addItemsToArray(get(rule, operation.field) ?? [], operation.value)
+          );
         }
 
         break;
 
       case 'delete':
-        set(rule, action.field, deleteItemsFromArray(get(rule, action.field) ?? [], action.value));
+        set(
+          rule,
+          operation.field,
+          deleteItemsFromArray(get(rule, operation.field) ?? [], operation.value)
+        );
 
         break;
     }

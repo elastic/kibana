@@ -29,9 +29,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       const payload = {
         ids: [createdAlert.id],
-        editActions: [
+        operations: [
           {
-            action: 'add',
+            operation: 'add',
             field: 'tags',
             value: ['tag-1'],
           },
@@ -77,9 +77,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       const payload = {
         ids: [createdAlert1.id, createdAlert2.id],
-        editActions: [
+        operations: [
           {
-            action: 'set',
+            operation: 'set',
             field: 'tags',
             value: ['rewritten'],
           },
@@ -119,9 +119,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
       const payload = {
         ids: [createdAlert.id],
-        editActions: [
+        operations: [
           {
-            action: 'add',
+            operation: 'add',
             field: 'tags',
             value: ['tag-1'],
           },

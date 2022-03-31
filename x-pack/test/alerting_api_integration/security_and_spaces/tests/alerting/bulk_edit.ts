@@ -44,9 +44,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
           const payload = {
             ids: [createdAlert.id],
-            editActions: [
+            operations: [
               {
-                action: 'add',
+                operation: 'add',
                 field: 'actions',
                 value: [
                   {

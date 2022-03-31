@@ -167,10 +167,10 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -219,10 +219,10 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'delete',
+            operation: 'delete',
             value: ['foo'],
           },
         ],
@@ -271,10 +271,10 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'set',
+            operation: 'set',
             value: ['test-1', 'test-2'],
           },
         ],
@@ -302,10 +302,10 @@ describe('bulkEdit()', () => {
     test('should call unsecuredSavedObjectsClient.find for aggregations by alertTypeId and consumer', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -335,10 +335,10 @@ describe('bulkEdit()', () => {
     test('should call unsecuredSavedObjectsClient.find for aggregations when called with ids options', async () => {
       await rulesClient.bulkEdit({
         ids: ['2', '3'],
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -381,10 +381,10 @@ describe('bulkEdit()', () => {
       await expect(
         rulesClient.bulkEdit({
           filter: 'alert.attributes.tags: "APM"',
-          editActions: [
+          operations: [
             {
               field: 'tags',
-              action: 'add',
+              operation: 'add',
               value: ['test-1'],
             },
           ],
@@ -408,10 +408,10 @@ describe('bulkEdit()', () => {
       await expect(
         rulesClient.bulkEdit({
           filter: 'alert.attributes.tags: "APM"',
-          editActions: [
+          operations: [
             {
               field: 'tags',
-              action: 'add',
+              operation: 'add',
               value: ['test-1'],
             },
           ],
@@ -427,10 +427,10 @@ describe('bulkEdit()', () => {
       await expect(
         rulesClient.bulkEdit({
           filter: 'alert.attributes.tags: "APM"',
-          editActions: [
+          operations: [
             {
               field: 'tags',
-              action: 'add',
+              operation: 'add',
               value: ['test-1'],
             },
           ],
@@ -448,10 +448,10 @@ describe('bulkEdit()', () => {
       await expect(
         rulesClient.bulkEdit({
           filter: 'alert.attributes.tags: "APM"',
-          editActions: [
+          operations: [
             {
               field: 'tags',
-              action: 'add',
+              operation: 'add',
               value: ['test-1'],
             },
           ],
@@ -471,10 +471,10 @@ describe('bulkEdit()', () => {
     test('should call createPointInTimeFinderAsInternalUser that returns api Keys', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -494,10 +494,10 @@ describe('bulkEdit()', () => {
     test('should call bulkMarkApiKeysForInvalidation if apiKey present', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -521,10 +521,10 @@ describe('bulkEdit()', () => {
       });
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -536,10 +536,10 @@ describe('bulkEdit()', () => {
     test('should not call create apiKey if rule is disabled', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -559,10 +559,10 @@ describe('bulkEdit()', () => {
 
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -592,10 +592,10 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -634,10 +634,10 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
-        editActions: [
+        operations: [
           {
             field: 'tags',
-            action: 'add',
+            operation: 'add',
             value: ['test-1'],
           },
         ],
@@ -681,7 +681,7 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        editActions: [],
+        operations: [],
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
@@ -715,10 +715,10 @@ describe('bulkEdit()', () => {
         rulesClient.bulkEdit({
           filter: 'alert.attributes.tags: "APM"',
           ids: ['1', '2'],
-          editActions: [
+          operations: [
             {
               field: 'tags',
-              action: 'add',
+              operation: 'add',
               value: ['test-1'],
             },
           ],
