@@ -74,13 +74,17 @@ export const mockState: AppState = {
     loading: {
       monitorList: false,
       serviceLocations: false,
+      enablement: false,
     },
     error: {
       monitorList: null,
       serviceLocations: null,
+      enablement: null,
     },
+    enablement: null,
     syntheticsService: {
       loading: false,
+      signupUrl: null,
     },
   },
   ml: {

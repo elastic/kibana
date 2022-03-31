@@ -14,7 +14,7 @@ import { addBasePath } from '../index';
 
 import { wrapError, wrapEsError } from './error_utils';
 
-const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
+export const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
 const SIZE = 500;
 
 interface BoolQuery {

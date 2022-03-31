@@ -82,7 +82,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
     );
   });
 
@@ -94,7 +94,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
     );
   });
 
@@ -195,9 +195,15 @@ describe('getExecutionLogAggregation', () => {
               numTriggeredActions: {
                 max: { field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions' },
               },
+              numScheduledActions: {
+                max: { field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions' },
+              },
               executionDuration: { max: { field: 'event.duration' } },
               outcomeAndMessage: {
-                top_hits: { size: 1, _source: { includes: ['event.outcome', 'message'] } },
+                top_hits: {
+                  size: 1,
+                  _source: { includes: ['event.outcome', 'message', 'error.message'] },
+                },
               },
             },
           },
@@ -257,6 +263,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
                   value: 5.0,
                 },
                 outcomeAndMessage: {
@@ -341,6 +350,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -417,6 +429,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -435,6 +448,240 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
+          num_succeeded_actions: 5,
+          num_errored_actions: 0,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 0,
+          timed_out: false,
+          schedule_delay_ms: 3126,
+        },
+      ],
+    });
+  });
+
+  test('should format results correctly with rule execution errors', () => {
+    const results = {
+      aggregations: {
+        executionUuid: {
+          meta: {},
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: '6705da7d-2635-499d-a6a8-1aee1ae1eac9',
+              doc_count: 27,
+              timeoutMessage: {
+                meta: {},
+                doc_count: 0,
+              },
+              alertCounts: {
+                meta: {},
+                buckets: {
+                  activeAlerts: {
+                    doc_count: 5,
+                  },
+                  newAlerts: {
+                    doc_count: 5,
+                  },
+                  recoveredAlerts: {
+                    doc_count: 0,
+                  },
+                },
+              },
+              ruleExecution: {
+                meta: {},
+                doc_count: 1,
+                numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
+                  value: 5.0,
+                },
+                outcomeAndMessage: {
+                  hits: {
+                    total: {
+                      value: 1,
+                      relation: 'eq',
+                    },
+                    max_score: 1.0,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'S4wIZX8B8TGQpG7XQZns',
+                        _score: 1.0,
+                        _source: {
+                          event: {
+                            outcome: 'failure',
+                          },
+                          message:
+                            "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                          error: {
+                            message: 'I am erroring in rule execution!!',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                scheduleDelay: {
+                  value: 3.074e9,
+                },
+                totalSearchDuration: {
+                  value: 0.0,
+                },
+                esSearchDuration: {
+                  value: 0.0,
+                },
+                executionDuration: {
+                  value: 1.056e9,
+                },
+                executeStartTime: {
+                  value: 1.646667512617e12,
+                  value_as_string: '2022-03-07T15:38:32.617Z',
+                },
+              },
+              actionExecution: {
+                meta: {},
+                doc_count: 5,
+                actionOutcomes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'success',
+                      doc_count: 5,
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              key: '41b2755e-765a-4044-9745-b03875d5e79a',
+              doc_count: 32,
+              timeoutMessage: {
+                meta: {},
+                doc_count: 0,
+              },
+              alertCounts: {
+                meta: {},
+                buckets: {
+                  activeAlerts: {
+                    doc_count: 5,
+                  },
+                  newAlerts: {
+                    doc_count: 5,
+                  },
+                  recoveredAlerts: {
+                    doc_count: 5,
+                  },
+                },
+              },
+              ruleExecution: {
+                meta: {},
+                doc_count: 1,
+                numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
+                  value: 5.0,
+                },
+                outcomeAndMessage: {
+                  hits: {
+                    total: {
+                      value: 1,
+                      relation: 'eq',
+                    },
+                    max_score: 1.0,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'a4wIZX8B8TGQpG7Xwpnz',
+                        _score: 1.0,
+                        _source: {
+                          event: {
+                            outcome: 'success',
+                          },
+                          message:
+                            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+                        },
+                      },
+                    ],
+                  },
+                },
+                scheduleDelay: {
+                  value: 3.126e9,
+                },
+                totalSearchDuration: {
+                  value: 0.0,
+                },
+                esSearchDuration: {
+                  value: 0.0,
+                },
+                executionDuration: {
+                  value: 1.165e9,
+                },
+                executeStartTime: {
+                  value: 1.646667545604e12,
+                  value_as_string: '2022-03-07T15:39:05.604Z',
+                },
+              },
+              actionExecution: {
+                meta: {},
+                doc_count: 5,
+                actionOutcomes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'success',
+                      doc_count: 5,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        executionUuidCardinality: {
+          value: 374,
+        },
+      },
+    };
+    expect(formatExecutionLogResult(results)).toEqual({
+      total: 374,
+      data: [
+        {
+          id: '6705da7d-2635-499d-a6a8-1aee1ae1eac9',
+          timestamp: '2022-03-07T15:38:32.617Z',
+          duration_ms: 1056,
+          status: 'failure',
+          message:
+            "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule' - I am erroring in rule execution!!",
+          num_active_alerts: 5,
+          num_new_alerts: 5,
+          num_recovered_alerts: 0,
+          num_triggered_actions: 5,
+          num_scheduled_actions: 5,
+          num_succeeded_actions: 5,
+          num_errored_actions: 0,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 0,
+          timed_out: false,
+          schedule_delay_ms: 3074,
+        },
+        {
+          id: '41b2755e-765a-4044-9745-b03875d5e79a',
+          timestamp: '2022-03-07T15:39:05.604Z',
+          duration_ms: 1165,
+          status: 'success',
+          message:
+            "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          num_active_alerts: 5,
+          num_new_alerts: 5,
+          num_recovered_alerts: 5,
+          num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -479,6 +726,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 0.0,
+                },
+                numScheduledActions: {
                   value: 0.0,
                 },
                 outcomeAndMessage: {
@@ -558,6 +808,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -634,6 +887,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 0,
           num_recovered_alerts: 0,
           num_triggered_actions: 0,
+          num_scheduled_actions: 0,
           num_succeeded_actions: 0,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -652,6 +906,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -696,6 +951,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
                   value: 5.0,
                 },
                 outcomeAndMessage: {
@@ -780,6 +1038,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -856,6 +1117,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 0,
           num_errored_actions: 5,
           total_search_duration_ms: 0,
@@ -874,6 +1136,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,

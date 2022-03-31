@@ -231,7 +231,7 @@ const fetchExceptionLists = async ({
   signal,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
   const query = {
-    filter: filters,
+    filter: filters || undefined,
     namespace_type: namespaceTypes,
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
