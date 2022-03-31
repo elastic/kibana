@@ -88,14 +88,14 @@ export default class SuggestionsComponent extends PureComponent<SuggestionsCompo
         inputContainer={this.props.inputContainer}
         suggestionsSize={this.props.size}
       >
-        {(containerWidth: number) => (
+        {(rect: DOMRect) => (
           <div
             id="kbnTypeahead__items"
             role="listbox"
             ref={this.assignParentNode}
             onScroll={this.handleScroll}
           >
-            {renderSuggestions(containerWidth)}
+            {renderSuggestions(rect.width)}
           </div>
         )}
       </ResizableSuggestionsListDiv>
@@ -158,9 +158,9 @@ const StyledSuggestionsListDiv = styled.div`
 const ResizableSuggestionsListDiv: React.FC<{
   inputContainer: HTMLElement;
   suggestionsSize?: SuggestionsListSize;
+  children: (rect: DOMRect) => ReactNode;
 }> = React.memo((props) => {
   const inputContainer = props.inputContainer;
-  const children = props.children as (rect: DOMRect) => ReactNode;
 
   const [{ documentHeight }, { pageYOffset }, containerRect] = useDimensions(inputContainer);
 
@@ -191,7 +191,7 @@ const ResizableSuggestionsListDiv: React.FC<{
             ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
           })}
         >
-          {children(containerRect)}
+          {props.children(containerRect)}
         </div>
       </div>
     </StyledSuggestionsListDiv>

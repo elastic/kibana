@@ -32,8 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-
-      await PageObjects.lens.waitForVisualization();
     });
 
     const expectedData = [
@@ -75,34 +73,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should render xy chart', async () => {
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
     it('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('partitionVisChart');
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedPieData(data!);
     });
 
     it('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('partitionVisChart');
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedPieData(data!);
     });
 
     it('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap', 'treemap');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('partitionVisChart');
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedPieData(data!);
     });
 
     it('should render heatmap chart', async () => {
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
       if (!debugState) {
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render metric', async () => {
       await PageObjects.lens.switchToVisualization('lnsMetric');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
     });
   });

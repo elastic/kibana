@@ -12,13 +12,12 @@ import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
-import { State, XYState } from '../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
-import { XYDataLayerConfig } from '../../../common/expressions';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;

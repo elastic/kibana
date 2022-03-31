@@ -12,7 +12,12 @@ import type { PackagePolicy } from '../../../../common';
 import { migratePackagePolicyToV820 as migration } from './to_v8_2_0';
 
 describe('8.2.0 Endpoint Package Policy migration', () => {
-  const policyDoc = ({ windowsMalware = {}, macMalware = {}, linuxMalware = {} }) => {
+  const policyDoc = ({
+    windowsMalware = {},
+    macMalware = {},
+    linuxMalware = {},
+    linuxEvents = {},
+  }) => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -48,6 +53,7 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
                   },
                   linux: {
                     ...linuxMalware,
+                    ...linuxEvents,
                   },
                 },
               },
@@ -64,12 +70,14 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'off' } },
       macMalware: { malware: { mode: 'off' } },
       linuxMalware: { malware: { mode: 'off' } },
+      linuxEvents: { events: { process: true, file: true, network: true } },
     });
 
     const migratedDoc = policyDoc({
       windowsMalware: { malware: { mode: 'off', blocklist: false } },
       macMalware: { malware: { mode: 'off', blocklist: false } },
       linuxMalware: { malware: { mode: 'off', blocklist: false } },
+      linuxEvents: { events: { process: true, file: true, network: true, session_data: false } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
@@ -80,12 +88,14 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'prevent' } },
       macMalware: { malware: { mode: 'prevent' } },
       linuxMalware: { malware: { mode: 'prevent' } },
+      linuxEvents: { events: { process: true, file: true, network: true } },
     });
 
     const migratedDoc = policyDoc({
       windowsMalware: { malware: { mode: 'prevent', blocklist: true } },
       macMalware: { malware: { mode: 'prevent', blocklist: true } },
       linuxMalware: { malware: { mode: 'prevent', blocklist: true } },
+      linuxEvents: { events: { process: true, file: true, network: true, session_data: false } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
@@ -96,12 +106,14 @@ describe('8.2.0 Endpoint Package Policy migration', () => {
       windowsMalware: { malware: { mode: 'detect' } },
       macMalware: { malware: { mode: 'detect' } },
       linuxMalware: { malware: { mode: 'detect' } },
+      linuxEvents: { events: { process: true, file: true, network: true } },
     });
 
     const migratedDoc = policyDoc({
       windowsMalware: { malware: { mode: 'detect', blocklist: true } },
       macMalware: { malware: { mode: 'detect', blocklist: true } },
       linuxMalware: { malware: { mode: 'detect', blocklist: true } },
+      linuxEvents: { events: { process: true, file: true, network: true, session_data: false } },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
