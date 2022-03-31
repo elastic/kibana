@@ -347,6 +347,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               item={rule as RuleTableItem}
               onRuleChanged={requestRefresh}
               direction="row"
+              isEditable={hasEditButton}
+              previousSnoozeInterval={null}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

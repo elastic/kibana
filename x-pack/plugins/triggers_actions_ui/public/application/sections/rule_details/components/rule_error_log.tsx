@@ -50,6 +50,11 @@ const updateButtonProps = {
   fill: false,
 };
 
+const sortErrorLog = (a: IErrorLog, b: IErrorLog, direction: 'desc' | 'asc' = 'desc') =>
+  direction === 'desc'
+    ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    : new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+
 export type RuleErrorLogProps = {
   rule: Rule;
   refreshToken?: number;
@@ -99,7 +104,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       const result = await loadExecutionLogAggregations({
         id: rule.id,
         sort: {
-          [sort?.field || 'timestamp']: { order: sort?.direction },
+          [sort?.field || 'timestamp']: { order: sort?.direction || 'desc' },
         } as unknown as LoadExecutionLogAggregationsProps['sort'],
         dateStart: getParsedDate(dateStart),
         dateEnd: getParsedDate(dateEnd),
@@ -108,7 +113,8 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       });
       setLogs(result.errors);
       const start = pagination.pageIndex * pagination.pageSize;
-      setLogList(result.errors.slice(start, start + pagination.pageSize));
+      const logsSortDesc = result.errors.sort((a, b) => sortErrorLog(a, b, sort?.direction));
+      setLogList(logsSortDesc.slice(start, start + pagination.pageSize));
       setPagination({
         ...pagination,
         totalItemCount: result.totalErrors,
@@ -187,13 +193,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   }, [pagination]);
 
   useEffect(() => {
-    setLogs((prevLogs) =>
-      prevLogs.sort((a, b) =>
-        sort?.direction === 'desc'
-          ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          : new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      )
-    );
+    setLogs((prevLogs) => prevLogs.sort((a, b) => sortErrorLog(a, b, sort?.direction)));
     setPagination((prevPagination) => ({
       ...prevPagination,
       pageIndex: 0,

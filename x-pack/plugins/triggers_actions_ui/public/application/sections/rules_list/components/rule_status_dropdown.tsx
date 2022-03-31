@@ -157,7 +157,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   return (
     <EuiFlexGroup
       direction={direction}
-      alignItems="flexEnd"
+      alignItems={direction === 'row' ? 'flexEnd' : 'flexStart'}
       justifyContent="flexStart"
       gutterSize="s"
     >
@@ -344,7 +344,6 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiHorizontalRule margin="s" />
     </>
   );
-
   return (
     <EuiPanel paddingSize="none">
       <EuiSpacer size="s" />
@@ -439,6 +438,7 @@ const isItemSnoozed = (item: { snoozeEndTime?: Date | null; muteAll: boolean }) 
   if (!snoozeEndTime) {
     return false;
   }
+  console.log('snoozeEndTime', snoozeEndTime, moment(Date.now()).isBefore(snoozeEndTime));
   return moment(Date.now()).isBefore(snoozeEndTime);
 };
 
