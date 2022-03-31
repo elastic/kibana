@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
@@ -78,6 +77,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     );
 
     const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
+    const showEmptyState = useShowPagesWithEmptyView();
+    const emptyStateProps = showEmptyState
+      ? { ...NO_DATA_PAGE_TEMPLATE_PROPS, template: 'centeredContent' }
+      : {};
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -97,19 +100,19 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         solutionNav={solutionNav}
         restrictWidth={false}
         template="default"
+        {...emptyStateProps}
       >
-        
-          <>
-            <GlobalKQLHeader />
-            <EuiPanel
-              className="securityPageWrapper"
-              data-test-subj="pageContainer"
-              hasShadow={false}
-              paddingSize="l"
-            >
-              {children}
-            </EuiPanel>
-          </>
+        <>
+          <GlobalKQLHeader />
+          <EuiPanel
+            className="securityPageWrapper"
+            data-test-subj="pageContainer"
+            hasShadow={false}
+            paddingSize="l"
+          >
+            {children}
+          </EuiPanel>
+        </>
       </StyledKibanaPageTemplate>
     );
   });

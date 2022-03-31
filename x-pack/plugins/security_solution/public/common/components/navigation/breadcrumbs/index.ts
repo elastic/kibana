@@ -26,7 +26,7 @@ import {
   AdministrationRouteSpyState,
   UsersRouteSpyState,
 } from '../../../utils/route/types';
-import { getAppLandingUrl } from '../../link_to';
+import { getAppLandingUrl } from '../../link_to/redirect_to_landing';
 import { timelineActions } from '../../../../../public/timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TabNavigationProps } from '../tab_navigation/types';
@@ -92,7 +92,7 @@ export const getBreadcrumbsForRoute = (
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
   const landingPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.landing });
-  console.log(landingPath)
+
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getAppLandingUrl(landingPath),
