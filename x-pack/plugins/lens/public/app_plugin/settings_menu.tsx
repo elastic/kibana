@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreTheme } from 'kibana/public';
-import { EuiPopover, EuiPopoverTitle, EuiSwitch } from '@elastic/eui';
+import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -57,7 +57,7 @@ export function SettingsMenu({
   }, [dispatch, autoApplyEnabled]);
 
   return (
-    <EuiPopover
+    <EuiWrappingPopover
       data-test-subj="lnsApp__settingsMenu"
       ownFocus
       button={anchorElement}
@@ -75,7 +75,7 @@ export function SettingsMenu({
         onChange={() => toggleAutoApply()}
         data-test-subj="lnsToggleAutoApply"
       />
-    </EuiPopover>
+    </EuiWrappingPopover>
   );
 }
 

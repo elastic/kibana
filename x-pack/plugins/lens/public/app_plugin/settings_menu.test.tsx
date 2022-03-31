@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiSwitch, EuiSwitchEvent, EuiWrappingPopover } from '@elastic/eui';
 import { getMountWithProviderParams } from '../mocks';
 import { SettingsMenu } from './settings_menu';
 import { selectAutoApplyEnabled } from '../state_management';
@@ -22,7 +22,7 @@ class Harness {
   }
 
   triggerClose() {
-    this._instance.find(EuiPopover).props().closePopover();
+    this._instance.find(EuiWrappingPopover).props().closePopover();
   }
 
   private get autoApplySwitch() {
