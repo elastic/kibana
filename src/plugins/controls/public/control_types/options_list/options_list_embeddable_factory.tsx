@@ -51,7 +51,7 @@ export class OptionsListEmbeddableFactory
   public isEditable = () => Promise.resolve(false);
 
   public getDisplayName = () => OptionsListStrings.getDisplayName();
-  public getIconType = () => 'list';
+  public getIconType = () => 'editorChecklist';
   public getDescription = () => OptionsListStrings.getDescription();
 
   public inject = createOptionsListInject();

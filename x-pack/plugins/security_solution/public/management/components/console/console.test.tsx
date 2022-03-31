@@ -6,9 +6,9 @@
  */
 
 import { AppContextTestRender } from '../../../common/mock/endpoint';
-import { ConsoleProps } from './console';
 import { getConsoleTestSetup } from './mocks';
 import userEvent from '@testing-library/user-event';
+import { ConsoleProps } from './types';
 
 describe('When using Console component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
