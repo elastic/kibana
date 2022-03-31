@@ -482,5 +482,6 @@ x-pack/plugins/session_view @elastic/awp-platform
 
 ## Shared UX
 /src/plugins/shared_ux/ @elastic/shared-ux
+/pacakges/shared-ux-*/ @elastic/shared-ux
 /src/plugins/kibana_react/ @elastic/shared-ux
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
+/src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation
