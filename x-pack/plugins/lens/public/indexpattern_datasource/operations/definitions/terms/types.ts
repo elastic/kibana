@@ -11,6 +11,8 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'terms';
   params: {
     size: number;
+    // accuracy mode is accomplished by increasing shard_size
+    accuracyMode: boolean | undefined;
     // if order is alphabetical, the `fallback` flag indicates whether it became alphabetical because there wasn't
     // another option or whether the user explicitly chose to make it alphabetical.
     orderBy:

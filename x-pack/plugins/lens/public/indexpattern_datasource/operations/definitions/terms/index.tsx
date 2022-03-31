@@ -235,6 +235,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+
+    const shardSize = column.params.accuracyMode
+      ? Math.max(1000, column.params.size * 1.5 + 10)
+      : undefined;
+
     if (column.params?.secondaryFields?.length) {
       return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
         id: columnId,
@@ -247,6 +252,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
         order: column.params.orderDirection,
         size: column.params.size,
+        shardSize,
         otherBucket: Boolean(column.params.otherBucket),
         otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
           defaultMessage: 'Other',
@@ -264,6 +270,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
       order: column.params.orderDirection,
       size: column.params.size,
+      shardSize,
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -616,7 +623,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const newOrderByValue = fromValue(e.target.value);
-              const updatedLayer = updateDefaultLabels(
+              let updatedLayer = updateDefaultLabels(
                 updateColumnParam({
                   layer,
                   columnId,
@@ -625,14 +632,24 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 }),
                 indexPattern
               );
-              updateLayer(
-                updateColumnParam({
+
+              updatedLayer = updateColumnParam({
+                layer: updatedLayer,
+                columnId,
+                paramName: 'orderDirection',
+                value: newOrderByValue.type === 'alphabetical' ? 'asc' : 'desc',
+              });
+
+              if (newOrderByValue.type === 'rare' && currentColumn.params.accuracyMode) {
+                updatedLayer = updateColumnParam({
                   layer: updatedLayer,
                   columnId,
-                  paramName: 'orderDirection',
-                  value: newOrderByValue.type === 'alphabetical' ? 'asc' : 'desc',
-                })
-              );
+                  paramName: 'accuracyMode',
+                  value: false,
+                });
+              }
+
+              updateLayer(updatedLayer);
             }}
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
               defaultMessage: 'Rank by',
@@ -742,6 +759,26 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       layer,
                       columnId,
                       paramName: 'missingBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
+                  defaultMessage: 'Enable accuracy mode',
+                })}
+                compressed
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                data-test-subj="indexPattern-terms-missing-bucket"
+                checked={Boolean(currentColumn.params.accuracyMode)}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'accuracyMode',
                       value: e.target.checked,
                     })
                   )

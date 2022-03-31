@@ -32,6 +32,7 @@ export interface AggParamsMultiTerms extends BaseAggParams {
   orderAgg?: AggConfigSerialized;
   order?: 'asc' | 'desc';
   size?: number;
+  shardSize?: number;
   otherBucket?: boolean;
   otherBucketLabel?: string;
   separatorLabel?: string;
@@ -126,6 +127,9 @@ export const getMultiTermsBucketAgg = () => {
       {
         name: 'size',
         default: 5,
+      },
+      {
+        name: 'shardSize',
       },
       {
         name: 'otherBucket',
