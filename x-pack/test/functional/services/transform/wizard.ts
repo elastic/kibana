@@ -685,12 +685,12 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertDataViewTimeFieldInputExists() {
-      await testSubjects.existOrFail(`transformIndexPatternTimeFieldSelect`);
+      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
     },
 
     async assertDataViewTimeFieldValue(expectedValue: string) {
       const actualValue = await testSubjects.getAttribute(
-        `transformIndexPatternTimeFieldSelect`,
+        `transformDataViewTimeFieldSelect`,
         'value'
       );
       expect(actualValue).to.eql(
@@ -700,7 +700,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDataViewTimeField(fieldName: string) {
-      const selectControl = await testSubjects.find('transformIndexPatternTimeFieldSelect');
+      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
       await selectControl.type(fieldName);
       await this.assertDataViewTimeFieldValue(fieldName);
     },

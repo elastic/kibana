@@ -15,8 +15,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // FAILING TEST: https://github.com/elastic/kibana/issues/109687
-  describe.skip('transform', function () {
+  describe('transform', function () {
     this.tags(['ciGroup21', 'transform']);
 
     before(async () => {
