@@ -221,7 +221,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
-export { eqlCreateParams };
+export { eqlCreateParams, eqlResponseParams };
 
 const threatMatchRuleParams = {
   required: {

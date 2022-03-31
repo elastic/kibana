@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService } from '../../../../../../data/common';
+import { DataViewsService } from '../../../../../../data_views/common';
 import { from } from 'rxjs';
 
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
@@ -56,7 +56,7 @@ describe('AbstractSearchStrategy', () => {
       {
         getDefault: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
-      } as unknown as IndexPatternsService,
+      } as unknown as DataViewsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
     );
 

@@ -20,15 +20,19 @@ interface DocCount {
 }
 
 interface SizeBuckets {
-  sizes?: { values: SizePercentiles };
+  output_size?: { values: SizePercentiles };
 }
 
 interface ObjectTypeBuckets {
-  objectTypes: AggregationBuckets;
+  objectTypes?: AggregationBuckets;
 }
 
 interface LayoutTypeBuckets {
-  layoutTypes: AggregationBuckets;
+  layoutTypes?: AggregationBuckets;
+}
+
+interface ErrorCodeBuckets {
+  errorCodes?: AggregationBuckets;
 }
 
 /*
@@ -47,7 +51,8 @@ export interface KeyCountBucket
   extends DocCount,
     SizeBuckets,
     ObjectTypeBuckets,
-    LayoutTypeBuckets {
+    LayoutTypeBuckets,
+    ErrorCodeBuckets {
   key: BaseJobTypes;
   isDeprecated?: DocCount;
 }
@@ -91,7 +96,7 @@ export interface AvailableTotal {
   available: boolean;
   total: number;
   deprecated?: number;
-  sizes: SizePercentiles;
+  output_size: SizePercentiles;
   app: {
     search?: number;
     dashboard?: number;
@@ -111,12 +116,32 @@ export type AppCounts = {
 };
 
 export interface JobTypes {
-  csv_searchsource: AvailableTotal & { metrics: MetricsStatsCsv };
-  csv_searchsource_immediate: AvailableTotal & { metrics: MetricsStatsCsv };
-  PNG: AvailableTotal & { metrics: MetricsStatsPng };
-  PNGV2: AvailableTotal & { metrics: MetricsStatsPng };
-  printable_pdf: AvailableTotal & { layout: LayoutCounts; metrics: MetricsStatsPdf };
-  printable_pdf_v2: AvailableTotal & { layout: LayoutCounts; metrics: MetricsStatsPdf };
+  csv_searchsource: AvailableTotal & {
+    metrics: MetricsStatsCsv;
+    error_codes: ErrorCodesStatsCsv;
+  };
+  csv_searchsource_immediate: AvailableTotal & {
+    metrics: MetricsStatsCsv;
+    error_codes: ErrorCodesStatsCsv;
+  };
+  PNG: AvailableTotal & {
+    metrics: MetricsStatsPng;
+    error_codes: ErrorCodesStatsPng;
+  };
+  PNGV2: AvailableTotal & {
+    metrics: MetricsStatsPng;
+    error_codes: ErrorCodesStatsPng;
+  };
+  printable_pdf: AvailableTotal & {
+    layout: LayoutCounts;
+    metrics: MetricsStatsPdf;
+    error_codes: ErrorCodesStatsPdf;
+  };
+  printable_pdf_v2: AvailableTotal & {
+    layout: LayoutCounts;
+    metrics: MetricsStatsPdf;
+    error_codes: ErrorCodesStatsPdf;
+  };
 }
 
 export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
@@ -157,6 +182,27 @@ export interface MetricsPercentiles {
   '75.0': number | null;
   '95.0': number | null;
   '99.0': number | null;
+}
+
+type ErrorCodesStatsCsv = Pick<
+  ErrorCodeStats,
+  | 'authentication_expired_error'
+  | 'queue_timeout_error'
+  | 'unknown_error'
+  | 'kibana_shutting_down_error'
+>;
+type ErrorCodesStatsPng = Omit<ErrorCodeStats, 'pdf_worker_out_of_memory_error'>;
+type ErrorCodesStatsPdf = ErrorCodeStats;
+
+export interface ErrorCodeStats {
+  authentication_expired_error: number | null;
+  queue_timeout_error: number | null;
+  unknown_error: number | null;
+  pdf_worker_out_of_memory_error: number | null;
+  browser_could_not_launch_error: number | null;
+  browser_unexpectedly_closed_error: number | null;
+  browser_screenshot_error: number | null;
+  kibana_shutting_down_error: number | null;
 }
 
 export interface MetricsStats {

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
 import {
-  GetRuleExecutionEventsResponse,
+  GetAggregateRuleExecutionEventsResponse,
   RulesSchema,
 } from '../../../../../../common/detection_engine/schemas/response';
 
@@ -62,19 +61,44 @@ export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse
 
 export const fetchRuleExecutionEvents = async ({
   ruleId,
+  start,
+  end,
+  filters,
   signal,
 }: {
   ruleId: string;
+  start: string;
+  end: string;
+  filters?: string;
   signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
+}): Promise<GetAggregateRuleExecutionEventsResponse> => {
   return Promise.resolve({
     events: [
       {
-        date: '2021-12-29T10:42:59.996Z',
-        status: RuleExecutionStatus.succeeded,
-        message: 'Rule executed successfully',
+        duration_ms: 3866,
+        es_search_duration_ms: 1236,
+        execution_uuid: '88d15095-7937-462c-8f21-9763e1387cad',
+        gap_duration_ms: 0,
+        indexing_duration_ms: 95,
+        message:
+          "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
+        num_active_alerts: 0,
+        num_errored_actions: 0,
+        num_new_alerts: 0,
+        num_recovered_alerts: 0,
+        num_succeeded_actions: 1,
+        num_triggered_actions: 1,
+        schedule_delay_ms: -127535,
+        search_duration_ms: 1255,
+        security_message: 'succeeded',
+        security_status: 'succeeded',
+        status: 'success',
+        timed_out: false,
+        timestamp: '2022-03-13T06:04:05.838Z',
+        total_search_duration_ms: 0,
       },
     ],
+    total: 1,
   });
 };
 

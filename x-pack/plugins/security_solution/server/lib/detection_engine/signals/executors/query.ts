@@ -85,7 +85,6 @@ export const queryExecutor = async ({
       id: completeRule.alertId,
       inputIndexPattern: inputIndex,
       dataViewId: ruleParams.dataViewId,
-      signalsIndex: ruleParams.outputIndex,
       filter: esFilter,
       pageSize: searchAfterSize,
       buildReasonMessage: buildReasonMessageForQueryAlert,

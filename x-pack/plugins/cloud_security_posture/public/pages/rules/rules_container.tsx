@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { extractErrorMessage } from '../../../common/utils/helpers';
+import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
 import { RulesTableHeader } from './rules_table_header';
@@ -38,6 +38,7 @@ interface RulesPageData {
   total: number;
   error?: string;
   loading: boolean;
+  lastModified: string | null;
 }
 
 export type RulesState = RulesPageData & RulesQuery;
@@ -82,8 +83,15 @@ const getRulesPageData = (
     rules_map: new Map(rules.map((rule) => [rule.id, rule])),
     rules_page: page.map((rule) => changedRules.get(rule.attributes.id) || rule),
     total: data?.total || 0,
+    lastModified: getLastModified(rules) || null,
   };
 };
+
+const getLastModified = (data: RuleSavedObject[]): string | undefined =>
+  data
+    .map((v) => v.updatedAt)
+    .filter(isNonNullable)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
 
 const getPage = (data: readonly RuleSavedObject[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
@@ -178,6 +186,7 @@ export const RulesContainer = () => {
           searchValue={rulesQuery.search}
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
+          lastModified={rulesPageData.lastModified}
         />
         <EuiSpacer />
         <RulesTable
@@ -205,8 +214,9 @@ export const RulesContainer = () => {
       )}
       {selectedRuleId && (
         <RuleFlyout
-          rule={rulesPageData.rules_map.get(selectedRuleId)!}
+          rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}
           onClose={() => setSelectedRuleId(null)}
+          toggleRule={toggleRule}
         />
       )}
     </div>

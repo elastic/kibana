@@ -221,19 +221,6 @@ export interface FetchRuleProps {
   signal: AbortSignal;
 }
 
-export interface EnableRulesProps {
-  ids: string[];
-  enabled: boolean;
-}
-
-export interface DeleteRulesProps {
-  ids: string[];
-}
-
-export interface DuplicateRulesProps {
-  rules: Rule[];
-}
-
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
   query?: string;

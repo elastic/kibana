@@ -279,11 +279,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_source:bounds'),
-      });
+      const { rawResponse: esResp } = await searchSource
+        .fetch$({
+          abortSignal: abortController.signal,
+          legacyHitsTotal: false,
+          executionContext: makePublicExecutionContext('es_source:bounds'),
+        })
+        .toPromise();
 
       if (!esResp.aggregations) {
         return null;
@@ -341,7 +343,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getGeoFieldName(): string {
     if (!this._descriptor.geoField) {
-      throw new Error('Should not call');
+      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
     }
     return this._descriptor.geoField;
   }

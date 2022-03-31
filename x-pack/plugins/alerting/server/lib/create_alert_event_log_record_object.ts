@@ -16,6 +16,8 @@ interface CreateAlertEventLogRecordParams {
   ruleId: string;
   ruleType: UntypedNormalizedRuleType;
   action: string;
+  spaceId?: string;
+  consumer?: string;
   ruleName?: string;
   instanceId?: string;
   message?: string;
@@ -48,6 +50,8 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     group,
     subgroup,
     namespace,
+    consumer,
+    spaceId,
   } = params;
   const alerting =
     params.instanceId || group || subgroup
@@ -70,18 +74,20 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
     },
     kibana: {
-      ...(alerting ? alerting : {}),
-      ...(executionId
-        ? {
-            alert: {
-              rule: {
+      alert: {
+        rule: {
+          rule_type_id: ruleType.id,
+          ...(consumer ? { consumer } : {}),
+          ...(executionId
+            ? {
                 execution: {
                   uuid: executionId,
                 },
-              },
-            },
-          }
-        : {}),
+              }
+            : {}),
+        },
+      },
+      ...(alerting ? alerting : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,
@@ -89,6 +95,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         type_id: so.typeId,
         namespace,
       })),
+      ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
     },
     ...(message ? { message } : {}),

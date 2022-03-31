@@ -12,6 +12,8 @@
   // Padding / negative margins to make room for overflow shadow
   padding-left: $euiSizeXS;
   margin-left: -$euiSizeXS;
+  padding-right: $euiSizeXS;
+  margin-right: -$euiSizeXS;
 }
 
 .lnsSuggestionPanel {
@@ -91,4 +93,10 @@
 
 .lnsSuggestionPanel__applyChangesPrompt {
   height: $lnsSuggestionHeight;
+  background-color: $euiColorLightestShade !important;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }

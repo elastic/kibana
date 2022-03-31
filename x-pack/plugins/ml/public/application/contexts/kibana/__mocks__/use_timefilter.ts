@@ -6,8 +6,15 @@
  */
 
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { TimefilterContract } from '../../../../../../../../src/plugins/data/public';
 
-export const timefilterMock = dataPluginMock.createStartContract().query.timefilter.timefilter;
+export const timefilterMock = dataPluginMock.createStartContract().query.timefilter
+  .timefilter as jest.Mocked<TimefilterContract>;
+
+export const createTimefilterMock = () => {
+  return dataPluginMock.createStartContract().query.timefilter
+    .timefilter as jest.Mocked<TimefilterContract>;
+};
 
 export const useTimefilter = jest.fn(() => {
   return timefilterMock;

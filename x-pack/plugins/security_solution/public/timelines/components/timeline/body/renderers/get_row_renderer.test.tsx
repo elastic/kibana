@@ -20,6 +20,12 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
 
+// EuiIcons coming from .testenv render the icon's aria-label as a span
+// extractEuiIcon removes the aria-label before checking for equality
+const extractEuiIconText = (str: string) => {
+  return str.replaceAll('External link', '');
+};
+
 jest.mock('../../../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
@@ -90,7 +96,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+    expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
@@ -109,7 +115,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+    expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
@@ -128,7 +134,7 @@ describe('get_column_renderer', () => {
         <span>{row}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+    expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toBe(
       'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });

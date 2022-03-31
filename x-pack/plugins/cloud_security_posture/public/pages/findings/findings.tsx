@@ -10,7 +10,7 @@ import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { FindingsContainer } from './findings_container';
-import { CspPageTemplate } from '../../components/page_template';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import { FINDINGS } from './translations';
 
 const pageHeader: EuiPageHeaderProps = {
@@ -18,15 +18,12 @@ const pageHeader: EuiPageHeaderProps = {
 };
 
 export const Findings = () => {
-  const dataView = useKubebeatDataView();
+  const dataViewQuery = useKubebeatDataView();
   useCspBreadcrumbs([allNavigationItems.findings]);
 
   return (
-    // `CspPageTemplate` takes care of loading and error states for the kubebeat data view, no need to handle them here
-    <CspPageTemplate pageHeader={pageHeader}>
-      {dataView.status === 'success' && dataView.data && (
-        <FindingsContainer dataView={dataView.data} />
-      )}
+    <CspPageTemplate pageHeader={pageHeader} query={dataViewQuery}>
+      {dataViewQuery.data && <FindingsContainer dataView={dataViewQuery.data} />}
     </CspPageTemplate>
   );
 };

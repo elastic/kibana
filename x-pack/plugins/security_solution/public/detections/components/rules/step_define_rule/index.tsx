@@ -161,10 +161,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     dataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(getScopeFromPath(pathname));
-  // console.log('SELECTED PATTERNS', selectedPatterns);
-  console.log('INDEX PATTERN', indexPattern);
-  console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
-  // console.log('DATA VIEW ID', selectedDataViewId);
+  // // console.log('SELECTED PATTERNS', selectedPatterns);
+  // console.log('INDEX PATTERN', indexPattern);
+  // console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
+  // // console.log('DATA VIEW ID', selectedDataViewId);
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
     defaultDataView,
@@ -177,7 +177,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, getScopeFromPath(pathname)));
 
-  console.log('ALL OPTIONS', kibanaDataViews);
+  // console.log('ALL OPTIONS', kibanaDataViews);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -190,7 +190,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     threatIndex: threatIndicesConfig,
     dataViewId: selectedDataViewId ?? 'security-solution-default',
   };
-  console.error('initial state', JSON.stringify(initialState, null, 2));
+  // console.error('initial state', JSON.stringify(initialState, null, 2));
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -236,32 +236,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
-  const [
-    indexPatternsLoading,
-    {
-      browserFields,
-      // indexPatterns,
-    },
-  ] = useFetchIndex(index);
-  console.log('BROWSER FIELDS', browserFields);
-  const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
-    (groupAcc, [groupName, groupValue]) => {
-      return {
-        ...groupAcc,
-        [groupName]: {
-          fields: Object.entries(groupValue.fields ?? {}).reduce<
-            Record<string, Partial<BrowserField>>
-          >((fieldAcc, [fieldName, fieldValue]) => {
-            if (fieldValue.aggregatable === true) {
-              fieldAcc[fieldName] = fieldValue;
-            }
-            return fieldAcc;
-          }, {}),
-        } as Partial<BrowserField>,
-      };
-    },
-    {}
-  );
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
 
   const [
     threatIndexPatternsLoading,
@@ -319,7 +295,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [onSubmit]);
 
-  console.error('FORM DATA', JSON.stringify(getFormData(), null, 2));
+  // console.error('FORM DATA', JSON.stringify(getFormData(), null, 2));
 
   const getData = useCallback(async () => {
     const result = await submit();
@@ -362,14 +338,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
-        browserFields={aggregatableFields}
+        browserFields={fields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [aggregatableFields]
+    [fields]
   );
   const SourcererFlex = styled(EuiFlexItem)`
     align-items: flex-end;
@@ -433,10 +409,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   type: FIELD_TYPES.COMBO_BOX,
                 }}
                 singleSelection={{ asPlainText: true }}
-                onChange={() => console.log('something happened')}
+                onChange={() => {} /* console.log('something happened') */}
                 options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
                 placeholder={'hello world'}
-                selectedOptions={() => console.log('SELECTED')}
+                selectedOptions={() => {}} // console.log('SELECTED')}
               />
               {/* <EuiComboBox
                 path="dataViewId"
@@ -467,7 +443,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-              {console.error('INDEX PATTERN', indexPattern)}
               {isEqlRule(ruleType) ? (
                 <UseField
                   key="EqlQueryBar"
@@ -507,7 +482,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     // docValueFields,
                     // runtimeMappings,
                     idAria: 'detectionEngineStepDefineRuleQueryBar',
-                    indexPattern: indexPattern,
+                    indexPattern,
                     isDisabled: isLoading,
                     isLoading: isLoadingIndexPattern,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
@@ -622,3 +597,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 };
 
 export const StepDefineRule = memo(StepDefineRuleComponent);
+
+export function aggregatableFields(browserFields: BrowserFields): BrowserFields {
+  const result: Record<string, Partial<BrowserField>> = {};
+  for (const [groupName, groupValue] of Object.entries(browserFields)) {
+    const fields: Record<string, Partial<BrowserField>> = {};
+    if (groupValue.fields) {
+      for (const [fieldName, fieldValue] of Object.entries(groupValue.fields)) {
+        if (fieldValue.aggregatable === true) {
+          fields[fieldName] = fieldValue;
+        }
+      }
+    }
+    result[groupName] = {
+      fields,
+    };
+  }
+  return result;
+}

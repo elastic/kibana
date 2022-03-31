@@ -34,6 +34,8 @@ import './index.scss';
 import { GaugeCentralMajorMode } from '../../common/types';
 import { isBulletShape, isRoundShape } from '../../common/utils';
 
+import './gauge.scss';
+
 declare global {
   interface Window {
     /**
@@ -211,6 +213,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       centralMajor,
       centralMajorMode,
       ticksPosition,
+      commonLabel,
     } = args;
 
     const getColor = useCallback(
@@ -300,8 +303,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
-    const min = getMinValue(row, accessors);
-    const max = getMaxValue(row, accessors);
+    const min = getMinValue(row, accessors, palette?.params, args.respectRanges);
+    const max = getMaxValue(row, accessors, palette?.params, args.respectRanges);
 
     if (min === max) {
       return (
@@ -377,50 +380,52 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       : {};
 
     return (
-      <Chart>
-        <Settings
-          debugState={window._echDebugStateFlag ?? false}
-          theme={[{ background: { color: 'transparent' } }, chartTheme]}
-          ariaLabel={args.ariaLabel}
-          ariaUseDefaultSummary={!args.ariaLabel}
-        />
-        <Goal
-          id="goal"
-          subtype={getSubtypeByGaugeType(gaugeType)}
-          base={bands[0]}
-          target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
-          actual={actualValue}
-          tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
-          tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
-          bands={bands}
-          ticks={ticks}
-          bandFillColor={
-            colorMode === GaugeColorModes.PALETTE
-              ? (val) => {
-                  const value = getPreviousSectionValue(val.value, bands);
+      <div className="gauge__wrapper">
+        <Chart>
+          <Settings
+            debugState={window._echDebugStateFlag ?? false}
+            theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            ariaLabel={args.ariaLabel}
+            ariaUseDefaultSummary={!args.ariaLabel}
+          />
+          <Goal
+            id="goal"
+            subtype={getSubtypeByGaugeType(gaugeType)}
+            base={bands[0]}
+            target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
+            actual={actualValue}
+            tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
+            tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
+            bands={bands}
+            ticks={ticks}
+            bandFillColor={
+              colorMode === GaugeColorModes.PALETTE
+                ? (val) => {
+                    const value = getPreviousSectionValue(val.value, bands);
 
-                  const overridedColor = overrideColor(
-                    value,
-                    args.percentageMode ? bands : args.palette?.params?.stops ?? [],
-                    args.percentageMode ? tickFormatter : undefined
-                  );
+                    const overridedColor = overrideColor(
+                      value,
+                      args.percentageMode ? bands : args.palette?.params?.stops ?? [],
+                      args.percentageMode ? tickFormatter : undefined
+                    );
 
-                  if (overridedColor) {
-                    return overridedColor;
+                    if (overridedColor) {
+                      return overridedColor;
+                    }
+                    return args.palette
+                      ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
+                      : TRANSPARENT;
                   }
-
-                  return args.palette
-                    ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
-                    : TRANSPARENT;
-                }
-              : () => TRANSPARENT
-          }
-          labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
-          labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
-          {...extraTitles}
-          {...goalConfig}
-        />
-      </Chart>
+                : () => TRANSPARENT
+            }
+            labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
+            labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
+            {...extraTitles}
+            {...goalConfig}
+          />
+        </Chart>
+        {commonLabel && <div className="gauge__label">{commonLabel}</div>}
+      </div>
     );
   }
 );
