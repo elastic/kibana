@@ -14,13 +14,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
         onlyShowFilters={true}
       />
     </EuiFlexItem>
-    <EuiFlexItem
-      style={
-        Object {
-          "maxWidth": "582px",
-        }
-      }
-    >
+    <Styled(EuiFlexItem)>
       <EuiSuperDatePicker
         commonlyUsedRanges={
           Array [
@@ -81,7 +75,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
         timeFormat="HH:mm"
         width="full"
       />
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
   <EuiSpacer
     size="s"
@@ -184,7 +178,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
     onChange={[Function]}
     pagination={
       Object {
-        "pageIndex": 0,
+        "pageIndex": 1,
         "pageSize": 5,
         "pageSizeOptions": Array [
           5,

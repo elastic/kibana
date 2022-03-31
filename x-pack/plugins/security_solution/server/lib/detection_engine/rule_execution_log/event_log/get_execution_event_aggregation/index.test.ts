@@ -128,7 +128,7 @@ describe('getExecutionEventAggregation', () => {
                   },
                 },
               ],
-              from: 20,
+              from: 10,
               size: 10,
               gap_policy: 'insert_zeros',
             },

@@ -16,6 +16,7 @@ import {
   ExecutionEventAggregationOptions,
   ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
+  EXECUTION_UUID_FIELD,
 } from './types';
 
 // Base ECS fields
@@ -31,7 +32,6 @@ const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
 const TOTAL_ACTIONS_TRIGGERED_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
-const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 // TODO: To be added in https://github.com/elastic/kibana/pull/126210
 // const TOTAL_ALERTS_CREATED: 'kibana.alert.rule.execution.metrics.total_alerts_created',
 // const TOTAL_ALERTS_DETECTED: 'kibana.alert.rule.execution.metrics.total_alerts_detected',
@@ -116,6 +116,7 @@ export const getExecutionEventAggregation = ({
             sort: formatSortForBucketSort(sort),
             from: (page - 1) * perPage,
             size: perPage,
+            // Must override gap_policy to not miss fields/docs, for details see: https://github.com/elastic/kibana/pull/127339/files#r825240516
             gap_policy: 'insert_zeros',
           },
         },
@@ -303,9 +304,11 @@ export const formatAggExecutionEventFromBucket = (
 /**
  * Formats getAggregateExecutionEvents response from Elasticsearch response
  * @param results Elasticsearch response
+ * @param totalExecutions total number of executions to override from initial statusFilter query
  */
 export const formatExecutionEventResponse = (
-  results: AggregateEventsBySavedObjectResult
+  results: AggregateEventsBySavedObjectResult,
+  totalExecutions?: number
 ): GetAggregateRuleExecutionEventsResponse => {
   const { aggregations } = results;
 
@@ -320,7 +323,7 @@ export const formatExecutionEventResponse = (
   const buckets = (aggregations.executionUuid as ExecutionUuidAggResult).buckets;
 
   return {
-    total,
+    total: totalExecutions ? totalExecutions : total,
     events: buckets.map((b: ExecutionUuidAggBucket) => formatAggExecutionEventFromBucket(b)),
   };
 };

@@ -7,22 +7,30 @@
 
 import * as t from 'io-ts';
 
-// import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DefaultEmptyString, IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
 import { Either } from 'fp-ts/lib/Either';
-import { ruleExecutionStatus } from '../common';
+import {
+  ExecutionLogTableSortColumns,
+  executionLogTableSortColumns,
+  ruleExecutionStatus,
+  RuleExecutionStatusType,
+} from '../common';
 
 /**
  * Types the DefaultStatusFiltersStringArray as:
  *   - If undefined, then a default array will be set
  *   - If an array is sent in, then the array will be validated to ensure all elements are a ruleExecutionStatus
  */
-export const DefaultStatusFiltersStringArray = new t.Type<string[], string[] | undefined, unknown>(
+export const DefaultStatusFiltersStringArray = new t.Type<
+  RuleExecutionStatusType[],
+  RuleExecutionStatusType[],
+  unknown
+>(
   'DefaultStatusFiltersStringArray',
-  t.array(t.string).is,
-  (input, context): Either<t.Errors, string[]> => {
+  t.array(ruleExecutionStatus).is,
+  (input, context): Either<t.Errors, RuleExecutionStatusType[]> => {
     if (input == null) {
       return t.success([]);
     } else if (typeof input === 'string') {
@@ -34,50 +42,51 @@ export const DefaultStatusFiltersStringArray = new t.Type<string[], string[] | u
   t.identity
 );
 
-const sortFields = t.keyof({
-  timestamp: null,
-  duration_ms: null,
-  gap_duration_ms: null,
-  indexing_duration_ms: null,
-  search_duration_ms: null,
-  schedule_delay_ms: null,
-});
-
 /**
  * Types the DefaultSortField as:
  *   - If undefined, then a default sort field of 'timestamp' will be set
  *  - If a string is sent in, then the string will be validated to ensure it is as valid sortFields
  */
-export const DefaultSortField = new t.Type<string, string | undefined, unknown>(
+export const DefaultSortField = new t.Type<
+  ExecutionLogTableSortColumns,
+  ExecutionLogTableSortColumns,
+  unknown
+>(
   'DefaultSortField',
-  t.string.is,
-  (input, context): Either<t.Errors, string> =>
-    input == null ? t.success('timestamp') : sortFields.validate(input, context),
+  executionLogTableSortColumns.is,
+  (input, context): Either<t.Errors, ExecutionLogTableSortColumns> =>
+    input == null ? t.success('timestamp') : executionLogTableSortColumns.validate(input, context),
   t.identity
 );
 
-// TODO: Getting type error when using estypes.SortOrder?
 const sortOrder = t.keyof({ asc: null, desc: null });
+type SortOrder = t.TypeOf<typeof sortOrder>;
 
 /**
  * Types the DefaultSortOrder as:
  *   - If undefined, then a default sort order of 'desc' will be set
  *   - If a string is sent in, then the string will be validated to ensure it is as valid sortOrder
  */
-export const DefaultSortOrder = new t.Type<string, string | undefined, unknown>(
+export const DefaultSortOrder = new t.Type<SortOrder, SortOrder, unknown>(
   'DefaultSortOrder',
-  t.string.is,
-  (input, context): Either<t.Errors, string> =>
+  sortOrder.is,
+  (input, context): Either<t.Errors, SortOrder> =>
     input == null ? t.success('desc') : sortOrder.validate(input, context),
   t.identity
 );
 
+/**
+ * Route Request Params
+ */
 export const GetRuleExecutionEventsRequestParams = t.exact(
   t.type({
     ruleId: t.string,
   })
 );
 
+/**
+ * Route Query Params (as constructed from the above codecs)
+ */
 export const GetRuleExecutionEventsQueryParams = t.exact(
   t.type({
     start: IsoDateString,

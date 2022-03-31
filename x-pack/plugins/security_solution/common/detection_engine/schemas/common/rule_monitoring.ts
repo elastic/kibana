@@ -53,6 +53,8 @@ export enum RuleExecutionStatus {
 
 export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
 
+export type RuleExecutionStatusType = t.TypeOf<typeof ruleExecutionStatus>;
+
 export const ruleExecutionStatusOrder = PositiveInteger;
 export type RuleExecutionStatusOrder = t.TypeOf<typeof ruleExecutionStatusOrder>;
 
@@ -135,8 +137,7 @@ export const aggregateRuleExecutionEvent = t.type({
 
 export type AggregateRuleExecutionEvent = t.TypeOf<typeof aggregateRuleExecutionEvent>;
 
-// TODO: Is there an io-ts variant of 'Pick', or corollary? Doesn't seem so? https://github.com/gcanti/io-ts/issues/300
-export const executionLogTableSortColumns = t.type({
+export const executionLogTableSortColumns = t.keyof({
   timestamp: IsoDateString,
   duration_ms: t.number,
   gap_duration_ms: t.number,
