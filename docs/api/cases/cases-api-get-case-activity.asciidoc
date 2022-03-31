@@ -6,9 +6,11 @@
 
 Returns all user activity for the specified case.
 
+deprecated::[8.1.0]
+
 === Request
 
-`GET <kibana host>:<port>/api/cases/<case ID>/user_actions` deprecated:[8.1.0, "This endpoint is deprecated and will be removed in a future release."]
+`GET <kibana host>:<port>/api/cases/<case ID>/user_actions`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>/user_actions`
 
