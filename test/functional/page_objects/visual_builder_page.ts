@@ -782,7 +782,9 @@ export class VisualBuilderPageObject extends FtrService {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(byField, field);
+    });
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
   }
@@ -793,7 +795,9 @@ export class VisualBuilderPageObject extends FtrService {
     await this.common.sleep(1000);
     const byFields = await this.testSubjects.findAll('fieldSelectItem');
     const selectedByField = byFields[byFields.length - 1];
-    await this.comboBox.setElement(selectedByField, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(selectedByField, field);
+    });
   }
 
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
