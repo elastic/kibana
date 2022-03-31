@@ -14,10 +14,10 @@ these APIs:
 * <<cases-api-find-connectors>>
 * <<cases-api-get-case-activity>>
 * <<cases-api-get-case>>
+* <<cases-api-get-status>>
 * <<cases-api-get-comments>>
 * {security-guide}/cases-get-connector.html[Get current connector]
 * {security-guide}/cases-api-get-reporters.html[Get reporters]
-* {security-guide}/cases-api-get-status.html[Get status]
 * <<cases-api-get-tag>>
 * {security-guide}/cases-api-push.html[Push case]
 * {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
@@ -38,6 +38,7 @@ include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
 //GET
 include::cases/cases-api-get-case-activity.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-status.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-tags.asciidoc[leveloffset=+1]
 //UPDATE

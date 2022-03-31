@@ -812,7 +812,7 @@ export class TaskRunner<
     } else {
       if (executionStatus.warning) {
         set(event, 'event.reason', executionStatus.warning?.reason || 'unknown');
-        set(event, 'message', event?.message || executionStatus.warning.message);
+        set(event, 'message', executionStatus.warning?.message || event?.message);
       }
       set(
         event,

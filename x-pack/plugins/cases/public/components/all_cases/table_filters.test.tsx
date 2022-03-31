@@ -222,4 +222,46 @@ describe('CasesTableFilters ', () => {
 
     expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
   });
+
+  describe('create case button', () => {
+    it('should not render the create case button when displayCreateCaseButton and onCreateCasePressed are not passed', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters {...props} />
+        </TestProviders>
+      );
+      expect(wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`).length).toBe(0);
+    });
+
+    it('should render the create case button when displayCreateCaseButton and onCreateCasePressed are passed', () => {
+      const onCreateCasePressed = jest.fn();
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            displayCreateCaseButton={true}
+            onCreateCasePressed={onCreateCasePressed}
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`)).toBeTruthy();
+    });
+
+    it('should call the onCreateCasePressed when create case is clicked', () => {
+      const onCreateCasePressed = jest.fn();
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            displayCreateCaseButton={true}
+            onCreateCasePressed={onCreateCasePressed}
+          />
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="cases-table-add-case-filter-bar"]`).first().simulate('click');
+      wrapper.update();
+      // NOTE: intentionally checking no arguments are passed
+      expect(onCreateCasePressed).toHaveBeenCalledWith();
+    });
+  });
 });
