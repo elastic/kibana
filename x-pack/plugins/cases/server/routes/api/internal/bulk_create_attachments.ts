@@ -10,6 +10,7 @@ import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constan
 import { BulkCreateCommentRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { escapeHatch } from '../utils';
 
 export const bulkCreateAttachmentsRoute = createCasesRoute({
   method: 'post',
@@ -18,6 +19,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
     params: schema.object({
       case_id: schema.string(),
     }),
+    body: schema.arrayOf(escapeHatch),
   },
   handler: async ({ context, request, response }) => {
     try {
