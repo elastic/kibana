@@ -44,7 +44,7 @@ const tableColumns: Array<EuiBasicTableColumn<RuleAlertsItem>> = [
     render: (alertCount: number, { id }) => (
       <EuiLink
         data-test-subj="severityRuleAlertsTable-name"
-        href={`/app/security/alerts?rule.id=${id}` /* TODO */}
+        href={`/app/security/alerts?filters=kibana.alert.rule.uuid:${id}` /* TODO */}
       >
         {alertCount}
       </EuiLink>
@@ -59,7 +59,7 @@ const tableColumns: Array<EuiBasicTableColumn<RuleAlertsItem>> = [
   },
 ];
 
-interface RuleAlertsTableProps {
+export interface RuleAlertsTableProps {
   signalIndexName: string | null;
 }
 
