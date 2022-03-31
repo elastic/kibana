@@ -53,11 +53,11 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 
-export interface RuleTypeParams extends AlertTypeParams {
+export interface RuleTypeParams extends RuleTypeParams {
   anomalyThreshold?: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;

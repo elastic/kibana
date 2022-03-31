@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { AlertExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
+import { RuleExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -461,7 +461,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                   {rule.executionStatus.error?.reason ===
-                    AlertExecutionStatusErrorReasons.License && (
+                    RuleExecutionStatusErrorReasons.License && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         href={`${http.basePath.get()}/app/management/stack/license_management`}

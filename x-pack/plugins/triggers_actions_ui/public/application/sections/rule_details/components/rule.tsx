@@ -22,7 +22,7 @@ import {
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import {
   ActionGroup,
-  AlertExecutionStatusErrorReasons,
+  RuleExecutionStatusErrorReasons,
   AlertStatusValues,
 } from '../../../../../../alerting/common';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
@@ -96,7 +96,7 @@ export function RuleComponent({
 
   const healthColor = getHealthColor(rule.executionStatus.status);
   const isLicenseError =
-    rule.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];

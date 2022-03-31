@@ -94,7 +94,7 @@ const createAbortableSearchServiceMock = () => {
   };
 };
 
-const createAlertServicesMock = <
+const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
@@ -113,11 +113,11 @@ const createAlertServicesMock = <
     search: createAbortableSearchServiceMock(),
   };
 };
-export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
+export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
 
 export const alertsMock = {
   createAlertFactory: createAlertFactoryMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
-  createAlertServices: createAlertServicesMock,
+  createRuleExecutorServices: createRuleExecutorServicesMock,
 };

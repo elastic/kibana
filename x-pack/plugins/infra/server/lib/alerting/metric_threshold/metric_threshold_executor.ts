@@ -15,7 +15,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { Rule, RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
@@ -46,7 +46,7 @@ type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-type MetricThresholdAlert = Alert<
+type MetricThresholdAlert = Rule<
   MetricThresholdAlertState,
   MetricThresholdAlertContext,
   MetricThresholdAllowedActionGroups

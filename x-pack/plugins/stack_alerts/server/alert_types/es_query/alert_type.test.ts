@@ -7,9 +7,9 @@
 
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { AlertServices } from '../../../../alerting/server';
+import { RuleExecutorServices } from '../../../../alerting/server';
 import {
-  AlertServicesMock,
+  RuleExecutorServicesMock,
   alertsMock,
   AlertInstanceMock,
 } from '../../../../alerting/server/mocks';
@@ -131,7 +131,7 @@ describe('alertType', () => {
       thresholdComparator: 'between',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -143,7 +143,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -198,7 +198,7 @@ describe('alertType', () => {
       thresholdComparator: '>',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const newestDocumentTimestamp = Date.now();
 
@@ -222,7 +222,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -281,7 +281,7 @@ describe('alertType', () => {
       thresholdComparator: '>',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const previousTimestamp = Date.now();
     const newestDocumentTimestamp = previousTimestamp + 1000;
@@ -300,7 +300,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -352,7 +352,7 @@ describe('alertType', () => {
       thresholdComparator: '>',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const oldestDocumentTimestamp = Date.now();
 
@@ -374,7 +374,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -433,7 +433,7 @@ describe('alertType', () => {
       thresholdComparator: '>',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const oldestDocumentTimestamp = Date.now();
 
@@ -452,7 +452,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -541,7 +541,7 @@ describe('alertType', () => {
       thresholdComparator: '>',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const oldestDocumentTimestamp = Date.now();
 
@@ -566,7 +566,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -624,7 +624,7 @@ describe('alertType', () => {
       thresholdComparator: '>',
       threshold: [0],
     };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
     const oldestDocumentTimestamp = Date.now();
 
@@ -650,7 +650,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
+      services: alertServices as unknown as RuleExecutorServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId

@@ -79,10 +79,10 @@ import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import {
-  AlertExecutionStatus,
-  AlertExecutionStatusValues,
+  RuleExecutionStatus,
+  RuleExecutionStatusValues,
   ALERTS_FEATURE_ID,
-  AlertExecutionStatusErrorReasons,
+  RuleExecutionStatusErrorReasons,
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
@@ -191,7 +191,7 @@ export const RulesList: React.FunctionComponent = () => {
     ruleTypeId: string;
   } | null>(null);
   const [rulesStatusesTotal, setRulesStatusesTotal] = useState<Record<string, number>>(
-    AlertExecutionStatusValues.reduce(
+    RuleExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
         ({
           ...prev,
@@ -365,15 +365,12 @@ export const RulesList: React.FunctionComponent = () => {
     );
   };
 
-  const renderAlertExecutionStatus = (
-    executionStatus: AlertExecutionStatus,
-    item: RuleTableItem
-  ) => {
+  const renderRuleExecutionStatus = (executionStatus: RuleExecutionStatus, item: RuleTableItem) => {
     const healthColor = getHealthColor(executionStatus.status);
     const tooltipMessage =
       executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
     const isLicenseError =
-      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+      executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
     const statusMessage = isLicenseError
       ? ALERT_STATUS_LICENSE_ERROR
       : rulesStatusesTranslationsMapping[executionStatus.status];
@@ -467,11 +464,11 @@ export const RulesList: React.FunctionComponent = () => {
     };
   };
 
-  const buildErrorListItems = (_executionStatus: AlertExecutionStatus) => {
+  const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
     const errorMessage = _executionStatus?.error?.message;
     const isLicenseError =
-      _executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+      _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
     const statusMessage = isLicenseError ? ALERT_STATUS_LICENSE_ERROR : null;
 
     return [
@@ -493,7 +490,7 @@ export const RulesList: React.FunctionComponent = () => {
     ];
   };
 
-  const toggleErrorMessage = (_executionStatus: AlertExecutionStatus, ruleItem: RuleTableItem) => {
+  const toggleErrorMessage = (_executionStatus: RuleExecutionStatus, ruleItem: RuleTableItem) => {
     setItemIdToExpandedRowMap((itemToExpand) => {
       const _itemToExpand = { ...itemToExpand };
       if (_itemToExpand[ruleItem.id]) {
@@ -827,8 +824,8 @@ export const RulesList: React.FunctionComponent = () => {
         truncateText: false,
         width: '120px',
         'data-test-subj': 'rulesTableCell-lastResponse',
-        render: (_executionStatus: AlertExecutionStatus, item: RuleTableItem) => {
-          return renderAlertExecutionStatus(item.executionStatus, item);
+        render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => {
+          return renderRuleExecutionStatus(item.executionStatus, item);
         },
       },
       {
@@ -916,7 +913,7 @@ export const RulesList: React.FunctionComponent = () => {
           const _executionStatus = item.executionStatus;
           const hasErrorMessage = _executionStatus.status === 'error';
           const isLicenseError =
-            _executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+            _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
 
           return isLicenseError || hasErrorMessage ? (
             <EuiButtonIcon

@@ -10,17 +10,17 @@ import {
   uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import {
-  AlertExecutorOptions,
+  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
 import { alertsMock } from '../../../alerting/server/mocks';
 
 export const createDefaultAlertExecutorOptions = <
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = {},
   InstanceContext extends AlertInstanceContext = {},
   ActionGroupIds extends string = ''
@@ -42,7 +42,7 @@ export const createDefaultAlertExecutorOptions = <
   startedAt?: Date;
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
-}): AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
+}): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   alertId,
   createdBy: 'CREATED_BY',
   startedAt,
@@ -68,7 +68,8 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
-    alertFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>().alertFactory,
+    alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
+      .alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

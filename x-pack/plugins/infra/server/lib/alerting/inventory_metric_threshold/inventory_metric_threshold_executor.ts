@@ -16,7 +16,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { Rule, RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -44,7 +44,7 @@ export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specifi
 export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
 export type InventoryMetricThresholdAlertContext = AlertContext; // no specific instance context used
 
-type InventoryMetricThresholdAlert = Alert<
+type InventoryMetricThresholdAlert = Rule<
   InventoryMetricThresholdAlertState,
   InventoryMetricThresholdAlertContext,
   InventoryMetricThresholdAllowedActionGroups

@@ -12,7 +12,7 @@ export type {
   PluginSetupContract as AlertingSetup,
   RuleType,
   RuleParamsAndRefs,
-  AlertExecutorOptions,
+  RuleExecutorOptions,
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 

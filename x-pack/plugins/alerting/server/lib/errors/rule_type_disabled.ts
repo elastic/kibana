@@ -8,16 +8,16 @@
 import { KibanaResponseFactory } from '../../../../../../src/core/server';
 import { ErrorThatHandlesItsOwnResponse } from './types';
 
-export type AlertTypeDisabledReason =
+export type RuleTypeDisabledReason =
   | 'config'
   | 'license_unavailable'
   | 'license_invalid'
   | 'license_expired';
 
-export class AlertTypeDisabledError extends Error implements ErrorThatHandlesItsOwnResponse {
-  public readonly reason: AlertTypeDisabledReason;
+export class RuleTypeDisabledError extends Error implements ErrorThatHandlesItsOwnResponse {
+  public readonly reason: RuleTypeDisabledReason;
 
-  constructor(message: string, reason: AlertTypeDisabledReason) {
+  constructor(message: string, reason: RuleTypeDisabledReason) {
     super(message);
     this.reason = reason;
   }

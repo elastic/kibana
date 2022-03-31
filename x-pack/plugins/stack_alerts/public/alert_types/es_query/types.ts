@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 
 export interface Comparator {
   text: string;
@@ -13,7 +13,7 @@ export interface Comparator {
   requiredValues: number;
 }
 
-export interface EsQueryAlertParams extends AlertTypeParams {
+export interface EsQueryAlertParams extends RuleTypeParams {
   index: string[];
   timeField?: string;
   esQuery: string;

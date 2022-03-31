@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from 'src/core/server';
-import { RuleType, AlertExecutorOptions } from '../../types';
+import { RuleType, RuleExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
   EsQueryAlertParams,
@@ -151,7 +151,7 @@ export function getAlertType(logger: Logger): RuleType<
   };
 
   async function executor(
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       EsQueryAlertParams,
       EsQueryAlertState,
       {},

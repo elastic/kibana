@@ -16,10 +16,10 @@ import { ElasticsearchClient } from 'kibana/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
-  Alert,
+  Rule,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  AlertTypeState as RuleTypeState,
+  RuleTypeState,
 } from '../../../../../alerting/server';
 
 import {
@@ -60,7 +60,7 @@ export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type LogThresholdAlertState = AlertState; // no specific state used
 export type LogThresholdAlertContext = AlertContext; // no specific instance context used
 
-type LogThresholdAlert = Alert<
+type LogThresholdAlert = Rule<
   LogThresholdAlertState,
   LogThresholdAlertContext,
   LogThresholdActionGroups

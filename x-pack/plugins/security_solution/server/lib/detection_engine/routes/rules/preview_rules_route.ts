@@ -30,7 +30,7 @@ import { RuleExecutionStatus } from '../../../../../common/detection_engine/sche
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
   parseDuration,
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -124,7 +124,7 @@ export const previewRulesRoute = async (
 
         const runExecutors = async <
           TParams extends RuleParams,
-          TState extends AlertTypeState,
+          TState extends RuleTypeState,
           TInstanceState extends AlertInstanceState,
           TInstanceContext extends AlertInstanceContext,
           TActionGroupIds extends string = ''

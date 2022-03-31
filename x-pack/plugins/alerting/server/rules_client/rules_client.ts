@@ -22,25 +22,25 @@ import {
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
-  Alert as Rule,
-  PartialAlert as PartialRule,
+  Rule,
+  PartialRule,
   RawRule,
   RuleTypeRegistry,
-  AlertAction as RuleAction,
+  RuleAction,
   IntervalSchedule,
-  SanitizedAlert as SanitizedRule,
+  SanitizedRule,
   RuleTaskState,
   AlertSummary,
-  AlertExecutionStatusValues as RuleExecutionStatusValues,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
+  RuleExecutionStatusValues,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   ResolvedSanitizedRule,
-  AlertWithLegacyId as RuleWithLegacyId,
+  RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
-  PartialAlertWithLegacyId as PartialRuleWithLegacyId,
+  PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -406,7 +406,7 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -1204,7 +1204,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({

@@ -10,15 +10,15 @@
 
 import { AlertsHealth } from './alert';
 
-export * from './alert';
+export * from './rule';
 export * from './rule_type';
-export * from './alert_instance';
 export * from './rule_task_instance';
-export * from './alert_navigation';
+export * from './rule_navigation';
+export * from './alert_instance';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './disabled_action_groups';
-export * from './alert_notify_when_type';
+export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
 

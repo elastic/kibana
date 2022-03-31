@@ -14,7 +14,7 @@ import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
-import { Alert as CreatedAlert, createAlertFactory } from '../alert';
+import { Alert, createAlertFactory } from '../alert';
 import {
   createWrappedScopedClusterClientFactory,
   ElasticsearchError,
@@ -26,9 +26,9 @@ import {
   validateRuleTypeParams,
 } from '../lib';
 import {
-  Alert,
-  AlertExecutionStatus,
-  AlertExecutionStatusErrorReasons,
+  Rule,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
   IntervalSchedule,
   RawAlertInstance,
   RawRule,
@@ -39,7 +39,7 @@ import {
   RuleMonitoringHistory,
   RuleTaskState,
   RuleTypeRegistry,
-  SanitizedAlert,
+  SanitizedRule,
 } from '../types';
 import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
@@ -51,8 +51,8 @@ import { partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
@@ -91,9 +91,9 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
 });
 
 export class TaskRunner<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -201,7 +201,7 @@ export class TaskRunner<
     spaceId: string,
     apiKey: RawRule['apiKey'],
     kibanaBaseUrl: string | undefined,
-    actions: Alert<Params>['actions'],
+    actions: Rule<Params>['actions'],
     ruleParams: Params,
     request: KibanaRequest
   ) {
@@ -252,7 +252,7 @@ export class TaskRunner<
     }
   }
 
-  private isRuleSnoozed(rule: SanitizedAlert<Params>): boolean {
+  private isRuleSnoozed(rule: SanitizedRule<Params>): boolean {
     if (rule.muteAll) {
       return true;
     }
@@ -288,7 +288,7 @@ export class TaskRunner<
 
   private async executeAlert(
     alertId: string,
-    alert: CreatedAlert<InstanceState, InstanceContext>,
+    alert: Alert<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     alertExecutionStore: AlertExecutionStore
   ) {
@@ -312,7 +312,7 @@ export class TaskRunner<
 
   private async executeAlerts(
     fakeRequest: KibanaRequest,
-    rule: SanitizedAlert<Params>,
+    rule: SanitizedRule<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
@@ -343,10 +343,10 @@ export class TaskRunner<
 
     const alerts = mapValues<
       Record<string, RawAlertInstance>,
-      CreatedAlert<InstanceState, InstanceContext>
+      Alert<InstanceState, InstanceContext>
     >(
       alertRawInstances,
-      (rawAlert, alertId) => new CreatedAlert<InstanceState, InstanceContext>(alertId, rawAlert)
+      (rawAlert, alertId) => new Alert<InstanceState, InstanceContext>(alertId, rawAlert)
     );
 
     const originalAlerts = cloneDeep(alerts);
@@ -439,7 +439,7 @@ export class TaskRunner<
       event.event = event.event || {};
       event.event.outcome = 'failure';
 
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
     }
 
     event.message = `rule executed: ${ruleLabel}`;
@@ -455,7 +455,7 @@ export class TaskRunner<
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
       alerts,
-      (alert: CreatedAlert<InstanceState, InstanceContext>) => alert.hasScheduledActions()
+      (alert: Alert<InstanceState, InstanceContext>) => alert.hasScheduledActions()
     );
 
     const recoveredAlerts = getRecoveredAlerts(alerts, originalAlertIds);
@@ -501,7 +501,7 @@ export class TaskRunner<
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
       const alertsWithExecutableActions = Object.entries(alertsWithScheduledActions).filter(
-        ([alertName, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) => {
+        ([alertName, alert]: [string, Alert<InstanceState, InstanceContext>]) => {
           const throttled = alert.isThrottled(throttle);
           const muted = mutedAlertIdsSet.has(alertName);
           let shouldExecuteAction = true;
@@ -529,7 +529,7 @@ export class TaskRunner<
 
       await Promise.all(
         alertsWithExecutableActions.map(
-          ([alertId, alert]: [string, CreatedAlert<InstanceState, InstanceContext>]) =>
+          ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) =>
             this.executeAlert(alertId, alert, executionHandler, alertExecutionStore)
         )
       );
@@ -569,7 +569,7 @@ export class TaskRunner<
       alertExecutionStore,
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
-        Record<string, CreatedAlert<InstanceState, InstanceContext>>,
+        Record<string, Alert<InstanceState, InstanceContext>>,
         RawAlertInstance
       >(alertsWithScheduledActions, (alert) => alert.toRaw()),
     };
@@ -578,7 +578,7 @@ export class TaskRunner<
   private async validateAndExecuteRule(
     fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
-    rule: SanitizedAlert<Params>,
+    rule: SanitizedRule<Params>,
     event: Event
   ) {
     const {
@@ -616,14 +616,14 @@ export class TaskRunner<
       enabled = decryptedAttributes.enabled;
       consumer = decryptedAttributes.consumer;
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
     }
 
     this.ruleConsumer = consumer;
 
     if (!enabled) {
       throw new ErrorWithReason(
-        AlertExecutionStatusErrorReasons.Disabled,
+        RuleExecutionStatusErrorReasons.Disabled,
         new Error(`Rule failed to execute because rule ran after it was disabled.`)
       );
     }
@@ -633,7 +633,7 @@ export class TaskRunner<
     // Get rules client with space level permissions
     const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
 
-    let rule: SanitizedAlert<Params>;
+    let rule: SanitizedRule<Params>;
 
     // Ensure API key is still valid and user has access
     try {
@@ -650,7 +650,7 @@ export class TaskRunner<
         });
       }
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, err);
     }
 
     this.ruleName = rule.name;
@@ -658,7 +658,7 @@ export class TaskRunner<
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
     }
 
     if (rule.monitoring) {
@@ -759,7 +759,7 @@ export class TaskRunner<
         return getDefaultRuleMonitoring();
       }) ?? getDefaultRuleMonitoring();
 
-    const executionStatus = map<RuleExecutionState, ElasticsearchError, AlertExecutionStatus>(
+    const executionStatus = map<RuleExecutionState, ElasticsearchError, RuleExecutionStatus>(
       state,
       (ruleExecutionState) => executionStatusFromState(ruleExecutionState),
       (err: ElasticsearchError) => executionStatusFromError(err)
@@ -991,11 +991,11 @@ export class TaskRunner<
     this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
 
     // Update the rule saved object with execution status
-    const executionStatus: AlertExecutionStatus = {
+    const executionStatus: RuleExecutionStatus = {
       lastExecutionDate: new Date(),
       status: 'error',
       error: {
-        reason: AlertExecutionStatusErrorReasons.Timeout,
+        reason: RuleExecutionStatusErrorReasons.Timeout,
         message: `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
       },
     };

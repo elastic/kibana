@@ -23,23 +23,23 @@ import {
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
 import {
-  Alert,
-  AlertActionParams,
+  Rule,
+  RuleTypeParams,
+  RuleTypeState,
+  RuleActionParams,
+  RuleExecutionStatuses,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
+  RuleNotifyWhenType,
   ActionGroup,
-  AlertTypeParams,
-  AlertTypeState,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertExecutionStatuses,
-  AlertExecutionStatusErrorReasons,
   AlertsHealth,
-  AlertNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
-  AlertExecutionStatusWarningReasons,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { RuleTypeConfig } from './config';
@@ -68,7 +68,7 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
-export interface AlertServices<
+export interface RuleExecutorServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
@@ -84,9 +84,9 @@ export interface AlertServices<
   shouldStopExecution: () => boolean;
 }
 
-export interface AlertExecutorOptions<
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+export interface RuleExecutorOptions<
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
@@ -95,7 +95,7 @@ export interface AlertExecutorOptions<
   executionId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
   params: Params;
   state: State;
   rule: SanitizedRuleConfig;
@@ -107,29 +107,29 @@ export interface AlertExecutorOptions<
   updatedBy: string | null;
 }
 
-export interface RuleParamsAndRefs<Params extends AlertTypeParams> {
+export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
   references: SavedObjectReference[];
   params: Params;
 }
 
 export type ExecutorType<
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
 > = (
-  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+  options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
 ) => Promise<State | void>;
 
-export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
+export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
 }
 
 export interface RuleType<
-  Params extends AlertTypeParams = never,
-  ExtractedParams extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  ExtractedParams extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
@@ -138,7 +138,7 @@ export interface RuleType<
   id: string;
   name: string;
   validate?: {
-    params?: AlertTypeParamsValidator<Params>;
+    params?: RuleTypeParamsValidator<Params>;
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
@@ -173,57 +173,57 @@ export interface RuleType<
   config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
 >;
 
-export interface RawAlertAction extends SavedObjectAttributes {
+export interface RawRuleAction extends SavedObjectAttributes {
   group: string;
   actionRef: string;
   actionTypeId: string;
-  params: AlertActionParams;
+  params: RuleActionParams;
 }
 
-export interface AlertMeta extends SavedObjectAttributes {
+export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
 }
 
 // note that the `error` property is "null-able", as we're doing a partial
-// update on the alert when we update this data, but need to ensure we
+// update on the rule when we update this data, but need to ensure we
 // delete any previous error if the current status has no error
 export interface RawRuleExecutionStatus extends SavedObjectAttributes {
-  status: AlertExecutionStatuses;
+  status: RuleExecutionStatuses;
   lastExecutionDate: string;
   lastDuration?: number;
   error: null | {
-    reason: AlertExecutionStatusErrorReasons;
+    reason: RuleExecutionStatusErrorReasons;
     message: string;
   };
   warning: null | {
-    reason: AlertExecutionStatusWarningReasons;
+    reason: RuleExecutionStatusWarningReasons;
     message: string;
   };
 }
 
-export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
-  Partial<Omit<Alert<Params>, 'id'>>;
+export type PartialRule<Params extends RuleTypeParams = never> = Pick<Rule<Params>, 'id'> &
+  Partial<Omit<Rule<Params>, 'id'>>;
 
-export interface AlertWithLegacyId<Params extends AlertTypeParams = never> extends Alert<Params> {
+export interface RuleWithLegacyId<Params extends RuleTypeParams = never> extends Rule<Params> {
   legacyId: string | null;
 }
 
-export type SanitizedRuleWithLegacyId<Params extends AlertTypeParams = never> = Omit<
-  AlertWithLegacyId<Params>,
+export type SanitizedRuleWithLegacyId<Params extends RuleTypeParams = never> = Omit<
+  RuleWithLegacyId<Params>,
   'apiKey'
 >;
 
-export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = Pick<
-  AlertWithLegacyId<Params>,
+export type PartialRuleWithLegacyId<Params extends RuleTypeParams = never> = Pick<
+  RuleWithLegacyId<Params>,
   'id'
 > &
-  Partial<Omit<AlertWithLegacyId<Params>, 'id'>>;
+  Partial<Omit<RuleWithLegacyId<Params>, 'id'>>;
 
 export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
@@ -233,7 +233,7 @@ export interface RawRule extends SavedObjectAttributes {
   consumer: string;
   legacyId: string | null;
   schedule: SavedObjectAttributes;
-  actions: RawAlertAction[];
+  actions: RawRuleAction[];
   params: SavedObjectAttributes;
   mapped_params?: MappedParams;
   scheduledTaskId?: string | null;
@@ -244,27 +244,14 @@ export interface RawRule extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyWhen: AlertNotifyWhenType | null;
+  notifyWhen: RuleNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
-  meta?: AlertMeta;
+  meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
 }
-
-export type AlertInfoParams = Pick<
-  RawRule,
-  | 'params'
-  | 'throttle'
-  | 'notifyWhen'
-  | 'muteAll'
-  | 'mutedInstanceIds'
-  | 'name'
-  | 'tags'
-  | 'createdBy'
-  | 'updatedBy'
->;
 
 export interface AlertingPlugin {
   setup: PluginSetupContract;

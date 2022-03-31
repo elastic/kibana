@@ -29,7 +29,7 @@ import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
-interface AlertAction {
+interface RuleAction {
   group: string;
   id: string;
   actionTypeId: string;
@@ -42,7 +42,7 @@ jest.mock('../../../triggers_actions_ui/public/application/lib/action_connector_
 }));
 
 jest.mock('../../../triggers_actions_ui/public/application/lib/rule_api', () => ({
-  loadAlertTypes: jest.fn(),
+  loadRuleTypes: jest.fn(),
 }));
 
 const initLegacyShims = () => {
@@ -234,7 +234,7 @@ describe('alert_form', () => {
                 setActionIdByIndex={(id: string, index: number) => {
                   initialAlert.actions[index].id = id;
                 }}
-                setActions={(_updatedActions: AlertAction[]) => {}}
+                setActions={(_updatedActions: RuleAction[]) => {}}
                 setActionParamsProperty={(key: string, value: any, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }

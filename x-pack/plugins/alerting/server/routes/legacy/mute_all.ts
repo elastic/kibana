@@ -11,7 +11,7 @@ import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
@@ -42,7 +42,7 @@ export const muteAllAlertRoute = (
         await rulesClient.muteAll({ id });
         return res.noContent();
       } catch (e) {
-        if (e instanceof AlertTypeDisabledError) {
+        if (e instanceof RuleTypeDisabledError) {
           return e.sendResponse(res);
         }
         throw e;

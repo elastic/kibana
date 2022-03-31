@@ -12,8 +12,8 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Alert } from '../../../common/alert';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { Rule } from '../../../common/alert';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
@@ -57,7 +57,7 @@ describe('createAlertRoute', () => {
     ],
   };
 
-  const createResult: Alert<{ bar: boolean }> = {
+  const createResult: Rule<{ bar: boolean }> = {
     ...mockedAlert,
     enabled: true,
     muteAll: false,
@@ -436,7 +436,7 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.create.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok', 'forbidden']);
 
