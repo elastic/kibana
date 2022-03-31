@@ -149,6 +149,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
       confirmButtonText={i18n.translate('xpack.fleet.newEnrollmentKey.submitButton', {
         defaultMessage: 'Create enrollment token',
       })}
+      confirmButtonDisabled={!form.policyIdInput.value}
     >
       {body}
     </EuiConfirmModal>
