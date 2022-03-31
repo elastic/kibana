@@ -21,7 +21,7 @@ import { IterableInput, AsyncMapFn } from './types';
  * @param fn Function to call for each item
  */
 export async function asyncForEach<T>(iterable: IterableInput<T>, fn: AsyncMapFn<T, any>) {
-  await lastValueFrom(mapWithLimit$(iterable, Infinity, fn).pipe(defaultIfEmpty()));
+  await lastValueFrom(mapWithLimit$(iterable, Infinity, fn).pipe(defaultIfEmpty(undefined)));
 }
 
 /**
@@ -40,5 +40,5 @@ export async function asyncForEachWithLimit<T>(
   limit: number,
   fn: AsyncMapFn<T, any>
 ) {
-  await lastValueFrom(mapWithLimit$(iterable, limit, fn).pipe(defaultIfEmpty()));
+  await lastValueFrom(mapWithLimit$(iterable, limit, fn).pipe(defaultIfEmpty(undefined)));
 }
