@@ -7,9 +7,8 @@
 
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { SignalSourceHit } from '../../../signals/types';
-import { RACAlert } from '../../types';
 
-export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
+export const filterSource = (doc: SignalSourceHit) => {
   const docSource = doc._source ?? {};
   const {
     event,

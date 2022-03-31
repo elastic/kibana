@@ -29,7 +29,7 @@ import {
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { RACAlert } from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
+import { DetectionAlert } from '../../../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // query for the signals with the superuser
           // to allow a check that the signals were NOT closed with t1 analyst
-          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(setSignalStatus({ signalIds, status: 'closed' }))
             .expect(200);
 
-          const { body: signalsClosed }: { body: estypes.SearchResponse<RACAlert> } =
+          const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
             await supertest
               .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
               .set('kbn-xsrf', 'true')
