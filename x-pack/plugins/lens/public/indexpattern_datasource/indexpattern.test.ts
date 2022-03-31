@@ -294,7 +294,6 @@ describe('IndexPattern Data Source', () => {
           },
         },
         savedObjectReferences: [
-          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -2705,14 +2704,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const currentIndexPatternReference = {
-      id: 'some-id',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    };
-
     const references1: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -2721,7 +2713,6 @@ describe('IndexPattern Data Source', () => {
     ];
 
     const references2: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

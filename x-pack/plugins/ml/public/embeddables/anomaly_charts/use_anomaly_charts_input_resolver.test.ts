@@ -40,6 +40,12 @@ describe('useAnomalyChartsInputResolver', () => {
   const start = moment().subtract(1, 'years');
   const end = moment();
 
+  const renderCallbacks = {
+    onRenderComplete: jest.fn(),
+    onLoading: jest.fn(),
+    onError: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.useFakeTimers();
 
@@ -116,20 +122,26 @@ describe('useAnomalyChartsInputResolver', () => {
         refresh,
         services,
         1000,
-        0
+        0,
+        renderCallbacks
       )
     );
 
     expect(result.current.chartsData).toBe(undefined);
     expect(result.current.error).toBe(undefined);
     expect(result.current.isLoading).toBe(true);
+    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(0);
 
     jest.advanceTimersByTime(501);
+
+    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
 
     const explorerServices = services[2];
 
     expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
     expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(1);
+
+    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(1);
 
     embeddableInput.next({
       id: 'test-explorer-charts-embeddable',
@@ -144,8 +156,14 @@ describe('useAnomalyChartsInputResolver', () => {
     });
     jest.advanceTimersByTime(501);
 
+    expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(2);
+
     expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
     expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(2);
+
+    expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(2);
+
+    expect(renderCallbacks.onError).toHaveBeenCalledTimes(0);
   });
 
   test.skip('should not complete the observable on error', async () => {
@@ -156,7 +174,8 @@ describe('useAnomalyChartsInputResolver', () => {
         refresh,
         services,
         1000,
-        1
+        1,
+        renderCallbacks
       )
     );
 
@@ -168,5 +187,6 @@ describe('useAnomalyChartsInputResolver', () => {
     } as Partial<AnomalyChartsEmbeddableInput>);
 
     expect(result.current.error).toBeDefined();
+    expect(renderCallbacks.onError).toHaveBeenCalledTimes(1);
   });
 });
