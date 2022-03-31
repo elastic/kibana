@@ -64,11 +64,7 @@ export const Page: FC = () => {
 
       <NodeAvailableWarning />
 
-      <SavedObjectsWarning
-        jobType="data-frame-analytics"
-        onCloseFlyout={refresh}
-        forceRefresh={isLoading}
-      />
+      <SavedObjectsWarning onCloseFlyout={refresh} forceRefresh={isLoading} />
       <UpgradeWarning />
 
       {selectedTabId === 'map' && (mapJobId || mapModelId) && (

@@ -60,3 +60,46 @@ it('prints the whole interface, including comments', async () => {
     "
   `);
 });
+
+it(`handles export-type'd interfaces`, async () => {
+  const result = await run(
+    `
+      export type { Foo } from './foo'
+    `,
+    {
+      otherFiles: {
+        ['foo.ts']: `
+          export interface Foo {
+            name: string
+          }
+        `,
+      },
+    }
+  );
+
+  expect(result.code).toMatchInlineSnapshot(`
+    "export interface Foo {
+        name: string;
+    }
+    //# sourceMappingURL=index.d.ts.map"
+  `);
+  expect(result.map).toMatchInlineSnapshot(`
+    Object {
+      "file": "index.d.ts",
+      "mappings": "iBAAiB,G",
+      "names": Array [],
+      "sourceRoot": "../../../src",
+      "sources": Array [
+        "foo.ts",
+      ],
+      "version": 3,
+    }
+  `);
+  expect(result.logs).toMatchInlineSnapshot(`
+    "debug loaded sourcemaps for [
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+    ]
+    "
+  `);
+});

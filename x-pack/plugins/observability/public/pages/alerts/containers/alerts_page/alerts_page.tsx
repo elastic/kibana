@@ -44,6 +44,7 @@ interface RuleStatsState {
   disabled: number;
   muted: number;
   error: number;
+  snoozed: number;
 }
 
 export interface TopAlert {
@@ -90,6 +91,7 @@ function AlertsPage() {
     disabled: 0,
     muted: 0,
     error: 0,
+    snoozed: 0,
   });
 
   useEffect(() => {
@@ -111,18 +113,21 @@ function AlertsPage() {
       const response = await loadRuleAggregations({
         http,
       });
-      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
-      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
+        response;
+      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus && ruleSnoozedStatus) {
         const total = Object.values(ruleExecutionStatus).reduce((acc, value) => acc + value, 0);
         const { disabled } = ruleEnabledStatus;
         const { muted } = ruleMutedStatus;
         const { error } = ruleExecutionStatus;
+        const { snoozed } = ruleSnoozedStatus;
         setRuleStats({
           ...ruleStats,
           total,
           disabled,
           muted,
           error,
+          snoozed,
         });
       }
       setRuleStatsLoading(false);
@@ -142,7 +147,7 @@ function AlertsPage() {
   }, []);
 
   const manageRulesHref = config.unsafe.rules.enabled
-    ? http.basePath.prepend('/app/observability/rules')
+    ? http.basePath.prepend('/app/observability/alerts/rules')
     : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
@@ -263,9 +268,9 @@ function AlertsPage() {
             data-test-subj="statDisabled"
           />,
           <EuiStat
-            title={ruleStats.muted}
+            title={ruleStats.muted + ruleStats.snoozed}
             description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
-              defaultMessage: 'Muted',
+              defaultMessage: 'Snoozed',
             })}
             color="primary"
             titleSize="xs"

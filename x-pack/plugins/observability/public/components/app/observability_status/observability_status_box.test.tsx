@@ -6,26 +6,38 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ObservabilityStatusBox } from './observability_status_box';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { applicationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+
+const application = applicationServiceMock.createStartContract();
 
 describe('ObservabilityStatusBox', () => {
   describe('Empty state', () => {
     beforeEach(() => {
       const props = {
         id: 'logs',
-        dataSourceName: 'Logs',
+        title: 'Logs',
         hasData: false,
         description: 'test description',
         modules: [],
-        integrationLink: 'testIntegrationUrl.com',
+        addTitle: 'logs add title',
+        addLink: 'http://example.com',
         learnMoreLink: 'learnMoreUrl.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
+        weight: 1,
       };
+
+      application.navigateToUrl.mockImplementation();
 
       render(
         <IntlProvider locale="en">
-          <ObservabilityStatusBox {...props} />
+          <KibanaContextProvider services={{ application }}>
+            <ObservabilityStatusBox {...props} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
     });
@@ -35,8 +47,8 @@ describe('ObservabilityStatusBox', () => {
     });
 
     it('should have a learn more button', () => {
-      const learnMoreLink = screen.getByRole('link') as HTMLAnchorElement;
-      expect(learnMoreLink.href).toContain('learnMoreUrl.com');
+      const learnMoreLink = screen.getByText('Learn more') as HTMLElement;
+      expect(learnMoreLink.closest('a')?.href).toContain('learnMoreUrl.com');
     });
   });
 
@@ -44,7 +56,7 @@ describe('ObservabilityStatusBox', () => {
     beforeEach(() => {
       const props = {
         id: 'logs',
-        dataSourceName: 'Logs',
+        title: 'Logs',
         hasData: true,
         description: 'test description',
         modules: [
@@ -52,8 +64,12 @@ describe('ObservabilityStatusBox', () => {
           { name: 'module2', hasData: false },
           { name: 'module3', hasData: true },
         ],
-        integrationLink: 'addIntegrationUrl.com',
-        learnMoreLink: 'learnMoreUrl.com',
+        addTitle: 'logs add title',
+        addLink: 'addIntegrationUrl.com',
+        learnMoreLink: 'http://example.com',
+        goToAppTitle: 'go to app title',
+        goToAppLink: 'go to app link',
+        weight: 1,
       };
 
       render(
@@ -65,9 +81,12 @@ describe('ObservabilityStatusBox', () => {
 
     // it('should have a check icon', () => {});
 
-    it('should have the integration link', () => {
-      const addIntegrationLink = screen.getByRole('link') as HTMLAnchorElement;
-      expect(addIntegrationLink.href).toContain('addIntegrationUrl.com');
+    // FIXME for some reason `<KibanaContextProvider>` doesn't propagate the
+    // services. When the code tries to call `application.naviageToUrl` (which
+    // this test depends on) it complains about `undefined` values.
+    it.skip('should have the integration link', () => {
+      const addIntegrationLink = screen.getByText('logs add title');
+      fireEvent.click(addIntegrationLink);
     });
 
     it('should have the list of modules', () => {

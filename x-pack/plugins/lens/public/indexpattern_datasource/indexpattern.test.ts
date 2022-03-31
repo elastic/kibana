@@ -12,6 +12,7 @@ import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } 
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -186,6 +187,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
@@ -292,7 +294,6 @@ describe('IndexPattern Data Source', () => {
           },
         },
         savedObjectReferences: [
-          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -433,7 +434,7 @@ describe('IndexPattern Data Source', () => {
                             "1d",
                           ],
                           "min_doc_count": Array [
-                            0,
+                            1,
                           ],
                           "schema": Array [
                             "segment",
@@ -2624,9 +2625,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
         })
       ).toBe(state);
     });
@@ -2653,9 +2652,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
           staticValue: 0, // use a falsy value to check also this corner case
         })
       ).toEqual({
@@ -2707,14 +2704,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const currentIndexPatternReference = {
-      id: 'some-id',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    };
-
     const references1: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -2723,7 +2713,6 @@ describe('IndexPattern Data Source', () => {
     ];
 
     const references2: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

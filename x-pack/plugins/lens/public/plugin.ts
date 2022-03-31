@@ -16,7 +16,12 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public';
+import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type {
@@ -32,6 +37,7 @@ import type { NavigationPublicPluginStart } from '../../../../src/plugins/naviga
 import type { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import type { EventAnnotationPluginSetup } from '../../../../src/plugins/event_annotation/public';
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
@@ -78,6 +84,7 @@ import type {
   LensTopNavMenuEntryGenerator,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
@@ -103,6 +110,7 @@ export interface LensPluginSetupDependencies {
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  eventAnnotation: EventAnnotationPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
   discover?: DiscoverSetup;
@@ -110,6 +118,7 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
@@ -118,6 +127,7 @@ export interface LensPluginStartDependencies {
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
+  eventAnnotation: EventAnnotationPluginSetup;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -233,6 +243,7 @@ export class LensPlugin {
       embeddable,
       visualizations,
       charts,
+      eventAnnotation,
       globalSearch,
       usageCollection,
     }: LensPluginSetupDependencies
@@ -249,9 +260,11 @@ export class LensPlugin {
         charts,
         expressions,
         fieldFormats,
-        plugins.fieldFormats.deserialize
+        plugins.fieldFormats.deserialize,
+        eventAnnotation
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
+      const datasourceMap = await this.editorFrameService!.loadDatasources();
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
@@ -262,7 +275,8 @@ export class LensPlugin {
         documentToExpression: this.editorFrameService!.documentToExpression,
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
-        indexPatternService: plugins.data.indexPatterns,
+        datasourceMap,
+        indexPatternService: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
@@ -292,7 +306,7 @@ export class LensPlugin {
     const ensureDefaultDataView = () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      startServices().plugins.data.indexPatterns.ensureDefaultDataView();
+      startServices().plugins.dataViews.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -309,7 +323,8 @@ export class LensPlugin {
             charts,
             expressions,
             fieldFormats,
-            deps.fieldFormats.deserialize
+            deps.fieldFormats.deserialize,
+            eventAnnotation
           ),
           ensureDefaultDataView(),
         ]);
@@ -366,7 +381,8 @@ export class LensPlugin {
     charts: ChartsPluginSetup,
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
-    formatFactory: FormatFactory
+    formatFactory: FormatFactory,
+    eventAnnotation: EventAnnotationPluginSetup
   ) {
     const {
       DatatableVisualization,
@@ -400,6 +416,7 @@ export class LensPlugin {
       charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
+      eventAnnotation,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
@@ -428,6 +445,14 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_EDITOR_TRIGGER,
       visualizeTSVBAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      createOpenInDiscoverAction(
+        startDependencies.discover!,
+        core.application.capabilities.discover.show as boolean
+      )
     );
 
     return {

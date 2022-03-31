@@ -34,6 +34,7 @@ import { DocTableInfinite } from '../../../../components/doc_table/doc_table_inf
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
+import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -156,30 +157,33 @@ function DiscoverDocumentsComponent({
       )}
       {!isLegacy && (
         <div className="dscDiscoverGrid">
-          <DataGridMemoized
-            ariaLabelledBy="documentsAriaLabel"
-            columns={columns}
-            expandedDoc={expandedDoc}
-            indexPattern={indexPattern}
-            isLoading={isLoading}
-            rows={rows}
-            sort={(state.sort as SortPairArr[]) || []}
-            sampleSize={sampleSize}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
-            setExpandedDoc={setExpandedDoc}
-            showTimeCol={showTimeCol}
-            settings={state.grid}
-            onAddColumn={onAddColumn}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onRemoveColumn={onRemoveColumn}
-            onSetColumns={onSetColumns}
-            onSort={onSort}
-            onResize={onResize}
-            useNewFieldsApi={useNewFieldsApi}
-            rowHeightState={state.rowHeight}
-            onUpdateRowHeight={onUpdateRowHeight}
-          />
+          <>
+            <DocumentExplorerUpdateCallout />
+            <DataGridMemoized
+              ariaLabelledBy="documentsAriaLabel"
+              columns={columns}
+              expandedDoc={expandedDoc}
+              indexPattern={indexPattern}
+              isLoading={isLoading}
+              rows={rows}
+              sort={(state.sort as SortPairArr[]) || []}
+              sampleSize={sampleSize}
+              searchDescription={savedSearch.description}
+              searchTitle={savedSearch.title}
+              setExpandedDoc={setExpandedDoc}
+              showTimeCol={showTimeCol}
+              settings={state.grid}
+              onAddColumn={onAddColumn}
+              onFilter={onAddFilter as DocViewFilterFn}
+              onRemoveColumn={onRemoveColumn}
+              onSetColumns={onSetColumns}
+              onSort={onSort}
+              onResize={onResize}
+              useNewFieldsApi={useNewFieldsApi}
+              rowHeightState={state.rowHeight}
+              onUpdateRowHeight={onUpdateRowHeight}
+            />
+          </>
         </div>
       )}
     </EuiFlexItem>

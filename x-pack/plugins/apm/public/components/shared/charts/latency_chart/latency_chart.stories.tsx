@@ -69,7 +69,7 @@ const stories: Meta<Args> = {
       return (
         <MemoryRouter
           initialEntries={[
-            `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&comparisonType=day`,
+            `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&offset=1d`,
           ]}
         >
           <MockApmPluginContextWrapper value={apmPluginContextMock}>

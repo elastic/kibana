@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+export interface AlertStatusEventEntityIdMap {
+  [alertUuid: string]: {
+    status: string;
+    processEntityId: string;
+  };
+}
+
 export const enum EventKind {
   event = 'event',
   signal = 'signal',
@@ -18,6 +25,11 @@ export const enum EventAction {
 }
 
 export interface User {
+  id: string;
+  name: string;
+}
+
+export interface Group {
   id: string;
   name: string;
 }
@@ -43,8 +55,6 @@ export interface EntryMeta {
 }
 
 export interface Teletype {
-  descriptor: number;
-  type: string;
   char_device: {
     major: number;
     minor: number;
@@ -64,12 +74,13 @@ export interface ProcessFields {
   start: string;
   end?: string;
   user: User;
+  group: Group;
   exit_code?: number;
   entry_meta?: EntryMeta;
   tty: Teletype;
 }
 
-export interface ProcessSelf extends Omit<ProcessFields, 'user'> {
+export interface ProcessSelf extends ProcessFields {
   parent: ProcessFields;
   session_leader: ProcessFields;
   entry_leader: ProcessFields;
@@ -125,6 +136,7 @@ export interface ProcessEvent {
     action: EventAction;
   };
   user: User;
+  group: Group;
   host: ProcessEventHost;
   process: ProcessSelf;
   kibana?: {
@@ -140,16 +152,19 @@ export interface ProcessEventsPage {
 export interface Process {
   id: string; // the process entity_id
   events: ProcessEvent[];
+  alerts: ProcessEvent[];
   children: Process[];
   orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
   searchMatched: string | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
+  addAlert(alert: ProcessEvent): void;
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
   getAlerts(): ProcessEvent[];
+  updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap): void;
   hasExec(): boolean;
   getOutput(): string;
   getDetails(): ProcessEvent;

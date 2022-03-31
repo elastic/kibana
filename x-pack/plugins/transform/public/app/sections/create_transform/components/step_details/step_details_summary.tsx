@@ -16,7 +16,7 @@ import { StepDetailsExposedState } from './common';
 export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
   const {
     continuousModeDateField,
-    createIndexPattern,
+    createDataView,
     isContinuousModeEnabled,
     isRetentionPolicyEnabled,
     retentionPolicyDateField,
@@ -28,14 +28,14 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
     destinationIndex,
     destinationIngestPipeline,
     touched,
-    indexPatternTimeField,
+    dataViewTimeField,
   } = props;
 
   if (touched === false) {
     return null;
   }
 
-  const destinationIndexHelpText = createIndexPattern
+  const destinationIndexHelpText = createDataView
     ? i18n.translate('xpack.transform.stepDetailsSummary.createDataViewMessage', {
         defaultMessage: 'A Kibana data view will be created for this transform.',
       })
@@ -69,13 +69,13 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
       >
         <span>{destinationIndex}</span>
       </EuiFormRow>
-      {createIndexPattern && indexPatternTimeField !== undefined && indexPatternTimeField !== '' && (
+      {createDataView && dataViewTimeField !== undefined && dataViewTimeField !== '' && (
         <EuiFormRow
           label={i18n.translate('xpack.transform.stepDetailsSummary.dataViewTimeFieldLabel', {
             defaultMessage: 'Kibana data view time field',
           })}
         >
-          <span>{indexPatternTimeField}</span>
+          <span>{dataViewTimeField}</span>
         </EuiFormRow>
       )}
 

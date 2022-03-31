@@ -99,7 +99,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
-    const { connectors } = useConnectors({ toastPermissionsErrors: false });
+    const { connectors } = useConnectors();
 
     const sorting = useMemo(
       () => ({
@@ -260,6 +260,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}
+          displayCreateCaseButton={isSelectorView}
+          onCreateCasePressed={onRowClick}
         />
         <CasesTable
           columns={columns}

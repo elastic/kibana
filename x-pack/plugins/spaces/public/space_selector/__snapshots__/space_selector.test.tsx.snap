@@ -1,66 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without crashing 1`] = `
-<EuiPage
+<KibanaPageTemplate
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
+  pageContentBodyProps={
+    Object {
+      "className": "spcSpaceSelector__pageContent",
+    }
+  }
+  template="empty"
 >
-  <EuiPageBody>
-    <EuiPageHeader
-      className="spcSpaceSelector__heading"
+  <EuiText
+    size="s"
+    textAlign="center"
+  >
+    <EuiSpacer
+      size="xxl"
+    />
+    <ForwardRef
+      name="Elastic"
+      size="xl"
+    />
+    <EuiSpacer
+      size="xxl"
+    />
+    <h1
+      className="eui spcSpaceSelector__pageHeader"
+      tabIndex={0}
     >
-      <EuiSpacer
-        size="xxl"
+      <FormattedMessage
+        defaultMessage="Select your space"
+        id="xpack.spaces.spaceSelector.selectSpacesTitle"
+        values={Object {}}
       />
-      <span
-        className="spcSpaceSelector__logo"
-      >
-        <EuiIcon
-          size="xxl"
-          type="logoElastic"
+    </h1>
+    <EuiTextColor
+      color="subdued"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="You can change your space at anytime."
+          id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+          values={Object {}}
         />
-      </span>
-      <EuiTitle
-        size="l"
-      >
-        <h1
-          tabIndex={0}
-        >
-          <FormattedMessage
-            defaultMessage="Select your space"
-            id="xpack.spaces.spaceSelector.selectSpacesTitle"
-            values={Object {}}
-          />
-        </h1>
-      </EuiTitle>
-      <EuiText
-        color="subdued"
-        size="s"
-      >
-        <p>
-          <FormattedMessage
-            defaultMessage="You can change your space at anytime"
-            id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-            values={Object {}}
-          />
-        </p>
-      </EuiText>
-    </EuiPageHeader>
-    <EuiPageContent
-      className="spcSpaceSelector__pageContent"
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        direction="column"
-        responsive={false}
-      />
-      <EuiSpacer
-        size="xl"
-      />
-      <EuiLoadingSpinner
-        size="xl"
-      />
-    </EuiPageContent>
-  </EuiPageBody>
-</EuiPage>
+      </p>
+    </EuiTextColor>
+  </EuiText>
+  <EuiSpacer
+    size="xxl"
+  />
+  <EuiSpacer
+    size="xl"
+  />
+  <EuiLoadingSpinner
+    size="xl"
+  />
+</KibanaPageTemplate>
 `;

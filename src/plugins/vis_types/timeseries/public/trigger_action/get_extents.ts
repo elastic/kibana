@@ -57,7 +57,7 @@ export const getYExtents = (model: Panel) => {
 
   model.series.forEach((s) => {
     if (s.axis_position === 'left') {
-      if (s.chart_type !== 'line' || (s.chart_type === 'line' && s.fill !== '0')) {
+      if (s.chart_type !== 'line' || (s.chart_type === 'line' && Number(s.fill) > 0)) {
         hasBarOrAreaLeft = true;
       }
       if (s.separate_axis) {
@@ -68,7 +68,7 @@ export const getYExtents = (model: Panel) => {
       }
     }
     if (s.axis_position === 'right' && s.separate_axis) {
-      if (s.chart_type !== 'line' || (s.chart_type === 'line' && s.fill !== '0')) {
+      if (s.chart_type !== 'line' || (s.chart_type === 'line' && Number(s.fill) > 0)) {
         hasBarOrAreaRight = true;
       }
       if (s.separate_axis) {

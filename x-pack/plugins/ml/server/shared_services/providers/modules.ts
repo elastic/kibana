@@ -38,14 +38,14 @@ export function getModulesProvider(
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
               const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
                 dataViewsService,
-                jobSavedObjectService,
+                mlSavedObjectService,
                 request
               );
               return dr.findMatches(...args);
@@ -55,14 +55,14 @@ export function getModulesProvider(
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
               const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
                 dataViewsService,
-                jobSavedObjectService,
+                mlSavedObjectService,
                 request
               );
               return dr.getModule(moduleId);
@@ -72,14 +72,14 @@ export function getModulesProvider(
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
               const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
                 dataViewsService,
-                jobSavedObjectService,
+                mlSavedObjectService,
                 request
               );
               return dr.listModules();
@@ -89,14 +89,14 @@ export function getModulesProvider(
           return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canCreateJob'])
-            .ok(async ({ scopedClient, mlClient, jobSavedObjectService, getDataViewsService }) => {
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService, getDataViewsService }) => {
               const dataViewsService = await getDataViewsService();
               const dr = dataRecognizerFactory(
                 scopedClient,
                 mlClient,
                 savedObjectsClient,
                 dataViewsService,
-                jobSavedObjectService,
+                mlSavedObjectService,
                 request
               );
               return dr.setup(

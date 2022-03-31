@@ -10,46 +10,15 @@ import { EuiConfirmModal, EuiFormRow, EuiRange } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { AGG_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-
-function resolutionToSliderValue(resolution: GRID_RESOLUTION) {
-  if (resolution === GRID_RESOLUTION.SUPER_FINE) {
-    return 4;
-  }
-
-  if (resolution === GRID_RESOLUTION.MOST_FINE) {
-    return 3;
-  }
-
-  if (resolution === GRID_RESOLUTION.FINE) {
-    return 2;
-  }
-
-  return 1;
-}
-
-function sliderValueToResolution(value: number) {
-  if (value === 4) {
-    return GRID_RESOLUTION.SUPER_FINE;
-  }
-
-  if (value === 3) {
-    return GRID_RESOLUTION.MOST_FINE;
-  }
-
-  if (value === 2) {
-    return GRID_RESOLUTION.FINE;
-  }
-
-  return GRID_RESOLUTION.COARSE;
-}
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { isMvt } from './is_mvt';
 
 function isUnsupportedVectorTileMetric(metric: AggDescriptor) {
   return metric.type === AGG_TYPE.TERMS;
 }
 
 interface Props {
-  isHeatmap: boolean;
+  renderAs: RENDER_AS;
   resolution: GRID_RESOLUTION;
   onChange: (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => void;
   metrics: AggDescriptor[];
@@ -64,9 +33,70 @@ export class ResolutionEditor extends Component<Props, State> {
     showModal: false,
   };
 
+  _getScale() {
+    return this.props.renderAs === RENDER_AS.HEX
+      ? {
+          [GRID_RESOLUTION.SUPER_FINE]: 3,
+          [GRID_RESOLUTION.MOST_FINE]: 2,
+          [GRID_RESOLUTION.FINE]: 2,
+          [GRID_RESOLUTION.COARSE]: 1,
+        }
+      : {
+          [GRID_RESOLUTION.SUPER_FINE]: 4,
+          [GRID_RESOLUTION.MOST_FINE]: 3,
+          [GRID_RESOLUTION.FINE]: 2,
+          [GRID_RESOLUTION.COARSE]: 1,
+        };
+  }
+
+  _getTicks() {
+    const scale = this._getScale();
+    const unlabeledTicks = [
+      {
+        label: '',
+        value: scale[GRID_RESOLUTION.FINE],
+      },
+    ];
+    if (scale[GRID_RESOLUTION.FINE] !== scale[GRID_RESOLUTION.MOST_FINE]) {
+      unlabeledTicks.push({
+        label: '',
+        value: scale[GRID_RESOLUTION.MOST_FINE],
+      });
+    }
+
+    return [
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.lowLabel', {
+          defaultMessage: `low`,
+        }),
+        value: scale[GRID_RESOLUTION.COARSE],
+      },
+      ...unlabeledTicks,
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.highLabel', {
+          defaultMessage: `high`,
+        }),
+        value: scale[GRID_RESOLUTION.SUPER_FINE],
+      },
+    ];
+  }
+
+  _resolutionToSliderValue(resolution: GRID_RESOLUTION): number {
+    const scale = this._getScale();
+    return scale[resolution];
+  }
+
+  _sliderValueToResolution(value: number): GRID_RESOLUTION {
+    const scale = this._getScale();
+    const resolution = Object.keys(scale).find((key) => {
+      return scale[key as GRID_RESOLUTION] === value;
+    });
+    return resolution ? (resolution as GRID_RESOLUTION) : GRID_RESOLUTION.COARSE;
+  }
+
   _onResolutionChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
-    const resolution = sliderValueToResolution(parseInt(event.currentTarget.value, 10));
-    if (!this.props.isHeatmap && resolution === GRID_RESOLUTION.SUPER_FINE) {
+    const resolution = this._sliderValueToResolution(parseInt(event.currentTarget.value, 10));
+    if (isMvt(this.props.renderAs, resolution)) {
       const hasUnsupportedMetrics = this.props.metrics.find(isUnsupportedVectorTileMetric);
       if (hasUnsupportedMetrics) {
         this.setState({ showModal: true });
@@ -129,11 +159,13 @@ export class ResolutionEditor extends Component<Props, State> {
 
   render() {
     const helpText =
-      !this.props.isHeatmap && this.props.resolution === GRID_RESOLUTION.SUPER_FINE
+      (this.props.renderAs === RENDER_AS.POINT || this.props.renderAs === RENDER_AS.GRID) &&
+      this.props.resolution === GRID_RESOLUTION.SUPER_FINE
         ? i18n.translate('xpack.maps.source.esGrid.superFineHelpText', {
             defaultMessage: 'High resolution uses vector tiles.',
           })
         : undefined;
+    const ticks = this._getTicks();
     return (
       <>
         {this._renderModal()}
@@ -145,28 +177,13 @@ export class ResolutionEditor extends Component<Props, State> {
           display="columnCompressed"
         >
           <EuiRange
-            value={resolutionToSliderValue(this.props.resolution)}
+            value={this._resolutionToSliderValue(this.props.resolution)}
             onChange={this._onResolutionChange}
             min={1}
-            max={4}
+            max={ticks.length}
             showTicks
             tickInterval={1}
-            ticks={[
-              {
-                label: i18n.translate('xpack.maps.source.esGrid.lowLabel', {
-                  defaultMessage: `low`,
-                }),
-                value: 1,
-              },
-              { label: '', value: 2 },
-              { label: '', value: 3 },
-              {
-                label: i18n.translate('xpack.maps.source.esGrid.highLabel', {
-                  defaultMessage: `high`,
-                }),
-                value: 4,
-              },
-            ]}
+            ticks={ticks}
             compressed
           />
         </EuiFormRow>

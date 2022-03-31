@@ -147,7 +147,7 @@ export const ShareModeControl = (props: Props) => {
       <EuiSpacer size="s" />
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiText
               color="subdued"
@@ -183,7 +183,7 @@ export const ShareModeControl = (props: Props) => {
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         <SelectableSpacesControl
           spaces={spaces}
           shareOptions={shareOptions}
