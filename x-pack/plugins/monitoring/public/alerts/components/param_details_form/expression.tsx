@@ -92,13 +92,12 @@ export const Expression: React.FC<Props> = (props) => {
 
   const onFilterChange = useCallback(
     (filter: string) => {
-      if (derivedIndexPattern) {
-        setRuleParams('filterQueryText', filter);
+      if (derivedIndexPattern) setRuleParams('filterQueryText', filter);
+      if (derivedIndexPattern)
         setRuleParams(
           'filterQuery',
           convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
         );
-      }
     },
     [setRuleParams, derivedIndexPattern]
   );

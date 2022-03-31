@@ -19,13 +19,12 @@ export const Expression = ({ ruleParams, config, setRuleParams, dataViews }: Pro
   const { derivedIndexPattern } = useDerivedIndexPattern(dataViews, config);
   const onFilterChange = useCallback(
     (filter: string) => {
-      if (derivedIndexPattern) {
-        setRuleParams('filterQueryText', filter);
+      if (derivedIndexPattern) setRuleParams('filterQueryText', filter);
+      if (derivedIndexPattern)
         setRuleParams(
           'filterQuery',
           convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
         );
-      }
     },
     [setRuleParams, derivedIndexPattern]
   );
