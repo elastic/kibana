@@ -85,6 +85,12 @@ describe('strict', () => {
         .toThrow(/"bar" not defined in/);
     });
 
+    it('should allow undefined parameters when passed to helpers', () => {
+      expectTemplate('{{#unless foo}}success{{/unless}}')
+        .withCompileOptions({ strict: true })
+        .toCompileTo('success');
+    });
+
     it('should allow undefined hash when passed to helpers', () => {
       expectTemplate('{{helper value=@foo}}')
         .withCompileOptions({
@@ -98,6 +104,12 @@ describe('strict', () => {
           },
         })
         .toCompileTo('success');
+    });
+
+    it('should show error location on missing property lookup', () => {
+      expectTemplate('\n\n\n   {{hello}}')
+        .withCompileOptions({ strict: true })
+        .toThrow('"hello" not defined in [object Object] - 4:5');
     });
 
     it('should error contains correct location properties on missing property lookup', () => {

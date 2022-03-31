@@ -28,7 +28,7 @@ class HandlebarsTestBench {
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private helpers: { [key: string]: HelperDelegate | undefined } = {};
-  private input: any;
+  private input: any = {};
 
   constructor(template: string, options: TestOptions = {}) {
     this.template = template;
