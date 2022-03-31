@@ -33,10 +33,10 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
 
   public euiAction = {
     name: i18n.translate('savedObjectsManagement.shareToSpace.actionTitle', {
-      defaultMessage: 'Share to space',
+      defaultMessage: 'Assign spaces',
     }),
     description: i18n.translate('savedObjectsManagement.shareToSpace.actionDescription', {
-      defaultMessage: 'Share this saved object to one or more spaces',
+      defaultMessage: 'Change the spaces this object is assigned to',
     }),
     icon: 'share',
     type: 'icon',

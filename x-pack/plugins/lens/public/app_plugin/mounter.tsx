@@ -251,6 +251,7 @@ export async function mountApp(
             initialContext={initialContext}
             contextOriginatingApp={historyLocationState?.originatingApp}
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+            theme$={core.theme.theme$}
           />
         </Provider>
       );
