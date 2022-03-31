@@ -16,7 +16,7 @@ const getLogViewTitle = (savedObject: SavedObject<unknown>) =>
   pipe(
     logViewSavedObjectRT.decode(savedObject),
     fold(
-      (errors) => `Log view [id=${savedObject.id}]`,
+      () => `Log view [id=${savedObject.id}]`,
       ({ attributes: { name } }) => name
     )
   );
