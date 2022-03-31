@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-const map = require('lodash/map');
 const axios = require('axios');
 
 const CLOUD_API_KEY = process.env.CLOUD_API_KEY_SECRET;
@@ -17,9 +16,8 @@ const request = axios.create({
   headers: { Authorization: `ApiKey ${CLOUD_API_KEY}` },
 });
 
-const getDeployments = async () => request.get('/deployments');
-
-const deleteInstance = async (deploymentId) => {
+module.exports = async function (deploymentId) {
+  if (!deploymentId) throw 'A deploymend id is needed for this action';
   let response;
   try {
     response = await request.post(`deployments/${deploymentId}/_shutdown`);
@@ -30,13 +28,3 @@ const deleteInstance = async (deploymentId) => {
 
   return response;
 };
-
-(async () => {
-  await getDeployments().then(async (response) => {
-    const deploymentIds = map(response.data.deployments, 'id');
-
-    console.log('deploymentIds', deploymentIds);
-
-    await Promise.all(deploymentIds.map(deleteInstance));
-  });
-})();
