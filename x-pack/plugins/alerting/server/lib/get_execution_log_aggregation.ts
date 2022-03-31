@@ -26,6 +26,8 @@ const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_
 const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
 const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
+const NUMBER_OF_SCHEDULED_ACTIONS_FIELD =
+  'kibana.alert.rule.execution.metrics.number_of_scheduled_actions';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
@@ -57,6 +59,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     esSearchDuration: estypes.AggregationsMaxAggregate;
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
+    numScheduledActions: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
   };
   alertCounts: IAlertCounts;
@@ -82,6 +85,7 @@ const ExecutionLogSortFields: Record<string, string> = {
   es_search_duration: 'ruleExecution>esSearchDuration',
   schedule_delay: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
+  num_scheduled_actions: 'ruleExecution>numScheduledActions',
 };
 
 export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
@@ -182,6 +186,11 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                 field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
               },
             },
+            numScheduledActions: {
+              max: {
+                field: NUMBER_OF_SCHEDULED_ACTIONS_FIELD,
+              },
+            },
             executionDuration: {
               max: {
                 field: DURATION_FIELD,
@@ -256,6 +265,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
     num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
     num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
+    num_scheduled_actions: bucket?.ruleExecution?.numScheduledActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,
     num_errored_actions: actionExecutionError,
     total_search_duration_ms: bucket?.ruleExecution?.totalSearchDuration?.value ?? 0,
