@@ -45,7 +45,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const { syntheticsService } = server;
 
-    const errors = await syntheticsService.pushConfigs(request, [
+    const errors = await syntheticsService.pushConfigs([
       {
         ...monitor,
         id: newMonitor.id,

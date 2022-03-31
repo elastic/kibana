@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from 'kibana/server';
 import { statuses } from '../';
@@ -296,7 +297,10 @@ export class ReportingStore {
       throw err;
     }
 
-    this.reportingCore.getEventLogger(report).logClaimTask();
+    // log the amount of time the report waited in "pending" status
+    this.reportingCore.getEventLogger(report).logClaimTask({
+      queueDurationMs: moment.utc().valueOf() - moment.utc(report.created_at).valueOf(),
+    });
 
     return body;
   }
