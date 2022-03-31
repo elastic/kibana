@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fakeServer, SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   ListNodesRouteResponse,
@@ -14,60 +14,75 @@ import {
 } from '../../../common/types';
 import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
 
+type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+}
+
 export const init = () => {
-  const server = fakeServer.create();
-  server.respondImmediately = true;
-  server.respondWith([200, {}, 'DefaultServerResponse']);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
-    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server),
+    httpSetup,
+    httpRequestsMockHelpers,
   };
 };
 
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadPolicies = (response: any = []) => {
-    server.respondWith('GET', `${API_BASE_PATH}/policies`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'DELETE', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
+
+  const mockMethodImplementation = (method: HttpMethod, path: string) =>
+    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.delete.mockImplementation((path) =>
+    mockMethodImplementation('DELETE', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setLoadSnapshotPolicies = (response: any = [], error?: { status: number; body: any }) => {
-    const status = error ? error.status : 200;
-    const body = error ? error.body : response;
+  const setLoadPolicies = (response: any = [], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/policies`, response, error);
 
-    server.respondWith('GET', `${API_BASE_PATH}/snapshot_policies`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setLoadSnapshotPolicies = (response: any = [], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/snapshot_policies`, response, error);
 
-  const setListNodes = (body: ListNodesRouteResponse) => {
-    server.respondWith('GET', `${API_BASE_PATH}/nodes/list`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setListNodes = (response: ListNodesRouteResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/nodes/list`, response, error);
 
-  const setNodesDetails = (nodeAttributes: string, body: NodesDetailsResponse) => {
-    server.respondWith('GET', `${API_BASE_PATH}/nodes/${nodeAttributes}/details`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setNodesDetails = (
+    nodeAttributes: string,
+    response: NodesDetailsResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/nodes/${nodeAttributes}/details`, response, error);
 
-  const setListSnapshotRepos = (body: ListSnapshotReposResponse) => {
-    server.respondWith('GET', `${API_BASE_PATH}/snapshot_repositories`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setListSnapshotRepos = (response: ListSnapshotReposResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/snapshot_repositories`, response, error);
 
   const setDefaultResponses = () => {
     setLoadPolicies([getDefaultHotPhasePolicy()]);

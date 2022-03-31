@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { setupEnvironment } from '../../helpers';
+import { API_BASE_PATH } from '../../../../common/constants';
 import {
   getDefaultHotPhasePolicy,
   POLICY_WITH_INCLUDE_EXCLUDE,
@@ -17,17 +18,13 @@ import { SerializationTestBed, setupSerializationTestBed } from './policy_serial
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: SerializationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupSerializationTestBed();
+      testBed = await setupSerializationTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -44,7 +41,7 @@ describe('<EditPolicy /> serialization', () => {
     it('preserves policy settings it did not configure', async () => {
       httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS]);
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component, actions } = testBed;
@@ -56,42 +53,44 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('delete');
       await actions.savePolicy();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-
-      expect(entirePolicy).toEqual({
-        foo: 'bar', // Made up value
-        name: 'my_policy',
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_docs: 1000,
-                max_size: '50gb',
-                unknown_setting: 123, // Made up setting that should stay preserved
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/policies`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            foo: 'bar', // Made up value
+            phases: {
+              hot: {
+                min_age: '0ms',
+                actions: {
+                  rollover: {
+                    unknown_setting: 123, // Made up setting that should stay preserved
+                    max_size: '50gb',
+                    max_docs: 1000,
+                  },
+                },
+              },
+              warm: {
+                min_age: '10d',
+                actions: {
+                  my_unfollow_action: {}, // Made up action
+                  set_priority: {
+                    priority: 22,
+                    unknown_setting: true,
+                  },
+                },
               },
             },
-            min_age: '0ms',
-          },
-          warm: {
-            actions: {
-              my_unfollow_action: {}, // Made up action
-              set_priority: {
-                priority: 22,
-                unknown_setting: true,
-              },
-            },
-            min_age: '10d',
-          },
-        },
-      });
+            name: 'my_policy',
+          }),
+        })
+      );
     });
 
     it('default policy (only policy name input) on enterprise license', async () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
 
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component, actions } = testBed;
@@ -125,7 +124,7 @@ describe('<EditPolicy /> serialization', () => {
       httpRequestsMockHelpers.setLoadPolicies([]);
 
       await act(async () => {
-        testBed = await setupSerializationTestBed({
+        testBed = await setupSerializationTestBed(httpSetup, {
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },
@@ -241,7 +240,7 @@ describe('<EditPolicy /> serialization', () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component } = testBed;
@@ -335,7 +334,7 @@ describe('<EditPolicy /> serialization', () => {
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {
-          testBed = await setupSerializationTestBed();
+          testBed = await setupSerializationTestBed(httpSetup);
         });
 
         const { component } = testBed;
@@ -372,7 +371,7 @@ describe('<EditPolicy /> serialization', () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setupSerializationTestBed();
+        testBed = await setupSerializationTestBed(httpSetup);
       });
 
       const { component } = testBed;
@@ -499,7 +498,7 @@ describe('<EditPolicy /> serialization', () => {
         });
 
         await act(async () => {
-          testBed = await setupSerializationTestBed();
+          testBed = await setupSerializationTestBed(httpSetup);
         });
 
         const { component } = testBed;
