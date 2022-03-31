@@ -55,6 +55,12 @@
   }
 }
 
+.lnsLayerAddButton:disabled {
+  .lnsLayerAddButtonTechBadge {
+    color: $euiColorDisabled;
+  }
+}
+
 .lnsLayerAddButtonTechBadge {
   cursor: pointer;
 }

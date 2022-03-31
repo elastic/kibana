@@ -122,7 +122,7 @@ export function AddLayerButton({
                 disabled,
                 name:
                   type === layerTypes.ANNOTATIONS ? (
-                    <EuiFlexGroup gutterSize="s">
+                    <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         <span className="lnsLayerAddButtonLabel">{label}</span>
                       </EuiFlexItem>
