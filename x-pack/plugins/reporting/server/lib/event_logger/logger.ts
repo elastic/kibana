@@ -149,11 +149,12 @@ export function reportingEventLoggerFactory(logger: Logger) {
 
     logClaimTask({ queueDurationMs }: ExecutionClaimMetrics): ClaimedTask {
       const message = `claimed report ${this.report._id}`;
+      const queueDurationNs = queueDurationMs * 1000000;
       const event = deepMerge(
         {
           message,
           kibana: { reporting: { actionType: ActionType.CLAIM_TASK } },
-          event: { duration: queueDurationMs },
+          event: { duration: queueDurationNs }, // this field is always assumed to be nanoseconds
         } as Partial<ClaimedTask>,
         this.eventObj
       );
