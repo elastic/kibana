@@ -82,7 +82,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
     );
   });
 
@@ -94,7 +94,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
     );
   });
 
@@ -195,6 +195,9 @@ describe('getExecutionLogAggregation', () => {
               numTriggeredActions: {
                 max: { field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions' },
               },
+              numScheduledActions: {
+                max: { field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions' },
+              },
               executionDuration: { max: { field: 'event.duration' } },
               outcomeAndMessage: {
                 top_hits: {
@@ -260,6 +263,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
                   value: 5.0,
                 },
                 outcomeAndMessage: {
@@ -344,6 +350,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -420,6 +429,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -438,6 +448,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -482,6 +493,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
                   value: 5.0,
                 },
                 outcomeAndMessage: {
@@ -569,6 +583,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -645,6 +662,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -663,6 +681,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -707,6 +726,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 0.0,
+                },
+                numScheduledActions: {
                   value: 0.0,
                 },
                 outcomeAndMessage: {
@@ -786,6 +808,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -862,6 +887,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 0,
           num_recovered_alerts: 0,
           num_triggered_actions: 0,
+          num_scheduled_actions: 0,
           num_succeeded_actions: 0,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -880,6 +906,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -924,6 +951,9 @@ describe('formatExecutionLogResult', () => {
                 meta: {},
                 doc_count: 1,
                 numTriggeredActions: {
+                  value: 5.0,
+                },
+                numScheduledActions: {
                   value: 5.0,
                 },
                 outcomeAndMessage: {
@@ -1008,6 +1038,9 @@ describe('formatExecutionLogResult', () => {
                 numTriggeredActions: {
                   value: 5.0,
                 },
+                numScheduledActions: {
+                  value: 5.0,
+                },
                 outcomeAndMessage: {
                   hits: {
                     total: {
@@ -1084,6 +1117,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 0,
           num_errored_actions: 5,
           total_search_duration_ms: 0,
@@ -1102,6 +1136,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,

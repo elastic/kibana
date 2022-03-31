@@ -30,6 +30,7 @@ import type {
   WrapHits,
 } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
@@ -205,7 +206,7 @@ export const transformThresholdResultsToEcs = (
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const ruleParams = params.completeRule.ruleParams;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(

@@ -72,10 +72,11 @@ Array [
       >
         Set tags
         <span
-          aria-label="External link"
           class="euiLink__externalIcon"
           data-euiicon-type="popout"
-        />
+        >
+          External link
+        </span>
         <span
           class="euiScreenReaderOnly"
         >
