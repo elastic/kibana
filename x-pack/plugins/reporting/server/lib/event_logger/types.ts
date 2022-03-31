@@ -12,6 +12,9 @@ import { ActionType } from './';
 export interface ReportingAction<A extends ActionType> extends LogMeta {
   event: {
     timezone: string;
+    // Within ReportingEventLogger, duration is auto-calculated for "completion" event, manually calculated for
+    // "claimed" event.
+    duration?: number;
   };
   message: string;
   kibana: {
