@@ -46,6 +46,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
+  hideFullscreen?: true;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -53,6 +54,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
+  hideFullscreen,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -303,10 +305,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     setVisibleColumns(map('id', newColumns));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
-
+  
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
+      showFullScreenSelector: !hideFullscreen,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -324,7 +327,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </>
       ),
     }),
-    [actionId, endDate, startDate]
+    [actionId, endDate, startDate, hideFullscreen]
   );
 
   useEffect(
