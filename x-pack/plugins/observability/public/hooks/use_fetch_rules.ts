@@ -23,6 +23,7 @@ interface RuleState {
 export function useFetchRules({
   searchText,
   ruleLastResponseFilter,
+  typesFilter,
   setPage,
   page,
   sort,
@@ -47,7 +48,7 @@ export function useFetchRules({
         http,
         page,
         searchText,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
         ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
@@ -61,14 +62,18 @@ export function useFetchRules({
       if (!response.data?.length && page.index > 0) {
         setPage({ ...page, index: 0 });
       }
-      const isFilterApplied = !(isEmpty(searchText) && isEmpty(ruleLastResponseFilter));
+      const isFilterApplied = !(
+        isEmpty(searchText) &&
+        isEmpty(ruleLastResponseFilter) &&
+        isEmpty(typesFilter)
+      );
 
       setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
     setInitialLoad(false);
-  }, [http, page, setPage, searchText, ruleLastResponseFilter, sort]);
+  }, [http, page, setPage, searchText, ruleLastResponseFilter, typesFilter, sort]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);

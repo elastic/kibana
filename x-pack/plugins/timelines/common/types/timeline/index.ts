@@ -314,6 +314,7 @@ export enum TimelineId {
   usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -326,6 +327,7 @@ export enum TimelineId {
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
@@ -464,6 +466,7 @@ export enum TimelineTabs {
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  session = 'session',
   eql = 'eql',
 }
 

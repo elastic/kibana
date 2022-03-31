@@ -13,9 +13,25 @@ import {
   getServiceLocations,
   getServiceLocationsSuccess,
   getServiceLocationsFailure,
+  getSyntheticsEnablement,
+  getSyntheticsEnablementSuccess,
+  getSyntheticsEnablementFailure,
+  disableSynthetics,
+  disableSyntheticsSuccess,
+  disableSyntheticsFailure,
+  enableSynthetics,
+  enableSyntheticsSuccess,
+  enableSyntheticsFailure,
   getSyntheticsServiceAllowed,
 } from '../actions';
-import { fetchMonitorManagementList, fetchServiceAllowed, fetchServiceLocations } from '../api';
+import {
+  fetchMonitorManagementList,
+  fetchServiceLocations,
+  fetchServiceAllowed,
+  fetchGetSyntheticsEnablement,
+  fetchDisableSynthetics,
+  fetchEnableSynthetics,
+} from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorManagementEffect() {
@@ -30,6 +46,22 @@ export function* fetchMonitorManagementEffect() {
       getServiceLocationsSuccess,
       getServiceLocationsFailure
     )
+  );
+  yield takeLatest(
+    getSyntheticsEnablement,
+    fetchEffectFactory(
+      fetchGetSyntheticsEnablement,
+      getSyntheticsEnablementSuccess,
+      getSyntheticsEnablementFailure
+    )
+  );
+  yield takeLatest(
+    disableSynthetics,
+    fetchEffectFactory(fetchDisableSynthetics, disableSyntheticsSuccess, disableSyntheticsFailure)
+  );
+  yield takeLatest(
+    enableSynthetics,
+    fetchEffectFactory(fetchEnableSynthetics, enableSyntheticsSuccess, enableSyntheticsFailure)
   );
 }
 

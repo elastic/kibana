@@ -28,7 +28,8 @@ const apisToIntercept = [
   },
 ];
 
-describe('Home page', () => {
+// flaky test
+describe.skip('Home page', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -46,12 +47,12 @@ describe('Home page', () => {
     cy.loginAsReadOnlyUser();
   });
 
-  it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
+  it('Redirects to service page with environment, rangeFrom and rangeTo added to the URL', () => {
     cy.visit('/app/apm');
 
     cy.url().should(
       'include',
-      'app/apm/services?rangeFrom=now-15m&rangeTo=now'
+      'app/apm/services?environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now'
     );
   });
 
