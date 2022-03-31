@@ -180,8 +180,9 @@ export const AlertsByStatus = ({
                     data={data.buckets}
                     height={donutHeight}
                     link={data.link}
-                    name={data.label}
+                    label={data.label}
                     showLegend={false}
+                    sum={data.doc_count}
                   />
                 </EuiFlexItem>
               ))}

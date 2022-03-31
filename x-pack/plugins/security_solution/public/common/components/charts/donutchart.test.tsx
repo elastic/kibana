@@ -53,27 +53,23 @@ jest.mock('./common', () => {
   };
 });
 describe('DonutChart', () => {
+  const props = {
+    data: parsedMockAlertsData[0].buckets,
+    label: 'Open',
+    link: null,
+    legendField: 'kibana.alert.severity',
+    sum: 28149,
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
   test('should render Chart', () => {
-    const props = {
-      data: parsedMockAlertsData[0].buckets,
-      name: 'Open',
-      link: null,
-      legendField: 'kibana.alert.severity',
-    };
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart"]`)).toBeInTheDocument();
   });
 
   test('should render chart Settings', () => {
-    const props = {
-      data: parsedMockAlertsData[0].buckets,
-      name: 'Open',
-      link: null,
-      legendField: 'kibana.alert.severity',
-    };
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-settings"]`)).toBeInTheDocument();
 
@@ -95,23 +91,17 @@ describe('DonutChart', () => {
   });
 
   test('should render an empty chart', () => {
-    const props = {
+    const testProps = {
+      ...props,
       data: parsedMockAlertsData[1].buckets,
-      name: 'Acknowledged',
-      link: null,
-      legendField: 'kibana.alert.severity',
+      label: 'Acknowledged',
+      sum: 0,
     };
-    const { container } = render(<DonutChart {...props} />);
+    const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="empty-donut"]`)).toBeInTheDocument();
   });
 
   test('should render chart Partition', () => {
-    const props = {
-      data: parsedMockAlertsData[0].buckets,
-      name: 'Open',
-      link: null,
-      legendField: 'kibana.alert.severity',
-    };
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-partition"]`)).toBeInTheDocument();
     expect((Partition as jest.Mock).mock.calls[0][0].data).toEqual(parsedMockAlertsData[0].buckets);
@@ -120,12 +110,6 @@ describe('DonutChart', () => {
   });
 
   test('should render chart legend', () => {
-    const props = {
-      data: parsedMockAlertsData[0].buckets,
-      name: 'Open',
-      link: null,
-      legendField: 'kibana.alert.severity',
-    };
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="legend"]`)).toBeInTheDocument();
     expect((DraggableLegend as unknown as jest.Mock).mock.calls[0][0].legendItems).toEqual([
@@ -154,14 +138,11 @@ describe('DonutChart', () => {
   });
 
   test('should NOT render chart legend if showLegend is false', () => {
-    const props = {
-      data: parsedMockAlertsData[0].buckets,
-      name: 'Open',
-      link: null,
-      legendField: 'kibana.alert.severity',
+    const testProps = {
+      ...props,
       showLegend: false,
     };
-    const { container } = render(<DonutChart {...props} />);
+    const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="legend"]`)).not.toBeInTheDocument();
   });
 });

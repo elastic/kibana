@@ -26,10 +26,11 @@ type DonutChartData = ParsedSeverityBucket;
 export interface DonutChartProps {
   showLegend?: boolean;
   data: DonutChartData[];
-  name: string;
+  label: string;
   height?: number;
   legendField?: string;
   link?: string | null;
+  sum: number | null;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -50,13 +51,13 @@ export const DonutChart = ({
   height = 90,
   legendField,
   link,
-  name,
+  label,
   showLegend = true,
+  sum,
 }: DonutChartProps) => {
   const theme = useTheme();
 
   const { colors, chartTheme } = useContext(ThemeContext);
-  const sum = data.reduce((acc, curr) => acc + curr.value, 0);
   const isEmptyChart = sum === 0;
 
   const legendItems: LegendItem[] = useMemo(
@@ -95,16 +96,16 @@ export const DonutChart = ({
             <EuiFlexItem className="eui-textTruncate">
               {isEmptyChart && (
                 <EuiTextColor color="#ABB4C4" className="eui-textTruncate">
-                  {name}
+                  {label}
                 </EuiTextColor>
               )}
               {!isEmptyChart && !link && (
                 <EuiText className="eui-textTruncate" size="s">
-                  {name}
+                  {label}
                 </EuiText>
               )}
 
-              {!isEmptyChart && link && <EuiLink className="eui-textTruncate">{name}</EuiLink>}
+              {!isEmptyChart && link && <EuiLink className="eui-textTruncate">{label}</EuiLink>}
             </EuiFlexItem>
           </StyledEuiFlexGroup>
         )}
