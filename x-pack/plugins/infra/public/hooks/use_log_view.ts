@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpHandler } from 'src/core/public';
 import { LogView, LogViewAttributes, LogViewStatus, ResolvedLogView } from '../../common/log_views';
 import type { ILogViewsClient } from '../services/log_views';
@@ -114,11 +114,9 @@ export const useLogView = ({
     [logViewId, loadLogViewStatus, resolveLogView, updateLogView]
   );
 
-  const initialize = useCallback(async () => {
-    if (isUninitialized) {
-      return await load();
-    }
-  }, [isUninitialized, load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return {
     logViewId,
@@ -144,7 +142,6 @@ export const useLogView = ({
     logViewStatus,
 
     // actions
-    initialize,
     load,
     update,
   };

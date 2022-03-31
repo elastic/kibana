@@ -9,13 +9,11 @@ import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import useMount from 'react-use/lib/useMount';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { HeaderMenuPortal, useLinkProps } from '../../../../observability/public';
 import { AlertDropdown } from '../../alerting/log_threshold';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { useLogViewContext } from '../../hooks/use_log_view';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -28,15 +26,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const { initialize } = useLogViewContext();
-
   const kibana = useKibana();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-
-  useMount(() => {
-    initialize();
-  });
 
   // !! Need to be kept in sync with the deepLinks in x-pack/plugins/infra/public/plugin.ts
   const streamTab = {

@@ -113,11 +113,7 @@ export const ExpressionEditor: React.FC<
 };
 
 export const SourceStatusWrapper: React.FC = ({ children }) => {
-  const { initialize, load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
-
-  useMount(() => {
-    initialize();
-  });
+  const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
 
   return (
     <>
