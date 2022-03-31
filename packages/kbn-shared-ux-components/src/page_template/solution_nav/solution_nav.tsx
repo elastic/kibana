@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiAvatarProps,
   EuiFlyout,
   EuiSideNav,
   EuiSideNavItemType,
@@ -19,18 +20,18 @@ import {
 } from '@elastic/eui';
 
 import classNames from 'classnames';
-import { KibanaSolutionAvatar, KibanaSolutionAvatarProps } from '../../solution_avatar';
+import { KibanaSolutionAvatar } from '../../solution_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
-  name: KibanaSolutionAvatarProps['name'];
+  name: EuiAvatarProps['name'];
   /**
    * Solution logo, i.e. "logoObservability"
    */
-  icon?: KibanaSolutionAvatarProps['iconType'];
+  icon?: EuiAvatarProps['iconType'];
   /**
    * Control the collapsed state
    */
@@ -38,7 +39,7 @@ export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
   onCollapse?: () => void;
 };
 
-const SIZE = 248;
+const FLYOUT_SIZE = 248;
 
 const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) => {
   return items.map((item) => {
@@ -75,7 +76,13 @@ export const KibanaPageTemplateSolutionNav = ({
   /**
    * Create the avatar
    */
-  const solutionAvatar = icon ? <KibanaSolutionAvatar iconType={icon} name={name} /> : null;
+  const solutionAvatar = icon ? (
+    <KibanaSolutionAvatar
+      className="kbnPageTemplateSolutionNavAvatar"
+      iconType={icon}
+      name={name}
+    />
+  ) : null;
 
   /**
    * Create the titles
@@ -99,12 +106,12 @@ export const KibanaPageTemplateSolutionNav = ({
    */
 
   const sideNav = () => {
-    const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
-      'kbnPageTemplateSolutionNav--hidden': isHidden,
-    });
     if (!items) {
       return null;
     }
+    const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
+      'kbnPageTemplateSolutionNav--hidden': isHidden,
+    });
     return (
       <EuiSideNav
         aria-hidden={isHidden}
@@ -135,7 +142,7 @@ export const KibanaPageTemplateSolutionNav = ({
               outsideClickCloses
               onClose={() => setIsSideNavOpenOnMobile(false)}
               side="left"
-              size={SIZE}
+              size={FLYOUT_SIZE}
               closeButtonPosition="outside"
               className="kbnPageTemplateSolutionNav__flyout"
             >

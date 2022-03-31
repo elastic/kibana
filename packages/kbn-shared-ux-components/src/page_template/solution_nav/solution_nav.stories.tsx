@@ -10,11 +10,11 @@ import React from 'react';
 import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
 export default {
-  title: 'Page Template/Solution Nav/Solution NavBar',
-  description: 'Solution-specific sidebar',
+  title: 'Page Template/Solution Nav/Solution Nav',
+  description: 'Solution-specific navigation for the sidebar',
 };
 
-type Params = Pick<KibanaPageTemplateSolutionNavProps, 'name'>;
+type Params = Pick<KibanaPageTemplateSolutionNavProps, 'name' | 'icon' | 'isOpenOnDesktop'>;
 
 const items: KibanaPageTemplateSolutionNavProps['items'] = [
   {
@@ -56,12 +56,20 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
 ];
 
 export const PureComponent = (params: Params) => {
-  return <KibanaPageTemplateSolutionNav icon={'logoObservability'} items={items} {...params} />;
+  return <KibanaPageTemplateSolutionNav items={items} {...params} />;
 };
 
 PureComponent.argTypes = {
   name: {
     control: 'text',
-    defaultValue: 'Solution Name',
+    defaultValue: 'Kibana',
+  },
+  icon: {
+    control: { type: 'radio' },
+    options: ['logoObservability', 'logoSecurity'],
+  },
+  isOpenOnDesktop: {
+    control: 'boolean',
+    defaultValue: true,
   },
 };
