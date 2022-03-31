@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { BulkCreateCommentRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
-export const postCommentRoute = createCasesRoute({
+export const bulkCreateAttachmentsRoute = createCasesRoute({
   method: 'post',
-  path: CASE_COMMENTS_URL,
+  path: INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
@@ -30,7 +30,7 @@ export const postCommentRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to post comment in route case id: ${request.params.case_id}: ${error}`,
+        message: `Failed to bulk create attachments in route case id: ${request.params.case_id}: ${error}`,
         error,
       });
     }

@@ -12,7 +12,7 @@ import { CasesClientInternal } from '../client_internal';
 import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { AddArgs, addComment } from './add';
-import { bulkCreate, BulkCreateArgs } from './bulkCreate';
+import { bulkCreate, BulkCreateArgs } from './bulk_create';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
 import {
   find,

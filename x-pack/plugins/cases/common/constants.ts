@@ -71,6 +71,14 @@ export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as const;
 
 /**
+ * Internal routes
+ */
+
+export const CASES_INTERNAL_URL = '/internal/cases' as const;
+export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/attachments/_bulk_create` as const;
+
+/**
  * Action routes
  */
 
