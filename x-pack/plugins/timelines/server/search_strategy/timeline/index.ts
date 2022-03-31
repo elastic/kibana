@@ -64,6 +64,14 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           alerting,
           auditLogger: securityAuditLogger,
         });
+      } else if (entityType != null && entityType === EntityType.SESSIONS) {
+        return timelineSessionsSearchStrategy({
+          es,
+          request,
+          options,
+          deps,
+          queryFactory,
+        });
       } else {
         return timelineSearchStrategy({ es, request, options, deps, queryFactory });
       }
@@ -179,5 +187,52 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 
       throw err;
     })
+  );
+};
+
+const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
+  es,
+  request,
+  options,
+  deps,
+  queryFactory,
+}: {
+  es: ISearchStrategy;
+  request: TimelineStrategyRequestType<T>;
+  options: ISearchOptions;
+  deps: SearchStrategyDependencies;
+  queryFactory: TimelineFactory<T>;
+}) => {
+  const indices = request.defaultIndex ?? request.indexType;
+
+  const runtimeMappings = {
+    // TODO: remove once ECS is updated to support process.entry_leader.same_as_process
+    'process.is_entry_leader': {
+      type: 'boolean',
+      script: {
+        source:
+          "emit(doc.containsKey('process.entry_leader.entity_id') && doc['process.entry_leader.entity_id'].size() > 0 && doc['process.entity_id'].value == doc['process.entry_leader.entity_id'].value)",
+      },
+    },
+  };
+
+  const requestSessionLeaders = {
+    ...request,
+    defaultIndex: indices,
+    indexName: indices,
+  };
+
+  const dsl = queryFactory.buildDsl(requestSessionLeaders);
+
+  const params = { ...dsl, runtime_mappings: runtimeMappings };
+
+  return es.search({ ...requestSessionLeaders, params }, options, deps).pipe(
+    map((response) => {
+      return {
+        ...response,
+        rawResponse: shimHitsTotal(response.rawResponse, options),
+      };
+    }),
+    mergeMap((esSearchRes) => queryFactory.parse(requestSessionLeaders, esSearchRes))
   );
 };

@@ -20,6 +20,7 @@ export const getActions = ({
   {
     description: i18n.DELETE_CASE(),
     icon: 'trash',
+    color: 'danger',
     name: i18n.DELETE_CASE(),
     onClick: deleteCaseOnClick,
     type: 'icon',

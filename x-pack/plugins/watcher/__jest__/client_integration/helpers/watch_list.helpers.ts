@@ -13,9 +13,10 @@ import {
   TestBed,
   AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
 import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
-import { withAppContext } from './app_context.mock';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
@@ -23,8 +24,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(withAppContext(WatchList), testBedConfig);
 
 export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
   actions: {
@@ -35,7 +34,8 @@ export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
   };
 }
 
-export const setup = async (): Promise<WatchListTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<WatchListTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(WatchList, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**
