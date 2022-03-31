@@ -30,7 +30,7 @@ import { useKibana } from '../../../../kibana_react/public';
 import { SavedQuery, SavedQueryService, IDataPluginServices } from '../..';
 import { SavedQueryAttributes } from '../../query';
 
-interface Props {
+export interface SavedQueryManagementListProps {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
@@ -113,7 +113,7 @@ export function SavedQueryManagementList({
   savedQueryService,
   onClose,
   hasFiltersOrQuery,
-}: Props) {
+}: SavedQueryManagementListProps) {
   const kibana = useKibana<IDataPluginServices>();
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(null as SavedQuery | null);
@@ -241,7 +241,10 @@ export function SavedQueryManagementList({
     <>
       {savedQueries.length > 0 ? (
         <>
-          <div className="kbnSavedQueryManagement__listWrapper">
+          <div
+            className="kbnSavedQueryManagement__listWrapper"
+            data-test-subj="saved-query-management-list"
+          >
             <EuiSelectable<SelectableProps>
               aria-label="Basic example"
               options={savedQueriesOptions()}
@@ -278,7 +281,12 @@ export function SavedQueryManagementList({
         </>
       ) : (
         <>
-          <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+          <EuiText
+            size="s"
+            color="subdued"
+            className="kbnSavedQueryManagement__text"
+            data-test-subj="saved-query-management-empty"
+          >
             <p>{noSavedQueriesDescriptionText}</p>
           </EuiText>
         </>
