@@ -18,13 +18,16 @@ import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../host_isolation_exceptions/service');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const useIsExperimentalFeatureMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
@@ -52,6 +55,9 @@ describe('Policy Details', () => {
     let releaseApiFailure: () => void;
 
     beforeEach(() => {
+      useIsExperimentalFeatureMock.mockReturnValue({
+        policyListEnabled: true,
+      });
       http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));

@@ -72,4 +72,7 @@ export type {
 
 export { serializeComponentTemplate } from '../../../../common/lib';
 
-export { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+export {
+  reactRouterNavigate,
+  useExecutionContext,
+} from '../../../../../../../src/plugins/kibana_react/public';

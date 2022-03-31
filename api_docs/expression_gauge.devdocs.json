@@ -981,6 +981,19 @@
                 "path": "src/plugins/vis_types/gauge/public/to_ast.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.commonLabel",
+            "type": "string",
+            "tags": [],
+            "label": "commonLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

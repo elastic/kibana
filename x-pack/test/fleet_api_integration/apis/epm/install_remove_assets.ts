@@ -91,29 +91,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(resMetricsTemplate.statusCode).equal(404);
       });
       it('should have uninstalled the component templates', async function () {
-        const resMappings = await es.transport.request(
+        const resPackage = await es.transport.request(
           {
             method: 'GET',
-            path: `/_component_template/${logsTemplateName}@mappings`,
+            path: `/_component_template/${logsTemplateName}@package`,
           },
           {
             ignore: [404],
             meta: true,
           }
         );
-        expect(resMappings.statusCode).equal(404);
-
-        const resSettings = await es.transport.request(
-          {
-            method: 'GET',
-            path: `/_component_template/${logsTemplateName}@settings`,
-          },
-          {
-            ignore: [404],
-            meta: true,
-          }
-        );
-        expect(resSettings.statusCode).equal(404);
+        expect(resPackage.statusCode).equal(404);
 
         const resUserSettings = await es.transport.request(
           {
@@ -253,6 +241,16 @@ export default function (providerContext: FtrProviderContext) {
           resIndexPattern = err;
         }
         expect(resIndexPattern.response.data.statusCode).equal(404);
+        let resOsqueryPackAsset;
+        try {
+          resOsqueryPackAsset = await kibanaServer.savedObjects.get({
+            type: 'osquery-pack-asset',
+            id: 'sample_osquery_pack_asset',
+          });
+        } catch (err) {
+          resOsqueryPackAsset = err;
+        }
+        expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -372,22 +370,15 @@ const expectAssetsInstalled = ({
     expect(res.statusCode).equal(200);
   });
   it('should have installed the component templates', async function () {
-    const resMappings = await es.transport.request(
+    const resPackage = await es.transport.request(
       {
         method: 'GET',
-        path: `/_component_template/${logsTemplateName}@mappings`,
+        path: `/_component_template/${logsTemplateName}@package`,
       },
       { meta: true }
     );
-    expect(resMappings.statusCode).equal(200);
-    const resSettings = await es.transport.request(
-      {
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@settings`,
-      },
-      { meta: true }
-    );
-    expect(resSettings.statusCode).equal(200);
+    expect(resPackage.statusCode).equal(200);
+
     const resUserSettings = await es.transport.request(
       {
         method: 'GET',
@@ -447,6 +438,11 @@ const expectAssetsInstalled = ({
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    const resOsqueryPackAsset = await kibanaServer.savedObjects.get({
+      type: 'osquery-pack-asset',
+      id: 'sample_osquery_pack_asset',
+    });
+    expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
@@ -527,6 +523,10 @@ const expectAssetsInstalled = ({
           type: 'ml-module',
         },
         {
+          id: 'sample_osquery_pack_asset',
+          type: 'osquery-pack-asset',
+        },
+        {
           id: 'sample_search',
           type: 'search',
         },
@@ -546,11 +546,7 @@ const expectAssetsInstalled = ({
       installed_kibana_space_id: 'default',
       installed_es: [
         {
-          id: 'logs-all_assets.test_logs@mappings',
-          type: 'component_template',
-        },
-        {
-          id: 'logs-all_assets.test_logs@settings',
+          id: 'logs-all_assets.test_logs@package',
           type: 'component_template',
         },
         {
@@ -558,11 +554,7 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
-          id: 'metrics-all_assets.test_metrics@mappings',
-          type: 'component_template',
-        },
-        {
-          id: 'metrics-all_assets.test_metrics@settings',
+          id: 'metrics-all_assets.test_metrics@package',
           type: 'component_template',
         },
         {
@@ -685,6 +677,10 @@ const expectAssetsInstalled = ({
         },
         {
           id: '4c758d70-ecf1-56b3-b704-6d8374841b34',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '313ddb31-e70a-59e8-8287-310d4652a9b7',
           type: 'epm-packages-assets',
         },
         {

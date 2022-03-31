@@ -26,7 +26,7 @@ import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
-const CUSTOM_COLOR_RAMP = {
+export const CUSTOM_COLOR_RAMP = {
   type: STYLE_TYPE.DYNAMIC,
   options: {
     customColorRamp: SEVERITY_COLOR_RAMP,

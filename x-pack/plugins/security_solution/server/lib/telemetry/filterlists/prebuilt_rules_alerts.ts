@@ -9,7 +9,54 @@ import type { AllowlistFields } from './types';
 
 export const prebuiltRuleAllowlistFields: AllowlistFields = {
   _id: true,
+  id: true,
   '@timestamp': true,
+  // Base alert fields
+  'kibana.alert.ancestors': true,
+  'kibana.alert.depth': true,
+  'kibana.alert.original_event.action': true,
+  'kibana.alert.original_event.category': true,
+  'kibana.alert.original_event.dataset': true,
+  'kibana.alert.original_event.kind': true,
+  'kibana.alert.original_event.module': true,
+  'kibana.alert.original_event.type': true,
+  'kibana.alert.original_time': true,
+  'kibana.alert.reason': true,
+  'kibana.alert.risk_score': true,
+  'kibana.alert.rule.actions': true,
+  'kibana.alert.rule.category': true,
+  'kibana.alert.rule.consumer': true,
+  'kibana.alert.rule.created_at': true,
+  'kibana.alert.rule.description': true,
+  'kibana.alert.rule.enabled': true,
+  'kibana.alert.rule.exceptions_list': true,
+  'kibana.alert.rule.execution.uuid': true,
+  'kibana.alert.rule.false_positives': true,
+  'kibana.alert.rule.from': true,
+  'kibana.alert.rule.immutable': true,
+  'kibana.alert.rule.interval': true,
+  'kibana.alert.rule.name': true,
+  'kibana.alert.rule.producer': true,
+  'kibana.alert.rule.references': true,
+  'kibana.alert.rule.risk_score_mapping': true,
+  'kibana.alert.rule.rule_id': true,
+  'kibana.alert.rule.rule_type_id': true,
+  'kibana.alert.rule.severity': true,
+  'kibana.alert.rule.severity_mapping': true,
+  'kibana.alert.rule.tags': true,
+  'kibana.alert.rule.threat': true,
+  'kibana.alert.rule.timestamp_override': true,
+  'kibana.alert.rule.type': true,
+  'kibana.alert.rule.updated_at': true,
+  'kibana.alert.rule.uuid': true,
+  'kibana.alert.rule.version': true,
+  'kibana.alert.severity': true,
+  'kibana.alert.status': true,
+  'kibana.alert.uuid': true,
+  'kibana.alert.workflow_status': true,
+  'kibana.space_ids': true,
+  'kibana.version': true,
+  // Alert specific filter entries
   agent: {
     id: true,
   },
@@ -30,13 +77,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   group: {
     name: true,
   },
-  host: {
-    id: true,
-    os: {
-      family: true,
-      name: true,
-    },
-  },
+  host: true,
   http: {
     request: {
       body: {
@@ -119,30 +160,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   user: {
     domain: true,
     id: true,
-  },
-  // Base alert fields
-  kibana: {
-    alert: {
-      ancestors: true,
-      depth: true,
-      original_time: true,
-      reason: true,
-      risk_score: true,
-      rule: {
-        enabled: true,
-        from: true,
-        interval: true,
-        max_signals: true,
-        name: true,
-        rule_id: true,
-        tags: true,
-        type: true,
-        uuid: true,
-        version: true,
-        severity: true,
-        workflow_status: true,
-      },
-    },
   },
   // aws rule fields
   aws: {
@@ -257,38 +274,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   // winlog
-  winlog: {
-    event_data: {
-      AccessList: true,
-      AccessMask: true,
-      AllowedToDelegateTo: true,
-      AttributeLDAPDisplayName: true,
-      AttributeValue: true,
-      CallerProcessName: true,
-      CallTrace: true,
-      ClientProcessId: true,
-      GrantedAccess: true,
-      IntegrityLevel: true,
-      NewTargetUserName: true,
-      ObjectDN: true,
-      OldTargetUserName: true,
-      ParentProcessId: true,
-      PrivilegeList: true,
-      Properties: true,
-      RelativeTargetName: true,
-      ShareName: true,
-      SubjectLogonId: true,
-      SubjectUserName: true,
-      TargetImage: true,
-      TargetLogonId: true,
-      TargetProcessGUID: true,
-      TargetSid: true,
-    },
-    logon: {
-      type: true,
-    },
-  },
+  winlog: true,
   // ml signal fields
+  influencers: true,
   signal: {
     ancestors: true,
     depth: true,

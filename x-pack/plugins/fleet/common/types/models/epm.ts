@@ -75,6 +75,7 @@ export enum KibanaAssetType {
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   mlModule = 'ml_module',
   tag = 'tag',
+  osqueryPackAsset = 'osquery_pack_asset',
 }
 
 /*
@@ -91,6 +92,7 @@ export enum KibanaSavedObjectType {
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
   tag = 'tag',
+  osqueryPackAsset = 'osquery-pack-asset',
 }
 
 export enum ElasticsearchAssetType {
