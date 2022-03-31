@@ -51,8 +51,9 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
-import { JobSpacesList } from '../../components/job_spaces_list';
+import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
+import { TestTrainedModelFlyout, isTestable } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -134,6 +135,7 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+  const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
@@ -470,6 +472,19 @@ export const ModelsList: FC<Props> = ({
             return !isPopulatedObject(item.pipelines);
           },
         },
+        {
+          name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          icon: 'inputOutput',
+          type: 'icon',
+          isPrimary: true,
+          available: isTestable,
+          onClick: setShowTestFlyout,
+        },
       ] as Array<Action<ModelItem>>)
     );
   }
@@ -588,11 +603,11 @@ export const ModelsList: FC<Props> = ({
       render: (id: string) => {
         const spaces = modelSpaces[id];
         return (
-          <JobSpacesList
+          <MLSavedObjectsSpacesList
             spacesApi={spacesApi}
             spaceIds={spaces ?? []}
             id={id}
-            jobType="trained-model"
+            mlSavedObjectType="trained-model"
             refresh={fetchModelsData}
           />
         );
@@ -714,11 +729,7 @@ export const ModelsList: FC<Props> = ({
     <>
       {isManagementTable ? null : (
         <>
-          <SavedObjectsWarning
-            jobType="trained-model"
-            onCloseFlyout={fetchModelsData}
-            forceRefresh={isLoading}
-          />
+          <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
         </>
       )}
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -767,6 +778,12 @@ export const ModelsList: FC<Props> = ({
             }
           }}
           modelIds={modelIdsToDelete}
+        />
+      )}
+      {showTestFlyout === null ? null : (
+        <TestTrainedModelFlyout
+          model={showTestFlyout}
+          onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
     </>

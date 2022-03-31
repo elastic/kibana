@@ -13,21 +13,25 @@ import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../fle
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getEndpointListPath, getPolicyDetailPath } from '../../../common/routing';
+import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
 import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/service';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../host_isolation_exceptions/service');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const useIsExperimentalFeatureMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
-  const endpointListPath = getEndpointListPath({ name: 'endpointList' });
+  const policyListPath = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
@@ -51,6 +55,9 @@ describe('Policy Details', () => {
     let releaseApiFailure: () => void;
 
     beforeEach(() => {
+      useIsExperimentalFeatureMock.mockReturnValue({
+        policyListEnabled: true,
+      });
       http.get.mockImplementation(async () => {
         await new Promise((_, reject) => {
           releaseApiFailure = reject.bind(null, new Error('policy not found'));
@@ -125,14 +132,14 @@ describe('Policy Details', () => {
       expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
 
-    it('should display back to list button and policy title', async () => {
+    it('should display back to policy list button and policy title', async () => {
       policyView = render();
       await asyncActions;
       policyView.update();
 
       const backToListLink = policyView.find('BackToExternalAppButton');
-      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${endpointListPath}`);
-      expect(backToListLink.text()).toBe('View all endpoints');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${policyListPath}`);
+      expect(backToListLink.text()).toBe('Back to policy list');
 
       const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');
       expect(pageTitle).toHaveLength(1);
@@ -147,7 +154,31 @@ describe('Policy Details', () => {
       const backToListLink = policyView.find('a[data-test-subj="policyDetailsBackLink"]');
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListLink.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(endpointListPath);
+      expect(history.location.pathname).toEqual(policyListPath);
+    });
+
+    it('should display and navigate to custom back button if non-default backLink state is present', async () => {
+      const customBackLinkState = {
+        backLink: {
+          navigateTo: [
+            APP_UI_ID,
+            {
+              path: getEndpointListPath({ name: 'endpointList' }),
+            },
+          ],
+          label: 'View all endpoints',
+          href: '/app/security/administration/endpoints',
+        },
+      };
+
+      history.push({ pathname: policyDetailsPathUrl, state: customBackLinkState });
+      policyView = render();
+      await asyncActions;
+      policyView.update();
+
+      const backToListLink = policyView.find('BackToExternalAppButton');
+      expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security/administration/endpoints`);
+      expect(backToListLink.text()).toBe('View all endpoints');
     });
 
     it('should display agent stats', async () => {

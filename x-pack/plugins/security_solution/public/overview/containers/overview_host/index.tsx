@@ -146,5 +146,12 @@ export const useHostOverview = ({
     };
   }, [overviewHostRequest, overviewHostSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
+
   return [loading, overviewHostResponse];
 };

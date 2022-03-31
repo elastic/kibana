@@ -28,6 +28,8 @@ export const migratePackagePolicyToV820: SavedObjectMigrationFn<PackagePolicy, P
     policy.windows.malware.blocklist = policy.windows.malware.mode !== 'off';
     policy.mac.malware.blocklist = policy.mac.malware.mode !== 'off';
     policy.linux.malware.blocklist = policy.linux.malware.mode !== 'off';
+
+    policy.linux.events.session_data = false;
   }
 
   return updatedPackagePolicyDoc;

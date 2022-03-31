@@ -168,6 +168,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
+      eventLogIndex: eventLogService.getIndexPattern(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -452,6 +453,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.kibanaIndex!,
+      DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient
     );

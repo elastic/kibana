@@ -28,6 +28,7 @@ import {
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
 import { Setup } from '../../../lib/helpers/setup_request';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -63,6 +64,7 @@ export async function getServiceInstancesTransactionStatistics<
   serviceNodeIds,
   numBuckets,
   isComparisonSearch,
+  offset,
 }: {
   latencyAggregationType: LatencyAggregationType;
   setup: Setup;
@@ -77,13 +79,20 @@ export async function getServiceInstancesTransactionStatistics<
   kuery: string;
   size?: number;
   numBuckets?: number;
+  offset?: string;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
   const { apmEventClient } = setup;
 
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
   const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions(
     {
-      start,
-      end,
+      start: startWithOffset,
+      end: endWithOffset,
       numBuckets,
       searchAggregatedTransactions,
     }
@@ -108,7 +117,7 @@ export async function getServiceInstancesTransactionStatistics<
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-        ...rangeQuery(start, end),
+        ...rangeQuery(startWithOffset, endWithOffset),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
@@ -134,7 +143,7 @@ export async function getServiceInstancesTransactionStatistics<
                 field: '@timestamp',
                 fixed_interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: { min: start, max: end },
+                extended_bounds: { min: startWithOffset, max: endWithOffset },
               },
               aggs: subAggs,
             },
@@ -193,7 +202,11 @@ export async function getServiceInstancesTransactionStatistics<
               aggregation: latency,
               latencyAggregationType,
             }),
-            throughput: calculateThroughput({ start, end, value: count }),
+            throughput: calculateThroughput({
+              start: startWithOffset,
+              end: endWithOffset,
+              value: count,
+            }),
           };
         }
       }
