@@ -125,6 +125,7 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
           aria-label={i18n.translate('discover.docExplorerCallout.closeButtonAriaLabel', {
             defaultMessage: 'Close',
           })}
+          data-test-subj="dscExplorerCalloutClose"
           onClick={onCloseCallout}
           type="button"
           iconType="cross"
