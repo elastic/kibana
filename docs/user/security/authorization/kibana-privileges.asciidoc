@@ -21,15 +21,13 @@ From the <<role-management-api-put, role management API>>:
 --------------------------------------------------
 PUT /api/security/role/my_kibana_role
 {
-  "elasticsearch": {
-    "cluster" : [ ],
-    "indices" : [ ]
-  },
-  "kibana": [
+  "cluster": [],
+  "indices": [],
+  "applications": [
     {
-      "base": ["all"],
-      "feature": {},
-      "spaces": ["marketing"]
+      "application": "kibana-.kibana",
+      "privileges": ["space_all"],
+      "resources": ["space:marketing"]
     }
   ]
 }
@@ -58,19 +56,20 @@ From the <<role-management-api-put, role management API>>:
 --------------------------------------------------
 PUT /api/security/role/my_kibana_role
 {
-  "elasticsearch": {
-    "cluster" : [ ],
-    "indices" : [ ]
-  },
-  "kibana": [
-    {
-      "base": [],
-      "feature": {
-        "visualize": ["all"],
-        "dashboard": ["read", "url_create"]
-      },
-      "spaces": ["marketing"]
-    }
-  ]
+  "cluster" : [ ],
+    "indices" : [ ],
+    "applications" : [
+      {
+        "application" : "kibana-.kibana",
+        "privileges" : [
+          "feature_dashboard.minimal_read",
+          "feature_dashboard.url_create",
+          "feature_visualize.all"
+        ],
+        "resources" : [
+          "space:spatium"
+        ]
+      }
+    ]
 }
 --------------------------------------------------
