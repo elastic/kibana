@@ -18,13 +18,11 @@ import styled from 'styled-components';
 import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
-import { CaseAttachments } from '../../../types';
+
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick?: (theCase?: Case) => void;
-  updateCase?: (newCase: Case) => void;
   onClose?: () => void;
-  attachments?: CaseAttachments;
 }
 
 const Modal = styled(EuiModal)`
@@ -35,7 +33,7 @@ const Modal = styled(EuiModal)`
 `;
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({ attachments, hiddenStatuses, onRowClick, updateCase, onClose }) => {
+  ({ hiddenStatuses, onRowClick, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
       if (onClose) {
@@ -61,11 +59,9 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
         </EuiModalHeader>
         <EuiModalBody>
           <AllCasesList
-            attachments={attachments}
             hiddenStatuses={hiddenStatuses}
             isSelectorView={true}
             onRowClick={onClick}
-            updateCase={updateCase}
           />
         </EuiModalBody>
         <EuiModalFooter>

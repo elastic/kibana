@@ -20,7 +20,6 @@ export const getAllCasesSelectorModalLazy = ({
   userCanCrud,
   hiddenStatuses,
   onRowClick,
-  updateCase,
   onClose,
 }: GetAllCasesSelectorModalProps) => (
   <CasesProvider value={{ owner, userCanCrud }}>
@@ -28,7 +27,6 @@ export const getAllCasesSelectorModalLazy = ({
       <AllCasesSelectorModalLazy
         hiddenStatuses={hiddenStatuses}
         onRowClick={onRowClick}
-        updateCase={updateCase}
         onClose={onClose}
       />
     </Suspense>
@@ -40,18 +38,14 @@ export const getAllCasesSelectorModalLazy = ({
  * cases provider. to be further refactored https://github.com/elastic/kibana/issues/123183
  */
 export const getAllCasesSelectorModalNoProviderLazy = ({
-  attachments,
   hiddenStatuses,
   onRowClick,
-  updateCase,
   onClose,
 }: AllCasesSelectorModalProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <AllCasesSelectorModalLazy
-      attachments={attachments}
       hiddenStatuses={hiddenStatuses}
       onRowClick={onRowClick}
-      updateCase={updateCase}
       onClose={onClose}
     />
   </Suspense>

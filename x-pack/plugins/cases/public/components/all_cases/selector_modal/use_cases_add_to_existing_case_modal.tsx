@@ -13,10 +13,12 @@ import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
+import { CaseAttachments } from '../../../types';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
   toastContent?: string;
+  attachments?: CaseAttachments;
 };
 
 export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
@@ -75,12 +77,6 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
           closeModal();
           if (props.onClose) {
             return props.onClose();
-          }
-        },
-        updateCase: async (...args) => {
-          closeModal();
-          if (props.updateCase) {
-            return props.updateCase(...args);
           }
         },
       },
