@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'timePicker',
   ]);
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
+
   const renderService = getService('renderable');
 
   describe('Export import saved objects between versions', function () {

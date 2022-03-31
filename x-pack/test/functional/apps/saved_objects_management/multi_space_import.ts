@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
+
   const spacesService = getService('spaces');
   const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
