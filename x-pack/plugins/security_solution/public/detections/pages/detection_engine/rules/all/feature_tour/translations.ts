@@ -14,6 +14,20 @@ export const TOUR_TITLE = i18n.translate(
   }
 );
 
+export const PREVIOUS_STEP_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.previousStepLabel',
+  {
+    defaultMessage: 'Go to previous step',
+  }
+);
+
+export const NEXT_STEP_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.nextStepLabel',
+  {
+    defaultMessage: 'Go to next step',
+  }
+);
+
 export const SEARCH_CAPABILITIES_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.searchCapabilitiesTitle',
   {

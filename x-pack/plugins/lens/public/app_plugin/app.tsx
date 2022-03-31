@@ -58,6 +58,7 @@ export function App({
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
+  theme$,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -402,6 +403,7 @@ export function App({
           initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
+          theme$={theme$}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
