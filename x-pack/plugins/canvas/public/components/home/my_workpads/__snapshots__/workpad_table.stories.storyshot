@@ -37,7 +37,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="search"
                   size="m"
-                />
+                >
+                  
+                </span>
               </span>
             </div>
           </div>
@@ -73,7 +75,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                 className="euiFilePicker__icon"
                 data-euiicon-type="importAction"
                 size="m"
-              />
+              >
+                
+              </span>
               <div
                 className="euiFilePicker__promptText"
               >
@@ -150,7 +154,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                           color="inherit"
                           data-euiicon-type="arrowDown"
                           size="s"
-                        />
+                        >
+                          
+                        </span>
                         <span
                           className="euiButtonEmpty__text"
                         >
@@ -296,7 +302,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       className="euiTableSortIcon"
                       data-euiicon-type="sortDown"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </button>
               </th>
@@ -460,7 +468,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="exportAction"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -486,7 +496,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="copy"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -632,7 +644,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="exportAction"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -658,7 +672,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="copy"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -804,7 +820,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="exportAction"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -830,7 +848,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               color="inherit"
                               data-euiicon-type="copy"
                               size="m"
-                            />
+                            >
+                              
+                            </span>
                           </button>
                         </span>
                       </div>
@@ -873,7 +893,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                     <span
                       className="euiButtonEmpty__text"
                     >
@@ -915,7 +937,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   color="inherit"
                   data-euiicon-type="arrowLeft"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
               <ul
                 aria-label="Pagination for table: "
@@ -960,7 +984,9 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                   color="inherit"
                   data-euiicon-type="arrowRight"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
             </nav>
           </div>
