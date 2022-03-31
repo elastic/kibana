@@ -46,6 +46,7 @@ import type { TimeSeriesExplorerAppState } from '../../../../common/types/locato
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { useRefresh } from '../use_refresh';
+import { TimeseriesexplorerNoChartData } from '../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -317,6 +318,14 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
         <TimeseriesexplorerNoJobsFound />
+      </TimeSeriesExplorerPage>
+    );
+  }
+
+  if (!bounds) {
+    return (
+      <TimeSeriesExplorerPage>
+        <TimeseriesexplorerNoChartData />
       </TimeSeriesExplorerPage>
     );
   }
