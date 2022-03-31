@@ -38,7 +38,7 @@ describe('When on the host isolation exceptions entry form', () => {
     render = (exception) => {
       return mockedContext.render(
         <HostIsolationExceptionsForm
-          exception={exception}
+          item={exception}
           policies={policiesRequest.items}
           onChange={onChange}
           onError={onError}
