@@ -11,5 +11,6 @@ export const NO_DATA_CARD_MAX_WIDTH = 400;
 export const NoDataCardStyles = () => {
   return {
     maxWidth: NO_DATA_CARD_MAX_WIDTH,
+    marginInline: 'auto',
   };
 };

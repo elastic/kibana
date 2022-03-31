@@ -56,6 +56,7 @@ export class IndexLifecycleManagementPlugin
             i18n: { Context: I18nContext },
             application,
             docLinks,
+            executionContext,
           } = coreStart;
 
           const license = await licensing.license$.pipe(first()).toPromise();
@@ -74,6 +75,7 @@ export class IndexLifecycleManagementPlugin
             license,
             theme$,
             docLinks,
+            executionContext,
             cloud
           );
 
