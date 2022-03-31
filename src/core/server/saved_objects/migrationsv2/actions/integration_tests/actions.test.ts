@@ -1161,7 +1161,8 @@ describe('migration actions', () => {
 
       await expect(task()).rejects.toThrow('index_not_found_exception');
     });
-    it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
+    // Failing 7.latest ES 8.2 forward compatibility: https://github.com/elastic/kibana/issues/129078
+    it.skip('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
         '.kibana_1'
