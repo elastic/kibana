@@ -20,8 +20,8 @@ export async function fetchAnchor(
 ): Promise<EsHitRecord> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
 
-  const response = await searchSource.fetch();
-  const doc = response.hits?.hits?.[0];
+  const { rawResponse } = await searchSource.fetch$().toPromise();
+  const doc = rawResponse.hits?.hits?.[0];
 
   if (!doc) {
     throw new Error(

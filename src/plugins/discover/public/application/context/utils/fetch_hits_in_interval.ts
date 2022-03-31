@@ -48,7 +48,7 @@ export async function fetchHitsInInterval(
   if (stop) {
     range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(stop, nanosValue);
   }
-  const response = await searchSource
+  const { rawResponse } = await searchSource
     .setField('size', maxCount)
     .setField('query', {
       query: {
@@ -74,8 +74,9 @@ export async function fetchHitsInInterval(
     .setField('searchAfter', searchAfter)
     .setField('sort', sort)
     .setField('version', true)
-    .fetch();
+    .fetch$()
+    .toPromise();
 
   // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
-  return (response.hits?.hits as unknown as EsHitRecord[]) || [];
+  return (rawResponse.hits?.hits as unknown as EsHitRecord[]) || [];
 }
