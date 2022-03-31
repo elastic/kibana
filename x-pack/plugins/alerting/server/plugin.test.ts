@@ -21,6 +21,7 @@ import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
+import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -73,6 +74,7 @@ describe('Alerting Plugin', () => {
       actions: actionsMock.createSetup(),
       statusService: statusServiceMock.createSetupContract(),
       monitoringCollection: monitoringCollectionMock.createSetup(),
+      data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
     };
 
     let plugin: AlertingPlugin;
@@ -265,6 +267,7 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
+          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -303,6 +306,7 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
+          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
@@ -352,6 +356,7 @@ describe('Alerting Plugin', () => {
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
         monitoringCollection: monitoringCollectionMock.createSetup(),
+        data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
