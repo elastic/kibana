@@ -49,6 +49,5 @@ export async function loadRuleAggregations({
       },
     }
   );
-
   return rewriteBodyRes(res);
 }
