@@ -693,7 +693,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       } else {
         indexPatternString = 'log*';
       }
-      await PageObjects.lens.switchFirstLayerIndexPattern('indexPatternString');
+      await PageObjects.lens.switchFirstLayerIndexPattern(indexPatternString);
       expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
     });
 
