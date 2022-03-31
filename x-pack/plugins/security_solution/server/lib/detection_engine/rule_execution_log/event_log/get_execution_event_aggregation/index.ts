@@ -126,6 +126,7 @@ export const getExecutionEventAggregation = ({
             actionOutcomes: {
               terms: {
                 field: OUTCOME_FIELD,
+                // Size is 2 here as outcomes we're collating are `success` & `failed`
                 size: 2,
               },
             },
