@@ -155,6 +155,10 @@ export const CasesFindRequestRt = rt.partial({
    */
   fields: rt.union([rt.array(rt.string), rt.string]),
   /**
+   * A KQL date. If used all cases created after (gte) the from date will be returned
+   */
+  from: rt.string,
+  /**
    * The page of objects to return
    */
   page: NumberFromString,
@@ -180,11 +184,17 @@ export const CasesFindRequestRt = rt.partial({
    * The order to sort by
    */
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+
+  /**
+   * A KQL date. If used all cases created before (lte) the to date will be returned.
+   */
+  to: rt.string,
   /**
    * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
    * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
    * that the user has access to.
    */
+
   owner: rt.union([rt.array(rt.string), rt.string]),
 });
 

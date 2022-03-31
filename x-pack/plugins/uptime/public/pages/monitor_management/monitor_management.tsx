@@ -17,6 +17,7 @@ import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadc
 import { MonitorListContainer } from '../../components/monitor_management/monitor_list/monitor_list_container';
 import { EnablementEmptyState } from '../../components/monitor_management/monitor_list/enablement_empty_state';
 import { useEnablement } from '../../components/monitor_management/hooks/use_enablement';
+import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { Loader } from '../../components/monitor_management/loader/loader';
 
 export const MonitorManagementPage: React.FC = () => {
@@ -32,6 +33,7 @@ export const MonitorManagementPage: React.FC = () => {
     loading: enablementLoading,
     enableSynthetics,
   } = useEnablement();
+  const { loading: locationsLoading } = useLocations();
   const { list: monitorList } = useSelector(monitorManagementListSelector);
   const { isEnabled } = enablement;
 
@@ -62,7 +64,7 @@ export const MonitorManagementPage: React.FC = () => {
   return (
     <>
       <Loader
-        loading={enablementLoading || monitorList.total === null}
+        loading={enablementLoading || locationsLoading || monitorList.total === null}
         error={Boolean(enablementError)}
         loadingTitle={LOADING_LABEL}
         errorTitle={ERROR_HEADING_LABEL}

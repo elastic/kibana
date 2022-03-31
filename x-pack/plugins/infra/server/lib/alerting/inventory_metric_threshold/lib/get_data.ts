@@ -13,7 +13,7 @@ import {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
-import { LogQueryFields } from '../../../../services/log_queries/get_log_query_fields';
+import { LogQueryFields } from '../../../metrics/types';
 import { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';
 

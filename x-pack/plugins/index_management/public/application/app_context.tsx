@@ -17,6 +17,7 @@ import {
   ScopedHistory,
   DocLinksStart,
   IUiSettingsClient,
+  ExecutionContextStart,
 } from 'src/core/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 
@@ -29,6 +30,7 @@ export interface AppDependencies {
   core: {
     fatalErrors: FatalErrorsStart;
     getUrlForApp: ApplicationStart['getUrlForApp'];
+    executionContext: ExecutionContextStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;

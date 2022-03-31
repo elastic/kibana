@@ -13,6 +13,7 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  ApplicationStart,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
@@ -26,6 +27,7 @@ import { FieldFormatsStart } from '../../field_formats/public';
 import { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export interface IndexPatternManagmentContext {
+  application: ApplicationStart;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;

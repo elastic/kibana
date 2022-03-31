@@ -19,7 +19,8 @@
     {
       "matchPackagePatterns": [".*"],
       "enabled": false,
-      "prCreation": "not-pending"
+      "prCreation": "not-pending",
+      "stabilityDays": 7
     },
     {
       "groupName": "@elastic/charts",
@@ -28,7 +29,8 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "auto-backport", "Team:DataVis", "v8.1.0", "v7.17.0"],
       "draftPR": true,
-      "enabled": true
+      "enabled": true,
+      "prCreation": "immediate"
     },
     {
       "groupName": "@elastic/elasticsearch",
@@ -60,7 +62,8 @@
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
-      "enabled": true
+      "enabled": true,
+      "prCreation": "immediate"
     },
     {
       "groupName": "babel",
@@ -69,8 +72,7 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true,
-      "stabilityDays": 7
+      "enabled": true
     },
     {
       "groupName": "typescript",
@@ -79,8 +81,7 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true,
-      "stabilityDays": 7
+      "enabled": true
     },
     {
       "groupName": "polyfills",
@@ -90,8 +91,7 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "enabled": true,
-      "stabilityDays": 7
+      "enabled": true
     },
     {
       "groupName": "vega related modules",
