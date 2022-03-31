@@ -12,6 +12,7 @@ import type {
   PackageInfo,
   PackageUsageStats,
   InstallType,
+  InstallSource,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -108,6 +109,9 @@ export interface InstallPackageRequest {
 
 export interface InstallPackageResponse {
   items: AssetReference[];
+  _meta: {
+    install_source: InstallSource;
+  };
   // deprecated in 8.0
   response?: AssetReference[];
 }
@@ -123,6 +127,7 @@ export interface InstallResult {
   status?: 'installed' | 'already_installed';
   error?: Error;
   installType: InstallType;
+  installSource: InstallSource;
 }
 
 export interface BulkInstallPackageInfo {

@@ -11,7 +11,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services//endpoint_artifacts';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   createUserAndRole,
@@ -91,7 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
         {
           method: 'post',
           path: EXCEPTION_LIST_ITEM_URL,
-          getBody: () => exceptionsGenerator.generateTrustedAppForCreate(),
+          getBody: () => {
+            return exceptionsGenerator.generateTrustedAppForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
+          },
         },
         {
           method: 'put',
@@ -100,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
             exceptionsGenerator.generateTrustedAppForUpdate({
               id: trustedAppData.artifact.id,
               item_id: trustedAppData.artifact.item_id,
+              tags: [GLOBAL_ARTIFACT_TAG],
             }),
         },
       ];

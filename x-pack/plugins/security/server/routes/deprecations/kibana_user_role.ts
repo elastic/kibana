@@ -28,7 +28,7 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
     createLicensedRouteHandler(async (context, request, response) => {
       let users: estypes.SecurityGetUserResponse;
       try {
-        users = (await context.core.elasticsearch.client.asCurrentUser.security.getUser()).body;
+        users = await context.core.elasticsearch.client.asCurrentUser.security.getUser();
       } catch (err) {
         if (getErrorStatusCode(err) === 403) {
           logger.warn(
@@ -91,9 +91,8 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
     createLicensedRouteHandler(async (context, request, response) => {
       let roleMappings: estypes.SecurityGetRoleMappingResponse;
       try {
-        roleMappings = (
-          await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping()
-        ).body;
+        roleMappings =
+          await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping();
       } catch (err) {
         logger.error(`Failed to retrieve role mappings: ${getDetailedErrorMessage(err)}.`);
         return response.customError(wrapIntoCustomErrorResponse(err));

@@ -862,6 +862,33 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.AppLeaveConfirmAction.confirmButtonText",
+            "type": "string",
+            "tags": [],
+            "label": "confirmButtonText",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AppLeaveConfirmAction.buttonColor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buttonColor",
+            "description": [],
+            "signature": [
+              "ButtonColor",
+              " | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.AppLeaveConfirmAction.callback",
             "type": "Function",
             "tags": [],
@@ -1344,6 +1371,7 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "management",
@@ -1352,10 +1380,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/index.tsx"
               },
               {
                 "plugin": "security",
@@ -1403,6 +1427,7 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "visualizations",
@@ -1910,6 +1935,7 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "securitySolution",

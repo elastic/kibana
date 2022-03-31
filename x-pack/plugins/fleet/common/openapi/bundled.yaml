@@ -382,6 +382,15 @@ paths:
                       required:
                         - id
                         - type
+                  _meta:
+                    type: object
+                    properties:
+                      install_source:
+                        type: string
+                        enum:
+                          - registry
+                          - upload
+                          - bundled
                 required:
                   - items
       operationId: install-package
@@ -395,6 +404,8 @@ paths:
               type: object
               properties:
                 force:
+                  type: boolean
+                ignore_constraints:
                   type: boolean
     put:
       summary: Packages - Update
@@ -670,6 +681,39 @@ paths:
           name: policyId
           in: query
           required: false
+        - schema:
+            type: string
+          name: kuery
+          in: query
+          required: false
+  /agent_status/data:
+    get:
+      summary: Agents - Get incoming data
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          data:
+                            type: boolean
+      operationId: get-agent-data
+      parameters:
+        - schema:
+            type: array
+          name: agentsId
+          in: query
+          required: true
   /agents:
     get:
       summary: Agents - List
@@ -1368,7 +1412,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_enrollment_api_keys_response'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                required:
+                  - item
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
@@ -1555,6 +1604,8 @@ paths:
                       type: boolean
                     diff:
                       $ref: '#/components/schemas/upgrade_diff'
+                    agent_diff:
+                      $ref: '#/components/schemas/upgrade_agent_diff'
                   required:
                     - hasErrors
   /package_policies/{packagePolicyId}:
@@ -1756,6 +1807,23 @@ paths:
                     $ref: '#/components/schemas/output'
                 required:
                   - item
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /logstash_api_keys:
+    post:
+      summary: Generate Logstash API key
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+      operationId: generate-logstash-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
 components:
@@ -2175,6 +2243,7 @@ components:
         - lens
         - ml-module
         - security-rule
+        - csp_rule_template
     elasticsearch_asset_type:
       title: Elasticsearch asset type
       type: string
@@ -2378,6 +2447,12 @@ components:
             enum:
               - metrics
               - logs
+        data_output_id:
+          type: string
+          nullable: true
+        monitoring_output_id:
+          type: string
+          nullable: true
       required:
         - name
         - namespace
@@ -2477,6 +2552,10 @@ components:
               format: date-time
             updated_by:
               type: string
+            data_output_id:
+              type: string
+            monitoring_output_id:
+              type: string
             revision:
               type: number
             agents:
@@ -2501,8 +2580,10 @@ components:
         package_version:
           type: string
         last_activity_ms:
-          type: string
+          type: number
         size_in_bytes:
+          type: number
+        size_in_bytes_formatted:
           type: string
         dashboard:
           type: array
@@ -2537,22 +2618,6 @@ components:
         - api_key
         - active
         - created_at
-    get_enrollment_api_keys_response:
-      title: Bulk install packages response
-      type: object
-      properties:
-        list:
-          type: array
-          deprecated: true
-          properties:
-            items:
-              $ref: '#/components/schemas/enrollment_api_key'
-        item:
-          type: array
-          items:
-            $ref: '#/components/schemas/enrollment_api_key'
-      required:
-        - item
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array
@@ -2577,6 +2642,80 @@ components:
                     type: array
                     items:
                       type: string
+    full_agent_policy_input_stream:
+      title: Full agent policy input stream
+      allOf:
+        - type: object
+          additionalProperties: true
+          properties:
+            id:
+              type: string
+            data_stream:
+              type: object
+              properties:
+                dataset:
+                  type: string
+                type:
+                  type: string
+              required:
+                - dataset
+                - type
+          required:
+            - id
+            - data_stream
+    full_agent_policy_input:
+      title: Full agent policy input
+      allOf:
+        - type: object
+          additionalProperties: true
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            revision:
+              type: number
+            type:
+              type: string
+            data_stream:
+              type: object
+              properties:
+                namespace:
+                  type: string
+              required:
+                - namespace
+            use_output:
+              type: string
+            meta:
+              type: object
+              additionalProperties: true
+              properties:
+                package:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                    - name
+                    - version
+            streams:
+              $ref: '#/components/schemas/full_agent_policy_input_stream'
+          required:
+            - id
+            - name
+            - revision
+            - type
+            - data_stream
+            - use_output
+    upgrade_agent_diff:
+      title: Package policy Upgrade dryrun
+      type: array
+      items:
+        type: array
+        items:
+          $ref: '#/components/schemas/full_agent_policy_input'
     update_package_policy:
       title: Update package policy
       type: object
@@ -2633,6 +2772,8 @@ components:
           type: string
         description:
           type: string
+        force:
+          type: boolean
       required:
         - name
         - namespace
@@ -2662,12 +2803,21 @@ components:
           type: string
         ca_trusted_fingerprint:
           type: string
-        api_key:
-          type: string
         config:
           type: object
         config_yaml:
           type: string
+        ssl:
+          type: object
+          properties:
+            certificate:
+              type: string
+            certificate_authorities:
+              type: array
+              items:
+                type: string
+            key:
+              type: string
       required:
         - id
         - is_default

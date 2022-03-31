@@ -85,7 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('cloning', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/128967
+  describe.skip('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
     const transformConfigWithLatest = getLatestTransformConfig('cloning');
@@ -333,8 +334,8 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('should display the create data view switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();

@@ -14,8 +14,16 @@ import { BrowserTestRunResult } from './browser_test_results';
 import { fireEvent } from '@testing-library/dom';
 
 describe('BrowserTestRunResult', function () {
+  const onDone = jest.fn();
+  let testId: string;
+
+  beforeEach(() => {
+    testId = 'test-id';
+    jest.resetAllMocks();
+  });
+
   it('should render properly', async function () {
-    render(<BrowserTestRunResult monitorId={'test-id'} />);
+    render(<BrowserTestRunResult monitorId={testId} isMonitorSaved={true} onDone={onDone} />);
     expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('0 steps completed')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
@@ -28,7 +36,7 @@ describe('BrowserTestRunResult', function () {
             query: {
               bool: {
                 filter: [
-                  { term: { config_id: 'test-id' } },
+                  { term: { config_id: testId } },
                   {
                     terms: {
                       'synthetics.type': ['heartbeat/summary', 'journey/start'],
@@ -52,12 +60,13 @@ describe('BrowserTestRunResult', function () {
       data,
       stepListData: { steps: [stepEndDoc._source] } as any,
       loading: false,
+      stepsLoading: false,
       journeyStarted: true,
       summaryDoc: summaryDoc._source,
       stepEnds: [stepEndDoc._source],
     });
 
-    render(<BrowserTestRunResult monitorId={'test-id'} />);
+    render(<BrowserTestRunResult monitorId={testId} isMonitorSaved={true} onDone={onDone} />);
 
     expect(await screen.findByText('Test result')).toBeInTheDocument();
 
@@ -69,6 +78,9 @@ describe('BrowserTestRunResult', function () {
 
     expect(await screen.findByText('Go to https://www.elastic.co/')).toBeInTheDocument();
     expect(await screen.findByText('21.8 seconds')).toBeInTheDocument();
+
+    // Calls onDone on completion
+    expect(onDone).toHaveBeenCalled();
   });
 });
 

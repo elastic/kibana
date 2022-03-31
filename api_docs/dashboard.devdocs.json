@@ -1093,6 +1093,37 @@
     "functions": [
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.cleanEmptyKeys",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanEmptyKeys",
+        "description": [],
+        "signature": [
+          "(stateObj: Record<string, unknown>) => Record<string, unknown>"
+        ],
+        "path": "src/plugins/dashboard/public/locator.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.cleanEmptyKeys.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "stateObj",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "src/plugins/dashboard/public/locator.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.createDashboardEditUrl",
         "type": "Function",
         "tags": [],
@@ -1131,64 +1162,6 @@
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.createDashboardUrlGenerator",
-        "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "createDashboardUrlGenerator",
-        "description": [],
-        "signature": [
-          "(getStartServices: () => Promise<{ appBasePath: string; useHashedUrl: boolean; savedDashboardLoader: ",
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectLoader",
-            "text": "SavedObjectLoader"
-          },
-          "; }>) => ",
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorsDefinition",
-            "text": "UrlGeneratorsDefinition"
-          },
-          "<\"DASHBOARD_APP_URL_GENERATOR\">"
-        ],
-        "path": "src/plugins/dashboard/public/url_generator.ts",
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.createDashboardUrlGenerator.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "getStartServices",
-            "description": [],
-            "signature": [
-              "() => Promise<{ appBasePath: string; useHashedUrl: boolean; savedDashboardLoader: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectLoader",
-                "text": "SavedObjectLoader"
-              },
-              "; }>"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1246,7 +1219,7 @@
             "label": "controlGroupInput",
             "description": [],
             "signature": [
-              "DashboardControlGroupInput",
+              "DashboardContainerControlGroupInput",
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
@@ -1318,6 +1291,16 @@
             "signature": [
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.timeRestore",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeRestore",
+            "description": [],
             "path": "src/plugins/dashboard/public/types.ts",
             "deprecated": false
           },
@@ -1924,12 +1907,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-public.DashboardSavedObject.outcome",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "outcome",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false
@@ -1949,228 +1932,30 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardSavedObject.aliasPurpose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "aliasPurpose",
+            "description": [],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardSavedObject.controlGroupInput",
             "type": "Object",
             "tags": [],
             "label": "controlGroupInput",
             "description": [],
             "signature": [
-              "{ controlStyle?: ",
-              "ControlStyle",
-              " | undefined; panelsJSON?: string | undefined; } | undefined"
+              "Omit<",
+              "RawControlGroupAttributes",
+              ", \"id\"> | undefined"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.DashboardUrlGeneratorState",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "DashboardUrlGeneratorState",
-        "description": [],
-        "path": "src/plugins/dashboard/public/url_generator.ts",
-        "deprecated": true,
-        "references": [],
-        "children": [
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.dashboardId",
-            "type": "string",
-            "tags": [],
-            "label": "dashboardId",
-            "description": [
-              "\nIf given, the dashboard saved object with this id will be loaded. If not given,\na new, unsaved dashboard will be loaded up."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.timeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "timeRange",
-            "description": [
-              "\nOptionally set the time range in the time picker."
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.refreshInterval",
-            "type": "Object",
-            "tags": [],
-            "label": "refreshInterval",
-            "description": [
-              "\nOptionally set the refresh interval."
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [
-              "\nOptionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has filters saved with it, this will _replace_ those filters."
-            ],
-            "signature": [
-              "Filter",
-              "[] | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [
-              "\nOptionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the\nsaved dashboard has a query saved with it, this will _replace_ that query."
-            ],
-            "signature": [
-              "Query",
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.useHash",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "useHash",
-            "description": [
-              "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.preserveSavedFilters",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "preserveSavedFilters",
-            "description": [
-              "\nWhen `true` filters from saved filters from destination dashboard as merged with applied filters\nWhen `false` applied filters take precedence and override saved filters\n\ntrue is default"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.viewMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "viewMode",
-            "description": [
-              "\nView mode of the dashboard."
-            ],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.ViewMode",
-                "text": "ViewMode"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.searchSessionId",
-            "type": "string",
-            "tags": [],
-            "label": "searchSessionId",
-            "description": [
-              "\nSearch search session ID to restore.\n(Background search)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.panels",
-            "type": "Array",
-            "tags": [],
-            "label": "panels",
-            "description": [
-              "\nList of dashboard panels"
-            ],
-            "signature": [
-              {
-                "pluginId": "dashboard",
-                "scope": "common",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-common.SavedDashboardPanel730ToLatest",
-                "text": "SavedDashboardPanel730ToLatest"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dashboard",
-            "id": "def-public.DashboardUrlGeneratorState.savedQuery",
-            "type": "string",
-            "tags": [],
-            "label": "savedQuery",
-            "description": [
-              "\nSaved query ID"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/dashboard/public/url_generator.ts",
             "deprecated": false
           }
         ],
@@ -2179,20 +1964,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.DASHBOARD_APP_URL_GENERATOR",
-        "type": "string",
-        "tags": [],
-        "label": "DASHBOARD_APP_URL_GENERATOR",
-        "description": [],
-        "signature": [
-          "\"DASHBOARD_APP_URL_GENERATOR\""
-        ],
-        "path": "src/plugins/dashboard/public/url_generator.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "dashboard",
         "id": "def-public.DASHBOARD_CONTAINER_TYPE",
@@ -2287,27 +2058,6 @@
           " | undefined; }"
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-public.DashboardUrlGenerator",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardUrlGenerator",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorContract",
-            "text": "UrlGeneratorContract"
-          },
-          "<\"DASHBOARD_APP_URL_GENERATOR\">"
-        ],
-        "path": "src/plugins/dashboard/public/plugin.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2514,13 +2264,7 @@
           "description": [],
           "signature": [
             "() => ",
-            {
-              "pluginId": "savedObjects",
-              "scope": "public",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-public.SavedObjectLoader",
-              "text": "SavedObjectLoader"
-            }
+            "SavedObjectLoader"
           ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
@@ -2541,34 +2285,6 @@
           "deprecated": false,
           "children": [],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "dashboard",
-          "id": "def-public.DashboardStart.dashboardUrlGenerator",
-          "type": "Object",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "dashboardUrlGenerator",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "dashboard",
-              "scope": "public",
-              "docId": "kibDashboardPluginApi",
-              "section": "def-public.DashboardUrlGenerator",
-              "text": "DashboardUrlGenerator"
-            },
-            " | undefined"
-          ],
-          "path": "src/plugins/dashboard/public/plugin.tsx",
-          "deprecated": true,
-          "references": [
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/overview/containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href.ts"
-            }
-          ]
         },
         {
           "parentPluginId": "dashboard",
@@ -2715,6 +2431,78 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.controlGroupInputToRawAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "controlGroupInputToRawAttributes",
+        "description": [],
+        "signature": [
+          "(controlGroupInput: Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">) => ",
+          "RawControlGroupAttributes"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.controlGroupInputToRawAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlGroupInput",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ", \"id\">"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.getDefaultDashboardControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultDashboardControlGroupInput",
+        "description": [],
+        "signature": [
+          "() => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\">"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "dashboard",
         "id": "def-common.migratePanelsTo730",
@@ -2885,6 +2673,118 @@
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.rawAttributesToControlGroupInput",
+        "type": "Function",
+        "tags": [],
+        "label": "rawAttributesToControlGroupInput",
+        "description": [],
+        "signature": [
+          "(rawControlGroupAttributes: ",
+          "RawControlGroupAttributes",
+          ") => Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"id\"> | undefined"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.rawAttributesToControlGroupInput.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rawControlGroupAttributes",
+            "description": [],
+            "signature": [
+              "RawControlGroupAttributes"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.rawAttributesToSerializable",
+        "type": "Function",
+        "tags": [],
+        "label": "rawAttributesToSerializable",
+        "description": [],
+        "signature": [
+          "(rawControlGroupAttributes: Omit<",
+          "RawControlGroupAttributes",
+          ", \"id\">) => ",
+          "SerializableRecord"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.rawAttributesToSerializable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawControlGroupAttributes",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "RawControlGroupAttributes",
+              ", \"id\">"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.serializableToRawAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "serializableToRawAttributes",
+        "description": [],
+        "signature": [
+          "(serializable: ",
+          "SerializableRecord",
+          ") => Omit<",
+          "RawControlGroupAttributes",
+          ", \"type\" | \"id\">"
+        ],
+        "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.serializableToRawAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "serializable",
+            "description": [],
+            "signature": [
+              "SerializableRecord"
+            ],
+            "path": "src/plugins/dashboard/common/embeddable/dashboard_control_group.ts",
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

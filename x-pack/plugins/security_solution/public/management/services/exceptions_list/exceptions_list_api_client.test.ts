@@ -98,6 +98,41 @@ describe('Exceptions List Api Client', () => {
       expect(exceptionsListApiClientInstanceV2).toBeDefined();
       expect(exceptionsListApiClientInstanceV3).toBeDefined();
     });
+
+    it('Creating an instance fails because the create list call throws', async () => {
+      try {
+        fakeHttpServices.post.mockRejectedValueOnce({
+          response: {
+            status: 500,
+          },
+        });
+        const newFakeListId = 'fakeListIdV3';
+        const failedInstance = new ExceptionsListApiClient(
+          fakeHttpServices,
+          newFakeListId,
+          getFakeListDefinition()
+        );
+        await failedInstance.find(getQueryParams());
+      } catch (err) {
+        expect(err.response.status).toBe(500);
+      }
+    });
+
+    it('Creating an instance when list already exists does not throw', async () => {
+      fakeHttpServices.post.mockRejectedValueOnce({
+        response: {
+          status: 409,
+        },
+      });
+      const newFakeListId = 'fakeListIdV4';
+      const notFailedInstance = new ExceptionsListApiClient(
+        fakeHttpServices,
+        newFakeListId,
+        getFakeListDefinition()
+      );
+      await notFailedInstance.find(getQueryParams());
+      expect(notFailedInstance).toBeDefined();
+    });
   });
 
   describe('Wen using public methods', () => {
@@ -130,7 +165,8 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.get).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         query: {
-          id: fakeItemId,
+          item_id: fakeItemId,
+          id: undefined,
           namespace_type: 'agnostic',
         },
       });
@@ -187,7 +223,8 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         query: {
-          id: fakeItemId,
+          item_id: fakeItemId,
+          id: undefined,
           namespace_type: 'agnostic',
         },
       });
@@ -203,9 +240,56 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_URL}/summary`, {
         query: {
           filter: fakeQklFilter,
+          list_id: getFakeListId(),
           namespace_type: 'agnostic',
         },
       });
+    });
+
+    it('hasData method returns true when list has data', async () => {
+      fakeHttpServices.get.mockResolvedValue({
+        total: 1,
+      });
+
+      const exceptionsListApiClientInstance = getInstance();
+
+      await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(true);
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+        query: expect.objectContaining({
+          page: 1,
+          per_page: 1,
+        }),
+      });
+    });
+
+    it('hasData method returns false when list has no data', async () => {
+      fakeHttpServices.get.mockResolvedValue({
+        total: 0,
+      });
+
+      const exceptionsListApiClientInstance = getInstance();
+
+      await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(false);
+    });
+
+    it('return new instance when HttpCore changes', async () => {
+      const initialInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+      fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+
+      const newInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      expect(initialInstance).not.toStrictEqual(newInstance);
     });
   });
 });

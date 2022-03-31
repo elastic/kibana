@@ -230,7 +230,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isLoading={isLoading}
                 onClick={() => handleSubmit(false)}
               >
-                {I18n.COMPLETE_WITHOUT_ACTIVATING}
+                {I18n.COMPLETE_WITHOUT_ENABLING}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -239,9 +239,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={() => handleSubmit(true)}
-                data-test-subj="create-activate"
+                data-test-subj="create-enable"
               >
-                {I18n.COMPLETE_WITH_ACTIVATING}
+                {I18n.COMPLETE_WITH_ENABLING}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -52,16 +52,17 @@ export class CanvasPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
-    const expressionsFork = plugins.expressions.fork();
-
-    setupInterpreter(expressionsFork, {
+    const expressionsFork = plugins.expressions.fork('canvas');
+    const expressionsSetup = expressionsFork.setup();
+    setupInterpreter(expressionsSetup, {
       embeddablePersistableStateService: {
         extract: plugins.embeddable.extract,
         inject: plugins.embeddable.inject,
+        getAllMigrations: plugins.embeddable.getAllMigrations,
       },
     });
 
-    const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsFork };
+    const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsSetup };
     coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType(deps));
     coreSetup.savedObjects.registerType(workpadTypeFactory(deps));
@@ -69,7 +70,8 @@ export class CanvasPlugin implements Plugin {
 
     plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
-    const contextProvider = createWorkpadRouteContext({ expressions: expressionsFork });
+    const expressionsStart = expressionsFork.start();
+    const contextProvider = createWorkpadRouteContext({ expressions: expressionsStart });
     coreSetup.http.registerRouteHandlerContext<CanvasRouteHandlerContext, 'canvas'>(
       'canvas',
       contextProvider
@@ -79,7 +81,7 @@ export class CanvasPlugin implements Plugin {
 
     initRoutes({
       router: canvasRouter,
-      expressions: expressionsFork,
+      expressions: expressionsSetup,
       bfetch: plugins.bfetch,
       logger: this.logger,
     });

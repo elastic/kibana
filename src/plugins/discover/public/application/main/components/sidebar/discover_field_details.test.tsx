@@ -11,13 +11,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverFieldDetails } from './discover_field_details';
-import { DataViewField } from '../../../../../../data/common';
-import { stubIndexPattern } from '../../../../../../data/common/stubs';
+import { DataViewField } from '../../../../../../data_views/public';
+import { stubDataView } from '../../../../../../data_views/common/data_view.stub';
 
 describe('discover sidebar field details', function () {
   const onAddFilter = jest.fn();
   const defaultProps = {
-    indexPattern: stubIndexPattern,
+    indexPattern: stubDataView,
     details: { buckets: [], error: '', exists: 1, total: 2, columns: [] },
     onAddFilter,
   };

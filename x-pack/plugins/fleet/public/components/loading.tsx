@@ -12,7 +12,7 @@ import type { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/
 export const Loading: React.FunctionComponent<{ size?: EuiLoadingSpinnerSize }> = ({ size }) => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size={size || 'xl'} />
+      <EuiLoadingSpinner size={size || 'xl'} data-test-subj="loadingSpinner" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

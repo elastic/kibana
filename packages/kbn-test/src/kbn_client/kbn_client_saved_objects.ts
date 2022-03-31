@@ -219,6 +219,25 @@ export class KbnClientSavedObjects {
     this.log.success('deleted', deleted, 'objects');
   }
 
+  public async cleanStandardList(options?: { space?: string }) {
+    // add types here
+    const types = [
+      'search',
+      'index-pattern',
+      'visualization',
+      'dashboard',
+      'lens',
+      'map',
+      'graph-workspace',
+      'query',
+      'tag',
+      'url',
+      'canvas-workpad',
+    ];
+    const newOptions = { types, space: options?.space };
+    await this.clean(newOptions);
+  }
+
   public async bulkDelete(options: DeleteObjectsOptions) {
     let deleted = 0;
     let missing = 0;
@@ -228,8 +247,8 @@ export class KbnClientSavedObjects {
         await this.requester.request({
           method: 'DELETE',
           path: options.space
-            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}`
-            : uriencode`/api/saved_objects/${obj.type}/${obj.id}`,
+            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}?force=true`
+            : uriencode`/api/saved_objects/${obj.type}/${obj.id}?force=true`,
         });
         deleted++;
       } catch (error) {

@@ -51,10 +51,10 @@ type Props = {
 );
 
 const resolveAgentId = (
-  agentPolicies?: AgentPolicy[],
+  agentPolicies: AgentPolicy[],
   selectedAgentPolicyId?: string
 ): undefined | string => {
-  if (agentPolicies && agentPolicies.length && !selectedAgentPolicyId) {
+  if (agentPolicies.length && !selectedAgentPolicyId) {
     if (agentPolicies.length === 1) {
       return agentPolicies[0].id;
     }
@@ -154,7 +154,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}
-          value={selectedAgentPolicyId || undefined}
+          value={selectedAgentPolicyId}
           onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
           aria-label={i18n.translate(
             'xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel',
@@ -162,7 +162,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
               defaultMessage: 'Agent policy',
             }
           )}
-          hasNoInitialSelection={agentPolicies.length > 1}
+          hasNoInitialSelection={!selectedAgentPolicyId}
           data-test-subj="agentPolicyDropdown"
           isInvalid={!selectedAgentPolicyId}
         />

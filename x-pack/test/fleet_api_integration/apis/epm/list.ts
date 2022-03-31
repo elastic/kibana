@@ -57,11 +57,29 @@ export default function (providerContext: FtrProviderContext) {
         expect(listResponse.items.sort()).to.eql(['endpoint'].sort());
       });
 
-      it('allows user with only read permission to access', async () => {
+      it('allows user with only fleet permission to access', async () => {
         await supertestWithoutAuth
           .get('/api/fleet/epm/packages')
-          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
           .expect(200);
+      });
+      it('allows user with only integrations permission to access', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
+          .expect(200);
+      });
+      it('allows user with integrations read permission to access', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+          .expect(200);
+      });
+      it('does not allow user with the correct permissions', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .expect(403);
       });
     });
   });

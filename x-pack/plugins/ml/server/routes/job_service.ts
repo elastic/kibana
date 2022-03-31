@@ -896,7 +896,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
                 },
               } as estypes.MlPreviewDatafeedRequest);
 
-        const { body } = await mlClient.previewDatafeed(payload, getAuthorizationHeader(request));
+        const body = await mlClient.previewDatafeed(payload, getAuthorizationHeader(request));
         return response.ok({
           body,
         });

@@ -6,7 +6,7 @@
   "description": "Developer documentation for building custom Kibana plugins and extending Kibana functionality.",
   "items": [
     {
-      "category": "Getting started",
+      "label": "Getting started",
       "items": [
         { "id": "kibDevDocsWelcome" },
         { "id": "kibDevTutorialSetupDevEnv" },
@@ -16,7 +16,20 @@
       ]
     },
     {
-      "category": "Key concepts",
+      "label": "Contributing",
+      "items": [
+        { "id": "kibDevPrinciples" },
+        { "id": "kibRepoStructure" },
+        { "id": "kibStandards" },
+        { "id": "kibBestPractices" },
+        { "id": "kibDocumentation" },
+        { "id": "kibStyleGuide" },
+        { "id": "ktRFCProcess" },
+        { "id": "kibGitHub" }
+      ]
+    },
+    {
+      "label": "Key concepts",
       "items": [
         { "id": "kibPlatformIntro" },
         { "id": "kibDevAnatomyOfAPlugin" },
@@ -32,7 +45,7 @@
       ]
     },
     {
-      "category": "Tutorials",
+      "label": "Tutorials",
       "items": [
         { "id": "kibDevTutorialTestingPlugins" },
         { "id": "kibDevTutorialSavedObject" },
@@ -46,24 +59,17 @@
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },
-        { "id": "kibDevTutorialServerEndpoint" }
+        { "id": "kibDevTutorialCI" },
+        { "id": "kibDevTutorialServerEndpoint" },
+        { "id": "kibDevTutorialAdvancedSettings"},
+        { "id": "kibDevSharePluginReadme"}
       ]
     },
     {
-      "category": "Contributing",
+      "label": "Contributors Newsletters",
       "items": [
-        { "id": "kibRepoStructure" },
-        { "id": "kibDevPrinciples" },
-        { "id": "kibStandards" },
-        { "id": "ktRFCProcess" },
-        { "id": "kibBestPractices" },
-        { "id": "kibStyleGuide" },
-        { "id": "kibGitHub" }
-      ]
-    },
-    {
-      "category": "Contributors Newsletters",
-      "items": [
+        { "id": "kibMarch2022ContributorNewsletter" },
+        { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
         { "id": "kibDecember2021ContributorNewsletter" },
         { "id": "kibNovember2021ContributorNewsletter" },
@@ -78,7 +84,7 @@
       ]
     },
     {
-      "category": "API documentation",
+      "label": "API documentation",
       "items": [
         { "id": "kibDevDocsApiWelcome" },
         { "id": "kibDevDocsPluginDirectory" },

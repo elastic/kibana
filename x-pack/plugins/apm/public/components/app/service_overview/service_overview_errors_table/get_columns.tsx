@@ -7,17 +7,26 @@
 
 import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { truncate } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { ApmRoutes } from '../../../routing/apm_route_config';
+
+const ErrorLink = euiStyled(ErrorOverviewLink)`
+  ${truncate('100%')};
+`;
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -26,14 +35,41 @@ type ErrorGroupDetailedStatistics =
 
 export function getColumns({
   serviceName,
+  errorGroupDetailedStatisticsLoading,
   errorGroupDetailedStatistics,
   comparisonEnabled,
+  query,
 }: {
   serviceName: string;
+  errorGroupDetailedStatisticsLoading: boolean;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
+  query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
 }): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['errorGroups'][0]>> {
   return [
+    {
+      name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
+        defaultMessage: 'Type',
+      }),
+      field: 'type',
+      sortable: false,
+      render: (_, { type }) => {
+        return (
+          <ErrorLink
+            title={type}
+            serviceName={serviceName}
+            query={
+              {
+                ...query,
+                kuery: `error.exception.type:"${type}"`,
+              } as TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query']
+            }
+          >
+            {type}
+          </ErrorLink>
+        );
+      },
+    },
     {
       field: 'name',
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
@@ -95,6 +131,7 @@ export function getColumns({
         return (
           <SparkPlot
             color={currentPeriodColor}
+            isLoading={errorGroupDetailedStatisticsLoading}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',

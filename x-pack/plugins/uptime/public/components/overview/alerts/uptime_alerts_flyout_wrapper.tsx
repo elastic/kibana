@@ -34,7 +34,7 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
       triggersActionsUi.getAddAlertFlyout({
         consumer: 'uptime',
         onClose: onCloseAlertFlyout,
-        alertTypeId,
+        ruleTypeId: alertTypeId,
         canChangeTrigger: !alertTypeId,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

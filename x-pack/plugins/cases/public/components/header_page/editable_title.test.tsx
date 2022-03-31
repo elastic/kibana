@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { EditableTitle, EditableTitleProps } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -27,13 +27,17 @@ describe('EditableTitle', () => {
     jest.clearAllMocks();
   });
 
-  test('it renders', () => {
-    const wrapper = shallow(<EditableTitle {...defaultProps} />);
+  it('renders', () => {
+    const wrapper = shallow(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('it does not show the edit icon when the user does not have edit permissions', () => {
+  it('does not show the edit icon when the user does not have edit permissions', () => {
     const wrapper = mount(
       <TestProviders>
         <EditableTitle {...{ ...defaultProps, userCanCrud: false }} />
@@ -43,7 +47,7 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').exists()).toBeFalsy();
   });
 
-  test('it shows the edit title input field', () => {
+  it('shows the edit title input field', () => {
     const wrapper = mount(
       <TestProviders>
         <EditableTitle {...defaultProps} />
@@ -58,7 +62,7 @@ describe('EditableTitle', () => {
     );
   });
 
-  test('it shows the submit button', () => {
+  it('shows the submit button', () => {
     const wrapper = mount(
       <TestProviders>
         <EditableTitle {...defaultProps} />
@@ -73,7 +77,7 @@ describe('EditableTitle', () => {
     );
   });
 
-  test('it shows the cancel button', () => {
+  it('shows the cancel button', () => {
     const wrapper = mount(
       <TestProviders>
         <EditableTitle {...defaultProps} />
@@ -88,7 +92,7 @@ describe('EditableTitle', () => {
     );
   });
 
-  test('it DOES NOT shows the edit icon when in edit mode', () => {
+  it('DOES NOT shows the edit icon when in edit mode', () => {
     const wrapper = mount(
       <TestProviders>
         <EditableTitle {...defaultProps} />
@@ -103,7 +107,7 @@ describe('EditableTitle', () => {
     );
   });
 
-  test('it switch to non edit mode when canceled', () => {
+  it('switch to non edit mode when canceled', () => {
     const wrapper = mount(
       <TestProviders>
         <EditableTitle {...defaultProps} />
@@ -117,7 +121,7 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 
-  test('it should change the title', () => {
+  it('should change the title', () => {
     const newTitle = 'new test title';
 
     const wrapper = mount(
@@ -140,7 +144,7 @@ describe('EditableTitle', () => {
     ).toEqual(newTitle);
   });
 
-  test('it should NOT change the title when cancel', () => {
+  it('should NOT change the title when cancel', () => {
     const title = 'Test title';
     const newTitle = 'new test title';
 
@@ -164,7 +168,7 @@ describe('EditableTitle', () => {
     expect(wrapper.find('h1[data-test-subj="header-page-title"]').text()).toEqual(title);
   });
 
-  test('it submits the title', () => {
+  it('submits the title', () => {
     const newTitle = 'new test title';
 
     const wrapper = mount(
@@ -188,7 +192,7 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 
-  test('it does not submits the title when the length is longer than 64 characters', () => {
+  it('does not submit the title when the length is longer than 64 characters', () => {
     const longTitle =
       'This is a title that should not be saved as it is longer than 64 characters.';
 
@@ -215,5 +219,80 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
       false
     );
+  });
+
+  it('does not show an error after a previous edit error was displayed', () => {
+    const longTitle =
+      'This is a title that should not be saved as it is longer than 64 characters.';
+
+    const shortTitle = 'My title';
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    // simualte a long title
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: longTitle } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('.euiFormErrorText').text()).toBe(
+      'The length of the title is too long. The maximum length is 64.'
+    );
+
+    // write a shorter one
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: shortTitle } });
+    wrapper.update();
+
+    // submit the form
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+
+    // edit again
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    // no error should appear
+    expect(wrapper.find('.euiFormErrorText').length).toBe(0);
+  });
+
+  describe('Badges', () => {
+    let appMock: AppMockRenderer;
+
+    beforeEach(() => {
+      appMock = createAppMockRenderer();
+    });
+
+    it('does not render the badge if the release is ga', () => {
+      const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.queryByText('Beta')).toBeFalsy();
+      expect(renderResult.queryByText('Technical preview')).toBeFalsy();
+    });
+
+    it('does render the beta badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'beta' });
+      const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Beta')).toBeInTheDocument();
+    });
+
+    it('does render the experimental badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'experimental' });
+      const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Technical preview')).toBeInTheDocument();
+    });
   });
 });

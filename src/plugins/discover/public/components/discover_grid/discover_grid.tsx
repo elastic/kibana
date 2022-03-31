@@ -20,7 +20,8 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import { flattenHit, DataView } from '../../../../data/common';
+import type { DataView } from '../../../../data_views/public';
+import { flattenHit } from '../../../../data/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -408,7 +409,14 @@ export const DiscoverGrid = ({
 
   if (!rowCount) {
     return (
-      <div className="euiDataGrid__noResults">
+      <div
+        className="euiDataGrid__noResults"
+        data-render-complete={!isLoading}
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+        data-document-number={0}
+      >
         <EuiText size="xs" color="subdued">
           <EuiIcon type="discoverApp" size="m" color="subdued" />
           <EuiSpacer size="s" />

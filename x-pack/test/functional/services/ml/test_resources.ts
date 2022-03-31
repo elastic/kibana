@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
+import { MlApi } from './api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 
@@ -19,11 +20,16 @@ export enum SavedObjectType {
   SEARCH = 'search',
   VISUALIZATION = 'visualization',
   ML_JOB = 'ml-job',
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE = 'ml-trained-model',
+  ML_MODULE_SAVED_OBJECT_TYPE = 'ml-module',
 }
 
 export type MlTestResourcesi = ProvidedType<typeof MachineLearningTestResourcesProvider>;
 
-export function MachineLearningTestResourcesProvider({ getService }: FtrProviderContext) {
+export function MachineLearningTestResourcesProvider(
+  { getService }: FtrProviderContext,
+  mlApi: MlApi
+) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -59,11 +65,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       objectType: SavedObjectType
     ): Promise<string | undefined> {
       log.debug(`Searching for '${objectType}' with title '${title}'...`);
-      const findResponse = await supertest
+      const { body: findResponse, status } = await supertest
         .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200)
-        .then((res: any) => res.body);
+        .set(COMMON_REQUEST_HEADERS);
+      mlApi.assertResponseStatusCode(200, status, findResponse);
 
       for (const savedObject of findResponse.saved_objects) {
         const objectTitle = savedObject.attributes.title;
@@ -79,11 +84,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       const savedObjectIds: string[] = [];
 
       log.debug(`Searching for '${objectType}' ...`);
-      const findResponse = await supertest
+      const { body: findResponse, status } = await supertest
         .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200)
-        .then((res: any) => res.body);
+        .set(COMMON_REQUEST_HEADERS);
+      mlApi.assertResponseStatusCode(200, status, findResponse);
 
       findResponse.saved_objects.forEach((element: any) => {
         savedObjectIds.push(element.id);
@@ -115,12 +119,11 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         }`
       );
 
-      const createResponse = await supertest
+      const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.INDEX_PATTERN}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send({ attributes: { title, timeFieldName } })
-        .expect(200)
-        .then((res: any) => res.body);
+        .send({ attributes: { title, timeFieldName } });
+      mlApi.assertResponseStatusCode(200, status, createResponse);
 
       await this.assertIndexPatternExistByTitle(title);
 
@@ -131,12 +134,11 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async createBulkSavedObjects(body: object[]): Promise<string> {
       log.debug(`Creating bulk saved objects'`);
 
-      const createResponse = await supertest
+      const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/_bulk_create`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(body)
-        .expect(200)
-        .then((res: any) => res.body);
+        .send(body);
+      mlApi.assertResponseStatusCode(200, status, createResponse);
 
       log.debug(` > Created bulk saved objects'`);
       return createResponse;
@@ -159,12 +161,11 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async createSavedSearch(title: string, body: object): Promise<string> {
       log.debug(`Creating saved search with title '${title}'`);
 
-      const createResponse = await supertest
+      const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.SEARCH}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(body)
-        .expect(200)
-        .then((res: any) => res.body);
+        .send(body);
+      mlApi.assertResponseStatusCode(200, status, createResponse);
 
       await this.assertSavedSearchExistByTitle(title);
 
@@ -175,18 +176,17 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async createDashboard(title: string, body: object): Promise<string> {
       log.debug(`Creating dashboard with title '${title}'`);
 
-      const createResponse = await supertest
+      const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.DASHBOARD}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(body)
-        .expect(200)
-        .then((res: any) => res.body);
+        .send(body);
+      mlApi.assertResponseStatusCode(200, status, createResponse);
 
       log.debug(` > Created with id '${createResponse.id}'`);
       return createResponse.id;
     },
 
-    async createSavedSearchIfNeeded(savedSearch: any): Promise<string> {
+    async createSavedSearchIfNeeded(savedSearch: any, indexPatternTitle: string): Promise<string> {
       const title = savedSearch.requestBody.attributes.title;
       const savedSearchId = await this.getSavedSearchId(title);
       if (savedSearchId !== undefined) {
@@ -195,7 +195,7 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       } else {
         const body = await this.updateSavedSearchRequestBody(
           savedSearch.requestBody,
-          savedSearch.indexPatternTitle
+          indexPatternTitle
         );
         return await this.createSavedSearch(title, body);
       }
@@ -226,8 +226,8 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       return updatedBody;
     },
 
-    async createSavedSearchFarequoteFilterIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter);
+    async createSavedSearchFarequoteFilterIfNeeded(indexPatternTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, indexPatternTitle);
     },
 
     async createMLTestDashboardIfNeeded() {
@@ -249,20 +249,30 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       }
     },
 
-    async createSavedSearchFarequoteLuceneIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteLucene);
+    async createSavedSearchFarequoteLuceneIfNeeded(indexPatternTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteLucene, indexPatternTitle);
     },
 
-    async createSavedSearchFarequoteKueryIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteKuery);
+    async createSavedSearchFarequoteKueryIfNeeded(indexPatternTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteKuery, indexPatternTitle);
     },
 
-    async createSavedSearchFarequoteFilterAndLuceneIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndLucene);
+    async createSavedSearchFarequoteFilterAndLuceneIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterAndLucene,
+        indexPatternTitle
+      );
     },
 
-    async createSavedSearchFarequoteFilterAndKueryIfNeeded() {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndKuery);
+    async createSavedSearchFarequoteFilterAndKueryIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterAndKuery,
+        indexPatternTitle
+      );
     },
 
     async deleteSavedObjectById(id: string, objectType: SavedObjectType, force: boolean = false) {
@@ -272,11 +282,11 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
         log.debug(`${objectType} with id '${id}' does not exists. Nothing to delete.`);
         return;
       } else {
-        await supertest
+        const { body, status } = await supertest
           .delete(`/api/saved_objects/${objectType}/${id}`)
           .set(COMMON_REQUEST_HEADERS)
-          .query({ force })
-          .expect(200);
+          .query({ force });
+        mlApi.assertResponseStatusCode(200, status, body);
 
         await this.assertSavedObjectNotExistsById(id, objectType);
 
@@ -454,18 +464,41 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     },
 
     async cleanMLSavedObjects() {
-      log.debug('Deleting ML saved objects ...');
+      await this.cleanMLJobSavedObjects();
+      await this.cleanMLTrainedModelsSavedObjects();
+    },
+
+    async cleanMLJobSavedObjects() {
+      log.debug('Deleting ML job saved objects ...');
       const savedObjectIds = await this.getSavedObjectIdsByType(SavedObjectType.ML_JOB);
       for (const id of savedObjectIds) {
         await this.deleteSavedObjectById(id, SavedObjectType.ML_JOB, true);
       }
-      log.debug('> ML saved objects deleted.');
+      log.debug('> ML job saved objects deleted.');
+    },
+
+    async cleanMLTrainedModelsSavedObjects() {
+      log.debug('Deleting ML trained model saved objects ...');
+      const savedObjectIds = await this.getSavedObjectIdsByType(
+        SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
+      );
+      for (const id of savedObjectIds) {
+        await this.deleteSavedObjectById(
+          id,
+          SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+          true
+        );
+      }
+      log.debug('> ML trained model saved objects deleted.');
     },
 
     async setupFleet() {
       log.debug(`Setting up Fleet`);
       await retry.tryForTime(2 * 60 * 1000, async () => {
-        await supertest.post(`/api/fleet/setup`).set(COMMON_REQUEST_HEADERS).expect(200);
+        const { body, status } = await supertest
+          .post(`/api/fleet/setup`)
+          .set(COMMON_REQUEST_HEADERS);
+        mlApi.assertResponseStatusCode(200, status, body);
       });
       log.debug(` > Setup done`);
     },
@@ -476,10 +509,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       const version = await this.getFleetPackageVersion(packageName);
 
       await retry.tryForTime(30 * 1000, async () => {
-        await supertest
+        const { body, status } = await supertest
           .post(`/api/fleet/epm/packages/${packageName}/${version}`)
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        mlApi.assertResponseStatusCode(200, status, body);
       });
 
       log.debug(` > Installed`);
@@ -490,10 +523,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug(`Removing Fleet package '${packageName}-${version}'`);
 
       await retry.tryForTime(30 * 1000, async () => {
-        await supertest
+        const { body, status } = await supertest
           .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        mlApi.assertResponseStatusCode(200, status, body);
       });
 
       log.debug(` > Removed`);
@@ -504,10 +537,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       let packageVersion = '';
 
       await retry.tryForTime(10 * 1000, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/fleet/epm/packages?experimental=true`)
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        mlApi.assertResponseStatusCode(200, status, body);
 
         packageVersion =
           body.response.find(
@@ -541,10 +574,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
       log.debug(`Installing Kibana sample data '${sampleDataId}'`);
 
-      await supertest
+      const { body, status } = await supertest
         .post(`/api/sample_data/${sampleDataId}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      mlApi.assertResponseStatusCode(200, status, body);
 
       log.debug(` > Installed`);
     },
@@ -552,10 +585,10 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
       log.debug(`Removing Kibana sample data '${sampleDataId}'`);
 
-      await supertest
+      const { body, status } = await supertest
         .delete(`/api/sample_data/${sampleDataId}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(204); // No Content
+        .set(COMMON_REQUEST_HEADERS);
+      mlApi.assertResponseStatusCode(204, status, body);
 
       log.debug(` > Removed`);
     },

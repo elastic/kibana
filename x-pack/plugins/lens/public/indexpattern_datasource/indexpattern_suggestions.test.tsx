@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import type { IndexPatternPrivateState } from './types';
@@ -12,6 +12,7 @@ import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForVisualizeCharts,
   IndexPatternSuggestion,
 } from './indexpattern_suggestions';
 import { documentField } from './document_field';
@@ -1188,6 +1189,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -1198,6 +1200,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Count of records',
                     scale: 'ratio',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -1275,6 +1278,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -1285,6 +1289,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Count of records',
                     scale: 'ratio',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -1403,6 +1408,487 @@ describe('IndexPattern Data Source suggestions', () => {
           })
         );
       });
+    });
+  });
+
+  describe('#getDatasourceSuggestionsForVisualizeCharts', () => {
+    const context = [
+      {
+        indexPatternId: '1',
+        timeFieldName: 'timestamp',
+        chartType: 'area',
+        axisPosition: 'left',
+        palette: {
+          name: 'default',
+          type: 'palette',
+        },
+        metrics: [
+          {
+            agg: 'count',
+            isFullReference: false,
+            fieldName: 'document',
+            params: {},
+            color: '#68BC00',
+          },
+        ],
+        timeInterval: 'auto',
+      },
+    ] as VisualizeEditorLayersContext[];
+    function stateWithoutLayer() {
+      return {
+        ...testInitialState(),
+        layers: {},
+      };
+    }
+
+    it('should return empty array if indexpattern id doesnt match the state', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          indexPatternId: 'test',
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toStrictEqual([]);
+    });
+
+    it('should apply a count metric, with a timeseries bucket', () => {
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(stateWithoutLayer(), context);
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id3', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'count',
+                    sourceField: '___records___',
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
+    it('should apply a custom label if given', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          label: 'testLabel',
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id3', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'count',
+                    sourceField: '___records___',
+                    label: 'testLabel',
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
+    it('should apply a custom format if given', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          format: 'bytes',
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id3', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'count',
+                    sourceField: '___records___',
+                    label: 'Count of records',
+                    params: expect.objectContaining({
+                      format: {
+                        id: 'bytes',
+                        params: {
+                          decimals: 0,
+                        },
+                      },
+                    }),
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
+    it('should apply a split by terms aggregation if it is provided', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          splitFields: ['source'],
+          splitMode: 'terms',
+          termsParams: {
+            size: 10,
+            otherBucket: false,
+            orderBy: {
+              type: 'column',
+            },
+          },
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id3', 'id4', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'count',
+                    sourceField: '___records___',
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'terms',
+                    sourceField: 'source',
+                    params: expect.objectContaining({
+                      size: 10,
+                      otherBucket: false,
+                      orderDirection: 'desc',
+                    }),
+                  }),
+                  id4: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id4',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
+    it('should apply a split by filters aggregation if it is provided', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          splitMode: 'filters',
+          splitFilters: [
+            {
+              filter: {
+                query: 'category.keyword : "Men\'s Clothing" ',
+                language: 'kuery',
+              },
+              label: '',
+              color: '#68BC00',
+              id: 'a8d92740-7de1-11ec-b443-27e8df79881f',
+            },
+            {
+              filter: {
+                query: 'category.keyword : "Women\'s Accessories" ',
+                language: 'kuery',
+              },
+              label: '',
+              color: '#68BC00',
+              id: 'ad5dc500-7de1-11ec-b443-27e8df79881f',
+            },
+          ],
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id4', 'id3', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'count',
+                    sourceField: '___records___',
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'filters',
+                    label: 'Filters',
+                    params: expect.objectContaining({
+                      filters: [
+                        {
+                          input: {
+                            language: 'kuery',
+                            query: 'category.keyword : "Men\'s Clothing" ',
+                          },
+                          label: '',
+                        },
+                        {
+                          input: {
+                            language: 'kuery',
+                            query: 'category.keyword : "Women\'s Accessories" ',
+                          },
+                          label: '',
+                        },
+                      ],
+                    }),
+                  }),
+                  id4: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id4',
+              }),
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
+    it('should apply a formula layer if it is provided', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          metrics: [
+            {
+              agg: 'formula',
+              isFullReference: true,
+              fieldName: 'document',
+              params: {
+                formula: 'overall_sum(count())',
+              },
+              color: '#68BC00',
+            },
+          ],
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id3', 'id2X0', 'id2X1', 'id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'formula',
+                    params: expect.objectContaining({
+                      formula: 'overall_sum(count())',
+                    }),
+                  }),
+                  id2X0: expect.objectContaining({
+                    operationType: 'count',
+                    label: 'Part of overall_sum(count())',
+                  }),
+                  id2X1: expect.objectContaining({
+                    operationType: 'overall_sum',
+                    label: 'Part of overall_sum(count())',
+                  }),
+                  id3: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: true,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id3',
+              }),
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
+
+    it('should apply a static layer if it is provided', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          metrics: [
+            {
+              agg: 'static_value',
+              isFullReference: true,
+              fieldName: 'document',
+              params: {
+                value: '10',
+              },
+              color: '#68BC00',
+            },
+          ],
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'static_value',
+                    isStaticValue: true,
+                    params: expect.objectContaining({
+                      value: '10',
+                    }),
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: false,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
     });
   });
 
@@ -1550,6 +2036,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -1573,6 +2060,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -1620,6 +2108,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1630,6 +2119,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -1691,6 +2181,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1701,6 +2192,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1711,6 +2203,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -1791,6 +2284,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1801,6 +2295,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1811,6 +2306,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -1914,6 +2410,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Custom Range',
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1924,6 +2421,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'timestampLabel',
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -1934,6 +2432,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'Unique count of dest',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2446,6 +2945,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2456,6 +2956,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'Top 5',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2520,6 +3021,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'timestampLabel',
                     scale: 'interval',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2530,6 +3032,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Cumulative sum of Records label',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2540,6 +3043,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Cumulative sum of (incomplete)',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -2602,6 +3106,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2612,6 +3117,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2622,6 +3128,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],

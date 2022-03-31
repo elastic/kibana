@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { schema } from '@kbn/config-schema';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   getInferenceQuerySchema,
   modelIdSchema,
   optionalModelIdSchema,
+  putTrainedModelQuerySchema,
+  pipelineSchema,
+  inferTrainedModelQuery,
+  inferTrainedModelBody,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
-import { memoryOverviewServiceProvider } from '../models/memory_overview';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 
@@ -34,14 +39,14 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         query: getInferenceQuerySchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
-        const { body } = await mlClient.getTrainedModels({
+        const body = await mlClient.getTrainedModels({
           // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
           size: 1000,
           ...query,
@@ -79,7 +84,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           }
         } catch (e) {
           // the user might not have required permissions to fetch pipelines
-          mlLog.error(e);
+          // log the error to the debug log as this might be a common situation and
+          // we don't need to fill kibana's log with these messages.
+          mlLog.debug(e);
         }
 
         return response.ok({
@@ -94,8 +101,35 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
-   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained model
+   * @api {get} /api/ml/trained_models/_stats Get stats for all trained models
    * @apiName GetTrainedModelStats
+   * @apiDescription Retrieves usage information for all trained models.
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/_stats',
+      validate: false,
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const body = await mlClient.getTrainedModelsStats();
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /api/ml/trained_models/:modelId/_stats Get stats of a trained model
+   * @apiName GetTrainedModelStatsById
    * @apiDescription Retrieves usage information for trained models.
    */
   router.get(
@@ -105,13 +139,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.getTrainedModelsStats({
+        const body = await mlClient.getTrainedModelsStats({
           ...(modelId ? { model_id: modelId } : {}),
         });
         return response.ok({
@@ -137,7 +171,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canGetTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
@@ -148,6 +182,44 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         );
         return response.ok({
           body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {put} /api/ml/trained_models/:modelId Put a trained model
+   * @apiName PutTrainedModel
+   * @apiDescription Adds a new trained model
+   */
+  router.put(
+    {
+      path: '/api/ml/trained_models/{modelId}',
+      validate: {
+        params: modelIdSchema,
+        body: schema.any(),
+        query: putTrainedModelQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const body = await mlClient.putTrainedModel({
+          model_id: modelId,
+          body: request.body,
+          ...(request.query?.defer_definition_decompression
+            ? { defer_definition_decompression: true }
+            : {}),
+        });
+        return response.ok({
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -169,13 +241,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canDeleteDataFrameAnalytics'],
+        tags: ['access:ml:canDeleteTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.deleteTrainedModel({
+        const body = await mlClient.deleteTrainedModel({
           model_id: modelId,
         });
         return response.ok({
@@ -203,17 +275,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           'access:ml:canViewMlNodes',
           'access:ml:canGetDataFrameAnalytics',
           'access:ml:canGetJobs',
+          'access:ml:canGetTrainedModels',
         ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        const memoryOverviewService = memoryOverviewServiceProvider(mlClient);
-        const result = await modelsProvider(
-          client,
-          mlClient,
-          memoryOverviewService
-        ).getNodesOverview();
+        const result = await modelsProvider(client, mlClient).getNodesOverview();
         return response.ok({
           body: result,
         });
@@ -237,13 +305,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canStartStopTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.startTrainedModelDeployment({
+        const body = await mlClient.startTrainedModelDeployment({
           model_id: modelId,
         });
         return response.ok({
@@ -270,15 +338,88 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         query: forceQuerySchema,
       },
       options: {
-        tags: ['access:ml:canGetDataFrameAnalytics'],
+        tags: ['access:ml:canStartStopTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const { body } = await mlClient.stopTrainedModelDeployment({
+        const body = await mlClient.stopTrainedModelDeployment({
           model_id: modelId,
           force: request.query.force ?? false,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/infer/:modelId Evaluates a trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Evaluates a trained model.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/infer/{modelId}',
+      validate: {
+        params: modelIdSchema,
+        query: inferTrainedModelQuery,
+        body: inferTrainedModelBody,
+      },
+      options: {
+        tags: ['access:ml:canStartStopTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const body = await mlClient.inferTrainedModelDeployment({
+          model_id: modelId,
+          docs: request.body.docs,
+          ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/ingest_pipeline_simulate Ingest pipeline simulate
+   * @apiName IngestPipelineSimulate
+   * @apiDescription Simulates an ingest pipeline call using supplied documents
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/ingest_pipeline_simulate',
+      validate: {
+        body: pipelineSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { pipeline, docs, verbose } = request.body;
+
+        const body = await client.asCurrentUser.ingest.simulate({
+          verbose,
+          body: {
+            pipeline,
+            docs: docs as estypes.IngestSimulateDocument[],
+          },
         });
         return response.ok({
           body,

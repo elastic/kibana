@@ -43,6 +43,7 @@ export async function listEnrollmentApiKeys(
     from: (page - 1) * perPage,
     size: perPage,
     track_total_hits: true,
+    rest_total_hits_as_int: true,
     ignore_unavailable: true,
     body: {
       sort: [{ created_at: { order: 'desc' } }],
@@ -51,12 +52,11 @@ export async function listEnrollmentApiKeys(
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+  const items = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   return {
     items,
-    // @ts-expect-error value is number | TotalHits
-    total: res.body.hits.total.value,
+    total: res.hits.total as number,
     page,
     perPage,
   };
@@ -78,13 +78,13 @@ export async function getEnrollmentAPIKey(
   id: string
 ): Promise<EnrollmentAPIKey> {
   try {
-    const res = await esClient.get<FleetServerEnrollmentAPIKey>({
+    const body = await esClient.get<FleetServerEnrollmentAPIKey>({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
     });
 
     // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
-    return esDocToEnrollmentApiKey(res.body);
+    return esDocToEnrollmentApiKey(body);
   } catch (e) {
     if (e instanceof errors.ResponseError && e.statusCode === 404) {
       throw Boom.notFound(`Enrollment api key ${id} not found`);
@@ -207,7 +207,7 @@ export async function generateEnrollmentAPIKey(
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
-  const { body: key } = await esClient.security
+  const key = await esClient.security
     .createApiKey({
       body: {
         name,
@@ -264,7 +264,7 @@ export async function generateEnrollmentAPIKey(
   });
 
   return {
-    id: res.body._id,
+    id: res._id,
     ...body,
   };
 }
@@ -300,7 +300,7 @@ export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, api
   });
 
   // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
-  const [enrollmentAPIKey] = res.body.hits.hits.map(esDocToEnrollmentApiKey);
+  const [enrollmentAPIKey] = res.hits.hits.map(esDocToEnrollmentApiKey);
 
   if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
     throw new Error(

@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-analytics"
 PKG_REQUIRE_NAME = "@kbn/analytics"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__analytics"
 
 SOURCE_FILES = glob(
   [
@@ -24,11 +23,13 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "@npm//moment",
   "@npm//moment-timezone",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
+  "@npm//moment",
   "@npm//@types/moment-timezone",
   "@npm//@types/node",
 ]
@@ -75,7 +76,6 @@ ts_project(
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
@@ -106,7 +106,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

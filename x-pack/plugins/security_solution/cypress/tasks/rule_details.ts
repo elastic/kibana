@@ -24,14 +24,19 @@ import {
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
+  DEFINITION_DETAILS,
+  INDEX_PATTERNS_DETAILS,
+  DETAILS_TITLE,
+  DETAILS_DESCRIPTION,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
-export const activatesRule = () => {
-  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
+export const enablesRule = () => {
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then(({ response }) => {
+  cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
@@ -87,7 +92,12 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXCEPTIONS_TAB).trigger('click');
+      return $el.find(ADD_EXCEPTIONS_BTN);
+    })
+    .should('be.visible');
 };
 
 export const removeException = () => {
@@ -106,4 +116,13 @@ export const waitForTheRuleToBeExecuted = () => {
 
 export const goBackToAllRulesTable = () => {
   cy.get(BACK_TO_RULES).click();
+};
+
+export const getDetails = (title: string) =>
+  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+
+export const hasIndexPatterns = (indexPatterns: string) => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
 };

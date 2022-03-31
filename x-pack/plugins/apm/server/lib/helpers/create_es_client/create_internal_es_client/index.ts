@@ -72,14 +72,14 @@ export function createInternalESClient({
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
         requestType: 'search',
-        cb: (signal) => asInternalUser.search(params, { signal }),
+        cb: (signal) => asInternalUser.search(params, { signal, meta: true }),
         params,
       });
     },
     index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
       return callEs(operationName, {
         requestType: 'index',
-        cb: (signal) => asInternalUser.index(params, { signal }),
+        cb: (signal) => asInternalUser.index(params, { signal, meta: true }),
         params,
       });
     },
@@ -89,7 +89,7 @@ export function createInternalESClient({
     ): Promise<{ result: string }> => {
       return callEs(operationName, {
         requestType: 'delete',
-        cb: (signal) => asInternalUser.delete(params, { signal }),
+        cb: (signal) => asInternalUser.delete(params, { signal, meta: true }),
         params,
       });
     },
@@ -99,7 +99,8 @@ export function createInternalESClient({
     ) => {
       return callEs(operationName, {
         requestType: 'indices.create',
-        cb: (signal) => asInternalUser.indices.create(params, { signal }),
+        cb: (signal) =>
+          asInternalUser.indices.create(params, { signal, meta: true }),
         params,
       });
     },

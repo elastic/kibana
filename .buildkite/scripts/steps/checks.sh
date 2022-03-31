@@ -6,13 +6,14 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/bootstrap.sh
 
 .buildkite/scripts/steps/checks/commit/commit.sh
+.buildkite/scripts/steps/checks/bazel_packages.sh
 .buildkite/scripts/steps/checks/telemetry.sh
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/jest_configs.sh
 .buildkite/scripts/steps/checks/doc_api_changes.sh
 .buildkite/scripts/steps/checks/kbn_pm_dist.sh
 .buildkite/scripts/steps/checks/plugin_list_docs.sh
-.buildkite/scripts/steps/checks/type_check_plugin_public_api_docs.sh
+.buildkite/scripts/steps/checks/check_types.sh
 .buildkite/scripts/steps/checks/bundle_limits.sh
 .buildkite/scripts/steps/checks/i18n.sh
 .buildkite/scripts/steps/checks/file_casing.sh

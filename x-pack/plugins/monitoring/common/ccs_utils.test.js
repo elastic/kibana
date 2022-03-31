@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
 import { parseCrossClusterPrefix, prefixIndexPattern } from './ccs_utils';
 
 // TODO: tests were not running and are not updated.
@@ -16,10 +15,8 @@ describe.skip('ccs_utils', () => {
     const indexPattern = '.monitoring-xyz-1-*,.monitoring-xyz-2-*';
 
     it('returns the index pattern if ccs is not enabled', () => {
-      const get = sinon.stub();
-      const config = { get };
-
-      get.withArgs('monitoring.ui.ccs.enabled').returns(false);
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: false } } };
 
       // falsy string values should be ignored
       const allPattern = prefixIndexPattern(config, indexPattern, '*');
@@ -27,14 +24,11 @@ describe.skip('ccs_utils', () => {
 
       expect(allPattern).to.be(indexPattern);
       expect(onePattern).to.be(indexPattern);
-      expect(get.callCount).to.eql(2);
     });
 
     it('returns the index pattern if ccs is not used', () => {
-      const get = sinon.stub();
-      const config = { get };
-
-      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: true } } };
 
       // falsy string values should be ignored
       const undefinedPattern = prefixIndexPattern(config, indexPattern);
@@ -44,14 +38,11 @@ describe.skip('ccs_utils', () => {
       expect(undefinedPattern).to.be(indexPattern);
       expect(nullPattern).to.be(indexPattern);
       expect(blankPattern).to.be(indexPattern);
-      expect(get.callCount).to.eql(3);
     });
 
     it('returns the ccs-prefixed index pattern', () => {
-      const get = sinon.stub();
-      const config = { get };
-
-      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: true } } };
 
       const abcPattern = prefixIndexPattern(config, indexPattern, 'aBc');
       const underscorePattern = prefixIndexPattern(config, indexPattern, 'cluster_one');
@@ -62,14 +53,11 @@ describe.skip('ccs_utils', () => {
       expect(underscorePattern).to.eql(
         'cluster_one:.monitoring-xyz-1-*,cluster_one:.monitoring-xyz-2-*,cluster_one:monitoring-xyz-1-*,cluster_one:monitoring-xyz-2-*'
       );
-      expect(get.callCount).to.eql(2);
     });
 
     it('returns the ccs-prefixed index pattern when wildcard and the local cluster pattern', () => {
-      const get = sinon.stub();
-      const config = { get };
-
-      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: true } } };
 
       const pattern = prefixIndexPattern(config, indexPattern, '*');
 
@@ -79,7 +67,6 @@ describe.skip('ccs_utils', () => {
           ',' +
           indexPattern
       );
-      expect(get.callCount).to.eql(1);
     });
   });
 

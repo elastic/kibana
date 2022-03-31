@@ -14,3 +14,5 @@ export { createLogger, LogLevel } from './lib/utils/create_logger';
 
 export type { Fields } from './lib/entity';
 export type { ApmException, ApmSynthtraceEsClient } from './lib/apm';
+export type { SpanIterable } from './lib/span_iterable';
+export { SpanArrayIterable } from './lib/span_iterable';

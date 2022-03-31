@@ -21,13 +21,14 @@ export default function (providerContext: FtrProviderContext) {
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    describe('setup performs upgrades', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/118479
+    describe.skip('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';
         await supertest.delete(url).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
         await supertest
-          .post(`${url}-${oldEndpointVersion}`)
+          .post(`${url}/${oldEndpointVersion}`)
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
@@ -50,6 +51,109 @@ export default function (providerContext: FtrProviderContext) {
           latestEndpointVersion
         );
       });
+    });
+
+    describe('package policy upgrade on setup', () => {
+      let agentPolicyId: string;
+      before(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          });
+        agentPolicyId = agentPolicyResponse.item.id;
+      });
+
+      after(async function () {
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId });
+      });
+
+      it('should upgrade package policy on setup if keep policies up to date set to true', async () => {
+        const oldVersion = '1.9.0';
+        await supertest
+          .post(`/api/fleet/epm/packages/system/${oldVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+        await supertest
+          .put(`/api/fleet/epm/packages/system/${oldVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ keepPoliciesUpToDate: true })
+          .expect(200);
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'system-1',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            package: { name: 'system', version: oldVersion },
+            inputs: [],
+          })
+          .expect(200);
+
+        let { body } = await supertest
+          .get(`/api/fleet/epm/packages/system/${oldVersion}`)
+          .expect(200);
+        const latestVersion = body.item.latestVersion;
+        log.info(`System package latest version: ${latestVersion}`);
+        // make sure we're actually doing an upgrade
+        expect(latestVersion).not.eql(oldVersion);
+
+        ({ body } = await supertest
+          .post(`/api/fleet/epm/packages/system/${latestVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200));
+
+        await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+
+        ({ body } = await supertest
+          .get('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200));
+        expect(body.items.find((pkg: any) => pkg.name === 'system-1').package.version).to.equal(
+          latestVersion
+        );
+      });
+    });
+
+    it('does not fail when package is no longer compatible in registry', async () => {
+      await supertest
+        .post(`/api/fleet/epm/packages/deprecated/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true, ignore_constraints: true })
+        .expect(200);
+
+      const agentPolicyResponse = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'deprecated-ap-1',
+          namespace: 'default',
+          monitoring_enabled: [],
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'deprecated-1',
+          policy_id: agentPolicyResponse.body.item.id,
+          package: {
+            name: 'deprecated',
+            version: '0.1.0',
+          },
+          inputs: [],
+        })
+        .expect(200);
+
+      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
     });
 
     it('allows elastic/fleet-server user to call required APIs', async () => {

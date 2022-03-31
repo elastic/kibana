@@ -61,7 +61,7 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { registerTransformNodesRoutes } from './transforms_nodes';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../src/plugins/data_views/common';
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';
@@ -90,12 +90,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
-            {
-              size: 1000,
-              ...req.params,
-            }
-          );
+          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+            size: 1000,
+            ...req.params,
+          });
 
           if (ctx.alerting) {
             const transformHealthService = transformHealthServiceProvider(
@@ -132,7 +130,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+        const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
           transform_id: transformId,
         });
         return res.ok({ body });
@@ -154,7 +152,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const { body } =
+          const body =
             await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
               size: 1000,
               transform_id: '_all',
@@ -184,10 +182,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const { body } =
-          await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-            transform_id: transformId,
-          });
+        const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+          transform_id: transformId,
+        });
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -266,12 +263,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         const { transformId } = req.params;
 
         try {
-          const { body } =
-            await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
-              // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
-              body: req.body,
-              transform_id: transformId,
-            });
+          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+            body: req.body,
+            transform_id: transformId,
+          });
           return res.ok({
             body,
           });
@@ -441,7 +437,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(async (ctx, req, res) => {
       try {
-        const { body } = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
+        const body = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -453,11 +449,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   registerTransformNodesRoutes(routeDependencies);
 }
 
-async function getIndexPatternId(
-  indexName: string,
-  savedObjectsClient: SavedObjectsClientContract
-) {
-  const response = await savedObjectsClient.find<IIndexPattern>({
+async function getDataViewId(indexName: string, savedObjectsClient: SavedObjectsClientContract) {
+  const response = await savedObjectsClient.find<DataView>({
     type: 'index-pattern',
     perPage: 1,
     search: `"${indexName}"`,
@@ -468,11 +461,11 @@ async function getIndexPatternId(
   return ip?.id;
 }
 
-async function deleteDestIndexPatternById(
-  indexPatternId: string,
+async function deleteDestDataViewById(
+  dataViewId: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return await savedObjectsClient.delete('index-pattern', indexPatternId);
+  return await savedObjectsClient.delete('index-pattern', dataViewId);
 }
 
 async function deleteTransforms(
@@ -484,7 +477,7 @@ async function deleteTransforms(
 
   // Cast possible undefineds as booleans
   const deleteDestIndex = !!reqBody.deleteDestIndex;
-  const deleteDestIndexPattern = !!reqBody.deleteDestIndexPattern;
+  const deleteDestDataView = !!reqBody.deleteDestDataView;
   const shouldForceDelete = !!reqBody.forceDelete;
 
   const results: DeleteTransformsResponseSchema = {};
@@ -494,7 +487,7 @@ async function deleteTransforms(
 
     const transformDeleted: ResponseStatus = { success: false };
     const destIndexDeleted: ResponseStatus = { success: false };
-    const destIndexPatternDeleted: ResponseStatus = {
+    const destDataViewDeleted: ResponseStatus = {
       success: false,
     };
     const transformId = transformInfo.id;
@@ -508,24 +501,19 @@ async function deleteTransforms(
       if (!shouldForceDelete) {
         // Grab destination index info to delete
         try {
-          const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform(
-            {
-              transform_id: transformId,
-            }
-          );
+          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+            transform_id: transformId,
+          });
           const transformConfig = body.transforms[0];
-          // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
           destinationIndex = Array.isArray(transformConfig.dest.index)
-            ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-              transformConfig.dest.index[0]
-            : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
-              transformConfig.dest.index;
+            ? transformConfig.dest.index[0]
+            : transformConfig.dest.index;
         } catch (getTransformConfigError) {
           transformDeleted.error = getTransformConfigError.meta.body.error;
           results[transformId] = {
             transformDeleted,
             destIndexDeleted,
-            destIndexPatternDeleted,
+            destDataViewDeleted,
             destinationIndex,
           };
           // No need to perform further delete attempts
@@ -547,18 +535,15 @@ async function deleteTransforms(
       }
 
       // Delete the data view if there's a data view that matches the name of dest index
-      if (destinationIndex && deleteDestIndexPattern) {
+      if (destinationIndex && deleteDestDataView) {
         try {
-          const indexPatternId = await getIndexPatternId(
-            destinationIndex,
-            ctx.core.savedObjects.client
-          );
-          if (indexPatternId) {
-            await deleteDestIndexPatternById(indexPatternId, ctx.core.savedObjects.client);
-            destIndexPatternDeleted.success = true;
+          const dataViewId = await getDataViewId(destinationIndex, ctx.core.savedObjects.client);
+          if (dataViewId) {
+            await deleteDestDataViewById(dataViewId, ctx.core.savedObjects.client);
+            destDataViewDeleted.success = true;
           }
-        } catch (deleteDestIndexPatternError) {
-          destIndexPatternDeleted.error = deleteDestIndexPatternError.meta.body.error;
+        } catch (deleteDestDataViewError) {
+          destDataViewDeleted.error = deleteDestDataViewError.meta.body.error;
         }
       }
 
@@ -578,7 +563,7 @@ async function deleteTransforms(
       results[transformId] = {
         transformDeleted,
         destIndexDeleted,
-        destIndexPatternDeleted,
+        destDataViewDeleted,
         destinationIndex,
       };
     } catch (e) {
@@ -647,7 +632,7 @@ const previewTransformHandler: RequestHandler<
 > = async (ctx, req, res) => {
   try {
     const reqBody = req.body;
-    const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+    const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {
@@ -658,10 +643,10 @@ const previewTransformHandler: RequestHandler<
         include_unmapped: false,
       });
 
-      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
+      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.fields));
 
       const fields = Object.entries(
-        fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
+        fieldCapsResponse.fields as Record<string, Record<string, { type: string }>>
       ).reduce((acc, [fieldName, fieldCaps]) => {
         const fieldDefinition = Object.values(fieldCaps)[0];
         const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';

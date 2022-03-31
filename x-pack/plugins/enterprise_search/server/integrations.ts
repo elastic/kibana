@@ -236,6 +236,24 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point',
   },
   {
+    id: 'sharepoint_server',
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointServerName',
+      {
+        defaultMessage: 'SharePoint Server',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.sharepointServerDescription',
+      {
+        defaultMessage:
+          'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
+  },
+  {
     id: 'slack',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.slackName', {
       defaultMessage: 'Slack',

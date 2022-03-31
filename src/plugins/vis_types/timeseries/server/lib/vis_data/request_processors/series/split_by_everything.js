@@ -7,12 +7,13 @@
  */
 
 import { overwrite } from '../../helpers';
+import { getFieldsForTerms } from '../../../../../common/fields_utils';
 
 export function splitByEverything(req, panel, series) {
   return (next) => (doc) => {
     if (
       series.split_mode === 'everything' ||
-      (series.split_mode === 'terms' && !series.terms_field)
+      (series.split_mode === 'terms' && !getFieldsForTerms(series.terms_field).length)
     ) {
       overwrite(doc, `aggs.${series.id}.filter.match_all`, {});
     }

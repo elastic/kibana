@@ -10,8 +10,11 @@
   "id":"cases",
   "kibanaVersion":"kibana",
   "optionalPlugins":[
+    "home",
      "security",
-     "spaces"
+     "spaces",
+     "taskManager",
+     "usageCollection"
   ],
   "owner":{
      "githubTeam":"response-ops",
@@ -19,14 +22,18 @@
   },
   "requiredPlugins":[
      "actions",
+     "data",
+     "embeddable",
      "esUiShared",
      "lens",
      "features",
      "kibanaReact",
      "kibanaUtils",
-     "triggersActionsUi"
+     "triggersActionsUi",
+     "management"
   ],
   "requiredBundles": [
+    "home",
     "savedObjects"
   ],
   "server":true,

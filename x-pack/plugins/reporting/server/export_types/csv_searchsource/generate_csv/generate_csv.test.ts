@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import * as Rx from 'rxjs';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import type { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'kibana/server';
 import { identity, range } from 'lodash';
-import { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'src/core/server';
+import * as Rx from 'rxjs';
 import {
   elasticsearchServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from 'src/core/server/mocks';
 import { ISearchStartSearchSource } from 'src/plugins/data/common';
-import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
+import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
+import { Writable } from 'stream';
 import { ReportingConfig } from '../../../';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import {
@@ -26,11 +28,8 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLevelLogger,
-} from '../../../test_helpers';
+import { UnknownError } from '../../../../common/errors';
+import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
 
@@ -123,7 +122,7 @@ beforeEach(async () => {
   });
 });
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 it('formats an empty search result to CSV content', async () => {
   const generateCsv = new CsvGenerator(
@@ -298,16 +297,14 @@ it('uses the scrollId to page all the data', async () => {
     })
   );
   mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
-    body: {
-      hits: {
-        hits: range(0, HITS_TOTAL / 10).map(() => ({
-          fields: {
-            date: ['2020-12-31T00:14:28.000Z'],
-            ip: ['110.135.176.89'],
-            message: ['hit from a subsequent scroll'],
-          },
-        })),
-      },
+    hits: {
+      hits: range(0, HITS_TOTAL / 10).map(() => ({
+        fields: {
+          date: ['2020-12-31T00:14:28.000Z'],
+          ip: ['110.135.176.89'],
+          message: ['hit from a subsequent scroll'],
+        },
+      })),
     },
   });
 
@@ -806,4 +803,78 @@ it('can override ignoring frozen indices', async () => {
     { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
+});
+
+describe('error codes', () => {
+  it('returns the expected error code when authentication expires', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          _scroll_id: 'test',
+          hits: {
+            hits: range(0, 5).map(() => ({
+              fields: {
+                date: ['2020-12-31T00:14:28.000Z'],
+                ip: ['110.135.176.89'],
+                message: ['super cali fragile istic XPLA docious'],
+              },
+            })),
+            total: 10,
+          },
+        },
+      })
+    );
+
+    mockEsClient.asCurrentUser.scroll = jest.fn().mockImplementation(() => {
+      throw new esErrors.ResponseError({ statusCode: 403, meta: {} as any, warnings: [] });
+    });
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger,
+      stream
+    );
+
+    const { error_code: errorCode, warnings } = await generateCsv.generateData();
+    expect(errorCode).toBe('authentication_expired_error');
+    expect(warnings).toMatchInlineSnapshot(`
+      Array [
+        "This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.",
+      ]
+    `);
+  });
+
+  it('throws for unknown errors', async () => {
+    mockDataClient.search = jest.fn().mockImplementation(() => {
+      throw new esErrors.ResponseError({ statusCode: 500, meta: {} as any, warnings: [] });
+    });
+    const generateCsv = new CsvGenerator(
+      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger,
+      stream
+    );
+    await expect(generateCsv.generateData()).rejects.toBeInstanceOf(UnknownError);
+  });
 });

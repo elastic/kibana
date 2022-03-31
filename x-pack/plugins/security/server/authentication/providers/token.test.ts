@@ -49,15 +49,13 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+      mockOptions.client.asInternalUser.security.getToken.mockResponse(
         // @ts-expect-error not full interface
-        securityMock.createApiResponse({
-          body: {
-            access_token: tokenPair.accessToken,
-            refresh_token: tokenPair.refreshToken,
-            authentication: user,
-          },
-        })
+        {
+          access_token: tokenPair.accessToken,
+          refresh_token: tokenPair.refreshToken,
+          authentication: user,
+        }
       );
 
       await expect(provider.login(request, credentials)).resolves.toEqual(
@@ -163,9 +161,7 @@ describe('TokenAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-        securityMock.createApiResponse({ body: user })
-      );
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(

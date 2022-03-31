@@ -6,9 +6,6 @@ To import geospatical data into the Elastic Stack, the data must be indexed as {
 Geospatial data comes in many formats.
 Choose an import tool based on the format of your geospatial data.
 
-TIP: When you upload files in {kib}, there is a file size
-limit, which is configurable in <<fileupload-maxfilesize,Advanced Settings>>.
-
 [discrete]
 [[import-geospatial-privileges]]
 === Security privileges

@@ -19,8 +19,7 @@ jest.mock('./common', () => {
 });
 
 import { errors } from '@elastic/elasticsearch';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { ElasticsearchAssetType } from '../../../../types';
@@ -38,7 +37,7 @@ import { installTransform } from './install';
 import { getAsset } from './common';
 
 describe('test transform install', () => {
-  let esClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -104,18 +103,17 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {
@@ -394,18 +392,17 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {

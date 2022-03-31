@@ -39,9 +39,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     // check the manage_service_account cluster privilege
     else if (request.query.fleetServerSetup) {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const {
-        body: { has_all_requested: hasAllPrivileges },
-      } = await esClient.security.hasPrivileges({
+      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
       });
 
@@ -63,7 +61,7 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const { body: tokenResponse } = await esClient.transport.request<{
+    const tokenResponse = await esClient.transport.request<{
       created?: boolean;
       token?: GenerateServiceTokenResponse;
     }>({

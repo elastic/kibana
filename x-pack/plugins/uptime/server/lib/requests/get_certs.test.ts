@@ -84,11 +84,9 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
-    esClient.search.mockResolvedValueOnce({
-      body: {
-        hits: {
-          hits: mockHits,
-        },
+    esClient.search.mockResponseOnce({
+      hits: {
+        hits: mockHits,
       },
     } as any);
 
@@ -228,6 +226,9 @@ describe('getCerts', () => {
               ],
             },
             "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          },
+          Object {
+            "meta": true,
           },
         ],
       ]

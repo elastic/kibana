@@ -34,7 +34,6 @@ import {
   DETAILS_DESCRIPTION,
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -62,7 +61,7 @@ import {
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
   fillScheduleRuleAndContinue,
@@ -70,6 +69,7 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
@@ -92,12 +92,12 @@ describe('Detection rules, override', () => {
     });
   });
 
-  it('Creates and activates a new custom rule with override option', function () {
+  it('Creates and enables a new custom rule with override option', function () {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

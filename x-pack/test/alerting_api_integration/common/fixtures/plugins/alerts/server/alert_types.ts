@@ -594,7 +594,7 @@ function getCancellableRuleType() {
         },
       };
 
-      await services.search.asCurrentUser.search(query as any);
+      await services.scopedClusterClient.asCurrentUser.search(query as any);
 
       if (doLongPostProcessing) {
         await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -706,6 +706,57 @@ export function defineAlertTypes(
     async executor() {},
     producer: 'alertsFixture',
   };
+  const multipleSearchesRuleType: RuleType<
+    { numSearches: number; delay: string },
+    {},
+    {},
+    {},
+    {},
+    'default'
+  > = {
+    id: 'test.multipleSearches',
+    name: 'Test: MultipleSearches',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+      const numSearches = params.numSearches ?? 1;
+      const delay = params.delay ?? '10s';
+
+      const query = {
+        index: ES_TEST_INDEX_NAME,
+        body: {
+          query: {
+            bool: {
+              filter: {
+                match_all: {},
+              },
+            },
+          },
+          aggs: {
+            delay: {
+              shard_delay: {
+                value: delay,
+              },
+            },
+          },
+        },
+      };
+
+      let i: number = 0;
+      for (i = 0; i < numSearches; ++i) {
+        await services.scopedClusterClient.asCurrentUser.search(query as any);
+      }
+    },
+  };
 
   alerting.registerType(getAlwaysFiringAlertType());
   alerting.registerType(getCumulativeFiringAlertType());
@@ -721,6 +772,7 @@ export function defineAlertTypes(
   alerting.registerType(longRunningAlertType);
   alerting.registerType(goldNoopAlertType);
   alerting.registerType(exampleAlwaysFiringAlertType);
+  alerting.registerType(multipleSearchesRuleType);
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());

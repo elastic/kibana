@@ -15,7 +15,7 @@ import {
   getQueryParams,
   removeQueryParam,
 } from '../../../../../kibana_utils/public';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../url_generator';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 
 export interface DiscoverSearchSessionManagerDeps {
   history: History;

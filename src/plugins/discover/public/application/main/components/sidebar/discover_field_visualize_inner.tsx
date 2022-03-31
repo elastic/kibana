@@ -9,11 +9,11 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndexPatternField } from '../../../../../../data_views/common';
+import type { DataViewField } from '../../../../../../data_views/public';
 import { VisualizeInformation } from './lib/visualize_trigger_utils';
 
 interface DiscoverFieldVisualizeInnerProps {
-  field: IndexPatternField;
+  field: DataViewField;
   visualizeInfo: VisualizeInformation;
   handleVisualizeLinkClick: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
 }

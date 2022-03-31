@@ -77,7 +77,6 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     AppWrapper: memo(({ children }) => {
       return (
         <FleetAppContext
-          basepath={basePath}
           startServices={testRendererMocks.startServices}
           config={testRendererMocks.config}
           history={testRendererMocks.mountHistory}

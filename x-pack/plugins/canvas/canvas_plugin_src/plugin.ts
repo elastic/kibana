@@ -46,6 +46,7 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
         embeddablePersistableStateService: {
           extract: depsStart.embeddable.extract,
           inject: depsStart.embeddable.inject,
+          getAllMigrations: depsStart.embeddable.getAllMigrations,
         },
       });
       plugins.canvas.addFunctions(externalFunctions);

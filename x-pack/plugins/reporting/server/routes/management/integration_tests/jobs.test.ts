@@ -8,8 +8,7 @@
 jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClientMock } from '../../../../../../../src/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
 import { Readable } from 'stream';
@@ -37,7 +36,7 @@ describe('GET /api/reporting/jobs/download', () => {
   let core: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
   let mockStartDeps: ReportingInternalStart;
-  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let mockEsClient: ElasticsearchClientMock;
   let stream: jest.Mocked<ContentStream>;
 
   const getHits = (...sources: any) => {
@@ -114,7 +113,7 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('fails on malformed download IDs', async () => {
-    mockEsClient.search.mockResolvedValueOnce({ body: getHits() } as any);
+    mockEsClient.search.mockResponseOnce(getHits() as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -154,7 +153,7 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('returns 404 if job not found', async () => {
-    mockEsClient.search.mockResolvedValueOnce({ body: getHits() } as any);
+    mockEsClient.search.mockResponseOnce(getHits() as any);
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -163,12 +162,12 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('returns a 401 if not a valid job type', async () => {
-    mockEsClient.search.mockResolvedValueOnce({
-      body: getHits({
+    mockEsClient.search.mockResponseOnce(
+      getHits({
         jobtype: 'invalidJobType',
         payload: { title: 'invalid!' },
-      }),
-    } as any);
+      }) as any
+    );
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -177,12 +176,12 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it(`returns job's info`, async () => {
-    mockEsClient.search.mockResolvedValueOnce({
-      body: getHits({
+    mockEsClient.search.mockResponseOnce(
+      getHits({
         jobtype: 'base64EncodedJobType',
         payload: {}, // payload is irrelevant
-      }),
-    } as any);
+      }) as any
+    );
 
     registerJobInfoRoutes(core);
 
@@ -192,12 +191,12 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it(`returns 403 if a user cannot view a job's info`, async () => {
-    mockEsClient.search.mockResolvedValueOnce({
-      body: getHits({
+    mockEsClient.search.mockResponseOnce(
+      getHits({
         jobtype: 'customForbiddenJobType',
         payload: {}, // payload is irrelevant
-      }),
-    } as any);
+      }) as any
+    );
 
     registerJobInfoRoutes(core);
 
@@ -207,13 +206,13 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('when a job is incomplete', async () => {
-    mockEsClient.search.mockResolvedValueOnce({
-      body: getHits({
+    mockEsClient.search.mockResponseOnce(
+      getHits({
         jobtype: 'unencodedJobType',
         status: 'pending',
         payload: { title: 'incomplete!' },
-      }),
-    } as any);
+      }) as any
+    );
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -226,14 +225,14 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   it('when a job fails', async () => {
-    mockEsClient.search.mockResolvedValue({
-      body: getHits({
+    mockEsClient.search.mockResponse(
+      getHits({
         jobtype: 'unencodedJobType',
         status: 'failed',
         output: { content: 'job failure message' },
         payload: { title: 'failing job!' },
-      }),
-    } as any);
+      }) as any
+    );
     registerJobInfoRoutes(core);
 
     await server.start();
@@ -261,7 +260,7 @@ describe('GET /api/reporting/jobs/download', () => {
     };
 
     it('when a known job-type is complete', async () => {
-      mockEsClient.search.mockResolvedValueOnce({ body: getCompleteHits() } as any);
+      mockEsClient.search.mockResponseOnce(getCompleteHits() as any);
       registerJobInfoRoutes(core);
 
       await server.start();
@@ -273,7 +272,7 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it('succeeds when security is not there or disabled', async () => {
-      mockEsClient.search.mockResolvedValueOnce({ body: getCompleteHits() } as any);
+      mockEsClient.search.mockResponseOnce(getCompleteHits() as any);
 
       // @ts-ignore
       core.pluginSetupDeps.security = null;
@@ -290,11 +289,11 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it('forwards job content stream', async () => {
-      mockEsClient.search.mockResolvedValueOnce({
-        body: getCompleteHits({
+      mockEsClient.search.mockResponseOnce(
+        getCompleteHits({
           jobType: 'unencodedJobType',
-        }),
-      } as any);
+        }) as any
+      );
       registerJobInfoRoutes(core);
 
       await server.start();
@@ -306,12 +305,12 @@ describe('GET /api/reporting/jobs/download', () => {
     });
 
     it('refuses to return unknown content-types', async () => {
-      mockEsClient.search.mockResolvedValueOnce({
-        body: getCompleteHits({
+      mockEsClient.search.mockResponseOnce(
+        getCompleteHits({
           jobType: 'unencodedJobType',
           outputContentType: 'application/html',
-        }),
-      } as any);
+        }) as any
+      );
       registerJobInfoRoutes(core);
 
       await server.start();

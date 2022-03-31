@@ -32,7 +32,7 @@ export interface PercentileRange {
 export function PageLoadDistribution() {
   const { http } = useKibanaServices();
 
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
 
@@ -67,6 +67,8 @@ export function PageLoadDistribution() {
       }
       return Promise.resolve(null);
     },
+    // `rangeId` acts as a cache buster for stable ranges like "Today"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       end,
       start,
@@ -75,6 +77,7 @@ export function PageLoadDistribution() {
       percentileRange.max,
       searchTerm,
       serviceName,
+      rangeId,
     ]
   );
 

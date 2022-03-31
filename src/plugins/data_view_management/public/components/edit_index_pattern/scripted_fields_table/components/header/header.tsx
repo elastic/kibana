@@ -22,9 +22,9 @@ interface HeaderProps extends RouteComponentProps {
 }
 
 export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
-  const { application, docLinks } = useKibana<IndexPatternManagmentContext>().services;
+  const { dataViews, docLinks } = useKibana<IndexPatternManagmentContext>().services;
   const links = docLinks?.links;
-  const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+  const userEditPermission = dataViews.getCanSaveSync();
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>

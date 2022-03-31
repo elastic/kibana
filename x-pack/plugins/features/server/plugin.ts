@@ -41,21 +41,23 @@ import {
 export interface PluginSetupContract {
   registerKibanaFeature(feature: KibanaFeatureConfig): void;
   registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
-  /*
+  /**
    * Calling this function during setup will crash Kibana.
    * Use start contract instead.
    * @deprecated
-   * */
+   * @removeBy 8.8.0
+   */
   getKibanaFeatures(): KibanaFeature[];
-  /*
+  /**
    * Calling this function during setup will crash Kibana.
    * Use start contract instead.
    * @deprecated
-   * */
+   * @removeBy 8.8.0
+   */
   getElasticsearchFeatures(): ElasticsearchFeature[];
   getFeaturesUICapabilities(): UICapabilities;
 
-  /*
+  /**
    * In the future, OSS features should register their own subfeature
    * privileges. This can be done when parts of Reporting are moved to
    * src/plugins. For now, this method exists for `reporting` to tell

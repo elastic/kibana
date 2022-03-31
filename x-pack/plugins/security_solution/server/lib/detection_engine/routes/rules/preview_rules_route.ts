@@ -14,12 +14,13 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { createPreviewRuleExecutionLogger } from '../../signals/preview/preview_rule_execution_logger';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import {
   previewRulesSchema,
   RulePreviewLogs,
@@ -47,6 +48,9 @@ import {
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
+import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
+
+const PREVIEW_TIMEOUT_SECONDS = 60;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -88,13 +92,7 @@ export const previewRulesRoute = async (
           ].includes(invocationCount)
         ) {
           return response.ok({
-            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [] }] },
-          });
-        }
-
-        if (request.body.type === 'threat_match') {
-          return response.ok({
-            body: { logs: [{ errors: ['Preview for rule type not supported'], warnings: [] }] },
+            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
           });
         }
 
@@ -107,15 +105,17 @@ export const previewRulesRoute = async (
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
+        throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
+        const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
+        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
+        let isAborted = false;
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
@@ -146,11 +146,24 @@ export const previewRulesRoute = async (
               id: string
             ) => Pick<
               Alert<TInstanceState, TInstanceContext, TActionGroupIds>,
-              'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
+              | 'getState'
+              | 'replaceState'
+              | 'scheduleActions'
+              | 'scheduleActionsWithSubGroup'
+              | 'setContext'
+              | 'getContext'
+              | 'hasContext'
             >;
+            done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
           let statePreview = runState as TState;
+
+          const abortController = new AbortController();
+          setTimeout(() => {
+            abortController.abort();
+            isAborted = true;
+          }, PREVIEW_TIMEOUT_SECONDS * 1000);
 
           const startedAt = moment();
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
@@ -169,7 +182,11 @@ export const previewRulesRoute = async (
             updatedBy: username ?? 'preview-updated-by',
           };
 
-          while (invocationCount > 0) {
+          let invocationStartTime;
+
+          while (invocationCount > 0 && !isAborted) {
+            invocationStartTime = moment();
+
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
@@ -182,10 +199,12 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
-                // Just use es client always for preview
-                search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
-                scopedClusterClient: context.core.elasticsearch.client,
+                scopedClusterClient: wrapScopedClusterClient({
+                  abortController,
+                  scopedClusterClient: context.core.elasticsearch.client,
+                }),
+                uiSettingsClient: context.core.uiSettings.client,
               },
               spaceId,
               startedAt: startedAt.toDate(),
@@ -194,12 +213,11 @@ export const previewRulesRoute = async (
               updatedBy: rule.updatedBy,
             })) as TState;
 
-            // Save and reset error and warning logs
-            const errors = previewRuleExecutionLogger.logged.statusChanges
+            const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
               .map((item) => item.message ?? 'Unkown Error');
 
-            const warnings = previewRuleExecutionLogger.logged.statusChanges
+            const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
               .map((item) => item.message ?? 'Unknown Warning');
 
@@ -207,9 +225,14 @@ export const previewRulesRoute = async (
               errors,
               warnings,
               startedAt: startedAt.toDate().toISOString(),
+              duration: moment().diff(invocationStartTime, 'milliseconds'),
             });
 
-            previewRuleExecutionLogger.clearLogs();
+            loggedStatusChanges.length = 0;
+
+            if (errors.length) {
+              break;
+            }
 
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
@@ -226,7 +249,7 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'threshold':
@@ -239,7 +262,7 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'threat_match':
@@ -252,7 +275,7 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'eql':
@@ -263,7 +286,7 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
           case 'machine_learning':
@@ -274,7 +297,7 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              { create: alertInstanceFactoryStub }
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
         }
@@ -291,6 +314,7 @@ export const previewRulesRoute = async (
           body: {
             previewId,
             logs,
+            isAborted,
           },
         });
       } catch (err) {

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { LevelLogger, ReportingStore } from './lib';
-import { registerEventLogProviderActions } from './lib/event_logger';
+import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -29,16 +28,15 @@ import { registerReportingUsageCollector } from './usage';
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
 {
-  private logger: LevelLogger;
+  private logger: Logger;
   private reportingCore?: ReportingCore;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
-    this.logger = new LevelLogger(initContext.logger.get());
+    this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
@@ -60,7 +58,6 @@ export class ReportingPlugin
       ...plugins,
     });
 
-    registerEventLogProviderActions(plugins.eventLog);
     registerUiSettings(core);
     registerDeprecations({ core, reportingCore });
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
@@ -115,5 +112,9 @@ export class ReportingPlugin
     });
 
     return reportingCore.getContract();
+  }
+
+  stop() {
+    this.reportingCore?.pluginStop();
   }
 }

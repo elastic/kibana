@@ -12,11 +12,161 @@
     "classes": [
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "CiStatsClient",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.fromEnv",
+            "type": "Function",
+            "tags": [],
+            "label": "fromEnv",
+            "description": [
+              "\nCreate a CiStatsReporter by inspecting the ENV for the necessary config"
+            ],
+            "signature": [
+              "(log: ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CiStatsClient",
+                "text": "CiStatsClient"
+              }
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsClient.fromEnv.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Config",
+                    "text": "Config"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.getLatestTestGroupStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getLatestTestGroupStats",
+            "description": [],
+            "signature": [
+              "(options: LatestTestGroupStatsOptions) => Promise<LatestTestGroupStatsResp>"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsClient.getLatestTestGroupStats.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "LatestTestGroupStatsOptions"
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.CiStatsReporter",
         "type": "Class",
         "tags": [],
         "label": "CiStatsReporter",
-        "description": [],
+        "description": [
+          "Object that helps report data to the ci-stats service"
+        ],
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
         "deprecated": false,
         "children": [
@@ -182,7 +332,7 @@
                 "section": "def-server.TimingsOptions",
                 "text": "TimingsOptions"
               },
-              ") => Promise<true | undefined>"
+              ") => Promise<boolean | undefined>"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false,
@@ -236,7 +386,7 @@
                 "section": "def-server.MetricsOptions",
                 "text": "MetricsOptions"
               },
-              " | undefined) => Promise<true | undefined>"
+              " | undefined) => Promise<boolean | undefined>"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false,
@@ -282,6 +432,52 @@
                 "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
                 "deprecated": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsReporter.reportTests",
+            "type": "Function",
+            "tags": [],
+            "label": "reportTests",
+            "description": [
+              "\nSend test reports to ci-stats"
+            ],
+            "signature": [
+              "({ group, testRuns }: ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CiStatsReportTestsOptions",
+                "text": "CiStatsReportTestsOptions"
+              },
+              ") => Promise<ReportTestsResponse | undefined>"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsReporter.reportTests.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ group, testRuns }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.CiStatsReportTestsOptions",
+                    "text": "CiStatsReportTestsOptions"
+                  }
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -733,11 +929,9 @@
             "type": "Function",
             "tags": [],
             "label": "indent",
-            "description": [
-              "\nIndent the output of the ToolingLog by some character (4 is a good choice usually).\n\nIf provided, the `block` function will be executed and once it's promise is resolved\nor rejected the indentation will be reset to its original state.\n"
-            ],
+            "description": [],
             "signature": [
-              "<T>(delta?: number, block?: (() => Promise<T>) | undefined) => Promise<T> | undefined"
+              "{ (delta: number): undefined; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
             "deprecated": false,
@@ -748,9 +942,7 @@
                 "type": "number",
                 "tags": [],
                 "label": "delta",
-                "description": [
-                  "the number of spaces to increase/decrease the indentation"
-                ],
+                "description": [],
                 "signature": [
                   "number"
                 ],
@@ -764,11 +956,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "block",
-                "description": [
-                  "a function to run and reset any indentation changes after"
-                ],
+                "description": [],
                 "signature": [
-                  "(() => Promise<T>) | undefined"
+                  "(() => T | Promise<T>) | undefined"
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
                 "deprecated": false,
@@ -1758,6 +1948,53 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.diffStrings",
+        "type": "Function",
+        "tags": [],
+        "label": "diffStrings",
+        "description": [
+          "\nProduces a diff string which is nicely formatted to show the differences between two strings. This will\nbe a multi-line string so it's generally a good idea to include a `\\n` before this first line of the diff\nif you are concatenating it with another message."
+        ],
+        "signature": [
+          "(expected: string, received: string) => string | undefined"
+        ],
+        "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.diffStrings.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expected",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.diffStrings.$2",
+            "type": "string",
+            "tags": [],
+            "label": "received",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.extract",
         "type": "Function",
         "tags": [],
@@ -2496,6 +2733,37 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.sortPackageJson",
+        "type": "Function",
+        "tags": [],
+        "label": "sortPackageJson",
+        "description": [],
+        "signature": [
+          "(json: string) => string"
+        ],
+        "path": "packages/kbn-dev-utils/src/sort_package_json.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.sortPackageJson.$1",
+            "type": "string",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-utils/src/sort_package_json.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.transformFileStream",
         "type": "Function",
         "tags": [],
@@ -2731,39 +2999,13 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.CiStatsMetadata",
-        "type": "Interface",
-        "tags": [],
-        "label": "CiStatsMetadata",
-        "description": [],
-        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.CiStatsMetadata.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: string | number | boolean | string[] | undefined",
-            "description": [
-              "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
-            ],
-            "signature": [
-              "[key: string]:  string | number | boolean | string[] | undefined"
-            ],
-            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.CiStatsMetric",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsMetric",
-        "description": [],
+        "description": [
+          "A ci-stats metric record"
+        ],
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
         "deprecated": false,
         "children": [
@@ -2843,16 +3085,307 @@
               "Arbitrary key-value pairs which can be used for additional filtering/reporting"
             ],
             "signature": [
+              "CiStatsMetadata",
+              " | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsReportTestsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CiStatsReportTestsOptions",
+        "description": [
+          "Options for reporting tests to ci-stats"
+        ],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsReportTestsOptions.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [
+              "\nInformation about the group of tests that were run"
+            ],
+            "signature": [
               {
                 "pluginId": "@kbn/dev-utils",
                 "scope": "server",
                 "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              },
-              " | undefined"
+                "section": "def-server.CiStatsTestGroupInfo",
+                "text": "CiStatsTestGroupInfo"
+              }
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsReportTestsOptions.testRuns",
+            "type": "Array",
+            "tags": [],
+            "label": "testRuns",
+            "description": [
+              "\nInformation about each test that ran, including failure information"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CiStatsTestRun",
+                "text": "CiStatsTestRun"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsTestGroupInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "CiStatsTestGroupInfo",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestGroupInfo.startTime",
+            "type": "string",
+            "tags": [],
+            "label": "startTime",
+            "description": [
+              "\nISO-8601 formatted datetime representing when the group of tests started running"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestGroupInfo.durationMs",
+            "type": "number",
+            "tags": [],
+            "label": "durationMs",
+            "description": [
+              "\nThe number of miliseconds that the tests ran for"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestGroupInfo.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of tests run in this group, any value is valid but test groups are groupped by type in the UI so use something consistent"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestGroupInfo.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of this specific group (within the \"type\")"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestGroupInfo.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nArbitrary metadata associated with this group. We currently look for a ciGroup metadata property for highlighting that when appropriate"
+            ],
+            "signature": [
+              "CiStatsMetadata"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsTestRun",
+        "type": "Interface",
+        "tags": [],
+        "label": "CiStatsTestRun",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.startTime",
+            "type": "string",
+            "tags": [],
+            "label": "startTime",
+            "description": [
+              "\nISO-8601 formatted datetime representing when the tests started running"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.durationMs",
+            "type": "number",
+            "tags": [],
+            "label": "durationMs",
+            "description": [
+              "\nDuration of the tests in milliseconds"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.seq",
+            "type": "number",
+            "tags": [],
+            "label": "seq",
+            "description": [
+              "\nA sequence number, this is used to order the tests in a specific test run"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of this \"test run\", usually this is just \"test\" but when reporting issues in hooks it can be set to the type of hook"
+            ],
+            "signature": [
+              "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.result",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "result",
+            "description": [
+              "\n\"fail\", \"pass\" or \"skip\", the result of the tests"
+            ],
+            "signature": [
+              "\"fail\" | \"pass\" | \"skip\""
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.suites",
+            "type": "Array",
+            "tags": [],
+            "label": "suites",
+            "description": [
+              "\nThe list of suite names containing this test, the first being the outermost suite"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of this specific test run"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.file",
+            "type": "string",
+            "tags": [],
+            "label": "file",
+            "description": [
+              "\nRelative path from the root of the repo contianing this test"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nError message if the test failed"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.stdout",
+            "type": "string",
+            "tags": [],
+            "label": "stdout",
+            "description": [
+              "\nDebug output/stdout produced by the test"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsTestRun.screenshots",
+            "type": "Array",
+            "tags": [],
+            "label": "screenshots",
+            "description": [
+              "\nScreenshots captured during the test run"
+            ],
+            "signature": [
+              "{ name: string; base64Png: string; }[] | undefined"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
             "deprecated": false
           }
         ],
@@ -2864,7 +3397,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CiStatsTiming",
-        "description": [],
+        "description": [
+          "A ci-stats timing event"
+        ],
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
         "deprecated": false,
         "children": [
@@ -2914,13 +3449,7 @@
               "hash of key-value pairs which will be stored with the timing for additional filtering and reporting"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              },
+              "CiStatsMetadata",
               " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
@@ -3421,7 +3950,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MetricsOptions",
-        "description": [],
+        "description": [
+          "Options for reporting metrics to ci-stats"
+        ],
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
         "deprecated": false,
         "children": [
@@ -3435,13 +3966,7 @@
               "Default metadata to add to each metric"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              },
+              "CiStatsMetadata",
               " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
@@ -3781,7 +4306,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TimingsOptions",
-        "description": [],
+        "description": [
+          "Options for reporting timings to ci-stats"
+        ],
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
         "deprecated": false,
         "children": [
@@ -4022,6 +4549,34 @@
         "label": "CA_CERT_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsTestResult",
+        "type": "Type",
+        "tags": [],
+        "label": "CiStatsTestResult",
+        "description": [],
+        "signature": [
+          "\"fail\" | \"pass\" | \"skip\""
+        ],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsTestType",
+        "type": "Type",
+        "tags": [],
+        "label": "CiStatsTestType",
+        "description": [],
+        "signature": [
+          "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
+        ],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

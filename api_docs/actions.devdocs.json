@@ -600,6 +600,49 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-server.FindActionResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindActionResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.FindActionResult",
+            "text": "FindActionResult"
+          },
+          " extends ",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ActionResult",
+            "text": "ActionResult"
+          },
+          "<",
+          "ActionTypeConfig",
+          ">"
+        ],
+        "path": "x-pack/plugins/actions/server/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.FindActionResult.referencedByCount",
+            "type": "number",
+            "tags": [],
+            "label": "referencedByCount",
+            "description": [],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-server.PreConfiguredAction",
         "type": "Interface",
         "tags": [],
@@ -695,7 +738,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly source?: string | undefined; readonly group?: string | undefined; readonly summary?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"info\" | \"warning\" | \"critical\" | undefined; readonly component?: string | undefined; readonly class?: string | undefined; }"
+          "{ readonly source?: string | undefined; readonly summary?: string | undefined; readonly group?: string | undefined; readonly timestamp?: string | undefined; readonly eventAction?: \"resolve\" | \"trigger\" | \"acknowledge\" | undefined; readonly dedupKey?: string | undefined; readonly severity?: \"error\" | \"info\" | \"warning\" | \"critical\" | undefined; readonly component?: string | undefined; readonly class?: string | undefined; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/pagerduty.ts",
         "deprecated": false,
@@ -866,7 +909,13 @@
             "text": "ActionTypeExecutorResult"
           },
           "<unknown>>; getAll: () => Promise<",
-          "FindActionResult",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.FindActionResult",
+            "text": "FindActionResult"
+          },
           "[]>; getBulk: (ids: string[]) => Promise<",
           {
             "pluginId": "actions",

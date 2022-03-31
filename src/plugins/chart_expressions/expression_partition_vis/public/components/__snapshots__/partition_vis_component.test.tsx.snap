@@ -5,33 +5,34 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
   css={
     Object {
       "map": undefined,
-      "name": "1bdmk0u",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
-  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 8px;
+  
+  min-height: 0;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
   }
-  data-test-subj="visTypePieChart"
+  data-test-subj="partitionVisChart"
 >
   <div
     css={
       Object {
         "map": undefined,
-        "name": "1lu5dww",
+        "name": "19k4zle",
         "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
         "toString": [Function],
       }
     }
@@ -400,33 +401,34 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
   css={
     Object {
       "map": undefined,
-      "name": "1bdmk0u",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
-  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 8px;
+  
+  min-height: 0;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
   }
-  data-test-subj="visTypePieChart"
+  data-test-subj="partitionVisChart"
 >
   <div
     css={
       Object {
         "map": undefined,
-        "name": "1lu5dww",
+        "name": "19k4zle",
         "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
         "toString": [Function],
       }
     }
@@ -826,33 +828,34 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
   css={
     Object {
       "map": undefined,
-      "name": "1bdmk0u",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
-  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 8px;
+  
+  min-height: 0;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
   }
-  data-test-subj="visTypePieChart"
+  data-test-subj="partitionVisChart"
 >
   <div
     css={
       Object {
         "map": undefined,
-        "name": "1lu5dww",
+        "name": "19k4zle",
         "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
         "toString": [Function],
       }
     }
@@ -1205,33 +1208,34 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
   css={
     Object {
       "map": undefined,
-      "name": "1bdmk0u",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
-  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 8px;
+  
+  min-height: 0;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
   }
-  data-test-subj="visTypePieChart"
+  data-test-subj="partitionVisChart"
 >
   <div
     css={
       Object {
         "map": undefined,
-        "name": "1lu5dww",
+        "name": "19k4zle",
         "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
         "toString": [Function],
       }
     }
@@ -1615,33 +1619,34 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
   css={
     Object {
       "map": undefined,
-      "name": "1bdmk0u",
+      "name": "13h2mjc",
       "next": undefined,
       "styles": "
-  display:flex;flex:1 1 auto;min-height:0;min-width:0;;;
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 8px;
+  
+  min-height: 0;
+  min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
 ",
       "toString": [Function],
     }
   }
-  data-test-subj="visTypePieChart"
+  data-test-subj="partitionVisChart"
 >
   <div
     css={
       Object {
         "map": undefined,
-        "name": "1lu5dww",
+        "name": "19k4zle",
         "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;",
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
         "toString": [Function],
       }
     }

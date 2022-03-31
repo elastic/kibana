@@ -21,19 +21,21 @@ import { observabilityFeatureId, observabilityAppId } from '../../../../../commo
 import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
+  appId?: 'securitySolutionUI' | 'observability';
   autoOpen?: boolean;
+  lensAttributes: TypedLensByValueInput['attributes'] | null;
+  owner?: string;
   setAutoOpen?: (val: boolean) => void;
   timeRange: { from: string; to: string };
-  appId?: 'security' | 'observability';
-  lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
 export function AddToCaseAction({
-  lensAttributes,
-  timeRange,
-  autoOpen,
-  setAutoOpen,
   appId,
+  autoOpen,
+  lensAttributes,
+  owner = observabilityFeatureId,
+  setAutoOpen,
+  timeRange,
 }: AddToCaseProps) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
@@ -47,14 +49,14 @@ export function AddToCaseAction({
     (theCase) =>
       toMountPoint(
         <CaseToastText
-          linkUrl={getUrlForApp(observabilityAppId, {
+          linkUrl={getUrlForApp(appId ?? observabilityAppId, {
             deepLinkId: CasesDeepLinkId.cases,
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
         />,
         { theme$: theme?.theme$ }
       ),
-    [getUrlForApp, theme?.theme$]
+    [appId, getUrlForApp, theme?.theme$]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);
@@ -68,12 +70,13 @@ export function AddToCaseAction({
       to: absoluteToDate?.toISOString() ?? '',
     },
     appId,
+    owner,
   });
 
   const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
     onRowClick: onCaseClicked,
     userCanCrud: true,
-    owner: [observabilityFeatureId],
+    owner: [owner],
     onClose: () => {
       setIsCasesOpen(false);
     },
@@ -111,7 +114,7 @@ export function AddToCaseAction({
       )}
       {isCasesOpen &&
         lensAttributes &&
-        cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+        cases.ui.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 }

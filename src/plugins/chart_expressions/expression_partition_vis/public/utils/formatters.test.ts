@@ -8,31 +8,19 @@
 
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { Datatable } from '../../../../expressions';
-import { createMockPieParams, createMockVisData } from '../mocks';
+import { createMockVisData } from '../mocks';
 import { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
 import { BucketColumns } from '../../common/types';
 
 describe('generateFormatters', () => {
-  const visParams = createMockPieParams();
   const visData = createMockVisData();
   const defaultFormatter = jest.fn((...args) => fieldFormatsMock.deserialize(...args));
   beforeEach(() => {
     defaultFormatter.mockClear();
   });
 
-  it('returns empty object, if labels should not be should ', () => {
-    const formatters = generateFormatters(
-      { ...visParams, labels: { ...visParams.labels, show: false } },
-      visData,
-      defaultFormatter
-    );
-
-    expect(formatters).toEqual({});
-    expect(defaultFormatter).toHaveBeenCalledTimes(0);
-  });
-
   it('returns formatters, if columns have meta parameters', () => {
-    const formatters = generateFormatters(visParams, visData, defaultFormatter);
+    const formatters = generateFormatters(visData, defaultFormatter);
     const formattingResult = fieldFormatsMock.deserialize();
 
     const serializedFormatters = Object.keys(formatters).reduce(
@@ -62,7 +50,7 @@ describe('generateFormatters', () => {
       columns: visData.columns.map(({ meta, ...col }) => ({ ...col, meta: { type: 'string' } })),
     };
 
-    const formatters = generateFormatters(visParams, newVisData, defaultFormatter);
+    const formatters = generateFormatters(newVisData, defaultFormatter);
 
     expect(formatters).toEqual({
       'col-0-2': undefined,

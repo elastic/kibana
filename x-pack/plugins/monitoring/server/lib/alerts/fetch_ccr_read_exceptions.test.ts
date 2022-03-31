@@ -31,9 +31,9 @@ describe('fetchCCReadExceptions', () => {
     },
   };
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-  esClient.search.mockReturnValue(
+  esClient.search.mockResponse(
     // @ts-expect-error not full response interface
-    elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+    esRes
   );
   it('should call ES with correct query', async () => {
     await fetchCCRReadExceptions(esClient, 1643306331418, 1643309869056, 10000);
@@ -47,15 +47,39 @@ describe('fetchCCReadExceptions', () => {
           bool: {
             filter: [
               {
-                nested: {
-                  path: 'ccr_stats.read_exceptions',
-                  query: { exists: { field: 'ccr_stats.read_exceptions.exception' } },
+                bool: {
+                  should: [
+                    {
+                      nested: {
+                        ignore_unmapped: true,
+                        path: 'ccr_stats.read_exceptions',
+                        query: {
+                          exists: {
+                            field: 'ccr_stats.read_exceptions.exception',
+                          },
+                        },
+                      },
+                    },
+                    {
+                      nested: {
+                        ignore_unmapped: true,
+                        path: 'elasticsearch.ccr.read_exceptions',
+                        query: {
+                          exists: {
+                            field: 'elasticsearch.ccr.read_exceptions.exception',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
               },
               {
                 bool: {
                   should: [
                     { term: { type: 'ccr_stats' } },
+                    { term: { 'metricset.name': 'ccr' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.ccr' } },
                   ],
                   minimum_should_match: 1,
@@ -82,9 +106,13 @@ describe('fetchCCReadExceptions', () => {
                       _source: {
                         includes: [
                           'cluster_uuid',
+                          'elasticsearch.cluster.id',
                           'ccr_stats.read_exceptions',
+                          'elasticsearch.ccr.read_exceptions',
                           'ccr_stats.shard_id',
+                          'elasticsearch.ccr.shard_id',
                           'ccr_stats.leader_index',
+                          'elasticsearch.ccr.leader.index',
                         ],
                       },
                       size: 1,
@@ -104,7 +132,7 @@ describe('fetchCCReadExceptions', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
 
     await fetchCCRReadExceptions(esClient, 1643306331418, 1643309869056, 10000);

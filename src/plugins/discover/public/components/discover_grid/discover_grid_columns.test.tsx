@@ -24,6 +24,21 @@ describe('Discover grid columns', function () {
       Array [
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",
@@ -39,6 +54,21 @@ describe('Discover grid columns', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",
@@ -68,6 +98,21 @@ describe('Discover grid columns', function () {
       Array [
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": false,
             "showMoveLeft": false,
             "showMoveRight": false,
@@ -83,6 +128,21 @@ describe('Discover grid columns', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": false,
             "showMoveLeft": false,
             "showMoveRight": false,
@@ -109,6 +169,21 @@ describe('Discover grid columns', function () {
       Array [
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": false,
             "showMoveLeft": true,
             "showMoveRight": true,
@@ -138,6 +213,21 @@ describe('Discover grid columns', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",
@@ -156,6 +246,21 @@ describe('Discover grid columns', function () {
         },
         Object {
           "actions": Object {
+            "additional": Array [
+              Object {
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy to clipboard"
+                  id="discover.grid.copyToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
             "showHide": Object {
               "iconType": "cross",
               "label": "Remove column",

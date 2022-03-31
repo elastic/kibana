@@ -20,6 +20,7 @@ jest.mock('../../kibana_react/public', () => {
 import { CoreStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
+import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
 import { FieldEditorLoader } from './components/field_editor_loader';
@@ -35,7 +36,7 @@ describe('DataViewFieldEditorPlugin', () => {
     data: dataPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     dataViews: dataPluginMock.createStartContract().dataViews,
-    fieldFormats: dataPluginMock.createStartContract().fieldFormats,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
   };
 
   let plugin: IndexPatternFieldEditorPlugin;

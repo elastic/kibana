@@ -10,38 +10,48 @@ import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../lib/helpers/setup_request';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 export async function getErrorGroupDetailedStatistics({
   kuery,
   serviceName,
   setup,
   numBuckets,
-  transactionType,
   groupIds,
   environment,
   start,
   end,
+  offset,
 }: {
   kuery: string;
   serviceName: string;
   setup: Setup;
   numBuckets: number;
-  transactionType: string;
   groupIds: string[];
   environment: string;
   start: number;
   end: number;
+  offset?: string;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
   const { apmEventClient } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+    numBuckets,
+  });
 
   const timeseriesResponse = await apmEventClient.search(
     'get_service_error_group_detailed_statistics',
@@ -56,8 +66,7 @@ export async function getErrorGroupDetailedStatistics({
             filter: [
               { terms: { [ERROR_GROUP_ID]: groupIds } },
               { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
@@ -76,8 +85,8 @@ export async function getErrorGroupDetailedStatistics({
                   fixed_interval: intervalString,
                   min_doc_count: 0,
                   extended_bounds: {
-                    min: start,
-                    max: end,
+                    min: startWithOffset,
+                    max: endWithOffset,
                   },
                 },
               },
@@ -111,25 +120,21 @@ export async function getErrorGroupPeriods({
   serviceName,
   setup,
   numBuckets,
-  transactionType,
   groupIds,
   environment,
-  comparisonStart,
-  comparisonEnd,
   start,
   end,
+  offset,
 }: {
   kuery: string;
   serviceName: string;
   setup: Setup;
   numBuckets: number;
-  transactionType: string;
   groupIds: string[];
   environment: string;
-  comparisonStart?: number;
-  comparisonEnd?: number;
   start: number;
   end: number;
+  offset?: string;
 }) {
   const commonProps = {
     environment,
@@ -137,7 +142,6 @@ export async function getErrorGroupPeriods({
     serviceName,
     setup,
     numBuckets,
-    transactionType,
     groupIds,
   };
 
@@ -147,14 +151,14 @@ export async function getErrorGroupPeriods({
     end,
   });
 
-  const previousPeriodPromise =
-    comparisonStart && comparisonEnd
-      ? getErrorGroupDetailedStatistics({
-          ...commonProps,
-          start: comparisonStart,
-          end: comparisonEnd,
-        })
-      : [];
+  const previousPeriodPromise = offset
+    ? getErrorGroupDetailedStatistics({
+        ...commonProps,
+        start,
+        end,
+        offset,
+      })
+    : [];
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     currentPeriodPromise,

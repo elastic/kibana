@@ -98,9 +98,12 @@ export const UserActions = React.memo(
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
 
-    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
-      getManualAlertIdsWithNoRuleId(caseData.comments)
+    const alertIdsWithoutRuleInfo = useMemo(
+      () => getManualAlertIdsWithNoRuleId(caseData.comments),
+      [caseData.comments]
     );
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
     const {
       loadingCommentIds,

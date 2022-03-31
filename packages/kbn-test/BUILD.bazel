@@ -5,7 +5,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-test"
 PKG_REQUIRE_NAME = "@kbn/test"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__test"
 
 SOURCE_FILES = glob(
   [
@@ -30,6 +29,8 @@ filegroup(
 NPM_MODULE_EXTRA_FILES = [
   "jest-preset.js",
   "jest_integration/jest-preset.js",
+  "jest_integration_node/jest-preset.js",
+  "jest_node/jest-preset.js",
   "jest.config.js",
   "README.md",
   "package.json",
@@ -52,6 +53,7 @@ RUNTIME_DEPS = [
     "@npm//execa",
     "@npm//exit-hook",
     "@npm//form-data",
+    "@npm//get-port",
     "@npm//getopts",
     "@npm//globby",
     "@npm//he",
@@ -84,11 +86,13 @@ TYPES_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
+  "@npm//axe-core",
   "@npm//axios",
   "@npm//elastic-apm-node",
   "@npm//del",
   "@npm//exit-hook",
   "@npm//form-data",
+  "@npm//get-port",
   "@npm//getopts",
   "@npm//jest",
   "@npm//jest-cli",
@@ -137,10 +141,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -172,7 +174,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

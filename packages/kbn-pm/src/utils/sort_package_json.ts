@@ -7,41 +7,10 @@
  */
 
 import Fs from 'fs/promises';
-
-import sorter from 'sort-package-json';
-
+import { sortPackageJson as sort } from '@kbn/dev-utils/sort_package_json';
 import { Kibana } from './kibana';
 
 export async function sortPackageJson(kbn: Kibana) {
   const packageJsonPath = kbn.getAbsolute('package.json');
-  const packageJson = await Fs.readFile(packageJsonPath, 'utf-8');
-  await Fs.writeFile(
-    packageJsonPath,
-    JSON.stringify(
-      sorter(JSON.parse(packageJson), {
-        // top level keys in the order they were written when this was implemented
-        sortOrder: [
-          'name',
-          'description',
-          'keywords',
-          'private',
-          'version',
-          'branch',
-          'types',
-          'tsdocMetadata',
-          'build',
-          'homepage',
-          'bugs',
-          'kibana',
-          'author',
-          'scripts',
-          'repository',
-          'engines',
-          'resolutions',
-        ],
-      }),
-      null,
-      2
-    )
-  );
+  await Fs.writeFile(packageJsonPath, sort(await Fs.readFile(packageJsonPath, 'utf-8')));
 }

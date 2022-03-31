@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   Comparator,
-  ComparatorToi18nMap,
+  ComparatorToi18nSymbolsMap,
   TimeUnit,
 } from '../../../../common/alerting/logs/log_threshold/types';
 
@@ -23,11 +23,11 @@ export const getReasonMessageForUngroupedCountAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.ungroupedCountAlertReasonDescription', {
     defaultMessage:
-      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last {duration}. Alert when ({translatedComparator} {expectedCount}).',
+      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last {duration}. Alert when {comparator} {expectedCount}.',
     values: {
       actualCount,
       expectedCount,
-      translatedComparator: ComparatorToi18nMap[comparator],
+      comparator: ComparatorToi18nSymbolsMap[comparator],
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
@@ -42,12 +42,12 @@ export const getReasonMessageForGroupedCountAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription', {
     defaultMessage:
-      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last {duration} for {groupName}. Alert when ({translatedComparator} {expectedCount}).',
+      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last {duration} for {groupName}. Alert when {comparator} {expectedCount}.',
     values: {
       actualCount,
       expectedCount,
       groupName,
-      translatedComparator: ComparatorToi18nMap[comparator],
+      comparator: ComparatorToi18nSymbolsMap[comparator],
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
@@ -61,11 +61,11 @@ export const getReasonMessageForUngroupedRatioAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.ungroupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The ratio of selected logs is {actualRatio} in the last {duration}. Alert when ({translatedComparator} {expectedRatio}).',
+      'The ratio of selected logs is {actualRatio} in the last {duration}. Alert when {comparator} {expectedRatio}.',
     values: {
       actualRatio,
       expectedRatio,
-      translatedComparator: ComparatorToi18nMap[comparator],
+      comparator: ComparatorToi18nSymbolsMap[comparator],
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });
@@ -80,12 +80,12 @@ export const getReasonMessageForGroupedRatioAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The ratio of selected logs is {actualRatio} in the last {duration} for {groupName}. Alert when ({translatedComparator} {expectedRatio}).',
+      'The ratio of selected logs is {actualRatio} in the last {duration} for {groupName}. Alert when {comparator} {expectedRatio}.',
     values: {
       actualRatio,
       expectedRatio,
       groupName,
-      translatedComparator: ComparatorToi18nMap[comparator],
+      comparator: ComparatorToi18nSymbolsMap[comparator],
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit as TimeUnitChar),
     },
   });

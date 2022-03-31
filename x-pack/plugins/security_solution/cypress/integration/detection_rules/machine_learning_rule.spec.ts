@@ -24,7 +24,6 @@ import {
   ANOMALY_SCORE_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
@@ -40,6 +39,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
+import { getDetails } from '../../tasks/rule_details';
 import {
   changeRowsPerPageTo100,
   filterByCustomRules,
@@ -47,7 +47,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineMachineLearningRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -68,13 +68,13 @@ describe('Detection rules, machine learning', () => {
     cleanKibana();
   });
 
-  it('Creates and activates a new ml rule', () => {
+  it('Creates and enables a new ml rule', () => {
     loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
     fillAboutRuleAndContinue(getMachineLearningRule());
     fillScheduleRuleAndContinue(getMachineLearningRule());
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 

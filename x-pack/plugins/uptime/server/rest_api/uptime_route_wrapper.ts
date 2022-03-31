@@ -23,7 +23,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
   handler: async (context, request, response) => {
     const { client: esClient } = context.core.elasticsearch;
     let savedObjectsClient: SavedObjectsClientContract;
-    if (server.config?.service?.enabled) {
+    if (server.config?.service) {
       savedObjectsClient = context.core.savedObjects.getClient({
         includedHiddenTypes: [syntheticsServiceApiKey.name],
       });
@@ -41,12 +41,13 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     const uptimeEsClient = createUptimeESClient({
       request,
       savedObjectsClient,
+      isInspectorEnabled,
       esClient: esClient.asCurrentUser,
     });
 
     server.uptimeEsClient = uptimeEsClient;
 
-    if (isInspectorEnabled) {
+    if (isInspectorEnabled || server.isDev) {
       inspectableEsQueriesMap.set(request, []);
     }
 
@@ -66,7 +67,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     return response.ok({
       body: {
         ...res,
-        ...(isInspectorEnabled && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
+        ...((isInspectorEnabled || server.isDev) && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
           ? { _inspect: inspectableEsQueriesMap.get(request) }
           : {}),
       },

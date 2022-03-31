@@ -45,28 +45,32 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail(`transformEditRetentionPolicySwitch`, {
         timeout: 1000,
       });
-      const isEnabled = await testSubjects.isEnabled(`transformEditRetentionPolicySwitch`);
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected 'transformEditRetentionPolicySwitch' input to be '${
-          expectedValue ? 'enabled' : 'disabled'
-        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const isEnabled = await testSubjects.isEnabled(`transformEditRetentionPolicySwitch`);
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected 'transformEditRetentionPolicySwitch' input to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(expectedValue: boolean) {
       await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,
       });
-      const isEnabled = await testSubjects.isEnabled(
-        `transformEditFlyoutRetentionPolicyFieldSelect`
-      );
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${
-          expectedValue ? 'enabled' : 'disabled'
-        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const isEnabled = await testSubjects.isEnabled(
+          `transformEditFlyoutRetentionPolicyFieldSelect`
+        );
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async assertTransformEditFlyoutRetentionPolicyFieldSelectValue(expectedValue: string) {

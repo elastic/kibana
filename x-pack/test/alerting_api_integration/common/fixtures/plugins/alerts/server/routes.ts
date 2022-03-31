@@ -20,11 +20,16 @@ import { RawRule } from '../../../../../../../plugins/alerting/server/types';
 import {
   ConcreteTaskInstance,
   TaskInstance,
+  TaskManagerStartContract,
 } from '../../../../../../../plugins/task_manager/server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
-export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { logger: Logger }) {
+export function defineRoutes(
+  core: CoreSetup<FixtureStartDeps>,
+  taskManagerStart: Promise<TaskManagerStartContract>,
+  { logger }: { logger: Logger }
+) {
   const router = core.http.createRouter();
   router.put(
     {
@@ -321,6 +326,41 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
         return res.noContent();
       } catch (err) {
         return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/alerting_actions_telemetry/run_now`,
+      validate: {
+        body: schema.object({
+          taskId: schema.string({
+            validate: (telemetryTaskId: string) => {
+              if (
+                ['Alerting-alerting_telemetry', 'Actions-actions_telemetry'].includes(
+                  telemetryTaskId
+                )
+              ) {
+                return;
+              }
+              return 'invalid telemetry task id';
+            },
+          }),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const { taskId } = req.body;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runNow(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
   );

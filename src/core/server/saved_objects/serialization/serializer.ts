@@ -9,6 +9,7 @@ import typeDetect from 'type-detect';
 import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectsUtils } from '../service';
 import {
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
@@ -170,8 +171,9 @@ export class SavedObjectsSerializer {
    * @param {string} type - The saved object type
    * @param {string} id - The id of the saved object
    */
-  public generateRawLegacyUrlAliasId(namespace: string, type: string, id: string) {
-    return `${LEGACY_URL_ALIAS_TYPE}:${namespace}:${type}:${id}`;
+  public generateRawLegacyUrlAliasId(namespace: string | undefined, type: string, id: string) {
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    return `${LEGACY_URL_ALIAS_TYPE}:${namespaceString}:${type}:${id}`;
   }
 
   /**

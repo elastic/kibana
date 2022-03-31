@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { filter } from 'lodash';
 import React, { useEffect, useState, useCallback } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
@@ -17,6 +16,7 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +26,7 @@ import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
+import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
@@ -45,15 +46,6 @@ const mappingConflictHeader = i18n.translate(
   }
 );
 
-const confirmModalOptionsDelete = {
-  confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
-    defaultMessage: 'Delete',
-  }),
-  title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
-    defaultMessage: 'Delete data view?',
-  }),
-};
-
 const securityDataView = i18n.translate(
   'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
   {
@@ -65,7 +57,7 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { application, uiSettings, overlays, chrome, dataViews } =
+    const { uiSettings, overlays, chrome, dataViews } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -90,32 +82,14 @@ export const EditIndexPattern = withRouter(
       setDefaultIndex(indexPattern.id || '');
     }, [uiSettings, indexPattern.id]);
 
-    const removePattern = () => {
-      async function doRemove() {
-        if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await dataViews.getIdsWithTitle();
-          uiSettings.remove('defaultIndex');
-          const otherPatterns = filter(indexPatterns, (pattern) => {
-            return pattern.id !== indexPattern.id;
-          });
-
-          if (otherPatterns.length) {
-            uiSettings.set('defaultIndex', otherPatterns[0].id);
-          }
-        }
-        if (indexPattern.id) {
-          Promise.resolve(dataViews.delete(indexPattern.id)).then(function () {
-            history.push('');
-          });
-        }
-      }
-
-      overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
-        if (isConfirmed) {
-          doRemove();
-        }
-      });
-    };
+    const removeHandler = removeDataView({
+      dataViews,
+      uiSettings,
+      overlays,
+      onDelete: () => {
+        history.push('');
+      },
+    });
 
     const timeFilterHeader = i18n.translate(
       'indexPatternManagement.editIndexPattern.timeFilterHeader',
@@ -143,15 +117,38 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
-    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+    const userEditPermission = dataViews.getCanSaveSync();
+
+    const warning =
+      (indexPattern.namespaces && indexPattern.namespaces.length > 1) ||
+      indexPattern.namespaces.includes('*') ? (
+        <FormattedMessage
+          id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
+          defaultMessage="Delete the data view {dataViewName} from every space it is shared in. You can't undo this action."
+          values={{
+            dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="indexPatternManagement.editDataView.deleteWarning"
+          defaultMessage="The data view {dataViewName} will be deleted. You can't undo this action."
+          values={{
+            dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+          }}
+        />
+      );
 
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
+          deleteIndexPatternClick={() =>
+            removeHandler([indexPattern as RemoveDataViewProps], <div>{warning}</div>)
+          }
           defaultIndex={defaultIndex}
+          canSave={userEditPermission}
         >
           {showTagsSection && (
             <EuiFlexGroup wrap gutterSize="s">

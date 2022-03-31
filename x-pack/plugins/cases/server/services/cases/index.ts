@@ -39,7 +39,7 @@ import {
 } from '../../../common/api';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
-import { defaultPage, defaultPerPage } from '../../routes/api';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import {
@@ -420,8 +420,8 @@ export class CasesService {
         return {
           saved_objects: [],
           total: 0,
-          per_page: options?.perPage ?? defaultPerPage,
-          page: options?.page ?? defaultPage,
+          per_page: options?.perPage ?? DEFAULT_PER_PAGE,
+          page: options?.page ?? DEFAULT_PAGE,
         };
       }
 

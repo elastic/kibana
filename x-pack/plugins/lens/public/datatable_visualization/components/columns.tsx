@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
@@ -40,7 +41,9 @@ export const createGridColumns = (
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
   onColumnHide: ((eventData: { columnId: string }) => void) | undefined,
-  alignments: Record<string, 'left' | 'right' | 'center'>
+  alignments: Record<string, 'left' | 'right' | 'center'>,
+  headerRowHeight: 'auto' | 'single' | 'custom',
+  headerRowLines: number
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -99,7 +102,7 @@ export const createGridColumns = (
                     data-test-subj="lensDatatableFilterFor"
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, rowIndex);
-                      closePopover();
+                      closePopover?.();
                     }}
                     iconType="plusInCircle"
                   >
@@ -137,7 +140,7 @@ export const createGridColumns = (
                     aria-label={filterOutAriaLabel}
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                      closePopover();
+                      closePopover?.();
                     }}
                     iconType="minusInCircle"
                   >
@@ -209,12 +212,24 @@ export const createGridColumns = (
       }
     }
     const currentAlignment = alignments && alignments[field];
-    const alignmentClassName = `lnsTableCell--${currentAlignment}`;
+    const hasMultipleRows = headerRowHeight === 'auto' || headerRowHeight === 'custom';
+
+    const columnStyle = css({
+      ...(headerRowHeight === 'custom' && {
+        WebkitLineClamp: headerRowLines,
+      }),
+      ...(hasMultipleRows && {
+        whiteSpace: 'normal',
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+      }),
+      textAlign: currentAlignment,
+    });
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
       cellActions,
-      display: <div className={alignmentClassName}>{name}</div>,
+      display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
       actions: {
         showHide: false,

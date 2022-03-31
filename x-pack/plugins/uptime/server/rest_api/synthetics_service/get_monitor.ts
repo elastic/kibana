@@ -7,12 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { normalizeSecrets } from '../../lib/synthetics_service/utils/secrets';
 
-export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
+export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
@@ -20,10 +22,21 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    server: { encryptedSavedObjects },
+    savedObjectsClient,
+  }): Promise<any> => {
     const { monitorId } = request.params;
+    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     try {
-      return await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+      const monitorWithSecrets = await libs.requests.getSyntheticsMonitor({
+        monitorId,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
+      });
+      return normalizeSecrets(monitorWithSecrets);
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
@@ -46,7 +59,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       search: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ request, savedObjectsClient }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
     const { perPage = 50, page, sortField, sortOrder, search } = request.query;
     // TODO: add query/filtering params
     const {
@@ -65,6 +78,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       ...rest,
       perPage: perPageT,
       monitors,
+      syncErrors: server.syntheticsService.syncErrors,
     };
   },
 });

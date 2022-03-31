@@ -57,6 +57,8 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./multi_terms'));
       loadTestFile(require.resolve('./epoch_millis'));
+      loadTestFile(require.resolve('./show_underlying_data'));
+      loadTestFile(require.resolve('./show_underlying_data_dashboard'));
     });
 
     describe('', function () {
@@ -66,16 +68,19 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./time_shift'));
       loadTestFile(require.resolve('./drag_and_drop'));
+      loadTestFile(require.resolve('./disable_auto_apply'));
       loadTestFile(require.resolve('./geo_field'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
       loadTestFile(require.resolve('./gauge'));
       loadTestFile(require.resolve('./metrics'));
       loadTestFile(require.resolve('./reference_lines'));
+      loadTestFile(require.resolve('./annotations'));
       loadTestFile(require.resolve('./inspector'));
       loadTestFile(require.resolve('./error_handling'));
       loadTestFile(require.resolve('./lens_tagging'));
       loadTestFile(require.resolve('./lens_reporting'));
+      loadTestFile(require.resolve('./tsvb_open_in_lens'));
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
     });

@@ -287,9 +287,7 @@
                 "label": "reportUiCounter",
                 "description": [],
                 "signature": [
-                  "((appName: string, type: ",
-                  "UiCounterMetricType",
-                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                  "((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -977,8 +975,8 @@
                     "pluginId": "embeddable",
                     "scope": "public",
                     "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.Container",
-                    "text": "Container"
+                    "section": "def-public.IContainer",
+                    "text": "IContainer"
                   },
                   "<{}, ",
                   {
@@ -997,6 +995,27 @@
                     "text": "ContainerOutput"
                   },
                   "> | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.Unnamed.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddableContainerSettings",
+                    "text": "EmbeddableContainerSettings"
+                  },
+                  " | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -2344,6 +2363,21 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.refreshInputFromParent",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshInputFromParent",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -5204,9 +5238,7 @@
             "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
-          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: ",
-          "UiCounterMetricType",
-          ", eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
+          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -5493,9 +5525,7 @@
                 "label": "reportUiCounter",
                 "description": [],
                 "signature": [
-                  "((appName: string, type: ",
-                  "UiCounterMetricType",
-                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                  "((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
@@ -5995,6 +6025,49 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddableContainerSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableContainerSettings",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.initializeSequentially",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initializeSequentially",
+            "description": [
+              "\nIf true, the container will wait for each embeddable to load after creation before loading the next embeddable."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.childIdInitializeOrder",
+            "type": "Array",
+            "tags": [],
+            "label": "childIdInitializeOrder",
+            "description": [
+              "\nInitialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -8093,6 +8166,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.refreshInputFromParent",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshInputFromParent",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],

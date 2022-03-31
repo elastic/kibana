@@ -7,8 +7,7 @@
  */
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { IAggConfigs } from '../../../../../data/common';
-import { DataPublicPluginStart, search } from '../../../../../data/public';
+import { DataPublicPluginStart, search, IAggConfigs } from '../../../../../data/public';
 import { Dimensions, HistogramParamsBounds } from '../components/chart/point_series';
 
 export function getDimensions(

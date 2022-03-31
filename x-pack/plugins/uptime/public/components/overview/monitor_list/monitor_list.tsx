@@ -38,7 +38,6 @@ import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestNowColumn } from './columns/test_now_col';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -105,8 +104,6 @@ export const MonitorListComponent: ({
     }, {});
   };
 
-  const { config } = useUptimeSettingsContext();
-
   const columns = [
     ...[
       {
@@ -123,7 +120,8 @@ export const MonitorListComponent: ({
             state: {
               timestamp,
               summaryPings,
-              monitor: { type, duration },
+              monitor: { type, duration, checkGroup },
+              error: summaryError,
             },
             configId,
           }: MonitorSummary
@@ -135,8 +133,10 @@ export const MonitorListComponent: ({
               timestamp={timestamp}
               summaryPings={summaryPings ?? []}
               monitorType={type}
-              duration={duration!.us}
+              duration={duration?.us}
               monitorId={monitorId}
+              checkGroup={checkGroup}
+              summaryError={summaryError}
             />
           );
         },
@@ -206,19 +206,15 @@ export const MonitorListComponent: ({
         />
       ),
     },
-    ...(config.ui?.monitorManagement?.enabled
-      ? [
-          {
-            align: 'center' as const,
-            field: '',
-            name: TEST_NOW_COLUMN,
-            width: '100px',
-            render: (item: MonitorSummary) => (
-              <TestNowColumn monitorId={item.monitor_id} configId={item.configId} />
-            ),
-          },
-        ]
-      : []),
+    {
+      align: 'center' as const,
+      field: '',
+      name: TEST_NOW_COLUMN,
+      width: '100px',
+      render: (item: MonitorSummary) => (
+        <TestNowColumn monitorId={item.monitor_id} configId={item.configId} />
+      ),
+    },
     ...(!hideExtraColumns
       ? [
           {

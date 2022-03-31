@@ -172,6 +172,8 @@ export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
       return OperatorTypeEnum.MATCH;
     case 'match_any':
       return OperatorTypeEnum.MATCH_ANY;
+    case 'wildcard':
+      return OperatorTypeEnum.WILDCARD;
     case 'list':
       return OperatorTypeEnum.LIST;
     default:
@@ -207,6 +209,7 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
   switch (item.type) {
     case OperatorTypeEnum.MATCH:
     case OperatorTypeEnum.MATCH_ANY:
+    case OperatorTypeEnum.WILDCARD:
       return item.value;
     case OperatorTypeEnum.EXISTS:
       return undefined;
@@ -524,6 +527,54 @@ export const getEntryOnMatchChange = (
 };
 
 /**
+ * Determines proper entry update when user updates value
+ * when operator is of type "wildcard"
+ *
+ * @param item - current exception item entry values
+ * @param newField - newly entered value
+ *
+ */
+export const getEntryOnWildcardChange = (
+  item: FormattedBuilderEntry,
+  newField: string
+): { index: number; updatedEntry: BuilderEntry } => {
+  const { nested, parent, entryIndex, field, operator } = item;
+
+  if (nested != null && parent != null) {
+    const fieldName = field != null ? field.name.split('.').slice(-1)[0] : '';
+
+    return {
+      index: parent.parentIndex,
+      updatedEntry: {
+        ...parent.parent,
+        entries: [
+          ...parent.parent.entries.slice(0, entryIndex),
+          {
+            field: fieldName,
+            id: item.id,
+            operator: operator.operator,
+            type: OperatorTypeEnum.WILDCARD,
+            value: newField,
+          },
+          ...parent.parent.entries.slice(entryIndex + 1),
+        ],
+      },
+    };
+  } else {
+    return {
+      index: entryIndex,
+      updatedEntry: {
+        field: field != null ? field.name : '',
+        id: item.id,
+        operator: operator.operator,
+        type: OperatorTypeEnum.WILDCARD,
+        value: newField,
+      },
+    };
+  }
+};
+
+/**
  * On operator change, determines whether value needs to be cleared or not
  *
  * @param field
@@ -562,6 +613,15 @@ export const getEntryFromOperator = (
         list: { id: '', type: 'ip' },
         operator: selectedOperator.operator,
         type: OperatorTypeEnum.LIST,
+      };
+    case 'wildcard':
+      return {
+        field: fieldValue,
+        id: currentEntry.id,
+        operator: selectedOperator.operator,
+        type: OperatorTypeEnum.WILDCARD,
+        value:
+          isSameOperatorType && typeof currentEntry.value === 'string' ? currentEntry.value : '',
       };
     default:
       return {

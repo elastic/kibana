@@ -103,6 +103,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": []
           },
           {
@@ -460,6 +461,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "apm",
@@ -717,6 +719,7 @@
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "security",
@@ -733,10 +736,6 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/public/plugin.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/public/plugin.ts"
             },
             {
               "plugin": "apm",
@@ -794,6 +793,7 @@
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [],
           "children": [],
           "returnComment": []
@@ -1793,6 +1793,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": []
           },
           {
@@ -2197,6 +2198,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "apm",
@@ -2498,6 +2500,7 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "spaces",
@@ -2530,10 +2533,6 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/plugin.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/plugin.ts"
             },
             {
               "plugin": "remoteClusters",
@@ -2623,6 +2622,7 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "mapsEms",

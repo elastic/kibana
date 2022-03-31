@@ -19,7 +19,9 @@ export default function ({ getPageObjects, getService }) {
   describe('geo top hits', () => {
     describe('split on string field', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], false);
+        await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
+          skipBrowserRefresh: true,
+        });
         await PageObjects.maps.loadSavedMap('document example top hits');
       });
 

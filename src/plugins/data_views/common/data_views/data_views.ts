@@ -11,10 +11,14 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, FLEET_ASSETS_TO_IGNORE, SavedObjectsClientCommon } from '..';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  DEFAULT_ASSETS_TO_IGNORE,
+  SavedObjectsClientCommon,
+} from '..';
 
 import { createDataViewCache } from '.';
-import type { RuntimeField } from '../types';
+import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
 import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
 import {
@@ -48,6 +52,7 @@ export type IndexPatternListSavedObjectAttrs = Pick<
 
 export interface DataViewListItem {
   id: string;
+  namespaces?: string[];
   title: string;
   type?: string;
   typeMeta?: TypeMeta;
@@ -62,6 +67,44 @@ export interface DataViewsServiceDeps {
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
   getCanSave: () => Promise<boolean>;
+}
+
+export interface DataViewsServicePublicMethods {
+  clearCache: (id?: string | undefined) => void;
+  create: (spec: DataViewSpec, skipFetchFields?: boolean) => Promise<DataView>;
+  createAndSave: (
+    spec: DataViewSpec,
+    override?: boolean,
+    skipFetchFields?: boolean
+  ) => Promise<DataView>;
+  createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  delete: (indexPatternId: string) => Promise<{}>;
+  ensureDefaultDataView: EnsureDefaultDataView;
+  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  find: (search: string, size?: number) => Promise<DataView[]>;
+  get: (id: string) => Promise<DataView>;
+  getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
+  getCanSave: () => Promise<boolean>;
+  getDefault: () => Promise<DataView | null>;
+  getDefaultId: () => Promise<string | null>;
+  getDefaultDataView: () => Promise<DataView | null>;
+  getFieldsForIndexPattern: (
+    indexPattern: DataView | DataViewSpec,
+    options?: GetFieldsOptions | undefined
+  ) => Promise<FieldSpec[]>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  getIds: (refresh?: boolean) => Promise<string[]>;
+  getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  getTitles: (refresh?: boolean) => Promise<string[]>;
+  hasUserDataView: () => Promise<boolean>;
+  refreshFields: (indexPattern: DataView) => Promise<void>;
+  savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
+  setDefault: (id: string | null, force?: boolean) => Promise<void>;
+  updateSavedObject: (
+    indexPattern: DataView,
+    saveAttempts?: number,
+    ignoreErrors?: boolean
+  ) => Promise<void | Error>;
 }
 
 export class DataViewsService {
@@ -176,6 +219,7 @@ export class DataViewsService {
     }
     return this.savedObjectsCache.map((obj) => ({
       id: obj?.id,
+      namespaces: obj?.namespaces,
       title: obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
@@ -374,6 +418,7 @@ export class DataViewsService {
     const {
       id,
       version,
+      namespaces,
       attributes: {
         title,
         timeFieldName,
@@ -400,6 +445,7 @@ export class DataViewsService {
     return {
       id,
       version,
+      namespaces,
       title,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -420,7 +466,7 @@ export class DataViewsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(DATA_VIEW_SAVED_OBJECT_TYPE, id, 'management/kibana/dataViews');
+      throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
     }
 
     return this.initFromSavedObject(savedObject);
@@ -450,20 +496,36 @@ export class DataViewsService {
         spec.fieldAttrs
       );
 
+      const addRuntimeFieldToSpecFields = (
+        name: string,
+        fieldType: RuntimeType,
+        runtimeField: RuntimeFieldSpec
+      ) => {
+        spec.fields![name] = {
+          name,
+          type: castEsToKbnFieldTypeName(fieldType),
+          esTypes: [fieldType],
+          runtimeField,
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+          customLabel: spec.fieldAttrs?.[name]?.customLabel,
+          count: spec.fieldAttrs?.[name]?.count,
+        };
+      };
+
       // CREATE RUNTIME FIELDS
-      for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
+      for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
-        if (!spec.fields[key]) {
-          spec.fields[key] = {
-            name: key,
-            type: castEsToKbnFieldTypeName(value.type),
-            runtimeField: value,
-            aggregatable: true,
-            searchable: true,
-            readFromDocValues: false,
-            customLabel: spec.fieldAttrs?.[key]?.customLabel,
-            count: spec.fieldAttrs?.[key]?.count,
-          };
+        if (!spec.fields[name]) {
+          // For composite runtime field we add the subFields, **not** the composite
+          if (runtimeField.type === 'composite') {
+            Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
+              addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
+            });
+          } else {
+            addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+          }
         }
       }
     } catch (err) {
@@ -711,8 +773,8 @@ export class DataViewsService {
       // otherwise fallback to any data view
       const userDataViews = patterns.filter(
         (pattern) =>
-          pattern.title !== FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
-          pattern.title !== FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
+          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
+          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
       );
 
       defaultId = userDataViews[0]?.id ?? patterns[0].id;

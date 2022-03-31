@@ -1182,6 +1182,63 @@
       },
       {
         "parentPluginId": "spaces",
+        "id": "def-public.RedirectLegacyUrlParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RedirectLegacyUrlParams",
+        "description": [
+          "\nParameters for the redirectLegacyUrl function."
+        ],
+        "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.RedirectLegacyUrlParams.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "\nThe path to use for the new URL, optionally including `search` and/or `hash` URL components."
+            ],
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.RedirectLegacyUrlParams.aliasPurpose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "aliasPurpose",
+            "description": [
+              "\nThe reason the resolved alias was created.\n\nThis is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias was created\nbecause of saved object conversion, then we will display a toast telling the user that the object has a new URL."
+            ],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.RedirectLegacyUrlParams.objectNoun",
+            "type": "string",
+            "tags": [],
+            "label": "objectNoun",
+            "description": [
+              "\nThe string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new location_.\nDefault value is 'object'."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spaces",
         "id": "def-public.ShareToSpaceFlyoutProps",
         "type": "Interface",
         "tags": [],
@@ -1716,6 +1773,85 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceAvatarProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nCallback to be invoked when the avatar is clicked."
+            ],
+            "signature": [
+              "((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpaceAvatarProps.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "React.MouseEvent<HTMLDivElement, MouseEvent>"
+                ],
+                "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceAvatarProps.onKeyPress",
+            "type": "Function",
+            "tags": [],
+            "label": "onKeyPress",
+            "description": [
+              "\nCallback to be invoked when the avatar is clicked via keyboard."
+            ],
+            "signature": [
+              "((event: React.KeyboardEvent<HTMLDivElement>) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpaceAvatarProps.onKeyPress.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "React.KeyboardEvent<HTMLDivElement>"
+                ],
+                "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceAvatarProps.style",
+            "type": "Object",
+            "tags": [],
+            "label": "style",
+            "description": [
+              "\nStyle props for the avatar."
+            ],
+            "signature": [
+              "React.CSSProperties | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1776,6 +1912,23 @@
             ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceListProps.listOnClick",
+            "type": "Function",
+            "tags": [],
+            "label": "listOnClick",
+            "description": [
+              "\nClick handler for spaces list, specifically excluding expand and contract buttons."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_list/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1820,10 +1973,18 @@
             "tags": [],
             "label": "redirectLegacyUrl",
             "description": [
-              "\nRedirect the user from a legacy URL to a new URL. This needs to be used if a call to `SavedObjectsClient.resolve()` results in an\n`\"aliasMatch\"` outcome, which indicates that the user has loaded the page using a legacy URL. Calling this function will trigger a\nclient-side redirect to the new URL, and it will display a toast to the user.\n\nConsumers need to determine the local path for the new URL on their own, based on the object ID that was used to call\n`SavedObjectsClient.resolve()` (old ID) and the object ID in the result (new ID). For example...\n\nThe old object ID is `workpad-123` and the new object ID is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.\n\nFull legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`\n\nNew URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`\n\nThe protocol, hostname, port, base path, and app path are automatically included.\n"
+              "\nRedirect the user from a legacy URL to a new URL. This needs to be used if a call to `SavedObjectsClient.resolve()` results in an\n`\"aliasMatch\"` outcome, which indicates that the user has loaded the page using a legacy URL. Calling this function will trigger a\nclient-side redirect to the new URL, and it will display a toast to the user.\n\nConsumers need to determine the local path for the new URL on their own, based on the object ID that was used to call\n`SavedObjectsClient.resolve()` (old ID) and the object ID in the result (new ID). For example...\n\nThe old object ID is `workpad-123` and the new object ID is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.\n\nFull legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`\n\nNew URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`\n\nThe protocol, hostname, port, base path, and app path are automatically included."
             ],
             "signature": [
-              "(path: string, objectNoun?: string | undefined) => Promise<void>"
+              "(params: ",
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.RedirectLegacyUrlParams",
+                "text": "RedirectLegacyUrlParams"
+              },
+              ") => Promise<void>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1831,34 +1992,22 @@
               {
                 "parentPluginId": "spaces",
                 "id": "def-public.SpacesApiUi.redirectLegacyUrl.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "path",
-                "description": [
-                  "The path to use for the new URL, optionally including `search` and/or `hash` URL components."
-                ],
+                "label": "params",
+                "description": [],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "spaces",
+                    "scope": "public",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-public.RedirectLegacyUrlParams",
+                    "text": "RedirectLegacyUrlParams"
+                  }
                 ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "spaces",
-                "id": "def-public.SpacesApiUi.redirectLegacyUrl.$2",
-                "type": "string",
-                "tags": [],
-                "label": "objectNoun",
-                "description": [
-                  "The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new\nlocation_. Default value is 'object'."
-                ],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3028,6 +3177,48 @@
                     "section": "def-common.Space",
                     "text": "Space"
                   }
+                ],
+                "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-server.ISpacesClient.createSavedObjectFinder",
+            "type": "Function",
+            "tags": [],
+            "label": "createSavedObjectFinder",
+            "description": [
+              "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nsaved objects within the specified space."
+            ],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              "<unknown, unknown>"
+            ],
+            "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-server.ISpacesClient.createSavedObjectFinder.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "the id of the space to search."
+                ],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,

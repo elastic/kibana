@@ -331,7 +331,7 @@ export async function fetchHighLevelStats<
     },
   };
 
-  const { body: response } = await callCluster.search<T>(params, {
+  const response = await callCluster.search<T>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },

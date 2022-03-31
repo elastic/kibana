@@ -11,6 +11,7 @@ import {
   AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -85,10 +86,11 @@ const createActions = (testBed: TestBed) => {
     },
 
     filterByConfigType: async () => {
-      // We need to read the document "body" as the filter dropdown options are added there and not inside
-      // the component DOM tree. The "Config" option is expected to be the first item.
+      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
+      // is added in a portalled popover and not inside the component DOM tree.
+      // The "Config" option is expected to be the first item.
       const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiFilterSelect__items .euiFilterSelectItem'
+        '.euiSelectableList .euiSelectableListItem'
       );
 
       await act(async () => {
@@ -117,10 +119,11 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupKibanaPage = async (
+  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<KibanaTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(KibanaDeprecations, overrides),
+    WithAppDependencies(KibanaDeprecations, httpSetup, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();

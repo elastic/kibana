@@ -309,6 +309,14 @@ export const fields: DataViewFieldBase[] = [
     readFromDocValues: false,
     subType: { nested: { path: 'nestedField.nestedChild' } },
   },
+  {
+    name: 'file.path.text',
+    type: 'string',
+    esTypes: ['text'],
+    searchable: true,
+    aggregatable: false,
+    subType: { multi: { parent: 'file.path' } },
+  },
 ] as unknown as DataViewFieldBase[];
 
 export const getField = (name: string) => fields.find((field) => field.name === name);

@@ -8,11 +8,12 @@
 jest.mock('./lib/generate_pdf');
 
 import * as Rx from 'rxjs';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { Writable } from 'stream';
 import { ReportingCore } from '../../';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { LocatorParams } from '../../../common/types';
-import { cryptoFactory, LevelLogger } from '../../lib';
+import { cryptoFactory } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 import { generatePdfObservable } from './lib/generate_pdf';
@@ -26,14 +27,7 @@ const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
 
-const mockLoggerFactory = {
-  get: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
+const getMockLogger = () => loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -88,10 +82,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
     expect.anything(),
     expect.anything(),
     expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.objectContaining({ browserTimezone: 'UTC' }),
-    undefined
+    expect.objectContaining({ browserTimezone: 'UTC' })
   );
 });
 

@@ -13,11 +13,13 @@ import { SimpleTestResults } from './simple/simple_test_results';
 interface Props {
   monitorId: string;
   monitor: SyntheticsMonitor;
+  isMonitorSaved: boolean;
+  onDone: () => void;
 }
-export const TestRunResult = ({ monitorId, monitor }: Props) => {
+export const TestRunResult = ({ monitorId, monitor, isMonitorSaved, onDone }: Props) => {
   return monitor.type === 'browser' ? (
-    <BrowserTestRunResult monitorId={monitorId} />
+    <BrowserTestRunResult monitorId={monitorId} isMonitorSaved={isMonitorSaved} onDone={onDone} />
   ) : (
-    <SimpleTestResults monitorId={monitorId} />
+    <SimpleTestResults monitorId={monitorId} onDone={onDone} />
   );
 };

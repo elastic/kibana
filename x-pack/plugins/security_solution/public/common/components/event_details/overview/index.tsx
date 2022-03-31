@@ -26,7 +26,7 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import { OverviewCardWithActions } from '../overview/overview_card';
+import { OverviewCardWithActions, OverviewCard } from '../overview/overview_card';
 import { StatusPopoverButton } from '../overview/status_popover_button';
 import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
@@ -44,10 +44,20 @@ interface Props {
   handleOnEventClosed: () => void;
   indexName: string;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 export const Overview = React.memo<Props>(
-  ({ browserFields, contextId, data, eventId, handleOnEventClosed, indexName, timelineId }) => {
+  ({
+    browserFields,
+    contextId,
+    data,
+    eventId,
+    handleOnEventClosed,
+    indexName,
+    timelineId,
+    isReadOnly,
+  }) => {
     const statusData = useMemo(() => {
       const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
       return (
@@ -106,70 +116,83 @@ export const Overview = React.memo<Props>(
       );
     }, [browserFields, contextId, data, eventId, timelineId]);
 
-    const signalCard = hasData(statusData) ? (
-      <EuiFlexItem key="status">
-        <OverviewCardWithActions
-          title={SIGNAL_STATUS}
-          enrichedFieldInfo={statusData}
-          contextId={contextId}
-        >
-          <StatusPopoverButton
-            eventId={eventId}
-            contextId={contextId}
+    const signalCard =
+      hasData(statusData) && !isReadOnly ? (
+        <EuiFlexItem key="status">
+          <OverviewCardWithActions
+            title={SIGNAL_STATUS}
             enrichedFieldInfo={statusData}
-            indexName={indexName}
-            timelineId={timelineId}
-            handleOnEventClosed={handleOnEventClosed}
-          />
-        </OverviewCardWithActions>
-      </EuiFlexItem>
-    ) : null;
+            contextId={contextId}
+          >
+            <StatusPopoverButton
+              eventId={eventId}
+              contextId={contextId}
+              enrichedFieldInfo={statusData}
+              indexName={indexName}
+              timelineId={timelineId}
+              handleOnEventClosed={handleOnEventClosed}
+            />
+          </OverviewCardWithActions>
+        </EuiFlexItem>
+      ) : null;
 
     const severityCard = hasData(severityData) ? (
       <EuiFlexItem key="severity">
-        <OverviewCardWithActions
-          title={ALERTS_HEADERS_SEVERITY}
-          enrichedFieldInfo={severityData}
-          contextId={contextId}
-        >
-          <SeverityBadge value={severityData.values[0] as Severity} />
-        </OverviewCardWithActions>
+        {!isReadOnly ? (
+          <OverviewCardWithActions
+            title={ALERTS_HEADERS_SEVERITY}
+            enrichedFieldInfo={severityData}
+            contextId={contextId}
+          >
+            <SeverityBadge value={severityData.values[0] as Severity} />
+          </OverviewCardWithActions>
+        ) : (
+          <OverviewCard title={ALERTS_HEADERS_SEVERITY}>
+            <SeverityBadge value={severityData.values[0] as Severity} />
+          </OverviewCard>
+        )}
       </EuiFlexItem>
     ) : null;
 
     const riskScoreCard = hasData(riskScoreData) ? (
       <EuiFlexItem key="riskScore">
-        <OverviewCardWithActions
-          title={ALERTS_HEADERS_RISK_SCORE}
-          enrichedFieldInfo={riskScoreData}
-          contextId={contextId}
-        >
-          {riskScoreData.values[0]}
-        </OverviewCardWithActions>
+        {!isReadOnly ? (
+          <OverviewCardWithActions
+            title={ALERTS_HEADERS_RISK_SCORE}
+            enrichedFieldInfo={riskScoreData}
+            contextId={contextId}
+            dataTestSubj="riskScore"
+          >
+            {riskScoreData.values[0]}
+          </OverviewCardWithActions>
+        ) : (
+          <OverviewCard title={ALERTS_HEADERS_RISK_SCORE}>{riskScoreData.values[0]}</OverviewCard>
+        )}
       </EuiFlexItem>
     ) : null;
 
-    const ruleNameCard = hasData(ruleNameData) ? (
-      <EuiFlexItem key="ruleName">
-        <OverviewCardWithActions
-          title={ALERTS_HEADERS_RULE}
-          enrichedFieldInfo={ruleNameData}
-          contextId={contextId}
-        >
-          <FormattedFieldValue
+    const ruleNameCard =
+      hasData(ruleNameData) && !isReadOnly ? (
+        <EuiFlexItem key="ruleName">
+          <OverviewCardWithActions
+            title={ALERTS_HEADERS_RULE}
+            enrichedFieldInfo={ruleNameData}
             contextId={contextId}
-            eventId={eventId}
-            value={ruleNameData.values[0]}
-            fieldName={ruleNameData.data.field}
-            linkValue={ruleNameData.linkValue}
-            fieldType={ruleNameData.data.type}
-            fieldFormat={ruleNameData.data.format}
-            isDraggable={false}
-            truncate={false}
-          />
-        </OverviewCardWithActions>
-      </EuiFlexItem>
-    ) : null;
+          >
+            <FormattedFieldValue
+              contextId={contextId}
+              eventId={eventId}
+              value={ruleNameData.values[0]}
+              fieldName={ruleNameData.data.field}
+              linkValue={ruleNameData.linkValue}
+              fieldType={ruleNameData.data.type}
+              fieldFormat={ruleNameData.data.format}
+              isDraggable={false}
+              truncate={false}
+            />
+          </OverviewCardWithActions>
+        </EuiFlexItem>
+      ) : null;
 
     const { width, ref } = useThrottledResizeObserver();
 

@@ -33,6 +33,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
+  minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
@@ -85,6 +86,7 @@ describe('aggregate()', () => {
             { key: 'ok', doc_count: 10 },
             { key: 'pending', doc_count: 4 },
             { key: 'unknown', doc_count: 2 },
+            { key: 'warning', doc_count: 1 },
           ],
         },
         enabled: {
@@ -97,6 +99,17 @@ describe('aggregate()', () => {
           buckets: [
             { key: 0, key_as_string: '0', doc_count: 27 },
             { key: 1, key_as_string: '1', doc_count: 3 },
+          ],
+        },
+        snoozed: {
+          buckets: [
+            {
+              key: '2022-03-21T20:22:01.501Z-*',
+              format: 'strict_date_time',
+              from: 1.647894121501e12,
+              from_as_string: '2022-03-21T20:22:01.501Z',
+              doc_count: 2,
+            },
           ],
         },
       },
@@ -134,6 +147,7 @@ describe('aggregate()', () => {
           "ok": 10,
           "pending": 4,
           "unknown": 2,
+          "warning": 1,
         },
         "ruleEnabledStatus": Object {
           "disabled": 2,
@@ -142,6 +156,9 @@ describe('aggregate()', () => {
         "ruleMutedStatus": Object {
           "muted": 3,
           "unmuted": 27,
+        },
+        "ruleSnoozedStatus": Object {
+          "snoozed": 2,
         },
       }
     `);
@@ -162,6 +179,13 @@ describe('aggregate()', () => {
           },
           muted: {
             terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
           },
         },
       },
@@ -189,6 +213,13 @@ describe('aggregate()', () => {
           },
           muted: {
             terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
           },
         },
       },

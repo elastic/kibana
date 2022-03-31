@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiDescribedFormGroup,
-  EuiSelectOption,
+  EuiComboBoxOptionOption,
   EuiFormRow,
+  EuiComboBox,
 } from '@elastic/eui';
-import { SelectWithPlaceholder } from '../../../../../shared/select_with_placeholder';
-
 interface Props {
   title: string;
   description: string;
   fieldLabel: string;
   isLoading: boolean;
-  options?: EuiSelectOption[];
+  options?: Array<EuiComboBoxOptionOption<string>>;
+  isDisabled: boolean;
   value?: string;
-  disabled: boolean;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (value?: string) => void;
 }
 
 export function FormRowSelect({
@@ -30,10 +30,25 @@ export function FormRowSelect({
   fieldLabel,
   isLoading,
   options,
-  value,
-  disabled,
+  isDisabled,
   onChange,
 }: Props) {
+  const [selectedOptions, setSelected] = useState<
+    Array<EuiComboBoxOptionOption<string>> | undefined
+  >([]);
+
+  const handleOnChange = (
+    nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>
+  ) => {
+    const [selectedOption] = nextSelectedOptions;
+    setSelected(nextSelectedOptions);
+    onChange(selectedOption.value);
+  };
+
+  useEffect(() => {
+    setSelected(undefined);
+  }, [isLoading]);
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -41,12 +56,18 @@ export function FormRowSelect({
       description={description}
     >
       <EuiFormRow label={fieldLabel}>
-        <SelectWithPlaceholder
+        <EuiComboBox
+          isClearable={false}
           isLoading={isLoading}
+          singleSelection={{ asPlainText: true }}
           options={options}
-          value={value}
-          disabled={disabled}
-          onChange={onChange}
+          isDisabled={isDisabled}
+          selectedOptions={selectedOptions}
+          onChange={handleOnChange}
+          placeholder={i18n.translate(
+            'xpack.apm.agentConfig.servicePage.environment.placeholder',
+            { defaultMessage: 'Select Option' }
+          )}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

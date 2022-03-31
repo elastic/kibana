@@ -36,7 +36,7 @@ export async function getAgentKeys({
     body,
   });
 
-  const agentKeys = apiResponse.body.api_keys.filter(
+  const agentKeys = apiResponse.api_keys.filter(
     ({ invalidated }) => !invalidated
   );
   return {

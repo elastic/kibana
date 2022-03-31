@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
-import { ThreatMatchNamedQuery } from './types';
+import { ThreatMatchNamedQuery, ThreatListItem } from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -147,7 +147,9 @@ export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQu
   return query;
 };
 
-export const extractNamedQueries = (hit: SignalSourceHit): ThreatMatchNamedQuery[] =>
+export const extractNamedQueries = (
+  hit: SignalSourceHit | ThreatListItem
+): ThreatMatchNamedQuery[] =>
   hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
 
 export const buildExecutionIntervalValidator: (interval: string) => (funcName: string) => void = (

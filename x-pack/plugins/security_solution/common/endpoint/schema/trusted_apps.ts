@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { TrustedAppConditionEntry } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
@@ -95,7 +96,7 @@ const MacEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
-  validate(entries: ConditionEntry[]) {
+  validate(entries: TrustedAppConditionEntry[]) {
     return (
       getDuplicateFields(entries)
         .map((field) => `duplicatedEntry.${field}`)

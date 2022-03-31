@@ -53,9 +53,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     defaultValue,
     handleSubmit: async (payload, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
+      const isEcsFieldValueValid =
+        ecsFieldValue &&
+        Object.values(ecsFieldValue).every((field) => !isEmpty(Object.values(field)[0]));
 
       return new Promise((resolve) => {
-        if (isValid && ecsFieldValue) {
+        if (isValid && isEcsFieldValueValid) {
           onSave({
             ...payload,
             ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
@@ -67,7 +70,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     },
   });
 
-  const { submit, setFieldValue, reset, isSubmitting } = form;
+  const { submit, setFieldValue, reset, isSubmitting, validate } = form;
 
   const [{ query }] = useFormData({
     form,
@@ -76,36 +79,37 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
-      if (!savedQuery) {
-        return reset();
+      reset();
+
+      if (savedQuery) {
+        setFieldValue('id', savedQuery.id);
+        setFieldValue('query', savedQuery.query);
+
+        if (savedQuery.description) {
+          setFieldValue('description', savedQuery.description);
+        }
+
+        if (savedQuery.interval) {
+          setFieldValue('interval', savedQuery.interval);
+        }
+
+        if (savedQuery.platform) {
+          setFieldValue('platform', savedQuery.platform);
+        }
+
+        if (savedQuery.version) {
+          setFieldValue('version', [savedQuery.version]);
+        }
+
+        if (savedQuery.ecs_mapping) {
+          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
+        }
       }
 
-      setFieldValue('id', savedQuery.id);
-      setFieldValue('query', savedQuery.query);
-
-      if (savedQuery.description) {
-        setFieldValue('description', savedQuery.description);
-      }
-
-      if (savedQuery.interval) {
-        setFieldValue('interval', savedQuery.interval);
-      }
-
-      if (savedQuery.platform) {
-        setFieldValue('platform', savedQuery.platform);
-      }
-
-      if (savedQuery.version) {
-        setFieldValue('version', [savedQuery.version]);
-      }
-
-      if (savedQuery.ecs_mapping) {
-        setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
-      }
+      validate();
     },
-    [setFieldValue, reset]
+    [reset, validate, setFieldValue]
   );
-
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 

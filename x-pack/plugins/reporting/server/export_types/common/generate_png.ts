@@ -6,19 +6,26 @@
  */
 
 import apm from 'elastic-apm-node';
+import type { Logger } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
+import type { ReportingCore } from '../../';
 import { LayoutTypes } from '../../../../screenshotting/common';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { ReportingCore } from '../../';
-import { ScreenshotOptions } from '../../types';
-import { LevelLogger } from '../../lib';
+import type { PngMetrics } from '../../../common/types';
+import type { PngScreenshotOptions } from '../../types';
+
+interface PngResult {
+  buffer: Buffer;
+  metrics?: PngMetrics;
+  warnings: string[];
+}
 
 export function generatePngObservable(
   reporting: ReportingCore,
-  logger: LevelLogger,
-  options: ScreenshotOptions
-): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+  logger: Logger,
+  options: Omit<PngScreenshotOptions, 'format'>
+): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
   const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
   if (!options.layout.dimensions) {
@@ -34,16 +41,17 @@ export function generatePngObservable(
   const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
   let apmBuffer: typeof apm.currentSpan;
 
-  return reporting.getScreenshots({ ...options, layout }).pipe(
-    tap(({ metrics$ }) => {
-      metrics$.subscribe(({ cpu, memory }) => {
-        apmTrans?.setLabel('cpu', cpu, false);
-        apmTrans?.setLabel('memory', memory, false);
-      });
+  return reporting.getScreenshots({ ...options, layout, format: 'png' }).pipe(
+    tap(({ metrics }) => {
+      if (metrics) {
+        apmTrans?.setLabel('cpu', metrics.cpu, false);
+        apmTrans?.setLabel('memory', metrics.memory, false);
+      }
       apmScreenshots?.end();
       apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
     }),
-    map(({ results }) => ({
+    map(({ metrics, results }) => ({
+      metrics,
       buffer: results[0].screenshots[0].data,
       warnings: results.reduce((found, current) => {
         if (current.error) {

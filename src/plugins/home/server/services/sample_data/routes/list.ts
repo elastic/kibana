@@ -68,6 +68,7 @@ export const createListRoute = (
 };
 
 type ExistingSampleObjects = Map<string, FindSampleObjectsResponseObject[]>;
+
 async function findExistingSampleObjects(
   context: RequestHandlerContext,
   logger: Logger,
@@ -104,15 +105,14 @@ async function getSampleDatasetStatus(
     const dataIndexConfig = sampleDataset.dataIndices[i];
     const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
     try {
-      const { body: indexExists } =
-        await context.core.elasticsearch.client.asCurrentUser.indices.exists({
-          index,
-        });
+      const indexExists = await context.core.elasticsearch.client.asCurrentUser.indices.exists({
+        index,
+      });
       if (!indexExists) {
         return { status: NOT_INSTALLED };
       }
 
-      const { body: count } = await context.core.elasticsearch.client.asCurrentUser.count({
+      const count = await context.core.elasticsearch.client.asCurrentUser.count({
         index,
       });
       if (count.count === 0) {

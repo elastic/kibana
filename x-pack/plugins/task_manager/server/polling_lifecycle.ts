@@ -50,6 +50,7 @@ import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
+  unusedTypes: string[];
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
@@ -90,6 +91,7 @@ export class TaskPollingLifecycle {
   private middleware: Middleware;
 
   private usageCounter?: UsageCounter;
+  private config: TaskManagerConfig;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -106,6 +108,7 @@ export class TaskPollingLifecycle {
     config,
     taskStore,
     definitions,
+    unusedTypes,
     executionContext,
     usageCounter,
   }: TaskPollingLifecycleOpts) {
@@ -115,6 +118,7 @@ export class TaskPollingLifecycle {
     this.store = taskStore;
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
+    this.config = config;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -134,6 +138,7 @@ export class TaskPollingLifecycle {
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
+      unusedTypes,
       logger: this.logger,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency
@@ -237,6 +242,7 @@ export class TaskPollingLifecycle {
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
+      eventLoopDelayConfig: { ...this.config.event_loop_delay },
     });
   };
 

@@ -96,6 +96,7 @@ import type {
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { percolatorFieldMap } from './lib/detection_engine/field_maps/percolator_field_map';
+import { featureUsageService } from './endpoint/services/feature_usage';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -169,10 +170,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      kibanaIndex: core.savedObjects.getKibanaIndex(),
+      eventLogIndex: eventLogService.getIndexPattern(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
+      logger,
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
@@ -367,6 +369,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       taskManager: plugins.taskManager!,
     });
 
+    featureUsageService.setup(plugins.licensing);
+
     return {};
   }
 
@@ -429,6 +433,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // License related start
       licenseService.start(this.licensing$);
+      featureUsageService.start(plugins.licensing);
       this.policyWatcher = new PolicyWatcher(
         plugins.fleet.packagePolicyService,
         core.savedObjects,
@@ -469,12 +474,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       licenseService,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
+      featureUsageService,
     });
 
     this.telemetryReceiver.start(
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.kibanaIndex!,
+      DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient
     );

@@ -20,7 +20,7 @@ export interface Usage {
 
 export function fetchProvider(index: string) {
   return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
-    const [{ body: response }, { body: config }] = await Promise.all([
+    const [response, config] = await Promise.all([
       esClient.get(
         {
           index,

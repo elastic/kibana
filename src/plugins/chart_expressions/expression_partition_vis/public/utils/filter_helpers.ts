@@ -9,13 +9,13 @@
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '../../../../expressions/public';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { ClickTriggerEvent } from '../../../../charts/public';
 import { ValueClickContext } from '../../../../embeddable/public';
 import type { FieldFormat } from '../../../../field_formats/common';
 import { BucketColumns } from '../../common/types';
+import { FilterEvent } from '../types';
 
 export const canFilter = async (
-  event: ClickTriggerEvent | null,
+  event: FilterEvent | null,
   actions: DataPublicPluginStart['actions']
 ): Promise<boolean> => {
   if (!event) {

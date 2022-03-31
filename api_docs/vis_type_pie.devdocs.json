@@ -23,11 +23,11 @@
           },
           "<",
           {
-            "pluginId": "expressionPie",
+            "pluginId": "expressionPartitionVis",
             "scope": "common",
-            "docId": "kibExpressionPiePluginApi",
-            "section": "def-common.PieVisParams",
-            "text": "PieVisParams"
+            "docId": "kibExpressionPartitionVisPluginApi",
+            "section": "def-common.PartitionVisParams",
+            "text": "PartitionVisParams"
           },
           ">"
         ],

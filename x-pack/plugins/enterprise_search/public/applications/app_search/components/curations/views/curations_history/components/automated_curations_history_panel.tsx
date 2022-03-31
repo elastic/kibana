@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID } from '../../../../../../../../common/constants';
 import { EntSearchLogStream } from '../../../../../../shared/log_stream';
 import { DataPanel } from '../../../../data_panel';
 import { EngineLogic } from '../../../../engine';
@@ -49,6 +50,7 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
       hasBorder
     >
       <EntSearchLogStream
+        sourceId={ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID}
         hoursAgo={720}
         query={filters.join(' and ')}
         columns={[

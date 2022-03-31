@@ -14,7 +14,7 @@ import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
-import { FindOptionsType } from '../event_log_client';
+import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
@@ -47,8 +47,19 @@ interface QueryOptionsEventsBySavedObjectFilter {
   namespace: string | undefined;
   type: string;
   ids: string[];
-  findOptions: FindOptionsType;
   legacyIds?: string[];
+}
+
+export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
+  findOptions: FindOptionsType;
+};
+
+export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
+  aggregateOptions: AggregateOptionsType;
+};
+
+export interface AggregateEventsBySavedObjectResult {
+  aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,9 +131,9 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       const esClient = await this.elasticsearchClientPromise;
       const response = await esClient.bulk({ body: bulkBody });
 
-      if (response.body.errors) {
+      if (response.errors) {
         const error = new Error('Error writing some bulk events');
-        error.stack += '\n' + util.inspect(response.body.items, { depth: null });
+        error.stack += '\n' + util.inspect(response.items, { depth: null });
         this.logger.error(error);
       }
     } catch (err) {
@@ -164,8 +175,8 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: legacyResult } = await esClient.indices.existsTemplate({ name });
-      const { body: indexTemplateResult } = await esClient.indices.existsIndexTemplate({ name });
+      const legacyResult = await esClient.indices.existsTemplate({ name });
+      const indexTemplateResult = await esClient.indices.existsIndexTemplate({ name });
       return (legacyResult as boolean) || (indexTemplateResult as boolean);
     } catch (err) {
       throw new Error(`error checking existence of index template: ${err.message}`);
@@ -178,7 +189,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putIndexTemplate({
         name,
         body: template,
-        // @ts-expect-error doesn't exist in @elastic/elasticsearch
         create: true,
       });
     } catch (err) {
@@ -200,11 +210,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   ): Promise<estypes.IndicesGetTemplateResponse> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: templates } = await esClient.indices.getTemplate(
-        { name: indexTemplatePattern },
-        { ignore: [404] }
-      );
-      return templates;
+      return await esClient.indices.getTemplate({ name: indexTemplatePattern }, { ignore: [404] });
     } catch (err) {
       throw new Error(`error getting existing legacy index templates: ${err.message}`);
     }
@@ -238,11 +244,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   ): Promise<estypes.IndicesGetSettingsResponse> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: indexSettings } = await esClient.indices.getSettings(
-        { index: indexPattern },
-        { ignore: [404] }
-      );
-      return indexSettings;
+      return await esClient.indices.getSettings({ index: indexPattern }, { ignore: [404] });
     } catch (err) {
       throw new Error(
         `error getting existing indices matching pattern ${indexPattern}: ${err.message}`
@@ -256,7 +258,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       await esClient.indices.putSettings({
         index: indexName,
         body: {
-          'index.hidden': true,
+          index: { hidden: true },
         },
       });
     } catch (err) {
@@ -269,11 +271,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   ): Promise<estypes.IndicesGetAliasResponse> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body: indexAliases } = await esClient.indices.getAlias(
-        { index: indexPattern },
-        { ignore: [404] }
-      );
-      return indexAliases;
+      return await esClient.indices.getAlias({ index: indexPattern }, { ignore: [404] });
     } catch (err) {
       throw new Error(
         `error getting existing index aliases matching pattern ${indexPattern}: ${err.message}`
@@ -318,7 +316,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async doesAliasExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body } = await esClient.indices.existsAlias({ name });
+      const body = await esClient.indices.existsAlias({ name });
       return body as boolean;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
@@ -340,196 +338,31 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async queryEventsBySavedObjects(
-    queryOptions: QueryOptionsEventsBySavedObjectFilter
+    queryOptions: FindEventsOptionsBySavedObjectFilter
   ): Promise<QueryEventsBySavedObjectResult> {
-    const { index, namespace, type, ids, findOptions, legacyIds } = queryOptions;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { page, per_page: perPage, start, end, sort_field, sort_order, filter } = findOptions;
-
-    const defaultNamespaceQuery = {
-      bool: {
-        must_not: {
-          exists: {
-            field: 'kibana.saved_objects.namespace',
-          },
-        },
-      },
-    };
-    const namedNamespaceQuery = {
-      term: {
-        'kibana.saved_objects.namespace': {
-          value: namespace,
-        },
-      },
-    };
-    const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+    const { index, type, ids, findOptions } = queryOptions;
+    const { page, per_page: perPage, sort } = findOptions;
 
     const esClient = await this.elasticsearchClientPromise;
-    let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
-    try {
-      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
-    } catch (err) {
-      this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
-        message: err.message,
-        statusCode: err.statusCode,
-      });
-      throw err;
-    }
-    const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
-      {
-        term: {
-          'kibana.saved_objects.rel': {
-            value: SAVED_OBJECT_REL_PRIMARY,
-          },
-        },
-      },
-      {
-        term: {
-          'kibana.saved_objects.type': {
-            value: type,
-          },
-        },
-      },
-      // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
-      namespaceQuery,
-    ];
 
-    const musts: estypes.QueryDslQueryContainer[] = [
-      {
-        nested: {
-          path: 'kibana.saved_objects',
-          query: {
-            bool: {
-              must: reject(savedObjectsQueryMust, isUndefined),
-            },
-          },
-        },
-      },
-    ];
-
-    const shouldQuery = [];
-
-    shouldQuery.push({
-      bool: {
-        must: [
-          {
-            nested: {
-              path: 'kibana.saved_objects',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      terms: {
-                        // default maximum of 65,536 terms, configurable by index.max_terms_count
-                        'kibana.saved_objects.id': ids,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            range: {
-              'kibana.version': {
-                gte: LEGACY_ID_CUTOFF_VERSION,
-              },
-            },
-          },
-        ],
-      },
-    });
-
-    if (legacyIds && legacyIds.length > 0) {
-      shouldQuery.push({
-        bool: {
-          must: [
-            {
-              nested: {
-                path: 'kibana.saved_objects',
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          // default maximum of 65,536 terms, configurable by index.max_terms_count
-                          'kibana.saved_objects.id': legacyIds,
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            {
-              bool: {
-                should: [
-                  {
-                    range: {
-                      'kibana.version': {
-                        lt: LEGACY_ID_CUTOFF_VERSION,
-                      },
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: {
-                        exists: {
-                          field: 'kibana.version',
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-    }
-
-    musts.push({
-      bool: {
-        should: shouldQuery,
-      },
-    });
-
-    if (start) {
-      musts.push({
-        range: {
-          '@timestamp': {
-            gte: start,
-          },
-        },
-      });
-    }
-    if (end) {
-      musts.push({
-        range: {
-          '@timestamp': {
-            lte: end,
-          },
-        },
-      });
-    }
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
 
     const body: estypes.SearchRequest['body'] = {
       size: perPage,
       from: (page - 1) * perPage,
-      sort: [{ [sort_field]: { order: sort_order } }],
-      query: {
-        bool: {
-          filter: dslFilterQuery,
-          must: reject(musts, isUndefined),
-        },
-      },
+      query,
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : {}),
     };
 
     try {
       const {
-        body: {
-          hits: { hits, total },
-        },
+        hits: { hits, total },
       } = await esClient.search<IValidatedEvent>({
         index,
         track_total_hits: true,
@@ -548,8 +381,225 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  private debug(message: string, object?: unknown) {
-    const objectString = object == null ? '' : JSON.stringify(object);
-    this.logger.debug(`esContext: ${message} ${objectString}`);
+  public async aggregateEventsBySavedObjects(
+    queryOptions: AggregateEventsOptionsBySavedObjectFilter
+  ): Promise<AggregateEventsBySavedObjectResult> {
+    const { index, type, ids, aggregateOptions } = queryOptions;
+    const { aggs } = aggregateOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest['body'] = {
+      size: 0,
+      query,
+      aggs,
+    };
+
+    try {
+      const { aggregations } = await esClient.search<IValidatedEvent>({
+        index,
+        body,
+      });
+      return {
+        aggregations,
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
   }
+}
+
+function getNamespaceQuery(namespace?: string) {
+  const defaultNamespaceQuery = {
+    bool: {
+      must_not: {
+        exists: {
+          field: 'kibana.saved_objects.namespace',
+        },
+      },
+    },
+  };
+  const namedNamespaceQuery = {
+    term: {
+      'kibana.saved_objects.namespace': {
+        value: namespace,
+      },
+    },
+  };
+  return namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+}
+
+export function getQueryBody(
+  logger: Logger,
+  opts: FindEventsOptionsBySavedObjectFilter | AggregateEventsOptionsBySavedObjectFilter,
+  queryOptions: QueryOptionsType
+) {
+  const { namespace, type, ids, legacyIds } = opts;
+  const { start, end, filter } = queryOptions ?? {};
+
+  const namespaceQuery = getNamespaceQuery(namespace);
+  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+  try {
+    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+  } catch (err) {
+    logger.debug(
+      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+        message: err.message,
+        statusCode: err.statusCode,
+      })}`
+    );
+    throw err;
+  }
+
+  const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
+    {
+      term: {
+        'kibana.saved_objects.rel': {
+          value: SAVED_OBJECT_REL_PRIMARY,
+        },
+      },
+    },
+    {
+      term: {
+        'kibana.saved_objects.type': {
+          value: type,
+        },
+      },
+    },
+    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+    namespaceQuery,
+  ];
+
+  const musts: estypes.QueryDslQueryContainer[] = [
+    {
+      nested: {
+        path: 'kibana.saved_objects',
+        query: {
+          bool: {
+            must: reject(savedObjectsQueryMust, isUndefined),
+          },
+        },
+      },
+    },
+  ];
+
+  const shouldQuery = [];
+  shouldQuery.push({
+    bool: {
+      must: [
+        {
+          nested: {
+            path: 'kibana.saved_objects',
+            query: {
+              bool: {
+                must: [
+                  {
+                    terms: {
+                      // default maximum of 65,536 terms, configurable by index.max_terms_count
+                      'kibana.saved_objects.id': ids,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        {
+          range: {
+            'kibana.version': {
+              gte: LEGACY_ID_CUTOFF_VERSION,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  if (legacyIds && legacyIds.length > 0) {
+    shouldQuery.push({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        // default maximum of 65,536 terms, configurable by index.max_terms_count
+                        'kibana.saved_objects.id': legacyIds,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    'kibana.version': {
+                      lt: LEGACY_ID_CUTOFF_VERSION,
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'kibana.version',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  }
+
+  musts.push({
+    bool: {
+      should: shouldQuery,
+    },
+  });
+
+  if (start) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          gte: start,
+        },
+      },
+    });
+  }
+  if (end) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          lte: end,
+        },
+      },
+    });
+  }
+
+  return {
+    bool: {
+      ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+      must: reject(musts, isUndefined),
+    },
+  };
 }

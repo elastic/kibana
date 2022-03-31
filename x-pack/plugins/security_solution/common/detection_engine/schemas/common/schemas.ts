@@ -50,6 +50,12 @@ export type Outcome = t.TypeOf<typeof outcome>;
 export const alias_target_id = t.string;
 export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
 
+export const alias_purpose = t.union([
+  t.literal('savedObjectConversion'),
+  t.literal('savedObjectImport'),
+]);
+export type AliasPurpose = t.TypeOf<typeof alias_purpose>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
 

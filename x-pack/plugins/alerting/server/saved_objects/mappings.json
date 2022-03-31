@@ -53,6 +53,16 @@
         "type": "flattened",
         "ignore_above": 4096
       },
+      "mapped_params": {
+        "properties": {
+          "risk_score": {
+            "type": "float"
+          },
+          "severity": {
+            "type": "keyword"
+          }
+        }
+      },
       "scheduledTaskId": {
         "type": "keyword"
       },
@@ -153,8 +163,22 @@
                 "type": "keyword"
               }
             }
+          },
+          "warning": {
+            "properties": {
+              "reason": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "keyword"
+              }
+            }
           }
         }
+      },
+      "snoozeEndTime": {
+        "type": "date",
+        "format": "strict_date_time"
       }
     }
   }

@@ -16,7 +16,7 @@ const STORYBOOKS = [
   'canvas',
   'ci_composite',
   'cloud',
-  'codeeditor',
+  'controls',
   'custom_integrations',
   'dashboard_enhanced',
   'dashboard',
@@ -31,13 +31,13 @@ const STORYBOOKS = [
   'expression_tagcloud',
   'fleet',
   'infra',
+  'kibana_react',
   'lists',
   'observability',
   'presentation',
   'security_solution',
   'shared_ux',
   'ui_actions_enhanced',
-  'url_template_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

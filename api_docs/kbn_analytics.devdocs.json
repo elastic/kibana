@@ -356,15 +356,7 @@
             "label": "reportUiCounter",
             "description": [],
             "signature": [
-              "(appName: string, type: ",
-              {
-                "pluginId": "@kbn/analytics",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsPluginApi",
-                "section": "def-common.UiCounterMetricType",
-                "text": "UiCounterMetricType"
-              },
-              ", eventNames: string | string[], count?: number | undefined) => void"
+              "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
@@ -386,18 +378,12 @@
               {
                 "parentPluginId": "@kbn/analytics",
                 "id": "def-common.Reporter.reportUiCounter.$2",
-                "type": "CompoundType",
+                "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/analytics",
-                    "scope": "common",
-                    "docId": "kibKbnAnalyticsPluginApi",
-                    "section": "def-common.UiCounterMetricType",
-                    "text": "UiCounterMetricType"
-                  }
+                  "string"
                 ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
@@ -756,15 +742,7 @@
             "label": "uiCounter",
             "description": [],
             "signature": [
-              "Record<string, { key: string; appName: string; eventName: string; type: ",
-              {
-                "pluginId": "@kbn/analytics",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsPluginApi",
-                "section": "def-common.UiCounterMetricType",
-                "text": "UiCounterMetricType"
-              },
-              "; total: number; }> | undefined"
+              "Record<string, { key: string; appName: string; eventName: string; type: string; total: number; }> | undefined"
             ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false
@@ -1138,30 +1116,7 @@
         "label": "UiCounterMetricType",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/analytics",
-            "scope": "common",
-            "docId": "kibKbnAnalyticsPluginApi",
-            "section": "def-common.METRIC_TYPE",
-            "text": "METRIC_TYPE"
-          },
-          ".COUNT | ",
-          {
-            "pluginId": "@kbn/analytics",
-            "scope": "common",
-            "docId": "kibKbnAnalyticsPluginApi",
-            "section": "def-common.METRIC_TYPE",
-            "text": "METRIC_TYPE"
-          },
-          ".LOADED | ",
-          {
-            "pluginId": "@kbn/analytics",
-            "scope": "common",
-            "docId": "kibKbnAnalyticsPluginApi",
-            "section": "def-common.METRIC_TYPE",
-            "text": "METRIC_TYPE"
-          },
-          ".CLICK"
+          "string"
         ],
         "path": "packages/kbn-analytics/src/metrics/ui_counter.ts",
         "deprecated": false,

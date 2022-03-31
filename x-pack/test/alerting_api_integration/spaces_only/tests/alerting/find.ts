@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 async function createAlert(
@@ -19,7 +19,7 @@ async function createAlert(
   const { body: createdAlert } = await supertest
     .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
-    .send(getTestAlertData(overwrites))
+    .send(getTestRuleData(overwrites))
     .expect(200);
   objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
   return createdAlert;
@@ -36,7 +36,7 @@ const findTestUtils = (
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -72,7 +72,9 @@ const findTestUtils = (
         created_at: match.created_at,
         updated_at: match.updated_at,
         execution_status: match.execution_status,
-        ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
+        ...(describeType === 'internal'
+          ? { monitoring: match.monitoring, snooze_end_time: match.snooze_end_time }
+          : {}),
       });
       expect(Date.parse(match.created_at)).to.be.greaterThan(0);
       expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -82,7 +84,7 @@ const findTestUtils = (
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -106,6 +108,24 @@ const findTestUtils = (
           createAlert(objectRemover, supertest, { params: { strValue: 'my a' } }),
           createAlert(objectRemover, supertest, { params: { strValue: 'my b' } }),
           createAlert(objectRemover, supertest, { params: { strValue: 'my c' } }),
+          createAlert(objectRemover, supertest, {
+            params: {
+              risk_score: 60,
+              severity: 'high',
+            },
+          }),
+          createAlert(objectRemover, supertest, {
+            params: {
+              risk_score: 40,
+              severity: 'medium',
+            },
+          }),
+          createAlert(objectRemover, supertest, {
+            params: {
+              risk_score: 20,
+              severity: 'low',
+            },
+          }),
         ]);
       });
 
@@ -171,6 +191,62 @@ const findTestUtils = (
         expect(response.body.total).to.equal(1);
         expect(response.body.data[0].params.strValue).to.eql('my b');
       });
+
+      it('should sort by parameters', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?sort_field=params.severity&sort_order=asc`
+        );
+        expect(response.body.data[0].params.severity).to.equal('low');
+        expect(response.body.data[1].params.severity).to.equal('medium');
+        expect(response.body.data[2].params.severity).to.equal('high');
+      });
+
+      it('should search by parameters', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?search_fields=params.severity&search=medium`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].params.severity).to.eql('medium');
+      });
+
+      it('should filter on parameters', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?filter=alert.attributes.params.risk_score:40`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].params.risk_score).to.eql(40);
+
+        if (describeType === 'public') {
+          expect(response.body.data[0].mapped_params).to.eql(undefined);
+        }
+      });
+
+      it('should error if filtering on mapped parameters directly using the public API', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?filter=alert.attributes.mapped_params.risk_score:40`
+        );
+
+        if (describeType === 'public') {
+          expect(response.status).to.eql(400);
+          expect(response.body.message).to.eql(
+            'Error find rules: Filter is not supported on this field alert.attributes.mapped_params.risk_score'
+          );
+        } else {
+          expect(response.status).to.eql(200);
+        }
+      });
     });
   });
 };
@@ -192,7 +268,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 

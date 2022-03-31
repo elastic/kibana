@@ -7,20 +7,14 @@
  */
 
 import type { Logger } from 'src/core/server';
-import type {
-  CollectorFetchMethod,
-  CollectorOptions,
-  CollectorOptionsFetchExtendedContext,
-  ICollector,
-} from './types';
+import type { CollectorFetchMethod, CollectorOptions, ICollector } from './types';
 
 export class Collector<TFetchReturn, ExtraOptions extends object = {}>
   implements ICollector<TFetchReturn, ExtraOptions>
 {
-  public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<boolean>;
-  public readonly type: CollectorOptions<TFetchReturn, boolean>['type'];
-  public readonly fetch: CollectorFetchMethod<boolean, TFetchReturn, ExtraOptions>;
-  public readonly isReady: CollectorOptions<TFetchReturn, boolean>['isReady'];
+  public readonly type: CollectorOptions<TFetchReturn>['type'];
+  public readonly fetch: CollectorFetchMethod<TFetchReturn, ExtraOptions>;
+  public readonly isReady: CollectorOptions<TFetchReturn>['isReady'];
   /**
    * @private Constructor of a Collector. It should be called via the CollectorSet factory methods: `makeStatsCollector` and `makeUsageCollector`
    * @param log {@link Logger}
@@ -28,15 +22,7 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
    */
   constructor(
     public readonly log: Logger,
-    {
-      type,
-      fetch,
-      isReady,
-      extendFetchContext = {},
-      ...options
-    }: // Any does not affect here, but needs to be set so it doesn't affect anything else down the line
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    CollectorOptions<TFetchReturn, any, ExtraOptions>
+    { type, fetch, isReady, ...options }: CollectorOptions<TFetchReturn, ExtraOptions>
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
@@ -50,6 +36,5 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}>
     this.type = type;
     this.fetch = fetch;
     this.isReady = typeof isReady === 'function' ? isReady : () => true;
-    this.extendFetchContext = extendFetchContext;
   }
 }

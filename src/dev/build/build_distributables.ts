@@ -13,6 +13,7 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerCrossCompile: boolean;
   dockerPush: boolean;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
@@ -30,7 +31,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   createExamplePlugins: boolean;
-  useSnapshotEpr: boolean;
+  eprRegistry: 'production' | 'snapshot';
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {

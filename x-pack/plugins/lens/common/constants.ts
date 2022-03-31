@@ -7,7 +7,6 @@
 
 import rison from 'rison-node';
 import type { TimeRange } from '../../../../src/plugins/data/common/query';
-import { LayerType } from './types';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
@@ -17,10 +16,37 @@ export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 
-export const layerTypes: Record<string, LayerType> = {
+export const PieChartTypes = {
+  PIE: 'pie',
+  DONUT: 'donut',
+  TREEMAP: 'treemap',
+  MOSAIC: 'mosaic',
+  WAFFLE: 'waffle',
+} as const;
+
+export const CategoryDisplay = {
+  DEFAULT: 'default',
+  INSIDE: 'inside',
+  HIDE: 'hide',
+} as const;
+
+export const NumberDisplay = {
+  HIDDEN: 'hidden',
+  PERCENT: 'percent',
+  VALUE: 'value',
+} as const;
+
+export const LegendDisplay = {
+  DEFAULT: 'default',
+  SHOW: 'show',
+  HIDE: 'hide',
+} as const;
+
+export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',
-};
+  ANNOTATIONS: 'annotations',
+} as const;
 
 // might collide with user-supplied field names, try to make as unique as possible
 export const DOCUMENT_FIELD_NAME = '___records___';

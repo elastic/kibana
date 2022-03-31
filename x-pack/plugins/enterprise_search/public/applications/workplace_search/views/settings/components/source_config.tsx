@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
@@ -18,16 +25,15 @@ import { SourceDataItem } from '../../../types';
 import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
 import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
-import { staticSourceData } from '../../content_sources/source_data';
 import { SettingsLogic } from '../settings_logic';
 
 interface SourceConfigProps {
-  sourceIndex: number;
+  sourceData: SourceDataItem;
 }
 
-export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
+export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
-  const { configuration, serviceType } = staticSourceData[sourceIndex] as SourceDataItem;
+  const { configuration, serviceType } = sourceData;
   const { deleteSourceConfig } = useActions(SettingsLogic);
   const { saveSourceConfig, getSourceConfigData } = useActions(AddSourceLogic);
   const {
@@ -77,6 +83,32 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
             }
           )}
         </EuiConfirmModal>
+      )}
+      {serviceType === 'external' && (
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                size="s"
+                color="primary"
+                iconType="email"
+                title={
+                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.settings.feedbackCallOutText',
+                      {
+                        defaultMessage:
+                          'Have feedback about deploying a {name} Connector Package? Let us know.',
+                        values: { name },
+                      }
+                    )}
+                  </EuiLink>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </WorkplaceSearchPageTemplate>
   );

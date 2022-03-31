@@ -550,445 +550,6 @@
       },
       {
         "parentPluginId": "savedObjects",
-        "id": "def-public.SavedObjectLoader",
-        "type": "Class",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "SavedObjectLoader",
-        "description": [],
-        "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_objects.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboards.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboards.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/plugin.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.lowercaseType",
-            "type": "string",
-            "tags": [],
-            "label": "lowercaseType",
-            "description": [],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.loaderProperties",
-            "type": "Object",
-            "tags": [],
-            "label": "loaderProperties",
-            "description": [],
-            "signature": [
-              "{ [x: string]: string; }"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.Unnamed.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "SavedObjectClass",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "savedObjectsClient",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [
-              "\nRetrieve a saved object by id or create new one.\nReturns a promise that completes when the object finishes\ninitializing."
-            ],
-            "signature": [
-              "(opts?: string | Record<string, unknown> | undefined) => Promise<any>"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.get.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "opts",
-                "description": [],
-                "signature": [
-                  "string | Record<string, unknown> | undefined"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.urlFor",
-            "type": "Function",
-            "tags": [],
-            "label": "urlFor",
-            "description": [],
-            "signature": [
-              "(id: string) => string"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.urlFor.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.delete",
-            "type": "Function",
-            "tags": [],
-            "label": "delete",
-            "description": [],
-            "signature": [
-              "(ids: string | string[]) => Promise<void>"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.delete.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "ids",
-                "description": [],
-                "signature": [
-                  "string | string[]"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.mapHitSource",
-            "type": "Function",
-            "tags": [],
-            "label": "mapHitSource",
-            "description": [
-              "\nUpdates source to contain an id, url and references fields, and returns the updated\nsource object."
-            ],
-            "signature": [
-              "(source: Record<string, unknown>, id: string, references?: ",
-              "SavedObjectReference",
-              "[]) => Record<string, unknown>"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.mapHitSource.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "source",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.mapHitSource.$2",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.mapHitSource.$3",
-                "type": "Array",
-                "tags": [],
-                "label": "references",
-                "description": [],
-                "signature": [
-                  "SavedObjectReference",
-                  "[]"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "The modified source object, with an id and url field."
-            ]
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits",
-            "type": "Function",
-            "tags": [],
-            "label": "mapSavedObjectApiHits",
-            "description": [
-              "\nUpdates hit.attributes to contain an id and url field, and returns the updated\nattributes object."
-            ],
-            "signature": [
-              "({ attributes, id, references, }: { attributes: Record<string, unknown>; id: string; references?: ",
-              "SavedObjectReference",
-              "[] | undefined; }) => Record<string, unknown>"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
-                "description": [],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "children": [
-                  {
-                    "parentPluginId": "savedObjects",
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributes",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "attributes",
-                    "description": [],
-                    "signature": [
-                      "{ [x: string]: unknown; }"
-                    ],
-                    "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "savedObjects",
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                    "deprecated": false
-                  },
-                  {
-                    "parentPluginId": "savedObjects",
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.references",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "references",
-                    "description": [],
-                    "signature": [
-                      "SavedObjectReference",
-                      "[] | undefined"
-                    ],
-                    "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                    "deprecated": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": [
-              "The modified hit.attributes object, with an id and url field."
-            ]
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoader.find",
-            "type": "Function",
-            "tags": [],
-            "label": "find",
-            "description": [],
-            "signature": [
-              "(search?: string, sizeOrOptions?: number | ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectLoaderFindOptions",
-                "text": "SavedObjectLoaderFindOptions"
-              },
-              ") => Promise<{ total: number; hits: Record<string, unknown>[]; }>"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.find.$1",
-                "type": "string",
-                "tags": [],
-                "label": "search",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.find.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "sizeOrOptions",
-                "description": [],
-                "signature": [
-                  "number | ",
-                  {
-                    "pluginId": "savedObjects",
-                    "scope": "public",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectLoaderFindOptions",
-                    "text": "SavedObjectLoaderFindOptions"
-                  }
-                ],
-                "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjects",
         "id": "def-public.SavedObjectSaveModal",
         "type": "Class",
         "tags": [
@@ -1016,6 +577,7 @@
         ],
         "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "embeddable",
@@ -1681,7 +1243,7 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; }"
+                  "<T>>; }"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
@@ -2039,6 +1601,7 @@
         "description": [],
         "path": "src/plugins/saved_objects/public/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "savedObjectsTaggingOss",
@@ -2075,6 +1638,18 @@
           {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
           },
           {
             "plugin": "dashboard",
@@ -3083,65 +2658,6 @@
       },
       {
         "parentPluginId": "savedObjects",
-        "id": "def-public.SavedObjectLoaderFindOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectLoaderFindOptions",
-        "description": [],
-        "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoaderFindOptions.size",
-            "type": "number",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoaderFindOptions.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectLoaderFindOptions.hasReference",
-            "type": "Array",
-            "tags": [],
-            "label": "hasReference",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjects",
         "id": "def-public.SavedObjectMetaData",
         "type": "Interface",
         "tags": [],
@@ -3668,6 +3184,7 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "dashboard",
@@ -3689,6 +3206,7 @@
           ],
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "visualizations",

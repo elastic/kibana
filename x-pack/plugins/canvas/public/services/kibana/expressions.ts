@@ -52,7 +52,7 @@ export class ExpressionsService {
     context?: ExpressionExecutionParams
   ): Promise<ExpressionValue> {
     return await this.expressions
-      .execute(ast, input, context)
+      .execute(ast, input, { ...context, namespace: 'canvas' })
       .getData()
       .pipe(pluck('result'))
       .toPromise();

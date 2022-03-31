@@ -4,7 +4,7 @@
   ],
   "description": "Detects the occurrence of mailbox audit bypass associations. The mailbox audit is responsible for logging specified mailbox events (like accessing a folder or a message or permanently deleting a message). However, actions taken by some authorized accounts, such as accounts used by third-party tools or accounts used for lawful monitoring, can create a large number of mailbox audit log entries and may not be of interest to your organization. Because of this, administrators can create bypass associations, allowing certain accounts to perform their tasks without being logged. Attackers can abuse this allowlist mechanism to conceal actions taken, as the mailbox audit will log no activity done by the account.",
   "false_positives": [
-    "Legitimate whitelisting of noisy accounts"
+    "Legitimate allowlisting of noisy accounts"
   ],
   "from": "now-30m",
   "index": [
@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "O365 Mailbox Audit Logging Bypass",
-  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:o365.audit and event.provider:Exchange and event.action:Set-MailboxAuditBypassAssociation and event.outcome:success\n",
   "references": [
     "https://twitter.com/misconfig/status/1476144066807140355"
@@ -56,5 +56,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

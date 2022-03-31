@@ -14,7 +14,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
@@ -65,7 +65,7 @@ export const updateRulesBulkRoute = (
               });
             }
 
-            throwHttpError(await mlAuthz.validateRuleType(payloadRule.type));
+            throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const existingRule = await readRules({
               isRuleRegistryEnabled,

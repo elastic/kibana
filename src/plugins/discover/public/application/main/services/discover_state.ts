@@ -10,6 +10,7 @@ import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import { Filter, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -22,14 +23,12 @@ import {
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  esFilters,
-  Filter,
   FilterManager,
   Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '../../../../../data/public';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
@@ -277,7 +276,7 @@ export function getState({
         data.query,
         appStateContainer,
         {
-          filters: esFilters.FilterStateStore.APP_STATE,
+          filters: FilterStateStore.APP_STATE,
           query: true,
         }
       );
@@ -316,13 +315,13 @@ export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newS
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
 }
 
 /**
