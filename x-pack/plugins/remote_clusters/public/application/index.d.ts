@@ -6,7 +6,7 @@
  */
 import { Observable } from 'rxjs';
 
-import { ScopedHistory, CoreTheme } from 'kibana/public';
+import { ScopedHistory, CoreTheme, ExecutionContextStart } from 'kibana/public';
 import { RegisterManagementAppArgs, I18nStart } from '../types';
 
 export declare const renderApp: (
@@ -15,6 +15,7 @@ export declare const renderApp: (
   appDependencies: {
     isCloudEnabled: boolean;
     cloudBaseUrl: string;
+    executionContext: ExecutionContextStart;
   },
   history: ScopedHistory,
   theme$: Observable<CoreTheme>
