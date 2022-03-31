@@ -370,7 +370,7 @@ export class CsvGenerator {
         } else {
           warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
         }
-      } else if (!this.maxSizeReached) {
+      } else {
         warnings.push(i18nTexts.unknownError(err?.message));
       }
     } finally {
