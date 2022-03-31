@@ -65,7 +65,7 @@ export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
 }: DiscoverHistogramProps) {
-  const { data, theme, uiSettings } = useDiscoverServices();
+  const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
 
@@ -207,7 +207,7 @@ export function DiscoverHistogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = data.fieldFormats.deserialize(chartData.yAxisFormat);
+  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 

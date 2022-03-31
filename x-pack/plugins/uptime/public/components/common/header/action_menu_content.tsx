@@ -78,7 +78,7 @@ export function ActionMenuContent(): React.ReactElement {
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.manageLink.label', {
-          defaultMessage: 'Navigate to the Uptime monitor management page',
+          defaultMessage: 'Navigate to the Uptime Monitor Management page',
         })}
         color="text"
         data-test-subj="management-page-link"
@@ -88,7 +88,7 @@ export function ActionMenuContent(): React.ReactElement {
       >
         <FormattedMessage
           id="xpack.uptime.page_header.manageLink"
-          defaultMessage="Monitor management"
+          defaultMessage="Monitor Management"
         />
       </EuiHeaderLink>
 

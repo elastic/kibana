@@ -15,6 +15,8 @@ import { PlatformSelector } from './platform_selector';
 interface Props {
   fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
+  policyId: string | undefined;
+  isK8s: string | undefined;
 }
 
 function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
@@ -24,6 +26,8 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   fleetServerHosts,
+  policyId,
+  isK8s,
 }) => {
   const { docLinks } = useStartServices();
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
@@ -40,7 +44,7 @@ cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip
 .\\elastic-agent.exe install ${enrollArgs}`;
 
   const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
@@ -59,7 +63,7 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
       linuxDebCommand={linuxDebCommand}
       linuxRpmCommand={linuxRpmCommand}
       troubleshootLink={docLinks.links.fleet.troubleshooting}
-      isK8s={false}
+      isK8s={isK8s === 'IS_KUBERNETES'}
     />
   );
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { RulesContainer } from './rules_container';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { QueryClient } from 'react-query';
 import { useFindCspRules, useBulkUpdateCspRules, type RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
@@ -38,7 +38,7 @@ const getRuleMock = ({ id = chance.guid(), enabled }: { id?: string; enabled: bo
     updatedAt: chance.date().toISOString(),
     attributes: {
       id,
-      name: chance.word(),
+      name: chance.sentence(),
       enabled,
     },
   } as RuleSavedObject);
@@ -335,5 +335,41 @@ describe('<RulesContainer />', () => {
         enabled: !enabled,
       }))
     );
+  });
+
+  it('updates the rules from within the flyout', () => {
+    const Wrapper = getWrapper();
+    const enabled = true;
+    const rules = Array.from({ length: 20 }, () => getRuleMock({ enabled }));
+
+    (useFindCspRules as jest.Mock).mockReturnValue({
+      status: 'success',
+      data: {
+        total: rules.length,
+        savedObjects: rules,
+      },
+    });
+
+    render(
+      <Wrapper>
+        <RulesContainer />
+      </Wrapper>
+    );
+
+    const rule = rules[0];
+    const rowId = TEST_SUBJECTS.getCspRulesTableRowItemTestId(rule.id);
+    const switchId = TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id);
+
+    fireEvent.click(screen.getByTestId(rowId)); // open flyout
+
+    const flyout = screen.getByTestId(TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER);
+
+    fireEvent.click(within(flyout).getByTestId(switchId)); // change to !enabled
+    fireEvent.click(screen.getByTestId(TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON)); // save
+
+    const { mutate } = useBulkUpdateCspRules();
+
+    expect(mutate).toHaveBeenCalledTimes(1);
+    expect(mutate).toHaveBeenCalledWith([{ ...rule.attributes, enabled: !enabled }]);
   });
 });
