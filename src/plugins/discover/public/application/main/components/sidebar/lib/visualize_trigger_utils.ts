@@ -46,7 +46,8 @@ async function getCompatibleActions(
 export function triggerVisualizeActions(
   field: DataViewField,
   indexPatternId: string | undefined,
-  contextualFields: string[]
+  contextualFields: string[],
+  shouldPassOriginatingApp: boolean = true
 ) {
   if (!indexPatternId) return;
   const trigger = getTriggerConstant(field.type);
@@ -54,7 +55,11 @@ export function triggerVisualizeActions(
     indexPatternId,
     fieldName: field.name,
     contextualFields,
-    originatingApp: APP_ID,
+    ...(shouldPassOriginatingApp
+      ? {
+          originatingApp: APP_ID,
+        }
+      : {}),
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
