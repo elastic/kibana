@@ -617,10 +617,12 @@ export const getXyVisualization = ({
       ...getDataLayers(state.layers),
       ...getReferenceLayers(state.layers),
     ].filter(({ accessors }) => accessors.length > 0);
+
     const accessorsWithArrayValues = [];
+
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
-      const rows = activeData[layerId] && activeData[layerId].rows;
+      const rows = activeData?.[layerId] && activeData[layerId].rows;
       if (!rows) {
         break;
       }
@@ -632,6 +634,7 @@ export const getXyVisualization = ({
         }
       }
     }
+
     return accessorsWithArrayValues.map((label) => (
       <FormattedMessage
         key={label}
@@ -693,9 +696,8 @@ const getMappedAccessors = ({
     columnId: accessor,
   }));
 
-  if (frame.activeData) {
-    const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
-
+  const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
+  if (activeData) {
     const colorAssignments = getColorAssignments(
       getDataLayers(state.layers),
       { tables: activeData },

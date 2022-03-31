@@ -235,6 +235,7 @@ export function getIndexPatternDatasource({
       if (staticValue == null) {
         return state;
       }
+
       return mergeLayer({
         state,
         layerId,

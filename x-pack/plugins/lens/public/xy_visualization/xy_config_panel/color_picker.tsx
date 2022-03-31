@@ -77,7 +77,7 @@ export const ColorPicker = ({
 
     const colorAssignments = getColorAssignments(
       getDataLayers(state.layers),
-      { tables: activeData },
+      { tables: activeData ?? {} },
       formatFactory
     );
     const mappedAccessors = getAccessorColorConfig(
