@@ -438,7 +438,6 @@ const isItemSnoozed = (item: { snoozeEndTime?: Date | null; muteAll: boolean }) 
   if (!snoozeEndTime) {
     return false;
   }
-  console.log('snoozeEndTime', snoozeEndTime, moment(Date.now()).isBefore(snoozeEndTime));
   return moment(Date.now()).isBefore(snoozeEndTime);
 };
 
