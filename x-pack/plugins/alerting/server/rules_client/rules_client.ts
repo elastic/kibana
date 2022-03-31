@@ -1362,7 +1362,7 @@ export class RulesClient {
     const ids = (options as BulkEditOptionsIds<Params>).ids;
 
     if (ids && queryFilter) {
-      throw Error(
+      throw Boom.badRequest(
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
       );
     }
@@ -1415,12 +1415,14 @@ export class RulesClient {
     });
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_EDIT) {
-      throw Error(`More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`);
+      throw Boom.badRequest(
+        `More than ${MAX_RULES_NUMBER_FOR_BULK_EDIT} rules matched for bulk edit`
+      );
     }
     const buckets = aggregations?.alertTypeId.buckets;
 
-    if (buckets === undefined || buckets.length === 0) {
-      throw Error('Rules not found');
+    if (buckets === undefined) {
+      throw Error('No rules found for bulk edit');
     }
 
     await pMap(

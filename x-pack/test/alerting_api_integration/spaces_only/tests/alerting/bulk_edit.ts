@@ -132,11 +132,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_bulk_edit`)
         .set('kbn-xsrf', 'foo')
         .send(payload)
-        .expect(500, {
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred. Check Kibana server logs for details.',
-          statusCode: 500,
-        });
+        .expect(200, { rules: [], errors: [] });
     });
   });
 }

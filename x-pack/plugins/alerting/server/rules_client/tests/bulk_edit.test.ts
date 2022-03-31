@@ -392,12 +392,10 @@ describe('bulkEdit()', () => {
       ).rejects.toThrow('More than 10000 rules matched for bulk edit');
     });
 
-    test('should throw if aggregations result is empty', async () => {
+    test('should throw if aggregations result is invalid', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
         aggregations: {
-          alertTypeId: {
-            buckets: [],
-          },
+          alertTypeId: {},
         },
         saved_objects: [],
         per_page: 0,
@@ -416,7 +414,7 @@ describe('bulkEdit()', () => {
             },
           ],
         })
-      ).rejects.toThrow('Rules not found');
+      ).rejects.toThrow('No rules found for bulk edit');
     });
 
     test('should throw if ruleType is not enabled', async () => {
