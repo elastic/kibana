@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@elastic/datemath';
 import {
@@ -51,9 +51,9 @@ const updateButtonProps = {
 };
 
 export type RuleErrorLogProps = {
-  requestRefresh: () => Promise<void>;
   rule: Rule;
   refreshToken?: number;
+  requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
 export const RuleErrorLog = (props: RuleErrorLogProps) => {
@@ -90,6 +90,8 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         })) || []
     );
   });
+
+  const isInitialized = useRef(false);
 
   const loadEventLogs = async () => {
     setIsLoading(true);
@@ -199,7 +201,10 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   }, [sort?.direction]);
 
   useEffect(() => {
-    loadEventLogs();
+    if (isInitialized.current) {
+      loadEventLogs();
+    }
+    isInitialized.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshToken]);
 

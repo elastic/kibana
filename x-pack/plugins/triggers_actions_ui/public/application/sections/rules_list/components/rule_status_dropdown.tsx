@@ -251,7 +251,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     },
   ];
 
-  return <EuiContextMenu initialPanelId={0} panels={panels} />;
+  return <EuiContextMenu data-test-subj="ruleStatusMenu" initialPanelId={0} panels={panels} />;
 };
 
 interface SnoozePanelProps {
@@ -321,7 +321,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={onClickApplyButton}>
+          <EuiButton onClick={onClickApplyButton} data-test-subj="ruleSnoozeApply">
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
               defaultMessage: 'Apply',
             })}
@@ -372,7 +372,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiLink onClick={onApplyIndefinite}>
+          <EuiLink onClick={onApplyIndefinite} data-test-subj="ruleSnoozeIndefiniteApply">
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
               defaultMessage: 'Snooze indefinitely',
             })}
@@ -384,7 +384,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiButton color="danger" onClick={onCancelSnooze}>
+              <EuiButton color="danger" onClick={onCancelSnooze} data-test-subj="ruleSnoozeCancel">
                 Cancel snooze
               </EuiButton>
             </EuiFlexItem>
