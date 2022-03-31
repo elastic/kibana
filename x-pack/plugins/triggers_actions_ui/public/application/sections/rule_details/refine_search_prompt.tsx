@@ -35,13 +35,6 @@ export const RefineSearchPrompt = (props: RefineSearchFooterProps) => {
     [euiTheme]
   );
 
-  const documentSizeValues = useMemo(
-    () => ({
-      documentSize,
-    }),
-    [documentSize]
-  );
-
   if (documentSize < visibleDocumentSize) {
     return null;
   }
@@ -51,7 +44,7 @@ export const RefineSearchPrompt = (props: RefineSearchFooterProps) => {
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.ruleDetails.refineSearchPrompt.prompt"
         defaultMessage="These are the first {documentSize} matching your search, refine your search to see others."
-        values={documentSizeValues}
+        values={{ documentSize }}
       />
       &nbsp;
       <EuiLink href={`#${backToTopAnchor}`}>
