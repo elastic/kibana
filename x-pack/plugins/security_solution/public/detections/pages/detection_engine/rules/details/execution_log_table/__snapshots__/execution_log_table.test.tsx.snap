@@ -16,14 +16,63 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
     </EuiFlexItem>
     <Styled(EuiFlexItem)>
       <EuiSuperDatePicker
+        commonlyUsedRanges={
+          Array [
+            Object {
+              "end": "now/d",
+              "label": "Today",
+              "start": "now/d",
+            },
+            Object {
+              "end": "now/w",
+              "label": "This week",
+              "start": "now/w",
+            },
+            Object {
+              "end": "now/M",
+              "label": "This month",
+              "start": "now/M",
+            },
+            Object {
+              "end": "now/y",
+              "label": "This year",
+              "start": "now/y",
+            },
+            Object {
+              "end": "now-1d/d",
+              "label": "Yesterday",
+              "start": "now-1d/d",
+            },
+            Object {
+              "end": "now",
+              "label": "Week to date",
+              "start": "now/w",
+            },
+            Object {
+              "end": "now",
+              "label": "Month to date",
+              "start": "now/M",
+            },
+            Object {
+              "end": "now",
+              "label": "Year to date",
+              "start": "now/y",
+            },
+          ]
+        }
+        dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
         end="now"
+        isAutoRefreshOnly={false}
+        isDisabled={false}
         isPaused={true}
         onRefresh={[Function]}
         onRefreshChange={[Function]}
         onTimeChange={[Function]}
         recentlyUsedRanges={Array []}
         refreshInterval={1000}
+        showUpdateButton={true}
         start="now-24h"
+        timeFormat="HH:mm"
         width="full"
       />
     </Styled(EuiFlexItem)>
