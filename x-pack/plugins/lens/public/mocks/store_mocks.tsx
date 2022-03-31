@@ -96,7 +96,7 @@ export interface MountStoreProps {
   dispatch?: jest.Mock;
 }
 
-export const mountWithProvider = (
+export const mountWithProvider = async (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
@@ -110,7 +110,7 @@ export const mountWithProvider = (
 
   let instance: ReactWrapper = {} as ReactWrapper;
 
-  act(() => {
+  await act(async () => {
     instance = mount(mountArgs.component, mountArgs.options);
   });
   return { instance, lensStore, deps };
