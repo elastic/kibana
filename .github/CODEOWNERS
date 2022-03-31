@@ -467,6 +467,7 @@ x-pack/plugins/session_view @elastic/awp-platform
 /x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/apps/reporting_management/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/examples/screenshotting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/es_archives/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
