@@ -8,7 +8,7 @@
 
 import { configureAxe } from 'jest-axe';
 import { Result } from 'axe-core';
-import { AXE_OPTIONS, AXE_CONFIG } from '@kbn/test';
+import { AXE_OPTIONS, AXE_CONFIG } from '@kbn/axe-config';
 import { ReactWrapper } from './testbed/types';
 
 const axeRunner = configureAxe({ globalOptions: { ...AXE_CONFIG } });

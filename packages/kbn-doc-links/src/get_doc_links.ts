@@ -585,6 +585,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       elasticAgent: `${FLEET_DOCS}elastic-agent-installation.html`,
       beatsAgentComparison: `${FLEET_DOCS}beats-agent-comparison.html`,
       datastreams: `${FLEET_DOCS}data-streams.html`,
+      datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
       datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,

@@ -29,7 +29,12 @@ import {
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '.';
+import {
+  TimesliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
 import { EmbeddableFactory } from '../../embeddable/public';
 
@@ -97,6 +102,19 @@ export class ControlsPlugin
         rangeSliderFactory
       );
       registerControlType(rangeSliderFactory);
+
+      // Time Slider Control Factory Setup
+      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactory = embeddable.registerEmbeddableFactory(
+        TIME_SLIDER_CONTROL,
+        timeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
+        timeSliderFactoryDef,
+        timeSliderFactory
+      );
+
+      registerControlType(timeSliderFactory);
     });
 
     return {

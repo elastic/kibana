@@ -346,6 +346,7 @@ export interface DocLinks {
     troubleshooting: string;
     elasticAgent: string;
     datastreams: string;
+    datastreamsILM: string;
     datastreamsNamingScheme: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
