@@ -312,8 +312,20 @@ export function registerEncryptedSavedObjects(
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['ssl']),
-    attributesToExcludeFromAAD: new Set([]),
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToExcludeFromAAD: new Set([
+      'output_id',
+      'name',
+      'type',
+      'is_default',
+      'is_default_monitoring',
+      'hosts',
+      'ca_sha256',
+      'ca_trusted_fingerprint',
+      'config',
+      'config_yaml',
+      'is_preconfigured',
+    ]),
   });
   // Encrypted saved objects
 }

@@ -46,10 +46,11 @@ export function outputIdToUuid(id: string) {
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
   const { output_id: outputId, ssl, ...atributes } = so.attributes;
+
   return {
     id: outputId ?? so.id,
     ...atributes,
-    ...(ssl ? JSON.parse(ssl as string) : {}),
+    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
   };
 }
 
@@ -259,9 +260,7 @@ class OutputService {
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await appContextService
-      .getEncryptedSavedObjects()
-      .getDecryptedAsInternalUser<SavedObjectAttribute>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
