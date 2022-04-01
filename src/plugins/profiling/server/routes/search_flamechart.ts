@@ -189,7 +189,12 @@ async function queryFlameGraph(
   const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
   const stackTraceIDs = [...stackTraceEvents.keys()];
   const chunkSize = Math.floor(stackTraceEvents.size / nQueries);
-  const chunks = chunk(stackTraceIDs, chunkSize);
+  let chunks = chunk(stackTraceIDs, chunkSize);
+
+  if (chunks.length !== nQueries) {
+    // The last array element contains the remainder, just drop it as irrelevant.
+    chunks = chunks.slice(0, nQueries);
+  }
 
   const stackResponses = await logExecutionLatency(
     logger,
