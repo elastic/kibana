@@ -107,8 +107,8 @@ export class QueryContext {
       return {
         range: {
           'monitor.timespan': {
-            gte: 'now-5m',
-            lte: 'now',
+            gte: 'now+1m',
+            lte: 'now+6m',
           },
         },
       };

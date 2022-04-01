@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -37,31 +38,19 @@ export const TroubleshootPopover = () => {
 
   return (
     <EuiPopover
-      button={
-        <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-          Troubleshoot
-        </EuiButtonEmpty>
-      }
+      button={<EuiButtonEmpty onClick={onButtonClick}>{WHERE_ARE_MY_MONITORS}</EuiButtonEmpty>}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="upCenter"
     >
-      <EuiPopoverTitle>Troubleshoot out of sync clock</EuiPopoverTitle>
+      <EuiPopoverTitle>{SYSTEM_CLOCK_OUT_OF_SYNC}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText size="s">
           <p>
             <FormattedMessage
               id="xpack.uptime.monitorList.noMessage.troubleshoot"
-              defaultMessage="If there is data in the pings over time chart and you dont see any monitors in monitor
-            list. There might be an issue with your system clock, either on the system heartbeat is
-            running or where kibana is running."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.uptime.monitorList.noMessage.troubleshoot.part"
-              defaultMessage="You can try the absolute date range, if that shows missing monitors, then make sure to
-            check out of sync system clock."
+              defaultMessage="Try using an absolute date range. If monitors appears afterwards,
+              there may be an issue with the system clock where Heartbeat or Kibana is installed."
             />
           </p>
         </EuiText>
@@ -69,6 +58,7 @@ export const TroubleshootPopover = () => {
       <EuiPopoverFooter>
         <EuiButton
           fullWidth
+          iconType="calendar"
           size="s"
           onClick={() => {
             if (middleBucketTimestamp && firstBucketTimestamp) {
@@ -79,9 +69,30 @@ export const TroubleshootPopover = () => {
             }
           }}
         >
-          Try absolute date range
+          {APPLY_ABSOLUTE_DATE_RANGE}
         </EuiButton>
       </EuiPopoverFooter>
     </EuiPopover>
   );
 };
+
+export const APPLY_ABSOLUTE_DATE_RANGE = i18n.translate(
+  'xpack.uptime.monitorList.troubleshoot.tryDateRange',
+  {
+    defaultMessage: 'Apply absolute date range',
+  }
+);
+
+export const WHERE_ARE_MY_MONITORS = i18n.translate(
+  'xpack.uptime.monitorList.troubleshoot.whereAreMyMonitors',
+  {
+    defaultMessage: 'Where are my monitors?',
+  }
+);
+
+export const SYSTEM_CLOCK_OUT_OF_SYNC = i18n.translate(
+  'xpack.uptime.monitorList.troubleshoot.systemClockOutOfSync',
+  {
+    defaultMessage: 'System clock may be out of sync',
+  }
+);
