@@ -134,6 +134,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
     observability: {
+      useRulesLink: () => ({ href: 'newRuleLink' }),
       navigation: {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
@@ -284,20 +285,25 @@ const getHistoryFromUrl = (url: Url) => {
   });
 };
 
-// This function allows us to query for the nearest button with test
-// no matter whether it has nested tags or not (as EuiButton elements do).
-export const forNearestButton =
+const forNearestTag =
+  (tag: string) =>
   (getByText: (f: MatcherFunction) => HTMLElement | null) =>
   (text: string): HTMLElement | null =>
     getByText((_content: string, node: Nullish<Element>) => {
       if (!node) return false;
       const noOtherButtonHasText = Array.from(node.children).every(
-        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
+        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== tag)
       );
       return (
-        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
+        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === tag
       );
     });
+
+// This function allows us to query for the nearest button with test
+// no matter whether it has nested tags or not (as EuiButton elements do).
+export const forNearestButton = forNearestTag('button');
+
+export const forNearestAnchor = forNearestTag('a');
 
 export const makeUptimePermissionsCore = (
   permissions: Partial<{

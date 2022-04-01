@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { ThemeServiceStart, ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobId, JobSummary } from '../../common/types';
@@ -28,7 +28,7 @@ export const getWarningFormulasToast = (
     { theme$: theme.theme$ }
   ),
   text: toMountPoint(
-    <Fragment>
+    <>
       <p>
         <FormattedMessage
           id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
@@ -40,7 +40,7 @@ export const getWarningFormulasToast = (
         <ReportLink getUrl={getReportLink} />
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
-    </Fragment>,
+    </>,
     { theme$: theme.theme$ }
   ),
   'data-test-subj': 'completeReportCsvFormulasWarning',

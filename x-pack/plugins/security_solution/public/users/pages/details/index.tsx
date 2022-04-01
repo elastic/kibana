@@ -42,7 +42,17 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
-const ID = 'UsersDetailsQueryId';
+
+import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
+import { UserOverview } from '../../../overview/components/user_overview';
+import { useUserDetails } from '../../containers/users/details';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
+import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
+import { UsersType } from '../../store/model';
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+const QUERY_ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
@@ -80,11 +90,31 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     filters: getFilters(),
   });
 
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({
+    id: QUERY_ID,
+    filterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   useEffect(() => {
     dispatch(setUsersDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
+
+  const [loading, { inspect, userDetails, refetch }] = useUserDetails({
+    id: QUERY_ID,
+    endDate: to,
+    startDate: from,
+    userName: detailName,
+    indexNames: selectedPatterns,
+    skip: selectedPatterns.length === 0,
+  });
+
+  const capabilities = useMlCapabilities();
+
+  useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
   return (
     <>
@@ -108,11 +138,43 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               }
               title={detailName}
             />
+            <AnomalyTableProvider
+              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
+              startDate={from}
+              endDate={to}
+              skip={isInitializing}
+            >
+              {({ isLoadingAnomaliesData, anomaliesData }) => (
+                <UserOverview
+                  userName={detailName}
+                  id={QUERY_ID}
+                  isInDetailsSidePanel={false}
+                  data={userDetails}
+                  anomaliesData={anomaliesData}
+                  isLoadingAnomaliesData={isLoadingAnomaliesData}
+                  loading={loading}
+                  startDate={from}
+                  endDate={to}
+                  narrowDateRange={(score, interval) => {
+                    const fromTo = scoreIntervalToDateTime(score, interval);
+                    setAbsoluteRangeDatePicker({
+                      id: 'global',
+                      from: fromTo.from,
+                      to: fromTo.to,
+                    });
+                  }}
+                />
+              )}
+            </AnomalyTableProvider>
+
             <EuiSpacer />
 
-            <SecuritySolutionTabNavigation navTabs={navTabsUsersDetails(detailName)} />
+            <SecuritySolutionTabNavigation
+              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
+            />
 
             <EuiSpacer />
+
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}

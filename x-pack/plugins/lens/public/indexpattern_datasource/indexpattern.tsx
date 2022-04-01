@@ -13,15 +13,17 @@ import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { isEqual } from 'lodash';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
   DatasourceDataPanelProps,
-  Operation,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   InitializationOptions,
+  OperationDescriptor,
+  FramePublicAPI,
 } from '../types';
 import {
   loadInitialState,
@@ -45,7 +47,7 @@ import {
   getDatasourceSuggestionsForVisualizeCharts,
 } from './indexpattern_suggestions';
 
-import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
+import { getFiltersInLayer, getVisualDefaultsForLayer, isColumnInvalid } from './utils';
 import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -53,7 +55,9 @@ import {
   GenericIndexPatternColumn,
   getErrorMessages,
   insertNewColumn,
+  TermsIndexPatternColumn,
 } from './operations';
+import { getReferenceRoot } from './operations/layer_helpers';
 import {
   IndexPatternField,
   IndexPatternPrivateState,
@@ -75,6 +79,7 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
+import { DOCUMENT_FIELD_NAME } from '../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
@@ -83,8 +88,8 @@ export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
   dataView?: IndexPattern
-): Operation {
-  const { dataType, label, isBucketed, scale, operationType } = column;
+): OperationDescriptor {
+  const { dataType, label, isBucketed, scale, operationType, timeShift } = column;
   const fieldTypes =
     'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
   return {
@@ -97,6 +102,7 @@ export function columnToOperation(
       column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
         ? 'version'
         : undefined,
+    hasTimeShift: Boolean(timeShift),
   };
 }
 
@@ -112,6 +118,7 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  dataViews,
   fieldFormats,
   charts,
   dataViewFieldEditor,
@@ -120,6 +127,7 @@ export function getIndexPatternDatasource({
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -133,7 +141,7 @@ export function getIndexPatternDatasource({
       }),
     });
 
-  const indexPatternsService = data.indexPatterns;
+  const indexPatternsService = dataViews;
 
   const handleChangeIndexPattern = (
     id: string,
@@ -222,7 +230,7 @@ export function getIndexPatternDatasource({
       });
     },
 
-    initializeDimension(state, layerId, { columnId, groupId, label, dataType, staticValue }) {
+    initializeDimension(state, layerId, { columnId, groupId, staticValue }) {
       const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
       if (staticValue == null) {
         return state;
@@ -255,6 +263,7 @@ export function getIndexPatternDatasource({
             <IndexPatternDataPanel
               changeIndexPattern={handleChangeIndexPattern}
               data={data}
+              dataViews={dataViews}
               fieldFormats={fieldFormats}
               charts={charts}
               indexPatternFieldEditor={dataViewFieldEditor}
@@ -451,18 +460,35 @@ export function getIndexPatternDatasource({
 
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
+      const layer = state.layers[layerId];
+      const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
         datasourceId: 'indexpattern',
-
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder
-            .filter((colId) => !isReferenced(state.layers[layerId], colId))
-            .map((colId) => ({ columnId: colId }));
+          // consider also referenced columns in this case
+          // but map fields to the top referencing column
+          const fieldsPerColumn: Record<string, string[]> = {};
+          Object.keys(layer.columns).forEach((colId) => {
+            const visibleColumnId = getReferenceRoot(layer, colId);
+            fieldsPerColumn[visibleColumnId] = fieldsPerColumn[visibleColumnId] || [];
+
+            const column = layer.columns[colId];
+            if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+              fieldsPerColumn[visibleColumnId].push(
+                ...[column.sourceField].concat(column.params.secondaryFields ?? [])
+              );
+            }
+            if ('sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
+              fieldsPerColumn[visibleColumnId].push(column.sourceField);
+            }
+          });
+          return visibleColumnIds.map((colId, i) => ({
+            columnId: colId,
+            fields: [...new Set(fieldsPerColumn[colId] || [])],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
-          const layer = state.layers[layerId];
-
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(
@@ -474,10 +500,10 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getVisualDefaults: () => {
-          const layer = state.layers[layerId];
-          return getVisualDefaultsForLayer(layer);
-        },
+        getSourceId: () => layer.indexPatternId,
+        getFilters: (activeData: FramePublicAPI['activeData']) =>
+          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
+        getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers) {

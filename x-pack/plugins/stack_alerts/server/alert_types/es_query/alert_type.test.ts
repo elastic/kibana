@@ -14,18 +14,23 @@ import {
   AlertInstanceMock,
 } from '../../../../alerting/server/mocks';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { getAlertType, ConditionMetAlertInstanceId, ActionGroupId } from './alert_type';
+import { getAlertType } from './alert_type';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionContext } from './action_context';
 import { ESSearchResponse, ESSearchRequest } from '../../../../../../src/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { coreMock } from '../../../../../../src/core/server/mocks';
+import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
+import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
+import { Comparator } from '../../../common/comparator_types';
+
+const logger = loggingSystemMock.create().get();
+const coreSetup = coreMock.createSetup();
+const alertType = getAlertType(logger, coreSetup);
 
 describe('alertType', () => {
-  const logger = loggingSystemMock.create().get();
-
-  const alertType = getAlertType(logger);
-
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.es-query');
     expect(alertType.name).toBe('Elasticsearch query');
@@ -58,642 +63,514 @@ describe('alertType', () => {
             "description": "A string that describes the threshold condition.",
             "name": "conditions",
           },
+          Object {
+            "description": "Navigate to Discover and show the records that triggered
+             the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.",
+            "name": "link",
+          },
         ],
         "params": Array [
           Object {
-            "description": "The index the query was run against.",
-            "name": "index",
+            "description": "The number of hits to retrieve for each query.",
+            "name": "size",
+          },
+          Object {
+            "description": "An array of values to use as the threshold. 'between' and 'notBetween' require two values.",
+            "name": "threshold",
+          },
+          Object {
+            "description": "A function to determine if the threshold was met.",
+            "name": "thresholdComparator",
+          },
+          Object {
+            "description": "Serialized search source fields used to fetch the documents from Elasticsearch.",
+            "name": "searchConfiguration",
           },
           Object {
             "description": "The string representation of the Elasticsearch query.",
             "name": "esQuery",
           },
           Object {
-            "description": "The number of hits to retrieve for each query.",
-            "name": "size",
-          },
-          Object {
-            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
-            "name": "threshold",
-          },
-          Object {
-            "description": "A function to determine if the threshold has been met.",
-            "name": "thresholdComparator",
+            "description": "The index the query was run against.",
+            "name": "index",
           },
         ],
       }
     `);
   });
 
-  it('validator succeeds with valid params', async () => {
-    const params: Partial<Writable<EsQueryAlertParams>> = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '<',
-      threshold: [0],
-    };
+  describe('elasticsearch query', () => {
+    it('validator succeeds with valid es query params', async () => {
+      const params: Partial<Writable<OnlyEsQueryAlertParams>> = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.LT,
+        threshold: [0],
+      };
 
-    expect(alertType.validate?.params?.validate(params)).toBeTruthy();
-  });
+      expect(alertType.validate?.params?.validate(params)).toBeTruthy();
+    });
 
-  it('validator fails with invalid params - threshold', async () => {
-    const paramsSchema = alertType.validate?.params;
-    if (!paramsSchema) throw new Error('params validator not set');
+    it('validator fails with invalid es query params - threshold', async () => {
+      const paramsSchema = alertType.validate?.params;
+      if (!paramsSchema) throw new Error('params validator not set');
 
-    const params: Partial<Writable<EsQueryAlertParams>> = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: 'between',
-      threshold: [0],
-    };
+      const params: Partial<Writable<OnlyEsQueryAlertParams>> = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.BETWEEN,
+        threshold: [0],
+      };
 
-    expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
-      `"[threshold]: must have two elements for the \\"between\\" comparator"`
-    );
-  });
+      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"[threshold]: must have two elements for the \\"between\\" comparator"`
+      );
+    });
 
-  it('alert executor handles no documentes returned by ES', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: 'between',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+    it('alert executor handles no documents returned by ES', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.BETWEEN,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
-    const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
-    );
+      const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
+      );
 
-    const result = await alertType.executor({
-      alertId: uuid.v4(),
-      executionId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      state: {
+      const result = await invokeExecutor({ params, alertServices });
+
+      expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "latestTimestamp": undefined,
+        }
+      `);
+    });
+
+    it('alert executor returns the latestTimestamp of the newest detected document', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.GT,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      const newestDocumentTimestamp = Date.now();
+
+      const searchResult: ESSearchResponse<unknown, {}> = generateResults([
+        {
+          'time-field': newestDocumentTimestamp,
+        },
+        {
+          'time-field': newestDocumentTimestamp - 1000,
+        },
+        {
+          'time-field': newestDocumentTimestamp - 2000,
+        },
+      ]);
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
+      );
+
+      const result = await invokeExecutor({ params, alertServices });
+
+      expect(alertServices.alertFactory.create).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
-      },
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      rule: {
-        name: uuid.v4(),
-        tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: '',
-        ruleTypeName: '',
-        enabled: true,
-        schedule: {
-          interval: '1h',
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(result).toMatchObject({
+        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+      });
+    });
+
+    it('alert executor correctly handles numeric time fields that were stored by legacy rules prior to v7.12.1', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.GT,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      const previousTimestamp = Date.now();
+      const newestDocumentTimestamp = previousTimestamp + 1000;
+
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          generateResults([
+            {
+              'time-field': newestDocumentTimestamp,
+            },
+          ])
+        )
+      );
+
+      const result = await invokeExecutor({
+        params,
+        alertServices,
+        state: {
+          // @ts-expect-error previousTimestamp is numeric, but should be string (this was a bug prior to v7.12.1)
+          latestTimestamp: previousTimestamp,
         },
-        actions: [],
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: null,
-      },
+      });
+
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.replaceState).toHaveBeenCalledWith({
+        // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
+        latestTimestamp: new Date(previousTimestamp).toISOString(),
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(result).toMatchObject({
+        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+      });
     });
 
-    expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
+    it('alert executor ignores previous invalid latestTimestamp values stored by legacy rules prior to v7.12.1', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.GT,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "latestTimestamp": undefined,
-      }
-    `);
-  });
+      const oldestDocumentTimestamp = Date.now();
 
-  it('alert executor returns the latestTimestamp of the newest detected document', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '>',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-    const newestDocumentTimestamp = Date.now();
-
-    const searchResult: ESSearchResponse<unknown, {}> = generateResults([
-      {
-        'time-field': newestDocumentTimestamp,
-      },
-      {
-        'time-field': newestDocumentTimestamp - 1000,
-      },
-      {
-        'time-field': newestDocumentTimestamp - 2000,
-      },
-    ]);
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
-    );
-
-    const result = await alertType.executor({
-      alertId: uuid.v4(),
-      executionId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      state: {
-        latestTimestamp: undefined,
-      },
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      rule: {
-        name: uuid.v4(),
-        tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: '',
-        ruleTypeName: '',
-        enabled: true,
-        schedule: {
-          interval: '1h',
-        },
-        actions: [],
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: null,
-      },
-    });
-
-    expect(alertServices.alertFactory.create).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
-    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
-    expect(instance.replaceState).toHaveBeenCalledWith({
-      latestTimestamp: undefined,
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
-    });
-
-    expect(result).toMatchObject({
-      latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
-    });
-  });
-
-  it('alert executor correctly handles numeric time fields that were stored by legacy rules prior to v7.12.1', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '>',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-    const previousTimestamp = Date.now();
-    const newestDocumentTimestamp = previousTimestamp + 1000;
-
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        generateResults([
-          {
-            'time-field': newestDocumentTimestamp,
-          },
-        ])
-      )
-    );
-
-    const executorOptions = {
-      alertId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      consumer: '',
-      throttle: null,
-      notifyWhen: null,
-      schedule: {
-        interval: '1h',
-      },
-    };
-    const result = await alertType.executor({
-      ...executorOptions,
-      state: {
-        // @ts-expect-error previousTimestamp is numeric, but should be string (this was a bug prior to v7.12.1)
-        latestTimestamp: previousTimestamp,
-      },
-    });
-
-    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
-    expect(instance.replaceState).toHaveBeenCalledWith({
-      // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
-      latestTimestamp: new Date(previousTimestamp).toISOString(),
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
-    });
-
-    expect(result).toMatchObject({
-      latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
-    });
-  });
-
-  it('alert executor ignores previous invalid latestTimestamp values stored by legacy rules prior to v7.12.1', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '>',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-    const oldestDocumentTimestamp = Date.now();
-
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        generateResults([
-          {
-            'time-field': oldestDocumentTimestamp,
-          },
-          {
-            'time-field': oldestDocumentTimestamp - 1000,
-          },
-        ])
-      )
-    );
-
-    const result = await alertType.executor({
-      alertId: uuid.v4(),
-      executionId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      state: {
-        // inaalid legacy `latestTimestamp`
-        latestTimestamp: 'FaslK3QBySSL_rrj9zM5',
-      },
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      rule: {
-        name: uuid.v4(),
-        tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: '',
-        ruleTypeName: '',
-        enabled: true,
-        schedule: {
-          interval: '1h',
-        },
-        actions: [],
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: null,
-      },
-    });
-
-    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
-    expect(instance.replaceState).toHaveBeenCalledWith({
-      latestTimestamp: undefined,
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
-    });
-
-    expect(result).toMatchObject({
-      latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
-    });
-  });
-
-  it('alert executor carries over the queried latestTimestamp in the alert state', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '>',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-    const oldestDocumentTimestamp = Date.now();
-
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        generateResults([
-          {
-            'time-field': oldestDocumentTimestamp,
-          },
-        ])
-      )
-    );
-
-    const executorOptions = {
-      alertId: uuid.v4(),
-      executionId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      state: {
-        latestTimestamp: undefined,
-      },
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      rule: {
-        name: uuid.v4(),
-        tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: '',
-        ruleTypeName: '',
-        enabled: true,
-        schedule: {
-          interval: '1h',
-        },
-        actions: [],
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: null,
-      },
-    };
-    const result = await alertType.executor(executorOptions);
-
-    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
-    expect(instance.replaceState).toHaveBeenCalledWith({
-      latestTimestamp: undefined,
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
-    });
-
-    expect(result).toMatchObject({
-      latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
-    });
-
-    const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        generateResults([
-          {
-            'time-field': newestDocumentTimestamp,
-          },
-          {
-            'time-field': newestDocumentTimestamp - 1000,
-          },
-        ])
-      )
-    );
-
-    const secondResult = await alertType.executor({
-      ...executorOptions,
-      state: result as EsQueryAlertState,
-    });
-    const existingInstance: AlertInstanceMock =
-      alertServices.alertFactory.create.mock.results[1].value;
-    expect(existingInstance.replaceState).toHaveBeenCalledWith({
-      latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
-    });
-
-    expect(secondResult).toMatchObject({
-      latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
-    });
-  });
-
-  it('alert executor ignores tie breaker sort values', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '>',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-    const oldestDocumentTimestamp = Date.now();
-
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        generateResults(
-          [
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          generateResults([
             {
               'time-field': oldestDocumentTimestamp,
             },
             {
               'time-field': oldestDocumentTimestamp - 1000,
             },
-          ],
-          true
+          ])
         )
-      )
-    );
+      );
 
-    const result = await alertType.executor({
-      alertId: uuid.v4(),
-      executionId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      state: {
+      const result = await invokeExecutor({ params, alertServices });
+
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
-      },
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      rule: {
-        name: uuid.v4(),
-        tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: '',
-        ruleTypeName: '',
-        enabled: true,
-        schedule: {
-          interval: '1h',
-        },
-        actions: [],
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: null,
-      },
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(result).toMatchObject({
+        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+      });
     });
 
-    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
-    expect(instance.replaceState).toHaveBeenCalledWith({
-      latestTimestamp: undefined,
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
-    });
+    it('alert executor carries over the queried latestTimestamp in the alert state', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.GT,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
-    expect(result).toMatchObject({
-      latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
-    });
-  });
+      const oldestDocumentTimestamp = Date.now();
 
-  it('alert executor ignores results with no sort values', async () => {
-    const params: EsQueryAlertParams = {
-      index: ['index-name'],
-      timeField: 'time-field',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-      thresholdComparator: '>',
-      threshold: [0],
-    };
-    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
-
-    const oldestDocumentTimestamp = Date.now();
-
-    alertServices.search.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        generateResults(
-          [
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          generateResults([
             {
               'time-field': oldestDocumentTimestamp,
             },
-            {
-              'time-field': oldestDocumentTimestamp - 1000,
-            },
-          ],
-          true,
-          true
+          ])
         )
-      )
-    );
+      );
 
-    const result = await alertType.executor({
-      alertId: uuid.v4(),
-      executionId: uuid.v4(),
-      startedAt: new Date(),
-      previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<
-        EsQueryAlertState,
-        ActionContext,
-        typeof ActionGroupId
-      >,
-      params,
-      state: {
+      const result = await invokeExecutor({ params, alertServices });
+
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
-      },
-      spaceId: uuid.v4(),
-      name: uuid.v4(),
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-      rule: {
-        name: uuid.v4(),
-        tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: '',
-        ruleTypeName: '',
-        enabled: true,
-        schedule: {
-          interval: '1h',
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(result).toMatchObject({
+        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+      });
+
+      const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          generateResults([
+            {
+              'time-field': newestDocumentTimestamp,
+            },
+            {
+              'time-field': newestDocumentTimestamp - 1000,
+            },
+          ])
+        )
+      );
+
+      const secondResult = await invokeExecutor({
+        params,
+        alertServices,
+        state: result as EsQueryAlertState,
+      });
+
+      const existingInstance: AlertInstanceMock =
+        alertServices.alertFactory.create.mock.results[1].value;
+      expect(existingInstance.replaceState).toHaveBeenCalledWith({
+        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(secondResult).toMatchObject({
+        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+      });
+    });
+
+    it('alert executor ignores tie breaker sort values', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.GT,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      const oldestDocumentTimestamp = Date.now();
+
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          generateResults(
+            [
+              {
+                'time-field': oldestDocumentTimestamp,
+              },
+              {
+                'time-field': oldestDocumentTimestamp - 1000,
+              },
+            ],
+            true
+          )
+        )
+      );
+
+      const result = await invokeExecutor({ params, alertServices });
+
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.replaceState).toHaveBeenCalledWith({
+        latestTimestamp: undefined,
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(result).toMatchObject({
+        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+      });
+    });
+
+    it('alert executor ignores results with no sort values', async () => {
+      const params: OnlyEsQueryAlertParams = {
+        index: ['index-name'],
+        timeField: 'time-field',
+        esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.GT,
+        threshold: [0],
+      };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      const oldestDocumentTimestamp = Date.now();
+
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          generateResults(
+            [
+              {
+                'time-field': oldestDocumentTimestamp,
+              },
+              {
+                'time-field': oldestDocumentTimestamp - 1000,
+              },
+            ],
+            true,
+            true
+          )
+        )
+      );
+
+      const result = await invokeExecutor({ params, alertServices });
+
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.replaceState).toHaveBeenCalledWith({
+        latestTimestamp: undefined,
+        dateStart: expect.any(String),
+        dateEnd: expect.any(String),
+      });
+
+      expect(result).toMatchObject({
+        latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+      });
+    });
+  });
+
+  describe('search source query', () => {
+    const dataViewMock = {
+      id: 'test-id',
+      title: 'test-title',
+      timeFieldName: 'time-field',
+      fields: [
+        {
+          name: 'message',
+          type: 'string',
+          displayName: 'message',
+          scripted: false,
+          filterable: false,
+          aggregatable: false,
         },
-        actions: [],
-        createdBy: null,
-        updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: null,
-      },
+        {
+          name: 'timestamp',
+          type: 'date',
+          displayName: 'timestamp',
+          scripted: false,
+          filterable: false,
+          aggregatable: false,
+        },
+      ],
+    };
+    const defaultParams: OnlySearchSourceAlertParams = {
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: Comparator.LT,
+      threshold: [0],
+      searchConfiguration: {},
+      searchType: 'searchSource',
+    };
+
+    afterAll(() => {
+      jest.resetAllMocks();
     });
 
-    const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
-    expect(instance.replaceState).toHaveBeenCalledWith({
-      latestTimestamp: undefined,
-      dateStart: expect.any(String),
-      dateEnd: expect.any(String),
+    it('validator succeeds with valid search source params', async () => {
+      expect(alertType.validate?.params?.validate(defaultParams)).toBeTruthy();
     });
 
-    expect(result).toMatchObject({
-      latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+    it('validator fails with invalid search source params - esQuery provided', async () => {
+      const paramsSchema = alertType.validate?.params!;
+      const params: Partial<Writable<EsQueryAlertParams>> = {
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.LT,
+        threshold: [0],
+        esQuery: '',
+        searchType: 'searchSource',
+      };
+
+      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"[esQuery]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('alert executor handles no documents returned by ES', async () => {
+      const params = defaultParams;
+      const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+        if (name === 'index') {
+          return dataViewMock;
+        }
+      });
+      (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce(searchResult);
+
+      await invokeExecutor({ params, alertServices });
+
+      expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
+    });
+
+    it('alert executor throws an error when index does not have time field', async () => {
+      const params = defaultParams;
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+        if (name === 'index') {
+          return { dataViewMock, timeFieldName: undefined };
+        }
+      });
+
+      await expect(invokeExecutor({ params, alertServices })).rejects.toThrow(
+        'Invalid data view without timeFieldName.'
+      );
+    });
+
+    it('alert executor schedule actions when condition met', async () => {
+      const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
+      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
+        if (name === 'index') {
+          return dataViewMock;
+        }
+      });
+
+      (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce({
+        hits: { total: 3, hits: [{}, {}, {}] },
+      });
+
+      await invokeExecutor({ params, alertServices });
+
+      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(instance.scheduleActions).toHaveBeenCalled();
     });
   });
 });
@@ -735,4 +612,55 @@ function generateResults(
       hits,
     },
   };
+}
+
+async function invokeExecutor({
+  params,
+  alertServices,
+  state,
+}: {
+  params: OnlySearchSourceAlertParams | OnlyEsQueryAlertParams;
+  alertServices: AlertServicesMock;
+  state?: EsQueryAlertState;
+}) {
+  return await alertType.executor({
+    alertId: uuid.v4(),
+    executionId: uuid.v4(),
+    startedAt: new Date(),
+    previousStartedAt: new Date(),
+    services: alertServices as unknown as AlertServices<
+      EsQueryAlertState,
+      ActionContext,
+      typeof ActionGroupId
+    >,
+    params: params as EsQueryAlertParams,
+    state: {
+      latestTimestamp: undefined,
+      ...state,
+    },
+    spaceId: uuid.v4(),
+    name: uuid.v4(),
+    tags: [],
+    createdBy: null,
+    updatedBy: null,
+    rule: {
+      name: uuid.v4(),
+      tags: [],
+      consumer: '',
+      producer: '',
+      ruleTypeId: '',
+      ruleTypeName: '',
+      enabled: true,
+      schedule: {
+        interval: '1h',
+      },
+      actions: [],
+      createdBy: null,
+      updatedBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      throttle: null,
+      notifyWhen: null,
+    },
+  });
 }

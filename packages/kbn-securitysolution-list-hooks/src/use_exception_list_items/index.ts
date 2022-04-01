@@ -27,7 +27,7 @@ export type ReturnExceptionListAndItems = [
 ];
 
 /**
- * Hook for using to get an ExceptionList and it's ExceptionListItems
+ * Hook for using to get an ExceptionList and its ExceptionListItems
  *
  * @param http Kibana http service
  * @param lists array of ExceptionListIdentifiers for all lists to fetch

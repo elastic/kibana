@@ -12,7 +12,7 @@ import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/common';
+import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FetchDeps } from './fetch_all';
 
@@ -76,7 +76,9 @@ describe('test fetchCharts', () => {
         Object {
           "enabled": true,
           "id": "1",
-          "params": Object {},
+          "params": Object {
+            "emptyAsNull": false,
+          },
           "schema": "metric",
           "type": "count",
         },
@@ -85,6 +87,7 @@ describe('test fetchCharts', () => {
           "id": "2",
           "params": Object {
             "drop_partials": false,
+            "extendToTimeRange": false,
             "extended_bounds": Object {},
             "field": "timestamp",
             "interval": "auto",

@@ -9,8 +9,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { CoreSetup } from 'kibana/public';
-import { KibanaContextProvider, KibanaThemeProvider } from './shared_imports';
+import { CoreSetup, ExecutionContextStart } from 'kibana/public';
+import { KibanaContextProvider, KibanaThemeProvider, useExecutionContext } from './shared_imports';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
@@ -19,6 +19,21 @@ import { App } from './crud_app/app';
 import './index.scss';
 
 import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
+
+const AppWithExecutionContext = ({
+  history,
+  executionContext,
+}: {
+  history: ManagementAppMountParams['history'];
+  executionContext: ExecutionContextStart;
+}) => {
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'rollup',
+  });
+
+  return <App history={history} />;
+};
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -40,7 +55,7 @@ export const renderApp = async (
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider services={services}>
           <Provider store={rollupJobsStore}>
-            <App history={history} />
+            <AppWithExecutionContext executionContext={core.executionContext} history={history} />
           </Provider>
         </KibanaContextProvider>
       </KibanaThemeProvider>

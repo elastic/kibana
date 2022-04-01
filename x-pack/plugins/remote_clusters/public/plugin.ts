@@ -51,6 +51,7 @@ export class RemoteClustersUIPlugin
             i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
+            executionContext,
           } = core;
 
           docTitle.change(PLUGIN.getI18nName());
@@ -69,7 +70,7 @@ export class RemoteClustersUIPlugin
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled, cloudBaseUrl },
+            { isCloudEnabled, cloudBaseUrl, executionContext },
             history,
             theme$
           );

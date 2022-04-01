@@ -24,6 +24,8 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
    */
   name: string;
 
+  namespace?: string;
+
   /**
    * Aliases that can be used instead of `name`.
    */
@@ -90,9 +92,11 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       inject,
       extract,
       migrations,
+      namespace,
     } = functionDefinition;
 
     this.name = name;
+    this.namespace = namespace;
     this.type = type;
     this.aliases = aliases || [];
     this.fn = fn as ExpressionFunction['fn'];

@@ -18,6 +18,7 @@ import {
   PageError,
   WithPrivileges,
   NotAuthorizedSection,
+  useExecutionContext,
 } from '../shared_imports';
 import { PageLoading } from './components';
 import { DEFAULT_SECTION, Section } from './constants';
@@ -29,11 +30,12 @@ import {
   PolicyAdd,
   PolicyEdit,
 } from './sections';
-import { useConfig } from './app_context';
+import { useAppContext, useConfig } from './app_context';
 
 export const App: React.FunctionComponent = () => {
   const { slm_ui: slmUi } = useConfig();
   const { apiError } = useAuthorizationContext();
+  const { core } = useAppContext();
 
   const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
 
@@ -42,6 +44,11 @@ export const App: React.FunctionComponent = () => {
   }
 
   const sectionsRegex = sections.join('|');
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestore',
+  });
 
   return apiError ? (
     <PageError

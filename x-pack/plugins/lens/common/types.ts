@@ -13,9 +13,18 @@ import type {
   SerializedFieldFormat,
 } from '../../../../src/plugins/field_formats/common';
 import type { Datatable } from '../../../../src/plugins/expressions/common';
-import type { PaletteContinuity } from '../../../../src/plugins/charts/common';
-import type { PaletteOutput } from '../../../../src/plugins/charts/common';
-import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+import type {
+  PaletteContinuity,
+  PaletteOutput,
+  ColorMode,
+} from '../../../../src/plugins/charts/common';
+import {
+  CategoryDisplay,
+  layerTypes,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+} from './constants';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -73,7 +82,7 @@ export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
   maxSteps?: number;
 };
 
-export type LayerType = 'data' | 'referenceLine';
+export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
 // Shared by XY Chart and Heatmap as for now
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
@@ -102,6 +111,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
+  legendSize?: number;
   truncateLegend?: boolean;
 }
 
@@ -114,4 +124,14 @@ export interface PieVisualizationState {
   shape: $Values<typeof PieChartTypes>;
   layers: PieLayerState[];
   palette?: PaletteOutput;
+}
+export interface MetricState {
+  layerId: string;
+  accessor?: string;
+  layerType: LayerType;
+  colorMode?: ColorMode;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  titlePosition?: 'top' | 'bottom';
+  size?: string;
+  textAlign?: 'left' | 'right' | 'center';
 }

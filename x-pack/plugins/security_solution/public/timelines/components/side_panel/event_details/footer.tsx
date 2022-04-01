@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
@@ -20,6 +20,7 @@ import { getFieldValue } from '../../../../detections/components/host_isolation/
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../../common/ecs';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -34,6 +35,7 @@ interface EventDetailsFooterProps {
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
+  refetchFlyoutData: () => Promise<void>;
 }
 
 interface AddExceptionModalWrapperData {
@@ -55,6 +57,7 @@ export const EventDetailsFooterComponent = React.memo(
     timelineId,
     globalQuery,
     timelineQuery,
+    refetchFlyoutData,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
@@ -107,6 +110,14 @@ export const EventDetailsFooterComponent = React.memo(
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
 
+    const [isOsqueryFlyoutOpenWithAgentId, setOsqueryFlyoutOpenWithAgentId] = useState<
+      null | string
+    >(null);
+
+    const closeOsqueryFlyout = useCallback(() => {
+      setOsqueryFlyoutOpenWithAgentId(null);
+    }, [setOsqueryFlyoutOpenWithAgentId]);
+
     return (
       <>
         <EuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
@@ -122,9 +133,11 @@ export const EventDetailsFooterComponent = React.memo(
                   onAddEventFilterClick={onAddEventFilterClick}
                   onAddExceptionTypeClick={onAddExceptionTypeClick}
                   onAddIsolationStatusClick={onAddIsolationStatusClick}
+                  refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
                   timelineId={timelineId}
+                  onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
                 />
               )}
             </EuiFlexItem>
@@ -150,6 +163,9 @@ export const EventDetailsFooterComponent = React.memo(
             onCancel={closeAddEventFilterModal}
             maskProps={{ style: 'z-index: 5000' }}
           />
+        )}
+        {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
+          <OsqueryFlyout agentId={isOsqueryFlyoutOpenWithAgentId} onClose={closeOsqueryFlyout} />
         )}
       </>
     );

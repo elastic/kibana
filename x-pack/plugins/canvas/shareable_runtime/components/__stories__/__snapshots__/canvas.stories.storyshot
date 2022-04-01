@@ -1327,7 +1327,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   <span
                     data-euiicon-type="logoElastic"
                     size="l"
-                  />
+                  >
+                    
+                  </span>
                 </a>
               </div>
               <div
@@ -1387,7 +1389,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
                 <div
@@ -1429,7 +1433,6 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     aria-label="Next Page"
                     className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -1439,7 +1442,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1459,7 +1464,6 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
@@ -1469,7 +1473,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                           color="inherit"
                           data-euiicon-type="gear"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -2811,7 +2817,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   <span
                     data-euiicon-type="logoElastic"
                     size="l"
-                  />
+                  >
+                    
+                  </span>
                 </a>
               </div>
               <div
@@ -2871,7 +2879,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
                 <div
@@ -2913,7 +2923,6 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     aria-label="Next Page"
                     className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -2923,7 +2932,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
               </div>
@@ -2943,7 +2954,6 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
@@ -2953,7 +2963,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                           color="inherit"
                           data-euiicon-type="gear"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -3111,7 +3123,9 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   <span
                     data-euiicon-type="logoElastic"
                     size="l"
-                  />
+                  >
+                    
+                  </span>
                 </a>
               </div>
               <div
@@ -3171,7 +3185,9 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
                 <div
@@ -3222,7 +3238,9 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                       color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
               </div>
@@ -3242,7 +3260,6 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
@@ -3252,7 +3269,9 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                           color="inherit"
                           data-euiicon-type="gear"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </div>
                   </div>

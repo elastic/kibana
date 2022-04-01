@@ -84,6 +84,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         executionStatus,
         actions,
         scheduledTaskId,
+        snoozeEndTime,
         ...rest
       }) => ({
         ...rest,
@@ -97,6 +98,8 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         mute_all: muteAll,
         muted_alert_ids: mutedInstanceIds,
         scheduled_task_id: scheduledTaskId,
+        // Remove this object spread boolean check after snoozeEndTime is added to the public API
+        ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
         execution_status: executionStatus && {
           ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
           last_execution_date: executionStatus.lastExecutionDate,

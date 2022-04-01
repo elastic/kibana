@@ -355,9 +355,19 @@ export const sourceConfigData: SourceConfigData = {
     privateKey: '-----BEGIN PRIVATE KEY-----\nkeykeykeykey==\n-----END PRIVATE KEY-----\n',
     publicKey: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
     consumerKey: 'elastic_enterprise_search_123',
-    apiKey: 'asdf1234',
-    url: 'https://www.elastic.co',
+    externalConnectorApiKey: 'asdf1234',
+    externalConnectorUrl: 'https://www.elastic.co',
   },
+};
+
+export const externalConfiguredConnector = {
+  serviceType: 'external',
+  name: 'External Connector',
+  configured: true,
+  needsPermissions: false,
+  accountContextOnly: true,
+  supportedByLicense: false,
+  privateSourcesEnabled: false,
 };
 
 export const oauthApplication = {

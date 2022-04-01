@@ -12,44 +12,53 @@ import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
 import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
+import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 
-export const UsersContainer = React.memo(() => (
-  <Switch>
-    <Route path={usersTabPath}>
-      <Users />
-    </Route>
+export const UsersContainer = React.memo(() => {
+  const capabilities = useMlCapabilities();
+  const hasMlPermissions = hasMlUserPermissions(capabilities);
 
-    <Route
-      path={usersDetailsTabPath}
-      render={({
-        match: {
-          params: { detailName },
-        },
-      }) => <UsersDetails usersDetailsPagePath={usersDetailsPagePath} detailName={detailName} />}
-    />
-    <Route
-      path={usersDetailsPagePath}
-      render={({
-        match: {
-          params: { detailName },
-        },
-        location: { search = '' },
-      }) => (
-        <Redirect
-          to={{
-            pathname: `${USERS_PATH}/${detailName}/${UsersTableType.allUsers}`,
-            search,
-          }}
-        />
-      )}
-    />
-    <Route
-      path={USERS_PATH}
-      render={({ location: { search = '' } }) => (
-        <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
-      )}
-    />
-  </Switch>
-));
+  return (
+    <Switch>
+      <Route path={usersTabPath}>
+        <Users />
+      </Route>
+
+      <Route
+        path={usersDetailsTabPath}
+        render={({
+          match: {
+            params: { detailName },
+          },
+        }) => <UsersDetails usersDetailsPagePath={usersDetailsPagePath} detailName={detailName} />}
+      />
+      <Route
+        path={usersDetailsPagePath}
+        render={({
+          match: {
+            params: { detailName },
+          },
+          location: { search = '' },
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${USERS_PATH}/${detailName}/${
+                hasMlPermissions ? UsersTableType.anomalies : UsersTableType.events
+              }`,
+              search,
+            }}
+          />
+        )}
+      />
+      <Route
+        path={USERS_PATH}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
+        )}
+      />
+    </Switch>
+  );
+});
 
 UsersContainer.displayName = 'UsersContainer';

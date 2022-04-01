@@ -10,22 +10,30 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
-import { explorerService } from '../../explorer_dashboard_service';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
+import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
+
+export interface KQLFilterSettings {
+  filterQuery: InfluencersFilterQuery;
+  queryString: string;
+  tableQueryString: string;
+  isAndOperator: boolean;
+  filteredFields: string[];
+}
 
 export function getKqlQueryValues({
   inputString,
   queryLanguage,
   indexPattern,
 }: {
-  inputString: string | { [key: string]: any };
+  inputString: string | { [key: string]: unknown };
   queryLanguage: string;
   indexPattern: DataView;
-}): { clearSettings: boolean; settings: any } {
+}): { clearSettings: boolean; settings: KQLFilterSettings } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
   const ast = fromKueryExpression(inputString);
@@ -58,8 +66,8 @@ export function getKqlQueryValues({
     clearSettings,
     settings: {
       filterQuery: influencersFilterQuery,
-      queryString: inputString,
-      tableQueryString: inputString,
+      queryString: inputString as string,
+      tableQueryString: inputString as string,
       isAndOperator,
       filteredFields,
     },
@@ -88,7 +96,7 @@ function getInitSearchInputState({
 
 interface ExplorerQueryBarProps {
   filterActive: boolean;
-  filterPlaceHolder: string;
+  filterPlaceHolder?: string;
   indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;
@@ -101,6 +109,8 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   queryString,
   updateLanguage,
 }) => {
+  const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
+
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
     getInitSearchInputState({ filterActive, queryString })
@@ -130,9 +140,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
       });
 
       if (clearSettings === true) {
-        explorerService.clearInfluencerFilterSettings();
+        anomalyExplorerCommonStateService.clearFilterSettings();
       } else {
-        explorerService.setInfluencerFilterSettings(settings);
+        anomalyExplorerCommonStateService.setFilterSettings(settings);
       }
     } catch (e) {
       console.log('Invalid query syntax in search bar', e); // eslint-disable-line no-console

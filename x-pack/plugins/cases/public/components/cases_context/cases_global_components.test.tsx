@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
+import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_cases_selector_modal';
+import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
-import {
-  getAllCasesSelectorModalNoProviderLazy,
-  getCreateCaseFlyoutLazyNoProvider,
-} from '../../methods';
 import { getInitialCasesContextState } from './cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
-jest.mock('../../methods');
+jest.mock('../../client/ui/get_create_case_flyout');
+jest.mock('../../client/ui/get_all_cases_selector_modal');
 
 const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as jest.Mock;
 const getAllCasesSelectorModalNoProviderLazyMock =

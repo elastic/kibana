@@ -23,7 +23,7 @@ export const discoverActionNameText = i18n.translate(
 export const isDiscoverActionDisabled = (
   items: TransformListRow[],
   forceDisable: boolean,
-  indexPatternExists: boolean
+  dataViewExists: boolean
 ) => {
   if (items.length !== 1) {
     return true;
@@ -38,14 +38,14 @@ export const isDiscoverActionDisabled = (
   const transformNeverStarted =
     stoppedTransform === true && transformProgress === undefined && isBatchTransform === true;
 
-  return forceDisable === true || indexPatternExists === false || transformNeverStarted === true;
+  return forceDisable === true || dataViewExists === false || transformNeverStarted === true;
 };
 
 export interface DiscoverActionNameProps {
-  indexPatternExists: boolean;
+  dataViewExists: boolean;
   items: TransformListRow[];
 }
-export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ indexPatternExists, items }) => {
+export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ dataViewExists, items }) => {
   const isBulkAction = items.length > 1;
 
   const item = items[0];
@@ -65,7 +65,7 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ indexPatternEx
         defaultMessage: 'Links to Discover are not supported as a bulk action.',
       }
     );
-  } else if (!indexPatternExists) {
+  } else if (!dataViewExists) {
     disabledTransformMessage = i18n.translate(
       'xpack.transform.transformList.discoverTransformNoDataViewToolTip',
       {

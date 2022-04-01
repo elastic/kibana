@@ -155,8 +155,9 @@ export class FunctionalTestRunner {
         readProviderSpec(type, providers).map((p) => ({
           ...p,
           fn: skip.includes(p.name)
-            ? (...args: unknown[]) => {
-                const result = p.fn(...args);
+            ? (ctx: any) => {
+                const result = ProviderCollection.callProviderFn(p.fn, ctx);
+
                 if ('then' in result) {
                   throw new Error(
                     `Provider [${p.name}] returns a promise so it can't loaded during test analysis`

@@ -13,6 +13,7 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerCrossCompile: boolean;
   dockerPush: boolean;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;

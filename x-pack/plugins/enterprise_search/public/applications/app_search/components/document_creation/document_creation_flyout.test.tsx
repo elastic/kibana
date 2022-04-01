@@ -16,8 +16,8 @@ import { EuiFlyout } from '@elastic/eui';
 import {
   ShowCreationModes,
   ApiCodeExample,
-  PasteJsonText,
-  UploadJsonFile,
+  JsonFlyout,
+  ElasticsearchIndex,
 } from './creation_mode_components';
 import { Summary } from './creation_response_components';
 import { DocumentCreationFlyout, FlyoutContent } from './document_creation_flyout';
@@ -26,11 +26,12 @@ import { DocumentCreationStep } from './types';
 describe('DocumentCreationFlyout', () => {
   const values = {
     isDocumentCreationOpen: true,
-    creationMode: 'text',
+    creationMode: 'api',
     creationStep: DocumentCreationStep.AddDocuments,
   };
   const actions = {
     closeDocumentCreation: jest.fn(),
+    setActiveJsonTab: jest.fn(),
   };
 
   beforeEach(() => {
@@ -70,18 +71,18 @@ describe('DocumentCreationFlyout', () => {
         expect(wrapper.find(ApiCodeExample)).toHaveLength(1);
       });
 
-      it('renders PasteJsonText', () => {
-        setMockValues({ ...values, creationMode: 'text' });
+      it('renders JsonFlyout', () => {
+        setMockValues({ ...values, creationMode: 'json' });
         const wrapper = shallow(<FlyoutContent />);
 
-        expect(wrapper.find(PasteJsonText)).toHaveLength(1);
+        expect(wrapper.find(JsonFlyout)).toHaveLength(1);
       });
 
-      it('renders UploadJsonFile', () => {
-        setMockValues({ ...values, creationMode: 'file' });
+      it('renders ElasticsearchIndex', () => {
+        setMockValues({ ...values, creationMode: 'elasticsearchIndex' });
         const wrapper = shallow(<FlyoutContent />);
 
-        expect(wrapper.find(UploadJsonFile)).toHaveLength(1);
+        expect(wrapper.find(ElasticsearchIndex)).toHaveLength(1);
       });
     });
 

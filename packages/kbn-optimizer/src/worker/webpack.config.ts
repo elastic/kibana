@@ -236,6 +236,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
     },
@@ -266,6 +267,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path].br',
         test: /\.(js|css)$/,
         cache: false,
+        compressionOptions: {
+          level: 11,
+        },
       }),
       new CompressionPlugin({
         algorithm: 'gzip',
@@ -283,7 +287,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           terserOptions: {
-            compress: true,
+            compress: { passes: 2 },
             keep_classnames: true,
             mangle: true,
           },

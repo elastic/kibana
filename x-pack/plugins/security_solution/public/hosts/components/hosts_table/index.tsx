@@ -25,9 +25,8 @@ import {
   HostItem,
   HostsSortField,
   HostsFields,
-  HostRiskSeverity,
 } from '../../../../common/search_strategy/security_solution/hosts';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, RiskSeverity } from '../../../../common/search_strategy';
 import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../../../common/constants';
@@ -43,6 +42,7 @@ interface HostsTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -53,7 +53,7 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<HostRiskSeverity>?
+  Columns<RiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -78,6 +78,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -135,7 +136,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const dispatchSeverityUpdate = useCallback(
-    (s: HostRiskSeverity) => {
+    (s: RiskSeverity) => {
       dispatch(
         hostsActions.updateHostRiskScoreSeverityFilter({
           severitySelection: [s],
@@ -173,6 +174,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
       totalCount={fakeTotalCount}

@@ -19,10 +19,7 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
   EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter';
@@ -103,7 +100,6 @@ const PreviewRenderer = ({
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
@@ -149,7 +145,6 @@ const SuggestionPreview = ({
           hasBorder
           hasShadow={false}
           className={classNames('lnsSuggestionPanel__button', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
           })}
           paddingSize="none"
@@ -339,41 +334,33 @@ export function SuggestionPanel({
     }
   }
 
-  const applyChangesPrompt = (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      className="lnsSuggestionPanel__applyChangesPrompt"
-      paddingSize="m"
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <h3>
-            <FormattedMessage
-              id="xpack.lens.suggestions.applyChangesPrompt"
-              defaultMessage="Apply your changes to see suggestions."
-            />
-          </h3>
-          <EuiSpacer size="s" />
-          <EuiButton
-            fill
-            iconType="play"
-            size="s"
-            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-            onClick={() => dispatchLens(applyChanges())}
-            data-test-subj="lnsSuggestionApplyChanges"
-          >
-            <FormattedMessage
-              id="xpack.lens.suggestions.applyChangesLabel"
-              defaultMessage="Apply"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  const renderApplyChangesPrompt = () => (
+    <EuiPanel hasShadow={false} className="lnsSuggestionPanel__applyChangesPrompt" paddingSize="m">
+      <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
+        <p>
+          <FormattedMessage
+            id="xpack.lens.suggestions.applyChangesPrompt"
+            defaultMessage="Latest changes must be applied to view suggestions."
+          />
+        </p>
+      </EuiText>
+
+      <EuiButtonEmpty
+        iconType="checkInCircleFilled"
+        size="s"
+        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        onClick={() => dispatchLens(applyChanges())}
+        data-test-subj="lnsApplyChanges__suggestions"
+      >
+        <FormattedMessage
+          id="xpack.lens.suggestions.applyChangesLabel"
+          defaultMessage="Apply changes"
+        />
+      </EuiButtonEmpty>
     </EuiPanel>
   );
 
-  const suggestionsUI = (
+  const renderSuggestionsUI = () => (
     <>
       {currentVisualization.activeId && !hideSuggestions && (
         <SuggestionPreview
@@ -463,7 +450,7 @@ export function SuggestionPanel({
         }
       >
         <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
-          {changesApplied ? suggestionsUI : applyChangesPrompt}
+          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
         </div>
       </EuiAccordion>
     </div>

@@ -19,22 +19,6 @@ Object {
       },
       "name": "Field 2",
     },
-    Object {
-      "id": "col-0-3",
-      "meta": Object {
-        "dimensionName": undefined,
-        "type": "number",
-      },
-      "name": "Field 3",
-    },
-    Object {
-      "id": "col-0-4",
-      "meta": Object {
-        "dimensionName": undefined,
-        "type": "number",
-      },
-      "name": "Field 4",
-    },
   ],
   "rows": Array [
     Object {
@@ -102,6 +86,7 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
+      "legendSize": undefined,
       "maxLegendLines": 2,
       "metric": Object {
         "accessor": 0,

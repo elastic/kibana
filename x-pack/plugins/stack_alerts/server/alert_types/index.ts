@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
@@ -14,6 +14,7 @@ interface RegisterAlertTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerting: AlertingSetup;
+  core: CoreSetup;
 }
 
 export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {

@@ -13,9 +13,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
 
   describe('maps in canvas', function () {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // create new workpad

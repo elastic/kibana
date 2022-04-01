@@ -34,7 +34,7 @@ export const getStopsWithColorsFromRanges = (
 ) => {
   return ranges.reduce<PaletteConfig>(
     (acc, range, index, rangesArr) => {
-      if (index && range.from !== rangesArr[index - 1].to) {
+      if ((index && range.from !== rangesArr[index - 1].to) || index === 0) {
         acc.color.push(TRANSPARENT);
         acc.stop.push(range.from);
       }

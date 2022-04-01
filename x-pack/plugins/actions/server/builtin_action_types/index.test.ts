@@ -14,6 +14,7 @@ import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '../../../licensing/server/mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 const ACTION_TYPE_IDS = [
   '.index',
@@ -24,6 +25,7 @@ const ACTION_TYPE_IDS = [
   '.swimlane',
   '.teams',
   '.webhook',
+  '.xmatters',
 ];
 
 export function createActionTypeRegistry(): {
@@ -31,10 +33,14 @@ export function createActionTypeRegistry(): {
   actionTypeRegistry: ActionTypeRegistry;
 } {
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const inMemoryMetrics = inMemoryMetricsMock.create();
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.createSetup(),
     licensing: licensingMock.createSetup(),
-    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
+    taskRunnerFactory: new TaskRunnerFactory(
+      new ActionExecutor({ isESOCanEncrypt: true }),
+      inMemoryMetrics
+    ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: licenseStateMock.create(),
     preconfiguredActions: [],

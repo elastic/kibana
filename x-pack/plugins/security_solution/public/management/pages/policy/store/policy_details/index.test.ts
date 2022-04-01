@@ -283,7 +283,7 @@ describe('policy details: ', () => {
                       registry: true,
                       security: true,
                     },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
@@ -312,7 +312,7 @@ describe('policy details: ', () => {
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
@@ -332,9 +332,9 @@ describe('policy details: ', () => {
                     logging: { file: 'info' },
                   },
                   linux: {
-                    events: { process: true, file: true, network: true },
+                    events: { process: true, file: true, network: true, session_data: false },
                     logging: { file: 'info' },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {

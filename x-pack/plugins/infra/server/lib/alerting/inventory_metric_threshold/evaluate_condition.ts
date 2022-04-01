@@ -7,20 +7,20 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { mapValues } from 'lodash';
-import moment from 'moment';
-import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { Logger } from '@kbn/logging';
+import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
-import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
+import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 
 type ConditionResult = InventoryMetricConditions & {
-  shouldFire: boolean[];
-  shouldWarn: boolean[];
+  shouldFire: boolean;
+  shouldWarn: boolean;
   currentValue: number;
-  isNoData: boolean[];
+  isNoData: boolean;
   isError: boolean;
 };
 
@@ -33,7 +33,8 @@ export const evaluateCondition = async ({
   compositeSize,
   filterQuery,
   lookbackSize,
-  startTime,
+  executionTimestamp,
+  logger,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -43,16 +44,14 @@ export const evaluateCondition = async ({
   compositeSize: number;
   filterQuery?: string;
   lookbackSize?: number;
-  startTime?: number;
+  executionTimestamp: Date;
+  logger: Logger;
 }): Promise<Record<string, ConditionResult>> => {
-  const { comparator, warningComparator, metric, customMetric } = condition;
-  let { threshold, warningThreshold } = condition;
-
-  const to = startTime ? moment(startTime) : moment();
+  const { metric, customMetric } = condition;
 
   const timerange = {
-    to: to.valueOf(),
-    from: calcualteFromBasedOnMetric(to, condition, nodeType, metric, customMetric),
+    to: executionTimestamp.valueOf(),
+    from: calculateFromBasedOnMetric(executionTimestamp, condition, nodeType, metric, customMetric),
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;
@@ -69,61 +68,22 @@ export const evaluateCondition = async ({
     source,
     logQueryFields,
     compositeSize,
+    condition,
+    logger,
     filterQuery,
     customMetric
   );
 
-  threshold = threshold.map((n) => convertMetricValue(metric, n));
-  warningThreshold = warningThreshold?.map((n) => convertMetricValue(metric, n));
-
-  const valueEvaluator = (value?: DataValue, t?: number[], c?: Comparator) => {
-    if (value === undefined || value === null || !t || !c) return [false];
-    const comparisonFunction = comparatorMap[c];
-    return [comparisonFunction(value as number, t)];
-  };
-
   const result = mapValues(currentValues, (value) => {
     return {
       ...condition,
-      shouldFire: valueEvaluator(value, threshold, comparator),
-      shouldWarn: valueEvaluator(value, warningThreshold, warningComparator),
-      isNoData: [value === null],
+      shouldFire: value.trigger,
+      shouldWarn: value.warn,
+      isNoData: value === null,
       isError: value === undefined,
-      currentValue: getCurrentValue(value),
+      currentValue: value.value,
     };
   }) as unknown; // Typescript doesn't seem to know what `throw` is doing
 
   return result as Record<string, ConditionResult>;
-};
-
-const getCurrentValue: (value: number | null) => number = (value) => {
-  if (value !== null) return Number(value);
-  return NaN;
-};
-
-type DataValue = number | null;
-
-const comparatorMap = {
-  [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
-    value >= Math.min(a, b) && value <= Math.max(a, b),
-  // `threshold` is always an array of numbers in case the BETWEEN comparator is
-  // used; all other compartors will just destructure the first value in the array
-  [Comparator.GT]: (a: number, [b]: number[]) => a > b,
-  [Comparator.LT]: (a: number, [b]: number[]) => a < b,
-  [Comparator.OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
-  [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
-  [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
-};
-
-// Some metrics in the UI are in a different unit that what we store in ES.
-const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
-  if (converters[metric]) {
-    return converters[metric](value);
-  } else {
-    return value;
-  }
-};
-const converters: Record<string, (n: number) => number> = {
-  cpu: (n) => Number(n) / 100,
-  memory: (n) => Number(n) / 100,
 };

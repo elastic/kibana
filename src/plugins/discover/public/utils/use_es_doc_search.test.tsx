@@ -9,7 +9,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Observable } from 'rxjs';
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data_views/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';

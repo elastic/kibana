@@ -8,6 +8,7 @@
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import memoizeOne from 'memoize-one';
 import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
 import type {
   DatasourceFixAction,
@@ -227,15 +228,12 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
+    const buildColumnFn = columnParams
+      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
+      : operationDefinition.buildColumn({ ...baseOptions, layer });
 
     return updateDefaultLabels(
-      addOperationFn(
-        layer,
-        operationDefinition.buildColumn({ ...baseOptions, layer }),
-        columnId,
-        visualizationGroups,
-        targetGroup
-      ),
+      addOperationFn(layer, buildColumnFn, columnId, visualizationGroups, targetGroup),
       indexPattern
     );
   }
@@ -1185,7 +1183,10 @@ export function updateColumnParam<C extends GenericIndexPatternColumn>({
   };
 }
 
-function adjustColumnReferencesForChangedColumn(layer: IndexPatternLayer, changedColumnId: string) {
+export function adjustColumnReferencesForChangedColumn(
+  layer: IndexPatternLayer,
+  changedColumnId: string
+) {
   const newColumns = { ...layer.columns };
   Object.keys(newColumns).forEach((currentColumnId) => {
     if (currentColumnId !== changedColumnId) {
@@ -1411,6 +1412,35 @@ export function isReferenced(layer: IndexPatternLayer, columnId: string): boolea
     'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
+}
+
+const computeReferenceLookup = memoizeOne((layer: IndexPatternLayer): Record<string, string> => {
+  // speed up things for deep chains as in formula
+  const refLookup: Record<string, string> = {};
+  for (const [parentId, col] of Object.entries(layer.columns)) {
+    if ('references' in col) {
+      for (const colId of col.references) {
+        refLookup[colId] = parentId;
+      }
+    }
+  }
+  return refLookup;
+});
+
+/**
+ * Given a columnId, returns the visible root column id for it
+ * This is useful to map internal properties of referenced columns to the visible column
+ * @param layer
+ * @param columnId
+ * @returns id of the reference root
+ */
+export function getReferenceRoot(layer: IndexPatternLayer, columnId: string): string {
+  const refLookup = computeReferenceLookup(layer);
+  let currentId = columnId;
+  while (isReferenced(layer, currentId)) {
+    currentId = refLookup[currentId];
+  }
+  return currentId;
 }
 
 export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {
@@ -1676,7 +1706,7 @@ export function getSplitByTermsLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { termsParams, metrics, timeInterval, splitWithDateHistogram } = layer;
+  const { termsParams, metrics, timeInterval, splitWithDateHistogram, dropPartialBuckets } = layer;
   const copyMetricsArray = [...metrics];
 
   const computedLayer = computeLayerFromContext(
@@ -1701,6 +1731,7 @@ export function getSplitByTermsLayer(
       visualizationGroups: [],
       columnParams: {
         interval: timeInterval,
+        dropPartials: dropPartialBuckets,
       },
     }),
     columnId,
@@ -1754,7 +1785,7 @@ export function getSplitByFiltersLayer(
   dateField: IndexPatternField | undefined,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer {
-  const { splitFilters, metrics, timeInterval } = layer;
+  const { splitFilters, metrics, timeInterval, dropPartialBuckets } = layer;
   const filterParams = splitFilters?.map((param) => {
     const query = param.filter ? param.filter.query : '';
     const language = param.filter ? param.filter.language : 'kuery';
@@ -1786,6 +1817,7 @@ export function getSplitByFiltersLayer(
       visualizationGroups: [],
       columnParams: {
         interval: timeInterval,
+        dropPartials: dropPartialBuckets,
       },
     }),
     columnId,

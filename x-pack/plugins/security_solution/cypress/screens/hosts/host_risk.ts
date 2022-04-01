@@ -20,10 +20,9 @@ export const HOST_BY_RISK_TABLE = '.table-hostRisk-loading-false';
 export const HOST_BY_RISK_TABLE_CELL =
   '[data-test-subj="table-hostRisk-loading-false"] .euiTableCellContent';
 
-export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="host-risk-filter-button"]';
+export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-button"]';
 
-export const HOST_BY_RISK_TABLE_FILTER_CRITICAL =
-  '[data-test-subj="host-risk-filter-item-Critical"]';
+export const HOST_BY_RISK_TABLE_FILTER_CRITICAL = '[data-test-subj="risk-filter-item-Critical"]';
 
 export const HOST_BY_RISK_TABLE_PERPAGE_BUTTON =
   '[data-test-subj="loadingMoreSizeRowPopover"] button';

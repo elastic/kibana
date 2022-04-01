@@ -42,10 +42,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.disableAutoApply();
 
       expect(await PageObjects.lens.getAutoApplyEnabled()).not.to.be.ok();
+
+      await PageObjects.lens.closeSettingsMenu();
     });
 
-    it('should preserve auto-apply controls with full-screen datasource', async () => {
+    it('should preserve apply-changes button with full-screen datasource', async () => {
       await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.disableAutoApply();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -56,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       PageObjects.lens.toggleFullscreen();
 
-      expect(await PageObjects.lens.getAutoApplyToggleExists()).to.be.ok();
+      expect(await PageObjects.lens.applyChangesExists('toolbar')).to.be.ok();
 
       PageObjects.lens.toggleFullscreen();
 
@@ -79,21 +83,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // assert that changes haven't been applied
-      await PageObjects.lens.waitForEmptyWorkspace();
+      await PageObjects.lens.waitForWorkspaceWithApplyChangesPrompt();
 
-      await PageObjects.lens.applyChanges();
+      await PageObjects.lens.applyChanges('workspace');
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
     });
 
     it('should hide suggestions when a change is made', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
-      expect(await PageObjects.lens.getAreSuggestionsPromptingToApply()).to.be.ok();
+      expect(await PageObjects.lens.applyChangesExists('suggestions')).to.be.ok();
 
-      await PageObjects.lens.applyChanges(true);
+      await PageObjects.lens.applyChanges('suggestions');
 
-      expect(await PageObjects.lens.getAreSuggestionsPromptingToApply()).not.to.be.ok();
+      expect(await PageObjects.lens.applyChangesExists('suggestions')).not.to.be.ok();
     });
   });
 }

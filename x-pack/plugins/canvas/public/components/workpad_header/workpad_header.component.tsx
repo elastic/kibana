@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import {
   AddFromLibraryButton,
   QuickButtonGroup,
@@ -169,13 +170,13 @@ export const WorkpadHeader: FC<Props> = ({
               {{
                 primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
                 quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                addFromLibraryButton: (
+                extraButtons: [
                   <AddFromLibraryButton
                     onClick={showEmbedPanel}
                     data-test-subj="canvas-add-from-library-button"
-                  />
-                ),
-                extraButtons: [<EditorMenu addElement={addElement} />],
+                  />,
+                  <EditorMenu addElement={addElement} />,
+                ],
               }}
             </SolutionToolbar>
           </EuiFlexItem>

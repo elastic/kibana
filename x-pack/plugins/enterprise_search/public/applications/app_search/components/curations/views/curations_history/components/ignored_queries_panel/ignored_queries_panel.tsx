@@ -96,7 +96,7 @@ export const IgnoredQueriesPanel: React.FC = () => {
         hasActions
         pagination={{
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         }}
         onChange={handlePageChange(onPaginate)}
       />

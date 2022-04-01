@@ -26,12 +26,12 @@ const EDITOR_HEIGHT = '300px';
 
 interface Props {
   index: string;
-  indexPattern: string;
+  dataView: string;
   initialized: boolean;
   onIndexChange(): void;
-  createIndexPattern: boolean;
-  onCreateIndexPatternChange(): void;
-  onIndexPatternChange(): void;
+  createDataView: boolean;
+  onCreateDataViewChange(): void;
+  onDataViewChange(): void;
   indexSettingsString: string;
   mappingsString: string;
   pipelineString: string;
@@ -39,7 +39,7 @@ interface Props {
   onMappingsStringChange(mappings: string): void;
   onPipelineStringChange(pipeline: string): void;
   indexNameError: string;
-  indexPatternNameError: string;
+  dataViewNameError: string;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
   results: FindFileStructureResponse;
@@ -48,12 +48,12 @@ interface Props {
 
 export const AdvancedSettings: FC<Props> = ({
   index,
-  indexPattern,
+  dataView,
   initialized,
   onIndexChange,
-  createIndexPattern,
-  onCreateIndexPatternChange,
-  onIndexPatternChange,
+  createDataView,
+  onCreateDataViewChange,
+  onDataViewChange,
   indexSettingsString,
   mappingsString,
   pipelineString,
@@ -61,7 +61,7 @@ export const AdvancedSettings: FC<Props> = ({
   onMappingsStringChange,
   onPipelineStringChange,
   indexNameError,
-  indexPatternNameError,
+  dataViewNameError,
   combinedFields,
   onCombinedFieldsChange,
   results,
@@ -103,16 +103,16 @@ export const AdvancedSettings: FC<Props> = ({
 
       <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
         <EuiCheckbox
-          id="createIndexPattern"
+          id="createDataView"
           label={
             <FormattedMessage
               id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
               defaultMessage="Create data view"
             />
           }
-          checked={createIndexPattern === true}
+          checked={createDataView === true}
           disabled={initialized === true || canCreateDataView === false}
-          onChange={onCreateIndexPatternChange}
+          onChange={onCreateDataViewChange}
         />
       </CreateDataViewToolTip>
 
@@ -125,15 +125,15 @@ export const AdvancedSettings: FC<Props> = ({
             defaultMessage="Data view name"
           />
         }
-        isInvalid={indexPatternNameError !== ''}
-        error={[indexPatternNameError]}
+        isInvalid={dataViewNameError !== ''}
+        error={[dataViewNameError]}
       >
         <EuiFieldText
-          disabled={createIndexPattern === false || initialized === true}
-          placeholder={createIndexPattern === true ? index : ''}
-          value={indexPattern}
-          onChange={onIndexPatternChange}
-          isInvalid={indexPatternNameError !== ''}
+          disabled={createDataView === false || initialized === true}
+          placeholder={createDataView === true ? index : ''}
+          value={dataView}
+          onChange={onDataViewChange}
+          isInvalid={dataViewNameError !== ''}
         />
       </EuiFormRow>
 

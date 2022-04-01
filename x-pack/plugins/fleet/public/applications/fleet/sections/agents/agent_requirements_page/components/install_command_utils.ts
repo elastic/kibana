@@ -7,6 +7,10 @@
 
 import type { PLATFORM_TYPE } from '../../../../hooks';
 
+export type CommandsByPlatform = {
+  [key in PLATFORM_TYPE]: string;
+};
+
 export function getInstallCommandForPlatform(
   platform: PLATFORM_TYPE,
   esHost: string,
@@ -15,7 +19,7 @@ export function getInstallCommandForPlatform(
   fleetServerHost?: string,
   isProductionDeployment?: boolean,
   sslCATrustedFingerprint?: string
-) {
+): CommandsByPlatform {
   const commandArguments = [];
   const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
 
@@ -52,14 +56,11 @@ export function getInstallCommandForPlatform(
     return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
   }, '');
 
-  switch (platform) {
-    case 'linux-mac':
-      return `sudo ./elastic-agent install ${commandArgumentsStr}`;
-    case 'windows':
-      return `.\\elastic-agent.exe install ${commandArgumentsStr}`;
-    case 'rpm-deb':
-      return `sudo elastic-agent enroll ${commandArgumentsStr}`;
-    default:
-      return '';
-  }
+  return {
+    linux: `sudo ./elastic-agent install ${commandArgumentsStr}`,
+    mac: `sudo ./elastic-agent install ${commandArgumentsStr}`,
+    windows: `.\\elastic-agent.exe install ${commandArgumentsStr}`,
+    deb: `sudo elastic-agent enroll ${commandArgumentsStr}`,
+    rpm: `sudo elastic-agent enroll ${commandArgumentsStr}`,
+  };
 }
