@@ -117,39 +117,48 @@ async function queryFlameGraph(
     logger,
     'query to fetch events from ' + eventsIndex.name,
     async () => {
-      return await client.search({
-        index: eventsIndex.name,
-        size: 0,
-        query: filter,
-        aggs: {
-          group_by: {
-            composite: {
-              size: 100000, // This is the upper limit of entries per event index.
-              sources: [
-                {
-                  traceid: {
-                    terms: {
-                      field: 'StackTraceID',
+      return await client.search(
+        {
+          index: eventsIndex.name,
+          size: 0,
+          query: filter,
+          aggs: {
+            group_by: {
+              composite: {
+                size: 100000, // This is the upper limit of entries per event index.
+                sources: [
+                  {
+                    traceid: {
+                      terms: {
+                        field: 'StackTraceID',
+                      },
                     },
                   },
-                },
-              ],
-            },
-            aggs: {
-              sum_count: {
-                sum: {
-                  field: 'Count',
+                ],
+              },
+              aggs: {
+                sum_count: {
+                  sum: {
+                    field: 'Count',
+                  },
                 },
               },
             },
-          },
-          total_count: {
-            sum: {
-              field: 'Count',
+            total_count: {
+              sum: {
+                field: 'Count',
+              },
             },
           },
         },
-      });
+        {
+          // Adrien and Dario found out this is a work-around for some bug in 8.1.
+          // It reduces the query time by avoiding unneeded searches.
+          querystring: {
+            pre_filter_shard_size: 1,
+          },
+        }
+      );
     }
   );
 
