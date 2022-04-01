@@ -22,7 +22,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'anomaly-detection'
     | 'apm-indices'
     | 'custom-links'
-    | 'schema';
+    | 'schema'
+    | 'storage-explorer';
   hidden?: boolean;
 };
 
@@ -127,6 +128,17 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
+    },
+    {
+      key: 'storage-explorer',
+      label: i18n.translate('xpack.apm.settings.storageExplorer', {
+        defaultMessage: 'Storage explorer',
+      }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/storage-explorer`,
+        search,
+      }),
     },
   ];
 

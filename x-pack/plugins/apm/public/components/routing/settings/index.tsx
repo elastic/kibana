@@ -20,6 +20,7 @@ import { CustomLinkOverview } from '../../app/settings/custom_link';
 import { Schema } from '../../app/settings/schema';
 import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { AgentKeys } from '../../app/settings/agent_keys';
+import { StorageExplorer } from '../../app/settings/storage_explorer';
 
 function page({
   title,
@@ -131,6 +132,16 @@ export const settings = {
         }),
         element: <AgentKeys />,
         tab: 'agent-keys',
+      }),
+      '/settings/storage-explorer': page({
+        title: i18n.translate(
+          'xpack.apm.views.settings.storageExplorer.title',
+          {
+            defaultMessage: 'Storage explorer',
+          }
+        ),
+        element: <StorageExplorer />,
+        tab: 'storage-explorer',
       }),
       '/settings': {
         element: <Redirect to="/settings/agent-configuration" />,
