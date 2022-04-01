@@ -11,6 +11,7 @@ import {
   formatExecutionLogResult,
   formatSortForBucketSort,
   formatSortForTermSort,
+  ExecutionUuidAggResult,
 } from './get_execution_log_aggregation';
 
 describe('formatSortForBucketSort', () => {
@@ -250,7 +251,11 @@ describe('formatExecutionLogResult', () => {
     });
   });
   test('should return empty results if aggregations.excludeExecuteStart are undefined', () => {
-    expect(formatExecutionLogResult({ aggregations: { excludeExecuteStart: undefined } })).toEqual({
+    expect(
+      formatExecutionLogResult({
+        aggregations: { excludeExecuteStart: undefined as unknown as ExecutionUuidAggResult },
+      })
+    ).toEqual({
       total: 0,
       data: [],
     });

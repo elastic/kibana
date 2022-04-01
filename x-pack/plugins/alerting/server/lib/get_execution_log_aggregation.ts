@@ -68,7 +68,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
   };
 }
 
-interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
+export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
   extends estypes.AggregationsAggregateBase {
   buckets: TBucket[];
 }
