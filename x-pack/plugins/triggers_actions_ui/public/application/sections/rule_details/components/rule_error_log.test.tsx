@@ -135,7 +135,6 @@ const mockRule: Rule = {
 };
 
 const loadExecutionLogAggregationsMock = jest.fn();
-const fakeNow = new Date('2022-03-31T18:03:33.133');
 
 describe('rule_error_log', () => {
   beforeEach(() => {
@@ -152,10 +151,10 @@ describe('rule_error_log', () => {
       }
     });
     loadExecutionLogAggregationsMock.mockResolvedValue(mockLogResponse);
-    global.Date.now = jest.fn(() => fakeNow.getTime());
   });
 
   it('renders correctly', async () => {
+    const nowMock = jest.spyOn(Date, 'now').mockReturnValue(0);
     const wrapper = mountWithIntl(
       <RuleErrorLog
         rule={mockRule}
@@ -173,8 +172,8 @@ describe('rule_error_log', () => {
 
     expect(loadExecutionLogAggregationsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        dateEnd: '2022-03-31T18:03:33-04:00',
-        dateStart: '2022-03-30T18:03:33-04:00',
+        dateEnd: '1969-12-31T19:00:00-05:00',
+        dateStart: '1969-12-30T19:00:00-05:00',
         id: '56b61397-13d7-43d0-a583-0fa8c704a46f',
         page: 0,
         perPage: 1,
@@ -195,6 +194,8 @@ describe('rule_error_log', () => {
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
     expect(wrapper.find('.euiTableRow').length).toEqual(10);
+
+    nowMock.mockRestore();
   });
 
   it('can sort on timestamp columns', async () => {
