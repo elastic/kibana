@@ -99,6 +99,9 @@ async function queryFlameGraph(
   sampleSize: number
 ): Promise<FlameGraph> {
   const testing = index === 'profiling-events2';
+  if (testing) {
+    index = 'profiling-events-all';
+  }
 
   const eventsIndex = await logExecutionLatency(
     logger,
@@ -198,15 +201,43 @@ async function queryFlameGraph(
 
   const stackResponses = await logExecutionLatency(
     logger,
-    'mget query (' + nQueries + ' parallel) for ' + stackTraceEvents.size + ' stacktraces',
+    (testing ? 'search' : 'mget') +
+      ' query (' +
+      nQueries +
+      ' parallel) for ' +
+      stackTraceEvents.size +
+      ' stacktraces',
     async () => {
       return await Promise.all(
         chunks.map((ids) => {
-          return client.mget({
-            index: 'profiling-stacktraces',
-            ids,
-            _source_includes: ['FrameID', 'Type'],
-          });
+          if (testing) {
+            return client.search(
+              {
+                index: 'profiling-stacktraces',
+                size: stackTraceEvents.size,
+                sort: '_doc',
+                query: {
+                  ids: {
+                    values: [...ids],
+                  },
+                },
+                _source: false,
+                docvalue_fields: ['FrameID', 'Type'],
+              },
+              {
+                querystring: {
+                  filter_path: 'hits.hits._id,hits.hits.fields.FrameID,hits.hits.fields.Type',
+                  pre_filter_shard_size: 1,
+                },
+              }
+            );
+          } else {
+            return client.mget({
+              index: 'profiling-stacktraces',
+              ids,
+              _source_includes: ['FrameID', 'Type'],
+            });
+          }
         })
       );
     }
