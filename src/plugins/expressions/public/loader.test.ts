@@ -159,7 +159,7 @@ describe('ExpressionLoader', () => {
         throttle: 20,
       });
 
-      expectObservable(expressionLoader.data$).toBe('a 19ms c 2ms d', {
+      expectObservable(expressionLoader.data$).toBe('a 19ms c 19ms d', {
         a: expect.objectContaining({ result: 1 }),
         c: expect.objectContaining({ result: 3 }),
         d: expect.objectContaining({ result: 4 }),
