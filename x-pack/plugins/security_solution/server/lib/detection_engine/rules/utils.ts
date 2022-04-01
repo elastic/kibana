@@ -63,7 +63,7 @@ import {
 } from '../../../../common/constants';
 import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import { LegacyIRuleActionsAttributes, LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
@@ -332,7 +332,7 @@ export const legacyMigrate = async ({
         },
       },
     }),
-    savedObjectsClient.find({
+    savedObjectsClient.find<LegacyIRuleActionsAttributes>({
       type: legacyRuleActionsSavedObjectType,
       hasReference: {
         type: 'alert',
@@ -341,29 +341,61 @@ export const legacyMigrate = async ({
     }),
   ]);
 
-  if (siemNotification != null && siemNotification.data.length > 0) {
-    await Promise.all([
-      rulesClient.delete({ id: siemNotification.data[0].id }),
-      legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0
-        ? savedObjectsClient.delete(
-            legacyRuleActionsSavedObjectType,
-            legacyRuleActionsSO.saved_objects[0].id
-          )
-        : null,
-    ]);
+  const siemNotificationsExist = siemNotification != null && siemNotification.data.length > 0;
+  const legacyRuleNotificationSOsExist =
+    legacyRuleActionsSO != null && legacyRuleActionsSO.saved_objects.length > 0;
 
+  // Assumption: if no legacy sidecar SO or notification rule types exist
+  // that reference the rule in question, assume rule actions are not legacy
+  if (!siemNotificationsExist && !legacyRuleNotificationSOsExist) {
+    return rule;
+  }
+
+  // If the legacy notification rule type ("siem.notification") exist,
+  // migration and cleanup are needed
+  if (siemNotificationsExist) {
+    await rulesClient.delete({ id: siemNotification.data[0].id });
+  }
+  // If legacy notification sidecar ("siem-detection-engine-rule-actions")
+  // exist, migration and cleanup are needed
+  if (legacyRuleNotificationSOsExist) {
+    // Delete the legacy sidecar SO
+    await savedObjectsClient.delete(
+      legacyRuleActionsSavedObjectType,
+      legacyRuleActionsSO.saved_objects[0].id
+    );
+
+    // If "siem-detection-engine-rule-actions" notes that `ruleThrottle` is
+    // "no_actions" or "rule", rule has no actions or rule is set to run
+    // action on every rule run. In these cases, sidecar deletion is the only
+    // cleanup needed to migrate rule to new actions. "siem.notification" are
+    // not created for these action types
+    if (
+      legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
+      legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'rule'
+    ) {
+      return rule;
+    }
+
+    // If rule has an action on any other interval (other than on every
+    // rule run), need to move the action info from the sidecar/legacy action
+    // into the rule itself
     const { id, ...restOfRule } = rule;
+
     const migratedRule = {
       ...restOfRule,
       actions: siemNotification.data[0].actions,
-      throttle: siemNotification.data[0].schedule.interval,
-      notifyWhen: transformToNotifyWhen(siemNotification.data[0].throttle),
+      throttle: legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle,
+      notifyWhen: transformToNotifyWhen(
+        legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle
+      ),
     };
+
     await rulesClient.update({
-      id: rule.id,
+      id,
       data: migratedRule,
     });
-    return { id: rule.id, ...migratedRule };
+
+    return { id, ...migratedRule };
   }
-  return rule;
 };

@@ -13,6 +13,7 @@ import {
   transformToAlertThrottle,
   transformFromAlertThrottle,
   transformActions,
+  legacyMigrate,
 } from './utils';
 import { AlertAction, SanitizedAlert } from '../../../../../alerting/common';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -23,6 +24,67 @@ import {
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import {
+  getEmptyFindResult,
+  legacyGetSiemNotificationRuleActionsSOResultWithSingleHit,
+  legacyGetDailyNotificationResult,
+  legacyGetHourlyNotificationResult,
+  legacyGetWeeklyNotificationResult,
+} from '../routes/__mocks__/request_responses';
+import { requestContextMock } from '../routes/__mocks__';
+
+const getRuleLegacyActions = (): SanitizedAlert<RuleParams> =>
+  ({
+    id: '123',
+    notifyWhen: 'onThrottleInterval',
+    name: 'Simple Rule Query',
+    tags: ['__internal_rule_id:ruleId', '__internal_immutable:false'],
+    alertTypeId: 'siem.queryRule',
+    consumer: 'siem',
+    enabled: true,
+    throttle: '1h',
+    apiKeyOwner: 'elastic',
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    muteAll: false,
+    mutedInstanceIds: [],
+    monitoring: { execution: { history: [], calculated_metrics: { success_ratio: 0 } } },
+    mapped_params: { risk_score: 1, severity: '60-high' },
+    schedule: { interval: '5m' },
+    actions: [],
+    params: {
+      author: [],
+      description: 'Simple Rule Query',
+      ruleId: 'ruleId',
+      falsePositives: [],
+      from: 'now-6m',
+      immutable: false,
+      outputIndex: '.siem-signals-default',
+      maxSignals: 100,
+      riskScore: 1,
+      riskScoreMapping: [],
+      severity: 'high',
+      severityMapping: [],
+      threat: [],
+      to: 'now',
+      references: [],
+      version: 1,
+      exceptionsList: [],
+      type: 'query',
+      language: 'kuery',
+      index: ['auditbeat-*'],
+      query: 'user.name: root or user.name: admin',
+    },
+    snoozeEndTime: null,
+    updatedAt: '2022-03-31T21:47:25.695Z',
+    createdAt: '2022-03-31T21:47:16.379Z',
+    scheduledTaskId: '21bb9b60-b13c-11ec-99d0-asdfasdfasf',
+    executionStatus: {
+      status: 'pending',
+      lastExecutionDate: '2022-03-31T21:47:25.695Z',
+      lastDuration: 0,
+    },
+  } as unknown as SanitizedAlert<RuleParams>);
 
 describe('utils', () => {
   describe('#calculateInterval', () => {
@@ -586,6 +648,282 @@ describe('utils', () => {
           params: {},
         },
       ]);
+    });
+  });
+
+  describe('#legacyMigrate', () => {
+    const ruleId = '123';
+    const notificationId = '456';
+    const { clients } = requestContextMock.createTools();
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    test('it does no cleanup or migration if no legacy reminants found', async () => {
+      clients.rulesClient.find.mockResolvedValueOnce(getEmptyFindResult());
+      clients.savedObjectsClient.find.mockResolvedValueOnce({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
+
+      const rule = {
+        ...getRuleLegacyActions(),
+        id: ruleId,
+        actions: [],
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        muteAll: true,
+      } as SanitizedAlert<RuleParams>;
+
+      const migratedRule = await legacyMigrate({
+        rulesClient: clients.rulesClient,
+        savedObjectsClient: clients.savedObjectsClient,
+        rule,
+      });
+
+      expect(clients.rulesClient.delete).not.toHaveBeenCalled();
+      expect(clients.savedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(migratedRule).toEqual(rule);
+    });
+
+    // Even if a rule is created with no actions pre 7.16, a
+    // siem-detection-engine-rule-actions SO is still created
+    test('it migrates a rule with no actions', async () => {
+      // siem.notifications is not created for a rule with no actions
+      clients.rulesClient.find.mockResolvedValueOnce(getEmptyFindResult());
+      // siem-detection-engine-rule-actions SO is still created
+      clients.savedObjectsClient.find.mockResolvedValueOnce(
+        legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['none'], ruleId, notificationId)
+      );
+
+      const migratedRule = await legacyMigrate({
+        rulesClient: clients.rulesClient,
+        savedObjectsClient: clients.savedObjectsClient,
+        rule: {
+          ...getRuleLegacyActions(),
+          id: ruleId,
+          actions: [],
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          muteAll: true,
+        },
+      });
+
+      expect(clients.rulesClient.delete).not.toHaveBeenCalled();
+      expect(clients.savedObjectsClient.delete).toHaveBeenCalledWith(
+        'siem-detection-engine-rule-actions',
+        'ID_OF_LEGACY_SIDECAR_NO_ACTIONS'
+      );
+      expect(migratedRule?.actions).toEqual([]);
+      expect(migratedRule?.notifyWhen).toEqual('onActiveAlert');
+      expect(migratedRule?.throttle).toBeNull();
+      expect(migratedRule?.muteAll).toBeTruthy();
+    });
+
+    test('it migrates a rule with every rule run action', async () => {
+      // siem.notifications is not created for a rule with actions run every rule run
+      clients.rulesClient.find.mockResolvedValueOnce(getEmptyFindResult());
+      // siem-detection-engine-rule-actions SO is still created
+      clients.savedObjectsClient.find.mockResolvedValueOnce(
+        legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['rule'], ruleId, notificationId)
+      );
+
+      const migratedRule = await legacyMigrate({
+        rulesClient: clients.rulesClient,
+        savedObjectsClient: clients.savedObjectsClient,
+        rule: {
+          ...getRuleLegacyActions(),
+          id: ruleId,
+          actions: [
+            {
+              actionTypeId: '.email',
+              params: {
+                subject: 'Test Actions',
+                to: ['test@test.com'],
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              id: 'action_0',
+              group: 'default',
+            },
+          ],
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          muteAll: false,
+        },
+      });
+
+      expect(clients.rulesClient.delete).not.toHaveBeenCalled();
+      expect(clients.savedObjectsClient.delete).toHaveBeenCalledWith(
+        'siem-detection-engine-rule-actions',
+        'ID_OF_LEGACY_SIDECAR_RULE_RUN_ACTIONS'
+      );
+      expect(migratedRule?.actions).toEqual([
+        {
+          id: 'action_0',
+          actionTypeId: '.email',
+          group: 'default',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            subject: 'Test Actions',
+            to: ['test@test.com'],
+          },
+        },
+      ]);
+      expect(migratedRule?.notifyWhen).toEqual('onActiveAlert');
+      expect(migratedRule?.throttle).toBeNull();
+      expect(migratedRule?.muteAll).toBeFalsy();
+    });
+
+    test('it migrates a rule with daily legacy actions', async () => {
+      // siem.notifications is not created for a rule with no actions
+      clients.rulesClient.find.mockResolvedValueOnce({
+        page: 1,
+        perPage: 1,
+        total: 1,
+        data: [legacyGetDailyNotificationResult(notificationId, ruleId)],
+      });
+      // siem-detection-engine-rule-actions SO is still created
+      clients.savedObjectsClient.find.mockResolvedValueOnce(
+        legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['daily'], ruleId, notificationId)
+      );
+
+      const migratedRule = await legacyMigrate({
+        rulesClient: clients.rulesClient,
+        savedObjectsClient: clients.savedObjectsClient,
+        rule: {
+          ...getRuleLegacyActions(),
+          id: ruleId,
+          actions: [],
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+        },
+      });
+
+      expect(clients.rulesClient.delete).toHaveBeenCalledWith({ id: '456' });
+      expect(clients.savedObjectsClient.delete).toHaveBeenCalledWith(
+        'siem-detection-engine-rule-actions',
+        'ID_OF_LEGACY_SIDECAR_DAILY_ACTIONS'
+      );
+      expect(migratedRule?.actions).toEqual([
+        {
+          actionTypeId: '.email',
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            to: ['test@test.com'],
+            subject: 'Test Actions',
+          },
+        },
+      ]);
+      expect(migratedRule?.throttle).toEqual('1d');
+      expect(migratedRule?.notifyWhen).toEqual('onThrottleInterval');
+      expect(migratedRule?.muteAll).toBeFalsy();
+    });
+
+    test('it migrates a rule with hourly legacy actions', async () => {
+      // siem.notifications is not created for a rule with no actions
+      clients.rulesClient.find.mockResolvedValueOnce({
+        page: 1,
+        perPage: 1,
+        total: 1,
+        data: [legacyGetHourlyNotificationResult(notificationId, ruleId)],
+      });
+      // siem-detection-engine-rule-actions SO is still created
+      clients.savedObjectsClient.find.mockResolvedValueOnce(
+        legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(
+          ['hourly'],
+          ruleId,
+          notificationId
+        )
+      );
+
+      const migratedRule = await legacyMigrate({
+        rulesClient: clients.rulesClient,
+        savedObjectsClient: clients.savedObjectsClient,
+        rule: {
+          ...getRuleLegacyActions(),
+          id: ruleId,
+          actions: [],
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+        },
+      });
+
+      expect(clients.rulesClient.delete).toHaveBeenCalledWith({ id: '456' });
+      expect(clients.savedObjectsClient.delete).toHaveBeenCalledWith(
+        'siem-detection-engine-rule-actions',
+        'ID_OF_LEGACY_SIDECAR_HOURLY_ACTIONS'
+      );
+      expect(migratedRule?.actions).toEqual([
+        {
+          actionTypeId: '.email',
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            to: ['test@test.com'],
+            subject: 'Test Actions',
+          },
+        },
+      ]);
+      expect(migratedRule?.throttle).toEqual('1h');
+      expect(migratedRule?.notifyWhen).toEqual('onThrottleInterval');
+      expect(migratedRule?.muteAll).toBeFalsy();
+    });
+
+    test('it migrates a rule with weekly legacy actions', async () => {
+      // siem.notifications is not created for a rule with no actions
+      clients.rulesClient.find.mockResolvedValueOnce({
+        page: 1,
+        perPage: 1,
+        total: 1,
+        data: [legacyGetWeeklyNotificationResult(notificationId, ruleId)],
+      });
+      // siem-detection-engine-rule-actions SO is still created
+      clients.savedObjectsClient.find.mockResolvedValueOnce(
+        legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(
+          ['weekly'],
+          ruleId,
+          notificationId
+        )
+      );
+
+      const migratedRule = await legacyMigrate({
+        rulesClient: clients.rulesClient,
+        savedObjectsClient: clients.savedObjectsClient,
+        rule: {
+          ...getRuleLegacyActions(),
+          id: ruleId,
+          actions: [],
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+        },
+      });
+
+      expect(clients.rulesClient.delete).toHaveBeenCalledWith({ id: '456' });
+      expect(clients.savedObjectsClient.delete).toHaveBeenCalledWith(
+        'siem-detection-engine-rule-actions',
+        'ID_OF_LEGACY_SIDECAR_WEEKLY_ACTIONS'
+      );
+      expect(migratedRule?.actions).toEqual([
+        {
+          actionTypeId: '.email',
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            to: ['test@test.com'],
+            subject: 'Test Actions',
+          },
+        },
+      ]);
+      expect(migratedRule?.throttle).toEqual('7d');
+      expect(migratedRule?.notifyWhen).toEqual('onThrottleInterval');
+      expect(migratedRule?.muteAll).toBeFalsy();
     });
   });
 });
