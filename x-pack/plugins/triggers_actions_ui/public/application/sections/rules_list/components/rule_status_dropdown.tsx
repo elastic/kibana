@@ -43,6 +43,7 @@ export interface ComponentOpts {
   disableRule: () => Promise<void>;
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
+  isEditable: boolean;
   previousSnoozeInterval: string | null;
 }
 
@@ -60,6 +61,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   enableRule,
   snoozeRule,
   unsnoozeRule,
+  isEditable,
   previousSnoozeInterval,
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
@@ -124,11 +126,17 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       </EuiToolTip>
     ) : null;
 
-  const badge = (
+  const nonEditableBadge = (
+    <EuiBadge color={badgeColor} data-test-subj="statusDropdownReadonly">
+      {badgeMessage}
+    </EuiBadge>
+  );
+
+  const editableBadge = (
     <EuiBadge
       color={badgeColor}
       iconSide="right"
-      iconType={!isUpdating ? 'arrowDown' : undefined}
+      iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}
       onClick={onClickBadge}
       iconOnClick={onClickBadge}
       onClickAriaLabel={OPEN_MENU_ARIA_LABEL}
@@ -150,24 +158,28 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={badge}
-          isOpen={isPopoverOpen}
-          closePopover={onClosePopover}
-          panelPaddingSize="s"
-          data-test-subj="statusDropdown"
-          title={badgeMessage}
-        >
-          <RuleStatusMenu
-            onClosePopover={onClosePopover}
-            onChangeEnabledStatus={onChangeEnabledStatus}
-            onChangeSnooze={onChangeSnooze}
-            isEnabled={isEnabled}
-            isSnoozed={isSnoozed}
-            snoozeEndTime={item.snoozeEndTime}
-            previousSnoozeInterval={previousSnoozeInterval}
-          />
-        </EuiPopover>
+        {isEditable ? (
+          <EuiPopover
+            button={editableBadge}
+            isOpen={isPopoverOpen && isEditable}
+            closePopover={onClosePopover}
+            panelPaddingSize="s"
+            data-test-subj="statusDropdown"
+            title={badgeMessage}
+          >
+            <RuleStatusMenu
+              onClosePopover={onClosePopover}
+              onChangeEnabledStatus={onChangeEnabledStatus}
+              onChangeSnooze={onChangeSnooze}
+              isEnabled={isEnabled}
+              isSnoozed={isSnoozed}
+              snoozeEndTime={item.snoozeEndTime}
+              previousSnoozeInterval={previousSnoozeInterval}
+            />
+          </EuiPopover>
+        ) : (
+          nonEditableBadge
+        )}
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="remainingSnoozeTime" grow={false}>
         {remainingSnoozeTime}

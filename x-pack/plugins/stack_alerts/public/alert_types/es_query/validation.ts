@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { EsQueryAlertParams } from './types';
 import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
+import { isSearchSourceAlert } from './util';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
-  const { index, timeField, esQuery, size, threshold, timeWindowSize, thresholdComparator } =
-    alertParams;
+  const { size, threshold, timeWindowSize, thresholdComparator } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),
@@ -22,46 +22,9 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     threshold1: new Array<string>(),
     thresholdComparator: new Array<string>(),
     timeWindowSize: new Array<string>(),
+    searchConfiguration: new Array<string>(),
   };
   validationResult.errors = errors;
-  if (!index || index.length === 0) {
-    errors.index.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
-      })
-    );
-  }
-  if (!timeField) {
-    errors.timeField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
-    );
-  }
-  if (!esQuery) {
-    errors.esQuery.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'Elasticsearch query is required.',
-      })
-    );
-  } else {
-    try {
-      const parsedQuery = JSON.parse(esQuery);
-      if (!parsedQuery.query) {
-        errors.esQuery.push(
-          i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
-            defaultMessage: `Query field is required.`,
-          })
-        );
-      }
-    } catch (err) {
-      errors.esQuery.push(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
-          defaultMessage: 'Query must be valid JSON.',
-        })
-      );
-    }
-  }
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
@@ -96,6 +59,7 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       })
     );
   }
+
   if (!size) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSizeText', {
@@ -111,5 +75,66 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       })
     );
   }
+
+  /**
+   * Skip esQuery and index params check if it is search source alert,
+   * since it should contain searchConfiguration instead of esQuery and index.
+   */
+  const isSearchSource = isSearchSourceAlert(alertParams);
+  if (isSearchSource) {
+    if (!alertParams.searchConfiguration) {
+      errors.searchConfiguration.push(
+        i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration',
+          {
+            defaultMessage: 'Search source configuration is required.',
+          }
+        )
+      );
+    }
+    return validationResult;
+  }
+
+  if (!alertParams.index || alertParams.index.length === 0) {
+    errors.index.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
+        defaultMessage: 'Index is required.',
+      })
+    );
+  }
+
+  if (!alertParams.timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+
+  if (!alertParams.esQuery) {
+    errors.esQuery.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'Elasticsearch query is required.',
+      })
+    );
+  } else {
+    try {
+      const parsedQuery = JSON.parse(alertParams.esQuery);
+      if (!parsedQuery.query) {
+        errors.esQuery.push(
+          i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
+            defaultMessage: `Query field is required.`,
+          })
+        );
+      }
+    } catch (err) {
+      errors.esQuery.push(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
+          defaultMessage: 'Query must be valid JSON.',
+        })
+      );
+    }
+  }
+
   return validationResult;
 };
