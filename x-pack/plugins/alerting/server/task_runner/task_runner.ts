@@ -391,6 +391,7 @@ export class TaskRunner<
             savedObjectsClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
+            searchSourceClient: this.context.data.search.searchSource.asScoped(fakeRequest),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,

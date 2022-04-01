@@ -13,6 +13,7 @@ export type {
   RuleType,
   RuleParamsAndRefs,
   RuleExecutorOptions,
+  RuleTypeParams,
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
