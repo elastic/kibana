@@ -194,7 +194,7 @@ const LogstashInstructionSteps = () => {
             <EuiButton href={docLinks.links.fleet.guide} target="_blank">
               <FormattedMessage
                 id="xpack.fleet.settings.logstashInstructions.viewDocumentationButtonLabel"
-                defaultMessage="View documentaion"
+                defaultMessage="View documentation"
               />
             </EuiButton>
             <EuiSpacer size="m" />

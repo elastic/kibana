@@ -52,32 +52,6 @@ exports[`ElasticAgentCardComponent props href 1`] = `
 </RedirectAppLinks>
 `;
 
-exports[`ElasticAgentCardComponent props recommended 1`] = `
-<RedirectAppLinks
-  currentAppId$={
-    Observable {
-      "_isScalar": false,
-      "source": Subject {
-        "_isScalar": false,
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
-  navigateToUrl={[MockFunction]}
->
-  <NoDataCard
-    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
-    image="test-file-stub"
-    recommended={true}
-    title="Add Elastic Agent"
-  />
-</RedirectAppLinks>
-`;
-
 exports[`ElasticAgentCardComponent renders 1`] = `
 <RedirectAppLinks
   currentAppId$={
