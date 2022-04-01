@@ -348,6 +348,8 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visit(hostDetailsUrl(hostName));
+  cy.get('[data-test-subj="loading-spinner"]').should('exist');
+  cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
 };
 
 export const visitUserDetailsPage = (userName = 'bob') => {

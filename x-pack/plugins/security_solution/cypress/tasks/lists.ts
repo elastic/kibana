@@ -16,6 +16,15 @@ import {
   VALUE_LIST_TYPE_SELECTOR,
 } from '../screens/lists';
 
+export const createListsIndex = () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/lists/index',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+};
+
 export const waitForListsIndexToBeCreated = () => {
   cy.request({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
     if (response.status !== 200) {
@@ -30,11 +39,11 @@ export const waitForValueListsModalToBeLoaded = () => {
 };
 
 export const openValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click();
+  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click({ force: true });
 };
 
 export const closeValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LIST_CLOSE_BUTTON).click();
+  return cy.get(VALUE_LIST_CLOSE_BUTTON).click({ force: true });
 };
 
 export const selectValueListsFile = (file: string): Cypress.Chainable<JQuery<HTMLElement>> => {

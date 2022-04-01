@@ -9,7 +9,7 @@ import { ROLES } from '../../../common/test';
 import { deleteRoleAndUser, login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import {
-  waitForListsIndexToBeCreated,
+  createListsIndex,
   waitForValueListsModalToBeLoaded,
   openValueListsModal,
   selectValueListsFile,
@@ -33,9 +33,9 @@ describe('value lists', () => {
       login();
     });
     beforeEach(() => {
+      createListsIndex();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForValueListsModalToBeLoaded();
-      waitForListsIndexToBeCreated();
     });
 
     afterEach(() => {

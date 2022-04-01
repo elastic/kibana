@@ -34,7 +34,7 @@ describe('Inspect', () => {
     );
   });
 
-  context.only('Hosts details', () => {
+  context('Hosts details', () => {
     before(() => {
       visitHostDetailsPage('test.local');
     });

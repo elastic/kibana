@@ -43,7 +43,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails, goToTheRuleDetailsOf } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -64,6 +64,7 @@ describe('EQL rules', () => {
   before(() => {
     cleanKibana();
     login();
+    deleteAlertsAndRules();
   });
   describe('Detection rules, EQL', () => {
     const expectedUrls = getEqlRule().referenceUrls.join('');
@@ -74,7 +75,6 @@ describe('EQL rules', () => {
     const expectedNumberOfAlerts = '1 alert';
 
     beforeEach(() => {
-      deleteAlertsAndRules();
       createTimeline(getEqlRule().timeline).then((response) => {
         cy.wrap({
           ...getEqlRule(),
@@ -155,14 +155,12 @@ describe('EQL rules', () => {
   });
 
   describe('Detection rules, sequence EQL', () => {
-    const expectedNumberOfRules = 1;
     const expectedNumberOfSequenceAlerts = '2 alerts';
 
     before(() => {
       esArchiverLoad('auditbeat_big');
     });
     beforeEach(() => {
-      deleteAlertsAndRules();
       createTimeline(getEqlSequenceRule().timeline).then((response) => {
         cy.wrap({
           ...getEqlSequenceRule(),
@@ -184,14 +182,7 @@ describe('EQL rules', () => {
       fillAboutRuleAndContinue(this.rule);
       fillScheduleRuleAndContinue(this.rule);
       createAndEnableRule();
-
-      cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-      cy.get(RULES_TABLE).then(($table) => {
-        cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-      });
-
-      goToRuleDetails();
+      goToTheRuleDetailsOf(this.rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
