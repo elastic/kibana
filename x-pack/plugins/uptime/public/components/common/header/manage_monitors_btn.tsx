@@ -19,7 +19,7 @@ import { ClientPluginsSetup } from '../../../apps/plugin';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const ManageMonitorsBtn = () => {
-  const [isOpen, setIsOpen] = useLocalStorage('manage-monitor-intro-tour-open', 'false');
+  const [isOpen, closeTour] = useLocalStorage('manage-monitor-intro-tour-open', 'true');
 
   const history = useHistory();
 
@@ -38,9 +38,9 @@ export const ManageMonitorsBtn = () => {
           <p>{PUBLIC_BETA_DESCRIPTION}</p>
         </EuiText>
       }
-      isStepOpen={Boolean(isOpen)}
+      isStepOpen={Boolean(isOpen === 'true')}
       minWidth={300}
-      onFinish={() => setIsOpen(false)}
+      onFinish={() => closeTour('false')}
       step={1}
       stepsTotal={1}
       title={MONITOR_MANAGEMENT_LABEL}
