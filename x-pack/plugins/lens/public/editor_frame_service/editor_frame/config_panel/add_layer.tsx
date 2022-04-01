@@ -143,6 +143,7 @@ export function AddLayerButton({
                     <span className="lnsLayerAddButtonLabel">{label}</span>
                   ),
                 className: 'lnsLayerAddButton',
+                width: 300,
                 icon: icon && <EuiIcon size="m" type={icon} />,
                 ['data-test-subj']: `lnsLayerAddButton-${type}`,
                 onClick: () => {
