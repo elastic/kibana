@@ -12,11 +12,19 @@ import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { usePostComment, UsePostComment } from './use_post_comment';
 import { basicCaseId } from './mock';
 import * as api from './api';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
+const useToastMock = useToasts as jest.Mock;
+
 describe('usePostComment', () => {
+  const toastErrorMock = jest.fn();
+  useToastMock.mockReturnValue({
+    addError: toastErrorMock,
+  });
+
   const abortCtrl = new AbortController();
   const samplePost = {
     comment: 'a comment',
@@ -98,7 +106,7 @@ describe('usePostComment', () => {
     });
   });
 
-  it('unhappy path', async () => {
+  it('set isError true and shows a toast error when an error occurs', async () => {
     const spyOnPostCase = jest.spyOn(api, 'postComment');
     spyOnPostCase.mockImplementation(() => {
       throw new Error('Something went wrong');
@@ -119,6 +127,10 @@ describe('usePostComment', () => {
         isLoading: false,
         isError: true,
         postComment: result.current.postComment,
+      });
+
+      expect(toastErrorMock).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Error fetching data',
       });
     });
   });
