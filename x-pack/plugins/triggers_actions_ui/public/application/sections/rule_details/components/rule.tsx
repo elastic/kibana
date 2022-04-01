@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useState } from 'react';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiHealth,
@@ -65,7 +65,7 @@ type RuleProps = {
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;
   isLoadingChart?: boolean;
-} & Pick<RuleApis, 'enableRule' | 'muteAlertInstance' | 'unmuteAlertInstance'>;
+} & Pick<RuleApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
@@ -76,7 +76,6 @@ export function RuleComponent({
   ruleType,
   readOnly,
   ruleSummary,
-  enableRule,
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
