@@ -302,7 +302,7 @@
           "PinnedEvent",
           ">; resolveTimelineConfig?: ",
           "ResolveTimelineConfig",
-          " | undefined; showSaveModal?: boolean | undefined; savedQueryId?: string | null | undefined; show: boolean; status: ",
+          " | undefined; showSaveModal?: boolean | undefined; savedQueryId?: string | null | undefined; sessionViewId: string | null; show: boolean; status: ",
           "TimelineStatus",
           "; updated?: number | undefined; updatedBy?: string | null | undefined; isSaving: boolean; version: string | null; initialized?: boolean | undefined; }"
         ],
