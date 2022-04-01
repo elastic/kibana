@@ -17,7 +17,7 @@ import { FilterItem } from './filter_item';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
 
-interface Props {
+export interface Props {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;

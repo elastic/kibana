@@ -48,6 +48,9 @@ export class VisualizePageObject extends FtrService {
     LOGSTASH_NON_TIME_BASED: 'logstash*',
   };
 
+  remoteEsPrefix = 'ftr-remote:';
+  defaultIndexString = 'logstash-*';
+
   public async initTests(isNewLibrary = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
@@ -55,7 +58,7 @@ export class VisualizePageObject extends FtrService {
     );
 
     await this.kibanaServer.uiSettings.replace({
-      defaultIndex: 'logstash-*',
+      defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,

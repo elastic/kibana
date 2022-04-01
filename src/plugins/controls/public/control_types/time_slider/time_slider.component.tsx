@@ -188,7 +188,7 @@ export const TimeSlider: FC<TimeSliderProps> = (props) => {
       panelPaddingSize="s"
       anchorPosition="downCenter"
       disableFocusTrap
-      repositionOnScroll
+      attachToAnchor={false}
     >
       {isValidRange(range) ? (
         <TimeSliderComponentPopover
@@ -304,7 +304,7 @@ export const TimeSliderComponentPopover: FC<
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <ValidatedDualRange
-            id={'my-id'}
+            id={`range${fieldName}`}
             max={fullRange[1]}
             min={fullRange[0]}
             onChange={onChangeHandler}

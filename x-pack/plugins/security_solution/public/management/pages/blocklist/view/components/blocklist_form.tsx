@@ -287,16 +287,19 @@ export const BlockListForm = memo(
 
     const handleOnDescriptionChange = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const nextItem = {
+          ...item,
+          description: event.target.value,
+        };
+        validateValues(nextItem);
+
         onChange({
           isValid: isValid(errorsRef.current),
-          item: {
-            ...item,
-            description: event.target.value,
-          },
+          item: nextItem,
         });
         setHasFormChanged(true);
       },
-      [onChange, item]
+      [onChange, item, validateValues]
     );
 
     const handleOnOsChange = useCallback(
