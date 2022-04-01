@@ -10,7 +10,7 @@ import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
-} from '../../../../common/';
+} from '../../../../../../common/constants';
 import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
 export type EsIndexName = string;

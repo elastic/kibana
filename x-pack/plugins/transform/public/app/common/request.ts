@@ -10,6 +10,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HttpFetchError } from '../../../../../../src/core/public';
 import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
+import {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../common/constants';
 import type {
   PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
@@ -26,10 +32,6 @@ import type { StepDefineExposedState } from '../sections/create_transform/compon
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import {
-  DEFAULT_CONTINUOUS_MODE_DELAY,
-  DEFAULT_TRANSFORM_FREQUENCY,
-  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
-  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
   getEsAggFromAggConfig,
   getEsAggFromGroupByConfig,
   isGroupByDateHistogram,

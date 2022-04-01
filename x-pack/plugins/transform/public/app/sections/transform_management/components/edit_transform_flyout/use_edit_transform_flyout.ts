@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
@@ -317,8 +318,12 @@ const getUpdateValue = (
         }, {})
       : {};
 
-  if (formValue === formStateAttribute.defaultValue && formStateAttribute.isOptional) {
-    return formValue !== configValue ? dependsOnConfig : {};
+  if (
+    formValue === formStateAttribute.defaultValue &&
+    formValue === configValue &&
+    formStateAttribute.isOptional
+  ) {
+    return {};
   }
 
   // If the resettable section the form field belongs to is disabled,
@@ -357,7 +362,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // top level attributes
     description: initializeField('description', 'description', config),
     frequency: initializeField('frequency', 'frequency', config, {
-      defaultValue: '1m',
+      defaultValue: DEFAULT_TRANSFORM_FREQUENCY,
       validator: 'frequency',
     }),
 
