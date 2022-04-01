@@ -65,14 +65,14 @@ export class TextClassificationInference extends InferenceBase<InferResponse> {
     } else if (labels.length === 2) {
       // otherwise, if the config only contains two classification_labels
       // we can safely assume the non-top value and return two results
-      formattedResponse = labels.map((l) => {
+      formattedResponse = labels.map((value) => {
         const predictionProbability =
-          resp.predicted_value === l
+          resp.predicted_value === value
             ? resp.prediction_probability
             : 1 - resp.prediction_probability;
 
         return {
-          value: l,
+          value,
           predictionProbability: Number(predictionProbability.toPrecision(PROBABILITY_SIG_FIGS)),
         };
       });
