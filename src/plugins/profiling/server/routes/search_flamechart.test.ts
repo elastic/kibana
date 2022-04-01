@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  getSampledTraceEventsIndex,
-  extractFileIDFromFrameID,
-  DownsampledEventsIndex,
-  parallelMget,
-} from './search_flamechart';
+import { DownsampledEventsIndex, getSampledTraceEventsIndex } from './downsampling';
+import { extractFileIDFromFrameID, parallelMget } from './search_flamechart';
 import { ElasticsearchClient } from 'kibana/server';
 
 describe('Using down-sampled indexes', () => {

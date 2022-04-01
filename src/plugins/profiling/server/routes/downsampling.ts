@@ -27,7 +27,7 @@ function getFullDownsampledIndex(index: string, i: number): string {
 //
 // More details on how the down-sampling works can be found at the write path
 //   https://github.com/elastic/prodfiler/blob/bdcc2711c6cd7e89d63b58a17329fb9fdbabe008/pf-elastic-collector/elastic.go
-function getSampledTraceEventsIndex(
+export function getSampledTraceEventsIndex(
   index: string,
   targetSampleSize: number,
   sampleCountFromInitialExp: number,
@@ -52,7 +52,10 @@ function getSampledTraceEventsIndex(
     }
     // If we come here, it means that the most sparse index still holds too many items.
     // The only problem is the query time, the result set is good.
-    return { name: getFullDownsampledIndex(index, maxExp), sampleRate: 1 / samplingFactor ** maxExp };
+    return {
+      name: getFullDownsampledIndex(index, maxExp),
+      sampleRate: 1 / samplingFactor ** maxExp,
+    };
   } else if (sampleCountFromInitialExp < targetSampleSize) {
     // Search in less down-sampled indexes.
     for (let i = initialExp - 1; i >= 1; i--) {
