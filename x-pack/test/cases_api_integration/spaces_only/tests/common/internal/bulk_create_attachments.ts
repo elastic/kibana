@@ -12,31 +12,32 @@ import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCase,
-  createComment,
   removeServerGeneratedPropertiesFromSavedObject,
   getAuthWithSuperUser,
+  bulkCreateAttachments,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
 
-  describe('post_comment', () => {
+  describe('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
-    it('should post a comment in space1', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
-      const patchedCase = await createComment({
-        supertest,
+    it('should bulk create attachments in space1', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      const patchedCase = await bulkCreateAttachments({
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        params: postCommentUserReq,
+        params: [postCommentUserReq],
         auth: authSpace1,
       });
+
       const comment = removeServerGeneratedPropertiesFromSavedObject(
         patchedCase.comments![0] as AttributesTypeUser
       );
@@ -57,11 +58,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should not post a comment on a case in a different space', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200, authSpace1);
-      await createComment({
-        supertest,
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await bulkCreateAttachments({
+        supertest: supertestWithoutAuth,
         caseId: postedCase.id,
-        params: postCommentUserReq,
+        params: [postCommentUserReq],
         auth: getAuthWithSuperUser('space2'),
         expectedHttpCode: 404,
       });
