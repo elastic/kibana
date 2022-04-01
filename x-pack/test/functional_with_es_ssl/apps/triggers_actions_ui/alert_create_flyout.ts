@@ -291,8 +291,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
       // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '');
       await testSubjects.setValue('queryJsonEditor', JSON.stringify({ query: { foo: {} } }), {
         clearWithKeyboard: true,
       });
