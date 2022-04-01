@@ -12,7 +12,23 @@ import { CliError } from './cli_error';
 import { parseCliFlags } from './cli_flags';
 import * as Path from './path';
 
-const TYPE_SUMMARIZER_PACKAGES = ['@kbn/type-summarizer', '@kbn/crypto', '@kbn/generate'];
+const TYPE_SUMMARIZER_PACKAGES = [
+  '@kbn/type-summarizer',
+  '@kbn/crypto',
+  '@kbn/generate',
+  '@kbn/mapbox-gl',
+  '@kbn/ace',
+  '@kbn/alerts',
+  '@kbn/analytics',
+  '@kbn/apm-config-loader',
+  '@kbn/apm-utils',
+  '@kbn/plugin-discovery',
+];
+
+type TypeSummarizerType = 'api-extractor' | 'type-summarizer';
+function isTypeSummarizerType(v: string): v is TypeSummarizerType {
+  return v === 'api-extractor' || v === 'type-summarizer';
+}
 
 const isString = (i: any): i is string => typeof i === 'string' && i.length > 0;
 
@@ -22,7 +38,7 @@ interface BazelCliConfig {
   tsconfigPath: string;
   inputPath: string;
   repoRelativePackageDir: string;
-  use: 'api-extractor' | 'type-summarizer';
+  type: TypeSummarizerType;
 }
 
 function isKibanaRepo(dir: string) {
@@ -55,11 +71,11 @@ function findRepoRoot() {
   }
 }
 
-export function parseBazelCliFlags(argv: string[]): BazelCliConfig {
+export function parseBazelCliFlags(argv: string[]): BazelCliConfig[] {
   const { rawFlags, unknownFlags } = parseCliFlags(argv, {
     string: ['use'],
     default: {
-      use: 'api-extractor',
+      use: 'api-extractor,type-summarizer',
     },
   });
 
@@ -79,8 +95,11 @@ export function parseBazelCliFlags(argv: string[]): BazelCliConfig {
     throw new CliError(`extra positional arguments`, { showHelp: true });
   }
 
-  const use = rawFlags.use;
-  if (use !== 'api-extractor' && use !== 'type-summarizer') {
+  const use = String(rawFlags.use || '')
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  if (!use.every(isTypeSummarizerType)) {
     throw new CliError(`invalid --use flag, expected "api-extractor" or "type-summarizer"`);
   }
 
@@ -90,14 +109,14 @@ export function parseBazelCliFlags(argv: string[]): BazelCliConfig {
   ).name;
   const repoRelativePackageDir = Path.relative(repoRoot, packageDir);
 
-  return {
-    use,
+  return use.map((type) => ({
+    type,
     packageName,
     tsconfigPath: Path.join(repoRoot, repoRelativePackageDir, 'tsconfig.json'),
     inputPath: Path.join(repoRoot, 'node_modules', packageName, 'target_types/index.d.ts'),
     repoRelativePackageDir,
-    outputDir: Path.join(repoRoot, 'data/type-summarizer-output', use),
-  };
+    outputDir: Path.join(repoRoot, 'data/type-summarizer-output', type),
+  }));
 }
 
 function parseJsonFromCli(json: string) {
@@ -125,7 +144,7 @@ function parseJsonFromCli(json: string) {
   }
 }
 
-export function parseBazelCliJson(json: string): BazelCliConfig {
+export function parseBazelCliJson(json: string): BazelCliConfig[] {
   const config = parseJsonFromCli(json);
   if (typeof config !== 'object' || config === null) {
     throw new CliError('config JSON must be an object');
@@ -168,17 +187,19 @@ export function parseBazelCliJson(json: string): BazelCliConfig {
     throw new CliError(`buildFilePath [${buildFilePath}] must be a relative path`);
   }
 
-  return {
-    packageName,
-    outputDir: Path.resolve(outputDir),
-    tsconfigPath: Path.resolve(tsconfigPath),
-    inputPath: Path.resolve(inputPath),
-    repoRelativePackageDir: Path.dirname(buildFilePath),
-    use: TYPE_SUMMARIZER_PACKAGES.includes(packageName) ? 'type-summarizer' : 'api-extractor',
-  };
+  return [
+    {
+      packageName,
+      outputDir: Path.resolve(outputDir),
+      tsconfigPath: Path.resolve(tsconfigPath),
+      inputPath: Path.resolve(inputPath),
+      repoRelativePackageDir: Path.dirname(buildFilePath),
+      type: TYPE_SUMMARIZER_PACKAGES.includes(packageName) ? 'type-summarizer' : 'api-extractor',
+    },
+  ];
 }
 
-export function parseBazelCliConfig(argv: string[]) {
+export function parseBazelCliConfigs(argv: string[]): BazelCliConfig[] {
   if (typeof argv[0] === 'string' && argv[0].startsWith('{')) {
     return parseBazelCliJson(argv[0]);
   }

@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  GetK8sManifestRequestSchema,
   FleetRequestHandler,
 } from '../../types';
 
@@ -35,6 +36,7 @@ import type {
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
+  GetFullAgentManifestResponse,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
@@ -142,13 +144,15 @@ export const updateAgentPolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const { force, ...data } = request.body;
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
       esClient,
       request.params.agentPolicyId,
-      request.body,
+      data,
       {
+        force,
         user: user || undefined,
       }
     );
@@ -324,5 +328,60 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     } catch (error) {
       return defaultIngestErrorHandler({ error, response });
     }
+  }
+};
+
+export const getK8sManifest: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetK8sManifestRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const fleetServer = request.query.fleetServer ?? '';
+    const token = request.query.enrolToken ?? '';
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    if (fullAgentManifest) {
+      const body: GetFullAgentManifestResponse = {
+        item: fullAgentManifest,
+      };
+      return response.ok({
+        body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent manifest not found' },
+      });
+    }
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const downloadK8sManifest: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetK8sManifestRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const fleetServer = request.query.fleetServer ?? '';
+    const token = request.query.enrolToken ?? '';
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    if (fullAgentManifest) {
+      const body = fullAgentManifest;
+      const headers: ResponseHeaders = {
+        'content-type': 'text/x-yaml',
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+      };
+      return response.ok({
+        body,
+        headers,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent manifest not found' },
+      });
+    }
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

@@ -34,13 +34,14 @@ import { getActions } from './actions';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { useKibana } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import { PostComment } from '../../containers/use_post_comment';
 import { CaseAttachments } from '../../types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -102,6 +103,8 @@ export const useCasesColumns = ({
     isDisplayConfirmDeleteModal,
     isLoading: isDeleting,
   } = useDeleteCases();
+
+  const { isAlertsEnabled } = useCasesFeatures();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
@@ -227,7 +230,7 @@ export const useCasesColumns = ({
                 <EuiBadge
                   color="hollow"
                   key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${i}`}
+                  data-test-subj={`case-table-column-tags-${tag}`}
                 >
                   {tag}
                 </EuiBadge>
@@ -239,15 +242,19 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-    },
+    ...(isAlertsEnabled
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'totalAlerts',
+            name: ALERTS,
+            render: (totalAlerts: Case['totalAlerts']) =>
+              totalAlerts != null
+                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+                : getEmptyTagValue(),
+          },
+        ]
+      : []),
     ...(showSolutionColumn
       ? [
           {
@@ -402,6 +409,7 @@ const IconWrapper = styled.span`
 
 export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) => {
   const { triggersActionsUi } = useKibana().services;
+  const { actions } = useApplicationCapabilities();
 
   if (theCase.externalService == null) {
     return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
@@ -419,13 +427,16 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
 
   return (
     <p>
-      <IconWrapper>
-        <EuiIcon
-          size="original"
-          title={theCase.externalService?.connectorName}
-          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
-        />
-      </IconWrapper>
+      {actions.read && (
+        <IconWrapper>
+          <EuiIcon
+            size="original"
+            title={theCase.externalService?.connectorName}
+            type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
+            data-test-subj="cases-table-connector-icon"
+          />
+        </IconWrapper>
+      )}
       <EuiLink
         data-test-subj={`case-table-column-external`}
         title={theCase.externalService?.connectorName}

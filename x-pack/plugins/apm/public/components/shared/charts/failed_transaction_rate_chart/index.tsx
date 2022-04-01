@@ -8,18 +8,14 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALERT_RULE_TYPE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
-import { AlertType } from '../../../../../common/alert_types';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
@@ -61,7 +57,7 @@ export function FailedTransactionRateChart({
   } = useLegacyUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -72,15 +68,9 @@ export function FailedTransactionRateChart({
     ApmMlDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType, alerts } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -99,8 +89,7 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                comparisonStart,
-                comparisonEnd,
+                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }
@@ -115,8 +104,8 @@ export function FailedTransactionRateChart({
       end,
       transactionType,
       transactionName,
-      comparisonStart,
-      comparisonEnd,
+      offset,
+      comparisonEnabled,
     ]
   );
 
@@ -150,13 +139,28 @@ export function FailedTransactionRateChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.errorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.apm.errorRate', {
+                defaultMessage: 'Failed transaction rate',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('xpack.apm.errorRate.tip', {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            })}
+            position="right"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <TimeseriesChart
         id="errorRate"
         height={height}
@@ -167,10 +171,6 @@ export function FailedTransactionRateChart({
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartTheme}
         anomalyTimeseries={preferredAnomalyTimeseries}
-        alerts={alerts.filter(
-          (alert) =>
-            alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
-        )}
       />
     </EuiPanel>
   );

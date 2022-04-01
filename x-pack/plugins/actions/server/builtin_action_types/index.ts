@@ -16,6 +16,7 @@ import { getActionType as getSwimlaneActionType } from './swimlane';
 import { getActionType as getServerLogActionType } from './server_log';
 import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
+import { getActionType as getXmattersActionType } from './xmatters';
 import {
   getServiceNowITSMActionType,
   getServiceNowSIRActionType,
@@ -36,6 +37,8 @@ export type { ActionParamsType as SlackActionParams } from './slack';
 export { ActionTypeId as SlackActionTypeId } from './slack';
 export type { ActionParamsType as WebhookActionParams } from './webhook';
 export { ActionTypeId as WebhookActionTypeId } from './webhook';
+export type { ActionParamsType as XmattersActionParams } from './xmatters';
+export { ActionTypeId as XmattersActionTypeId } from './xmatters';
 export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
 export {
   ServiceNowITSMActionTypeId,
@@ -69,6 +72,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServerLogActionType({ logger }));
   actionTypeRegistry.register(getSlackActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getXmattersActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowITSMActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowSIRActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowITOMActionType({ logger, configurationUtilities }));

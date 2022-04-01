@@ -5,8 +5,17 @@
  * 2.0.
  */
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { type EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { extractErrorMessage } from '../../../common/utils/helpers';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  type EuiBasicTable,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+import { useParams } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
 import { RulesTableHeader } from './rules_table_header';
@@ -18,6 +27,9 @@ import {
   type RulesQueryResult,
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
+import { RuleFlyout } from './rules_flyout';
+import { pagePathGetters } from '../../../../fleet/public';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -26,6 +38,7 @@ interface RulesPageData {
   total: number;
   error?: string;
   loading: boolean;
+  lastModified: string | null;
 }
 
 export type RulesState = RulesPageData & RulesQuery;
@@ -70,17 +83,28 @@ const getRulesPageData = (
     rules_map: new Map(rules.map((rule) => [rule.id, rule])),
     rules_page: page.map((rule) => changedRules.get(rule.attributes.id) || rule),
     total: data?.total || 0,
+    lastModified: getLastModified(rules) || null,
   };
 };
+
+const getLastModified = (data: RuleSavedObject[]): string | undefined =>
+  data
+    .map((v) => v.updatedAt)
+    .filter(isNonNullable)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
 
 const getPage = (data: readonly RuleSavedObject[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const MAX_ITEMS_PER_PAGE = 10000;
 
+export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
+
 export const RulesContainer = () => {
+  const params = useParams<PageUrlParams>();
   const tableRef = useRef<EuiBasicTable>(null);
   const [changedRules, setChangedRules] = useState<Map<string, RuleSavedObject>>(new Map());
+  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [visibleSelectedRulesIds, setVisibleSelectedRulesIds] = useState<string[]>([]);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({ page: 0, perPage: 5, search: '' });
@@ -143,6 +167,8 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
+      <ManageIntegrationButton {...params} />
+      <EuiSpacer />
       <EuiPanel hasBorder hasShadow={false}>
         <RulesTableHeader
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
@@ -160,6 +186,7 @@ export const RulesContainer = () => {
           searchValue={rulesQuery.search}
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
+          lastModified={rulesPageData.lastModified}
         />
         <EuiSpacer />
         <RulesTable
@@ -178,11 +205,47 @@ export const RulesContainer = () => {
           setPagination={(paginationQuery) =>
             setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }))
           }
+          setSelectedRuleId={setSelectedRuleId}
+          selectedRuleId={selectedRuleId}
         />
       </EuiPanel>
       {hasChanges && (
         <RulesBottomBar onSave={bulkUpdateRules} onCancel={discardChanges} isLoading={isUpdating} />
       )}
+      {selectedRuleId && (
+        <RuleFlyout
+          rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}
+          onClose={() => setSelectedRuleId(null)}
+          toggleRule={toggleRule}
+        />
+      )}
     </div>
+  );
+};
+
+const ManageIntegrationButton = ({ policyId, packagePolicyId }: PageUrlParams) => {
+  const { http } = useKibana().services;
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1} style={{ alignItems: 'flex-end' }}>
+        <EuiButtonEmpty
+          href={http.basePath.prepend(
+            pagePathGetters
+              .edit_integration({
+                policyId,
+                packagePolicyId,
+              })
+              .join('')
+          )}
+          iconType="gear"
+          size="xs"
+        >
+          <FormattedMessage
+            id="xpack.csp.rules.manageIntegrationButtonLabel"
+            defaultMessage="Manage Integration"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

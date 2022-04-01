@@ -6,57 +6,96 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { useEuiTheme, transparentize, shade } from '@elastic/eui';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { CSSObject } from '@emotion/react';
 
-export const useButtonStyles = () => {
+interface ButtonStylesDeps {
+  isExpanded?: boolean;
+}
+
+export const useButtonStyles = ({ isExpanded }: ButtonStylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, font, size } = euiTheme;
+    const { colors, border, size, font } = euiTheme;
 
     const button: CSSObject = {
       background: transparentize(theme.euiColorVis6, 0.04),
       border: `${border.width.thin} solid ${transparentize(theme.euiColorVis6, 0.48)}`,
       lineHeight: '18px',
       height: '20px',
-      fontSize: '11px',
-      fontFamily: font.familyCode,
-      borderRadius: border.radius.medium,
-      color: colors.text,
-      marginLeft: size.s,
+      fontSize: size.m,
+      fontFamily: font.family,
+      fontWeight: font.weight.medium,
+      borderRadius: border.radius.small,
+      color: shade(theme.euiColorVis6, 0.25),
+      marginLeft: size.xs,
+      marginRight: size.xs,
       minWidth: 0,
+      padding: `${size.s} ${size.xxs}`,
+      span: {
+        padding: `0px ${size.xxs} !important`,
+      },
     };
 
     const buttonArrow: CSSObject = {
-      marginLeft: size.s,
+      marginLeft: size.xs,
     };
 
     const alertButton: CSSObject = {
       ...button,
+      color: colors.dangerText,
       background: transparentize(colors.dangerText, 0.04),
       border: `${border.width.thin} solid ${transparentize(colors.dangerText, 0.48)}`,
     };
 
-    const userChangedButton: CSSObject = {
-      ...button,
-      background: transparentize(theme.euiColorVis1, 0.04),
-      border: `${border.width.thin} solid ${transparentize(theme.euiColorVis1, 0.48)}`,
+    const alertsCountNumber: CSSObject = {
+      paddingLeft: size.xs,
     };
 
-    const getExpandedIcon = (expanded: boolean) => {
-      return expanded ? 'arrowUp' : 'arrowDown';
+    if (isExpanded) {
+      button.color = colors.ghost;
+      button.background = theme.euiColorVis6;
+      button['&:hover, &:focus'] = {
+        backgroundColor: `${theme.euiColorVis6} !important`,
+      };
+
+      alertButton.color = colors.ghost;
+      alertButton.background = colors.dangerText;
+      alertButton['&:hover, &:focus'] = {
+        backgroundColor: `${colors.dangerText} !important`,
+      };
+    }
+
+    const userChangedButton: CSSObject = {
+      ...button,
+      color: theme.euiColorVis3,
+      background: transparentize(theme.euiColorVis3, 0.04),
+      border: `${border.width.thin} solid ${transparentize(theme.euiColorVis3, 0.48)}`,
     };
+
+    const userChangedButtonUsername: CSSObject = {
+      textTransform: 'capitalize',
+    };
+
+    const buttonSize: CSSObject = {
+      padding: `0px ${euiTheme.size.xs}`,
+    };
+
+    const expandedIcon = isExpanded ? 'arrowUp' : 'arrowDown';
 
     return {
       buttonArrow,
       button,
       alertButton,
+      alertsCountNumber,
       userChangedButton,
-      getExpandedIcon,
+      userChangedButtonUsername,
+      buttonSize,
+      expandedIcon,
     };
-  }, [euiTheme]);
+  }, [euiTheme, isExpanded]);
 
   return cached;
 };

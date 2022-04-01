@@ -18,6 +18,7 @@ import {
   OUTPUT_API_ROUTES,
   SETTINGS_API_ROUTES,
   APP_API_ROUTES,
+  K8S_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -33,11 +34,15 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
-  getInfoPath: (pkgName: string, pkgVersion: string) => {
-    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-      '{pkgVersion}',
-      pkgVersion
-    );
+  getInfoPath: (pkgName: string, pkgVersion?: string) => {
+    if (pkgVersion) {
+      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+        '{pkgVersion}',
+        pkgVersion
+      );
+    } else {
+      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace('/{pkgVersion}', '');
+    }
   },
 
   getStatsPath: (pkgName: string) => {
@@ -137,6 +142,14 @@ export const agentPolicyRouteService = {
       agentPolicyId
     );
   },
+
+  getK8sInfoPath: () => {
+    return K8S_API_ROUTES.K8S_INFO_PATTERN;
+  },
+
+  getK8sFullDownloadPath: () => {
+    return K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN;
+  },
 };
 
 export const dataStreamRouteService = {
@@ -164,6 +177,7 @@ export const agentRouteService = {
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
+  getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,
   getCreateActionPath: (agentId: string) =>
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
 };

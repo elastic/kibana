@@ -125,6 +125,9 @@ export const eqlRawResponse: EqlRawResponseExpressionTypeDefinition = {
         meta: {
           type: 'eql',
           source: '*',
+          statistics: {
+            totalCount: (context.body as EqlSearchResponse<unknown>).hits.total?.value,
+          },
         },
         columns,
         rows,

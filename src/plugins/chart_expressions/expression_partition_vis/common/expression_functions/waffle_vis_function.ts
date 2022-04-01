@@ -53,12 +53,14 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getLegendDisplayArgHelp(),
       options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
+      strict: true,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      strict: true,
     },
     legendSize: {
       types: ['number'],
@@ -127,12 +129,16 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(context, [
-        [[args.metric], strings.getSliceSizeHelp()],
-        [buckets, strings.getSliceHelp()],
-        [args.splitColumn, strings.getColumnSplitHelp()],
-        [args.splitRow, strings.getRowSplitHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        context,
+        [
+          [[args.metric], strings.getSliceSizeHelp()],
+          [buckets, strings.getSliceHelp()],
+          [args.splitColumn, strings.getColumnSplitHelp()],
+          [args.splitRow, strings.getRowSplitHelp()],
+        ],
+        true
+      );
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 

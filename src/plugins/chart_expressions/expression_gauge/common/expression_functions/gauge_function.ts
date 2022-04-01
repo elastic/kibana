@@ -67,6 +67,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Type of gauge chart',
       }),
       required: true,
+      strict: true,
     },
     metric: {
       types: ['string', 'vis_dimension'],
@@ -99,6 +100,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.colorMode.help', {
         defaultMessage: 'If set to palette, the palette colors will be applied to the bands',
       }),
+      strict: true,
     },
     palette: {
       types: ['palette'],
@@ -113,6 +115,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
+      strict: true,
     },
     labelMajor: {
       types: ['string'],
@@ -127,6 +130,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Specifies the mode of labelMajor',
       }),
       default: GaugeLabelMajorModes.AUTO,
+      strict: true,
     },
     labelMinor: {
       types: ['string'],
@@ -146,6 +150,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       help: i18n.translate('expressionGauge.functions.gauge.args.centralMajorMode.help', {
         defaultMessage: 'Specifies the mode of centralMajor',
       }),
+      strict: true,
     },
     // used only in legacy gauge, consider it as @deprecated
     percentageMode: {
@@ -155,6 +160,19 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Enables relative precentage mode',
       }),
     },
+    respectRanges: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionGauge.functions.gauge.respectRanges.help', {
+        defaultMessage: 'Respect max and min values from ranges',
+      }),
+    },
+    commonLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionGauge.functions.gauge.args.commonLabel.help', {
+        defaultMessage: 'Specifies the common label outside the chart',
+      }),
+    },
     ariaLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gaugeChart.config.ariaLabel.help', {
@@ -162,7 +180,6 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       }),
     },
   },
-
   fn(data, args, handlers) {
     validateAccessor(args.metric, data.columns);
     validateAccessor(args.min, data.columns);
@@ -177,12 +194,16 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     }
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(data, [
-        [metric ? [metric] : undefined, strings.getMetricHelp()],
-        [min ? [min] : undefined, strings.getMinHelp()],
-        [max ? [max] : undefined, strings.getMaxHelp()],
-        [goal ? [goal] : undefined, strings.getGoalHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        data,
+        [
+          [metric ? [metric] : undefined, strings.getMetricHelp()],
+          [min ? [min] : undefined, strings.getMinHelp()],
+          [max ? [max] : undefined, strings.getMaxHelp()],
+          [goal ? [goal] : undefined, strings.getGoalHelp()],
+        ],
+        true
+      );
 
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }

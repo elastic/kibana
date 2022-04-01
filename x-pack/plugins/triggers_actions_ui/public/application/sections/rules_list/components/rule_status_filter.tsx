@@ -59,7 +59,7 @@ export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = 
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel"
-              defaultMessage="Status"
+              defaultMessage="Last response"
             />
           </EuiFilterButton>
         }
@@ -102,6 +102,8 @@ export function getHealthColor(status: AlertExecutionStatuses) {
       return 'primary';
     case 'pending':
       return 'accent';
+    case 'warning':
+      return 'warning';
     default:
       return 'subdued';
   }

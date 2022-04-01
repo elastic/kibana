@@ -15,7 +15,8 @@ import realHits from '../../../../__fixtures__/real_hits.js';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { flattenHit, IndexPatternAttributes } from '../../../../../../data/common';
+import { flattenHit } from '../../../../../../data/public';
+import { DataViewAttributes } from '../../../../../../data_views/public';
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
@@ -30,16 +31,14 @@ import { AvailableFields$ } from '../../utils/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
-
-  // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
-    Record<string, unknown>
-  > as ElasticSearchHit[];
+  const hits = each(cloneDeep(realHits), (hit) =>
+    flattenHit(hit, indexPattern)
+  ) as unknown as ElasticSearchHit[];
 
   const indexPatternList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<IndexPatternAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
+    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
+    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
+    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
   ];
 
   const fieldCounts: Record<string, number> = {};

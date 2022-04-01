@@ -24,13 +24,25 @@ export interface SavedObjectSetup {
 }
 
 export interface SavedObjectsStart {
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
-  /** @deprecated */
+  /**
+   * @deprecated
+   * @removeBy 8.8.0
+   */
   settings: {
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.8.0
+     */
     getPerPage: () => number;
-    /** @deprecated */
+    /**
+     * @deprecated
+     * @removeBy 8.8.0
+     */
     getListingLimit: () => number;
   };
 }

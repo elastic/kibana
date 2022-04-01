@@ -13,12 +13,13 @@ export {
 } from '../../../../alerting/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../../actions/common';
 
-export type Section = 'connectors' | 'rules';
+export type Section = 'connectors' | 'rules' | 'alerts';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToRuleDetails = `/rule/:ruleId`;
+export const routeToInternalAlerts = `/alerts`;
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
@@ -37,4 +38,37 @@ export enum SORT_ORDERS {
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
 
-export const DEFAULT_ALERT_INTERVAL = '1m';
+export const DEFAULT_RULE_INTERVAL = '1m';
+
+export const RULE_EXECUTION_LOG_COLUMN_IDS = [
+  'id',
+  'timestamp',
+  'execution_duration',
+  'status',
+  'message',
+  'num_active_alerts',
+  'num_new_alerts',
+  'num_recovered_alerts',
+  'num_triggered_actions',
+  'num_scheduled_actions',
+  'num_succeeded_actions',
+  'num_errored_actions',
+  'total_search_duration',
+  'es_search_duration',
+  'schedule_delay',
+  'timed_out',
+] as const;
+
+export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [
+  'execution_duration',
+  'total_search_duration',
+  'es_search_duration',
+  'schedule_delay',
+];
+
+export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  'timestamp',
+  'execution_duration',
+  'status',
+  'message',
+];

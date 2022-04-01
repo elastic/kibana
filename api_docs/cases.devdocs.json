@@ -34,9 +34,9 @@
             "text": "CasesUiStart"
           },
           ", ",
-          "SetupPlugins",
+          "CasesPluginSetup",
           ", ",
-          "StartPlugins",
+          "CasesPluginStart",
           ">"
         ],
         "path": "x-pack/plugins/cases/public/plugin.ts",
@@ -96,8 +96,8 @@
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: ",
-              "SetupPlugins",
-              ") => void"
+              "CasesPluginSetup",
+              ") => {}"
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
@@ -131,7 +131,7 @@
                 "label": "plugins",
                 "description": [],
                 "signature": [
-                  "SetupPlugins"
+                  "CasesPluginSetup"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
@@ -157,7 +157,7 @@
                 "text": "CoreStart"
               },
               ", plugins: ",
-              "StartPlugins",
+              "CasesPluginStart",
               ") => ",
               {
                 "pluginId": "cases",
@@ -198,7 +198,7 @@
                 "label": "plugins",
                 "description": [],
                 "signature": [
-                  "StartPlugins"
+                  "CasesPluginStart"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
@@ -452,7 +452,13 @@
         "label": "CaseAttachments",
         "description": [],
         "signature": [
-          "SupportedCaseAttachment",
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.SupportedCaseAttachment",
+            "text": "SupportedCaseAttachment"
+          },
           "[]"
         ],
         "path": "x-pack/plugins/cases/public/types.ts",
@@ -485,7 +491,7 @@
           " & ",
           "CasesContextProps"
         ],
-        "path": "x-pack/plugins/cases/public/methods/get_all_cases_selector_modal.tsx",
+        "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -501,7 +507,7 @@
           " & ",
           "CasesContextProps"
         ],
-        "path": "x-pack/plugins/cases/public/methods/get_cases.tsx",
+        "path": "x-pack/plugins/cases/public/client/ui/get_cases.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -517,7 +523,7 @@
           " & ",
           "CasesContextProps"
         ],
-        "path": "x-pack/plugins/cases/public/methods/get_create_case_flyout.tsx",
+        "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -533,7 +539,7 @@
           " & ",
           "CasesContextProps"
         ],
-        "path": "x-pack/plugins/cases/public/methods/get_recent_cases.tsx",
+        "path": "x-pack/plugins/cases/public/client/ui/get_recent_cases.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -548,6 +554,36 @@
           "\"cases\" | \"cases_create\" | \"cases_configure\""
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-public.SupportedCaseAttachment",
+        "type": "Type",
+        "tags": [],
+        "label": "SupportedCaseAttachment",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } | { comment: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".user; owner: string; }"
+        ],
+        "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -580,56 +616,26 @@
       "children": [
         {
           "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.canUseCases",
-          "type": "Function",
+          "id": "def-public.CasesUiStart.api",
+          "type": "Object",
           "tags": [],
-          "label": "canUseCases",
-          "description": [
-            "\nReturns an object denoting the current user's ability to read and crud cases.\nIf any owner(securitySolution, Observability) is found with crud or read capability respectively,\nthen crud or read is set to true.\nPermissions for specific owners can be found by passing an owner array"
-          ],
+          "label": "api",
+          "description": [],
           "signature": [
-            "(owners?: ",
-            "CasesOwners",
-            "[] | undefined) => { crud: boolean; read: boolean; }"
+            "{ getRelatedCases: (alertId: string, query: { owner?: string | string[] | undefined; }) => Promise<{ id: string; title: string; }[]>; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.canUseCases.$1",
-              "type": "Array",
-              "tags": [],
-              "label": "owners",
-              "description": [
-                "an array of CaseOwners that should be queried for permission"
-              ],
-              "signature": [
-                "CasesOwners",
-                "[] | undefined"
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": false
-            }
-          ],
-          "returnComment": [
-            "An object denoting the case permissions of the current user"
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getCases",
-          "type": "Function",
-          "tags": [
-            "return"
-          ],
-          "label": "getCases",
-          "description": [
-            "\nGet cases"
-          ],
+          "id": "def-public.CasesUiStart.ui",
+          "type": "Object",
+          "tags": [],
+          "label": "ui",
+          "description": [],
           "signature": [
-            "(props: ",
+            "{ getCases: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -645,66 +651,11 @@
               "section": "def-public.GetCasesProps",
               "text": "GetCasesProps"
             },
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.getCases.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [
-                "GetCasesProps"
-              ],
-              "signature": [
-                {
-                  "pluginId": "cases",
-                  "scope": "public",
-                  "docId": "kibCasesPluginApi",
-                  "section": "def-public.GetCasesProps",
-                  "text": "GetCasesProps"
-                }
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getCasesContext",
-          "type": "Function",
-          "tags": [],
-          "label": "getCasesContext",
-          "description": [],
-          "signature": [
-            "() => (props: ",
+            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => (props: ",
             "CasesContextProps",
             " & { children: React.ReactNode; }) => React.ReactElement<",
             "CasesContextProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getAllCasesSelectorModal",
-          "type": "Function",
-          "tags": [],
-          "label": "getAllCasesSelectorModal",
-          "description": [
-            "\nModal to select a case in a list of all owner cases"
-          ],
-          "signature": [
-            "(props: ",
+            ", string | React.JSXElementConstructor<any>>; getAllCasesSelectorModal: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -720,101 +671,7 @@
               "section": "def-public.GetAllCasesSelectorModalProps",
               "text": "GetAllCasesSelectorModalProps"
             },
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.getAllCasesSelectorModal.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [
-                "GetAllCasesSelectorModalProps"
-              ],
-              "signature": [
-                {
-                  "pluginId": "cases",
-                  "scope": "public",
-                  "docId": "kibCasesPluginApi",
-                  "section": "def-public.GetAllCasesSelectorModalProps",
-                  "text": "GetAllCasesSelectorModalProps"
-                }
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": [
-            "A react component that is a modal for selecting a case"
-          ]
-        },
-        {
-          "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getAllCasesSelectorModalNoProvider",
-          "type": "Function",
-          "tags": [],
-          "label": "getAllCasesSelectorModalNoProvider",
-          "description": [],
-          "signature": [
-            "(props: ",
-            {
-              "pluginId": "cases",
-              "scope": "public",
-              "docId": "kibCasesPluginApi",
-              "section": "def-public.GetAllCasesSelectorModalProps",
-              "text": "GetAllCasesSelectorModalProps"
-            },
-            ") => React.ReactElement<",
-            {
-              "pluginId": "cases",
-              "scope": "public",
-              "docId": "kibCasesPluginApi",
-              "section": "def-public.GetAllCasesSelectorModalProps",
-              "text": "GetAllCasesSelectorModalProps"
-            },
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.getAllCasesSelectorModalNoProvider.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "cases",
-                  "scope": "public",
-                  "docId": "kibCasesPluginApi",
-                  "section": "def-public.GetAllCasesSelectorModalProps",
-                  "text": "GetAllCasesSelectorModalProps"
-                }
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getCreateCaseFlyout",
-          "type": "Function",
-          "tags": [],
-          "label": "getCreateCaseFlyout",
-          "description": [
-            "\nFlyout with the form to create a case for the owner"
-          ],
-          "signature": [
-            "(props: ",
+            ", string | React.JSXElementConstructor<any>>; getCreateCaseFlyout: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -830,83 +687,7 @@
               "section": "def-public.GetCreateCaseFlyoutProps",
               "text": "GetCreateCaseFlyoutProps"
             },
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.getCreateCaseFlyout.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [
-                "GetCreateCaseFlyoutProps"
-              ],
-              "signature": [
-                {
-                  "pluginId": "cases",
-                  "scope": "public",
-                  "docId": "kibCasesPluginApi",
-                  "section": "def-public.GetCreateCaseFlyoutProps",
-                  "text": "GetCreateCaseFlyoutProps"
-                }
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": [
-            "A react component that is a flyout for creating a case"
-          ]
-        },
-        {
-          "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getCreateCaseFlyoutNoProvider",
-          "type": "Function",
-          "tags": [],
-          "label": "getCreateCaseFlyoutNoProvider",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "CreateCaseFlyoutProps",
-            ") => React.ReactElement<",
-            "CreateCaseFlyoutProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.getCreateCaseFlyoutNoProvider.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "CreateCaseFlyoutProps"
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "cases",
-          "id": "def-public.CasesUiStart.getRecentCases",
-          "type": "Function",
-          "tags": [],
-          "label": "getRecentCases",
-          "description": [
-            "\nGet the recent cases component"
-          ],
-          "signature": [
-            "(props: ",
+            ", string | React.JSXElementConstructor<any>>; getRecentCases: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -922,37 +703,10 @@
               "section": "def-public.GetRecentCasesProps",
               "text": "GetRecentCasesProps"
             },
-            ", string | React.JSXElementConstructor<any>>"
+            ", string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "cases",
-              "id": "def-public.CasesUiStart.getRecentCases.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [
-                "GetRecentCasesProps"
-              ],
-              "signature": [
-                {
-                  "pluginId": "cases",
-                  "scope": "public",
-                  "docId": "kibCasesPluginApi",
-                  "section": "def-public.GetRecentCasesProps",
-                  "text": "GetRecentCasesProps"
-                }
-              ],
-              "path": "x-pack/plugins/cases/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": [
-            "A react component for showing recent cases"
-          ]
+          "deprecated": false
         },
         {
           "parentPluginId": "cases",
@@ -962,11 +716,22 @@
           "label": "hooks",
           "description": [],
           "signature": [
-            "{ getUseCasesAddToNewCaseFlyout: (props: ",
-            "CreateCaseFlyoutProps",
-            ") => { open: () => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props: ",
-            "AllCasesSelectorModalProps",
-            ") => { open: () => void; close: () => void; }; }"
+            "{ getUseCasesAddToNewCaseFlyout: (props: AddToNewCaseFlyoutProps) => { open: () => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props: AddToExistingFlyoutProps) => { open: () => void; close: () => void; }; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.helpers",
+          "type": "Object",
+          "tags": [],
+          "label": "helpers",
+          "description": [],
+          "signature": [
+            "{ canUseCases: (owners?: ",
+            "CasesOwners",
+            "[] | undefined) => { crud: boolean; read: boolean; }; getRuleIdFromEvent: (event: Event) => { id: string; name: string; }; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false
@@ -1501,7 +1266,7 @@
         "label": "CasesFeatures",
         "description": [],
         "signature": [
-          "{ alerts?: { sync: boolean; } | undefined; metrics?: ",
+          "{ alerts?: { sync?: boolean | undefined; enabled?: boolean | undefined; } | undefined; metrics?: ",
           "CaseMetricsFeature",
           "[] | undefined; }"
         ],

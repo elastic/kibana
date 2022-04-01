@@ -4,25 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// eslint-disable-next-line
+import { createEsClientForTesting } from '@kbn/test';
 
-// / <reference types="cypress" />
-// ***********************************************************
-// This example plugins/index.js can be used to load plugins
-//
-// You can change the location of this file or turn off loading
-// the plugins file with the 'pluginsFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/plugins-guide
-// ***********************************************************
+const plugin: Cypress.PluginConfig = (on, config) => {
+  const client = createEsClientForTesting({
+    esUrl: config.env.ELASTICSEARCH_URL,
+  });
+  on('task', {
+    async insertDocs({ index, docs }: { index: string; docs: any[] }) {
+      const operations = docs.flatMap((doc) => [{ index: { _index: index } }, doc]);
 
-// This function is called when a project is opened or re-opened (e.g. due to
-// the project's config changing)
-
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (_on: any, _config: any) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
+      return client.bulk({ operations });
+    },
+    async deleteDocsByQuery({
+      index,
+      query,
+      ignoreUnavailable = false,
+    }: {
+      index: string;
+      query: any;
+      ignoreUnavailable?: boolean;
+    }) {
+      return client.deleteByQuery({ index, query, ignore_unavailable: ignoreUnavailable });
+    },
+  });
 };
+
+module.exports = plugin;
