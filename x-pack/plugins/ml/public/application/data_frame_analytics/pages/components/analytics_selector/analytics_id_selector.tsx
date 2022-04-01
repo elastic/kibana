@@ -184,17 +184,19 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   }, [selected?.model_id, selected?.job_id]);
 
   const pagination = {
-    initialPageSize: 5,
-    pageSizeOptions: [3, 5, 8],
+    initialPageSize: 20,
+    pageSizeOptions: [5, 10, 20, 50],
   };
 
   const selectionValue = {
     selectable: (item: TableItem) => {
-      const selectedId = selected?.job_id ?? selected?.model_id;
       const isDFA = isDataFrameAnalyticsConfigs(item);
       const itemId = isDFA ? item.id : item.model_id;
       const isBuiltInModel = isDFA ? false : item.tags.includes(BUILT_IN_MODEL_TAG);
-      return (selected === undefined || selectedId === itemId) && !isBuiltInModel;
+      return (
+        (selected === undefined || selected?.job_id === itemId || selected?.model_id === itemId) &&
+        !isBuiltInModel
+      );
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
@@ -208,7 +210,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
 
       setSelected({
         model_id: isDFA ? undefined : item.model_id,
-        job_id: isDFA ? item.id : undefined,
+        job_id: isDFA ? item.id : item.metadata?.analytics_config.id,
         analysis_type: analysisType,
       });
     },

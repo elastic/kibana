@@ -20,7 +20,7 @@ export function CustomLinkList({
   transaction,
 }: {
   customLinks: CustomLink[];
-  transaction: Transaction;
+  transaction?: Transaction;
 }) {
   return (
     <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
@@ -39,7 +39,7 @@ export function CustomLinkList({
   );
 }
 
-function getHref(link: CustomLink, transaction: Transaction) {
+function getHref(link: CustomLink, transaction?: Transaction) {
   try {
     return Mustache.render(link.url, transaction);
   } catch (e) {

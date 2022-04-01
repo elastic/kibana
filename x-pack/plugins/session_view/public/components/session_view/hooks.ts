@@ -58,7 +58,7 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage) => {
         if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
+            cursor: lastPage.events[lastPage.events.length - 1].process.start,
             forward: true,
           };
         }
@@ -66,7 +66,7 @@ export const useFetchSessionViewProcessEvents = (
       getPreviousPageParam: (firstPage) => {
         if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: firstPage.events[0]['@timestamp'],
+            cursor: firstPage.events[0].process.start,
             forward: false,
           };
         }
@@ -107,6 +107,7 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
+      cacheTime: 0,
     }
   );
 
@@ -147,6 +148,7 @@ export const useFetchAlertStatus = (
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
+      cacheTime: 0,
     }
   );
 
