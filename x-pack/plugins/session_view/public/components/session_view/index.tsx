@@ -44,7 +44,10 @@ export const SessionView = ({
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [displayOptions, setDisplayOptions] = useLocalStorage("displayOptions",{timestamp: true, verboseMode: true})
+  const [displayOptions, setDisplayOptions] = useLocalStorage('displayOptions', {
+    timestamp: true,
+    verboseMode: true,
+  });
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
 
@@ -101,9 +104,12 @@ export const SessionView = ({
     [loadAlertDetails, handleOnAlertDetailsClosed]
   );
 
-  const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
-    setDisplayOptions(checkedOptions);
-  }, []);
+  const handleOptionChange = useCallback(
+    (checkedOptions: DisplayOptionsState) => {
+      setDisplayOptions(checkedOptions);
+    },
+    [setDisplayOptions]
+  );
 
   if (!isFetching && !hasData) {
     return (

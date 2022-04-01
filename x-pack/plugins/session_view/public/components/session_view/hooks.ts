@@ -173,7 +173,7 @@ export const useSearchQuery = () => {
 
 export const useLocalStorage = (key: string, initialValue: DisplayOptionsState) => {
   const [storedValue, setStoredValue] = useState(() => {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return initialValue;
     }
     try {
@@ -191,9 +191,9 @@ export const useLocalStorage = (key: string, initialValue: DisplayOptionsState) 
     // Save state
     setStoredValue(value);
     // Save to local storage
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       window.localStorage.setItem(key, JSON.stringify(value));
     }
   };
   return [storedValue, setValue];
-}
+};
