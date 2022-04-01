@@ -82,19 +82,20 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
-      if (item.enabled !== enable) {
-        setIsUpdating(true);
-        try {
-          if (enable) {
-            await enableRule();
-          } else {
-            await disableRule();
-          }
-          setIsEnabled(!isEnabled);
-          onRuleChanged();
-        } finally {
-          setIsUpdating(false);
+      if (item.enabled === enable) {
+        return;
+      }
+      setIsUpdating(true);
+      try {
+        if (enable) {
+          await enableRule();
+        } else {
+          await disableRule();
         }
+        setIsEnabled(!isEnabled);
+        onRuleChanged();
+      } finally {
+        setIsUpdating(false);
       }
     },
     [item.enabled, isEnabled, onRuleChanged, enableRule, disableRule]

@@ -68,7 +68,6 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
 
   // Data grid states
   const [logs, setLogs] = useState<IErrorLog[]>([]);
-  const [logList, setLogList] = useState<IErrorLog[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
     pageSize: 10,
@@ -112,9 +111,6 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         perPage: 1,
       });
       setLogs(result.errors);
-      const start = pagination.pageIndex * pagination.pageSize;
-      const logsSortDesc = result.errors.sort((a, b) => sortErrorLog(a, b, sort?.direction));
-      setLogList(logsSortDesc.slice(start, start + pagination.pageSize));
       setPagination({
         ...pagination,
         totalItemCount: result.totalErrors,
@@ -181,24 +177,16 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     [dateFormat]
   );
 
+  const logList = useMemo(() => {
+    const start = pagination.pageIndex * pagination.pageSize;
+    const logsSortDesc = logs.sort((a, b) => sortErrorLog(a, b, sort?.direction));
+    return logsSortDesc.slice(start, start + pagination.pageSize);
+  }, [logs, pagination.pageIndex, pagination.pageSize, sort?.direction]);
+
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateStart, dateEnd]);
-
-  useEffect(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    setLogList(logs.slice(start, start + pagination.pageSize));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination]);
-
-  useEffect(() => {
-    setLogs((prevLogs) => prevLogs.sort((a, b) => sortErrorLog(a, b, sort?.direction)));
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      pageIndex: 0,
-    }));
-  }, [sort?.direction]);
 
   useEffect(() => {
     if (isInitialized.current) {
