@@ -158,9 +158,10 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   return (
     <EuiFlexGroup
       direction={direction}
-      alignItems={direction === 'row' ? 'flexEnd' : 'flexStart'}
+      alignItems={direction === 'row' ? 'center' : 'flexStart'}
       justifyContent="flexStart"
-      gutterSize="s"
+      gutterSize={direction === 'row' ? 's' : 'xs'}
+      responsive={false}
     >
       <EuiFlexItem grow={false}>
         {isEditable ? (

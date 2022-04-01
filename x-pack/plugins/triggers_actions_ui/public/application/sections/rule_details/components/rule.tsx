@@ -163,7 +163,6 @@ export function RuleComponent({
 
   return (
     <>
-      <EuiHorizontalRule />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiPanel color="subdued" hasBorder={false}>
@@ -171,6 +170,7 @@ export function RuleComponent({
               gutterSize="none"
               direction="column"
               justifyContent="spaceBetween"
+              responsive={false}
               style={{ height: '100%' }}
             >
               <EuiFlexItem>
