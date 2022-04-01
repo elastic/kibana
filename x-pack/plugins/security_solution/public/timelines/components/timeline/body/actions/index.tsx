@@ -24,7 +24,7 @@ import { useShallowEqualSelector } from '../../../../../common/hooks/use_selecto
 import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
-  updateTimelineSessionViewSessionId,
+  updateTimelineSessionViewConfig,
 } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
@@ -129,15 +129,25 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
 
-  const entryLeader = useMemo(() => {
-    const { process } = ecsData;
-    const entryLeaderIds = process?.entry_leader?.entity_id;
-    if (entryLeaderIds !== undefined && entryLeaderIds.length > 0) {
-      return entryLeaderIds[0];
-    } else {
+  const sessionViewConfig = useMemo(() => {
+    const { process, _id } = ecsData;
+    const sessionEntityId = process?.entry_leader?.entity_id?.[0];
+
+    if (sessionEntityId === undefined) {
       return null;
     }
-  }, [ecsData]);
+
+    const jumpToEntityId = process?.entity_id?.[0];
+    const jumpToCursor = process?.start?.[0];
+    const investigatedAlertId = eventType === 'signal' ? _id : undefined;
+
+    return {
+      sessionEntityId,
+      jumpToEntityId,
+      jumpToCursor,
+      investigatedAlertId,
+    };
+  }, [ecsData, eventType]);
 
   const openSessionView = useCallback(() => {
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
@@ -145,7 +155,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       if (dataGridIsFullScreen) {
         setTimelineFullScreen(true);
       }
-      if (entryLeader !== null) {
+      if (sessionViewConfig !== null) {
         dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
       }
     } else {
@@ -153,10 +163,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
         setGlobalFullScreen(true);
       }
     }
-    if (entryLeader !== null) {
-      dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: entryLeader }));
+    if (sessionViewConfig !== null) {
+      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
     }
-  }, [dispatch, timelineId, entryLeader, setGlobalFullScreen, setTimelineFullScreen]);
+  }, [dispatch, timelineId, sessionViewConfig, setGlobalFullScreen, setTimelineFullScreen]);
 
   return (
     <ActionsContainer>
@@ -250,7 +260,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         ) : null}
-        {entryLeader !== null ? (
+        {sessionViewConfig !== null ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>

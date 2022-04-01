@@ -23,6 +23,7 @@ export interface ProcessEcs {
   executable?: string[];
   title?: string[];
   thread?: Thread;
+  start?: string[];
   working_directory?: string[];
 }
 
