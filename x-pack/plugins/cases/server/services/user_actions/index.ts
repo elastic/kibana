@@ -91,7 +91,7 @@ interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
   user: User;
 }
 
-interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionArgs, 'owner'> {
+interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'> {
   attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
 }
 
@@ -247,7 +247,7 @@ export class CaseUserActionService {
     attachments,
     user,
     action = Actions.create,
-  }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
+  }: BulkCreateAttachmentUserAction): Promise<void> {
     this.log.debug(`Attempting to create a bulk create case user action`);
     const userActionsWithReferences = attachments.reduce<BuilderReturnValue[]>(
       (acc, attachment) => {
@@ -278,7 +278,7 @@ export class CaseUserActionService {
     caseId,
     attachments,
     user,
-  }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
+  }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       unsecuredSavedObjectsClient,
       caseId,
@@ -293,7 +293,7 @@ export class CaseUserActionService {
     caseId,
     attachments,
     user,
-  }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
+  }: BulkCreateAttachmentUserAction): Promise<void> {
     await this.bulkCreateAttachment({
       unsecuredSavedObjectsClient,
       caseId,

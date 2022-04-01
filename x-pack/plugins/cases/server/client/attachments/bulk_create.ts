@@ -73,9 +73,7 @@ export const bulkCreate = async (
     });
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-    const createdDate = new Date().toISOString();
     const updatedModel = await model.bulkCreate({
-      createdDate,
       attachments: attachmentsWithIds,
     });
 

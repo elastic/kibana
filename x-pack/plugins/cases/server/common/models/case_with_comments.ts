@@ -207,7 +207,7 @@ export class CaseCommentModel {
       ]);
 
       await Promise.all([
-        commentableCase.handleAlertComments([comment]),
+        commentableCase.handleAlertComments([commentReq]),
         this.createCommentUserAction(comment, commentReq),
       ]);
 
@@ -258,21 +258,20 @@ export class CaseCommentModel {
     return references;
   }
 
-  private async handleAlertComments(attachments: Array<SavedObject<CommentAttributes>>) {
+  private async handleAlertComments(attachments: CommentRequest[]) {
     const alerts = attachments.filter(
       (attachment) =>
-        attachment.attributes.type === CommentType.alert &&
-        this.caseInfo.attributes.settings.syncAlerts
+        attachment.type === CommentType.alert && this.caseInfo.attributes.settings.syncAlerts
     );
 
     await this.updateAlertsStatus(alerts);
   }
 
-  private async updateAlertsStatus(alerts: Array<SavedObject<CommentAttributes>>) {
+  private async updateAlertsStatus(alerts: CommentRequest[]) {
     const alertsToUpdate = alerts
       .map((alert) =>
         createAlertUpdateRequest({
-          comment: alert.attributes,
+          comment: alert,
           status: this.caseInfo.attributes.status,
         })
       )
@@ -299,14 +298,14 @@ export class CaseCommentModel {
     });
   }
 
-  private async bulkCreateCommentUserAction(attachments: Array<SavedObject<CommentAttributes>>) {
+  private async bulkCreateCommentUserAction(attachments: Array<{ id: string } & CommentRequest>) {
     await this.params.userActionService.bulkCreateAttachmentCreation({
       unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
       caseId: this.caseInfo.id,
-      attachments: attachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-        attachment: attachment.attributes,
+      attachments: attachments.map(({ id, ...attachment }) => ({
+        id,
+        owner: attachment.owner,
+        attachment,
       })),
       user: this.params.user,
     });
@@ -350,14 +349,12 @@ export class CaseCommentModel {
     }
   }
   public async bulkCreate({
-    createdDate,
     attachments,
   }: {
-    createdDate: string;
     attachments: Array<{ id: string } & CommentRequest>;
   }): Promise<CaseCommentModel> {
     try {
-      this.validateCreateCommentRequest([...attachments.values()]);
+      this.validateCreateCommentRequest(attachments);
 
       const caseReference = this.buildRefsToCase();
 
@@ -367,7 +364,7 @@ export class CaseCommentModel {
           attachments: attachments.map(({ id, ...attachment }) => {
             return {
               attributes: transformNewComment({
-                createdDate,
+                createdDate: new Date().toISOString(),
                 ...attachment,
                 ...this.params.user,
               }),
@@ -376,11 +373,15 @@ export class CaseCommentModel {
             };
           }),
         }),
-        this.updateCaseUserAndDate(createdDate),
+        this.updateCaseUserAndDate(new Date().toISOString()),
       ]);
 
-      const attachmentsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
+      const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
         (attachment) => attachment.error == null
+      );
+
+      const attachmentsWithoutErrors = attachments.filter((attachment) =>
+        savedObjectsWithoutErrors.some((so) => so.id === attachment.id)
       );
 
       await Promise.all([
