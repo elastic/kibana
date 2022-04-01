@@ -1,0 +1,689 @@
+1,2c1,13
+< describe('Regressions', function() {
+<   it('GH-94: Cannot read property of undefined', function() {
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+> 
+> // import Handlebars, { HelperOptions } from '..';
+> import { HelperOptions } from '..';
+> import { expectTemplate } from '../__jest__/test_bench';
+> 
+> describe('Regressions', () => {
+>   it('GH-94: Cannot read property of undefined', () => {
+9,10c20,21
+<               name: 'Charles Darwin'
+<             }
+---
+>               name: 'Charles Darwin',
+>             },
+13,15c24,26
+<             title: 'Lazarillo de Tormes'
+<           }
+<         ]
+---
+>             title: 'Lazarillo de Tormes',
+>           },
+>         ],
+17d27
+<       .withMessage('Renders without an undefined property error')
+21,43c31,36
+<   it("GH-150: Inverted sections print when they shouldn't", function() {
+<     var string = '{{^set}}not set{{/set}} :: {{#set}}set{{/set}}';
+< 
+<     expectTemplate(string)
+<       .withMessage(
+<         "inverted sections run when property isn't present in context"
+<       )
+<       .toCompileTo('not set :: ');
+< 
+<     expectTemplate(string)
+<       .withInput({ set: undefined })
+<       .withMessage('inverted sections run when property is undefined')
+<       .toCompileTo('not set :: ');
+< 
+<     expectTemplate(string)
+<       .withInput({ set: false })
+<       .withMessage('inverted sections run when property is false')
+<       .toCompileTo('not set :: ');
+< 
+<     expectTemplate(string)
+<       .withInput({ set: true })
+<       .withMessage("inverted sections don't run when property is true")
+<       .toCompileTo(' :: set');
+---
+>   it("GH-150: Inverted sections print when they shouldn't", () => {
+>     const string = '{{^set}}not set{{/set}} :: {{#set}}set{{/set}}';
+>     expectTemplate(string).toCompileTo('not set :: ');
+>     expectTemplate(string).withInput({ set: undefined }).toCompileTo('not set :: ');
+>     expectTemplate(string).withInput({ set: false }).toCompileTo('not set :: ');
+>     expectTemplate(string).withInput({ set: true }).toCompileTo(' :: set');
+46c39
+<   it('GH-158: Using array index twice, breaks the template', function() {
+---
+>   it('GH-158: Using array index twice, breaks the template', () => {
+49d41
+<       .withMessage('it works as expected')
+53,54c45,46
+<   it("bug reported by @fat where lambdas weren't being properly resolved", function() {
+<     var string =
+---
+>   it("bug reported by @fat where lambdas weren't being properly resolved", () => {
+>     const string =
+69,70c61,62
+<     var data = {
+<       thing: function() {
+---
+>     const data = {
+>       thing() {
+76c68
+<         { className: 'three', word: '@sayrer' }
+---
+>         { className: 'three', word: '@sayrer' },
+78c70
+<       hasThings: function() {
+---
+>       hasThings() {
+80c72
+<       }
+---
+>       },
+83c75
+<     var output =
+---
+>     const output =
+92,94c84
+<     expectTemplate(string)
+<       .withInput(data)
+<       .toCompileTo(output);
+---
+>     expectTemplate(string).withInput(data).toCompileTo(output);
+97,100c87,88
+<   it('GH-408: Multiple loops fail', function() {
+<     expectTemplate(
+<       '{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}'
+<     )
+---
+>   it('GH-408: Multiple loops fail', () => {
+>     expectTemplate('{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}{{#.}}{{name}}{{/.}}')
+103c91
+<         { name: 'Jane Doe', location: { city: 'New York' } }
+---
+>         { name: 'Jane Doe', location: { city: 'New York' } },
+105d92
+<       .withMessage('It should output multiple times')
+109,110c96,97
+<   it('GS-428: Nested if else rendering', function() {
+<     var succeedingTemplate =
+---
+>   it('GS-428: Nested if else rendering', () => {
+>     const succeedingTemplate =
+112c99
+<     var failingTemplate =
+---
+>     const failingTemplate =
+115,116c102,103
+<     var helpers = {
+<       blk: function(block) {
+---
+>     const helpers = {
+>       blk(block: HelperOptions) {
+119c106
+<       inverse: function(block) {
+---
+>       inverse(block: HelperOptions) {
+121c108
+<       }
+---
+>       },
+124,130c111,112
+<     expectTemplate(succeedingTemplate)
+<       .withHelpers(helpers)
+<       .toCompileTo('   Expected  ');
+< 
+<     expectTemplate(failingTemplate)
+<       .withHelpers(helpers)
+<       .toCompileTo('  Expected  ');
+---
+>     expectTemplate(succeedingTemplate).withHelpers(helpers).toCompileTo('   Expected  ');
+>     expectTemplate(failingTemplate).withHelpers(helpers).toCompileTo('  Expected  ');
+133,136c115,116
+<   it('GH-458: Scoped this identifier', function() {
+<     expectTemplate('{{./foo}}')
+<       .withInput({ foo: 'bar' })
+<       .toCompileTo('bar');
+---
+>   it('GH-458: Scoped this identifier', () => {
+>     expectTemplate('{{./foo}}').withInput({ foo: 'bar' }).toCompileTo('bar');
+139c119
+<   it('GH-375: Unicode line terminators', function() {
+---
+>   it('GH-375: Unicode line terminators', () => {
+143c123
+<   it('GH-534: Object prototype aliases', function() {
+---
+>   it('GH-534: Object prototype aliases', () => {
+144a125
+>     // @ts-expect-error
+147,149c128
+<     expectTemplate('{{foo}}')
+<       .withInput({ foo: 'bar' })
+<       .toCompileTo('bar');
+---
+>     expectTemplate('{{foo}}').withInput({ foo: 'bar' }).toCompileTo('bar');
+150a130
+>     // @ts-expect-error
+155,157c135,137
+<   it('GH-437: Matching escaping', function() {
+<     expectTemplate('{{{a}}').toThrow(Error, /Parse error on/);
+<     expectTemplate('{{a}}}').toThrow(Error, /Parse error on/);
+---
+>   it('GH-437: Matching escaping', () => {
+>     expectTemplate('{{{a}}').toThrow(/Parse error on/);
+>     expectTemplate('{{a}}}').toThrow(/Parse error on/);
+160,166c140,142
+<   it('GH-676: Using array in escaping mustache fails', function() {
+<     var data = { arr: [1, 2] };
+< 
+<     expectTemplate('{{arr}}')
+<       .withInput(data)
+<       .withMessage('it works as expected')
+<       .toCompileTo(data.arr.toString());
+---
+>   it('GH-676: Using array in escaping mustache fails', () => {
+>     const data = { arr: [1, 2] };
+>     expectTemplate('{{arr}}').withInput(data).toCompileTo(data.arr.toString());
+169c145
+<   it('Mustache man page', function() {
+---
+>   it('Mustache man page', () => {
+177c153
+<         in_ca: true
+---
+>         in_ca: true,
+179,182c155
+<       .withMessage('the hello world mustache example works')
+<       .toCompileTo(
+<         'Hello Chris. You have just won $10000! Well, $6000, after taxes.'
+<       );
+---
+>       .toCompileTo('Hello Chris. You have just won $10000! Well, $6000, after taxes.');
+185c158
+<   it('GH-731: zero context rendering', function() {
+---
+>   it('GH-731: zero context rendering', () => {
+189c162
+<         bar: 'OK'
+---
+>         bar: 'OK',
+194,197c167,168
+<   it('GH-820: zero pathed rendering', function() {
+<     expectTemplate('{{foo.bar}}')
+<       .withInput({ foo: 0 })
+<       .toCompileTo('');
+---
+>   it('GH-820: zero pathed rendering', () => {
+>     expectTemplate('{{foo.bar}}').withInput({ foo: 0 }).toCompileTo('');
+200c171
+<   it('GH-837: undefined values for helpers', function() {
+---
+>   it('GH-837: undefined values for helpers', () => {
+203c174
+<         str: function(value) {
+---
+>         str(value) {
+205c176
+<         }
+---
+>         },
+210c181
+<   it('GH-926: Depths and de-dupe', function() {
+---
+>   it('GH-926: Depths and de-dupe', () => {
+217c188
+<         notData: [1]
+---
+>         notData: [1],
+222c193
+<   it('GH-1021: Each empty string key', function() {
+---
+>   it('GH-1021: Each empty string key', () => {
+228,229c199,200
+<           value: 10000
+<         }
+---
+>           value: 10000,
+>         },
+234,245c205,216
+<   it('GH-1054: Should handle simple safe string responses', function() {
+<     expectTemplate('{{#wrap}}{{>partial}}{{/wrap}}')
+<       .withHelpers({
+<         wrap: function(options) {
+<           return new Handlebars.SafeString(options.fn());
+<         }
+<       })
+<       .withPartials({
+<         partial: '{{#wrap}}<partial>{{/wrap}}'
+<       })
+<       .toCompileTo('<partial>');
+<   });
+---
+>   // it('GH-1054: Should handle simple safe string responses', () => {
+>   //   expectTemplate('{{#wrap}}{{>partial}}{{/wrap}}')
+>   //     .withHelpers({
+>   //       wrap(options) {
+>   //         return new Handlebars.SafeString(options.fn());
+>   //       }
+>   //     })
+>   //     .withPartials({
+>   //       partial: '{{#wrap}}<partial>{{/wrap}}',
+>   //     })
+>   //     .toCompileTo('<partial>');
+>   // });
+247,248c218,219
+<   it('GH-1065: Sparse arrays', function() {
+<     var array = [];
+---
+>   it('GH-1065: Sparse arrays', () => {
+>     const array = [];
+252c223
+<       .withInput({ array: array })
+---
+>       .withInput({ array })
+256c227
+<   it('GH-1093: Undefined helper context', function() {
+---
+>   it('GH-1093: Undefined helper context', () => {
+260c231
+<         helper: function() {
+---
+>         helper(this: any) {
+263c234
+<           for (var name in this) {
+---
+>           for (const name in this) {
+270c241
+<         }
+---
+>         },
+275,304c246,275
+<   it('should support multiple levels of inline partials', function() {
+<     expectTemplate(
+<       '{{#> layout}}{{#*inline "subcontent"}}subcontent{{/inline}}{{/layout}}'
+<     )
+<       .withPartials({
+<         doctype: 'doctype{{> content}}',
+<         layout:
+<           '{{#> doctype}}{{#*inline "content"}}layout{{> subcontent}}{{/inline}}{{/doctype}}'
+<       })
+<       .toCompileTo('doctypelayoutsubcontent');
+<   });
+< 
+<   it('GH-1089: should support failover content in multiple levels of inline partials', function() {
+<     expectTemplate('{{#> layout}}{{/layout}}')
+<       .withPartials({
+<         doctype: 'doctype{{> content}}',
+<         layout:
+<           '{{#> doctype}}{{#*inline "content"}}layout{{#> subcontent}}subcontent{{/subcontent}}{{/inline}}{{/doctype}}'
+<       })
+<       .toCompileTo('doctypelayoutsubcontent');
+<   });
+< 
+<   it('GH-1099: should support greater than 3 nested levels of inline partials', function() {
+<     expectTemplate('{{#> layout}}Outer{{/layout}}')
+<       .withPartials({
+<         layout: '{{#> inner}}Inner{{/inner}}{{> @partial-block }}',
+<         inner: ''
+<       })
+<       .toCompileTo('Outer');
+<   });
+---
+>   // it('should support multiple levels of inline partials', () => {
+>   //   expectTemplate(
+>   //     '{{#> layout}}{{#*inline "subcontent"}}subcontent{{/inline}}{{/layout}}'
+>   //   )
+>   //     .withPartials({
+>   //       doctype: 'doctype{{> content}}',
+>   //       layout:
+>   //         '{{#> doctype}}{{#*inline "content"}}layout{{> subcontent}}{{/inline}}{{/doctype}}',
+>   //     })
+>   //     .toCompileTo('doctypelayoutsubcontent');
+>   // });
+> 
+>   // it('GH-1089: should support failover content in multiple levels of inline partials', () => {
+>   //   expectTemplate('{{#> layout}}{{/layout}}')
+>   //     .withPartials({
+>   //       doctype: 'doctype{{> content}}',
+>   //       layout:
+>   //         '{{#> doctype}}{{#*inline "content"}}layout{{#> subcontent}}subcontent{{/subcontent}}{{/inline}}{{/doctype}}',
+>   //     })
+>   //     .toCompileTo('doctypelayoutsubcontent');
+>   // });
+> 
+>   // it('GH-1099: should support greater than 3 nested levels of inline partials', () => {
+>   //   expectTemplate('{{#> layout}}Outer{{/layout}}')
+>   //     .withPartials({
+>   //       layout: '{{#> inner}}Inner{{/inner}}{{> @partial-block }}',
+>   //       inner: '',
+>   //     })
+>   //     .toCompileTo('Outer');
+>   // });
+306c277
+<   it('GH-1135 : Context handling within each iteration', function() {
+---
+>   it('GH-1135 : Context handling within each iteration', () => {
+315c286
+<         myif: function(conditional, options) {
+---
+>         myif(conditional, options) {
+321c292
+<         }
+---
+>         },
+326c297
+<   it('GH-1186: Support block params for existing programs', function() {
+---
+>   it.skip('GH-1186: Support block params for existing programs', () => {
+334c305
+<         listTwo: ['b']
+---
+>         listTwo: ['b'],
+336d306
+<       .withMessage('')
+340,343c310,311
+<   it('GH-1319: "unless" breaks when "each" value equals "null"', function() {
+<     expectTemplate(
+<       '{{#each list}}{{#unless ./prop}}parent={{../value}} {{/unless}}{{/each}}'
+<     )
+---
+>   it('GH-1319: "unless" breaks when "each" value equals "null"', () => {
+>     expectTemplate('{{#each list}}{{#unless ./prop}}parent={{../value}} {{/unless}}{{/each}}')
+346c314
+<         list: [null, 'a']
+---
+>         list: [null, 'a'],
+348d315
+<       .withMessage('')
+352,455c319,418
+<   it('GH-1341: 4.0.7 release breaks {{#if @partial-block}} usage', function() {
+<     expectTemplate('template {{>partial}} template')
+<       .withPartials({
+<         partialWithBlock:
+<           '{{#if @partial-block}} block {{> @partial-block}} block {{/if}}',
+<         partial: '{{#> partialWithBlock}} partial {{/partialWithBlock}}'
+<       })
+<       .toCompileTo('template  block  partial  block  template');
+<   });
+< 
+<   describe('GH-1561: 4.3.x should still work with precompiled templates from 4.0.0 <= x < 4.3.0', function() {
+<     it('should compile and execute templates', function() {
+<       var newHandlebarsInstance = Handlebars.create();
+< 
+<       registerTemplate(newHandlebarsInstance, compiledTemplateVersion7());
+<       newHandlebarsInstance.registerHelper('loud', function(value) {
+<         return value.toUpperCase();
+<       });
+<       var result = newHandlebarsInstance.templates['test.hbs']({
+<         name: 'yehuda'
+<       });
+<       equals(result.trim(), 'YEHUDA');
+<     });
+< 
+<     it('should call "helperMissing" if a helper is missing', function() {
+<       var newHandlebarsInstance = Handlebars.create();
+< 
+<       shouldThrow(
+<         function() {
+<           registerTemplate(newHandlebarsInstance, compiledTemplateVersion7());
+<           newHandlebarsInstance.templates['test.hbs']({});
+<         },
+<         Handlebars.Exception,
+<         'Missing helper: "loud"'
+<       );
+<     });
+< 
+<     it('should pass "options.lookupProperty" to "lookup"-helper, even with old templates', function() {
+<       var newHandlebarsInstance = Handlebars.create();
+<       registerTemplate(
+<         newHandlebarsInstance,
+<         compiledTemplateVersion7_usingLookupHelper()
+<       );
+< 
+<       newHandlebarsInstance.templates['test.hbs']({});
+< 
+<       expect(
+<         newHandlebarsInstance.templates['test.hbs']({
+<           property: 'a',
+<           test: { a: 'b' }
+<         })
+<       ).to.equal('b');
+<     });
+< 
+<     function registerTemplate(Handlebars, compileTemplate) {
+<       var template = Handlebars.template,
+<         templates = (Handlebars.templates = Handlebars.templates || {});
+<       templates['test.hbs'] = template(compileTemplate);
+<     }
+< 
+<     function compiledTemplateVersion7() {
+<       return {
+<         compiler: [7, '>= 4.0.0'],
+<         main: function(container, depth0, helpers, partials, data) {
+<           return (
+<             container.escapeExpression(
+<               (
+<                 helpers.loud ||
+<                 (depth0 && depth0.loud) ||
+<                 helpers.helperMissing
+<               ).call(
+<                 depth0 != null ? depth0 : container.nullContext || {},
+<                 depth0 != null ? depth0.name : depth0,
+<                 { name: 'loud', hash: {}, data: data }
+<               )
+<             ) + '\n\n'
+<           );
+<         },
+<         useData: true
+<       };
+<     }
+< 
+<     function compiledTemplateVersion7_usingLookupHelper() {
+<       // This is the compiled version of "{{lookup test property}}"
+<       return {
+<         compiler: [7, '>= 4.0.0'],
+<         main: function(container, depth0, helpers, partials, data) {
+<           return container.escapeExpression(
+<             helpers.lookup.call(
+<               depth0 != null ? depth0 : container.nullContext || {},
+<               depth0 != null ? depth0.test : depth0,
+<               depth0 != null ? depth0.property : depth0,
+<               {
+<                 name: 'lookup',
+<                 hash: {},
+<                 data: data
+<               }
+<             )
+<           );
+<         },
+<         useData: true
+<       };
+<     }
+<   });
+---
+>   // it('GH-1341: 4.0.7 release breaks {{#if @partial-block}} usage', () => {
+>   //   expectTemplate('template {{>partial}} template')
+>   //     .withPartials({
+>   //       partialWithBlock:
+>   //         '{{#if @partial-block}} block {{> @partial-block}} block {{/if}}',
+>   //       partial: '{{#> partialWithBlock}} partial {{/partialWithBlock}}',
+>   //     })
+>   //     .toCompileTo('template  block  partial  block  template');
+>   // });
+> 
+>   // describe('GH-1561: 4.3.x should still work with precompiled templates from 4.0.0 <= x < 4.3.0', () => {
+>   //   it('should compile and execute templates', () => {
+>   //     const newHandlebarsInstance = Handlebars.create();
+> 
+>   //     registerTemplate(newHandlebarsInstance, compiledTemplateVersion7());
+>   //     newHandlebarsInstance.registerHelper('loud', function(value) {
+>   //       return value.toUpperCase();
+>   //     });
+>   //     const result = newHandlebarsInstance.templates['test.hbs']({
+>   //       name: 'yehuda',
+>   //     });
+>   //     expect(result.trim()).toEqual('YEHUDA');
+>   //   });
+> 
+>   //   it('should call "helperMissing" if a helper is missing', () => {
+>   //     const newHandlebarsInstance = Handlebars.create();
+> 
+>   //     expect(() => {
+>   //       registerTemplate(newHandlebarsInstance, compiledTemplateVersion7());
+>   //       newHandlebarsInstance.templates['test.hbs']({});
+>   //     }).toThrow('Missing helper: "loud"'); // TODO: Is there a way we can test that the error is of type `Handlebars.Exception`?
+>   //   });
+> 
+>   //   it('should pass "options.lookupProperty" to "lookup"-helper, even with old templates', () => {
+>   //     const newHandlebarsInstance = Handlebars.create();
+>   //     registerTemplate(
+>   //       newHandlebarsInstance,
+>   //       compiledTemplateVersion7_usingLookupHelper()
+>   //     );
+> 
+>   //     newHandlebarsInstance.templates['test.hbs']({});
+> 
+>   //     expect(
+>   //       newHandlebarsInstance.templates['test.hbs']({
+>   //         property: 'a',
+>   //         test: { a: 'b' },
+>   //       })
+>   //     ).toEqual('b');
+>   //   });
+> 
+>   //   function registerTemplate(handlebars: typeof Handlebars, compileTemplate: TemplateSpecification) {
+>   //     const template = handlebars.template;
+>   //     const templates = (handlebars.templates = Handlebars.templates || {});
+>   //     templates['test.hbs'] = template(compileTemplate);
+>   //   }
+> 
+>   //   function compiledTemplateVersion7() {
+>   //     return {
+>   //       compiler: [7, '>= 4.0.0'],
+>   //       main(container, depth0, helpers, partials, data) {
+>   //         return (
+>   //           container.escapeExpression(
+>   //             (
+>   //               helpers.loud ||
+>   //               (depth0 && depth0.loud) ||
+>   //               helpers.helperMissing
+>   //             ).call(
+>   //               depth0 != null ? depth0 : container.nullContext || {},
+>   //               depth0 != null ? depth0.name : depth0,
+>   //               { name: 'loud', hash: {}, data: data }
+>   //             )
+>   //           ) + '\n\n'
+>   //         );
+>   //       },
+>   //       useData: true,
+>   //     };
+>   //   }
+> 
+>   //   function compiledTemplateVersion7_usingLookupHelper() {
+>   //     // This is the compiled version of "{{lookup test property}}"
+>   //     return {
+>   //       compiler: [7, '>= 4.0.0'],
+>   //       main(container, depth0, helpers, partials, data) {
+>   //         return container.escapeExpression(
+>   //           helpers.lookup.call(
+>   //             depth0 != null ? depth0 : container.nullContext || {},
+>   //             depth0 != null ? depth0.test : depth0,
+>   //             depth0 != null ? depth0.property : depth0,
+>   //             {
+>   //               name: 'lookup',
+>   //               hash: {},
+>   //               data: data
+>   //             }
+>   //           )
+>   //         );
+>   //       },
+>   //       useData: true,
+>   //     };
+>   //   }
+>   // });
+457c420
+<   it('should allow hash with protected array names', function() {
+---
+>   it('should allow hash with protected array names', () => {
+461c424
+<         helpa: function(options) {
+---
+>         helpa(options) {
+463c426
+<         }
+---
+>         },
+468,493c431,457
+<   describe('GH-1598: Performance degradation for partials since v4.3.0', function() {
+<     // Do not run test for runs without compiler
+<     if (!Handlebars.compile) {
+<       return;
+<     }
+< 
+<     var newHandlebarsInstance;
+<     beforeEach(function() {
+<       newHandlebarsInstance = Handlebars.create();
+<     });
+<     afterEach(function() {
+<       sinon.restore();
+<     });
+< 
+<     it('should only compile global partials once', function() {
+<       var templateSpy = sinon.spy(newHandlebarsInstance, 'template');
+<       newHandlebarsInstance.registerPartial({
+<         dude: 'I am a partial'
+<       });
+<       var string = 'Dudes: {{> dude}} {{> dude}}';
+<       newHandlebarsInstance.compile(string)(); // This should compile template + partial once
+<       newHandlebarsInstance.compile(string)(); // This should only compile template
+<       equal(templateSpy.callCount, 3);
+<       sinon.restore();
+<     });
+<   });
+---
+>   // describe('GH-1598: Performance degradation for partials since v4.3.0', () => {
+>   //   // Do not run test for runs without compiler
+>   //   if (!Handlebars.compile) {
+>   //     return;
+>   //   }
+> 
+>   //   let newHandlebarsInstance: typeof Handlebars;
+>   //   let templateSpy: jest.SpyInstance;
+>   //   beforeEach(function() {
+>   //     newHandlebarsInstance = Handlebars.create();
+>   //   });
+>   //   afterEach(function() {
+>   //     templateSpy.mockRestore();
+>   //   });
+> 
+>   //   it('should only compile global partials once', () => {
+>   //     templateSpy = jest.spyOn(newHandlebarsInstance, 'template');
+>   //     newHandlebarsInstance.registerPartial({
+>   //       dude: 'I am a partial',
+>   //     });
+>   //     const string = 'Dudes: {{> dude}} {{> dude}}';
+>   //     newHandlebarsInstance.compile(string)(); // This should compile template + partial once
+>   //     newHandlebarsInstance.compile(string)(); // This should only compile template
+>   //     expect(templateSpy).toHaveBeenCalledTimes(3);
+>   //     templateSpy.mockRestore();
+>   //   });
+>   // });
+495,496c459,460
+<   describe("GH-1639: TypeError: Cannot read property 'apply' of undefined\" when handlebars version > 4.6.0 (undocumented, deprecated usage)", function() {
+<     it('should treat undefined helpers like non-existing helpers', function() {
+---
+>   describe("GH-1639: TypeError: Cannot read property 'apply' of undefined\" when handlebars version > 4.6.0 (undocumented, deprecated usage)", () => {
+>     it('should treat undefined helpers like non-existing helpers', () => {

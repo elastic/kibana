@@ -44,6 +44,24 @@ We keep state internally in the `ElasticHandlebarsVisitor` object using the foll
 - `scopes`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `scopes` stack as needed.
 - `output`: An array containing the "rendered" output of each node (normally just one element per node). In the most simple template, this is simply joined together into a the final output string after the AST has been traversed. In more complicated templates, we use this array temporarily to collect parameters to give to helper functions (see the `getParams` function).
 
+## Development
+
+Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and conding conventions. They are all located under the `packages/kbn-handlebars/src/upstream` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
+
+```sh
+./packages/kbn-handlebars/scripts/check-for-test-changes.sh
+```
+
+If the script outputs a diff for a given file, it means that this file has been updated.
+
+Once all updates have been manually merged with our versions of the files, run the following script to "lock" us into the new updates:
+
+```sh
+./packages/kbn-handlebars/scripts/update-test-patches.sh
+```
+
+This will update the `.patch` files inside the `packages/kbn-handlebars/.patches` directory. Make sure to commit those changes.
+
 ## Debugging
 
 ### Environment variables
