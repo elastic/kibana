@@ -92,6 +92,70 @@ export function fieldIsInvalid(
   return !!getInvalidFieldMessage(column, indexPattern)?.length;
 }
 
+const accuracyModeDisabledWarning = (
+  columnName: string,
+  docLink: string,
+  enableAccuracyMode: () => void
+) => (
+  <>
+    <FormattedMessage
+      id="xpack.lens.indexPattern.precisionErrorWarning"
+      defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. If you need this field to be more exact, try enabling accuracy mode (this may impact performance). To learn more about this limit, {link}."
+      values={{
+        name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
+        link: (
+          <EuiLink href={docLink} color="text" target="_blank" external={true}>
+            <FormattedMessage
+              defaultMessage="visit the documentation"
+              id="xpack.lens.indexPattern.precisionErrorWarning.link"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+    <EuiSpacer size="s" />
+    <EuiButton onClick={enableAccuracyMode}>
+      {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
+        defaultMessage: 'Enable accuracy mode',
+      })}
+    </EuiButton>
+  </>
+);
+
+const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
+  <FormattedMessage
+    id="xpack.lens.indexPattern.precisionErrorWarning"
+    defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
+    values={{
+      name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
+      topValues: (
+        <EuiTextColor color="subdued">
+          <FormattedMessage
+            id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
+            defaultMessage="Top values"
+          />
+        </EuiTextColor>
+      ),
+      filters: (
+        <EuiTextColor color="subdued">
+          <FormattedMessage
+            id="xpack.lens.indexPattern.precisionErrorWarning.filters"
+            defaultMessage="Filters"
+          />
+        </EuiTextColor>
+      ),
+      link: (
+        <EuiLink href={docLink} color="text" target="_blank" external={true}>
+          <FormattedMessage
+            defaultMessage="visit the documentation"
+            id="xpack.lens.indexPattern.precisionErrorWarning.link"
+          />
+        </EuiLink>
+      ),
+    }}
+  />
+);
+
 export function getPrecisionErrorWarningMessages(
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI,
@@ -114,8 +178,12 @@ export function getPrecisionErrorWarningMessages(
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && checkColumnForPrecisionError(column)) {
           const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
+          const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(
+            'terms',
+            currentColumn
+          );
           const isAscendingCountSorting =
-            isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&
+            currentColumnIsTerms &&
             currentColumn.params.orderBy.type === 'column' &&
             currentColumn.params.orderDirection === 'asc' &&
             isColumnOfType<CountIndexPatternColumn>(
@@ -123,49 +191,39 @@ export function getPrecisionErrorWarningMessages(
               currentLayer.columns[currentColumn.params.orderBy.columnId]
             );
           const usesFloatingPointField =
-            isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&
+            currentColumnIsTerms &&
             !supportsRarityRanking(indexPattern.getFieldByName(currentColumn.sourceField));
           const usesMultipleFields =
-            isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&
-            (currentColumn.params.secondaryFields || []).length > 0;
-          if (!isAscendingCountSorting || usesFloatingPointField || usesMultipleFields) {
+            currentColumnIsTerms && (currentColumn.params.secondaryFields || []).length > 0;
+
+          if (
+            currentColumnIsTerms &&
+            (!isAscendingCountSorting || usesFloatingPointField || usesMultipleFields)
+          ) {
             warningMessages.push(
-              <FormattedMessage
-                id="xpack.lens.indexPattern.precisionErrorWarning"
-                defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
-                values={{
-                  name: <EuiTextColor color="accent">{column.name}</EuiTextColor>,
-                  topValues: (
-                    <EuiTextColor color="subdued">
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-                        defaultMessage="Top values"
-                      />
-                    </EuiTextColor>
-                  ),
-                  filters: (
-                    <EuiTextColor color="subdued">
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.precisionErrorWarning.filters"
-                        defaultMessage="Filters"
-                      />
-                    </EuiTextColor>
-                  ),
-                  link: (
-                    <EuiLink
-                      href={docLinks.links.aggs.terms_doc_count_error}
-                      color="text"
-                      target="_blank"
-                      external={true}
-                    >
-                      <FormattedMessage
-                        defaultMessage="visit the documentation"
-                        id="xpack.lens.indexPattern.precisionErrorWarning.link"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
+              currentColumn.params.accuracyMode
+                ? accuracyModeEnabledWarning(column.name, docLinks.links.aggs.terms_doc_count_error)
+                : accuracyModeDisabledWarning(
+                    column.name,
+                    docLinks.links.aggs.terms_doc_count_error,
+                    () => {
+                      setState((prevState) =>
+                        mergeLayer({
+                          state: prevState,
+                          layerId,
+                          newLayer: updateDefaultLabels(
+                            updateColumnParam({
+                              layer: currentLayer,
+                              columnId: column.id,
+                              paramName: 'accuracyMode',
+                              value: true,
+                            }),
+                            indexPattern
+                          ),
+                        })
+                      );
+                    }
+                  )
             );
           } else {
             warningMessages.push(
