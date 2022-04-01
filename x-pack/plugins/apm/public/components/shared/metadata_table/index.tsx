@@ -58,7 +58,19 @@ export function MetadataTable({ sections, isLoading }: Props) {
   const noResultFound = Boolean(searchTerm) && isEmpty(filteredSections);
   return (
     <React.Fragment>
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFieldSearch
+            onChange={onSearchChange}
+            placeholder={i18n.translate('xpack.apm.searchInput.filter', {
+              defaultMessage: 'Filter...',
+            })}
+            isInvalid={noResultFound}
+            value={searchTerm}
+            fullWidth={true}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink href={docLinks.links.apm.metaData}>
             <EuiText size="s">
@@ -66,20 +78,8 @@ export function MetadataTable({ sections, isLoading }: Props) {
             </EuiText>
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFieldSearch
-            onChange={onSearchChange}
-            placeholder={i18n.translate('xpack.apm.searchInput.filter', {
-              defaultMessage: 'Filter...',
-            })}
-            style={{
-              width: 400,
-            }}
-            isInvalid={noResultFound}
-            value={searchTerm}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       {isLoading && (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
