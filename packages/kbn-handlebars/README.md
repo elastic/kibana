@@ -64,6 +64,79 @@ This will update the `.patch` files inside the `packages/kbn-handlebars/.patches
 
 ## Debugging
 
+### Print AST
+
+To output the generated AST object structure in a somewhat readable form, use the following script:
+
+```sh
+./packages/kbn-handlebars/scripts/print_ast.js
+```
+
+Example:
+
+```sh
+./packages/kbn-handlebars/scripts/print_ast.js '{{value}}'
+```
+
+Output:
+
+```js
+{
+  type: 'Program',
+  body: [
+    {
+      type: 'MustacheStatement',
+      path: {
+        type: 'PathExpression',
+        data: false,
+        depth: 0,
+        parts: [ 'value' ],
+        original: 'value'
+      },
+      params: [],
+      hash: undefined,
+      escaped: true,
+      strip: { open: false, close: false }
+    }
+  ],
+  strip: {}
+}
+```
+
+You can also filter which properties not to display, e.g:
+
+```sh
+./packages/kbn-handlebars/scripts/print_ast.js '{{#myBlock}}Hello {{name}}{{/myBlock}}' params,hash,loc,strip,data,depth,parts,inverse,openStrip,inverseStrip,closeStrip,blockParams,escaped
+```
+
+Output:
+
+```js
+{
+  type: 'Program',
+  body: [
+    {
+      type: 'BlockStatement',
+      path: { type: 'PathExpression', original: 'myBlock' },
+      program: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ContentStatement',
+            original: 'Hello ',
+            value: 'Hello '
+          },
+          {
+            type: 'MustacheStatement',
+            path: { type: 'PathExpression', original: 'name' }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
 ### Environment variables
 
 By default each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. When debugging, it can be beneficial to islate a test run to just one or the other. To control this, you can use the following environment variables:
