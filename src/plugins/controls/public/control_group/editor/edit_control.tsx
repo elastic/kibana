@@ -22,11 +22,23 @@ import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
+interface EditControlResult {
+  type: string;
+  controlInput: Omit<ControlInput, 'id'>;
+}
+
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getHooks();
   const { getControlFactory } = controls.useService();
   const { openFlyout, openConfirm } = overlays.useService();
+
+  let promiseResolve: (result: EditControlResult) => void;
+  let promiseReject: () => void;
+  const initialInputPromise = new Promise<EditControlResult>((resolve, reject) => {
+    promiseResolve = resolve;
+    promiseReject = reject;
+  });
 
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
@@ -34,7 +46,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     typeof controlGroupReducers
   >();
   const {
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable, updateInputForChild },
+    containerActions: { untilEmbeddableLoaded, removeEmbeddable, replaceEmbeddable },
     actions: { setControlWidth },
     useEmbeddableSelector,
     useEmbeddableDispatch,
@@ -70,6 +82,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         }) &&
           isEqual(latestPanelState.current.width, panel.width))
       ) {
+        promiseReject();
         ref.close();
         return;
       }
@@ -81,9 +94,21 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       }).then((confirmed) => {
         if (confirmed) {
           dispatch(setControlWidth({ width: panel.width, embeddableId }));
+          promiseReject();
           ref.close();
         }
       });
+    };
+
+    const onSave = (type: string, ref: OverlayRef) => {
+      const newFactory = getControlFactory(type) as IEditableControlFactory;
+      if (!newFactory) throw new EmbeddableFactoryNotFoundError(type);
+
+      if (newFactory.presaveTransformFunction) {
+        inputToReturn = newFactory.presaveTransformFunction(inputToReturn);
+      }
+      promiseResolve({ type, controlInput: inputToReturn });
+      ref.close();
     };
 
     const flyoutInstance = openFlyout(
@@ -97,17 +122,10 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
           setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
           updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
-          onTypeEditorChange={(partialInput) =>
-            (inputToReturn = { ...inputToReturn, ...partialInput })
-          }
-          onSave={() => {
-            const editableFactory = factory as IEditableControlFactory;
-            if (editableFactory.presaveTransformFunction) {
-              inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
-            }
-            updateInputForChild(embeddableId, inputToReturn);
-            flyoutInstance.close();
+          onTypeEditorChange={(partialInput) => {
+            inputToReturn = { ...inputToReturn, ...partialInput };
           }}
+          onSave={(type) => onSave(type, flyoutInstance)}
           removeControl={() => {
             openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
               confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
@@ -134,6 +152,17 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       }
     );
     setFlyoutRef(flyoutInstance);
+
+    initialInputPromise.then(
+      async (promise) => {
+        replaceEmbeddable(
+          embeddable.id,
+          inputToReturn,
+          promise.type === embeddable.type ? undefined : promise.type
+        );
+      },
+      () => {} // swallow promise rejection because it can be part of normal flow
+    );
   };
 
   return (

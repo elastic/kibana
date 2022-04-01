@@ -107,8 +107,8 @@ export const ControlEditor = ({
     ) : null;
   };
 
-  const getTypeButtons = (controlTypes: string[]) => {
-    return controlTypes.map((type) => {
+  const getTypeButtons = () => {
+    return getControlTypes().map((type) => {
       const factory = getControlFactory(type);
       const icon = (factory as EmbeddableFactoryDefinition).getIconType?.();
       const tooltip = (factory as EmbeddableFactoryDefinition).getDescription?.();
@@ -150,9 +150,7 @@ export const ControlEditor = ({
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
           <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            <EuiKeyPadMenu>
-              {isCreate ? getTypeButtons(getControlTypes()) : getTypeButtons([selectedType])}
-            </EuiKeyPadMenu>
+            <EuiKeyPadMenu>{getTypeButtons()}</EuiKeyPadMenu>
           </EuiFormRow>
           {selectedType && (
             <>

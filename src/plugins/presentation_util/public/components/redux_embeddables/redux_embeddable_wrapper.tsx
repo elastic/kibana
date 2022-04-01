@@ -94,6 +94,7 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
           updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
           removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
           addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
+          replaceEmbeddable: embeddable.replaceEmbeddable.bind(embeddable),
         };
       }
       return;
