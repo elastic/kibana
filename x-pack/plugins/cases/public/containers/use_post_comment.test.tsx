@@ -122,4 +122,27 @@ describe('usePostComment', () => {
       });
     });
   });
+
+  it('throws an error when invoked with throwOnError true', async () => {
+    const spyOnPostCase = jest.spyOn(api, 'postComment');
+    spyOnPostCase.mockImplementation(() => {
+      throw new Error('This is not possible');
+    });
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
+        usePostComment()
+      );
+      await waitForNextUpdate();
+      async function test() {
+        await result.current.postComment({
+          caseId: basicCaseId,
+          data: samplePost,
+          updateCase: updateCaseCallback,
+          throwOnError: true,
+        });
+      }
+      expect(test()).rejects.toThrowError('This is not possible');
+    });
+  });
 });
