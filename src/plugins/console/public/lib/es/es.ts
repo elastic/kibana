@@ -7,6 +7,7 @@
  */
 
 import type { HttpFetchOptions, HttpResponse, HttpSetup } from 'kibana/public';
+import { API_BASE_PATH } from '../../../common/constants';
 
 const esVersion: string[] = [];
 
@@ -44,7 +45,7 @@ export async function send({
     asResponse,
     asSystemRequest,
   };
-  return await http.post<HttpResponse>('../api/console/proxy', options);
+  return await http.post<HttpResponse>(API_BASE_PATH, options);
 }
 
 export function constructESUrl(baseUri: string, path: string) {

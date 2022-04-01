@@ -78,6 +78,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         });
 
         if (reqId !== CURRENT_REQ_ID) {
+          // Skip if previous request is not resolved yet. This can happen when issuing multiple requests at the same time and with slow networks
           return;
         }
 

@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { MAJOR_VERSION } from './plugin';
-export { API_BASE_PATH } from './api';
+export const API_BASE_PATH = '../api/console/proxy';
