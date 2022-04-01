@@ -30,7 +30,7 @@ import { IDataPluginServices, IIndexPattern } from '../..';
 
 import { UI_SETTINGS } from '../../../common';
 
-interface Props {
+export interface Props {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;

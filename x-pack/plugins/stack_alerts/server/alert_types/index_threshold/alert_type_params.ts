@@ -6,12 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ComparatorFnNames } from '../lib';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
 } from '../../../../triggers_actions_ui/server';
+import { ComparatorFnNames } from '../lib';
+import { Comparator } from '../../../common/comparator_types';
 
 // alert type parameters
 
@@ -21,7 +22,7 @@ export const ParamsSchema = schema.object(
   {
     ...CoreQueryParamsSchemaProperties,
     // the comparison function to use to determine if the threshold as been met
-    thresholdComparator: schema.string({ validate: validateComparator }),
+    thresholdComparator: schema.string({ validate: validateComparator }) as Type<Comparator>,
     // the values to use as the threshold; `between` and `notBetween` require
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
@@ -52,8 +53,8 @@ function validateParams(anyParams: unknown): string | undefined {
   }
 }
 
-export function validateComparator(comparator: string): string | undefined {
-  if (ComparatorFnNames.has(comparator)) return;
+function validateComparator(comparator: string): string | undefined {
+  if (ComparatorFnNames.has(comparator as Comparator)) return;
 
   return i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
     defaultMessage: 'invalid thresholdComparator specified: {comparator}',
