@@ -33,7 +33,7 @@ export const EncryptionKeyRequiredCallout: React.FunctionComponent = () => {
           guideLink: (
             <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
               <FormattedMessage
-                id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
+                id="xpack.fleet.encryptionKeyRequired.link"
                 defaultMessage="Learn more"
               />
             </EuiLink>
