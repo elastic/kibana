@@ -59,9 +59,12 @@ export const FilterView: FC<Props> = ({
         title,
         color: 'hollow',
         onClick,
-        onClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemReadOnlyBadgeAriaLabel', {
-          defaultMessage: 'Filter entry',
-        }),
+        onClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemReadOnlyBadgeAriaLabel',
+          {
+            defaultMessage: 'Filter entry',
+          }
+        ),
         iconOnClick,
       }
     : {
@@ -75,14 +78,20 @@ export const FilterView: FC<Props> = ({
           tabIndex: -1,
         },
         iconOnClick,
-        iconOnClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
-          defaultMessage: 'Delete {filter}',
-          values: { filter: innerText },
-        }),
+        iconOnClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
+          {
+            defaultMessage: 'Delete {filter}',
+            values: { filter: innerText },
+          }
+        ),
         onClick,
-        onClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {
-          defaultMessage: 'Filter actions',
-        }),
+        onClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel',
+          {
+            defaultMessage: 'Filter actions',
+          }
+        ),
       };
 
   return (

@@ -60,7 +60,7 @@ export const EsQueryExpression = ({
   setRuleProperty,
   errors,
   data,
-}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.esQuery>, 'unifiedSearch'>) => {
+}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.esQuery>>) => {
   const {
     index,
     timeField,
