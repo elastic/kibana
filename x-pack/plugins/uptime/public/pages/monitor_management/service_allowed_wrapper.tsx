@@ -44,8 +44,8 @@ const REQUEST_ACCESS_LABEL = i18n.translate('xpack.uptime.monitorManagement.requ
   defaultMessage: 'Request access',
 });
 
-const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.label', {
-  defaultMessage: 'Monitor management',
+export const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.label', {
+  defaultMessage: 'Manage monitors',
 });
 
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
@@ -55,7 +55,7 @@ const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   }
 );
 
-const PUBLIC_BETA_DESCRIPTION = i18n.translate(
+export const PUBLIC_BETA_DESCRIPTION = i18n.translate(
   'xpack.uptime.monitorManagement.publicBetaDescription',
   {
     defaultMessage:
