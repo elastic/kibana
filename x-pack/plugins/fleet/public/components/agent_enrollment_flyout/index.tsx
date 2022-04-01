@@ -24,17 +24,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetSettings, useFleetStatus, useAgentEnrollmentFlyoutData } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
-import type { PackagePolicy } from '../../types';
+import type { PackagePolicy, AgentPolicy } from '../../types';
 
 import { Loading } from '..';
 
-import { ManagedInstructions } from './managed_instructions';
-import { StandaloneInstructions } from './standalone_instructions';
+import { FlyoutContent, StandaloneFlyout } from './flyout_content';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
-import type { BaseProps } from './types';
-import { useIsK8sPolicy, useAgentPolicyWithPackagePolicies } from './hooks';
+import type { BaseProps, SelectionType, FlyoutMode } from './types';
 
-type FlyoutMode = 'managed' | 'standalone';
+import { useIsK8sPolicy, useAgentPolicyWithPackagePolicies } from './hooks';
 
 export interface Props extends BaseProps {
   onClose: () => void;
@@ -43,8 +41,7 @@ export interface Props extends BaseProps {
 
 export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
-export * from './managed_instructions';
-export * from './standalone_instructions';
+export * from './flyout_content';
 export * from './steps';
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
@@ -53,14 +50,19 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   viewDataStep,
   defaultMode = 'managed',
 }) => {
-  const [mode, setMode] = useState<FlyoutMode>(defaultMode);
-
   const settings = useGetSettings();
   const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
 
   const fleetStatus = useFleetStatus();
-  const [policyId, setSelectedPolicyId] = useState(agentPolicy?.id);
+  const findPolicyById = (policies: AgentPolicy[], id: string | undefined) => {
+    if (!id) return undefined;
+    return policies.find((p) => p.id === id);
+  };
+
+  const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
+  const [mode, setMode] = useState<FlyoutMode>(defaultMode);
+  const [selectionType, setSelectionType] = useState<SelectionType>('tabs');
 
   const {
     agentPolicies,
@@ -68,7 +70,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     isLoadingAgentPolicies,
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
-  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(policyId);
+  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+  const selectedPolicy = findPolicyById(agentPolicies, selectedPolicyId);
+
   useEffect(() => {
     if (agentPolicyWithPackagePolicies && setIsFleetServerPolicySelected) {
       if (
@@ -107,31 +111,34 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
           />
         </EuiText>
-        <EuiSpacer size="l" />
-        <EuiTabs style={{ marginBottom: '-25px' }}>
-          <EuiTab
-            data-test-subj="managedTab"
-            isSelected={mode === 'managed'}
-            onClick={() => setMode('managed')}
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.enrollFleetTabLabel"
-              defaultMessage="Enroll in Fleet"
-            />
-          </EuiTab>
-          <EuiTab
-            data-test-subj="standaloneTab"
-            isSelected={mode === 'standalone'}
-            onClick={() => setMode('standalone')}
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
-              defaultMessage="Run standalone"
-            />
-          </EuiTab>
-        </EuiTabs>
+        {selectionType === 'tabs' ? (
+          <>
+            <EuiSpacer size="l" />
+            <EuiTabs style={{ marginBottom: '-25px' }}>
+              <EuiTab
+                data-test-subj="managedTab"
+                isSelected={mode === 'managed'}
+                onClick={() => setMode('managed')}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.enrollFleetTabLabel"
+                  defaultMessage="Enroll in Fleet"
+                />
+              </EuiTab>
+              <EuiTab
+                data-test-subj="standaloneTab"
+                isSelected={mode === 'standalone'}
+                onClick={() => setMode('standalone')}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
+                  defaultMessage="Run standalone"
+                />
+              </EuiTab>
+            </EuiTabs>
+          </>
+        ) : null}
       </EuiFlyoutHeader>
-
       <EuiFlyoutBody
         banner={
           fleetStatus.isReady &&
@@ -145,23 +152,39 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         {isLoadingInitialAgentPolicies ? (
           <Loading />
         ) : mode === 'managed' ? (
-          <ManagedInstructions
+          <FlyoutContent
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
-            policyId={policyId}
             agentPolicy={agentPolicy}
+            selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             isK8s={isK8s}
             refreshAgentPolicies={refreshAgentPolicies}
             isLoadingAgentPolicies={isLoadingAgentPolicies}
+            mode={mode}
+            setMode={setMode}
+            selectionType={selectionType}
+            setSelectionType={setSelectionType}
+            onClickViewAgents={onClose}
           />
         ) : (
-          <StandaloneInstructions
+          <StandaloneFlyout
+            settings={settings.data?.item}
             agentPolicy={agentPolicy}
+            selectedPolicy={selectedPolicy}
+            setSelectedPolicyId={setSelectedPolicyId}
             agentPolicies={agentPolicies}
+            viewDataStep={viewDataStep}
+            isFleetServerPolicySelected={isFleetServerPolicySelected}
             refreshAgentPolicies={refreshAgentPolicies}
+            isLoadingAgentPolicies={isLoadingAgentPolicies}
+            mode={mode}
+            setMode={setMode}
+            selectionType={selectionType}
+            setSelectionType={setSelectionType}
+            onClickViewAgents={onClose}
           />
         )}
       </EuiFlyoutBody>

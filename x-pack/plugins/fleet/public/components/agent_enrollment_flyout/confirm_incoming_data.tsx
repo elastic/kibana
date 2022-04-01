@@ -14,20 +14,27 @@ import { useGetAgentIncomingData } from '../../hooks';
 interface Props {
   agentsIds: string[];
   installedPolicy?: InstalledIntegrationPolicy;
+  agentDataConfirmed: boolean;
+  setAgentDataConfirmed: (v: boolean) => void;
 }
 
 export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   agentsIds,
   installedPolicy,
+  agentDataConfirmed,
+  setAgentDataConfirmed,
 }) => {
   const { enrolledAgents, numAgentsWithData, isLoading, linkButton } = useGetAgentIncomingData(
     agentsIds,
     installedPolicy
   );
+  if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
+    setAgentDataConfirmed(true);
+  }
 
   return (
     <>
-      {isLoading ? (
+      {!agentDataConfirmed ? (
         <EuiText size="s">
           {i18n.translate('xpack.fleet.confirmIncomingData.loading', {
             defaultMessage:

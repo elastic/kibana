@@ -23,17 +23,23 @@ export interface BaseProps {
 
   settings?: Settings;
 
-  setSelectedPolicyId?: (policyId?: string) => void;
-
-  policyId?: string;
-
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: string;
 }
 
+export type FlyoutMode = 'managed' | 'standalone';
+export type SelectionType = 'tabs' | 'radio';
+
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
+  selectedPolicy?: AgentPolicy;
+  setSelectedPolicyId: (policyId?: string) => void;
   refreshAgentPolicies: () => void;
   isLoadingAgentPolicies?: boolean;
+  onClickViewAgents: () => void;
+  mode: FlyoutMode;
+  setMode: (v: FlyoutMode) => void;
+  selectionType: SelectionType;
+  setSelectionType: (type: SelectionType) => void;
 }

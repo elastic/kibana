@@ -13,7 +13,7 @@ import { createFleetTestRendererMock } from '../../mock';
 
 import type { AgentPolicy } from '../../types';
 
-import { EnrollmentStepAgentPolicy } from '.';
+import { AgentPolicySelection } from '.';
 
 describe('step select agent policy', () => {
   let testRenderer: TestRenderer;
@@ -21,10 +21,11 @@ describe('step select agent policy', () => {
   let agentPolicies: AgentPolicy[] = [];
   const render = () =>
     (renderResult = testRenderer.render(
-      <EnrollmentStepAgentPolicy
+      <AgentPolicySelection
+        setSelectedPolicyId={jest.fn()}
+        selectedPolicy={agentPolicies[0]}
         agentPolicies={agentPolicies}
         withKeySelection={false}
-        onAgentPolicyChange={jest.fn()}
         excludeFleetServer={true}
         onClickCreatePolicy={jest.fn()}
         isFleetServerPolicy={false}
