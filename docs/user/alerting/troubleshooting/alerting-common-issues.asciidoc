@@ -85,7 +85,7 @@ and in the <<rule-details,details page>>:
 [role="screenshot"]
 image::images/rule-details-timeout-error.png[Rule details page with timeout error]
 
-If you want your rules to run longer, update the `xpack.alerting.rules.execution.timeout` configure in your <<alert-settings>>. You can also target a specific rule type by using `xpack.alerting.rules.execution.ruleTypeOverrides`.
+If you want your rules to run longer, update the `xpack.alerting.rules.execution.timeout` configuration in your <<alert-settings>>. You can also target a specific rule type by using `xpack.alerting.rules.execution.ruleTypeOverrides`.
 
 Rules that consistently run longer than their <<create-edit-rules, check interval>> may produce unexpected results. If the average run duration, visible on the <<rule-details,details page>>, is greater than the check interval, consider increasing the check interval.
 
