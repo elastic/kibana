@@ -76,7 +76,31 @@ describe('@elastic/eui i18n tokens', () => {
       test('defaultMessage is in sync with defString', () => {
         // Certain complex tokens (e.g. ones that have a function as a defaultMessage)
         // need custom i18n handling, and can't be checked for basic defString equality
-        const tokensToSkip = ['euiColumnSorting.buttonActive', 'euiSelectable.searchResults'];
+        const tokensToSkip = [
+          'euiColumnSorting.buttonActive',
+          'euiSelectable.searchResults',
+          'euiPrettyDuration.lastDurationSeconds',
+          'euiPrettyDuration.nextDurationSeconds',
+          'euiPrettyDuration.lastDurationMinutes',
+          'euiPrettyDuration.nextDurationMinutes',
+          'euiPrettyDuration.lastDurationHours',
+          'euiPrettyDuration.nextDurationHours',
+          'euiPrettyDuration.lastDurationDays',
+          'euiPrettyDuration.nexttDurationDays',
+          'euiPrettyDuration.lastDurationWeeks',
+          'euiPrettyDuration.nextDurationWeeks',
+          'euiPrettyDuration.lastDurationMonths',
+          'euiPrettyDuration.nextDurationMonths',
+          'euiPrettyDuration.lastDurationYears',
+          'euiPrettyDuration.nextDurationYears',
+          'euiPrettyInterval.seconds',
+          'euiPrettyInterval.minutes',
+          'euiPrettyInterval.hours',
+          'euiPrettyInterval.days',
+          'euiPrettyInterval.weeks',
+          'euiPrettyInterval.months',
+          'euiPrettyInterval.years',
+        ];
         if (tokensToSkip.includes(token)) return;
 
         // Clean up typical errors from the `@elastic/eui` extraction token tool

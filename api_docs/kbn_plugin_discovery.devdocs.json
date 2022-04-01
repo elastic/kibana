@@ -1,0 +1,416 @@
+{
+  "id": "@kbn/plugin-discovery",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/plugin-discovery",
+        "id": "def-server.getPluginSearchPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "getPluginSearchPaths",
+        "description": [],
+        "signature": [
+          "({ rootDir, oss, examples }: ",
+          {
+            "pluginId": "@kbn/plugin-discovery",
+            "scope": "server",
+            "docId": "kibKbnPluginDiscoveryPluginApi",
+            "section": "def-server.SearchOptions",
+            "text": "SearchOptions"
+          },
+          ") => string[]"
+        ],
+        "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.getPluginSearchPaths.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ rootDir, oss, examples }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/plugin-discovery",
+                "scope": "server",
+                "docId": "kibKbnPluginDiscoveryPluginApi",
+                "section": "def-server.SearchOptions",
+                "text": "SearchOptions"
+              }
+            ],
+            "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/plugin-discovery",
+        "id": "def-server.parseKibanaPlatformPlugin",
+        "type": "Function",
+        "tags": [],
+        "label": "parseKibanaPlatformPlugin",
+        "description": [],
+        "signature": [
+          "(manifestPath: string) => ",
+          {
+            "pluginId": "@kbn/plugin-discovery",
+            "scope": "server",
+            "docId": "kibKbnPluginDiscoveryPluginApi",
+            "section": "def-server.KibanaPlatformPlugin",
+            "text": "KibanaPlatformPlugin"
+          }
+        ],
+        "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.parseKibanaPlatformPlugin.$1",
+            "type": "string",
+            "tags": [],
+            "label": "manifestPath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/plugin-discovery",
+        "id": "def-server.simpleKibanaPlatformPluginDiscovery",
+        "type": "Function",
+        "tags": [],
+        "label": "simpleKibanaPlatformPluginDiscovery",
+        "description": [
+          "\nHelper to find the new platform plugins."
+        ],
+        "signature": [
+          "(scanDirs: string[], pluginPaths: string[]) => ",
+          {
+            "pluginId": "@kbn/plugin-discovery",
+            "scope": "server",
+            "docId": "kibKbnPluginDiscoveryPluginApi",
+            "section": "def-server.KibanaPlatformPlugin",
+            "text": "KibanaPlatformPlugin"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-plugin-discovery/src/simple_kibana_platform_plugin_discovery.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.simpleKibanaPlatformPluginDiscovery.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "scanDirs",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/simple_kibana_platform_plugin_discovery.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.simpleKibanaPlatformPluginDiscovery.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "pluginPaths",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/simple_kibana_platform_plugin_discovery.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/plugin-discovery",
+        "id": "def-server.KibanaPlatformPlugin",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaPlatformPlugin",
+        "description": [],
+        "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPlugin.directory",
+            "type": "string",
+            "tags": [],
+            "label": "directory",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPlugin.manifestPath",
+            "type": "string",
+            "tags": [],
+            "label": "manifestPath",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPlugin.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/plugin-discovery",
+                "scope": "server",
+                "docId": "kibKbnPluginDiscoveryPluginApi",
+                "section": "def-server.KibanaPlatformPluginManifest",
+                "text": "KibanaPlatformPluginManifest"
+              }
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/plugin-discovery",
+        "id": "def-server.KibanaPlatformPluginManifest",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaPlatformPluginManifest",
+        "description": [],
+        "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.ui",
+            "type": "boolean",
+            "tags": [],
+            "label": "ui",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.server",
+            "type": "boolean",
+            "tags": [],
+            "label": "server",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.owner",
+            "type": "Object",
+            "tags": [],
+            "label": "owner",
+            "description": [],
+            "signature": [
+              "{ name: string; githubTeam?: string | undefined; }"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.serviceFolders",
+            "type": "Object",
+            "tags": [],
+            "label": "serviceFolders",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.requiredPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredPlugins",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.optionalPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "optionalPlugins",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.requiredBundles",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredBundles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.KibanaPlatformPluginManifest.extraPublicDirs",
+            "type": "Object",
+            "tags": [],
+            "label": "extraPublicDirs",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-plugin-discovery/src/parse_kibana_platform_plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/plugin-discovery",
+        "id": "def-server.SearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchOptions",
+        "description": [],
+        "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.SearchOptions.rootDir",
+            "type": "string",
+            "tags": [],
+            "label": "rootDir",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.SearchOptions.oss",
+            "type": "boolean",
+            "tags": [],
+            "label": "oss",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/plugin-discovery",
+            "id": "def-server.SearchOptions.examples",
+            "type": "boolean",
+            "tags": [],
+            "label": "examples",
+            "description": [],
+            "path": "packages/kbn-plugin-discovery/src/plugin_search_paths.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
