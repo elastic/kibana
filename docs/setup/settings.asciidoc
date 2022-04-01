@@ -664,6 +664,9 @@ To enable telemetry and prevent users from disabling it,
 set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false` and <<settings-telemetry-optIn, `telemetry.optIn`>> to `true`.
 *Default: `true`*
 
+|[[settings-telemetry-hidePrivacyStatement]] `telemetry.hidePrivacyStatement`::
+ | Set to `true` to prevent from showing the privacy statement notice. Defaults to `false`.
+
 | `telemetry.enabled`
  | Reporting your cluster statistics helps
 us improve your user experience. Your data is never shared with anyone. Set to

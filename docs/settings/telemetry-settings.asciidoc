@@ -41,3 +41,6 @@ See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to lea
 ============
 When `false`, <<telemetry-optIn, `telemetry.optIn`>> must be `true`. To disable telemetry and not allow users to change that parameter, use <<telemetry-enabled, `telemetry.enabled`>>.
 ============
+
+[[telemetry-hidePrivacyStatement]] `telemetry.hidePrivacyStatement`::
+ Set to `true` to prevent from showing the privacy statement notice. Defaults to `false`.
