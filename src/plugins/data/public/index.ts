@@ -20,7 +20,6 @@ export * from './deprecated';
 
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export { FilterLabel, FilterItem, DataViewsList, DataViewPicker } from './ui';
-export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
 export {
   getDisplayValueFromFilter,
   generateFilters,
