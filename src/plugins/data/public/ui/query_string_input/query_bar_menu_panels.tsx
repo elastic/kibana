@@ -41,8 +41,8 @@ interface QueryBarMenuPanelProps {
   dateRangeTo?: string;
   query?: Query;
   showSaveQuery?: boolean;
-  showSavedQueryManagement?: boolean;
-  showFilterSetManagement?: boolean;
+  showQueryInput?: boolean;
+  showFilterBar?: boolean;
   savedQueryService: SavedQueryService;
   saveAsNewQueryFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
@@ -63,8 +63,8 @@ export function QueryBarMenuPanels({
   dateRangeTo,
   query,
   showSaveQuery,
-  showFilterSetManagement,
-  showSavedQueryManagement,
+  showFilterBar,
+  showQueryInput,
   savedQueryService,
   saveAsNewQueryFormComponent,
   manageFilterSetComponent,
@@ -218,7 +218,7 @@ export function QueryBarMenuPanels({
     defaultMessage: 'KQL',
   });
 
-  const filterSetRelatedPanels = [
+  const filtersRelatedPanels = [
     {
       name: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
         defaultMessage: 'Apply to all',
@@ -228,27 +228,9 @@ export function QueryBarMenuPanels({
       disabled: !Boolean(filters && filters.length > 0),
       'data-test-subj': 'filter-sets-applyToAllFilters',
     },
-    {
-      name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
-        defaultMessage: 'Clear all',
-      }),
-      disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
-      icon: 'crossInACircleFilled',
-      'data-test-subj': 'filter-sets-removeAllFilters',
-      onClick: () => {
-        closePopover();
-        onQueryBarSubmit({
-          query: { query: '', language },
-          dateRange: getDateRange(),
-        });
-        onRemoveAll();
-        onClearSavedQuery?.();
-      },
-    },
-    { isSeparator: true },
   ];
 
-  const savedFilterSetRelatedPanels = [
+  const queryAndFiltersRelatedPanels = [
     {
       name: savedQuery
         ? i18n.translate('data.filter.options.loadOtherFilterSetLabel', {
@@ -281,13 +263,40 @@ export function QueryBarMenuPanels({
   ];
 
   const items = [];
-  if (showFilterSetManagement) {
-    items.push(...filterSetRelatedPanels);
+  // apply to all actions are only shown when there are filters
+  if (showFilterBar) {
+    items.push(...filtersRelatedPanels);
   }
-  if (showSavedQueryManagement) {
-    items.push(...savedFilterSetRelatedPanels);
+  // clear all actions are only shown when there are filters or query
+  if (showFilterBar || showQueryInput) {
+    items.push(
+      {
+        name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
+          defaultMessage: 'Clear all',
+        }),
+        disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
+        icon: 'crossInACircleFilled',
+        'data-test-subj': 'filter-sets-removeAllFilters',
+        onClick: () => {
+          closePopover();
+          onQueryBarSubmit({
+            query: { query: '', language },
+            dateRange: getDateRange(),
+          });
+          onRemoveAll();
+          onClearSavedQuery?.();
+        },
+      },
+      { isSeparator: true }
+    );
   }
-  if (showFilterSetManagement && showSavedQueryManagement) {
+  // saved queries actions are only shown when the showQueryInput and showFilterBar is true
+  if (showQueryInput && showFilterBar) {
+    items.push(...queryAndFiltersRelatedPanels);
+  }
+
+  // language menu appears when the showQueryInput is true
+  if (showQueryInput) {
     items.push({
       name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
       panel: 3,

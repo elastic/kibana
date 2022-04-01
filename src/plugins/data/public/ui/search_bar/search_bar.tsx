@@ -381,8 +381,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         query={this.state.query}
         savedQuery={this.props.savedQuery}
         onClearSavedQuery={this.props.onClearSavedQuery}
-        showSavedQueryManagement={this.props.showQueryInput}
-        showFilterSetManagement={this.props.showFilterBar}
+        showQueryInput={this.props.showQueryInput}
+        showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
@@ -407,7 +407,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          prepend={this.props.showFilterBar && this.state.query ? queryBarMenu : undefined}
+          prepend={this.props.showFilterBar || this.props.showQueryInput ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}

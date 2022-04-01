@@ -120,11 +120,12 @@ describe('Querybar Menu component', () => {
     expect(component.find('[data-test-subj="queryBarMenuPanel"]')).toBeTruthy();
   });
 
-  it('should render the saved filter sets panels if the showSavedQueryManagement prop is true but disabled', async () => {
+  it('should render the saved filter sets panels if the showQueryInput prop is true but disabled', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
-      showSavedQueryManagement: true,
+      showQueryInput: true,
+      showFilterBar: true,
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
     const saveFilterSetButton = component.find(
@@ -139,11 +140,11 @@ describe('Querybar Menu component', () => {
     expect(loadFilterSetButton.first().prop('disabled')).toBe(true);
   });
 
-  it('should render the filter sets panels if the showFilterSetManagement is true but disabled', async () => {
+  it('should render the filter sets panels if the showFilterBar is true but disabled', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
-      showFilterSetManagement: true,
+      showFilterBar: true,
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
     const applyToAllFiltersButton = component.find(
@@ -162,7 +163,7 @@ describe('Querybar Menu component', () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
-      showFilterSetManagement: true,
+      showFilterBar: true,
       query: {
         query: 'category.keyword : "Men\'s Shoes" ',
         language: 'kuery',
@@ -179,7 +180,7 @@ describe('Querybar Menu component', () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
-      showFilterSetManagement: true,
+      showFilterBar: true,
       filters: [
         {
           meta: {
@@ -215,8 +216,8 @@ describe('Querybar Menu component', () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
-      showFilterSetManagement: true,
-      showSavedQueryManagement: true,
+      showFilterBar: true,
+      showQueryInput: true,
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
     const languageSwitcher = component.find('[data-test-subj="switchQueryLanguageButton"]');

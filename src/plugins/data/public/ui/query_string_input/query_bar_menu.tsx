@@ -37,8 +37,8 @@ export interface QueryBarMenuProps {
   query?: Query;
   savedQuery?: SavedQuery;
   onClearSavedQuery?: () => void;
-  showSavedQueryManagement?: boolean;
-  showFilterSetManagement?: boolean;
+  showQueryInput?: boolean;
+  showFilterBar?: boolean;
   showSaveQuery?: boolean;
 }
 
@@ -60,8 +60,8 @@ export function QueryBarMenu({
   query,
   savedQuery,
   onClearSavedQuery,
-  showSavedQueryManagement,
-  showFilterSetManagement,
+  showQueryInput,
+  showFilterBar,
   showSaveQuery,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
@@ -107,8 +107,8 @@ export function QueryBarMenu({
     dateRangeTo,
     query,
     showSaveQuery,
-    showFilterSetManagement,
-    showSavedQueryManagement,
+    showFilterBar,
+    showQueryInput,
     savedQueryService,
     saveAsNewQueryFormComponent,
     manageFilterSetComponent,
