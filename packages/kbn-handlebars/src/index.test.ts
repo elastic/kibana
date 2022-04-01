@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
+/**
+ * ABOUT THIS FILE:
+ *
+ * This file is for tests not copied from the upstream handlebars project, but
+ * tests that we feel are needed in order to fully cover our use-cases.
+ */
+
 import Handlebars from '.';
 import { expectTemplate } from './__jest__/test_bench';
 
