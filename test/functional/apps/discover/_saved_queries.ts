@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('set up a query with filters to save');
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
+    await PageObjects.discover.selectIndexPattern('logstash-*');
     await retry.try(async function tryingForTime() {
       const hitCount = await PageObjects.discover.getHitCount();
       expect(hitCount).to.be('4,731');
