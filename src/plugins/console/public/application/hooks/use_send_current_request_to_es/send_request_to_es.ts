@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup } from 'kibana/public';
+import type { HttpSetup, IHttpFetchError } from 'kibana/public';
 import { extractWarningMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../es_ui_shared/public';
 // @ts-ignore
@@ -120,17 +120,13 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         }
       } catch (error) {
         let value;
-        let contentType = '';
-        if (!error) {
-          value =
-            "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
-        }
+        let contentType: string | null = '';
 
-        if (error.response) {
-          const { status, headers } = error.response;
-
-          if (error.body) {
-            value = JSON.stringify(error.body, null, 2); // ES error should be shown
+        const { response, body = {} } = error as IHttpFetchError;
+        if (response) {
+          const { status, headers } = response;
+          if (body) {
+            value = JSON.stringify(body, null, 2); // ES error should be shown
             contentType = headers.get('Content-Type');
           } else {
             value = 'Request failed to get to the server (status code: ' + status + ')';
@@ -140,6 +136,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
           if (isMultiRequest) {
             value = '# ' + req.method + ' ' + req.url + '\n' + value;
           }
+        } else {
+          value =
+            "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
         }
 
         reject({
@@ -147,7 +146,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             value,
             contentType,
             timeMs: Date.now() - startTime,
-            statusCode: error?.response?.status ?? 0,
+            statusCode: error?.response?.status ?? 500,
             statusText: error?.response?.statusText ?? 'error',
           },
           request: {
