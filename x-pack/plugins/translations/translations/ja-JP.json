@@ -1445,8 +1445,6 @@
     "core.euiRelativeTab.fullDescription": "単位は変更可能です。現在 {unit} に設定されています。",
     "core.euiRelativeTab.numberInputError": "0以上でなければなりません",
     "core.euiRelativeTab.numberInputLabel": "時間スパンの量",
-    "core.euiRelativeTab.relativeDate": "{position} 日付",
-    "core.euiRelativeTab.roundingLabel": "{unit} に四捨五入する",
     "core.euiRelativeTab.unitInputLabel": "相対的時間スパン",
     "core.euiResizableButton.horizontalResizerAriaLabel": "左右矢印キーを押してパネルサイズを調整します",
     "core.euiResizableButton.verticalResizerAriaLabel": "上下矢印キーを押してパネルサイズを調整します",
