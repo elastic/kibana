@@ -32,6 +32,7 @@ export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover
   const button = <ToolbarButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
 
   return (
+    // @ts-ignore - Types of property css are incompatible Type 'InterpolationWithTheme<any>' is not assignable to type 'Interpolation<Theme>'.
     <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
