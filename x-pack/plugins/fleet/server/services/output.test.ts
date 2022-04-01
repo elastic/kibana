@@ -161,6 +161,8 @@ function getMockedSoClient(
     };
   });
 
+  mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+
   return soClient;
 }
 
@@ -591,6 +593,7 @@ describe('Output Service', () => {
     afterEach(() => {
       mockedAppContextService.getConfig.mockReset();
       mockedAppContextService.getConfig.mockReset();
+      mockedAppContextService.getInternalUserSOClient.mockReset();
     });
     it('Should use cloud ID as the source of truth for ES hosts', () => {
       // @ts-expect-error

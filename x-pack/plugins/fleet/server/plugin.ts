@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -417,7 +416,7 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await plugins.licensing.license$.pipe(take(1)).toPromise();
+        await plugins.licensing.license$.pipe(1).toPromise();
 
         await setupFleet(
           core.savedObjects.getScopedClient(
@@ -435,7 +434,7 @@ export class FleetPlugin
                   url: '/',
                 },
               },
-            } as unknown as KibanaRequest,
+            },
             {
               excludedWrappers: ['security'],
             }
