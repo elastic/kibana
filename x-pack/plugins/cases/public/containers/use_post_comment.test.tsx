@@ -67,6 +67,7 @@ describe('usePostComment', () => {
       });
       await waitForNextUpdate();
       expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
 
