@@ -21,6 +21,7 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { DataViewAttributes } from '../../../../../../../src/plugins/data_views/common/data_views';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -62,10 +63,16 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
-    const kibanaIndexPattern = await services.savedObjectsClient.get('index-pattern', dataViewId);
-    logger.debug(`kibana index pattern ${JSON.stringify(kibanaIndexPattern, null, 2)}`);
-    const runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
-    logger.debug(`runtime mappings ${runtimeMappings}`);
+    const kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
+      'index-pattern',
+      dataViewId
+    );
+    // logger.debug(`kibana index pattern ${JSON.stringify(kibanaIndexPattern, null, 2)}`);
+    let runtimeMappings = {};
+    if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
+      runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
+      logger.debug(`runtime mappings ${runtimeMappings}`);
+    }
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {

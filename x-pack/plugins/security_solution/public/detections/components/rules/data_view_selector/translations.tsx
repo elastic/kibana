@@ -13,3 +13,10 @@ export const IMPORT_TIMELINE_MODAL = i18n.translate(
     defaultMessage: 'Import query from saved timeline',
   }
 );
+
+export const PICK_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.pickDataView',
+  {
+    defaultMessage: 'Select a Data View',
+  }
+);

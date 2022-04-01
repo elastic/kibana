@@ -57,6 +57,7 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
+import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
@@ -403,27 +404,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <CommonUseField
+              <UseField
                 path="dataViewId"
-                field={{
-                  type: FIELD_TYPES.COMBO_BOX,
+                component={DataViewSelector}
+                componentProps={{
+                  kibanaDataViews,
                 }}
-                singleSelection={{ asPlainText: true }}
-                onChange={() => {} /* console.log('something happened') */}
-                options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
-                placeholder={'hello world'}
-                selectedOptions={() => {}} // console.log('SELECTED')}
               />
-              {/* <EuiComboBox
-                path="dataViewId"
-                fullWidth
-                singleSelection={{ asPlainText: true }}
-                onChange={onChangeIndexPatterns}
-                options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
-                placeholder={i18n.PICK_INDEX_PATTERNS}
-                renderOption={renderOption}
-                selectedOptions={selectedOptions}
-              /> */}
               <CommonUseField
                 path="index"
                 config={{
