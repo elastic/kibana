@@ -86,7 +86,7 @@ import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
 import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
+import { retryIfConflicts, retryOnBulkIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -116,6 +116,8 @@ import {
   formatExecutionErrorsResult,
   IExecutionErrorsResult,
 } from '../lib/format_execution_log_errors';
+import { TimeHistory } from '../../../../../src/plugins/data/public';
+import { throwIfResponseIsNotValid } from '../../../actions/server/builtin_action_types/lib/axios_utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -1368,7 +1370,6 @@ export class RulesClient {
     }
 
     const filter = ids ? this.convertIdsToFilterQuery(ids) : queryFilter;
-    const { operations, paramsModifier } = options;
 
     let authorizationTuple;
     try {
@@ -1440,6 +1441,50 @@ export class RulesClient {
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
+    const { apiKeysToInvalidate, results, errors } = await retryOnBulkIfConflicts(
+      this.logger,
+      `rulesClient.update('${JSON.stringify(options.operations)}')`,
+      (rulesToUpdate) => this.unsecuredSavedObjectsClient.bulkUpdate(rulesToUpdate),
+      this.bulkEditOcc.bind(this),
+      qNodeFilter as KueryNode,
+      options.operations,
+      options.paramsModifier
+    );
+
+    if (apiKeysToInvalidate.length) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: apiKeysToInvalidate },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      );
+    }
+
+    const updatedRules = results.map(({ id, attributes, references }) => {
+      return this.getAlertFromRaw<Params>(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
+      );
+    });
+
+    return { rules: updatedRules, errors };
+  }
+
+  private async bulkEditOcc<Params extends RuleTypeParams>({
+    filter,
+    operations,
+    paramsModifier,
+  }: {
+    filter: KueryNode;
+    operations: BulkEditOptions<Params>['operations'];
+    paramsModifier: BulkEditOptions<Params>['paramsModifier'];
+  }): Promise<{
+    apiKeysToInvalidate: string[];
+    rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+    errors: BulkEditError[];
+  }> {
     const rulesFinder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>(
         { namespace: this.namespace, type: 'alert' },
@@ -1572,28 +1617,7 @@ export class RulesClient {
         { concurrency: API_KEY_GENERATE_CONCURRENCY }
       );
     }
-
-    const results = await this.unsecuredSavedObjectsClient.bulkUpdate<RawRule>(rules);
-
-    if (apiKeysToInvalidate.length) {
-      await bulkMarkApiKeysForInvalidation(
-        { apiKeys: apiKeysToInvalidate },
-        this.logger,
-        this.unsecuredSavedObjectsClient
-      );
-    }
-
-    const updatedRules = results.saved_objects.map(({ id, attributes, references }) => {
-      return this.getAlertFromRaw<Params>(
-        id,
-        attributes.alertTypeId as string,
-        attributes as RawRule,
-        references,
-        false
-      );
-    });
-
-    return { rules: updatedRules, errors };
+    return { apiKeysToInvalidate, rules, errors };
   }
 
   private apiKeyAsAlertAttributes(
