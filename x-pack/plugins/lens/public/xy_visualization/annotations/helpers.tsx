@@ -21,7 +21,6 @@ import {
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { generateId } from '../../id_generator';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import { convertActiveDataFromIndexesToLayers } from '../reference_line_helpers';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;
@@ -120,14 +119,13 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
     : undefined;
 
   let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
-  const activeData = convertActiveDataFromIndexesToLayers(frame?.activeData, prevState.layers);
 
   if (!currentConfig) {
     resultAnnotations.push({
       label: defaultAnnotationLabel,
       key: {
         type: 'point_in_time',
-        timestamp: getStaticDate(getDataLayers(prevState.layers), activeData),
+        timestamp: getStaticDate(getDataLayers(prevState.layers), frame.activeData),
       },
       icon: 'triangle',
       ...previousConfig,

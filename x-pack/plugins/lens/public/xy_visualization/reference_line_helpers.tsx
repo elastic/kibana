@@ -267,7 +267,7 @@ function computeStaticValueForGroup(
  * @returns new hashmap of tables, where all the tables are mapped by layerId.
  */
 export const convertActiveDataFromIndexesToLayers = (
-  activeData: Record<string, Datatable> | undefined = {},
+  activeData: Record<string, Datatable> | undefined,
   layers: XYState['layers'] = []
 ): Record<string, Datatable> | undefined => {
   if (!activeData) {
@@ -316,13 +316,12 @@ export const getReferenceSupportedLayer = (
   ];
 
   const layers = state?.layers || [];
-  const activeData = convertActiveDataFromIndexesToLayers(frame?.activeData, layers);
 
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
     frame?.datasourceLayers || {},
-    activeData
+    frame?.activeData
   );
 
   const dataLayers = getDataLayers(layers);
@@ -342,7 +341,12 @@ export const getReferenceSupportedLayer = (
         columnId: generateId(),
         dataType: 'number',
         label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
-        staticValue: getStaticValue(dataLayers, label, { activeData }, layerHasNumberHistogram),
+        staticValue: getStaticValue(
+          dataLayers,
+          label,
+          { activeData: frame?.activeData },
+          layerHasNumberHistogram
+        ),
       }))
     : undefined;
 
@@ -446,7 +450,6 @@ export const getReferenceConfiguration = ({
     }
   );
 
-  const activeData = convertActiveDataFromIndexesToLayers(frame?.activeData, state.layers);
   const groupsToShow = getGroupsToShow(
     [
       // When a reference layer panel is added, a static reference line should automatically be included by default
@@ -472,7 +475,7 @@ export const getReferenceConfiguration = ({
     ],
     state,
     frame.datasourceLayers,
-    activeData
+    frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
   return {
