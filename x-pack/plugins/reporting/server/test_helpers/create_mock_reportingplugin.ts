@@ -119,6 +119,16 @@ export const createMockConfigSchema = (
       enabled: false,
       ...overrides.roles,
     },
+    capture: {
+      maxAttempts: 1,
+      loadDelay: 1,
+      timeouts: {
+        openUrl: 100,
+        renderComplete: 100,
+        waitForElements: 100,
+      },
+      zoom: 1,
+    },
   } as ReportingConfigType;
 };
 

@@ -209,16 +209,6 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'searcha
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
-// @public @deprecated
-export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
-    // (undocumented)
-    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-    // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-    // (undocumented)
-    stop?(): void;
-}
-
 // @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
@@ -839,6 +829,8 @@ export interface OverlayFlyoutOpenOptions {
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
+    outsideClickCloses?: boolean;
+    // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
     size?: EuiFlyoutSize;
@@ -920,7 +912,7 @@ interface Plugin_2<TSetup = void, TStart = void, TPluginsSetup extends object = 
 export { Plugin_2 as Plugin }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -972,6 +964,7 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export interface ResolvedSimpleSavedObject<T = unknown> {
+    alias_purpose?: SavedObjectsResolveResponse['alias_purpose'];
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
@@ -1255,8 +1248,6 @@ export interface SavedObjectsImportFailure {
         icon?: string;
     };
     overwrite?: boolean;
-    // @deprecated (undocumented)
-    title?: string;
     // (undocumented)
     type: string;
 }
@@ -1359,6 +1350,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
     alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
@@ -1401,7 +1393,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History_2<
 
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1427,6 +1419,8 @@ export class SimpleSavedObject<T = unknown> {
     set(key: string, value: any): T;
     // (undocumented)
     type: SavedObject<T>['type'];
+    // (undocumented)
+    updatedAt: SavedObject<T>['updated_at'];
     // (undocumented)
     _version?: SavedObject<T>['version'];
 }
@@ -1542,6 +1536,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:183:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

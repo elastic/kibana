@@ -14,7 +14,7 @@ import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export * from './deprecated';
-export { getEsQueryConfig } from '../common';
+export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
 /**
  * Exporters (CSV)

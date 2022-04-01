@@ -38,7 +38,6 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import type { FieldFormatsStart } from '../../../../src/plugins/field_formats/public/index';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -96,7 +95,6 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;

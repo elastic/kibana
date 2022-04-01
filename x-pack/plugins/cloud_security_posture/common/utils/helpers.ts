@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 
 /**
  * @example
@@ -16,7 +15,7 @@ export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
 
 export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'): string => {
   if (e instanceof Error) return e.message;
-  if (t.record(t.literal('message'), t.string).is(e)) return e.message;
+  if (typeof e === 'string') return e;
 
   return defaultMessage; // TODO: i18n
 };

@@ -23,6 +23,8 @@ import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 
 import { hasMultipleConnectorOptions } from '../../../../utils';
 
+import { SourcesLogic } from '../../sources_logic';
+
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
@@ -39,16 +41,27 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
     useActions(AddSourceLogic);
   const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
-  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
-    sourceConfigData;
-  const { serviceType, configuration, features, objTypes } = props.sourceData;
+  const {
+    name,
+    categories,
+    needsPermissions,
+    accountContextOnly,
+    privateSourcesEnabled,
+    configured,
+  } = sourceConfigData;
+  const { serviceType, configuration, features, objTypes, externalConnectorAvailable } =
+    props.sourceData;
   const addPath = getAddPath(serviceType);
   const { isOrganization } = useValues(AppLogic);
+  const { externalConfigured } = useValues(SourcesLogic);
 
   useEffect(() => {
-    initializeAddSource(props);
+    // We can land on this page from a choice page for multiple types of connectors
+    // If that's the case we want to skip the intro and configuration, if the external & internal connector have already been configured
+    const goToConnect = externalConnectorAvailable && externalConfigured && configured;
+    initializeAddSource(goToConnect ? { ...props, connect: true } : props);
     return resetSourceState;
-  }, []);
+  }, [configured]);
 
   const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
   const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
@@ -81,7 +94,12 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro
           name={name}
-          advanceStep={hasMultipleConnectorOptions(props.sourceData) ? goToChoice : goToSaveConfig}
+          // TODO: Remove this once we can support multiple external connectors
+          advanceStep={
+            hasMultipleConnectorOptions(props.sourceData) && !externalConfigured
+              ? goToChoice
+              : goToSaveConfig
+          }
           header={header}
         />
       )}
@@ -101,6 +119,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
           advanceStep={goToConnectInstance}
           privateSourcesEnabled={privateSourcesEnabled}
           header={header}
+          showFeedbackLink={serviceType === 'external'}
         />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConnectInstanceStep && (

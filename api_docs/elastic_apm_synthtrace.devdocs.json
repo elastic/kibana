@@ -60,6 +60,20 @@
                 "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.ApmSynthtraceEsClient.Unnamed.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "forceDataStreams",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -81,6 +95,36 @@
           },
           {
             "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplates",
+            "type": "Function",
+            "tags": [],
+            "label": "updateComponentTemplates",
+            "description": [],
+            "signature": [
+              "(numberOfPrimaryShards: number) => Promise<void>"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplates.$1",
+                "type": "number",
+                "tags": [],
+                "label": "numberOfPrimaryShards",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
             "id": "def-server.ApmSynthtraceEsClient.index",
             "type": "Function",
             "tags": [],
@@ -92,10 +136,20 @@
                 "pluginId": "@elastic/apm-synthtrace",
                 "scope": "server",
                 "docId": "kibElasticApmSynthtracePluginApi",
-                "section": "def-server.Fields",
-                "text": "Fields"
+                "section": "def-server.SpanIterable",
+                "text": "SpanIterable"
               },
-              "[]) => Promise<",
+              " | ",
+              {
+                "pluginId": "@elastic/apm-synthtrace",
+                "scope": "server",
+                "docId": "kibElasticApmSynthtracePluginApi",
+                "section": "def-server.SpanIterable",
+                "text": "SpanIterable"
+              },
+              "[], options?: ",
+              "StreamToBulkOptions",
+              " | undefined) => Promise<",
               "IndicesRefreshResponse",
               ">"
             ],
@@ -105,7 +159,7 @@
               {
                 "parentPluginId": "@elastic/apm-synthtrace",
                 "id": "def-server.ApmSynthtraceEsClient.index.$1",
-                "type": "Array",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "events",
                 "description": [],
@@ -114,16 +168,212 @@
                     "pluginId": "@elastic/apm-synthtrace",
                     "scope": "server",
                     "docId": "kibElasticApmSynthtracePluginApi",
-                    "section": "def-server.Fields",
-                    "text": "Fields"
+                    "section": "def-server.SpanIterable",
+                    "text": "SpanIterable"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@elastic/apm-synthtrace",
+                    "scope": "server",
+                    "docId": "kibElasticApmSynthtracePluginApi",
+                    "section": "def-server.SpanIterable",
+                    "text": "SpanIterable"
                   },
                   "[]"
                 ],
                 "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.ApmSynthtraceEsClient.index.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "StreamToBulkOptions",
+                  " | undefined"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/apm-synthtrace",
+        "id": "def-server.SpanArrayIterable",
+        "type": "Class",
+        "tags": [],
+        "label": "SpanArrayIterable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibElasticApmSynthtracePluginApi",
+            "section": "def-server.SpanArrayIterable",
+            "text": "SpanArrayIterable"
+          },
+          " implements ",
+          {
+            "pluginId": "@elastic/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibElasticApmSynthtracePluginApi",
+            "section": "def-server.SpanIterable",
+            "text": "SpanIterable"
+          }
+        ],
+        "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.SpanArrayIterable.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  "ApmFields",
+                  "[]"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.order",
+            "type": "Function",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "() => \"asc\" | \"desc\""
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.Symbol.asyncIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "[Symbol.asyncIterator]",
+            "description": [],
+            "signature": [
+              "() => AsyncIterator<",
+              "ApmFields",
+              ", any, undefined>"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.Symbol.iterator",
+            "type": "Function",
+            "tags": [],
+            "label": "[Symbol.iterator]",
+            "description": [],
+            "signature": [
+              "() => Iterator<",
+              "ApmFields",
+              ", any, undefined>"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.concat",
+            "type": "Function",
+            "tags": [],
+            "label": "concat",
+            "description": [],
+            "signature": [
+              "(...iterables: ",
+              {
+                "pluginId": "@elastic/apm-synthtrace",
+                "scope": "server",
+                "docId": "kibElasticApmSynthtracePluginApi",
+                "section": "def-server.SpanIterable",
+                "text": "SpanIterable"
+              },
+              "[]) => ",
+              "SpanGeneratorsUnion"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.SpanArrayIterable.concat.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "iterables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/apm-synthtrace",
+                    "scope": "server",
+                    "docId": "kibElasticApmSynthtracePluginApi",
+                    "section": "def-server.SpanIterable",
+                    "text": "SpanIterable"
+                  },
+                  "[]"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanArrayIterable.toArray",
+            "type": "Function",
+            "tags": [],
+            "label": "toArray",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ApmFields",
+              "[]"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -254,7 +504,7 @@
         "label": "timerange",
         "description": [],
         "signature": [
-          "(from: number, to: number) => ",
+          "(from: number | Date, to: number | Date) => ",
           "Timerange"
         ],
         "path": "packages/elastic-apm-synthtrace/src/lib/timerange.ts",
@@ -263,12 +513,12 @@
           {
             "parentPluginId": "@elastic/apm-synthtrace",
             "id": "def-server.timerange.$1",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "from",
             "description": [],
             "signature": [
-              "number"
+              "number | Date"
             ],
             "path": "packages/elastic-apm-synthtrace/src/lib/timerange.ts",
             "deprecated": false,
@@ -277,12 +527,12 @@
           {
             "parentPluginId": "@elastic/apm-synthtrace",
             "id": "def-server.timerange.$2",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "to",
             "description": [],
             "signature": [
-              "number"
+              "number | Date"
             ],
             "path": "packages/elastic-apm-synthtrace/src/lib/timerange.ts",
             "deprecated": false,
@@ -339,6 +589,111 @@
             ],
             "path": "packages/elastic-apm-synthtrace/src/lib/entity.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/apm-synthtrace",
+        "id": "def-server.SpanIterable",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanIterable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/apm-synthtrace",
+            "scope": "server",
+            "docId": "kibElasticApmSynthtracePluginApi",
+            "section": "def-server.SpanIterable",
+            "text": "SpanIterable"
+          },
+          " extends Iterable<",
+          "ApmFields",
+          ">,AsyncIterable<",
+          "ApmFields",
+          ">"
+        ],
+        "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanIterable.order",
+            "type": "Function",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "() => \"asc\" | \"desc\""
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanIterable.toArray",
+            "type": "Function",
+            "tags": [],
+            "label": "toArray",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ApmFields",
+              "[]"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/apm-synthtrace",
+            "id": "def-server.SpanIterable.concat",
+            "type": "Function",
+            "tags": [],
+            "label": "concat",
+            "description": [],
+            "signature": [
+              "(...iterables: ",
+              {
+                "pluginId": "@elastic/apm-synthtrace",
+                "scope": "server",
+                "docId": "kibElasticApmSynthtracePluginApi",
+                "section": "def-server.SpanIterable",
+                "text": "SpanIterable"
+              },
+              "[]) => ",
+              "SpanGeneratorsUnion"
+            ],
+            "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/apm-synthtrace",
+                "id": "def-server.SpanIterable.concat.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "iterables",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/apm-synthtrace",
+                    "scope": "server",
+                    "docId": "kibElasticApmSynthtracePluginApi",
+                    "section": "def-server.SpanIterable",
+                    "text": "SpanIterable"
+                  },
+                  "[]"
+                ],
+                "path": "packages/elastic-apm-synthtrace/src/lib/span_iterable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -476,7 +831,7 @@
             "signature": [
               "(events: ",
               "ApmFields",
-              "[]) => { 'metricset.name': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; _doc_count: number; '@timestamp'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
+              "[]) => { 'metricset.name': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; _doc_count: number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
               {
                 "pluginId": "@elastic/apm-synthtrace",
                 "scope": "server",
@@ -484,7 +839,9 @@
                 "section": "def-server.ApmException",
                 "text": "ApmException"
               },
-              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'observer.version'?: string | undefined; 'observer.version_major'?: number | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.name'?: string | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.type'?: string | undefined; 'span.destination.service.response_time.sum.us'?: number | undefined; 'span.destination.service.response_time.count'?: number | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; }[]"
+              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; observer?: ",
+              "Observer",
+              " | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.name'?: string | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.type'?: string | undefined; 'span.destination.service.response_time.sum.us'?: number | undefined; 'span.destination.service.response_time.count'?: number | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; }[]"
             ],
             "path": "packages/elastic-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
@@ -501,7 +858,7 @@
                   "ApmFields",
                   "[]"
                 ],
-                "path": "packages/elastic-apm-synthtrace/src/lib/apm/utils/get_transaction_metrics.ts",
+                "path": "packages/elastic-apm-synthtrace/src/lib/apm/processors/get_transaction_metrics.ts",
                 "deprecated": false
               }
             ]
@@ -516,7 +873,7 @@
             "signature": [
               "(events: ",
               "ApmFields",
-              "[]) => { \"metricset.name\": string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; '@timestamp'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
+              "[]) => { \"metricset.name\": string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
               {
                 "pluginId": "@elastic/apm-synthtrace",
                 "scope": "server",
@@ -524,7 +881,9 @@
                 "section": "def-server.ApmException",
                 "text": "ApmException"
               },
-              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'observer.version'?: string | undefined; 'observer.version_major'?: number | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.duration.histogram'?: { values: number[]; counts: number[]; } | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.name'?: string | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.type'?: string | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; }[]"
+              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; observer?: ",
+              "Observer",
+              " | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.duration.histogram'?: { values: number[]; counts: number[]; } | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.name'?: string | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.type'?: string | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; }[]"
             ],
             "path": "packages/elastic-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
@@ -541,26 +900,10 @@
                   "ApmFields",
                   "[]"
                 ],
-                "path": "packages/elastic-apm-synthtrace/src/lib/apm/utils/get_span_destination_metrics.ts",
+                "path": "packages/elastic-apm-synthtrace/src/lib/apm/processors/get_span_destination_metrics.ts",
                 "deprecated": false
               }
             ]
-          },
-          {
-            "parentPluginId": "@elastic/apm-synthtrace",
-            "id": "def-server.apm.getObserverDefaults",
-            "type": "Function",
-            "tags": [],
-            "label": "getObserverDefaults",
-            "description": [],
-            "signature": [
-              "() => ",
-              "ApmFields"
-            ],
-            "path": "packages/elastic-apm-synthtrace/src/lib/apm/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": []
           },
           {
             "parentPluginId": "@elastic/apm-synthtrace",
@@ -576,45 +919,6 @@
             "deprecated": false,
             "returnComment": [],
             "children": []
-          },
-          {
-            "parentPluginId": "@elastic/apm-synthtrace",
-            "id": "def-server.apm.apmEventsToElasticsearchOutput",
-            "type": "Function",
-            "tags": [],
-            "label": "apmEventsToElasticsearchOutput",
-            "description": [],
-            "signature": [
-              "({ events, writeTargets, }: { events: ",
-              "ApmFields",
-              "[]; writeTargets: ",
-              "ApmElasticsearchOutputWriteTargets",
-              "; }) => ",
-              "ElasticsearchOutput",
-              "[]"
-            ],
-            "path": "packages/elastic-apm-synthtrace/src/lib/apm/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@elastic/apm-synthtrace",
-                "id": "def-server.apm.apmEventsToElasticsearchOutput.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ events: ",
-                  "ApmFields",
-                  "[]; writeTargets: ",
-                  "ApmElasticsearchOutputWriteTargets",
-                  "; }"
-                ],
-                "path": "packages/elastic-apm-synthtrace/src/lib/apm/utils/apm_events_to_elasticsearch_output.ts",
-                "deprecated": false
-              }
-            ]
           },
           {
             "parentPluginId": "@elastic/apm-synthtrace",
@@ -645,7 +949,7 @@
                   "ApmFields",
                   "[]"
                 ],
-                "path": "packages/elastic-apm-synthtrace/src/lib/apm/utils/get_breakdown_metrics.ts",
+                "path": "packages/elastic-apm-synthtrace/src/lib/apm/processors/get_breakdown_metrics.ts",
                 "deprecated": false
               }
             ]
@@ -658,9 +962,9 @@
             "label": "getApmWriteTargets",
             "description": [],
             "signature": [
-              "({ client, }: { client: ",
+              "({ client, forceDataStreams, }: { client: ",
               "default",
-              "; }) => Promise<",
+              "; forceDataStreams?: boolean | undefined; }) => Promise<",
               "ApmElasticsearchOutputWriteTargets",
               ">"
             ],
@@ -678,7 +982,7 @@
                 "signature": [
                   "{ client: ",
                   "default",
-                  "; }"
+                  "; forceDataStreams?: boolean | undefined; }"
                 ],
                 "path": "packages/elastic-apm-synthtrace/src/lib/apm/utils/get_apm_write_targets.ts",
                 "deprecated": false

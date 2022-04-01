@@ -90,13 +90,7 @@
         "description": [],
         "signature": [
           "({ reportType, allSeries }: { reportType: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.ReportViewType",
-            "text": "ReportViewType"
-          },
+          "ReportViewType",
           "; allSeries: ",
           {
             "pluginId": "observability",
@@ -221,6 +215,40 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.createUseRulesLink",
+        "type": "Function",
+        "tags": [],
+        "label": "createUseRulesLink",
+        "description": [],
+        "signature": [
+          "(isNewRuleManagementEnabled: boolean) => (options?: ",
+          "Options",
+          ") => ",
+          "LinkProps"
+        ],
+        "path": "x-pack/plugins/observability/public/hooks/create_use_rules_link.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.createUseRulesLink.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNewRuleManagementEnabled",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/plugins/observability/public/hooks/create_use_rules_link.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.DatePicker",
         "type": "Function",
         "tags": [],
@@ -247,6 +275,48 @@
             "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
             "deprecated": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.DatePickerContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "DatePickerContextProvider",
+        "description": [],
+        "signature": [
+          "({ children }: { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.DatePickerContextProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-public.DatePickerContextProvider.$1.children",
+                "type": "Object",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "x-pack/plugins/observability/public/context/date_picker_context.tsx",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -293,7 +363,7 @@
         "label": "ExploratoryViewContextProvider",
         "description": [],
         "signature": [
-          "({\n  children,\n  reportTypes,\n  dataTypes,\n  indexPatterns,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
+          "({\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx",
         "deprecated": false,
@@ -303,7 +373,7 @@
             "id": "def-public.ExploratoryViewContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  indexPatterns,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}",
+            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}",
             "description": [],
             "signature": [
               "{ children: JSX.Element; } & ExploratoryViewContextValue"
@@ -1321,41 +1391,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.useRulesLink",
-        "type": "Function",
-        "tags": [],
-        "label": "useRulesLink",
-        "description": [],
-        "signature": [
-          "(options: ",
-          "Options",
-          " | undefined) => ",
-          "LinkProps"
-        ],
-        "path": "x-pack/plugins/observability/public/hooks/use_rules_link.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.useRulesLink.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              "Options",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/hooks/use_rules_link.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.useTheme",
         "type": "Function",
         "tags": [],
@@ -1657,18 +1692,18 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-public.ConfigProps.indexPattern",
+            "id": "def-public.ConfigProps.dataView",
             "type": "Object",
             "tags": [],
-            "label": "indexPattern",
+            "label": "dataView",
             "description": [],
             "signature": [
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               }
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -1715,7 +1750,7 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertingExperience: { enabled: boolean; }; cases: { enabled: boolean; }; overviewNext: { enabled: boolean; }; }"
+              "{ alertingExperience: { enabled: boolean; }; rules: { enabled: boolean; }; cases: { enabled: boolean; }; overviewNext: { enabled: boolean; }; }"
             ],
             "path": "x-pack/plugins/observability/public/index.ts",
             "deprecated": false
@@ -1949,7 +1984,13 @@
             "label": "axisTitlesVisibility",
             "description": [],
             "signature": [
-              "AxesSettingsConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxesSettingsConfig",
+                "text": "AxesSettingsConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
@@ -2165,13 +2206,7 @@
             "description": [],
             "signature": [
               "boolean | ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ActionTypes",
-                "text": "ActionTypes"
-              },
+              "ActionTypes",
               "[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
@@ -2317,6 +2352,39 @@
             "type": "boolean",
             "tags": [],
             "label": "hasData",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.InfraLogsHasDataResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "InfraLogsHasDataResponse",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.InfraLogsHasDataResponse.hasData",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasData",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.InfraLogsHasDataResponse.indices",
+            "type": "string",
+            "tags": [],
+            "label": "indices",
             "description": [],
             "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false
@@ -2945,10 +3013,19 @@
           {
             "parentPluginId": "observability",
             "id": "def-public.ObservabilityHasDataResponse.infra_logs",
-            "type": "boolean",
+            "type": "Object",
             "tags": [],
             "label": "infra_logs",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.InfraLogsHasDataResponse",
+                "text": "InfraLogsHasDataResponse"
+              }
+            ],
             "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false
           },
@@ -3178,207 +3255,7 @@
             "label": "dataViews",
             "description": [],
             "signature": [
-              "{ create: (spec: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", skipFetchFields?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[]>; get: (id: string) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; getCanSave: () => Promise<boolean>; ensureDefaultDataView: ",
-              "EnsureDefaultDataView",
-              "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewListItem",
-                "text": "DataViewListItem"
-              },
-              "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
-              "SavedObject",
-              "<",
-              "IndexPatternSavedObjectAttrs",
-              ">[] | null | undefined>; getDefault: () => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.GetFieldsOptions",
-                "text": "GetFieldsOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>; getFieldsForIndexPattern: (indexPattern: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", options?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.GetFieldsOptions",
-                "text": "GetFieldsOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>; refreshFields: (indexPattern: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ") => Promise<void>; fieldArrayToMap: (fields: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[], fieldAttrs?: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldAttrs",
-                "text": "FieldAttrs"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewFieldMap",
-                "text": "DataViewFieldMap"
-              },
-              "; savedObjectToSpec: (savedObject: ",
-              "SavedObject",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">) => ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              "; createAndSave: (spec: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; createSavedObject: (indexPattern: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ", override?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; updateSavedObject: (indexPattern: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; getCanSaveSync: () => boolean; }"
+              "DataViewsServicePublic"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
@@ -3417,6 +3294,47 @@
                 "section": "def-public.DiscoverStart",
                 "text": "DiscoverStart"
               }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              "{ getFeatures: () => Promise<",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]>; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.kibanaFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "kibanaFeatures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
@@ -3619,7 +3537,7 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false
@@ -3645,7 +3563,13 @@
             "label": "seriesTypes",
             "description": [],
             "signature": [
-              "SeriesType",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.SeriesType",
+                "text": "SeriesType"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -3697,6 +3621,19 @@
                 "text": "PersistableFilter"
               },
               ")[] | undefined; })[]"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SeriesConfig.textDefinitionFields",
+            "type": "Array",
+            "tags": [],
+            "label": "textDefinitionFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false
@@ -3779,7 +3716,13 @@
             "label": "yConfig",
             "description": [],
             "signature": [
-              "YConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YConfig",
+                "text": "YConfig"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -3869,7 +3812,13 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "SeriesType",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.SeriesType",
+                "text": "SeriesType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -3896,7 +3845,7 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"mobile\" | \"apm\" | \"synthetics\" | \"infra_metrics\" | \"infra_logs\" | \"ux\""
+              "\"mobile\" | \"apm\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false
@@ -3910,6 +3859,20 @@
             "description": [],
             "signature": [
               "URLReportDefinition",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SeriesUrl.textReportDefinitions",
+            "type": "Object",
+            "tags": [],
+            "label": "textReportDefinitions",
+            "description": [],
+            "signature": [
+              "URLTextReportDefinition",
               " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -4397,20 +4360,6 @@
     "misc": [
       {
         "parentPluginId": "observability",
-        "id": "def-public.ActionTypes",
-        "type": "Type",
-        "tags": [],
-        "label": "ActionTypes",
-        "description": [],
-        "signature": [
-          "\"save\" | \"explore\" | \"addToCase\" | \"openInLens\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/use_actions.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.AddInspectorRequest",
         "type": "Type",
         "tags": [],
@@ -4555,6 +4504,20 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.enableServiceGroups",
+        "type": "string",
+        "tags": [],
+        "label": "enableServiceGroups",
+        "description": [],
+        "signature": [
+          "\"observability:enableServiceGroups\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.FetchData",
         "type": "Type",
         "tags": [],
@@ -4666,7 +4629,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"restrictWidth\" | \"template\" | \"pageHeader\" | \"isEmptyState\" | \"noDataConfig\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\"> & { showSolutionNav?: boolean | undefined; }"
+          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"restrictWidth\" | \"template\" | \"noDataConfig\" | \"pageHeader\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\" | \"isEmptyState\"> & { showSolutionNav?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/page_template/lazy_page_template.tsx",
         "deprecated": false,
@@ -4694,7 +4657,7 @@
         "label": "ObservabilityFetchDataPlugins",
         "description": [],
         "signature": [
-          "\"apm\" | \"synthetics\" | \"infra_metrics\" | \"infra_logs\" | \"ux\""
+          "\"apm\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\""
         ],
         "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
         "deprecated": false,
@@ -4807,20 +4770,6 @@
           "\"REPORT_METRIC_FIELD\""
         ],
         "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ReportViewType",
-        "type": "Type",
-        "tags": [],
-        "label": "ReportViewType",
-        "description": [],
-        "signature": [
-          "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4987,7 +4936,11 @@
         "Observable",
         "<",
         "NavigationSection",
-        "[]>) => void; }; }"
+        "[]>) => void; }; useRulesLink: (options?: ",
+        "Options",
+        ") => ",
+        "LinkProps",
+        "; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
       "deprecated": false,
@@ -5005,13 +4958,7 @@
         "{ navigation: { PageTemplate: (pageTemplateProps: ",
         "WrappedPageTemplateProps",
         ") => JSX.Element; }; createExploratoryViewUrl: ({ reportType, allSeries }: { reportType: ",
-        {
-          "pluginId": "observability",
-          "scope": "public",
-          "docId": "kibObservabilityPluginApi",
-          "section": "def-public.ReportViewType",
-          "text": "ReportViewType"
-        },
+        "ReportViewType",
         "; allSeries: ",
         {
           "pluginId": "observability",
@@ -5020,7 +4967,17 @@
           "section": "def-public.AllSeries",
           "text": "AllSeries"
         },
-        "; }, baseHref?: string, appId?: string) => string; ExploratoryViewEmbeddable: (props: ",
+        "; }, baseHref?: string, appId?: string) => string; getAppDataView: (appId: ",
+        "AppDataType",
+        ", indexPattern?: string | undefined) => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.DataView",
+          "text": "DataView"
+        },
+        " | null | undefined>; ExploratoryViewEmbeddable: (props: ",
         {
           "pluginId": "observability",
           "scope": "public",
@@ -5028,7 +4985,11 @@
           "section": "def-public.ExploratoryEmbeddableProps",
           "text": "ExploratoryEmbeddableProps"
         },
-        ") => JSX.Element; }"
+        ") => JSX.Element; useRulesLink: (options?: ",
+        "Options",
+        ") => ",
+        "LinkProps",
+        "; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
       "deprecated": false,
@@ -5402,6 +5363,10 @@
                   "; helpers: ",
                   "default",
                   "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "default",
+                  "; child: (opts: ",
+                  "ClientOptions",
+                  ") => ",
                   "default",
                   "; Internal: ",
                   "default",
@@ -7210,6 +7175,20 @@
     "misc": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.apmServiceInventoryOptimizedSorting",
+        "type": "string",
+        "tags": [],
+        "label": "apmServiceInventoryOptimizedSorting",
+        "description": [],
+        "signature": [
+          "\"observability:apmServiceInventoryOptimizedSorting\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.AsDuration",
         "type": "Type",
         "tags": [],
@@ -7333,6 +7312,20 @@
           "\"/cases\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.defaultApmServiceEnvironment",
+        "type": "string",
+        "tags": [],
+        "label": "defaultApmServiceEnvironment",
+        "description": [],
+        "signature": [
+          "\"observability:apmDefaultServiceEnvironment\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

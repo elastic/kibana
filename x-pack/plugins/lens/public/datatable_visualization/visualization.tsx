@@ -32,7 +32,10 @@ export interface DatatableVisualizationState {
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
-  fitRowToContent?: boolean;
+  rowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeightLines?: number;
+  headerRowHeightLines?: number;
   paging?: PagingState;
 }
 
@@ -400,7 +403,16 @@ export const getDatatableVisualization = ({
             }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
-            fitRowToContent: [state.fitRowToContent ?? false],
+            fitRowToContent: [state.rowHeight === 'auto'],
+            headerRowHeight: [state.headerRowHeight ?? 'single'],
+            rowHeightLines: [
+              !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
+            ],
+            headerRowHeightLines: [
+              !state.headerRowHeight || state.headerRowHeight === 'single'
+                ? 1
+                : state.headerRowHeightLines ?? 2,
+            ],
             pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },

@@ -128,6 +128,7 @@ export async function getAgentsByKuery(
       from,
       size,
       track_total_hits: true,
+      rest_total_hits_as_int: true,
       ignore_unavailable: true,
       body: {
         ...body,
@@ -137,7 +138,7 @@ export async function getAgentsByKuery(
   const res = await queryAgents((page - 1) * perPage, perPage);
 
   let agents = res.hits.hits.map(searchHitToAgent);
-  let total = (res.hits.total as estypes.SearchTotalHits).value;
+  let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
@@ -202,11 +203,13 @@ export async function countInactiveAgents(
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
+    rest_total_hits_as_int: true,
+    filter_path: 'hits.total',
     ignore_unavailable: true,
     body,
   });
-  // @ts-expect-error value is number | TotalHits
-  return res.body.hits.total.value;
+
+  return (res.hits.total as number) || 0;
 }
 
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {

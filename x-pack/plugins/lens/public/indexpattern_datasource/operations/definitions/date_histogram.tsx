@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -38,6 +38,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
 import { IndexPatternLayer } from '../../types';
+import { TooltipWrapper } from '../../../shared_components';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -48,6 +49,8 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   params: {
     interval: string;
     ignoreTimeRange?: boolean;
+    includeEmptyRows?: boolean;
+    dropPartials?: boolean;
   };
 }
 
@@ -76,7 +79,7 @@ function getMultipleDateHistogramsErrorMessage(layer: IndexPatternLayer, columnI
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field',
-  { interval: string }
+  { interval: string; dropPartials?: boolean }
 > = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
@@ -118,6 +121,8 @@ export const dateHistogramOperation: OperationDefinition<
       scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
+        includeEmptyRows: true,
+        dropPartials: Boolean(columnParams?.dropPartials),
       },
     };
   },
@@ -142,6 +147,11 @@ export const dateHistogramOperation: OperationDefinition<
     const usedField = indexPattern.getFieldByName(column.sourceField);
     let timeZone: string | undefined;
     let interval = column.params?.interval ?? autoInterval;
+    const dropPartials = Boolean(
+      column.params?.dropPartials &&
+        // set to false when detached from time picker
+        (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
+    );
     if (
       usedField &&
       usedField.aggregationRestrictions &&
@@ -158,9 +168,10 @@ export const dateHistogramOperation: OperationDefinition<
       time_zone: timeZone,
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
       interval,
-      drop_partials: false,
-      min_doc_count: 0,
+      drop_partials: dropPartials,
+      min_doc_count: column.params?.includeEmptyRows ? 0 : 1,
       extended_bounds: extendedBoundsToAst({}),
+      extendToTimeRange: column.params?.includeEmptyRows,
     }).toAst();
   },
   paramEditor: function ParamEditor({
@@ -186,20 +197,37 @@ export const dateHistogramOperation: OperationDefinition<
       restrictedInterval(field!.aggregationRestrictions)
     );
 
-    function onChangeAutoInterval(ev: EuiSwitchEvent) {
-      const { fromDate, toDate } = dateRange;
-      const value = ev.target.checked
-        ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
-        : autoInterval;
-      updateLayer(
-        updateColumnParam({
-          layer: updateColumnParam({ layer, columnId, paramName: 'interval', value }),
-          columnId,
-          paramName: 'ignoreTimeRange',
-          value: false,
-        })
-      );
-    }
+    const onChangeAutoInterval = useCallback(
+      (ev: EuiSwitchEvent) => {
+        const { fromDate, toDate } = dateRange;
+        const value = ev.target.checked
+          ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
+          : autoInterval;
+        updateLayer(
+          updateColumnParam({
+            layer: updateColumnParam({ layer, columnId, paramName: 'interval', value }),
+            columnId,
+            paramName: 'ignoreTimeRange',
+            value: false,
+          })
+        );
+      },
+      [dateRange, data.search.aggs, updateLayer, layer, columnId]
+    );
+
+    const onChangeDropPartialBuckets = useCallback(
+      (ev: EuiSwitchEvent) => {
+        updateLayer(
+          updateColumnParam({
+            layer,
+            columnId,
+            paramName: 'dropPartials',
+            value: ev.target.checked,
+          })
+        );
+      },
+      [columnId, layer, updateLayer]
+    );
 
     const setInterval = (newInterval: typeof interval) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
@@ -208,8 +236,33 @@ export const dateHistogramOperation: OperationDefinition<
       updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     };
 
+    const bindToGlobalTimePickerValue =
+      indexPattern.timeFieldName === field?.name || !currentColumn.params.ignoreTimeRange;
+
     return (
       <>
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+          <TooltipWrapper
+            tooltipContent={i18n.translate(
+              'xpack.lens.indexPattern.dateHistogram.dropPartialBucketsHelp',
+              {
+                defaultMessage:
+                  'Drop partial buckets is disabled as these can be computed only for a time field bound to global time picker in the top right.',
+              }
+            )}
+            condition={!bindToGlobalTimePickerValue}
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.dateHistogram.dropPartialBuckets', {
+                defaultMessage: 'Drop partial buckets',
+              })}
+              checked={Boolean(currentColumn.params.dropPartials)}
+              onChange={onChangeDropPartialBuckets}
+              compressed
+              disabled={!bindToGlobalTimePickerValue}
+            />
+          </TooltipWrapper>
+        </EuiFormRow>
         {!intervalIsRestricted && (
           <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
@@ -375,10 +428,7 @@ export const dateHistogramOperation: OperationDefinition<
                   </>
                 }
                 disabled={indexPattern.timeFieldName === field?.name}
-                checked={
-                  indexPattern.timeFieldName === field?.name ||
-                  !currentColumn.params.ignoreTimeRange
-                }
+                checked={bindToGlobalTimePickerValue}
                 onChange={() => {
                   updateLayer(
                     updateColumnParam({
@@ -394,6 +444,26 @@ export const dateHistogramOperation: OperationDefinition<
             </EuiFormRow>
           </>
         )}
+        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.lens.indexPattern.dateHistogram.includeEmptyRows', {
+              defaultMessage: 'Include empty rows',
+            })}
+            checked={Boolean(currentColumn.params.includeEmptyRows)}
+            data-test-subj="indexPattern-include-empty-rows"
+            onChange={() => {
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'includeEmptyRows',
+                  value: !currentColumn.params.includeEmptyRows,
+                })
+              );
+            }}
+            compressed
+          />
+        </EuiFormRow>
       </>
     );
   },

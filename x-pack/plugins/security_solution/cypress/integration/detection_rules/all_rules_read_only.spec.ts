@@ -12,7 +12,7 @@ import {
   RULE_CHECKBOX,
   RULE_NAME,
 } from '../../screens/alerts_detection_rules';
-import { PAGE_TITLE } from '../../screens/common/page';
+import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -35,6 +35,10 @@ describe('All rules - read only', () => {
     cy.get(RULE_CHECKBOX).should('not.exist');
   });
 
+  it('Disables value lists upload', () => {
+    cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('be.disabled');
+  });
+
   it('Does not display action options', () => {
     // These are the 3 dots at the end of the row that opens up
     // options to take action on the rule
@@ -51,7 +55,6 @@ describe('All rules - read only', () => {
 
       dismissCallOut(MISSING_PRIVILEGES_CALLOUT);
       cy.reload();
-      cy.get(PAGE_TITLE).should('be.visible');
       cy.get(RULE_NAME).should('have.text', getNewRule().name);
 
       getCallOut(MISSING_PRIVILEGES_CALLOUT).should('not.exist');

@@ -23,6 +23,7 @@ import {
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
+  AlertExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -30,6 +31,11 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+}));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
@@ -117,6 +123,46 @@ describe('rule_details', () => {
         </EuiText>
       )
     ).toBeTruthy();
+  });
+
+  it('renders the rule warning banner with warning message, when rule status is a warning', () => {
+    const rule = mockRule({
+      executionStatus: {
+        status: 'warning',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        warning: {
+          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          message: 'warning message',
+        },
+      },
+    });
+    expect(
+      shallow(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      ).containsMatchingElement(
+        <EuiText size="s" color="warning" data-test-subj="ruleWarningMessageText">
+          {'warning message'}
+        </EuiText>
+      )
+    ).toBeTruthy();
+  });
+
+  it('displays a toast message when interval is less than configured minimum', async () => {
+    const rule = mockRule({
+      schedule: {
+        interval: '1s',
+      },
+    });
+    const wrapper = mountWithIntl(
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
   });
 
   describe('actions', () => {

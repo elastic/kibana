@@ -116,7 +116,6 @@ export async function validateReferences(params: ValidateReferencesParams) {
     errorMap[`${type}:${id}`] = {
       id,
       type,
-      title,
       meta: { title },
       error: { type: 'missing_references', references: missingReferences },
     };

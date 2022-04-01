@@ -32,7 +32,7 @@ import {
 import { setChangesApplied } from '../../state_management/lens_slice';
 
 const SELECTORS = {
-  APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsSuggestionApplyChanges"]',
+  APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
   SUGGESTIONS_PANEL: '[data-test-subj="lnsSuggestionsPanel"]',
   SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
 };

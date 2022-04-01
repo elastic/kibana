@@ -6,30 +6,28 @@
  */
 
 import { useMemo } from 'react';
-import { LogSourceConfigurationProperties } from '../../../containers/logs/log_source';
+import { LogViewAttributes } from '../../../../common/log_views';
 import { useCompositeFormElement } from './form_elements';
 import { useLogIndicesFormElement } from './indices_configuration_form_state';
 import { useLogColumnsFormElement } from './log_columns_configuration_form_state';
 import { useNameFormElement } from './name_configuration_form_state';
 
-export const useLogSourceConfigurationFormState = (
-  configuration?: LogSourceConfigurationProperties
-) => {
-  const nameFormElement = useNameFormElement(configuration?.name ?? '');
+export const useLogSourceConfigurationFormState = (logViewAttributes?: LogViewAttributes) => {
+  const nameFormElement = useNameFormElement(logViewAttributes?.name ?? '');
 
   const logIndicesFormElement = useLogIndicesFormElement(
     useMemo(
       () =>
-        configuration?.logIndices ?? {
+        logViewAttributes?.logIndices ?? {
           type: 'index_name',
           indexName: '',
         },
-      [configuration]
+      [logViewAttributes]
     )
   );
 
   const logColumnsFormElement = useLogColumnsFormElement(
-    useMemo(() => configuration?.logColumns ?? [], [configuration])
+    useMemo(() => logViewAttributes?.logColumns ?? [], [logViewAttributes])
   );
 
   const sourceConfigurationFormElement = useCompositeFormElement(

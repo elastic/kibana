@@ -50,8 +50,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import deepmerge from 'deepmerge';
 
-import ECSSchema from '../../common/schemas/ecs/v1.12.1.json';
-import osquerySchema from '../../common/schemas/osquery/v5.0.1.json';
+import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import {
@@ -590,7 +590,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
       () => ({
         key: {
           type: FIELD_TYPES.COMBO_BOX,
-          fieldsToValidateOnChange: ['result.value'],
+          fieldsToValidateOnChange: ['result.value', 'key'],
           validations: [
             {
               validator: getEcsFieldValidator(editForm),
@@ -638,7 +638,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
 
     const handleSubmit = useCallback(async () => {
       validate();
-      validateFields(['result.value']);
+      validateFields(['result.value', 'key']);
       const { data, isValid } = await submit();
 
       if (isValid) {

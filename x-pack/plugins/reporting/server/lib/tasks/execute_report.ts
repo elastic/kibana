@@ -20,7 +20,8 @@ import type {
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { QueueTimeoutError, ReportingError, UnknownError } from '../../../common/errors';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
+import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -233,7 +234,7 @@ export class ExecuteReportTask implements ReportingTask {
       const defaultOutput = null;
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
-      docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.warnings = [output.toString()];
       docOutput.error_code = output.code;
     }
 
@@ -286,6 +287,12 @@ export class ExecuteReportTask implements ReportingTask {
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
     return report;
+  }
+
+  // Generic is used to let TS infer the return type at call site.
+  private async throwIfKibanaShutsDown<T>(): Promise<T> {
+    await this.reporting.getKibanaShutdown$().toPromise();
+    throw new KibanaShuttingDownError();
   }
 
   /*
@@ -361,7 +368,10 @@ export class ExecuteReportTask implements ReportingTask {
 
             eventLog.logExecutionStart();
 
-            const output = await this._performJob(task, cancellationToken, stream);
+            const output = await Promise.race<TaskRunResult>([
+              this._performJob(task, cancellationToken, stream),
+              this.throwIfKibanaShutsDown(),
+            ]);
 
             stream.end();
 
@@ -418,10 +428,7 @@ export class ExecuteReportTask implements ReportingTask {
                 if (report == null) {
                   throw new Error(`Report ${jobId} is null!`);
                 }
-                const error =
-                  failedToExecuteErr instanceof ReportingError
-                    ? failedToExecuteErr
-                    : new UnknownError();
+                const error = mapToReportingError(failedToExecuteErr);
                 error.details =
                   error.details ||
                   `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;

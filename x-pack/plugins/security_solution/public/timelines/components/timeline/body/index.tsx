@@ -108,7 +108,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
-    const ACTION_BUTTON_COUNT = 5;
+    const ACTION_BUTTON_COUNT = 6;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -229,7 +229,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     );
     const kibana = useKibana();
     const casesPermissions = useGetUserCasesPermissions();
-    const CasesContext = kibana.services.cases.getCasesContext();
+    const CasesContext = kibana.services.cases.ui.getCasesContext();
 
     return (
       <>

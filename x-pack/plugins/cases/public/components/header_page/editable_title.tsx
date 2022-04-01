@@ -71,6 +71,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
       onSubmit(newTitle);
     }
     setEditMode(false);
+    setErrors([]);
   }, [newTitle, onSubmit, title]);
 
   const handleOnChange = useCallback(
@@ -82,39 +83,42 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
 
   return editMode ? (
     <EuiFormRow isInvalid={hasErrors} error={errors} fullWidth>
-      <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={true}
+        gutterSize="m"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={true}>
           <EuiFieldText
+            fullWidth={true}
             onChange={handleOnChange}
             value={`${newTitle}`}
             data-test-subj="editable-title-input-field"
           />
         </EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="success"
-              data-test-subj="editable-title-submit-btn"
-              fill
-              iconType="save"
-              onClick={onClickSubmit}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="editable-title-cancel-btn"
-              iconType="cross"
-              onClick={onCancel}
-              size="s"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="success"
+            data-test-subj="editable-title-submit-btn"
+            fill
+            iconType="save"
+            onClick={onClickSubmit}
+            size="s"
+          >
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="editable-title-cancel-btn"
+            iconType="cross"
+            onClick={onCancel}
+            size="s"
+          >
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   ) : (

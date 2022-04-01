@@ -13,9 +13,11 @@ import * as i18n from './translations';
 interface PreviewLogsComponentProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;
+  isAborted: boolean;
 }
 
 interface SortedLogs {
+  duration: number;
   startedAt?: string;
   logs: string[];
 }
@@ -25,12 +27,25 @@ interface LogAccordionProps {
   isError?: boolean;
 }
 
-const addLogs = (startedAt: string | undefined, logs: string[], allLogs: SortedLogs[]) =>
-  logs.length ? [{ startedAt, logs }, ...allLogs] : allLogs;
+const CustomWarning: React.FC<{ message: string }> = ({ message }) => (
+  <EuiCallOut color={'warning'} iconType="alert" data-test-subj={'preview-abort'}>
+    <EuiText>
+      <p>{message}</p>
+    </EuiText>
+  </EuiCallOut>
+);
+
+const addLogs = (
+  startedAt: string | undefined,
+  logs: string[],
+  duration: number,
+  allLogs: SortedLogs[]
+) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
 export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
   logs,
   hasNoiseWarning,
+  isAborted,
 }) => {
   const sortedLogs = useMemo(
     () =>
@@ -39,8 +54,8 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
         warnings: SortedLogs[];
       }>(
         ({ errors, warnings }, curr) => ({
-          errors: addLogs(curr.startedAt, curr.errors, errors),
-          warnings: addLogs(curr.startedAt, curr.warnings, warnings),
+          errors: addLogs(curr.startedAt, curr.errors, curr.duration, errors),
+          warnings: addLogs(curr.startedAt, curr.warnings, curr.duration, warnings),
         }),
         { errors: [], warnings: [] }
       ),
@@ -49,19 +64,32 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      {hasNoiseWarning ?? <CalloutGroup logs={[i18n.QUERY_PREVIEW_NOISE_WARNING]} />}
+      {hasNoiseWarning ?? <CustomWarning message={i18n.QUERY_PREVIEW_NOISE_WARNING} />}
       <LogAccordion logs={sortedLogs.errors} isError />
-      <LogAccordion logs={sortedLogs.warnings} />
+      <LogAccordion logs={sortedLogs.warnings}>
+        {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
+      </LogAccordion>
     </>
   );
 };
 
-const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
+const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
   const firstLog = logs[0];
-  const restOfLogs = logs.slice(1);
-  return firstLog ? (
+  if (!(children || firstLog)) return null;
+
+  const restOfLogs = children ? logs : logs.slice(1);
+  const bannerElement = children ?? (
+    <CalloutGroup
+      logs={firstLog.logs}
+      startedAt={firstLog.startedAt}
+      isError={isError}
+      duration={firstLog.duration}
+    />
+  );
+
+  return (
     <>
-      <CalloutGroup logs={firstLog.logs} startedAt={firstLog.startedAt} isError={isError} />
+      {bannerElement}
       {restOfLogs.length > 0 ? (
         <EuiAccordion
           id={isError ? 'previewErrorAccordion' : 'previewWarningAccordion'}
@@ -74,6 +102,7 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
               key={`accordion-log-${key}`}
               logs={log.logs}
               startedAt={log.startedAt}
+              duration={log.duration}
               isError={isError}
             />
           ))}
@@ -81,14 +110,15 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
       ) : null}
       <EuiSpacer size="m" />
     </>
-  ) : null;
+  );
 };
 
 export const CalloutGroup: React.FC<{
   logs: string[];
+  duration: number;
   startedAt?: string;
   isError?: boolean;
-}> = ({ logs, startedAt, isError }) => {
+}> = ({ logs, startedAt, isError, duration }) => {
   return logs.length > 0 ? (
     <>
       {logs.map((log, i) => (
@@ -97,7 +127,7 @@ export const CalloutGroup: React.FC<{
             color={isError ? 'danger' : 'warning'}
             iconType="alert"
             data-test-subj={isError ? 'preview-error' : 'preview-warning'}
-            title={startedAt != null ? `[${startedAt}]` : null}
+            title={`${startedAt ? `[${startedAt}] ` : ''}[${duration}ms]`}
           >
             <EuiText>
               <p>{log}</p>

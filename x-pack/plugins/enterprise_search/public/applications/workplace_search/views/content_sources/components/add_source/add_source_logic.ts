@@ -10,7 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { keys, pickBy } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { HttpFetchQuery } from 'src/core/public';
 
 import {
   flashAPIErrors,
@@ -21,11 +20,15 @@ import {
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import { WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
 import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
+
+import {
+  ExternalConnectorLogic,
+  isValidExternalUrl,
+} from './add_external_connector/external_connector_logic';
 
 export interface AddSourceProps {
   sourceData: SourceDataItem;
@@ -110,8 +113,8 @@ export interface SourceConfigData {
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
-    url?: string;
-    apiKey?: string;
+    externalConnectorUrl?: string;
+    externalConnectorApiKey?: string;
   };
   accountContextOnly?: boolean;
 }
@@ -153,15 +156,6 @@ interface PreContentSourceResponse {
   serviceType: string;
   githubOrganizations: string[];
 }
-
-/**
- * Workplace Search needs to know the host for the redirect. As of yet, we do not
- * have access to this in Kibana. We parse it from the browser and pass it as a param.
- */
-const {
-  location: { href },
-} = window;
-const kibanaHost = href.substr(0, href.indexOf(WORKPLACE_SEARCH_URL_PREFIX));
 
 export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
@@ -382,15 +376,21 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/internal/workplace_search/org/sources/${serviceType}/prepare`
         : `/internal/workplace_search/account/sources/${serviceType}/prepare`;
 
-      const query = {
-        kibana_host: kibanaHost,
-      } as HttpFetchQuery;
+      const indexPermissionsQuery = isOrganization
+        ? { index_permissions: indexPermissions }
+        : undefined;
 
-      if (isOrganization) query.index_permissions = indexPermissions;
-      if (subdomain) query.subdomain = subdomain;
+      const query = subdomain
+        ? {
+            ...indexPermissionsQuery,
+            subdomain,
+          }
+        : { ...indexPermissionsQuery };
 
       try {
-        const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
+        const response = await HttpLogic.values.http.get<SourceConnectData>(route, {
+          query,
+        });
         actions.setSourceConnectData(response);
         successCallback(response.oauthUrl);
       } catch (e) {
@@ -405,12 +405,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/internal/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/internal/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
-      const query = {
-        kibana_host: kibanaHost,
-      } as HttpFetchQuery;
-
       try {
-        const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
+        const response = await HttpLogic.values.http.get<SourceConnectData>(route);
         actions.setSourceConnectData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -440,6 +436,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         sourceConfigData,
       } = values;
 
+      const { externalConnectorUrl, externalConnectorApiKey } = ExternalConnectorLogic.values;
+      if (
+        serviceType === 'external' &&
+        externalConnectorUrl &&
+        !isValidExternalUrl(externalConnectorUrl)
+      ) {
+        ExternalConnectorLogic.actions.setUrlValidation(false);
+        actions.setButtonNotLoading();
+        return;
+      }
+
       const route = isUpdating
         ? `/internal/workplace_search/org/settings/connectors/${serviceType}`
         : '/internal/workplace_search/org/settings/connectors';
@@ -454,6 +461,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         private_key: sourceConfigData.configuredFields?.privateKey,
         public_key: sourceConfigData.configuredFields?.publicKey,
         consumer_key: sourceConfigData.configuredFields?.consumerKey,
+        external_connector_url: externalConnectorUrl || undefined,
+        external_connector_api_key: externalConnectorApiKey || undefined,
       };
 
       try {
@@ -482,7 +491,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
-      const query = { ...params, kibana_host: kibanaHost };
+      const query = { ...params };
       const route = '/internal/workplace_search/sources/create';
 
       /**
@@ -570,9 +579,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 });
 
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
-  const { connect, configure, reAuthenticate } = props;
+  const {
+    connect,
+    configure,
+    reAuthenticate,
+    sourceData: { serviceType },
+  } = props;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
+  // TODO: Re-do this once we have more than one external connector type
+  // External connectors have already shown the intro step before the choice page, so we don't want to show it again
+  if (serviceType === 'external') return AddSourceSteps.SaveConfigStep;
   return AddSourceSteps.ConfigIntroStep;
 };

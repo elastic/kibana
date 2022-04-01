@@ -139,11 +139,11 @@ function generateApmData(synthtrace: ApmSynthtraceEsClient) {
   const instance = apm.service('multiple-env-service', 'production', 'go').instance('my-instance');
 
   return synthtrace.index([
-    ...range
+    range
       .interval('1s')
       .rate(1)
-      .flatMap((timestamp) => [
-        ...instance.transaction('GET /api').timestamp(timestamp).duration(30).success().serialize(),
-      ]),
+      .spans((timestamp) =>
+        instance.transaction('GET /api').timestamp(timestamp).duration(30).success().serialize()
+      ),
   ]);
 }

@@ -8,22 +8,44 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ColorMode } from '../../../../../src/plugins/charts/common';
+import {
+  ColorMode,
+  CustomPaletteState,
+  PaletteOutput,
+} from '../../../../../src/plugins/charts/common';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import type { MetricConfig, MetricState } from '../../common/expressions';
+import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
 import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 
+interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
+  title: string;
+  description: string;
+  metricTitle: string;
+  mode: 'reduced' | 'full';
+  colorMode: ColorMode;
+  palette: PaletteOutput<CustomPaletteState>;
+}
+
 export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+
+const getFontSizeAndUnit = (fontSize: string) => {
+  const [size, sizeUnit] = fontSize.split(/(\d+)/).filter(Boolean);
+  return {
+    size: Number(size),
+    sizeUnit,
+  };
+};
 
 const toExpression = (
   paletteService: PaletteRegistry,
@@ -56,22 +78,87 @@ const toExpression = (
     reverse: false,
   };
 
+  const fontSizes: Record<string, { size: number; sizeUnit: string }> = {
+    xs: getFontSizeAndUnit(euiThemeVars.euiFontSizeXS),
+    s: getFontSizeAndUnit(euiThemeVars.euiFontSizeS),
+    m: getFontSizeAndUnit(euiThemeVars.euiFontSizeM),
+    l: getFontSizeAndUnit(euiThemeVars.euiFontSizeL),
+    xl: getFontSizeAndUnit(euiThemeVars.euiFontSizeXL),
+    xxl: getFontSizeAndUnit(euiThemeVars.euiFontSizeXXL),
+  };
+
+  const labelFont = fontSizes[state?.size || 'xl'];
+  const labelToMetricFontSizeMap: Record<string, number> = {
+    xs: fontSizes.xs.size * 2,
+    s: fontSizes.m.size * 2.5,
+    m: fontSizes.l.size * 2.5,
+    l: fontSizes.xl.size * 2.5,
+    xl: fontSizes.xxl.size * 2.5,
+    xxl: fontSizes.xxl.size * 3,
+  };
+  const metricFontSize = labelToMetricFontSizeMap[state?.size || 'xl'];
+
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'lens_metric_chart',
+        function: 'metricVis',
         arguments: {
-          title: [attributes?.title || ''],
-          size: [state?.size || 'xl'],
-          titlePosition: [state?.titlePosition || 'bottom'],
-          textAlign: [state?.textAlign || 'center'],
-          description: [attributes?.description || ''],
-          metricTitle: [operation?.label || ''],
-          accessor: [state.accessor],
-          mode: [attributes?.mode || 'full'],
+          labelPosition: [state?.titlePosition || 'bottom'],
+          font: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'font',
+                  arguments: {
+                    align: [state?.textAlign || 'center'],
+                    size: [metricFontSize],
+                    weight: ['600'],
+                    lHeight: [metricFontSize * 1.5],
+                    sizeUnit: [labelFont.sizeUnit],
+                  },
+                },
+              ],
+            },
+          ],
+          labelFont: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'font',
+                  arguments: {
+                    align: [state?.textAlign || 'center'],
+                    size: [labelFont.size],
+                    lHeight: [labelFont.size * 1.5],
+                    sizeUnit: [labelFont.sizeUnit],
+                  },
+                },
+              ],
+            },
+          ],
+          metric: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'visdimension',
+                  arguments: {
+                    accessor: [state.accessor],
+                  },
+                },
+              ],
+            },
+          ],
+          showLabels: [!attributes?.mode || attributes?.mode === 'full'],
           colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
+          autoScale: [true],
+          colorFullBackground: [true],
           palette:
             state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
@@ -81,6 +168,7 @@ const toExpression = (
     ],
   };
 };
+
 export const getMetricVisualization = ({
   paletteService,
   theme,

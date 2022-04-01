@@ -17,7 +17,11 @@ import {
 
 export const ComplianceTrendChart = () => (
   <Chart size={{ height: 200 }}>
-    <Settings showLegend={false} legendPosition="right" />
+    <Settings
+      showLegend={false}
+      legendPosition="right"
+      // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+    />
     <AreaSeries
       id="compliance_score"
       // TODO: no api for this chart yet, using empty state for now. needs BE

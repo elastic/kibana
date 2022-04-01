@@ -6,27 +6,69 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
+import { ApmFields } from './apm/apm_fields';
+import { SpanIterable } from './span_iterable';
+import { SpanGenerator } from './span_generator';
 
-export class Interval {
+export function parseInterval(interval: string): [number, string] {
+  const args = interval.match(/(\d+)(s|m|h|d)/);
+  if (!args || args.length < 3) {
+    throw new Error('Failed to parse interval');
+  }
+  return [Number(args[1]), args[2] as any];
+}
+
+export class Interval implements Iterable<number> {
   constructor(
-    private readonly from: number,
-    private readonly to: number,
-    private readonly interval: string
-  ) {}
+    public readonly from: Date,
+    public readonly to: Date,
+    public readonly interval: string,
+    public readonly yieldRate: number = 1
+  ) {
+    [this.intervalAmount, this.intervalUnit] = parseInterval(interval);
+  }
 
-  rate(rate: number) {
-    let now = this.from;
-    const args = this.interval.match(/(.*)(s|m|h|d)/);
-    if (!args) {
-      throw new Error('Failed to parse interval');
+  private readonly intervalAmount: number;
+  private readonly intervalUnit: any;
+
+  spans(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
+    return new SpanGenerator(this, [
+      function* (i) {
+        let index = 0;
+        for (const x of i) {
+          for (const a of map(x, index)) {
+            yield a;
+            index++;
+          }
+        }
+      },
+    ]);
+  }
+
+  rate(rate: number): Interval {
+    return new Interval(this.from, this.to, this.interval, rate);
+  }
+  private yieldRateTimestamps(timestamp: number) {
+    return new Array<number>(this.yieldRate).fill(timestamp);
+  }
+
+  private *_generate(): Iterable<number> {
+    if (this.from > this.to) {
+      let now = this.from;
+      do {
+        yield* this.yieldRateTimestamps(now.getTime());
+        now = new Date(moment(now).subtract(this.intervalAmount, this.intervalUnit).valueOf());
+      } while (now > this.to);
+    } else {
+      let now = this.from;
+      do {
+        yield* this.yieldRateTimestamps(now.getTime());
+        now = new Date(moment(now).add(this.intervalAmount, this.intervalUnit).valueOf());
+      } while (now < this.to);
     }
-    const timestamps: number[] = [];
-    while (now < this.to) {
-      timestamps.push(...new Array<number>(rate).fill(now));
-      now = moment(now)
-        .add(Number(args[1]), args[2] as any)
-        .valueOf();
-    }
-    return timestamps;
+  }
+
+  [Symbol.iterator]() {
+    return this._generate()[Symbol.iterator]();
   }
 }

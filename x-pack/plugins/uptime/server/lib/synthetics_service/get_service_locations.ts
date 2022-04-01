@@ -6,24 +6,39 @@
  */
 
 import axios from 'axios';
+import { pick } from 'lodash';
 import {
   ManifestLocation,
+  ServiceLocation,
   Locations,
-  ServiceLocationsApiResponse,
+  ThrottlingOptions,
+  BandwidthLimitKey,
 } from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../adapters/framework';
 
+export const getDevLocation = (devUrl: string): ServiceLocation => ({
+  id: 'localhost',
+  label: 'Local Synthetics Service',
+  geo: { lat: 0, lon: 0 },
+  url: devUrl,
+});
+
 export async function getServiceLocations(server: UptimeServerSetup) {
-  const locations: Locations = [];
+  let locations: Locations = [];
+
+  if (process.env.NODE_ENV !== 'production' && server.config.service?.devUrl) {
+    locations = [getDevLocation(server.config.service.devUrl)];
+  }
 
   if (!server.config.service?.manifestUrl) {
     return { locations };
   }
 
   try {
-    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(
-      server.config.service!.manifestUrl!
-    );
+    const { data } = await axios.get<{
+      throttling: ThrottlingOptions;
+      locations: Record<string, ManifestLocation>;
+    }>(server.config.service!.manifestUrl!);
 
     Object.entries(data.locations).forEach(([locationId, location]) => {
       locations.push({
@@ -35,11 +50,16 @@ export async function getServiceLocations(server: UptimeServerSetup) {
       });
     });
 
-    return { locations } as ServiceLocationsApiResponse;
+    const throttling = pick(
+      data.throttling,
+      BandwidthLimitKey.DOWNLOAD,
+      BandwidthLimitKey.UPLOAD,
+      BandwidthLimitKey.LATENCY
+    ) as ThrottlingOptions;
+
+    return { throttling, locations };
   } catch (e) {
     server.logger.error(e);
-    return {
-      locations: [],
-    } as ServiceLocationsApiResponse;
+    return { locations: [] };
   }
 }

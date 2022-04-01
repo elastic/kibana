@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '../../../../../../../data/common';
+import { DataViewField } from '../../../../../../../data_views/public';
 
 export interface FieldFilterState {
   missing: boolean;

@@ -30,7 +30,6 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
-import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -67,10 +66,7 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const { tiDataSources: allTiDataSources, isInitiallyLoaded: allTiDataSourcesLoaded } =
-    useAllTiDataSources();
-  const tiIntegrationStatus = useTiIntegrations();
-  const isTiLoaded = tiIntegrationStatus && allTiDataSourcesLoaded;
+  const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -149,7 +145,6 @@ const OverviewComponent = () => {
                       <EuiFlexItem grow={1}>
                         {isTiLoaded && (
                           <ThreatIntelLinkPanel
-                            allIntegrationsInstalled={tiIntegrationStatus?.allIntegrationsInstalled}
                             allTiDataSources={allTiDataSources}
                             deleteQuery={deleteQuery}
                             from={from}

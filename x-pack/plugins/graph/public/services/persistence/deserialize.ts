@@ -25,10 +25,8 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
-import {
-  IndexPattern,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../../src/plugins/data/public';
+import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
@@ -98,7 +96,7 @@ export function lookupIndexPatternId(savedWorkspace: GraphWorkspaceSavedObject) 
 }
 
 // returns all graph fields mapped out of the index pattern
-export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
+export function mapFields(indexPattern: DataView): WorkspaceField[] {
   const blockedFieldNames = ['_id', '_index', '_score', '_source', '_type'];
   const defaultHopSize = 5;
 
@@ -131,10 +129,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
     });
 }
 
-function getFieldsWithWorkspaceSettings(
-  indexPattern: IndexPattern,
-  selectedFields: SerializedField[]
-) {
+function getFieldsWithWorkspaceSettings(indexPattern: DataView, selectedFields: SerializedField[]) {
   const allFields = mapFields(indexPattern);
 
   // merge in selected information into all fields
@@ -216,7 +211,7 @@ export function makeNodeId(field: string, term: string) {
 
 export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   workspaceInstance: Workspace
 ): {
   urlTemplates: UrlTemplate[];

@@ -33,7 +33,7 @@ interface CommonProps {
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
-  indexPatternTitle?: string;
+  dataViewTitle?: string;
   sourceField: string;
   asCombobox?: boolean;
   onChange: (val?: string[], excludedValue?: string[]) => void;

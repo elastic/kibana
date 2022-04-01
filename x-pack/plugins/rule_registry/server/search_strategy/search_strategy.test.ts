@@ -8,7 +8,11 @@ import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
+import {
+  ruleRegistrySearchStrategyProvider,
+  EMPTY_RESPONSE,
+  RULE_SEARCH_STRATEGY_NAME,
+} from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
@@ -18,6 +22,9 @@ import { spacesMock } from '../../../spaces/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
+import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
+
+jest.mock('../lib/get_is_kibana_request');
 
 const getBasicResponse = (overwrites = {}) => {
   return merge(
@@ -68,6 +75,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   let getAuthzFilterSpy: jest.SpyInstance;
+  const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
     ruleDataService.findIndicesByFeature.mockImplementation(() => {
@@ -80,8 +88,16 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     data.search.getSearchStrategy.mockImplementation(() => {
       return {
-        search: () => of(response),
+        search: searchStrategySearch,
       };
+    });
+
+    (data.search.searchAsInternalUser.search as jest.Mock).mockImplementation(() => {
+      return of(response);
+    });
+
+    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
+      return true;
     });
 
     getAuthzFilterSpy = jest
@@ -94,7 +110,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   afterEach(() => {
     ruleDataService.findIndicesByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
+    (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
+    searchStrategySearch.mockClear();
   });
 
   it('should handle a basic search request', async () => {
@@ -198,5 +216,218 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       .search(request, options, deps as unknown as SearchStrategyDependencies)
       .toPromise();
     expect(result).toBe(EMPTY_RESPONSE);
+  });
+
+  it('should not apply rbac filters for siem', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(getAuthzFilterSpy).not.toHaveBeenCalled();
+  });
+
+  it('should throw an error if requesting multiple featureIds and one is SIEM', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    let err;
+    try {
+      await strategy
+        .search(request, options, deps as unknown as SearchStrategyDependencies)
+        .toPromise();
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeDefined();
+  });
+
+  it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
+    expect(searchStrategySearch).not.toHaveBeenCalled();
+  });
+
+  it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.SIEM],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect(data.search.searchAsInternalUser.search as jest.Mock).not.toHaveBeenCalled();
+    expect(searchStrategySearch).toHaveBeenCalled();
+  });
+
+  it('should support pagination', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      pagination: {
+        pageSize: 10,
+        pageIndex: 0,
+      },
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
+    expect(
+      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.size
+    ).toBe(10);
+    expect(
+      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.from
+    ).toBe(0);
+  });
+
+  it('should support sorting', async () => {
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      sort: [
+        {
+          test: {
+            order: 'desc',
+          },
+        },
+      ],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    await strategy
+      .search(request, options, deps as unknown as SearchStrategyDependencies)
+      .toPromise();
+    expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
+    expect(
+      (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.sort
+    ).toStrictEqual([{ test: { order: 'desc' } }]);
+  });
+
+  it('should reject, to the best of our ability, public requests', async () => {
+    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
+      return false;
+    });
+    const request: RuleRegistrySearchRequest = {
+      featureIds: [AlertConsumers.LOGS],
+      sort: [
+        {
+          test: {
+            order: 'desc',
+          },
+        },
+      ],
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(
+      data,
+      ruleDataService,
+      alerting,
+      logger,
+      security,
+      spaces
+    );
+
+    let err = null;
+    try {
+      await strategy
+        .search(request, options, deps as unknown as SearchStrategyDependencies)
+        .toPromise();
+    } catch (e) {
+      err = e;
+    }
+    expect(err).not.toBeNull();
+    expect(err.message).toBe(
+      `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
+    );
   });
 });

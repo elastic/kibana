@@ -26,7 +26,7 @@ describe('Create DataView runtime field', () => {
     cleanKibana();
   });
 
-  it.skip('adds field to alert table', () => {
+  it('adds field to alert table', () => {
     const fieldName = 'field.name.alert.page';
     loginAndWaitForPage(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
