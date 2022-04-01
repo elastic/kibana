@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import type { IRouter, KibanaResponseFactory, Logger } from 'kibana/server';
+import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from 'kibana/server';
 import {
   AggregationsHistogramAggregate,
   AggregationsHistogramBucket,
@@ -19,9 +19,8 @@ import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './mappings';
 
-
 export async function topNElasticSearchQuery(
-  context: DataRequestHandlerContext,
+  client: ElasticsearchClient,
   logger: Logger,
   index: string,
   projectID: string,
@@ -31,7 +30,6 @@ export async function topNElasticSearchQuery(
   searchField: string,
   response: KibanaResponseFactory
 ) {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const filter = newProjectTimeQuery(projectID, timeFrom, timeTo);
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
@@ -39,7 +37,7 @@ export async function topNElasticSearchQuery(
     logger,
     'query to find downsampled index',
     async () => {
-      return await findDownsampledIndex(logger, esClient, index, filter, targetSampleSize);
+      return await findDownsampledIndex(logger, client, index, filter, targetSampleSize);
     }
   );
 
@@ -47,7 +45,7 @@ export async function topNElasticSearchQuery(
     logger,
     'query to fetch events from ' + eventsIndex.name,
     async () => {
-      return await esClient.search({
+      return await client.search({
         index: eventsIndex.name,
         body: {
           query: filter,
@@ -62,14 +60,14 @@ export async function topNElasticSearchQuery(
   let totalCount = 0;
   const stackTraceEvents = new Set<StackTraceID>();
 
-  (
-    resEvents.body.aggregations?.histogram as AggregationsHistogramAggregate
-  ).buckets.forEach((timeInterval: AggregationsHistogramBucket) => {
-    totalCount += timeInterval.doc_count;
-    timeInterval.group_by.buckets.forEach((stackTraceItem: AggregationsStringTermsBucket) => {
-      stackTraceEvents.add(stackTraceItem.key);
-    });
-  });
+  (resEvents.body.aggregations?.histogram as AggregationsHistogramAggregate)?.buckets?.forEach(
+    (timeInterval: AggregationsHistogramBucket) => {
+      totalCount += timeInterval.doc_count;
+      timeInterval.group_by.buckets.forEach((stackTraceItem: AggregationsStringTermsBucket) => {
+        stackTraceEvents.add(stackTraceItem.key);
+      });
+    }
+  );
 
   logger.info('events total count: ' + totalCount);
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
@@ -86,7 +84,7 @@ export async function topNElasticSearchQuery(
     logger,
     'query for ' + stackTraceEvents.size + ' stacktraces',
     async () => {
-      return await esClient.mget({
+      return await client.mget({
         index: 'profiling-stacktraces',
         body: { ids: [...stackTraceEvents] },
       });
@@ -122,10 +120,11 @@ export function queryTopNCommon(
     },
     async (context, request, response) => {
       const { index, projectID, timeFrom, timeTo, n } = request.query;
+      const client = context.core.elasticsearch.client.asCurrentUser;
 
       try {
         return await topNElasticSearchQuery(
-          context,
+          client,
           logger,
           index,
           projectID,
