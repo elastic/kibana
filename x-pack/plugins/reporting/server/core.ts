@@ -164,7 +164,7 @@ export class ReportingCore {
     if (this.pluginSetupDeps && this.config) {
       return true;
     }
-    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+    return await Rx.firstValueFrom(this.pluginSetup$.pipe(take(2))); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
   /*
@@ -251,7 +251,7 @@ export class ReportingCore {
       return this.pluginStartDeps;
     }
 
-    return await this.pluginStart$.pipe(first()).toPromise();
+    return await Rx.firstValueFrom(this.pluginStart$);
   }
 
   public getExportTypesRegistry() {
@@ -270,12 +270,9 @@ export class ReportingCore {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
     const registry = this.getExportTypesRegistry();
 
-    return await license$
-      .pipe(
-        map((license) => checkLicense(registry, license)),
-        first()
-      )
-      .toPromise();
+    return await Rx.firstValueFrom(
+      license$.pipe(map((license) => checkLicense(registry, license)))
+    );
   }
 
   /*

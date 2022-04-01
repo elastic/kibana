@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import type { Logger } from 'src/core/server';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
@@ -59,7 +59,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await screenshots.getScreenshots(options).toPromise();
+    const result = await lastValueFrom(screenshots.getScreenshots(options));
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -116,12 +116,12 @@ describe('Screenshot Observable Pipeline', () => {
 
   it('pipelines multiple urls into', async () => {
     driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
-    const result = await screenshots
-      .getScreenshots({
+    const result = await lastValueFrom(
+      screenshots.getScreenshots({
         ...options,
         urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
       })
-      .toPromise();
+    );
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -253,15 +253,15 @@ describe('Screenshot Observable Pipeline', () => {
       driver.waitForSelector.mockImplementation((selectorArg: string) => {
         throw new Error('Mock error!');
       });
-      const result = await screenshots
-        .getScreenshots({
+      const result = await lastValueFrom(
+        screenshots.getScreenshots({
           ...options,
           urls: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
         })
-        .toPromise();
+      );
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
@@ -376,7 +376,7 @@ describe('Screenshot Observable Pipeline', () => {
       );
 
       layout.getViewport = () => null;
-      const result = await screenshots.getScreenshots(options).toPromise();
+      const result = await lastValueFrom(screenshots.getScreenshots(options));
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`

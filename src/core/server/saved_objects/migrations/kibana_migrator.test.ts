@@ -16,6 +16,7 @@ import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { firstValueFrom } from 'rxjs';
 
 jest.mock('./core/document_migrator', () => {
   return {
@@ -134,7 +135,7 @@ describe('KibanaMigrator', () => {
     it('emits results on getMigratorResult$()', async () => {
       const options = mockV2MigrationOptions();
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+      const migratorStatus = firstValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
       await migrator.runMigrations();
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -182,8 +182,8 @@ export class SavedSearchEmbeddable
 
     try {
       // Make the request
-      const { rawResponse: resp } = await searchSource
-        .fetch$({
+      const { rawResponse: resp } = await lastValueFrom(
+        searchSource.fetch$({
           abortSignal: this.abortController.signal,
           sessionId: searchSessionId,
           inspector: {
@@ -198,7 +198,7 @@ export class SavedSearchEmbeddable
           },
           executionContext,
         })
-        .toPromise();
+      );
       this.updateOutput({ loading: false, error: undefined });
 
       this.searchProps!.rows = resp.hits.hits;

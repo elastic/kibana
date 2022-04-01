@@ -22,7 +22,7 @@ const createSetupContractMock = () => {
     getTimeUpdate$: jest.fn(),
     getRefreshIntervalUpdate$: jest.fn(),
     getAutoRefreshFetch$: jest.fn(() => new Observable<() => void>()),
-    getFetch$: jest.fn(() => new Observable<() => void>()),
+    getFetch$: jest.fn().mockImplementation(() => new Observable<() => void>()),
     getTime: jest.fn(),
     setTime: jest.fn(),
     setRefreshInterval: jest.fn(),

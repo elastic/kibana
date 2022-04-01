@@ -64,7 +64,7 @@ describe('getFetchObservable', () => {
     fetch$.subscribe(() => {
       done();
     });
-    refetch$.next();
+    refetch$.next(undefined);
   });
   test('getAutoRefreshFetch$ should trigger fetch$.next', async () => {
     jest.useFakeTimers();

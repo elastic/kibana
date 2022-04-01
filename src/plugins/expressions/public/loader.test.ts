@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { loader, ExpressionLoader } from './loader';
@@ -125,7 +125,7 @@ describe('ExpressionLoader', () => {
 
   it('emits on $data when data is available', async () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
-    const { result } = await expressionLoader.data$.pipe(first()).toPromise();
+    const { result } = await firstValueFrom(expressionLoader.data$);
     expect(result).toBe(123);
   });
 
@@ -133,7 +133,7 @@ describe('ExpressionLoader', () => {
     const expressionLoader = new ExpressionLoader(element, 'var foo', {
       variables: { foo: of(1, 2) },
     });
-    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+    const { result, partial } = await firstValueFrom(expressionLoader.data$);
 
     expect(partial).toBe(false);
     expect(result).toBe(2);
@@ -145,7 +145,7 @@ describe('ExpressionLoader', () => {
       partial: true,
       throttle: 0,
     });
-    const { result, partial } = await expressionLoader.data$.pipe(first()).toPromise();
+    const { result, partial } = await firstValueFrom(expressionLoader.data$);
 
     expect(partial).toBe(true);
     expect(result).toBe(1);

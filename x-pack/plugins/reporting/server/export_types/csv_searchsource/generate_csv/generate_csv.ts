@@ -11,6 +11,7 @@ import type { IScopedClusterClient, IUiSettingsClient, Logger } from 'kibana/ser
 import type { IScopedSearchClient } from 'src/plugins/data/server';
 import type { Datatable } from 'src/plugins/expressions/server';
 import type { Writable } from 'stream';
+import { lastValueFrom } from 'rxjs';
 import type { ReportingConfig } from '../../..';
 import type {
   DataView,
@@ -83,7 +84,7 @@ export class CsvGenerator {
     };
 
     const results = (
-      await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
+      await lastValueFrom(this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }))
     ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;

@@ -73,7 +73,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   }
 
   public setup(core: CoreSetup) {
-    const signatureUpdated$ = new Subject();
+    const signatureUpdated$ = new Subject<void>();
 
     const { license$, refreshManually } = createLicenseUpdate(
       signatureUpdated$,

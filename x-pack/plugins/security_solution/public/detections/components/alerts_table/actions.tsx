@@ -26,6 +26,7 @@ import {
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 
+import { lastValueFrom } from 'rxjs';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -535,8 +536,11 @@ export const sendAlertToTimelineAction = async ({
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
         getTimelineTemplate(timelineId),
-        searchStrategyClient
-          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+        lastValueFrom(
+          searchStrategyClient.search<
+            TimelineEventsDetailsRequestOptions,
+            TimelineEventsDetailsStrategyResponse
+          >(
             {
               defaultIndex: [],
               docValueFields: [],
@@ -548,7 +552,7 @@ export const sendAlertToTimelineAction = async ({
               strategy: 'timelineSearchStrategy',
             }
           )
-          .toPromise(),
+        ),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];

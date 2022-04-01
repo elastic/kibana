@@ -7,6 +7,7 @@
 import React from 'react';
 import type { UseQueryResult } from 'react-query';
 import { render, screen } from '@testing-library/react';
+import { of } from 'rxjs';
 import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { Findings } from './findings';
 import { TestProvider } from '../../test/test_provider';
@@ -41,9 +42,7 @@ describe('<Findings />', () => {
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       data: { item: { status: 'installed' } },
     }));
-    (source.fetch$ as jest.Mock).mockReturnValue({
-      toPromise: () => Promise.resolve({ rawResponse: { hits: { hits: [] } } }),
-    });
+    (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
 
     (useKubebeatDataView as jest.Mock).mockReturnValue({
       status: 'success',

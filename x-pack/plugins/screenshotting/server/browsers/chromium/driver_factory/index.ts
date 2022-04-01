@@ -15,7 +15,6 @@ import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import {
   catchError,
   ignoreElements,
@@ -138,7 +137,7 @@ export class HeadlessChromiumDriverFactory {
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     // FIXME: 'create' is deprecated
-    return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
+    return Rx.Observable.create(async (observer: Rx.Subscriber<unknown>) => {
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
 
