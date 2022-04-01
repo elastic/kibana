@@ -17,12 +17,12 @@ import {
   EuiStat,
   EuiIconTip,
   EuiTabbedContent,
-  EuiEmptyPrompt,
-  EuiButton,
+  EuiText,
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -86,7 +86,6 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleProps) {
-  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
@@ -168,55 +167,47 @@ export function RuleComponent({
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiPanel color="subdued" hasBorder={false}>
-            {rule.enabled ? (
-              <EuiStat
-                data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-                titleSize="xs"
-                title={
-                  <EuiHealth
-                    data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-                    textSize="inherit"
-                    color={healthColor}
-                  >
-                    {statusMessage}
-                  </EuiHealth>
-                }
-                description={i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription',
-                  {
-                    defaultMessage: `Last response`,
+            <EuiFlexGroup
+              gutterSize="none"
+              direction="column"
+              justifyContent="spaceBetween"
+              style={{ height: '100%' }}
+            >
+              <EuiFlexItem>
+                <EuiStat
+                  data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
+                  titleSize="xs"
+                  title={
+                    <EuiHealth
+                      data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
+                      textSize="inherit"
+                      color={healthColor}
+                    >
+                      {statusMessage}
+                    </EuiHealth>
                   }
-                )}
-              />
-            ) : (
-              <EuiEmptyPrompt
-                data-test-subj="disabledEmptyPrompt"
-                body={
-                  <p>
+                  description={i18n.translate(
+                    'xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription',
+                    {
+                      defaultMessage: `Last response`,
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <p>
+                  <EuiText size="xs">
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRuleTitle"
-                      defaultMessage="Disabled"
+                      id="xpack.triggersActionsUI.sections.ruleDetails.ruleLastExecutionUpdatedAt"
+                      defaultMessage="Updated"
                     />
-                  </p>
-                }
-                actions={[
-                  <EuiButton
-                    data-test-subj="disabledEmptyPromptAction"
-                    color="primary"
-                    fill
-                    disabled={isEnabledUpdating}
-                    onClick={async () => {
-                      setIsEnabledUpdating(true);
-                      await enableRule(rule);
-                      requestRefresh();
-                      setIsEnabledUpdating(false);
-                    }}
-                  >
-                    Enable
-                  </EuiButton>,
-                ]}
-              />
-            )}
+                  </EuiText>
+                  <EuiText color="subdued" size="xs">
+                    {moment(rule.executionStatus.lastExecutionDate).fromNow()}
+                  </EuiText>
+                </p>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>

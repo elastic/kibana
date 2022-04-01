@@ -282,71 +282,92 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       />
       <EuiSpacer size="l" />
       <EuiPageContentBody>
-        <EuiFlexGroup wrap responsive={false} gutterSize="m">
+        <EuiFlexGroup responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
-                  defaultMessage="Type"
+            <EuiFlexGroup responsive={false} gutterSize="xs">
+              <EuiFlexItem grow={false} style={{ flexBasis: 'fit-content' }}>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.triggerActionsTitle"
+                      defaultMessage="Trigger actions"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <RuleStatusDropdown
+                  disableRule={async () => await disableRule(rule)}
+                  enableRule={async () => await enableRule(rule)}
+                  snoozeRule={async (snoozeEndTime: string | -1) =>
+                    await snoozeRule(rule, snoozeEndTime)
+                  }
+                  unsnoozeRule={async () => await unsnoozeRule(rule)}
+                  item={rule as RuleTableItem}
+                  onRuleChanged={requestRefresh}
+                  direction="row"
+                  isEditable={hasEditButton}
+                  previousSnoozeInterval={null}
                 />
-              </p>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="xs">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
+                      defaultMessage="Type"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {uniqueActions && uniqueActions.length ? (
-              <>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
-                    defaultMessage="Actions"
-                  />{' '}
-                  {hasActionsWithBrokenConnector && (
-                    <EuiIconTip
-                      data-test-subj="actionWithBrokenConnector"
-                      type="alert"
-                      color="danger"
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
-                        {
-                          defaultMessage:
-                            'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
-                        }
-                      )}
-                      position="right"
-                    />
-                  )}
-                </EuiText>
-
-                <EuiSpacer size="xs" />
-                <EuiFlexGroup wrap gutterSize="s">
-                  {uniqueActions.map((action, index) => (
-                    <EuiFlexItem key={index} grow={false}>
-                      <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                        {actionTypesByTypeId[action].name ?? action}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </>
+              <EuiFlexGroup responsive={false} gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
+                      defaultMessage="Actions"
+                    />{' '}
+                    {hasActionsWithBrokenConnector && (
+                      <EuiIconTip
+                        data-test-subj="actionWithBrokenConnector"
+                        type="alert"
+                        color="danger"
+                        content={i18n.translate(
+                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
+                          {
+                            defaultMessage:
+                              'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
+                          }
+                        )}
+                        position="right"
+                      />
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup wrap gutterSize="s">
+                    {uniqueActions.map((action, index) => (
+                      <EuiFlexItem key={index} grow={false}>
+                        <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
+                          {actionTypesByTypeId[action].name ?? action}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : null}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <RuleStatusDropdown
-              disableRule={async () => await disableRule(rule)}
-              enableRule={async () => await enableRule(rule)}
-              snoozeRule={async (snoozeEndTime: string | -1) =>
-                await snoozeRule(rule, snoozeEndTime)
-              }
-              unsnoozeRule={async () => await unsnoozeRule(rule)}
-              item={rule as RuleTableItem}
-              onRuleChanged={requestRefresh}
-              direction="row"
-              isEditable={hasEditButton}
-              previousSnoozeInterval={null}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {rule.enabled &&
