@@ -88,8 +88,8 @@ export const aggTerms = (): FunctionDefinition => ({
     },
     shardSize: {
       types: ['number'],
-      help: i18n.translate('data.search.aggs.buckets.terms.bucketSize.help', {
-        defaultMessage: 'TODO',
+      help: i18n.translate('data.search.aggs.buckets.terms.shardSize.help', {
+        defaultMessage: 'Number of terms to evaluate during the aggregation.',
       }),
     },
     missingBucket: {
