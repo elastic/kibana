@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   createFilter,
   generateTablePaginationOptions,
@@ -62,7 +62,7 @@ export const useAllResults = ({
   return useQuery(
     ['allActionResults', { actionId, activePage, limit, sort }],
     async () => {
-      const responseData = await lastValueFrom(
+      const responseData = await firstValueFrom(
         data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
           {
             actionId,

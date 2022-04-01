@@ -27,7 +27,7 @@ import {
 import { DocLinksStart, HttpSetup } from 'kibana/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { XJson, EuiCodeEditor } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
@@ -181,7 +181,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         const timeWindow = parseDuration(window);
         const parsedQuery = JSON.parse(esQuery);
         const now = Date.now();
-        const { rawResponse } = await lastValueFrom(
+        const { rawResponse } = await firstValueFrom(
           data.search.search({
             params: buildSortedEventsQuery({
               index,

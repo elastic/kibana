@@ -9,7 +9,7 @@ import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   createFilter,
   getInspectResponse,
@@ -68,7 +68,7 @@ export const useActionResults = ({
   return useQuery(
     ['actionResults', { actionId }],
     async () => {
-      const responseData = await lastValueFrom(
+      const responseData = await firstValueFrom(
         data.search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
           {
             actionId,

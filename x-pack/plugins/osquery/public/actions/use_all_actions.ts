@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   createFilter,
   generateTablePaginationOptions,
@@ -60,7 +60,7 @@ export const useAllActions = ({
   return useQuery(
     ['actions', { activePage, direction, limit, sortField }],
     async () => {
-      const responseData = await lastValueFrom(
+      const responseData = await firstValueFrom(
         data.search.search<ActionsRequestOptions, ActionsStrategyResponse>(
           {
             factoryQueryType: OsqueryQueries.actions,

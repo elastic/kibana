@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { DataView } from '../../../data_views/public';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
@@ -75,7 +75,7 @@ export function useEsDocSearch({
 
   const requestData = useCallback(async () => {
     try {
-      const { rawResponse } = await lastValueFrom(
+      const { rawResponse } = await firstValueFrom(
         data.search.search({
           params: {
             index,

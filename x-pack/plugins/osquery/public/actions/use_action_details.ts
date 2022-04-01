@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -37,7 +37,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],
     async () => {
-      const responseData = await lastValueFrom(
+      const responseData = await firstValueFrom(
         data.search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
           {
             actionId,
