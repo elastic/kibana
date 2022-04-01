@@ -40,6 +40,8 @@ describe('useAnomalyChartsInputResolver', () => {
   const start = moment().subtract(1, 'years');
   const end = moment();
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const renderCallbacks = {
     onRenderComplete: jest.fn(),
     onLoading: jest.fn(),
@@ -47,8 +49,6 @@ describe('useAnomalyChartsInputResolver', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
-
     const jobIds = ['test-job'];
     embeddableInput = new BehaviorSubject({
       id: 'test-explorer-charts-embeddable',
@@ -110,7 +110,6 @@ describe('useAnomalyChartsInputResolver', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -132,7 +131,7 @@ describe('useAnomalyChartsInputResolver', () => {
     expect(result.current.isLoading).toBe(true);
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(0);
 
-    jest.advanceTimersByTime(501);
+    await delay(501);
 
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
 
@@ -154,7 +153,7 @@ describe('useAnomalyChartsInputResolver', () => {
         to: 'now',
       },
     });
-    jest.advanceTimersByTime(501);
+    await delay(501);
 
     expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(2);
 
