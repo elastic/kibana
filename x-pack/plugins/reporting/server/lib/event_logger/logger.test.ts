@@ -175,7 +175,7 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "duration": 5500,
+          "duration": 5500000000,
           "timezone": "UTC",
         },
         Object {

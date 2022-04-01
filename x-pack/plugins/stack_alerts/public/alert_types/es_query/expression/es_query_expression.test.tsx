@@ -10,7 +10,6 @@ import 'brace';
 import { of } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import EsQueryAlertTypeExpression from './expression';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
@@ -18,11 +17,12 @@ import {
   IKibanaSearchResponse,
   ISearchStart,
 } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { EsQueryAlertParams } from './types';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryExpression } from './es_query_expression';
 
-jest.mock('../../../../../../src/plugins/kibana_react/public');
-jest.mock('../../../../../../src/plugins/es_ui_shared/public', () => ({
+jest.mock('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('../../../../../../../src/plugins/es_ui_shared/public', () => ({
   XJson: {
     useXJsonMode: jest.fn().mockReturnValue({
       convertToJson: jest.fn(),
@@ -42,8 +42,8 @@ jest.mock('../../../../../../src/plugins/es_ui_shared/public', () => ({
     />
   ),
 }));
-jest.mock('../../../../triggers_actions_ui/public', () => {
-  const original = jest.requireActual('../../../../triggers_actions_ui/public');
+jest.mock('../../../../../triggers_actions_ui/public', () => {
+  const original = jest.requireActual('../../../../../triggers_actions_ui/public');
   return {
     ...original,
     getIndexPatterns: () => {
@@ -100,6 +100,17 @@ const createDataPluginMock = () => {
 const dataMock = createDataPluginMock();
 const chartsStartMock = chartPluginMock.createStartContract();
 
+const defaultEsQueryExpressionParams: EsQueryAlertParams<SearchType.esQuery> = {
+  size: 100,
+  thresholdComparator: '>',
+  threshold: [0],
+  timeWindowSize: 15,
+  timeWindowUnit: 's',
+  index: ['test-index'],
+  timeField: '@timestamp',
+  esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+};
+
 describe('EsQueryAlertTypeExpression', () => {
   beforeAll(() => {
     (useKibana as jest.Mock).mockReturnValue({
@@ -117,20 +128,7 @@ describe('EsQueryAlertTypeExpression', () => {
     });
   });
 
-  function getAlertParams(overrides = {}) {
-    return {
-      index: ['test-index'],
-      timeField: '@timestamp',
-      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-      size: 100,
-      thresholdComparator: '>',
-      threshold: [0],
-      timeWindowSize: 15,
-      timeWindowUnit: 's',
-      ...overrides,
-    };
-  }
-  async function setup(alertParams: EsQueryAlertParams) {
+  async function setup(alertParams: EsQueryAlertParams<SearchType.esQuery>) {
     const errors = {
       index: [],
       esQuery: [],
@@ -140,7 +138,7 @@ describe('EsQueryAlertTypeExpression', () => {
     };
 
     const wrapper = mountWithIntl(
-      <EsQueryAlertTypeExpression
+      <EsQueryExpression
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
@@ -166,7 +164,7 @@ describe('EsQueryAlertTypeExpression', () => {
   }
 
   test('should render EsQueryAlertTypeExpression with expected components', async () => {
-    const wrapper = await setup(getAlertParams());
+    const wrapper = await setup(defaultEsQueryExpressionParams);
     expect(wrapper.find('[data-test-subj="indexSelectPopover"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="queryJsonEditor"]').exists()).toBeTruthy();
@@ -181,7 +179,10 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should render Test Query button disabled if alert params are invalid', async () => {
-    const wrapper = await setup(getAlertParams({ timeField: null }));
+    const wrapper = await setup({
+      ...defaultEsQueryExpressionParams,
+      timeField: null,
+    } as unknown as EsQueryAlertParams<SearchType.esQuery>);
     const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
     expect(testQueryButton.prop('disabled')).toBe(true);
@@ -196,7 +197,7 @@ describe('EsQueryAlertTypeExpression', () => {
       },
     });
     dataMock.search.search.mockImplementation(() => searchResponseMock$);
-    const wrapper = await setup(getAlertParams());
+    const wrapper = await setup(defaultEsQueryExpressionParams);
     const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');
@@ -217,7 +218,7 @@ describe('EsQueryAlertTypeExpression', () => {
     dataMock.search.search.mockImplementation(() => {
       throw new Error('What is this query');
     });
-    const wrapper = await setup(getAlertParams());
+    const wrapper = await setup(defaultEsQueryExpressionParams);
     const testQueryButton = wrapper.find('EuiButtonEmpty[data-test-subj="testQuery"]');
 
     testQueryButton.simulate('click');

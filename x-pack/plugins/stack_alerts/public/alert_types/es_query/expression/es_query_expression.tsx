@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,7 +18,6 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiFormRow,
-  EuiCallOut,
   EuiText,
   EuiTitle,
   EuiLink,
@@ -27,48 +26,25 @@ import {
 import { DocLinksStart, HttpSetup } from 'kibana/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { XJson, EuiCodeEditor } from '../../../../../../src/plugins/es_ui_shared/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { XJson, EuiCodeEditor } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   getFields,
-  COMPARATORS,
-  ThresholdExpression,
-  ForLastExpression,
   ValueExpression,
   RuleTypeParamsExpressionProps,
-} from '../../../../triggers_actions_ui/public';
-import { validateExpression } from './validation';
-import { parseDuration } from '../../../../alerting/common';
-import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { EsQueryAlertParams } from './types';
-import { IndexSelectPopover } from '../components/index_select_popover';
+  ForLastExpression,
+  ThresholdExpression,
+} from '../../../../../triggers_actions_ui/public';
+import { validateExpression } from '../validation';
+import { parseDuration } from '../../../../../alerting/common';
+import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
+import { EsQueryAlertParams, SearchType } from '../types';
+import { IndexSelectPopover } from '../../components/index_select_popover';
+import { DEFAULT_VALUES } from '../constants';
 
 function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
   return typeof total === 'number' ? total : total?.value ?? 0;
 }
-
-const DEFAULT_VALUES = {
-  THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
-  QUERY: `{
-  "query":{
-    "match_all" : {}
-  }
-}`,
-  SIZE: 100,
-  TIME_WINDOW_SIZE: 5,
-  TIME_WINDOW_UNIT: 'm',
-  THRESHOLD: [1000],
-};
-
-const expressionFieldsWithValidation = [
-  'index',
-  'esQuery',
-  'size',
-  'timeField',
-  'threshold0',
-  'threshold1',
-  'timeWindowSize',
-];
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
@@ -78,9 +54,13 @@ interface KibanaDeps {
   docLinks: DocLinksStart;
 }
 
-export const EsQueryAlertTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<EsQueryAlertParams>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+export const EsQueryExpression = ({
+  ruleParams,
+  setRuleParams,
+  setRuleProperty,
+  errors,
+  data,
+}: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.esQuery>>) => {
   const {
     index,
     timeField,
@@ -92,15 +72,28 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     timeWindowUnit,
   } = ruleParams;
 
-  const getDefaultParams = () => ({
+  const [currentAlertParams, setCurrentAlertParams] = useState<
+    EsQueryAlertParams<SearchType.esQuery>
+  >({
     ...ruleParams,
-    esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
-    size: size ?? DEFAULT_VALUES.SIZE,
     timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
     timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
     threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+    size: size ?? DEFAULT_VALUES.SIZE,
+    esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
   });
+
+  const setParam = useCallback(
+    (paramField: string, paramValue: unknown) => {
+      setCurrentAlertParams((currentParams) => ({
+        ...currentParams,
+        [paramField]: paramValue,
+      }));
+      setRuleParams(paramField, paramValue);
+    },
+    [setRuleParams]
+  );
 
   const { http, docLinks } = useKibana<KibanaDeps>().services;
 
@@ -114,42 +107,16 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     }>
   >([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
-  const [currentAlertParams, setCurrentAlertParams] = useState<EsQueryAlertParams>(
-    getDefaultParams()
-  );
   const [testQueryResult, setTestQueryResult] = useState<string | null>(null);
   const [testQueryError, setTestQueryError] = useState<string | null>(null);
 
-  const hasExpressionErrors = !!Object.keys(errors).find(
-    (errorKey) =>
-      expressionFieldsWithValidation.includes(errorKey) &&
-      errors[errorKey].length >= 1 &&
-      ruleParams[errorKey as keyof EsQueryAlertParams] !== undefined
-  );
-
-  const expressionErrorMessage = i18n.translate(
-    'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
-    {
-      defaultMessage: 'Expression contains errors.',
-    }
-  );
-
   const setDefaultExpressionValues = async () => {
-    setRuleProperty('params', getDefaultParams());
-
+    setRuleProperty('params', currentAlertParams);
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
     if (index && index.length > 0) {
       await refreshEsFields();
     }
-  };
-
-  const setParam = (paramField: string, paramValue: unknown) => {
-    setCurrentAlertParams({
-      ...currentAlertParams,
-      [paramField]: paramValue,
-    });
-    setRuleParams(paramField, paramValue);
   };
 
   useEffect(() => {
@@ -216,13 +183,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 
   return (
     <Fragment>
-      {hasExpressionErrors ? (
-        <Fragment>
-          <EuiSpacer />
-          <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
-          <EuiSpacer />
-        </Fragment>
-      ) : null}
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -408,6 +368,3 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     </Fragment>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { EsQueryAlertTypeExpression as default };
