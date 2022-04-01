@@ -312,8 +312,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
 
-        const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
-        expect(headingText.includes(updatedRuleName)).to.be(true);
+        await retry.tryForTime(30 * 1000, async () => {
+          const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
+          expect(headingText.includes(updatedRuleName)).to.be(true);
+        });
       });
 
       it('should reset rule when canceling an edit', async () => {
