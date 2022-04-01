@@ -26653,7 +26653,6 @@
     "xpack.stackAlerts.esQuery.actionVariableContextTitleLabel": "アラートのタイトル。",
     "xpack.stackAlerts.esQuery.actionVariableContextValueLabel": "しきい値条件を満たした値。",
     "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "一致するドキュメント数は{thresholdComparator} {threshold}です",
-    "xpack.stackAlerts.esQuery.alertTypeContextMessageDescription": "アラート'{name}'は有効です。\n\n- 値：{value}\n- 条件が満たされました：{window} の {conditions}\n- タイムスタンプ：{date}",
     "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "アラート'{name}'はクエリと一致しました",
     "xpack.stackAlerts.esQuery.alertTypeTitle": "Elasticsearch クエリ",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "無効な thresholdComparator が指定されました：{comparator}",
