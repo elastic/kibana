@@ -97,5 +97,6 @@ export type ApmFields = Fields &
     'faas.execution': string;
     'faas.trigger.type': string;
     'faas.trigger.request_id': string;
+    'span.db.statement': string;
   }> &
   ApmApplicationMetricFields;

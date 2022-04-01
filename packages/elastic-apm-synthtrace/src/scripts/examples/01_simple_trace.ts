@@ -11,6 +11,7 @@ import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
+import { mockDbStatement } from './mock/mock_db';
 
 const scenario: Scenario = async (runOptions: RunOptions) => {
   const { logger } = getCommonServices(runOptions);
@@ -39,7 +40,15 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
             .success()
             .children(
               instance
+                .span('GET /products', 'sql', 'mysql')
+                .dbStatement('SELECT * FROM PRODUCTS')
+                .duration(1000)
+                .success()
+                .destination('elasticsearch')
+                .timestamp(timestamp),
+              instance
                 .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .dbStatement(JSON.stringify(mockDbStatement))
                 .duration(1000)
                 .success()
                 .destination('elasticsearch')
