@@ -64,12 +64,15 @@ export const ServiceLocationErrors = t.array(
         status: t.number,
       }),
       t.partial({
-        failed_monitors: t.array(
-          t.interface({
-            id: t.string,
-            message: t.string,
-          })
-        ),
+        failed_monitors: t.union([
+          t.array(
+            t.interface({
+              id: t.string,
+              message: t.string,
+            })
+          ),
+          t.null,
+        ]),
       }),
     ]),
   })

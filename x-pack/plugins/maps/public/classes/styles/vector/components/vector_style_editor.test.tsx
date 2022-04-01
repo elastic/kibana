@@ -11,6 +11,7 @@ import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
 import { getDefaultStaticProperties } from '../vector_style_defaults';
 import { IVectorLayer } from '../../../layers/vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
+import { CustomIcon } from '../../../../../common/descriptor_types';
 import {
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
@@ -61,7 +62,8 @@ const vectorStyleDescriptor = {
 const vectorStyle = new VectorStyle(
   vectorStyleDescriptor,
   {} as unknown as IVectorSource,
-  {} as unknown as IVectorLayer
+  {} as unknown as IVectorLayer,
+  [] as CustomIcon[]
 );
 const styleProperties: StyleProperties = {};
 vectorStyle.getAllStyleProperties().forEach((styleProperty) => {
@@ -73,11 +75,13 @@ const defaultProps = {
   isPointsOnly: true,
   isLinesOnly: false,
   onIsTimeAwareChange: (isTimeAware: boolean) => {},
+  onCustomIconsChange: (customIcons: CustomIcon[]) => {},
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => {},
   hasBorder: true,
   styleProperties,
   isTimeAware: true,
   showIsTimeAware: true,
+  customIcons: [],
 };
 
 test('should render', async () => {

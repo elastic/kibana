@@ -14,6 +14,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       this.tags('ciGroup11');
       loadTestFile(require.resolve('./usage_collector/all_types'));
       loadTestFile(require.resolve('./usage_collector/detection_rules'));
+      loadTestFile(require.resolve('./usage_collector/detection_rule_status'));
 
       loadTestFile(require.resolve('./task_based/all_types'));
       loadTestFile(require.resolve('./task_based/detection_rules'));

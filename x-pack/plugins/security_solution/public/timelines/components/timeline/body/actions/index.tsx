@@ -257,7 +257,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="session-view-button"
-                  iconType="console"
+                  iconType="sessionViewer"
                   onClick={openSessionView}
                   size="s"
                 />
