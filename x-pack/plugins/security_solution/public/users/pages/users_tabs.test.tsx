@@ -15,8 +15,7 @@ import { SecuritySolutionTabNavigation } from '../../common/components/navigatio
 import { Users } from './users';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
-import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_landing';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/components/search_bar', () => ({
@@ -73,29 +72,20 @@ const mockHistory = {
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Users - rendering', () => {
-  test('it renders the Setup Instructions text when no index is available', async () => {
+  test('it renders getting started page when no index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
 
-    mount(
+    const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Users />
         </Router>
       </TestProviders>
     );
-    const getUrlForAppMock = (
-      appId: string,
-      options?: { deepLinkId?: string; path?: string; absolute?: boolean }
-    ) => `${appId}${options?.deepLinkId ? `/${options.deepLinkId}` : ''}${options?.path ?? ''}`;
 
-    const landingPath = getUrlForAppMock(APP_UI_ID, { deepLinkId: SecurityPageName.landing });
-
-    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
-      deepLinkId: SecurityPageName.landing,
-      path: getAppLandingUrl(landingPath),
-    });
+    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
   test('it should render tab navigation', async () => {

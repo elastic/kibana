@@ -27,9 +27,8 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useHostRiskScore } from '../../risk_score/containers';
-import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_landing';
 import { mockCasesContract } from '../../../../cases/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
@@ -303,25 +302,16 @@ describe('Overview', () => {
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
-      it('renders the Setup Instructions text', () => {
-        mount(
+      it('renders getting started page', () => {
+        const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
               <Overview />
             </MemoryRouter>
           </TestProviders>
         );
-        const getUrlForAppMock = (
-          appId: string,
-          options?: { deepLinkId?: string; path?: string; absolute?: boolean }
-        ) => `${appId}${options?.deepLinkId ? `/${options.deepLinkId}` : ''}${options?.path ?? ''}`;
 
-        const landingPath = getUrlForAppMock(APP_UI_ID, { deepLinkId: SecurityPageName.landing });
-
-        expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
-          deepLinkId: SecurityPageName.landing,
-          path: getAppLandingUrl(landingPath),
-        });
+        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
       });
     });
   });
