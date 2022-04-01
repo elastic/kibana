@@ -153,10 +153,10 @@ export function DevToolsSettingsModal(props: Props) {
   }, []);
 
   const toggleKeyboardShortcuts = useCallback(
-    (disable: boolean) => {
+    (disabled: boolean) => {
       if (props.editorInstance) {
         unregisterCommands(props.editorInstance);
-        setKeyboardShortcutsDisabled(disable);
+        setKeyboardShortcutsDisabled(disabled);
       }
     },
     [props.editorInstance]
@@ -306,7 +306,6 @@ export function DevToolsSettingsModal(props: Props) {
         >
           <EuiSwitch
             checked={keyboardShortcutsDisabled}
-            id="keyboardShortcuts"
             label={
               <FormattedMessage
                 defaultMessage="Disable keyboard shortcuts"

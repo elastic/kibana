@@ -8,6 +8,7 @@
 
 import { throttle } from 'lodash';
 import { SenseEditor } from '../../../../models/sense_editor';
+import { KEYBOARD_SHORTCUT_PREFIX } from '../../../../../../common/constants';
 
 interface Actions {
   senseEditor: SenseEditor;
@@ -28,12 +29,14 @@ export function registerCommands({
 
   coreEditor.registerKeyboardShortcut({
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    name: '__console_send_to_Elasticsearch',
+    // Prefix names with '__console' which is used to identify the registered keyboard shortcuts in console
+    // Ace editor uses camelCase strings for names of the commands
+    name: `${KEYBOARD_SHORTCUT_PREFIX}SendToElasticsearch`,
     fn: () => sendCurrentRequestToES(),
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: '__console_open_documentation',
+    name: `${KEYBOARD_SHORTCUT_PREFIX}OpenDocumentation`,
     keys: { win: 'Ctrl-/', mac: 'Command-/' },
     fn: () => {
       openDocumentation();
@@ -41,7 +44,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: '__console_auto_indent_request',
+    name: `${KEYBOARD_SHORTCUT_PREFIX}AutoIndentRequest`,
     keys: { win: 'Ctrl-I', mac: 'Command-I' },
     fn: () => {
       throttledAutoIndent();
@@ -49,7 +52,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: '__console_move_to_previous_request_start_or_end',
+    name: `${KEYBOARD_SHORTCUT_PREFIX}MoveToPreviousRequestStartOrEnd`,
     keys: { win: 'Ctrl-Up', mac: 'Command-Up' },
     fn: () => {
       senseEditor.moveToPreviousRequestEdge();
@@ -57,7 +60,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: '__console_move_to_next_request_start_or_end',
+    name: `${KEYBOARD_SHORTCUT_PREFIX}MoveToNextRequestStartOrEnd`,
     keys: { win: 'Ctrl-Down', mac: 'Command-Down' },
     fn: () => {
       senseEditor.moveToNextRequestEdge(false);

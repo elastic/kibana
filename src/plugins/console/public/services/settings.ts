@@ -35,79 +35,90 @@ export interface DevToolsSettings {
   keyboardShortcutsDisabled: boolean;
 }
 
+enum SettingKeys {
+  FONT_SIZE = 'font_size',
+  WRAP_MODE = 'wrap_mode',
+  TRIPLE_QUOTES = 'triple_quotes',
+  AUTOCOMPLETE_SETTINGS = 'autocomplete_settings',
+  CONSOLE_POLLING = 'console_polling',
+  POLL_INTERVAL = 'poll_interval',
+  DISABLE_HISTORY = 'disable_history',
+  KEYBOARD_SHORTCUTS_DISABLED = 'keyboard_shortcuts_disabled',
+}
+
 export class Settings {
   constructor(private readonly storage: Storage) {}
 
   getFontSize() {
-    return this.storage.get('font_size', DEFAULT_SETTINGS.fontSize);
+    return this.storage.get(SettingKeys.FONT_SIZE, DEFAULT_SETTINGS.fontSize);
   }
 
   setFontSize(size: number) {
-    this.storage.set('font_size', size);
+    this.storage.set(SettingKeys.FONT_SIZE, size);
     return true;
   }
 
   getWrapMode() {
-    return this.storage.get('wrap_mode', DEFAULT_SETTINGS.wrapMode);
+    return this.storage.get(SettingKeys.WRAP_MODE, DEFAULT_SETTINGS.wrapMode);
   }
 
   setWrapMode(mode: boolean) {
-    this.storage.set('wrap_mode', mode);
+    this.storage.set(SettingKeys.WRAP_MODE, mode);
     return true;
   }
 
   setTripleQuotes(tripleQuotes: boolean) {
-    this.storage.set('triple_quotes', tripleQuotes);
+    this.storage.set(SettingKeys.TRIPLE_QUOTES, tripleQuotes);
     return true;
   }
 
   getTripleQuotes() {
-    return this.storage.get('triple_quotes', DEFAULT_SETTINGS.tripleQuotes);
+    return this.storage.get(SettingKeys.TRIPLE_QUOTES, DEFAULT_SETTINGS.tripleQuotes);
   }
 
   getAutocomplete() {
-    return this.storage.get('autocomplete_settings', DEFAULT_SETTINGS.autocomplete);
+    return this.storage.get(SettingKeys.AUTOCOMPLETE_SETTINGS, DEFAULT_SETTINGS.autocomplete);
   }
 
   setAutocomplete(settings: object) {
-    this.storage.set('autocomplete_settings', settings);
+    this.storage.set(SettingKeys.AUTOCOMPLETE_SETTINGS, settings);
     return true;
   }
 
   getPolling() {
-    return this.storage.get('console_polling', DEFAULT_SETTINGS.polling);
+    return this.storage.get(SettingKeys.CONSOLE_POLLING, DEFAULT_SETTINGS.polling);
   }
 
   setPolling(polling: boolean) {
-    this.storage.set('console_polling', polling);
+    this.storage.set(SettingKeys.CONSOLE_POLLING, polling);
     return true;
   }
 
   setHistoryDisabled(disable: boolean) {
-    this.storage.set('disable_history', disable);
+    this.storage.set(SettingKeys.DISABLE_HISTORY, disable);
     return true;
   }
 
   getHistoryDisabled() {
-    return this.storage.get('disable_history', DEFAULT_SETTINGS.historyDisabled);
+    return this.storage.get(SettingKeys.DISABLE_HISTORY, DEFAULT_SETTINGS.historyDisabled);
   }
 
   setPollInterval(interval: number) {
-    this.storage.set('poll_interval', interval);
+    this.storage.set(SettingKeys.POLL_INTERVAL, interval);
   }
 
   getPollInterval() {
-    return this.storage.get('poll_interval', DEFAULT_SETTINGS.pollInterval);
+    return this.storage.get(SettingKeys.POLL_INTERVAL, DEFAULT_SETTINGS.pollInterval);
   }
 
   setKeyboardShortcutsDisabled(disable: boolean) {
-    this.storage.set('keyboard_shortcuts_disabled', disable);
+    this.storage.set(SettingKeys.KEYBOARD_SHORTCUTS_DISABLED, disable);
     return true;
   }
 
   getKeyboardShortcutsDisabled() {
     return this.storage.get(
-      'keyboard_shortcuts_disabled',
+      SettingKeys.KEYBOARD_SHORTCUTS_DISABLED,
       DEFAULT_SETTINGS.keyboardShortcutsDisabled
     );
   }
