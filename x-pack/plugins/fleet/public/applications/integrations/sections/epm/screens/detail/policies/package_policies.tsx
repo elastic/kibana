@@ -362,6 +362,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );
   }
+  const agentPolicy = packageAndAgentPolicies.find(
+    ({ agentPolicy: policy }) => policy.id === flyoutOpenForPolicyId
+  )?.agentPolicy;
 
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
@@ -379,18 +382,14 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {flyoutOpenForPolicyId && !isLoading && (
+      {flyoutOpenForPolicyId && agentPolicy && !isLoading && (
         <AgentEnrollmentFlyout
           onClose={() => {
             setFlyoutOpenForPolicyId(null);
             const { addAgentToPolicyId, ...rest } = parse(search);
             history.replace({ search: stringify(rest) });
           }}
-          agentPolicy={
-            packageAndAgentPolicies.find(
-              ({ agentPolicy }) => agentPolicy.id === flyoutOpenForPolicyId
-            )?.agentPolicy
-          }
+          agentPolicy={agentPolicy}
           viewDataStep={viewDataStep}
         />
       )}

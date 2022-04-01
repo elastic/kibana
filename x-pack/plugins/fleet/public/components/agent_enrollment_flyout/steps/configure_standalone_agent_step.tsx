@@ -21,13 +21,15 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
+import type { K8sMode } from '../types';
+
 export const ConfigureStandaloneAgentStep = ({
   isK8s,
   selectedPolicyId,
   yaml,
   downloadLink,
 }: {
-  isK8s: string;
+  isK8s?: K8sMode;
   selectedPolicyId?: string;
   yaml: string;
   downloadLink: string;

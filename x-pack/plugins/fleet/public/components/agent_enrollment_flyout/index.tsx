@@ -28,7 +28,7 @@ import type { PackagePolicy, AgentPolicy } from '../../types';
 
 import { Loading } from '..';
 
-import { ManagedOrFleetServerInstructions, StandaloneInstructions } from './instructions';
+import { Instructions } from './instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { BaseProps, SelectionType, FlyoutMode } from './types';
 
@@ -58,7 +58,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     if (!id) return undefined;
     return policies.find((p) => p.id === id);
   };
-
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
   const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
@@ -72,10 +71,14 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
-  const selectedPolicy = findPolicyById(agentPolicies, selectedPolicyId);
+
+  const selectedPolicy =
+    selectedPolicyId === agentPolicy?.id
+      ? agentPolicy
+      : findPolicyById(agentPolicies, selectedPolicyId);
 
   useEffect(() => {
-    if (agentPolicyWithPackagePolicies && setIsFleetServerPolicySelected) {
+    if (agentPolicyWithPackagePolicies && isFleetServerPolicySelected) {
       if (
         (agentPolicyWithPackagePolicies.package_policies as PackagePolicy[]).some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
@@ -86,7 +89,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         setIsFleetServerPolicySelected(false);
       }
     }
-  }, [agentPolicyWithPackagePolicies]);
+  }, [agentPolicyWithPackagePolicies, isFleetServerPolicySelected]);
 
   const { isK8s } = useIsK8sPolicy(
     agentPolicyWithPackagePolicies ? agentPolicyWithPackagePolicies : undefined
@@ -152,8 +155,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       >
         {isLoadingInitialAgentPolicies ? (
           <Loading />
-        ) : mode === 'managed' ? (
-          <ManagedOrFleetServerInstructions
+        ) : (
+          <Instructions
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
@@ -162,25 +165,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             isK8s={isK8s}
-            refreshAgentPolicies={refreshAgentPolicies}
-            isLoadingAgentPolicies={isLoadingAgentPolicies}
-            mode={mode}
-            setMode={setMode}
-            selectionType={selectionType}
-            setSelectionType={setSelectionType}
-            selectedApiKeyId={selectedApiKeyId}
-            setSelectedAPIKeyId={setSelectedAPIKeyId}
-            onClickViewAgents={onClose}
-          />
-        ) : (
-          <StandaloneInstructions
-            settings={settings.data?.item}
-            agentPolicy={agentPolicy}
-            selectedPolicy={selectedPolicy}
-            setSelectedPolicyId={setSelectedPolicyId}
-            agentPolicies={agentPolicies}
-            viewDataStep={viewDataStep}
-            isFleetServerPolicySelected={isFleetServerPolicySelected}
             refreshAgentPolicies={refreshAgentPolicies}
             isLoadingAgentPolicies={isLoadingAgentPolicies}
             mode={mode}

@@ -9,6 +9,10 @@ import type { EuiStepProps } from '@elastic/eui';
 
 import type { AgentPolicy, Settings } from '../../types';
 
+export type K8sMode = 'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES';
+export type FlyoutMode = 'managed' | 'standalone';
+export type SelectionType = 'tabs' | 'radio';
+
 export interface BaseProps {
   /**
    * The user selected policy to be used. If this value is `undefined` a value must be provided for `agentPolicies`.
@@ -25,12 +29,8 @@ export interface BaseProps {
 
   isFleetServerPolicySelected?: boolean;
 
-  isK8s?: string;
+  isK8s?: K8sMode;
 }
-
-export type FlyoutMode = 'managed' | 'standalone';
-export type SelectionType = 'tabs' | 'radio';
-
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;

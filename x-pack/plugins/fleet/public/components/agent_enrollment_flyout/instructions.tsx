@@ -22,13 +22,14 @@ import type { InstructionProps } from './types';
 import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './compute_steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
-export const ManagedOrFleetServerInstructions = (props: InstructionProps) => {
+export const Instructions = (props: InstructionProps) => {
   const {
     agentPolicies,
     isFleetServerPolicySelected,
     settings,
     isLoadingAgentPolicies,
     setSelectionType,
+    mode,
   } = props;
   const fleetStatus = useFleetStatus();
 
@@ -66,39 +67,43 @@ export const ManagedOrFleetServerInstructions = (props: InstructionProps) => {
     setSelectionType('tabs');
   }
 
-  if (hasNoFleetServerHost) {
-    return null;
-  }
-  if (showingAgentEnrollment) {
+  if (mode === 'managed') {
+    if (hasNoFleetServerHost) {
+      return null;
+    }
+    if (showingAgentEnrollment) {
+      return (
+        <>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.managedDescription"
+              defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
+          {isFleetServerPolicySelected ? (
+            <FleetServerSteps {...props} />
+          ) : (
+            <ManagedSteps {...props} />
+          )}
+        </>
+      );
+    }
     return (
       <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.managedDescription"
-            defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        {isFleetServerPolicySelected ? (
-          <FleetServerSteps {...props} />
+        {showFleetMissingRequirements ? (
+          <FleetServerRequirementPage />
         ) : (
-          <ManagedSteps {...props} />
+          <DefaultMissingRequirements />
         )}
       </>
     );
+  } else {
+    return <StandaloneInstructions {...props} />;
   }
-  return (
-    <>
-      {showFleetMissingRequirements ? (
-        <FleetServerRequirementPage />
-      ) : (
-        <DefaultMissingRequirements />
-      )}
-    </>
-  );
 };
 
-export const StandaloneInstructions = (props: InstructionProps) => {
+const StandaloneInstructions = (props: InstructionProps) => {
   return (
     <>
       <EuiText>

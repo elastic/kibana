@@ -5,12 +5,11 @@
  * 2.0.
  */
 import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
-
-export type InstructionsType = 'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES';
+import type { K8sMode } from '../../../components/agent_enrollment_flyout/types';
 
 export const StandaloneInstructions = (
   kibanaVersion: string,
-  isK8s: InstructionsType
+  isK8s?: K8sMode
 ): CommandsByPlatform => {
   const KUBERNETES_RUN_INSTRUCTIONS = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
 

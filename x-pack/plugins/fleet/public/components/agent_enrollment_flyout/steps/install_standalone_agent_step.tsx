@@ -15,13 +15,15 @@ import { PlatformSelector } from '../../enrollment_instructions/manual/platform_
 
 import { InstallationMessage } from '../installation_message';
 
+import type { K8sMode } from '../types';
+
 export const InstallStandaloneAgentStep = ({
   installCommand,
   isK8s,
   selectedPolicyId,
 }: {
   installCommand: CommandsByPlatform;
-  isK8s: string;
+  isK8s?: K8sMode;
   selectedPolicyId?: string;
 }): EuiContainedStepProps => {
   return {

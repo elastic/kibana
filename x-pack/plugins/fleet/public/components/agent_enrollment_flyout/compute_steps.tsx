@@ -47,8 +47,6 @@ import {
 
 import { usePollingAgentCount } from './confirm_agent_enrollment';
 
-import { useIsK8sPolicy, useAgentPolicyWithPackagePolicies } from './hooks';
-
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicy,
   agentPolicies,
@@ -60,17 +58,13 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   selectionType,
   selectedApiKeyId,
   setSelectedAPIKeyId,
+  isK8s,
 }) => {
   const core = useStartServices();
   const { notifications } = core;
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
   const [yaml, setYaml] = useState<any | undefined>('');
   const kibanaVersion = useKibanaVersion();
-
-  const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicy?.id);
-  const { isK8s } = useIsK8sPolicy(
-    agentPolicyWithPackagePolicies ? agentPolicyWithPackagePolicies : undefined
-  );
 
   let downloadLink = '';
 
