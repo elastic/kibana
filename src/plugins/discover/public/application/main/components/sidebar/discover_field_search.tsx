@@ -320,6 +320,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
     <EuiFilterButton
       grow={false}
       onClick={onHelpClick}
+      data-test-subj="fieldTypesHelpButton"
       className="dscFieldTypesHelp__button"
       aria-label="Filter type help"
     >
