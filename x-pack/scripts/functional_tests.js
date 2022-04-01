@@ -8,6 +8,7 @@
 require('../../src/setup_node_env');
 
 require('@kbn/test').runTestsCli([
+  require.resolve('../test/functional/config.ccs.ts'),
   require.resolve('../test/functional/config.js'),
   require.resolve('../test/functional_basic/config.ts'),
   require.resolve('../test/security_solution_endpoint/config.ts'),
