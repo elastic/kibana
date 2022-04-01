@@ -74,8 +74,8 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   const graphEventId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
-  const sessionViewId = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewId
+  const sessionViewConfig = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewConfig
   );
 
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -134,7 +134,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     [defaultDataView.patternList, isInTimeline, timelinePatterns]
   );
 
-  if (!isInTimeline && sessionViewId !== null) {
+  if (!isInTimeline && sessionViewConfig) {
     if (fullScreen) {
       return (
         <FullScreenOverlayContainer data-test-subj="overlayContainer">
