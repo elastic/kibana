@@ -24,7 +24,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import { IErrorLog } from '../../../../../../alerting/common';
+import { IExecutionErrors } from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -50,7 +50,11 @@ const updateButtonProps = {
   fill: false,
 };
 
-const sortErrorLog = (a: IErrorLog, b: IErrorLog, direction: 'desc' | 'asc' = 'desc') =>
+const sortErrorLog = (
+  a: IExecutionErrors,
+  b: IExecutionErrors,
+  direction: 'desc' | 'asc' = 'desc'
+) =>
   direction === 'desc'
     ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     : new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
@@ -67,13 +71,13 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   const { uiSettings, notifications } = useKibana().services;
 
   // Data grid states
-  const [logs, setLogs] = useState<IErrorLog[]>([]);
+  const [logs, setLogs] = useState<IExecutionErrors[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     pageIndex: 0,
     pageSize: 10,
     totalItemCount: 0,
   });
-  const [sort, setSort] = useState<EuiTableSortingType<IErrorLog>['sort']>({
+  const [sort, setSort] = useState<EuiTableSortingType<IExecutionErrors>['sort']>({
     field: 'timestamp',
     direction: 'desc',
   });
@@ -139,7 +143,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
     loadEventLogs();
   };
 
-  const columns: Array<EuiBasicTableColumn<IErrorLog>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<IExecutionErrors>> = useMemo(
     () => [
       {
         field: 'timestamp',

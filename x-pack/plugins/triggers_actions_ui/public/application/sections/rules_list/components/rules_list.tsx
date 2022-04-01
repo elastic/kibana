@@ -835,8 +835,8 @@ export const RulesList: React.FunctionComponent = () => {
       {
         field: 'enabled',
         name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTitle',
-          { defaultMessage: 'Actions' }
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.triggerActionsTitle',
+          { defaultMessage: 'Trigger actions' }
         ),
         sortable: true,
         truncateText: false,

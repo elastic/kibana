@@ -116,7 +116,7 @@ describe('rule_details', () => {
       <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
     );
     expect(wrapper.find('[data-test-subj="ruleErrorBanner"]').first().text()).toMatchInlineSnapshot(
-      `"<EuiIcon /> Cannot run rule <FormattedMessage />"`
+      `"<EuiIcon /> Cannot run rule, test <FormattedMessage />"`
     );
   });
 

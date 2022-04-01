@@ -38,7 +38,7 @@ import {
   snoozeRule,
   unsnoozeRule,
 } from '../../../lib/rule_api';
-import { IExecutionLogResult } from '../../../../../../alerting/common';
+import { IExecutionLogWithErrorsResult } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
@@ -66,7 +66,7 @@ export interface ComponentOpts {
   loadRuleTypes: () => Promise<RuleType[]>;
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
-  ) => Promise<IExecutionLogResult>;
+  ) => Promise<IExecutionLogWithErrorsResult>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeEndTime: string | -1) => Promise<void>;

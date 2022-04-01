@@ -309,7 +309,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   {hasActionsWithBrokenConnector && (
                     <EuiIconTip
                       data-test-subj="actionWithBrokenConnector"
-                      type="rule"
+                      type="alert"
                       color="danger"
                       content={i18n.translate(
                         'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
@@ -360,7 +360,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 <p>
                   <EuiIcon color="danger" type="alert" />
                   &nbsp;
-                  {getRuleStatusErrorReasonText()}
+                  <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
+                  {rule.executionStatus.error?.message}
                   &nbsp;
                   <EuiLink
                     href={`${http.basePath.get()}/app/management/stack/license_management`}
