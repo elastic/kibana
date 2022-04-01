@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -53,14 +53,9 @@ const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) =>
 /**
  * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
  */
-export const KibanaPageTemplateSolutionNav = ({
-  name,
-  icon,
-  items,
-  isOpenOnDesktop = true,
-  onCollapse,
-  ...rest
-}: KibanaPageTemplateSolutionNavProps) => {
+export const KibanaPageTemplateSolutionNav: FunctionComponent<
+  KibanaPageTemplateSolutionNavProps
+> = ({ name, icon, items, isOpenOnDesktop = false, onCollapse, ...rest }) => {
   const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);

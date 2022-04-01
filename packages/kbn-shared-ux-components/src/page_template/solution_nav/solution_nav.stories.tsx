@@ -14,7 +14,7 @@ export default {
   description: 'Solution-specific navigation for the sidebar',
 };
 
-type Params = Pick<KibanaPageTemplateSolutionNavProps, 'name' | 'icon' | 'isOpenOnDesktop'>;
+type Params = Pick<KibanaPageTemplateSolutionNavProps, 'name' | 'icon'>;
 
 const items: KibanaPageTemplateSolutionNavProps['items'] = [
   {
@@ -56,7 +56,7 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
 ];
 
 export const PureComponent = (params: Params) => {
-  return <KibanaPageTemplateSolutionNav items={items} {...params} />;
+  return <KibanaPageTemplateSolutionNav items={items} isOpenOnDesktop={true} {...params} />;
 };
 
 PureComponent.argTypes = {
@@ -66,10 +66,7 @@ PureComponent.argTypes = {
   },
   icon: {
     control: { type: 'radio' },
-    options: ['logoObservability', 'logoSecurity'],
-  },
-  isOpenOnDesktop: {
-    control: 'boolean',
-    defaultValue: true,
+    options: ['logoKibana', 'logoObservability', 'logoSecurity'],
+    defaultValue: 'logoKibana',
   },
 };

@@ -1,16 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KibanaPageTemplateSolutionNavCollapseButton collapsed 1`] = `
-<EuiButtonIcon
-  aria-label="Open side navigation"
-  className="kbnPageTemplateSolutionNavCollapseButton kbnPageTemplateSolutionNavCollapseButton-isCollapsed"
-  color="text"
-  iconType="menuRight"
-  size="s"
-  title="Open side navigation"
-/>
-`;
-
 exports[`KibanaPageTemplateSolutionNavCollapseButton isCollapsed 1`] = `
 <EuiButtonIcon
   aria-label="Open side navigation"
