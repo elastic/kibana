@@ -191,9 +191,10 @@ export const useSessionView = ({
       ? sessionView.getSessionView({
           sessionEntityId: sessionViewId,
           loadAlertDetails: openDetailsPanel,
+          isFullScreen: fullScreen,
         })
       : null;
-  }, [openDetailsPanel, sessionView, sessionViewId]);
+  }, [fullScreen, openDetailsPanel, sessionView, sessionViewId]);
 
   const navigation = useMemo(() => {
     return (

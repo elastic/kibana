@@ -36,6 +36,7 @@ import {
 export const SessionView = ({
   sessionEntityId,
   height,
+  isFullScreen = false,
   jumpToEvent,
   loadAlertDetails,
 }: SessionViewDeps) => {
@@ -50,7 +51,7 @@ export const SessionView = ({
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
 
-  const styles = useStyles({ height });
+  const styles = useStyles({ height, isFullScreen });
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);

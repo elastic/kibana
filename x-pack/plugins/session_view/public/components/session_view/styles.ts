@@ -11,22 +11,28 @@ import { CSSObject } from '@emotion/react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
-  height: string | undefined;
+  height?: string;
+  isFullScreen?: boolean;
 }
 
-export const useStyles = ({ height = '500px' }: StylesDeps) => {
+export const useStyles = ({ height = '500px', isFullScreen }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { border } = euiTheme;
 
+    // 118px = Session View Toolbar height + Close Session button height + margin
+    const sessionView: CSSObject = {
+      height: `${isFullScreen ? 'calc(100vh - 118px)' : height}`,
+    };
+
     const processTree: CSSObject = {
-      height: `${height}`,
+      ...sessionView,
       position: 'relative',
     };
 
     const detailPanel: CSSObject = {
-      height: `${height}px`,
+      ...sessionView,
       borderRightWidth: '0px',
     };
 
@@ -67,7 +73,7 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
       sessionViewerComponent,
       toolBar,
     };
-  }, [height, euiTheme]);
+  }, [euiTheme, isFullScreen, height]);
 
   return cached;
 };
