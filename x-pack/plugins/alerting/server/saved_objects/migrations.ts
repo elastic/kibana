@@ -7,6 +7,7 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
+import { mapValues } from 'lodash';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -21,7 +22,13 @@ import { RawRule, RawAlertAction, RawRuleExecutionStatus } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
+import {
+  MigrateFunctionsObject,
+  MigrateFunction,
+} from '../../../../../src/plugins/kibana_utils/common';
+import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { getMappedParams } from '../../server/rules_client/lib/mapped_params_utils';
+import { SerializedSearchSourceFields } from '../../../../../src/plugins/data/common';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -58,6 +65,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRu
 // Deprecated in 8.0
 export const isSiemSignalsRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   doc.attributes.alertTypeId === 'siem.signals';
+
+export const isEsQueryRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
+  doc.attributes.alertTypeId === '.es-query';
 
 export const isDetectionEngineAADRuleType = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
   (Object.values(ruleTypeMappings) as string[]).includes(doc.attributes.alertTypeId);
@@ -149,7 +159,7 @@ export function getMigrations(
   const migrationRules820 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addMappedParams)
+    pipeMigrations(addMappedParams, addSearchType)
   );
 
   return {
@@ -690,6 +700,23 @@ function addSecuritySolutionAADRuleTypes(
     : doc;
 }
 
+function addSearchType(doc: SavedObjectUnsanitizedDoc<RawRule>) {
+  const searchType = doc.attributes.params.searchType;
+
+  return isEsQueryRuleType(doc) && !searchType
+    ? {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          params: {
+            ...doc.attributes.params,
+            searchType: 'esQuery',
+          },
+        },
+      }
+    : doc;
+}
+
 function addSecuritySolutionAADRuleTypeTags(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
@@ -869,3 +896,42 @@ function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
   return (doc: SavedObjectUnsanitizedDoc<RawRule>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
+
+/**
+ * This creates a migration map that applies search source migrations to legacy es query rules
+ */
+const getEsQueryAlertSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+  mapValues<MigrateFunctionsObject, MigrateFunction>(
+    searchSourceMigrations,
+    (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
+      (state) => {
+        const _state = state as unknown as { attributes: RawRule };
+
+        const serializedSearchSource = _state.attributes.params
+          .searchConfiguration as SerializedSearchSourceFields;
+
+        if (!serializedSearchSource) return _state;
+
+        return {
+          ..._state,
+          attributes: {
+            ..._state.attributes,
+            params: {
+              ..._state.attributes.params,
+              searchConfiguration: migrate(serializedSearchSource),
+            },
+          },
+        };
+      }
+  );
+
+export const getAllMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject,
+  alertingSavedObjectTypeMigrations: SavedObjectMigrationMap
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(
+    alertingSavedObjectTypeMigrations,
+    getEsQueryAlertSearchSourceMigrations(
+      searchSourceMigrations
+    ) as unknown as SavedObjectMigrationMap
+  );

@@ -6,9 +6,9 @@
  */
 
 import uuid from 'uuid';
-import { getMigrations, isAnyActionSupportIncidents } from './migrations';
+import { getAllMigrations, getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawRule } from '../types';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
@@ -2251,6 +2251,24 @@ describe('successful migrations', () => {
           severity: '60-high',
         });
       });
+
+      test('migrates es_query alert params', () => {
+        const migration820 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.2.0'];
+        const alert = getMockData(
+          {
+            params: { esQuery: '{ "query": "test-query" }' },
+            alertTypeId: '.es-query',
+          },
+          true
+        );
+
+        const migratedAlert820 = migration820(alert, migrationContext);
+
+        expect(migratedAlert820.attributes.params).toEqual({
+          esQuery: '{ "query": "test-query" }',
+          searchType: 'esQuery',
+        });
+      });
     });
 
     describe('Metrics Inventory Threshold rule', () => {
@@ -2307,6 +2325,42 @@ describe('successful migrations', () => {
           },
         });
       });
+    });
+  });
+});
+
+describe('search source migration', () => {
+  it('should apply migration within es query alert rule', () => {
+    const esQueryRuleSavedObject = {
+      attributes: {
+        params: {
+          searchConfiguration: {
+            some: 'prop',
+            migrated: false,
+          },
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '9.1.1';
+    const migrations = getAllMigrations(
+      {
+        [versionToTest]: (state) => ({ ...state, migrated: true }),
+      },
+      getMigrations(encryptedSavedObjectsSetup, isPreconfigured)
+    );
+
+    expect(
+      migrations[versionToTest](esQueryRuleSavedObject, {} as SavedObjectMigrationContext)
+    ).toEqual({
+      attributes: {
+        params: {
+          searchConfiguration: {
+            some: 'prop',
+            migrated: true,
+          },
+        },
+      },
     });
   });
 });

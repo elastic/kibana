@@ -9,6 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
+import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -63,6 +64,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getExecutionConfigForRuleType } from './lib/get_rules_config';
@@ -127,6 +129,7 @@ export interface AlertingPluginsSetup {
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
+  data: DataPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -138,6 +141,7 @@ export interface AlertingPluginsStart {
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export class AlertingPlugin {
@@ -233,12 +237,16 @@ export class AlertingPlugin {
     // Usage counter for telemetry
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
 
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
       this.logger,
-      plugins.actions.isPreconfiguredConnector
+      plugins.actions.isPreconfiguredConnector,
+      getSearchSourceMigrations
     );
 
     initializeApiKeyInvalidator(
@@ -405,6 +413,7 @@ export class AlertingPlugin {
 
     taskRunnerFactory.initialize({
       logger,
+      data: plugins.data,
       savedObjects: core.savedObjects,
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
