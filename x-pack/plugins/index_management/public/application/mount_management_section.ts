@@ -62,6 +62,7 @@ export async function mountManagementSection(
     application,
     chrome: { docTitle },
     uiSettings,
+    executionContext,
   } = core;
 
   const { url } = startDependencies.share;
@@ -79,6 +80,7 @@ export async function mountManagementSection(
     core: {
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
+      executionContext,
     },
     plugins: {
       usageCollection,

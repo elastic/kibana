@@ -85,8 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // FAILING: https://github.com/elastic/kibana/issues/128967
-  describe.skip('cloning', function () {
+  describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
     const transformConfigWithLatest = getLatestTransformConfig('cloning');

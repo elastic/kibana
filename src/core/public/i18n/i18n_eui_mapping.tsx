@@ -843,6 +843,279 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{value}%',
         values: { value },
       }),
+    'euiPrettyDuration.lastDurationSeconds': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationSeconds', {
+        defaultMessage: 'Last {duration, plural, one {# second} other {# seconds}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationSeconds': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationSeconds', {
+        defaultMessage: 'Next {duration, plural, one {# second} other {# seconds}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationMinutes': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationMinutes', {
+        defaultMessage: 'Last {duration, plural, one {# minute} other {# minutes}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationMinutes': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationMinutes', {
+        defaultMessage: 'Next {duration, plural, one {# minute} other {# minutes}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationHours': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationHours', {
+        defaultMessage: 'Last {duration, plural, one {# hour} other {# hours}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationHours': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationHours', {
+        defaultMessage: 'Next {duration, plural, one {# hour} other {# hours}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationDays': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationDays', {
+        defaultMessage: 'Last {duration, plural, one {# day} other {# days}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nexttDurationDays': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nexttDurationDays', {
+        defaultMessage: 'Next {duration, plural, one {# day} other {# days}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationWeeks': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationWeeks', {
+        defaultMessage: 'Last {duration, plural, one {# week} other {# weeks}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationWeeks': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationWeeks', {
+        defaultMessage: 'Next {duration, plural, one {# week} other {# weeks}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationMonths': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationMonths', {
+        defaultMessage: 'Last {duration, plural, one {# month} other {# months}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationMonths': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationMonths', {
+        defaultMessage: 'Next {duration, plural, one {# month} other {# months}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationYears': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationYears', {
+        defaultMessage: 'Last {duration, plural, one {# year} other {# years}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationYears': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationYears', {
+        defaultMessage: 'Next {duration, plural, one {# year} other {# years}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.durationRoundedToSecond': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToSecond', {
+        defaultMessage: '{prettyDuration} rounded to the second',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToMinute': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToMinute', {
+        defaultMessage: '{prettyDuration} rounded to the minute',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToHour': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToHour', {
+        defaultMessage: '{prettyDuration} rounded to the hour',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToDay': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToDay', {
+        defaultMessage: '{prettyDuration} rounded to the day',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToWeek': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToWeek', {
+        defaultMessage: '{prettyDuration} rounded to the week',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToMonth': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToMonth', {
+        defaultMessage: '{prettyDuration} rounded to the month',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToYear': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToYear', {
+        defaultMessage: '{prettyDuration} rounded to the year',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.now': i18n.translate('core.euiPrettyDuration.now', {
+      defaultMessage: 'now',
+    }),
+    'euiPrettyDuration.invalid': i18n.translate('core.euiPrettyDuration.invalid', {
+      defaultMessage: 'Invalid date',
+    }),
+    'euiPrettyDuration.fallbackDuration': ({ displayFrom, displayTo }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.fallbackDuration', {
+        defaultMessage: '{displayFrom} to {displayTo}',
+        values: { displayFrom, displayTo },
+      }),
+    'euiPrettyInterval.seconds': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.seconds', {
+        defaultMessage: '{interval, plural, one {# second} other {# seconds}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.minutes': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.minutes', {
+        defaultMessage: '{interval, plural, one {# minute} other {# minutes}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.hours': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.hours', {
+        defaultMessage: '{interval, plural, one {# hour} other {# hours}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.days': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.days', {
+        defaultMessage: '{interval, plural, one {# day} other {# days}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.secondsShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.secondsShorthand', {
+        defaultMessage: '{interval} s',
+        values: { interval },
+      }),
+    'euiPrettyInterval.minutesShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.minutesShorthand', {
+        defaultMessage: '{interval} m',
+        values: { interval },
+      }),
+    'euiPrettyInterval.hoursShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.hoursShorthand', {
+        defaultMessage: '{interval} h',
+        values: { interval },
+      }),
+    'euiPrettyInterval.daysShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.daysShorthand', {
+        defaultMessage: '{interval} d',
+        values: { interval },
+      }),
+    'euiPrettyInterval.off': i18n.translate('core.euiPrettyInterval.off', {
+      defaultMessage: 'Off',
+    }),
+    'euiTimeOptions.last': i18n.translate('core.euiTimeOptions.last', {
+      defaultMessage: 'Last',
+    }),
+    'euiTimeOptions.next': i18n.translate('core.euiTimeOptions.next', {
+      defaultMessage: 'Next',
+    }),
+    'euiTimeOptions.seconds': i18n.translate('core.euiTimeOptions.seconds', {
+      defaultMessage: 'Seconds',
+    }),
+    'euiTimeOptions.minutes': i18n.translate('core.euiTimeOptions.minutes', {
+      defaultMessage: 'Minutes',
+    }),
+    'euiTimeOptions.hours': i18n.translate('core.euiTimeOptions.hours', {
+      defaultMessage: 'Hours',
+    }),
+    'euiTimeOptions.days': i18n.translate('core.euiTimeOptions.days', {
+      defaultMessage: 'Days',
+    }),
+    'euiTimeOptions.weeks': i18n.translate('core.euiTimeOptions.weeks', {
+      defaultMessage: 'Weeks',
+    }),
+    'euiTimeOptions.months': i18n.translate('core.euiTimeOptions.months', {
+      defaultMessage: 'Months',
+    }),
+    'euiTimeOptions.years': i18n.translate('core.euiTimeOptions.years', {
+      defaultMessage: 'Years',
+    }),
+    'euiTimeOptions.secondsAgo': i18n.translate('core.euiTimeOptions.secondsAgo', {
+      defaultMessage: 'Seconds ago',
+    }),
+    'euiTimeOptions.minutesAgo': i18n.translate('core.euiTimeOptions.minutesAgo', {
+      defaultMessage: 'Minutes ago',
+    }),
+    'euiTimeOptions.hoursAgo': i18n.translate('core.euiTimeOptions.hoursAgo', {
+      defaultMessage: 'Hours ago',
+    }),
+    'euiTimeOptions.daysAgo': i18n.translate('core.euiTimeOptions.daysAgo', {
+      defaultMessage: 'Days ago',
+    }),
+    'euiTimeOptions.weeksAgo': i18n.translate('core.euiTimeOptions.weeksAgo', {
+      defaultMessage: 'Weeks ago',
+    }),
+    'euiTimeOptions.monthsAgo': i18n.translate('core.euiTimeOptions.monthsAgo', {
+      defaultMessage: 'Months ago',
+    }),
+    'euiTimeOptions.yearsAgo': i18n.translate('core.euiTimeOptions.yearsAgo', {
+      defaultMessage: 'Years ago',
+    }),
+    'euiTimeOptions.secondsFromNow': i18n.translate('core.euiTimeOptions.secondsFromNow', {
+      defaultMessage: 'Seconds from now',
+    }),
+    'euiTimeOptions.minutesFromNow': i18n.translate('core.euiTimeOptions.minutesFromNow', {
+      defaultMessage: 'Minutes from now',
+    }),
+    'euiTimeOptions.hoursFromNow': i18n.translate('core.euiTimeOptions.hoursFromNow', {
+      defaultMessage: 'Hours from now',
+    }),
+    'euiTimeOptions.daysFromNow': i18n.translate('core.euiTimeOptions.daysFromNow', {
+      defaultMessage: 'Days from now',
+    }),
+    'euiTimeOptions.weeksFromNow': i18n.translate('core.euiTimeOptions.weeksFromNow', {
+      defaultMessage: 'Weeks from now',
+    }),
+    'euiTimeOptions.monthsFromNow': i18n.translate('core.euiTimeOptions.monthsFromNow', {
+      defaultMessage: 'Months from now',
+    }),
+    'euiTimeOptions.yearsFromNow': i18n.translate('core.euiTimeOptions.yearsFromNow', {
+      defaultMessage: 'Years from now',
+    }),
+    'euiTimeOptions.roundToSecond': i18n.translate('core.euiTimeOptions.roundToSecond', {
+      defaultMessage: 'Round to the second',
+    }),
+    'euiTimeOptions.roundToMinute': i18n.translate('core.euiTimeOptions.roundToMinute', {
+      defaultMessage: 'Round to the minute',
+    }),
+    'euiTimeOptions.roundToHour': i18n.translate('core.euiTimeOptions.roundToHour', {
+      defaultMessage: 'Round to the hour',
+    }),
+    'euiTimeOptions.roundToDay': i18n.translate('core.euiTimeOptions.roundToDay', {
+      defaultMessage: 'Round to the day',
+    }),
+    'euiTimeOptions.roundToWeek': i18n.translate('core.euiTimeOptions.roundToWeek', {
+      defaultMessage: 'Round to the week',
+    }),
+    'euiTimeOptions.roundToMonth': i18n.translate('core.euiTimeOptions.roundToMonth', {
+      defaultMessage: 'Round to the month',
+    }),
+    'euiTimeOptions.roundToYear': i18n.translate('core.euiTimeOptions.roundToYear', {
+      defaultMessage: 'Round to the year',
+    }),
+    'euiTimeOptions.today': i18n.translate('core.euiTimeOptions.today', {
+      defaultMessage: 'Today',
+    }),
+    'euiTimeOptions.thisWeek': i18n.translate('core.euiTimeOptions.thisWeek', {
+      defaultMessage: 'This week',
+    }),
+    'euiTimeOptions.thisMonth': i18n.translate('core.euiTimeOptions.thisMonth', {
+      defaultMessage: 'This month',
+    }),
+    'euiTimeOptions.thisYear': i18n.translate('core.euiTimeOptions.thisYear', {
+      defaultMessage: 'This year',
+    }),
+    'euiTimeOptions.yesterday': i18n.translate('core.euiTimeOptions.yesterday', {
+      defaultMessage: 'Yesterday',
+    }),
+    'euiTimeOptions.weekToDate': i18n.translate('core.euiTimeOptions.weekToDate', {
+      defaultMessage: 'Week to date',
+    }),
+    'euiTimeOptions.monthToDate': i18n.translate('core.euiTimeOptions.monthToDate', {
+      defaultMessage: 'Month to date',
+    }),
+    'euiTimeOptions.yearToDate': i18n.translate('core.euiTimeOptions.yearToDate', {
+      defaultMessage: 'Year to date',
+    }),
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
@@ -888,19 +1161,48 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Refresh is on, interval set to {optionValue} {optionText}.',
         values: { optionValue, optionText },
       }),
+    'euiDatePopoverContent.startDateLabel': i18n.translate(
+      'core.euiDatePopoverContent.startDateLabel',
+      { defaultMessage: 'Start date' }
+    ),
+    'euiDatePopoverContent.endDateLabel': i18n.translate(
+      'core.euiDatePopoverContent.endDateLabel',
+      { defaultMessage: 'End date' }
+    ),
+    'euiDatePopoverContent.absoluteTabLabel': i18n.translate(
+      'core.euiDatePopoverContent.absoluteTabLabel',
+      { defaultMessage: 'Absolute' }
+    ),
+    'euiDatePopoverContent.relativeTabLabel': i18n.translate(
+      'core.euiDatePopoverContent.relativeTabLabel',
+      { defaultMessage: 'Relative' }
+    ),
+    'euiDatePopoverContent.nowTabLabel': i18n.translate('core.euiDatePopoverContent.nowTabLabel', {
+      defaultMessage: 'Now',
+    }),
+    'euiDatePopoverContent.nowTabContent': i18n.translate(
+      'core.euiDatePopoverContent.nowTabContent',
+      {
+        defaultMessage:
+          'Setting the time to "now" means that on every refresh this time will be set to the time of the refresh.',
+      }
+    ),
+    'euiDatePopoverContent.nowTabButtonStart': i18n.translate(
+      'core.euiDatePopoverContent.nowTabButtonStart',
+      { defaultMessage: 'Set start date and time to now' }
+    ),
+    'euiDatePopoverContent.nowTabButtonEnd': i18n.translate(
+      'core.euiDatePopoverContent.nowTabButtonEnd',
+      { defaultMessage: 'Set end date and time to now' }
+    ),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
+      i18n.translate('core.euiAbsoluteTab.dateFormatError', {
+        defaultMessage: 'Expected format: {dateFormat}',
+        values: { dateFormat },
+      }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
-        values: { unit },
-      }),
-    'euiRelativeTab.relativeDate': ({ position }: EuiValues) =>
-      i18n.translate('core.euiRelativeTab.relativeDate', {
-        defaultMessage: '{position} date',
-        values: { position },
-      }),
-    'euiRelativeTab.roundingLabel': ({ unit }: EuiValues) =>
-      i18n.translate('core.euiRelativeTab.roundingLabel', {
-        defaultMessage: 'Round to the {unit}',
         values: { unit },
       }),
     'euiRelativeTab.unitInputLabel': i18n.translate('core.euiRelativeTab.unitInputLabel', {

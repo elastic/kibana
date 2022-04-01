@@ -14,6 +14,7 @@ import {
   notificationServiceMock,
   httpServiceMock,
   scopedHistoryMock,
+  executionContextServiceMock,
 } from '../../../../../../src/core/public/mocks';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
@@ -48,4 +49,5 @@ export const mockContextValue: AppDeps = {
   http: httpServiceMock.createSetupContract(),
   history,
   getUrlForApp: jest.fn(),
+  executionContext: executionContextServiceMock.createStartContract(),
 };
