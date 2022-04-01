@@ -64,4 +64,5 @@ export {
   reactRouterNavigate,
   useKibana,
   KibanaThemeProvider,
+  useExecutionContext,
 } from '../../../../src/plugins/kibana_react/public';

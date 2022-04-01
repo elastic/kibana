@@ -9,8 +9,15 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { StepDefineRule } from './index';
+import mockBrowserFields from './mock_browser_fields.json';
+
+import { aggregatableFields } from '.';
 
 jest.mock('../../../../common/lib/kibana');
+
+test('aggregatableFields', function () {
+  expect(aggregatableFields(mockBrowserFields)).toMatchSnapshot();
+});
 
 describe('StepDefineRule', () => {
   it('renders correctly', () => {
