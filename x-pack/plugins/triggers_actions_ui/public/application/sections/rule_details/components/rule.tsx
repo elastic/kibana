@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiHealth,
@@ -17,9 +17,12 @@ import {
   EuiStat,
   EuiIconTip,
   EuiTabbedContent,
+  EuiEmptyPrompt,
+  EuiButton,
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ActionGroup,
   AlertExecutionStatusErrorReasons,
@@ -62,7 +65,7 @@ type RuleProps = {
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;
   isLoadingChart?: boolean;
-} & Pick<RuleApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
+} & Pick<RuleApis, 'enableRule' | 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
@@ -73,6 +76,7 @@ export function RuleComponent({
   ruleType,
   readOnly,
   ruleSummary,
+  enableRule,
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
@@ -82,6 +86,7 @@ export function RuleComponent({
   durationEpoch = Date.now(),
   isLoadingChart,
 }: RuleProps) {
+  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
@@ -163,25 +168,55 @@ export function RuleComponent({
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiPanel color="subdued" hasBorder={false}>
-            <EuiStat
-              data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-              titleSize="xs"
-              title={
-                <EuiHealth
-                  data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-                  textSize="inherit"
-                  color={healthColor}
-                >
-                  {statusMessage}
-                </EuiHealth>
-              }
-              description={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription',
-                {
-                  defaultMessage: `Last response`,
+            {rule.enabled ? (
+              <EuiStat
+                data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
+                titleSize="xs"
+                title={
+                  <EuiHealth
+                    data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
+                    textSize="inherit"
+                    color={healthColor}
+                  >
+                    {statusMessage}
+                  </EuiHealth>
                 }
-              )}
-            />
+                description={i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription',
+                  {
+                    defaultMessage: `Last response`,
+                  }
+                )}
+              />
+            ) : (
+              <EuiEmptyPrompt
+                data-test-subj="disabledEmptyPrompt"
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRuleTitle"
+                      defaultMessage="Disabled"
+                    />
+                  </p>
+                }
+                actions={[
+                  <EuiButton
+                    data-test-subj="disabledEmptyPromptAction"
+                    color="primary"
+                    fill
+                    disabled={isEnabledUpdating}
+                    onClick={async () => {
+                      setIsEnabledUpdating(true);
+                      await enableRule(rule);
+                      requestRefresh();
+                      setIsEnabledUpdating(false);
+                    }}
+                  >
+                    Enable
+                  </EuiButton>,
+                ]}
+              />
+            )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -235,6 +270,7 @@ export function RuleComponent({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer size="xl" />
       <input
         type="hidden"

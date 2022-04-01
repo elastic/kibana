@@ -21,8 +21,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiIconTip,
-  EuiEmptyPrompt,
-  EuiPageTemplate,
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
@@ -152,7 +150,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const ruleActions = rule.actions;
   const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
-  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
 
   // Check whether interval is below configured minium
@@ -435,58 +432,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         )}
         <EuiFlexGroup>
           <EuiFlexItem>
-            {rule.enabled ? (
-              <RuleRouteWithApi
-                requestRefresh={requestRefresh}
-                refreshToken={refreshToken}
-                rule={rule}
-                ruleType={ruleType}
-                readOnly={!canSaveRule}
-              />
-            ) : (
-              <>
-                <EuiSpacer />
-                <EuiPageTemplate template="empty">
-                  <EuiEmptyPrompt
-                    data-test-subj="disabledEmptyPrompt"
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRuleTitle"
-                          defaultMessage="Disabled Rule"
-                        />
-                      </h2>
-                    }
-                    body={
-                      <>
-                        <p>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRule"
-                            defaultMessage="This rule is disabled and cannot be displayed."
-                          />
-                        </p>
-                      </>
-                    }
-                    actions={[
-                      <EuiButton
-                        data-test-subj="disabledEmptyPromptAction"
-                        color="primary"
-                        fill
-                        disabled={isEnabledUpdating}
-                        onClick={async () => {
-                          setIsEnabledUpdating(true);
-                          await enableRule(rule);
-                          requestRefresh();
-                          setIsEnabledUpdating(false);
-                        }}
-                      >
-                        Enable
-                      </EuiButton>,
-                    ]}
-                  />
-                </EuiPageTemplate>
-              </>
-            )}
+            <RuleRouteWithApi
+              requestRefresh={requestRefresh}
+              refreshToken={refreshToken}
+              rule={rule}
+              ruleType={ruleType}
+              readOnly={!canSaveRule}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>

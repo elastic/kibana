@@ -14,3 +14,7 @@
   bottom: $euiSizeXS;
   position: relative;
 }
+
+.euiEmptyPrompt--vertical .euiEmptyPrompt__main {
+ min-height: unset;
+}
