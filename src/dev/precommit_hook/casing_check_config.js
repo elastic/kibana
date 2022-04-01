@@ -59,6 +59,9 @@ export const IGNORE_FILE_GLOBS = [
   // filename must match upstream filenames from lodash
   'packages/elastic-safer-lodash-set/**/*',
 
+  // filename must match upstream filenames from handlebars
+  'packages/kbn-handlebars/src/upstream/**/*',
+
   'x-pack/plugins/maps/server/fonts/**/*',
 
   // Bazel default files
