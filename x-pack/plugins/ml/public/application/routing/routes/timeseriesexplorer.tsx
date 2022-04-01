@@ -324,7 +324,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   if (!bounds) {
     return (
-      <TimeSeriesExplorerPage>
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
         <TimeseriesexplorerNoChartData />
       </TimeSeriesExplorerPage>
     );
