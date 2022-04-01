@@ -16,3 +16,5 @@ export const LandingPageComponent = memo(() => {
     </SecuritySolutionPageWrapper>
   );
 });
+
+LandingPageComponent.displayName = 'LandingPageComponent';

@@ -85,9 +85,16 @@ describe('Users - rendering', () => {
         </Router>
       </TestProviders>
     );
+    const getUrlForAppMock = (
+      appId: string,
+      options?: { deepLinkId?: string; path?: string; absolute?: boolean }
+    ) => `${appId}${options?.deepLinkId ? `/${options.deepLinkId}` : ''}${options?.path ?? ''}`;
+
+    const landingPath = getUrlForAppMock(APP_UI_ID, { deepLinkId: SecurityPageName.landing });
+
     expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
       deepLinkId: SecurityPageName.landing,
-      path: getAppLandingUrl(),
+      path: getAppLandingUrl(landingPath),
     });
   });
 
