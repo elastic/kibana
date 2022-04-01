@@ -32,7 +32,6 @@ const generateAlertingConfig = (): AlertingConfig => ({
     removalDelay: '1h',
   },
   maxEphemeralActionsPerAlert: 10,
-  defaultRuleTaskTimeout: '5m',
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },
@@ -183,6 +182,10 @@ describe('Alerting Plugin', () => {
     describe('registerType()', () => {
       let setup: PluginSetupContract;
       beforeEach(async () => {
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+          generateAlertingConfig()
+        );
+        plugin = new AlertingPlugin(context);
         setup = await plugin.setup(setupMocks, mockPlugins);
       });
 

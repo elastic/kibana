@@ -29,7 +29,7 @@ node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_
 
 **Run Synthtrace**
 ```
-node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://elastic:changeme@localhost:9200
+node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://localhost:9200 --username=elastic --password=changeme
 ```
 
 **Connect Kibana to ES**

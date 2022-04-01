@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
 import { StatusAll, CaseStatusWithAllStatus } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
@@ -17,8 +17,8 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
-
 import * as i18n from './translations';
+
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -28,6 +28,8 @@ interface CasesTableFiltersProps {
   setFilterRefetch: (val: () => void) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   availableSolutions: string[];
+  displayCreateCaseButton?: boolean;
+  onCreateCasePressed?: () => void;
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -61,6 +63,8 @@ const CasesTableFiltersComponent = ({
   setFilterRefetch,
   hiddenStatuses,
   availableSolutions,
+  displayCreateCaseButton,
+  onCreateCasePressed,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
@@ -157,6 +161,12 @@ const CasesTableFiltersComponent = ({
     [countClosedCases, countInProgressCases, countOpenCases]
   );
 
+  const handleOnCreateCasePressed = useCallback(() => {
+    if (onCreateCasePressed) {
+      onCreateCasePressed();
+    }
+  }, [onCreateCasePressed]);
+
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem>
@@ -207,6 +217,18 @@ const CasesTableFiltersComponent = ({
           )}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {displayCreateCaseButton && onCreateCasePressed ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleOnCreateCasePressed}
+            iconType="plusInCircle"
+            data-test-subj="cases-table-add-case-filter-bar"
+          >
+            {i18n.CREATE_CASE_TITLE}
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };

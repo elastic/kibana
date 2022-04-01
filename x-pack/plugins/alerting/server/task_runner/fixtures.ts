@@ -6,7 +6,12 @@
  */
 
 import { isNil } from 'lodash';
-import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
+import {
+  Alert,
+  AlertExecutionStatusWarningReasons,
+  AlertTypeParams,
+  RecoveredActionGroup,
+} from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { TaskStatus } from '../../../task_manager/server';
@@ -22,6 +27,7 @@ export const RULE_TYPE_ID = 'test';
 export const DATE_1969 = '1969-12-31T00:00:00.000Z';
 export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
+export const DATE_9999 = '9999-12-31T12:34:56.789Z';
 export const MOCK_DURATION = 86400000000000;
 
 export const SAVED_OBJECT = {
@@ -210,6 +216,7 @@ export const generateEventLog = ({
   actionId,
   status,
   numberOfTriggeredActions,
+  numberOfScheduledActions,
   savedObjects = [generateAlertSO('1')],
 }: GeneratorParams = {}) => ({
   ...(status === 'error' && {
@@ -233,9 +240,10 @@ export const generateEventLog = ({
         ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...(!isNil(numberOfTriggeredActions) && {
+          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfScheduledActions)) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
+              number_of_scheduled_actions: numberOfScheduledActions,
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,
@@ -324,6 +332,12 @@ const generateMessage = ({
     }
     if (actionGroupId === 'recovered') {
       return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
+    }
+    if (
+      status === 'warning' &&
+      reason === AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS
+    ) {
+      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
     }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }
