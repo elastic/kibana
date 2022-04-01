@@ -9,6 +9,7 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'kibana/server';
 import { RuleExecutionMetrics } from '.';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
