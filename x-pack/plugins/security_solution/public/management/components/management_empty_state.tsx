@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useKibana } from '../../common/lib/kibana';
 
