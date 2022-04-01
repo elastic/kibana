@@ -287,6 +287,41 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.expectToBeAccessible",
+        "type": "Function",
+        "tags": [],
+        "label": "expectToBeAccessible",
+        "description": [
+          "\nFunction to test if a component doesn't have a11y violations from axe automated testing"
+        ],
+        "signature": [
+          "(component: ",
+          "ReactWrapper",
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.expectToBeAccessible.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-server.findTestSubject",
         "type": "Function",
         "tags": [],
@@ -352,6 +387,43 @@
               "Matcher"
             ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-jest-helpers",
+        "id": "def-server.getA11yViolations",
+        "type": "Function",
+        "tags": [],
+        "label": "getA11yViolations",
+        "description": [
+          "\nReturns a11y violations as found by axe testing"
+        ],
+        "signature": [
+          "(component: ",
+          "ReactWrapper",
+          ") => Promise<",
+          "Result",
+          "[]>"
+        ],
+        "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-jest-helpers",
+            "id": "def-server.getA11yViolations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "ReactWrapper"
+            ],
+            "path": "packages/kbn-test-jest-helpers/src/axe_helpers.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1570,7 +1642,7 @@
             "tags": [],
             "label": "component",
             "description": [
-              "The comonent under test"
+              "The component under test"
             ],
             "signature": [
               "ReactWrapper",

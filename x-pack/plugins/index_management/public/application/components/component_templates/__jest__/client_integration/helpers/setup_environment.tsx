@@ -12,6 +12,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   applicationServiceMock,
+  executionContextServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
 
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
@@ -37,6 +38,7 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup) => ({
   toasts: notificationServiceMock.createSetupContract().toasts,
   setBreadcrumbs: () => {},
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
+  executionContext: executionContextServiceMock.createInternalStartContract(),
 });
 
 export const setupEnvironment = initHttpRequests;

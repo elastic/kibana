@@ -198,20 +198,21 @@ function ExplorerChartContainer({
 
   useEffect(
     function getMapsPluginLink() {
-      if (!series) return;
       let isCancelled = false;
-      const generateLink = async () => {
-        if (!isCancelled) {
+      if (series && getChartType(series) === CHART_TYPE.GEO_MAP) {
+        const generateLink = async () => {
           try {
             const mapsLink = await getMapsLink();
-            setMapsLink(mapsLink?.path);
+            if (!isCancelled) {
+              setMapsLink(mapsLink?.path);
+            }
           } catch (error) {
             console.error(error);
             setMapsLink('');
           }
-        }
-      };
-      generateLink().catch(console.error);
+        };
+        generateLink().catch(console.error);
+      }
       return () => {
         isCancelled = true;
       };
