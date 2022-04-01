@@ -156,6 +156,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           isInvalid={hasNameError && hasBeenInputNameVisited}
           error={NAME_ERROR}
           isDisabled={disabled}
+          data-test-subj="hostIsolationExceptions-form-name-input-formRow"
         >
           <EuiFieldText
             id="eventFiltersFormInputName"
@@ -183,6 +184,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           isInvalid={hasIpError && hasBeenInputIpVisited}
           error={IP_ERROR}
           isDisabled={disabled}
+          data-test-subj="hostIsolationExceptions-form-ip-input-formRow"
         >
           <EuiFieldText
             id="eventFiltersFormInputName"
@@ -204,7 +206,12 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
 
     const descriptionInput = useMemo(
       () => (
-        <EuiFormRow label={DESCRIPTION_LABEL} fullWidth isDisabled={disabled}>
+        <EuiFormRow
+          label={DESCRIPTION_LABEL}
+          fullWidth
+          isDisabled={disabled}
+          data-test-subj="hostIsolationExceptions-form-description-input-formRow"
+        >
           <EuiTextArea
             id="eventFiltersFormInputName"
             placeholder={DESCRIPTION_PLACEHOLDER}
@@ -246,6 +253,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
         component="div"
         error={error && <FormattedError error={error} />}
         isInvalid={!!error}
+        data-test-subj="hostIsolationExceptions-form"
       >
         <EuiTitle size="xs">
           <h2>
