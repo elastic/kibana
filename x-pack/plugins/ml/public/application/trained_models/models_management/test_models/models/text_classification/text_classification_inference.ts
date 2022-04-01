@@ -57,9 +57,7 @@ export class TextClassificationInference extends InferenceBase<InferResponse> {
       formattedResponse = resp.top_classes.map((topClass) => {
         return {
           value: topClass.class_name,
-          predictionProbability: Number(
-            topClass.class_probability.toPrecision(PROBABILITY_SIG_FIGS)
-          ),
+          predictionProbability: topClass.class_probability,
         };
       });
     } else if (labels.length === 2) {
@@ -73,13 +71,17 @@ export class TextClassificationInference extends InferenceBase<InferResponse> {
 
         return {
           value,
-          predictionProbability: Number(predictionProbability.toPrecision(PROBABILITY_SIG_FIGS)),
+          predictionProbability,
         };
       });
     }
 
     return {
       response: formattedResponse
+        .map(({ value, predictionProbability }) => ({
+          value,
+          predictionProbability: Number(predictionProbability.toPrecision(PROBABILITY_SIG_FIGS)),
+        }))
         .sort((a, b) => a.predictionProbability - b.predictionProbability)
         .reverse(),
       rawResponse: resp,
