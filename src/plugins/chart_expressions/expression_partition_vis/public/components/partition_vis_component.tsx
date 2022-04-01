@@ -20,7 +20,8 @@ import {
   SeriesIdentifier,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendToggle, ChartsPluginSetup } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { getColumnByAccessor } from '../../../../visualizations/common/utils';
 import {

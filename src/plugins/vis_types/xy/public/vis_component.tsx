@@ -7,7 +7,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   Chart,
   ElementClickListener,
@@ -29,7 +29,6 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
-  PaletteRegistry,
   useActiveCursor,
 } from '../../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
