@@ -337,7 +337,11 @@ const getUpdateValue = (
   }
 
   return enabledBasedOnSection && (formValue !== configValue || enforceFormValue)
-    ? setNestedProperty(dependsOnConfig, formStateAttribute.configFieldName, formValue)
+    ? setNestedProperty(
+        dependsOnConfig,
+        formStateAttribute.configFieldName,
+        formValue === '' && formStateAttribute.isOptional ? undefined : formValue
+      )
     : {};
 };
 
