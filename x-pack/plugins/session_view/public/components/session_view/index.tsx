@@ -28,6 +28,7 @@ import {
   useFetchAlertStatus,
   useFetchSessionViewProcessEvents,
   useFetchSessionViewAlerts,
+  useLocalStorage,
 } from './hooks';
 
 /**
@@ -43,10 +44,7 @@ export const SessionView = ({
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [displayOptions, setDisplayOptions] = useState<DisplayOptionsState>({
-    timestamp: true,
-    verboseMode: true,
-  });
+  const [displayOptions, setDisplayOptions] = useLocalStorage("displayOptions",{timestamp: true, verboseMode: true})
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
 
