@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'timePicker',
   ]);
-
   const renderService = getService('renderable');
 
   describe('Export import saved objects between versions', function () {
@@ -50,21 +49,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to import 7.13 saved objects into 8.0.0 and verfiy the rendering of two dashboards', async function () {
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
-
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.13_import_saved_objects.ndjson')
       );
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
       await PageObjects.savedObjects.waitTableIsLoaded();
-
       const newObjectCount = await PageObjects.savedObjects.getExportCount();
       expect(newObjectCount - initialObjectCount).to.eql(86);
-      // logstash by reference dashboard with drilldowns
 
+      // logstash by reference dashboard with drilldowns
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('by_reference_drilldown');
-
       // dashboard should load properly
       await PageObjects.dashboard.expectOnDashboard('by_reference_drilldown');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -84,14 +80,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to import alerts and actions saved objects from 7.14 into 8.0.0', async function () {
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
-
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.14_import_alerts_actions.ndjson')
       );
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.savedObjects.clickImportDone();
       await PageObjects.savedObjects.waitTableIsLoaded();
-
       const newObjectCount = await PageObjects.savedObjects.getExportCount();
       expect(newObjectCount - initialObjectCount).to.eql(23);
     });

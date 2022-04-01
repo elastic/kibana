@@ -24,11 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
   const testSubjects = getService('testSubjects');
-
   const spacesService = getService('spaces');
   const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
-
   const getSpacePrefix = (spaceId: string) => {
     return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
   };
@@ -41,10 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
     // dashboard should load properly
     await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
-
     // count of panels rendered completely
     await renderService.waitForRender(8);
-
     // There should be 0 error embeddables on the dashboard
     await PageObjects.dashboard.verifyNoRenderErrors();
   };
@@ -74,22 +70,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('imported dashboard into default space should render correctly', async () => {
       await PageObjects.settings.navigateTo();
-
       await PageObjects.settings.clickKibanaSavedObjects();
-
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
-
       const spaceId = 'default';
       const importFileName = '_8.0.0_multispace_import.ndjson';
       const importFilePath = path.join(__dirname, 'exports', importFileName);
-
       const newObjectCount = await PageObjects.savedObjects.importIntoSpace(
         importFilePath,
         spaceId
       );
-
       expect(newObjectCount - initialObjectCount).to.eql(6);
-
       await checkIfDashboardRendered(spaceId);
     });
 
@@ -99,12 +89,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         basePath: getSpacePrefix(spaceId),
         shouldUseHashForSubUrl: false,
       });
-
       const initialObjectCount = await PageObjects.savedObjects.getExportCount();
-
       const importFileName = '_8.0.0_multispace_import.ndjson';
       const importFilePath = path.join(__dirname, 'exports', importFileName);
-
       const newObjectCount = await PageObjects.savedObjects.importIntoSpace(
         importFilePath,
         spaceId
@@ -120,26 +107,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         basePath: getSpacePrefix(spaceId),
         shouldUseHashForSubUrl: false,
       });
-
       await PageObjects.savedObjects.waitTableIsLoaded();
-
       await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
         'multi_space_import_8.0.0_export'
       );
-
       await PageObjects.copySavedObjectsToSpace.setupForm({
         createNewCopies: true,
         overwrite: false,
         destinationSpaceId,
       });
-
       await PageObjects.copySavedObjectsToSpace.startCopy();
       // Wait for successful copy
       await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
       await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
-
       const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
-
       expect(summaryCounts).to.eql({
         success: 6,
         pending: 0,
