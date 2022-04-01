@@ -6,7 +6,16 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiToolTip, EuiButton, EuiPopover, EuiIcon, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiPopover,
+  EuiIcon,
+  EuiContextMenu,
+  EuiBadge,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LayerType, layerTypes } from '../../../../common';
@@ -111,7 +120,30 @@ export function AddLayerButton({
               return {
                 toolTipContent,
                 disabled,
-                name: label,
+                name:
+                  type === layerTypes.ANNOTATIONS ? (
+                    <EuiFlexGroup gutterSize="m">
+                      <EuiFlexItem>
+                        <span className="lnsLayerAddButton__label">{label}</span>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          className="lnsLayerAddButton__techBadge"
+                          color="hollow"
+                          isDisabled={disabled}
+                        >
+                          {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
+                            defaultMessage: 'Technical preview',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <span className="lnsLayerAddButtonLabel">{label}</span>
+                  ),
+                className: 'lnsLayerAddButton',
+                width: 300,
                 icon: icon && <EuiIcon size="m" type={icon} />,
                 ['data-test-subj']: `lnsLayerAddButton-${type}`,
                 onClick: () => {
