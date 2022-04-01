@@ -8,6 +8,7 @@
 
 // Please also add new aliases to test/scripts/jenkins_storybook.sh
 export const storybookAliases = {
+  unified_search: 'src/plugins/data/.storybook',
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   ci_composite: '.ci/.storybook',
