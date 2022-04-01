@@ -375,12 +375,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const route = isOrganization
         ? `/internal/workplace_search/org/sources/${serviceType}/prepare`
         : `/internal/workplace_search/account/sources/${serviceType}/prepare`;
+
+      const indexPermissionsQuery = isOrganization
+        ? { index_permissions: indexPermissions }
+        : undefined;
+
       const query = subdomain
         ? {
-            index_permissions: indexPermissions,
+            ...indexPermissionsQuery,
             subdomain,
           }
-        : { index_permissions: indexPermissions };
+        : { ...indexPermissionsQuery };
 
       try {
         const response = await HttpLogic.values.http.get<SourceConnectData>(route, {
