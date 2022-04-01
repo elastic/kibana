@@ -14,7 +14,10 @@ import { i18n } from '@kbn/i18n';
 
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
-import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
+import {
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../../../../common/constants';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
@@ -388,6 +391,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
       isNullable: true,
+      isOptional: true,
       validator: 'integerAboveZero',
       valueParser: (v) => (v === '' ? null : +v),
     }),
@@ -396,7 +400,9 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       'settings.max_page_search_size',
       config,
       {
-        defaultValue: '500',
+        defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
+        isNullable: true,
+        isOptional: true,
         validator: 'integerRange10To10000',
         valueParser: (v) => +v,
       }
