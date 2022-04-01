@@ -18,7 +18,7 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiConfirmModal,
-  prettyDuration,
+  usePrettyDuration,
   ShortDate,
 } from '@elastic/eui';
 
@@ -64,7 +64,7 @@ const commonDurationRanges: DurationRange[] = [
   { start: 'now/y', end: 'now', label: 'Year to date' },
 ];
 
-function itemTitle(attributes: SavedQueryAttributes, format: string) {
+const itemTitle = (attributes: SavedQueryAttributes, format: string) => {
   let label = attributes.title;
 
   if (attributes.description) {
@@ -72,18 +72,19 @@ function itemTitle(attributes: SavedQueryAttributes, format: string) {
   }
 
   if (attributes.timefilter) {
-    label += `; ${prettyDuration(
-      attributes.timefilter?.from,
-      attributes.timefilter?.to,
-      commonDurationRanges,
-      format
-    )}`;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    label += `; ${usePrettyDuration({
+      timeFrom: attributes.timefilter?.from,
+      timeTo: attributes.timefilter?.to,
+      quickRanges: commonDurationRanges,
+      dateFormat: format,
+    })}`;
   }
 
   return label;
-}
+};
 
-function itemLabel(attributes: SavedQueryAttributes) {
+const itemLabel = (attributes: SavedQueryAttributes) => {
   let label: React.ReactNode = attributes.title;
 
   if (attributes.description) {
@@ -103,7 +104,7 @@ function itemLabel(attributes: SavedQueryAttributes) {
   }
 
   return label;
-}
+};
 
 export function SavedQueryManagementList({
   showSaveQuery,

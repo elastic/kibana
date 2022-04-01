@@ -72,15 +72,15 @@ const createMockStorage = () => ({
   set: action('set'),
   remove: action('remove'),
   clear: action('clear'),
-  get: action('get'),
+  get: () => true,
 });
 
 const services = {
   uiSettings: {
     get: () => {},
   },
-  savedObjects: action('uiSettings'),
-  notifications: action('uiSettings'),
+  savedObjects: action('savedObjects'),
+  notifications: action('notifications'),
   http: {
     basePath: {
       prepend: () => 'http://test',
@@ -155,7 +155,10 @@ const services = {
       getQuerySuggestions: () => [],
     },
     dataViews: {
-      getIdsWithTitle: () => [],
+      getIdsWithTitle: () => [
+        { id: '1234', title: 'logstash-*' },
+        { id: '1235', title: 'test-*' },
+      ],
     },
   },
 };
