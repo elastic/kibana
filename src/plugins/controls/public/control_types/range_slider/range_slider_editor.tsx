@@ -35,6 +35,8 @@ export const RangeSliderEditor = ({
   initialInput,
   setValidState,
   setDefaultTitle,
+  getRelevantDataViewId,
+  setLastUsedDataViewId,
 }: ControlEditorProps<RangeSliderEmbeddableInput>) => {
   // Controls Services Context
   const { dataViews } = pluginServices.getHooks();
@@ -50,7 +52,8 @@ export const RangeSliderEditor = ({
     if (state.fieldName) setDefaultTitle(state.fieldName);
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
-      const initialId = initialInput?.dataViewId ?? (await getDefaultId());
+      const initialId =
+        initialInput?.dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       let dataView: DataView | undefined;
       if (initialId) {
         onChange({ dataViewId: initialId });
@@ -77,6 +80,7 @@ export const RangeSliderEditor = ({
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
+            setLastUsedDataViewId?.(dataViewId);
             onChange({ dataViewId });
             get(dataViewId).then((newDataView) =>
               setState((s) => ({ ...s, dataView: newDataView }))

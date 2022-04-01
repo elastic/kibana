@@ -2792,7 +2792,7 @@
           ">; getExecutionLogForRule: ({ id, dateStart, dateEnd, filter, page, perPage, sort, }: ",
           "GetExecutionLogByIdParams",
           ") => Promise<",
-          "IExecutionLogResult",
+          "IExecutionLogWithErrorsResult",
           ">; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeEndTime, }: { id: string; snoozeEndTime: string | -1; }) => Promise<void>; unsnooze: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
@@ -3734,6 +3734,19 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.AlertExecutionStatus.numberOfScheduledActions",
+            "type": "number",
+            "tags": [],
+            "label": "numberOfScheduledActions",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.AlertExecutionStatus.metrics",
             "type": "Object",
             "tags": [],
@@ -4304,6 +4317,212 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.IExecutionLog",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionLog",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.duration_ms",
+            "type": "number",
+            "tags": [],
+            "label": "duration_ms",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.num_active_alerts",
+            "type": "number",
+            "tags": [],
+            "label": "num_active_alerts",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.num_new_alerts",
+            "type": "number",
+            "tags": [],
+            "label": "num_new_alerts",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.num_recovered_alerts",
+            "type": "number",
+            "tags": [],
+            "label": "num_recovered_alerts",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.num_triggered_actions",
+            "type": "number",
+            "tags": [],
+            "label": "num_triggered_actions",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.num_succeeded_actions",
+            "type": "number",
+            "tags": [],
+            "label": "num_succeeded_actions",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.num_errored_actions",
+            "type": "number",
+            "tags": [],
+            "label": "num_errored_actions",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.total_search_duration_ms",
+            "type": "number",
+            "tags": [],
+            "label": "total_search_duration_ms",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.es_search_duration_ms",
+            "type": "number",
+            "tags": [],
+            "label": "es_search_duration_ms",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.schedule_delay_ms",
+            "type": "number",
+            "tags": [],
+            "label": "schedule_delay_ms",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLog.timed_out",
+            "type": "boolean",
+            "tags": [],
+            "label": "timed_out",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.IExecutionLogResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionLogResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLogResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.IExecutionLogResult.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.IExecutionLog",
+                "text": "IExecutionLog"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.IntervalSchedule",
         "type": "Interface",
         "tags": [],
@@ -4393,7 +4612,7 @@
             "label": "state",
             "description": [],
             "signature": [
-              "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
+              "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; numberOfScheduledActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
             ],
             "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
             "deprecated": false
@@ -5029,6 +5248,20 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ExecutionLogSortFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutionLogSortFields",
+        "description": [],
+        "signature": [
+          "\"timestamp\" | \"execution_duration\" | \"total_search_duration\" | \"es_search_duration\" | \"schedule_delay\" | \"num_triggered_actions\""
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.INTERNAL_BASE_ALERTING_API_PATH",
         "type": "string",
         "tags": [],
@@ -5184,7 +5417,7 @@
         "label": "RuleExecutionState",
         "description": [],
         "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
+          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; numberOfScheduledActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
@@ -5357,6 +5590,20 @@
           "Map<string, string[]>"
         ],
         "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.executionLogSortableColumns",
+        "type": "Object",
+        "tags": [],
+        "label": "executionLogSortableColumns",
+        "description": [],
+        "signature": [
+          "readonly [\"timestamp\", \"execution_duration\", \"total_search_duration\", \"es_search_duration\", \"schedule_delay\", \"num_triggered_actions\"]"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

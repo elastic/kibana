@@ -51,6 +51,7 @@ export const SAVED_OBJECT_TYPES = [
  */
 
 export const CASES_URL = '/api/cases' as const;
+export const CASE_FIND_URL = `${CASES_URL}/_find` as const;
 export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}` as const;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure` as const;
 export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration_id}` as const;
