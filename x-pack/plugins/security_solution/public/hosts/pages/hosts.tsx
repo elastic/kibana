@@ -56,6 +56,7 @@ import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { filterHostExternalAlertData } from '../../common/components/visualization_actions/utils';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { Loader } from '../../common/components/loader';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -128,7 +129,8 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns, loading } =
+    useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -178,6 +180,10 @@ const HostsComponent = () => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+
+  if (loading) {
+    return <Loader data-test-subj="loadingPanelExploreHosts" overlay size="xl" />;
+  }
 
   return (
     <>

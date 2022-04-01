@@ -14,8 +14,8 @@ jest.mock('../route/use_route_spy', () => ({
     .mockImplementationOnce(() => [{ pageName: 'hosts' }])
     .mockImplementationOnce(() => [{ pageName: 'rules' }])
     .mockImplementationOnce(() => [{ pageName: 'network' }])
-    .mockImplementationOnce(() => [{ pageName: 'landing' }])
-    .mockImplementationOnce(() => [{ pageName: 'landing' }]),
+    .mockImplementationOnce(() => [{ pageName: 'get_started' }])
+    .mockImplementationOnce(() => [{ pageName: 'get_started' }]),
 }));
 jest.mock('../../../common/containers/sourcerer', () => ({
   useSourcererDataView: jest

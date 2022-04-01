@@ -100,7 +100,6 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
 
-
     expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
