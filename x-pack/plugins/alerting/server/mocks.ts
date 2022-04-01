@@ -12,7 +12,9 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
+  httpServerMock,
 } from '../../../../src/core/server/mocks';
+import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { rulesClientMock };
@@ -111,6 +113,11 @@ const createAlertServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
+    searchSourceClient: Promise.resolve(
+      dataPluginMock
+        .createStartContract()
+        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
+    ),
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

@@ -105,7 +105,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 
 describe('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
-  const TIMEPICKER_SELECTOR = 'EuiSuperDatePicker';
+  const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {

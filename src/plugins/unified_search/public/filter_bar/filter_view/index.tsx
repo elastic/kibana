@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, useInnerText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
@@ -18,6 +18,8 @@ interface Props {
   valueLabel: string;
   filterLabelStatus: FilterLabelStatus;
   errorMessage?: string;
+  readonly?: boolean;
+  hideAlias?: boolean;
   [propName: string]: any;
 }
 
@@ -28,6 +30,8 @@ export const FilterView: FC<Props> = ({
   valueLabel,
   errorMessage,
   filterLabelStatus,
+  readonly,
+  hideAlias,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
@@ -50,36 +54,45 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  return (
-    <EuiBadge
-      title={title}
-      color="hollow"
-      iconType="cross"
-      iconSide="right"
-      closeButtonProps={{
-        // Removing tab focus on close button because the same option can be obtained through the context menu
-        // Also, we may want to add a `DEL` keyboard press functionality
-        tabIndex: -1,
-      }}
-      iconOnClick={iconOnClick}
-      iconOnClickAriaLabel={i18n.translate(
-        'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
-        {
+  const badgeProps: EuiBadgeProps = readonly
+    ? {
+        title,
+        color: 'hollow',
+        onClick,
+        onClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemReadOnlyBadgeAriaLabel', {
+          defaultMessage: 'Filter entry',
+        }),
+        iconOnClick,
+      }
+    : {
+        title,
+        color: 'hollow',
+        iconType: 'cross',
+        iconSide: 'right',
+        closeButtonProps: {
+          // Removing tab focus on close button because the same option can be obtained through the context menu
+          // Also, we may want to add a `DEL` keyboard press functionality
+          tabIndex: -1,
+        },
+        iconOnClick,
+        iconOnClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
           defaultMessage: 'Delete {filter}',
           values: { filter: innerText },
-        }
-      )}
-      onClick={onClick}
-      onClickAriaLabel={i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel', {
-        defaultMessage: 'Filter actions',
-      })}
-      {...rest}
-    >
+        }),
+        onClick,
+        onClickAriaLabel: i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {
+          defaultMessage: 'Filter actions',
+        }),
+      };
+
+  return (
+    <EuiBadge {...badgeProps} {...rest}>
       <span ref={ref}>
         <FilterLabel
           filter={filter}
           valueLabel={valueLabel}
           filterLabelStatus={filterLabelStatus}
+          hideAlias={hideAlias}
         />
       </span>
     </EuiBadge>

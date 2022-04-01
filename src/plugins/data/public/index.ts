@@ -19,7 +19,12 @@ export * from './deprecated';
  */
 
 export { getEsQueryConfig, FilterStateStore } from '../common';
-export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
+export {
+  getDisplayValueFromFilter,
+  generateFilters,
+  extractTimeRange,
+  getIndexPatternFromFilter,
+} from './query';
 
 /**
  * Exporters (CSV)
@@ -268,7 +273,6 @@ export {
   TimeHistory,
   getQueryLog,
   mapAndFlattenFilters,
-  getIndexPatternFromFilter,
 } from './query';
 
 export type {
