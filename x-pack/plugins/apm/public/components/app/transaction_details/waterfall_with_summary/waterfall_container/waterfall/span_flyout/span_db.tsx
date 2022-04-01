@@ -8,11 +8,7 @@
 import { EuiSpacer, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-
-SyntaxHighlighter.registerLanguage('sql', sql);
 
 interface Props {
   spanDb?: NonNullable<Span['span']>['db'];
