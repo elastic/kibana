@@ -1294,8 +1294,8 @@ export const sessionViewAlertProcessMock: Process = {
 
 export const mockProcessMap = mockEvents.reduce(
   (processMap, event) => {
-    processMap[event.process.entity_id] = {
-      id: event.process.entity_id,
+    processMap[event.process!.entity_id!] = {
+      id: event.process!.entity_id!,
       events: [event],
       alerts: [],
       children: [],
