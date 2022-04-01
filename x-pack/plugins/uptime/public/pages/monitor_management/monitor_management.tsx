@@ -106,7 +106,7 @@ export const MonitorManagementPage: React.FC = () => {
 };
 
 const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.manageMonitorLoadingLabel', {
-  defaultMessage: 'Loading Monitor Management',
+  defaultMessage: 'Loading Manage Monitors',
 });
 
 const LEARN_MORE_LABEL = i18n.translate(
@@ -119,14 +119,14 @@ const LEARN_MORE_LABEL = i18n.translate(
 const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
   'xpack.uptime.monitorManagement.callout.disabled',
   {
-    defaultMessage: 'Monitor Management is disabled',
+    defaultMessage: 'Manage monitors is disabled',
   }
 );
 
 const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
   'xpack.uptime.monitorManagement.callout.disabled.adminContact',
   {
-    defaultMessage: 'Please contact your administrator to enable Monitor Management.',
+    defaultMessage: 'Please contact your administrator to enable manage monitors.',
   }
 );
 
@@ -134,24 +134,24 @@ const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.uptime.monitorManagement.callout.description.disabled',
   {
     defaultMessage:
-      'Monitor Management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor Management. Your existing monitors are paused.',
+      'Manage monitors is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Manage monitors. Your existing monitors are paused.',
   }
 );
 
 const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
-  defaultMessage: 'Error loading Monitor Management',
+  defaultMessage: 'Error loading manage monitors',
 });
 
 const ERROR_HEADING_BODY = i18n.translate(
   'xpack.uptime.monitorManagement.editMonitorError.description',
   {
-    defaultMessage: 'Monitor Management settings could not be loaded. Please contact Support.',
+    defaultMessage: 'Manage monitors settings could not be loaded. Please contact Support.',
   }
 );
 
 const SYNTHETICS_ENABLE_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.syntheticsEnableLabel.management',
   {
-    defaultMessage: 'Enable Monitor Management',
+    defaultMessage: 'Enable Manage Monitors',
   }
 );
