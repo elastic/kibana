@@ -623,7 +623,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const newOrderByValue = fromValue(e.target.value);
-              let updatedLayer = updateDefaultLabels(
+              const updatedLayer = updateDefaultLabels(
                 updateColumnParam({
                   layer,
                   columnId,
@@ -633,23 +633,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 indexPattern
               );
 
-              updatedLayer = updateColumnParam({
-                layer: updatedLayer,
-                columnId,
-                paramName: 'orderDirection',
-                value: newOrderByValue.type === 'alphabetical' ? 'asc' : 'desc',
-              });
-
-              if (newOrderByValue.type === 'rare' && currentColumn.params.accuracyMode) {
-                updatedLayer = updateColumnParam({
+              updateLayer(
+                updateColumnParam({
                   layer: updatedLayer,
                   columnId,
-                  paramName: 'accuracyMode',
-                  value: false,
-                });
-              }
-
-              updateLayer(updatedLayer);
+                  paramName: 'orderDirection',
+                  value: newOrderByValue.type === 'alphabetical' ? 'asc' : 'desc',
+                })
+              );
             }}
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
               defaultMessage: 'Rank by',
@@ -771,8 +762,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 })}
                 compressed
                 disabled={currentColumn.params.orderBy.type === 'rare'}
-                data-test-subj="indexPattern-terms-missing-bucket"
-                checked={Boolean(currentColumn.params.accuracyMode)}
+                data-test-subj="indexPattern-accuracy-mode"
+                checked={Boolean(
+                  currentColumn.params.accuracyMode && currentColumn.params.orderBy.type !== 'rare'
+                )}
                 onChange={(e: EuiSwitchEvent) =>
                   updateLayer(
                     updateColumnParam({
