@@ -4,3 +4,26 @@ steps:
     agents:
       queue: c2-16
     timeout_in_minutes: 60
+
+  - wait
+
+  - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for deb
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60
+    if: "build.env('RELEASE)BUILD') == true"
+
+  - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for rpm
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60
+    if: "build.env('RELEASE)BUILD') == true"
+
+  - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for docker
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 60
+    if: "build.env('RELEASE)BUILD') == true"
