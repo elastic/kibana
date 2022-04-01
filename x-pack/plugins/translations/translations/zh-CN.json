@@ -26682,7 +26682,6 @@
     "xpack.stackAlerts.esQuery.actionVariableContextTitleLabel": "告警的标题。",
     "xpack.stackAlerts.esQuery.actionVariableContextValueLabel": "满足阈值条件的值。",
     "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "匹配文档的数目{thresholdComparator} {threshold}",
-    "xpack.stackAlerts.esQuery.alertTypeContextMessageDescription": "告警“{name}”处于活动状态：\n\n- 值：{value}\n- 满足的条件：{conditions} 超过 {window}\n- 时间戳：{date}",
     "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "告警“{name}”已匹配查询",
     "xpack.stackAlerts.esQuery.alertTypeTitle": "Elasticsearch 查询",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "指定的 thresholdComparator 无效：{comparator}",

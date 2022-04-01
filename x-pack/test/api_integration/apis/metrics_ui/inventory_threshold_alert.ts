@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
     source,
     logQueryFields: void 0,
     compositeSize: 10000,
-    startTime: DATES['8.0.0'].hosts_only.max,
+    executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),
     logger,
   };
 
@@ -451,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           nodeType: 'pod' as InventoryItemType,
           condition: {
             ...baseCondition,
@@ -492,7 +492,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 5 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           logQueryFields: { indexPattern: 'metricbeat-*' },
           nodeType: 'pod',
           condition: {
