@@ -417,7 +417,7 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          table: [buildTableExpression(datasourceExpression)],
+          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
         },
       },
     ],
@@ -434,11 +434,10 @@ const annotationLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'annotationLayer',
+        function: 'extendedAnnotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
-          layerId: [layer.layerId],
-          table: [buildTableExpression(datasourceExpression)],
+          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>
@@ -499,7 +498,7 @@ const dataLayerToExpression = (
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          table: [buildTableExpression(datasourceExpression)],
+          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
           palette: [
             {
               type: 'expression',

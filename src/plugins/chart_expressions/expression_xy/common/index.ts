@@ -17,6 +17,7 @@ export {
   gridlinesConfigFunction,
   dataLayerFunction,
   annotationLayerFunction,
+  extendedAnnotationLayerFunction,
   extendedDataLayerFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
