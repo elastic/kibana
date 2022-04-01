@@ -68,6 +68,7 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
         { "id": "kibDecember2021ContributorNewsletter" },

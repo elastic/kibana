@@ -65,6 +65,7 @@ describe('buildAlert', () => {
     const timestamp = alert[TIMESTAMP];
     const expected = {
       [TIMESTAMP]: timestamp,
+      [EVENT_KIND]: 'signal',
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [
@@ -235,6 +236,7 @@ describe('buildAlert', () => {
 
     const expected = {
       [TIMESTAMP]: timestamp,
+      [EVENT_KIND]: 'signal',
       [SPACE_IDS]: [SPACE_ID],
       [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
       [ALERT_ANCESTORS]: [

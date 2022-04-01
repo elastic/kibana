@@ -13,6 +13,7 @@ export function getDefaultMapSettings(): MapSettings {
   return {
     autoFitToDataBounds: false,
     backgroundColor: euiThemeVars.euiColorEmptyShade,
+    customIcons: [],
     disableInteractive: false,
     disableTooltipControl: false,
     hideToolbarOverlay: false,
