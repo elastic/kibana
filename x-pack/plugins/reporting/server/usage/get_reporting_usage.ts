@@ -16,6 +16,7 @@ import type {
   AggregationBuckets,
   AggregationResultBuckets,
   AvailableTotal,
+  ErrorCodeStats,
   JobTypes,
   KeyCountBucket,
   LayoutCounts,
@@ -33,6 +34,7 @@ enum keys {
   STATUS_BY_APP = 'statusByApp',
   STATUS = 'statusTypes',
   OUTPUT_SIZE = 'output_size',
+  ERROR_CODE = 'errorCodes',
   IS_DEPRECATED = 'meta.isDeprecated',
   CSV_ROWS = 'csv_rows',
   PDF_CPU = 'pdf_cpu',
@@ -52,6 +54,7 @@ enum fields {
   PNG_MEMORY = 'metrics.png.memoryInMegabytes',
   OBJECT_TYPE = 'meta.objectType.keyword',
   OUTPUT_SIZE = 'output.size',
+  ERROR_CODE = 'output.error_code',
   STATUS = 'status',
 }
 
@@ -88,6 +91,7 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
 type JobType = Omit<AvailableTotal, 'available'> & {
   layout: LayoutCounts;
   metrics?: MetricsStats;
+  error_codes?: ErrorCodeStats;
 };
 
 function getAggStats(
@@ -103,6 +107,7 @@ function getAggStats(
       output_size: outputSizes,
       layoutTypes,
       objectTypes,
+      errorCodes,
     } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
 
@@ -113,6 +118,7 @@ function getAggStats(
       app: getKeyCount(get(objectTypes, 'buckets', [])),
       metrics: (metrics && metrics[key]) || undefined,
       output_size: get(outputSizes, 'values', {} as SizePercentiles),
+      error_codes: getKeyCount(get(errorCodes, 'buckets', [])),
       layout: getKeyCount(get(layoutTypes, 'buckets', [])),
     };
     return { ...accum, [key]: jobType };
@@ -214,9 +220,6 @@ export async function getReportingUsage(
               terms: { field: fields.JOB_TYPE, size: DEFAULT_TERMS_SIZE },
               aggs: {
                 isDeprecated: { filter: { term: { [keys.IS_DEPRECATED]: true } } },
-                [keys.OUTPUT_SIZE]: {
-                  percentiles: { field: fields.OUTPUT_SIZE, percents: SIZE_PERCENTILES },
-                },
                 [keys.LAYOUT]: { terms: { field: fields.LAYOUT, size: DEFAULT_TERMS_SIZE } },
                 [keys.STATUS_BY_APP]: {
                   terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE },
@@ -227,10 +230,21 @@ export async function getReportingUsage(
                 [keys.OBJECT_TYPE]: {
                   terms: { field: fields.OBJECT_TYPE, size: DEFAULT_TERMS_SIZE },
                 },
+                // per-job output size
+                [keys.OUTPUT_SIZE]: {
+                  percentiles: { field: fields.OUTPUT_SIZE, percents: SIZE_PERCENTILES },
+                },
+                // per-job error codes
+                [keys.ERROR_CODE]: {
+                  terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE },
+                },
               },
             },
             [keys.STATUS]: { terms: { field: fields.STATUS, size: DEFAULT_TERMS_SIZE } },
+            // overall output sizes
             [keys.OUTPUT_SIZE]: { percentiles: { field: fields.OUTPUT_SIZE } },
+            // overall error codes
+            [keys.ERROR_CODE]: { terms: { field: fields.ERROR_CODE, size: DEFAULT_TERMS_SIZE } },
           },
         },
         metrics: {

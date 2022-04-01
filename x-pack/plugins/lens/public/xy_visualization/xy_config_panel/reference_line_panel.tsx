@@ -19,7 +19,11 @@ import { updateLayer } from '.';
 import { useDebouncedValue } from '../../shared_components';
 import { idPrefix } from './dimension_editor';
 import { isHorizontalChart } from '../state_helpers';
-import { MarkerDecorationSettings } from './shared/marker_decoration_settings';
+import {
+  IconSelectSetting,
+  MarkerDecorationPosition,
+  TextDecorationSetting,
+} from './shared/marker_decoration_settings';
 import { LineStyleSettings } from './shared/line_style_settings';
 
 export const ReferenceLinePanel = (
@@ -69,8 +73,9 @@ export const ReferenceLinePanel = (
 
   return (
     <>
-      {' '}
-      <MarkerDecorationSettings
+      <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
+      <IconSelectSetting setConfig={setConfig} currentConfig={localConfig} />
+      <MarkerDecorationPosition
         isHorizontal={isHorizontal}
         setConfig={setConfig}
         currentConfig={localConfig}

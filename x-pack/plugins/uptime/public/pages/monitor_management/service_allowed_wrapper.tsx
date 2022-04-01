@@ -11,7 +11,7 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useSyntheticsServiceAllowed } from '../../components/monitor_management/hooks/use_service_allowed';
 
 export const ServiceAllowedWrapper: React.FC = ({ children }) => {
-  const { isAllowed, loading } = useSyntheticsServiceAllowed();
+  const { isAllowed, signupUrl, loading } = useSyntheticsServiceAllowed();
 
   if (loading) {
     return (
@@ -29,7 +29,7 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
         title={<h2>{MONITOR_MANAGEMENT_LABEL}</h2>}
         body={<p>{PUBLIC_BETA_DESCRIPTION}</p>}
         actions={[
-          <EuiButton color="primary" fill isDisabled={true}>
+          <EuiButton color="primary" fill isDisabled={!signupUrl} href={signupUrl ?? undefined}>
             {REQUEST_ACCESS_LABEL}
           </EuiButton>,
         ]}
@@ -51,7 +51,7 @@ const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.loading.label',
   {
-    defaultMessage: 'Loading monitor management',
+    defaultMessage: 'Loading Monitor Management',
   }
 );
 

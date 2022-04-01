@@ -14,7 +14,7 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
+import { ICON_SOURCE, RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './test_helpers/test_util';
@@ -57,7 +57,30 @@ describe('renderLegendDetailRow', () => {
     const iconStyle = makeProperty({
       iconPaletteId: 'filledShapes',
     });
+    const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
+    const component = shallow(legendRow);
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
 
+    expect(component).toMatchSnapshot();
+  });
+
+  test('Should render categorical legend with custom icons in breaks', async () => {
+    const iconStyle = makeProperty({
+      useCustomIconMap: true,
+      customIconStops: [
+        {
+          stop: null,
+          icon: 'kbn__custom_icon_sdf__foobar',
+          iconSource: ICON_SOURCE.CUSTOM,
+        },
+        {
+          stop: 'MX',
+          icon: 'marker',
+          iconSource: ICON_SOURCE.MAKI,
+        },
+      ],
+    });
     const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
     const component = shallow(legendRow);
     await new Promise((resolve) => process.nextTick(resolve));
@@ -88,8 +111,16 @@ describe('get mapbox icon-image expression (via internal _getMbIconImageExpressi
       const iconStyle = makeProperty({
         useCustomIconMap: true,
         customIconStops: [
-          { stop: null, icon: 'circle' },
-          { stop: 'MX', icon: 'marker' },
+          {
+            stop: null,
+            icon: 'circle',
+            iconSource: ICON_SOURCE.MAKI,
+          },
+          {
+            stop: 'MX',
+            icon: 'marker',
+            iconSource: ICON_SOURCE.MAKI,
+          },
         ],
       });
       expect(iconStyle._getMbIconImageExpression()).toEqual([
