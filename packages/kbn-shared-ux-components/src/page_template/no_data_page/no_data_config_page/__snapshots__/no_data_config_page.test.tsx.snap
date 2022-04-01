@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoDataConfigPage renders 1`] = `
+<EuiPageTemplate
+  className="kbnPageTemplate kbnPageTemplate--centeredBody"
+  pageContentProps={
+    Object {
+      "color": "transparent",
+      "hasShadow": false,
+    }
+  }
+  restrictWidth={950}
+  template="centeredBody"
+>
+  <NoDataPage
+    action={
+      Object {
+        "kibana": Object {
+          "button": "Click me",
+          "description": "Page with no data",
+          "onClick": [MockFunction],
+        },
+      }
+    }
+    docsLink="test-link"
+    logo="logoKibana"
+    solution="Kibana"
+  />
+</EuiPageTemplate>
+`;
