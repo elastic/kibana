@@ -267,7 +267,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Edit rule button', function () {
+    describe('Edit rule button', function () {
       const ruleName = uuid.v4();
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
 
@@ -365,7 +365,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Edit rule with deleted connector', function () {
+    describe('Edit rule with deleted connector', function () {
       const testRunUuid = uuid.v4();
 
       afterEach(async () => {
@@ -506,7 +506,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('View In App', function () {
+    describe('View In App', function () {
       const ruleName = uuid.v4();
 
       beforeEach(async () => {
@@ -559,7 +559,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Alerts', function () {
+    describe('Alerts', function () {
       const testRunUuid = uuid.v4();
       let rule: any;
 
@@ -769,7 +769,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Alert Pagination', function () {
+    describe('Alert Pagination', function () {
       const testRunUuid = uuid.v4();
       let rule: any;
 
@@ -844,7 +844,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Execution log', () => {
+    describe('Execution log', () => {
       const testRunUuid = uuid.v4();
       let rule: any;
 
