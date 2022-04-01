@@ -50,17 +50,12 @@
 .lnsLayerAddButton:hover {
   text-decoration: none;
 
-  .lnsLayerAddButtonLabel {
+  .lnsLayerAddButton__label {
     text-decoration: underline;
   }
-}
 
-.lnsLayerAddButton:disabled {
-  .lnsLayerAddButtonTechBadge {
-    color: $euiColorDisabled;
+  .lnsLayerAddButton__techBadge,
+  .lnsLayerAddButton__techBadge * {
+    cursor: pointer;
   }
-}
-
-.lnsLayerAddButtonTechBadge {
-  cursor: pointer;
 }
