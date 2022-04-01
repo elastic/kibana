@@ -435,7 +435,7 @@ export class FleetPlugin
                   url: '/',
                 },
               },
-            },
+            } as unknown as KibanaRequest,
             {
               excludedWrappers: ['security'],
             }

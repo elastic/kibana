@@ -7,6 +7,7 @@
 
 import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import uuid from 'uuid/v5';
+import { omit } from 'lodash';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import {
@@ -166,7 +167,7 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
-    const data: OutputSOAttributes = { ...output };
+    const data: OutputSOAttributes = { ...omit(output, 'ssl') };
 
     if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
@@ -204,8 +205,8 @@ class OutputService {
       data.output_id = options?.id;
     }
 
-    if (data.ssl) {
-      data.ssl = JSON.stringify(data.ssl);
+    if (output.ssl) {
+      data.ssl = JSON.stringify(output.ssl);
     }
 
     const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
@@ -317,7 +318,7 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<Output>> = { ...data };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
 
@@ -337,9 +338,8 @@ class OutputService {
       }
     }
 
-    if (updateData.ssl) {
-      // @ts-expect-error
-      updateData.ssl = JSON.stringify(updateData.ssl);
+    if (data.ssl) {
+      updateData.ssl = JSON.stringify(data.ssl);
     }
 
     // ensure only default output exists
