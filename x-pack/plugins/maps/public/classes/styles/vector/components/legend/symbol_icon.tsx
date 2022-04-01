@@ -40,7 +40,12 @@ export class SymbolIcon extends Component<Props, State> {
   async _loadSymbol() {
     let imgDataUrl;
     try {
-      const styledSvg = await styleSvg(this.props.svg, this.props.symbolId, this.props.fill, this.props.stroke);
+      const styledSvg = await styleSvg(
+        this.props.svg,
+        this.props.symbolId,
+        this.props.fill,
+        this.props.stroke
+      );
       imgDataUrl = buildSrcUrl(styledSvg);
     } catch (error) {
       // ignore failures - component will just not display an icon
