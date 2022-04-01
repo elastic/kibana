@@ -73,14 +73,13 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
               throwOnError: true,
             });
           }
+          casesToasts.showSuccessAttach({
+            theCase,
+            attachments: props.attachments,
+            title: props.toastTitle,
+            content: props.toastContent,
+          });
         }
-
-        casesToasts.showSuccessAttach({
-          theCase,
-          attachments: props.attachments,
-          title: props.toastTitle,
-          content: props.toastContent,
-        });
       } catch (error) {
         // error toast is handled
         // inside the postComment method

@@ -12,6 +12,7 @@ import React from 'react';
 import AllCasesSelectorModal from '.';
 import { Case, CaseStatuses, StatusAll } from '../../../../common';
 import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { usePostComment } from '../../../containers/use_post_comment';
 import { SupportedCaseAttachment } from '../../../types';
@@ -27,6 +28,8 @@ jest.mock('./all_cases_selector_modal', () => {
     AllCasesSelectorModal: jest.fn(),
   };
 });
+
+const useCasesToastMock = useCasesToast as jest.Mock;
 
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
@@ -77,6 +80,7 @@ describe('use cases add to existing case modal hook', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     dispatch.mockReset();
+    AllCasesSelectorModalMock.mockReset();
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -126,10 +130,15 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
-  it('should call postComment when a case is selected', async () => {
-    const mocked = jest.fn();
+  it('should call postComment when a case is selected and show a toast message', async () => {
+    const mockedPostMessage = jest.fn();
     usePostCommentMock.mockReturnValueOnce({
-      postComment: mocked,
+      postComment: mockedPostMessage,
+    });
+
+    const mockedToastSuccess = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: mockedToastSuccess,
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
@@ -141,18 +150,24 @@ describe('use cases add to existing case modal hook', () => {
     userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mocked).toHaveBeenCalledWith({
+      expect(mockedPostMessage).toHaveBeenCalledWith({
         caseId: 'test',
         data: alertComment,
         throwOnError: true,
       });
     });
+    expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call postComment when a case is selected but no attachments are passed', async () => {
-    const mocked = jest.fn();
+  it('should not call postComment nor show toast success when  a case is not selected', async () => {
+    const mockedPostMessage = jest.fn();
     usePostCommentMock.mockReturnValueOnce({
-      postComment: mocked,
+      postComment: mockedPostMessage,
+    });
+
+    const mockedToastSuccess = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: mockedToastSuccess,
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
@@ -165,7 +180,42 @@ describe('use cases add to existing case modal hook', () => {
     // give a small delay for the reducer to run
 
     act(() => {
-      expect(mocked).not.toHaveBeenCalled();
+      expect(mockedPostMessage).not.toHaveBeenCalled();
+      expect(mockedToastSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {
+    const mockedPostMessage = jest.fn().mockRejectedValue(new Error('Impossible'));
+    usePostCommentMock.mockReturnValueOnce({
+      postComment: mockedPostMessage,
+    });
+
+    const mockedToast = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: mockedToast,
+    });
+
+    // simulate a case selected
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick({ id: 'test' } as Case);
+      return null;
+    });
+
+    const result = appMockRender.render(<TestComponent />);
+    userEvent.click(result.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(mockedPostMessage).toHaveBeenCalledWith({
+        caseId: 'test',
+        data: alertComment,
+        throwOnError: true,
+      });
+    });
+
+    act(() => {
+      expect(mockedPostMessage).toHaveBeenCalled();
+      expect(mockedToast).not.toHaveBeenCalled();
     });
   });
 });
