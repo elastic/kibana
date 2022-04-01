@@ -11,7 +11,7 @@ import { trainedModelsApiProvider } from '../../../../services/ml_api_service/tr
 
 const DEFAULT_INPUT_FIELD = 'text_field';
 
-export type FormattedNerResp = Array<{
+export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;

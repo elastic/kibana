@@ -9,9 +9,14 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 
 import { NerOutput, NerInference } from './models/ner';
-import type { FormattedNerResp } from './models/ner';
+import type { FormattedNerResponse } from './models/ner';
 import { LangIdentOutput, LangIdentInference } from './models/lang_ident';
-import type { FormattedLangIdentResp } from './models/lang_ident';
+import type { FormattedLangIdentResponse } from './models/lang_ident';
+import {
+  TextClassificationOutput,
+  TextClassificationInference,
+} from './models/text_classification';
+import type { FormattedTextClassificationResponse } from './models/text_classification';
 
 import {
   TRAINED_MODEL_TYPE,
@@ -31,24 +36,37 @@ export const SelectedModel: FC<Props> = ({ model }) => {
     return null;
   }
 
-  if (
-    model.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
-    Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER
-  ) {
-    const inferrer = new NerInference(trainedModels, model);
-    return (
-      <InferenceInputForm
-        inferrer={inferrer}
-        getOutputComponent={(output: FormattedNerResp) => <NerOutput result={output} />}
-      />
-    );
+  if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
+    if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER) {
+      const inferrer = new NerInference(trainedModels, model);
+      return (
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={(output: FormattedNerResponse) => <NerOutput result={output} />}
+        />
+      );
+    }
+
+    if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
+      const inferrer = new TextClassificationInference(trainedModels, model);
+      return (
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={(output: FormattedTextClassificationResponse) => (
+            <TextClassificationOutput result={output} />
+          )}
+        />
+      );
+    }
   }
   if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
     const inferrer = new LangIdentInference(trainedModels, model);
     return (
       <InferenceInputForm
         inferrer={inferrer}
-        getOutputComponent={(output: FormattedLangIdentResp) => <LangIdentOutput result={output} />}
+        getOutputComponent={(output: FormattedLangIdentResponse) => (
+          <LangIdentOutput result={output} />
+        )}
       />
     );
   }

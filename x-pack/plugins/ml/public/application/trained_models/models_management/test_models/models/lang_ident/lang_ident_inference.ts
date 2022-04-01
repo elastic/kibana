@@ -9,14 +9,14 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceBase } from '../inference_base';
 
-export type FormattedLangIdentResp = Array<{
+export type FormattedLangIdentResponse = Array<{
   className: string;
   classProbability: number;
   classScore: number;
 }>;
 
 interface InferResponse {
-  response: FormattedLangIdentResp;
+  response: FormattedLangIdentResponse;
   rawResponse: estypes.IngestSimulateResponse;
 }
 

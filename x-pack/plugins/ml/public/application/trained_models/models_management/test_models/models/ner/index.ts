@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type { FormattedNerResp } from './ner_inference';
+export type { FormattedNerResponse } from './ner_inference';
 export { NerInference } from './ner_inference';
 export { NerOutput } from './ner_output';

@@ -9,12 +9,12 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiBasicTable, EuiTitle } from '@elastic/eui';
 
-import type { FormattedLangIdentResp } from './lang_ident_inference';
+import type { FormattedLangIdentResponse } from './lang_ident_inference';
 import { getLanguage } from './lang_codes';
 
 const PROBABILITY_SIG_FIGS = 3;
 
-export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result }) => {
+export const LangIdentOutput: FC<{ result: FormattedLangIdentResponse }> = ({ result }) => {
   if (result.length === 0) {
     return null;
   }

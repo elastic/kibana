@@ -9,13 +9,13 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceBase } from '../inference_base';
 
-export type FormattedNerResp = Array<{
+export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
 interface InferResponse {
-  response: FormattedNerResp;
+  response: FormattedNerResponse;
   rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
 }
 
@@ -28,7 +28,7 @@ export class NerInference extends InferenceBase<InferResponse> {
   }
 }
 
-function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResp {
+function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResponse {
   const { predicted_value: predictedValue, entities } = resp;
   const splitWordsAndEntitiesRegex = /(\[.*?\]\(.*?&.*?\))/;
   const matchEntityRegex = /(\[.*?\])\((.*?)&(.*?)\)/;

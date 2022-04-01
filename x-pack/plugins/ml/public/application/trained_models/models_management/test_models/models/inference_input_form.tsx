@@ -11,18 +11,27 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { LangIdentInference } from './lang_ident/lang_ident_inference';
-import { NerInference } from './ner/ner_inference';
-import type { FormattedLangIdentResp } from './lang_ident/lang_ident_inference';
-import type { FormattedNerResp } from './ner/ner_inference';
+import { LangIdentInference } from './lang_ident';
+import { NerInference } from './ner';
+import { TextClassificationInference } from './text_classification';
+
+import type { FormattedLangIdentResponse } from './lang_ident';
+import type { FormattedNerResponse } from './ner';
+import type { TextClassificationResponse } from './text_classification';
 
 import { MLJobEditor } from '../../../../jobs/jobs_list/components/ml_job_editor';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { ErrorMessage } from '../inference_error';
 import { OutputLoadingContent } from '../output_loading';
 
+type InferenceResponse =
+  | FormattedLangIdentResponse
+  | FormattedNerResponse
+  | TextClassificationResponse;
+type Inferrer = LangIdentInference | NerInference | TextClassificationInference;
+
 interface Props {
-  inferrer: LangIdentInference | NerInference;
+  inferrer: Inferrer;
   getOutputComponent(output: any): JSX.Element;
 }
 
@@ -34,7 +43,7 @@ enum TAB {
 export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) => {
   const [inputText, setInputText] = useState('');
   const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState<FormattedLangIdentResp | FormattedNerResp | null>(null);
+  const [output, setOutput] = useState<InferenceResponse | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [showOutput, setShowOutput] = useState(false);
