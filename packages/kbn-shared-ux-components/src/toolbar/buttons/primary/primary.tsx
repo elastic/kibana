@@ -9,16 +9,14 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-import { ButtonContentIconSide } from '@elastic/eui/src/components/button/button_content';
 
-export interface Props extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType'> {
+export interface Props extends Pick<EuiButtonPropsForButton, 'onClick' | 'iconType' | 'iconSide'> {
   label: string;
-  iconSide?: ButtonContentIconSide;
 }
 
 export const ToolbarButton = ({ label, iconSide = 'left', ...rest }: Props) => {
   return (
-    <EuiButton size="m" color="primary" fill={true} iconSide={iconSide} {...rest}>
+    <EuiButton size="m" color="primary" fill={true} {...{ iconSide, ...rest }}>
       {label}
     </EuiButton>
   );
