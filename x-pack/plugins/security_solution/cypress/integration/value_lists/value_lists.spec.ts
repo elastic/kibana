@@ -7,8 +7,7 @@
 
 import { ROLES } from '../../../common/test';
 import { deleteRoleAndUser, login, visitWithoutDateRange } from '../../tasks/login';
-import { ALERTS_URL } from '../../urls/navigation';
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import {
   waitForListsIndexToBeCreated,
   waitForValueListsModalToBeLoaded,
@@ -34,10 +33,9 @@ describe('value lists', () => {
       login();
     });
     beforeEach(() => {
-      visitWithoutDateRange(ALERTS_URL);
-      goToManageAlertsDetectionRules();
-      waitForListsIndexToBeCreated();
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForValueListsModalToBeLoaded();
+      waitForListsIndexToBeCreated();
     });
 
     afterEach(() => {
@@ -226,8 +224,7 @@ describe('value lists', () => {
   describe('user with restricted access role', () => {
     before(() => {
       login(ROLES.t1_analyst);
-      visitWithoutDateRange(ALERTS_URL, ROLES.t1_analyst);
-      goToManageAlertsDetectionRules();
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
     });
 
     after(() => {
