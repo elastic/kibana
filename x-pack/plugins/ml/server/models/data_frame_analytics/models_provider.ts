@@ -111,13 +111,16 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
      * Provides the ML nodes overview with allocated models.
      */
     async getNodesOverview(): Promise<NodesOverviewResponse> {
+      // TODO set node_id to ml:true when elasticsearch client is updated.
       const response = (await mlClient.getMemoryStats()) as MemoryStatsResponse;
 
       const { trained_model_stats: trainedModelStats } = await mlClient.getTrainedModelsStats({
         size: 10000,
       });
 
-      const mlNodes = Object.entries(response.nodes);
+      const mlNodes = Object.entries(response.nodes).filter(([, node]) =>
+        node.roles.includes('ml')
+      );
 
       const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
         ([nodeId, node]) => {
@@ -204,7 +207,12 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
       );
 
       return {
-        _nodes: response._nodes,
+        // TODO preserve _nodes from the response when getMemoryStats method is updated to support ml:true filter
+        _nodes: {
+          ...response._nodes,
+          total: mlNodes.length,
+          successful: mlNodes.length,
+        },
         nodes: nodeDeploymentStatsResponses,
       };
     },
