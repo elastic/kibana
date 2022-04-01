@@ -66,14 +66,14 @@ const commonDurationRanges: DurationRange[] = [
 
 const itemTitle = (attributes: SavedQueryAttributes, format: string) => {
   let label = attributes.title;
+  const prettifier = usePrettyDuration;
 
   if (attributes.description) {
     label += `; ${attributes.description}`;
   }
 
   if (attributes.timefilter) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    label += `; ${usePrettyDuration({
+    label += `; ${prettifier({
       timeFrom: attributes.timefilter?.from,
       timeTo: attributes.timefilter?.to,
       quickRanges: commonDurationRanges,
@@ -141,6 +141,27 @@ export function SavedQueryManagementList({
     };
     fetchCountAndSavedQueries();
   }, [savedQueryService]);
+
+  // const prettifier = usePrettyDuration;
+
+  // const itemTitle = (attributes: SavedQueryAttributes) => {
+  //   let label = attributes.title;
+
+  //   if (attributes.description) {
+  //     label += `; ${attributes.description}`;
+  //   }
+
+  //   if (attributes.timefilter) {
+  //     label += `; ${prettifier({
+  //       timeFrom: attributes.timefilter?.from,
+  //       timeTo: attributes.timefilter?.to,
+  //       quickRanges: commonDurationRanges,
+  //       dateFormat: format,
+  //     })}`;
+  //   }
+
+  //   return label;
+  // };
 
   const handleLoad = useCallback(() => {
     if (selectedSavedQuery) {
