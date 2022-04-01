@@ -104,17 +104,17 @@ export function buildSrcUrl(svgString) {
   return domUrl.createObjectURL(svg);
 }
 
-export async function styleSvg(svgString, fill, stroke) {
+export async function styleSvg(svgString, symbolId, fill, stroke) {
   const svgXml = await parseXmlString(svgString);
-  let style = '';
-  if (fill) {
-    style += `fill:${fill};`;
-  }
-  if (stroke) {
-    style += `stroke:${stroke};`;
-    style += `stroke-width:1;`;
-  }
-  if (style) svgXml.svg.$.style = style;
+  svgXml.svg.$.id = symbolId;
+  svgXml.svg.style = `
+    #${symbolId} * {
+      ${fill ? `fill: ${fill}` : '#000'};
+      ${stroke ? `stroke: ${stroke}` : '#000'};
+      stroke-width: 1;
+      vector-effect: non-scaling-stroke;
+    }
+  `;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
 }

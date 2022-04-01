@@ -19,27 +19,21 @@ describe('styleSvg', () => {
   it('Should not add style property when style not provided', async () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
-    const styledSvg = await styleSvg(unstyledSvgString);
-    expect(styledSvg.split('\n')[1]).toBe(
-      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11">'
-    );
+    const styledSvg = await styleSvg(unstyledSvgString, 'unstyled-symbol');
+    expect(styledSvg).toMatchSnapshot();
   });
 
   it('Should add fill style property to svg element', async () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
-    const styledSvg = await styleSvg(unstyledSvgString, 'red');
-    expect(styledSvg.split('\n')[1]).toBe(
-      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;">'
-    );
+    const styledSvg = await styleSvg(unstyledSvgString, 'filled-symbol', 'red');
+    expect(styledSvg).toMatchSnapshot();
   });
 
   it('Should add stroke and stroke-wdth style properties to svg element', async () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
-    const styledSvg = await styleSvg(unstyledSvgString, 'red', 'white');
-    expect(styledSvg.split('\n')[1]).toBe(
-      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;stroke-width:1;">'
-    );
+    const styledSvg = await styleSvg(unstyledSvgString, 'filled-stroked-symbol', 'red', 'white');
+    expect(styledSvg).toMatchSnapshot();
   });
 });
