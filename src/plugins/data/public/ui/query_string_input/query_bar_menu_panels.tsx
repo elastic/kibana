@@ -99,8 +99,10 @@ export function QueryBarMenuPanels({
 
       setSavedQueries(savedQueryItems.reverse().slice(0, 5));
     };
-    fetchSavedQueries();
-  }, [savedQueryService, savedQuery]);
+    if (showQueryInput && showFilterBar) {
+      fetchSavedQueries();
+    }
+  }, [savedQueryService, savedQuery, showQueryInput, showFilterBar]);
 
   useEffect(() => {
     if (savedQuery) {
