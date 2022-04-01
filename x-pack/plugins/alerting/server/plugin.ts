@@ -63,6 +63,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getExecutionConfigForRuleType } from './lib/get_rules_config';
@@ -139,6 +140,7 @@ export interface AlertingPluginsStart {
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export class AlertingPlugin {
@@ -407,6 +409,7 @@ export class AlertingPlugin {
 
     taskRunnerFactory.initialize({
       logger,
+      data: plugins.data,
       savedObjects: core.savedObjects,
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,
