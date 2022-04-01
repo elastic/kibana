@@ -17,11 +17,17 @@ export interface FilterLabelProps {
   filter: Filter;
   valueLabel?: string;
   filterLabelStatus?: FilterLabelStatus;
+  hideAlias?: boolean;
 }
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: FilterLabelProps) {
+export default function FilterLabel({
+  filter,
+  valueLabel,
+  filterLabelStatus,
+  hideAlias,
+}: FilterLabelProps) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
@@ -38,7 +44,7 @@ export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: F
     return <span className="globalFilterLabel__value">{text}</span>;
   };
 
-  if (filter.meta.alias !== null) {
+  if (!hideAlias && filter.meta.alias !== null) {
     return (
       <Fragment>
         {prefix}
