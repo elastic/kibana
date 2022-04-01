@@ -122,17 +122,20 @@ export function AddLayerButton({
                 disabled,
                 name:
                   type === layerTypes.ANNOTATIONS ? (
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <span className="lnsLayerAddButtonLabel">{label}</span>
-                      </EuiFlexItem>
+                    <EuiFlexGroup gutterSize="m">
                       <EuiFlexItem>
-                        <EuiBadge color="hollow">
-                          <span className="lnsLayerAddButtonTechBadge">
-                            {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
-                              defaultMessage: 'Technical preview',
-                            })}
-                          </span>
+                        <span className="lnsLayerAddButton__label">{label}</span>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          className="lnsLayerAddButton__techBadge"
+                          color="hollow"
+                          isDisabled={disabled}
+                        >
+                          {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
+                            defaultMessage: 'Technical preview',
+                          })}
                         </EuiBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
