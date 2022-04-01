@@ -49,7 +49,7 @@ export function send(
     dataType: 'text', // disable automatic guessing
   };
 
-  if (path.includes('geo.coordinates')) {
+  if (path.includes('/_mvt/')) {
     delete options.dataType;
     options.xhrFields = {
       responseType: 'arraybuffer',

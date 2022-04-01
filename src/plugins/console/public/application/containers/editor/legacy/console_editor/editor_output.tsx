@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { VectorTile } from '@mapbox/vector-tile';
+import { VectorTile, VectorTileLayer } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +56,54 @@ function modeForContentType(contentType?: string) {
   return 'ace/mode/text';
 }
 
+interface Output {
+  [key: string]: {};
+}
+
+function parseResult(response: VectorTile) {
+  const data = response.layers;
+  const output: Output = {};
+
+  for (const property in data) {
+    if (data.hasOwnProperty(property)) {
+      const propertyObject = data[property];
+
+      const vectorTileData = Object.keys(propertyObject)
+        .filter((key) => !key.includes('_') && key !== 'name')
+        .reduce(
+          (obj, key) => {
+            return Object.assign(obj, {
+              [key]: propertyObject[key as keyof VectorTileLayer],
+            });
+          },
+          { features: [] as any }
+        );
+
+      const featuresArray = [];
+
+      for (let index = 0; index < propertyObject.length; index++) {
+        const feature = propertyObject.feature(index);
+        const properties = feature.properties;
+        const geometry = feature.loadGeometry()[0];
+        const type = feature.type;
+
+        featuresArray.push({
+          geometry: {
+            coordinates: geometry,
+          },
+          properties,
+          type,
+        });
+      }
+
+      vectorTileData.features.push(...featuresArray);
+      output[property] = vectorTileData;
+    }
+  }
+
+  return JSON.stringify(output, null, '\t');
+}
+
 function EditorOutputUI() {
   const editorRef = useRef<null | HTMLDivElement>(null);
   const editorInstanceRef = useRef<null | CustomAceEditor>(null);
@@ -94,8 +142,8 @@ function EditorOutputUI() {
             }
 
             if (isMapboxVectorTile(contentType)) {
-              const output = new VectorTile(new Protobuf(value as ArrayBuffer));
-              editorOutput = JSON.stringify(output, null, '\t');
+              const vectorTile = new VectorTile(new Protobuf(value as ArrayBuffer));
+              editorOutput = parseResult(vectorTile);
             }
             return editorOutput;
           })
