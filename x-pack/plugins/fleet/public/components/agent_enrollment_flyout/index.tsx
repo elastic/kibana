@@ -28,7 +28,7 @@ import type { PackagePolicy, AgentPolicy } from '../../types';
 
 import { Loading } from '..';
 
-import { FlyoutContent, StandaloneFlyout } from './flyout_content';
+import { ManagedOrFleetServerInstructions, StandaloneInstructions } from './instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { BaseProps, SelectionType, FlyoutMode } from './types';
 
@@ -41,7 +41,7 @@ export interface Props extends BaseProps {
 
 export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
-export * from './flyout_content';
+export * from './instructions';
 export * from './steps';
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
@@ -61,6 +61,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
+  const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
   const [selectionType, setSelectionType] = useState<SelectionType>('tabs');
 
@@ -152,7 +153,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         {isLoadingInitialAgentPolicies ? (
           <Loading />
         ) : mode === 'managed' ? (
-          <FlyoutContent
+          <ManagedOrFleetServerInstructions
             settings={settings.data?.item}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
@@ -167,10 +168,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             setMode={setMode}
             selectionType={selectionType}
             setSelectionType={setSelectionType}
+            selectedApiKeyId={selectedApiKeyId}
+            setSelectedAPIKeyId={setSelectedAPIKeyId}
             onClickViewAgents={onClose}
           />
         ) : (
-          <StandaloneFlyout
+          <StandaloneInstructions
             settings={settings.data?.item}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
@@ -184,6 +187,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             setMode={setMode}
             selectionType={selectionType}
             setSelectionType={setSelectionType}
+            selectedApiKeyId={selectedApiKeyId}
+            setSelectedAPIKeyId={setSelectedAPIKeyId}
             onClickViewAgents={onClose}
           />
         )}

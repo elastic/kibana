@@ -19,16 +19,15 @@ import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import type { InstructionProps } from './types';
 
-import { ManagedSteps, StandaloneSteps } from './compute_steps';
+import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './compute_steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
-export const FlyoutContent = (props: InstructionProps) => {
+export const ManagedOrFleetServerInstructions = (props: InstructionProps) => {
   const {
     agentPolicies,
     isFleetServerPolicySelected,
     settings,
     isLoadingAgentPolicies,
-    mode,
     setSelectionType,
   } = props;
   const fleetStatus = useFleetStatus();
@@ -59,32 +58,35 @@ export const FlyoutContent = (props: InstructionProps) => {
     fleetServers.length === 0 ||
     (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
 
+  if (showingAgentEnrollment && isFleetServerPolicySelected) {
+    setSelectionType('tabs');
+  } else if (showingAgentEnrollment && !isFleetServerPolicySelected) {
+    setSelectionType('radio');
+  } else if (showFleetMissingRequirements) {
+    setSelectionType('tabs');
+  }
+
   if (hasNoFleetServerHost) {
     return null;
   }
   if (showingAgentEnrollment) {
-    setSelectionType('radio');
     return (
       <>
         <EuiText>
-          {mode === 'managed' ? (
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.managedDescription"
-              defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.standaloneDescription"
-              defaultMessage="Run an Elastic Agent standalone to configure and update the agent manually on the host where the agent is installed."
-            />
-          )}
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.managedDescription"
+            defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
+          />
         </EuiText>
         <EuiSpacer size="l" />
-        <ManagedSteps {...props} />
+        {isFleetServerPolicySelected ? (
+          <FleetServerSteps {...props} />
+        ) : (
+          <ManagedSteps {...props} />
+        )}
       </>
     );
   }
-  setSelectionType('tabs');
   return (
     <>
       {showFleetMissingRequirements ? (
@@ -96,7 +98,7 @@ export const FlyoutContent = (props: InstructionProps) => {
   );
 };
 
-export const StandaloneFlyout = (props: InstructionProps) => {
+export const StandaloneInstructions = (props: InstructionProps) => {
   return (
     <>
       <EuiText>

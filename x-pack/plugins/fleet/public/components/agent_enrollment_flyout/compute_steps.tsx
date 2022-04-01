@@ -58,10 +58,11 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   mode,
   setMode,
   selectionType,
+  selectedApiKeyId,
+  setSelectedAPIKeyId,
 }) => {
   const core = useStartServices();
   const { notifications } = core;
-  const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
   const [yaml, setYaml] = useState<any | undefined>('');
   const kibanaVersion = useKibanaVersion();
@@ -161,6 +162,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         downloadLink,
       })
     );
+
     steps.push(
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
@@ -177,13 +179,14 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     selectedPolicy,
     agentPolicies,
     selectedApiKeyId,
+    setSelectedAPIKeyId,
     setSelectedPolicyId,
     refreshAgentPolicies,
-    mode,
     selectionType,
-    setMode,
     yaml,
     downloadLink,
+    mode,
+    setMode,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;
@@ -194,7 +197,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicies,
   selectedPolicy,
   setSelectedPolicyId,
-  isFleetServerPolicySelected,
+  selectedApiKeyId,
+  setSelectedAPIKeyId,
   settings,
   refreshAgentPolicies,
   mode,
@@ -206,19 +210,108 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const core = useStartServices();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
-  const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-
   const [agentEnrolled, setAgentEnrollment] = useState<boolean>(false);
   const [agentDataConfirmed, setAgentDataConfirmed] = useState<boolean>(false);
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
   const apiKeyData = apiKey?.data;
-  const fleetServerInstructions = useFleetServerInstructions(apiKeyData?.item?.policy_id);
   const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id);
 
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
+
+  const instructionsSteps = useMemo(() => {
+    const steps: EuiContainedStepProps[] = !agentPolicy
+      ? [
+          AgentPolicySelectionStep({
+            selectedPolicy,
+            agentPolicies,
+            selectedApiKeyId,
+            setSelectedAPIKeyId,
+            setSelectedPolicyId,
+            refreshAgentPolicies,
+          }),
+        ]
+      : [
+          AgentEnrollmentKeySelectionStep({
+            selectedPolicy,
+            selectedApiKeyId,
+            setSelectedAPIKeyId,
+          }),
+        ];
+
+    if (selectionType === 'radio') {
+      steps.push(InstallationModeSelectionStep({ mode, setMode }));
+    }
+
+    steps.push(
+      InstallManagedAgentStep({
+        apiKeyData,
+        selectedApiKeyId,
+        fleetServerHosts,
+        isK8s,
+      })
+    );
+    if (selectedApiKeyId && apiKeyData) {
+      steps.push(
+        AgentEnrollmentConfirmationStep({
+          selectedPolicyId: selectedPolicy?.id,
+          onClickViewAgents,
+          troubleshootLink: link,
+          agentCount: enrolledAgentIds.length,
+          agentEnrolled,
+          setAgentEnrollment,
+        })
+      );
+    }
+    if (selectedPolicy && agentEnrolled) {
+      steps.push(
+        IncomingDataConfirmationStep({
+          agentsIds: enrolledAgentIds,
+          agentDataConfirmed,
+          setAgentDataConfirmed,
+        })
+      );
+    }
+
+    return steps;
+  }, [
+    agentPolicy,
+    selectedPolicy,
+    agentPolicies,
+    selectedApiKeyId,
+    setSelectedAPIKeyId,
+    setSelectedPolicyId,
+    refreshAgentPolicies,
+    selectionType,
+    apiKeyData,
+    fleetServerHosts,
+    isK8s,
+    agentEnrolled,
+    mode,
+    setMode,
+    onClickViewAgents,
+    link,
+    enrolledAgentIds,
+    agentDataConfirmed,
+  ]);
+
+  return <EuiSteps steps={instructionsSteps} />;
+};
+
+export const FleetServerSteps: React.FunctionComponent<InstructionProps> = ({
+  agentPolicy,
+  agentPolicies,
+  selectedPolicy,
+  setSelectedPolicyId,
+  refreshAgentPolicies,
+}) => {
+  const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
+
+  const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
+  const apiKeyData = apiKey?.data;
+  const fleetServerInstructions = useFleetServerInstructions(apiKeyData?.item?.policy_id);
 
   const fleetServerSteps = useMemo(() => {
     const {
@@ -266,43 +359,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           }),
         ];
 
-    if (selectionType === 'radio') {
-      steps.push(InstallationModeSelectionStep({ mode, setMode }));
-    }
-
-    if (isFleetServerPolicySelected) {
-      steps.push(...fleetServerSteps);
-    } else {
-      steps.push(
-        InstallManagedAgentStep({
-          apiKeyData,
-          selectedApiKeyId,
-          fleetServerHosts,
-          isK8s,
-        })
-      );
-      if (selectedApiKeyId && apiKeyData) {
-        steps.push(
-          AgentEnrollmentConfirmationStep({
-            selectedPolicyId: selectedPolicy?.id,
-            onClickViewAgents,
-            troubleshootLink: link,
-            agentCount: enrolledAgentIds.length,
-            agentEnrolled,
-            setAgentEnrollment,
-          })
-        );
-      }
-      if (selectedPolicy && agentEnrolled) {
-        steps.push(
-          IncomingDataConfirmationStep({
-            agentsIds: enrolledAgentIds,
-            agentDataConfirmed,
-            setAgentDataConfirmed,
-          })
-        );
-      }
-    }
+    steps.push(...fleetServerSteps);
 
     return steps;
   }, [
@@ -312,19 +369,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectedApiKeyId,
     setSelectedPolicyId,
     refreshAgentPolicies,
-    selectionType,
-    isFleetServerPolicySelected,
-    mode,
-    setMode,
     fleetServerSteps,
-    apiKeyData,
-    fleetServerHosts,
-    isK8s,
-    agentEnrolled,
-    onClickViewAgents,
-    link,
-    enrolledAgentIds,
-    agentDataConfirmed,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;

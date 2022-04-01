@@ -42,4 +42,6 @@ export interface InstructionProps extends BaseProps {
   setMode: (v: FlyoutMode) => void;
   selectionType: SelectionType;
   setSelectionType: (type: SelectionType) => void;
+  selectedApiKeyId?: string;
+  setSelectedAPIKeyId: (key?: string) => void;
 }
