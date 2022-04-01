@@ -62,6 +62,7 @@ describe('Alert Event Details', () => {
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
+
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
     });
