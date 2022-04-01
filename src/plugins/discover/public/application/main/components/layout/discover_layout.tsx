@@ -294,7 +294,7 @@ export function DiscoverLayout({
                   error={dataState.error}
                   hasQuery={!!state.query?.query}
                   hasFilters={
-                    state.filters && state.filters.filter((f) => !f.meta.disabled).length > 0
+                    state.filters && state.filters.filter((f) => !f.meta?.disabled).length > 0
                   }
                   onDisableFilters={onDisableFilters}
                 />
