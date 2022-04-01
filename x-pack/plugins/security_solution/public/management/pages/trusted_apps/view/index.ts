@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './trusted_apps_page';
+export * from './trusted_apps';

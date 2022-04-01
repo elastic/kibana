@@ -13,12 +13,52 @@ import {
   OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
-export { OS_TITLES } from '../../../common/translations';
-
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
     'Add a trusted application to improve performance or alleviate conflicts with other applications running on ' +
     'your hosts.',
+});
+
+export const NAME_LABEL = i18n.translate('xpack.securitySolution.trustedApps.name.label', {
+  defaultMessage: 'Name',
+});
+
+export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.trustedApps.details.header', {
+  defaultMessage: 'Details',
+});
+
+export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.trustedApps.details.header.description',
+  {
+    defaultMessage:
+      'Trusted applications improve performance or alleviate conflicts with other applications running on your hosts.',
+  }
+);
+
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.create.description',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const CONDITIONS_HEADER = i18n.translate(
+  'xpack.securitySolution.trustedApps.conditions.header',
+  {
+    defaultMessage: 'Conditions',
+  }
+);
+
+export const CONDITIONS_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.trustedApps.conditions.header.description',
+  {
+    defaultMessage:
+      'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+  }
+);
+
+export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.trustedApps.os.label', {
+  defaultMessage: 'Select operating system',
 });
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
@@ -74,23 +114,11 @@ export const ENTRY_PROPERTY_TITLES: Readonly<{
   }),
 };
 
-export const GRID_VIEW_TOGGLE_LABEL = i18n.translate(
-  'xpack.securitySolution.trustedapps.view.toggle.grid',
+export const POLICY_SELECT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.trustedApps.assignmentSectionDescription',
   {
-    defaultMessage: 'Grid view',
+    defaultMessage:
+      'Assign this trusted application globally across all policies, or assign it to specific policies.',
   }
 );
-
-export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
-  'xpack.securitySolution.trustedapps.view.toggle.list',
-  {
-    defaultMessage: 'List view',
-  }
-);
-
-export const SEARCH_TRUSTED_APP_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.trustedapps.list.search.placeholder',
-  {
-    defaultMessage: 'Search on the fields below: name, description, value',
-  }
-);
+//

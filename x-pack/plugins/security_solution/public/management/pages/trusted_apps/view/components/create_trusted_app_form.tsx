@@ -45,7 +45,8 @@ import {
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
 import { defaultConditionEntry } from '../../store/builders';
-import { CONDITION_FIELD_TITLE, OS_TITLES } from '../translations';
+import { CONDITION_FIELD_TITLE } from '../translations';
+import { OS_TITLES } from '../../../../common/translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
 import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
@@ -578,7 +579,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         <EuiFormRow
           fullWidth={fullWidth}
           data-test-subj={getTestId('conditionsRow')}
-          isInvalid={wasVisited?.entries && validationResult.result.entries?.isInvalid}
+          isInvalid={wasVisited.entries && validationResult.result.entries?.isInvalid}
           error={validationResult.result.entries?.errors}
           helpText={validationResult.result.entries?.warnings}
         >
