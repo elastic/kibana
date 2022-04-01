@@ -70,7 +70,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const featureCount = getFeatureCount(resultsField, tableItems);
   const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
 
-  // Show the color range only if feature influence is enabled and there's more than 0 features.
+  // Show the color range only if feature influence is enabled.
   const showColorRange =
     isOutlierAnalysis(jobConfig?.analysis) &&
     jobConfig?.analysis.outlier_detection.compute_feature_influence === true;
