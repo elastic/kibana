@@ -116,8 +116,6 @@ import {
   formatExecutionErrorsResult,
   IExecutionErrorsResult,
 } from '../lib/format_execution_log_errors';
-import { TimeHistory } from '../../../../../src/plugins/data/public';
-import { throwIfResponseIsNotValid } from '../../../actions/server/builtin_action_types/lib/axios_utils';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -1359,6 +1357,7 @@ export class RulesClient {
   ): Promise<{
     rules: Array<SanitizedRule<Params>>;
     errors: BulkEditError[];
+    total: number;
   }> {
     const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
     const ids = (options as BulkEditOptionsIds<Params>).ids;
@@ -1469,7 +1468,7 @@ export class RulesClient {
       );
     });
 
-    return { rules: updatedRules, errors };
+    return { rules: updatedRules, errors, total };
   }
 
   private async bulkEditOcc<Params extends RuleTypeParams>({
@@ -1486,15 +1485,12 @@ export class RulesClient {
     errors: BulkEditError[];
   }> {
     const rulesFinder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>(
-        { namespace: this.namespace, type: 'alert' },
-        {
-          filter,
-          type: 'alert',
-          perPage: 1000,
-          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
-        }
-      );
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>({
+        filter,
+        type: 'alert',
+        perPage: 1000,
+        ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+      });
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkEditError[] = [];

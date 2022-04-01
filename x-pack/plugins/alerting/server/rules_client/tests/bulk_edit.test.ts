@@ -140,7 +140,7 @@ describe('bulkEdit()', () => {
       producer: 'alerts',
     });
   });
-  describe('tags actions', () => {
+  describe('tags operations', () => {
     test('should add new tag', async () => {
       unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -176,6 +176,7 @@ describe('bulkEdit()', () => {
         ],
       });
 
+      expect(result.total).toBe(1);
       expect(result.errors).toHaveLength(0);
       expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('tags', ['foo', 'test-1']);
@@ -228,8 +229,6 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(result.errors).toHaveLength(0);
-      expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('tags', []);
 
       expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
@@ -280,8 +279,6 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(result.errors).toHaveLength(0);
-      expect(result.rules).toHaveLength(1);
       expect(result.rules[0]).toHaveProperty('tags', ['test-1', 'test-2']);
 
       expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
@@ -478,15 +475,12 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith(
-        { namespace: 'default', type: 'alert' },
-        {
-          filter: 'alert.attributes.tags: "APM"',
-          perPage: 1000,
-          type: 'alert',
-          namespaces: ['default'],
-        }
-      );
+      expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith({
+        filter: 'alert.attributes.tags: "APM"',
+        perPage: 1000,
+        type: 'alert',
+        namespaces: ['default'],
+      });
     });
 
     test('should call bulkMarkApiKeysForInvalidation if apiKey present', async () => {

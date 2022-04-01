@@ -91,6 +91,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(payload);
 
+      expect(bulkEditResponse.body.total).to.be(2);
       expect(bulkEditResponse.body.errors).to.have.length(0);
       expect(bulkEditResponse.body.rules).to.have.length(2);
       expect(bulkEditResponse.body.rules[0].tags).to.eql(['rewritten']);
@@ -132,7 +133,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_bulk_edit`)
         .set('kbn-xsrf', 'foo')
         .send(payload)
-        .expect(200, { rules: [], errors: [] });
+        .expect(200, { rules: [], errors: [], total: 0 });
     });
   });
 }

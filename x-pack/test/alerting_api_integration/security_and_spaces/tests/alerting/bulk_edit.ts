@@ -94,6 +94,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 rules: [],
+                total: 1,
               });
               expect(response.statusCode).to.eql(200);
               break;

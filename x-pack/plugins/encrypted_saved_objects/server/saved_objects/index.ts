@@ -50,7 +50,6 @@ export interface EncryptedSavedObjectsClient {
   ) => Promise<SavedObject<T>>;
 
   createPointInTimeFinderAsInternalUser<T = unknown, A = unknown>(
-    options: { type: string; namespace?: string },
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): Promise<ISavedObjectsPointInTimeFinder<T, A>>;
@@ -109,7 +108,6 @@ export function setupSavedObjects({
       },
 
       createPointInTimeFinderAsInternalUser: async <T = unknown, A = unknown>(
-        { type, namespace }: { type: string; namespace?: string },
         findOptions: SavedObjectsCreatePointInTimeFinderOptions,
         dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
       ): Promise<ISavedObjectsPointInTimeFinder<T, A>> => {
@@ -123,9 +121,13 @@ export function setupSavedObjects({
               ...savedObject,
               attributes: (await service.decryptAttributes(
                 {
-                  type,
+                  type: savedObject.type,
                   id: savedObject.id,
-                  namespace: getDescriptorNamespace(typeRegistry, type, namespace),
+                  namespace: getDescriptorNamespace(
+                    typeRegistry,
+                    savedObject.type,
+                    findOptions.namespaces
+                  ),
                 },
                 savedObject.attributes as Record<string, unknown>
               )) as T,
