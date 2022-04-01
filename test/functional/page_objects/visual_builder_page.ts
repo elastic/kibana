@@ -792,7 +792,7 @@ export class VisualBuilderPageObject extends FtrService {
   public async setAnotherGroupByTermsField(field: string) {
     const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
     await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
-    await this.common.sleep(1000);
+    await this.common.sleep(2000);
     const byFields = await this.testSubjects.findAll('fieldSelectItem');
     const selectedByField = byFields[byFields.length - 1];
     await this.retry.try(async () => {
