@@ -11,6 +11,7 @@ import {
   notificationServiceMock,
   fatalErrorsServiceMock,
   docLinksServiceMock,
+  executionContextServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { AppContextProvider } from '../../../public/application/app_context';
@@ -31,7 +32,12 @@ export const WithAppDependencies =
 
     return (
       <AppContextProvider
-        context={{ isCloudEnabled: !!isCloudEnabled, cloudBaseUrl: 'test.com', ...overrides }}
+        context={{
+          isCloudEnabled: !!isCloudEnabled,
+          cloudBaseUrl: 'test.com',
+          executionContext: executionContextServiceMock.createStartContract(),
+          ...overrides,
+        }}
       >
         <Comp {...rest} />
       </AppContextProvider>
