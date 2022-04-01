@@ -107,5 +107,5 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     </EuiPopover>
   );
 
-  return isOnMenu ? languageMenuItem : languageQueryStringComponent;
+  return Boolean(isOnMenu) ? languageMenuItem : languageQueryStringComponent;
 });

@@ -366,8 +366,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderQueryInput() {
-      const showLanguageSwitcher =
-        props.showQueryInput && !props.showAddFilter && !props.showDatePicker;
       return (
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
@@ -388,7 +386,7 @@ export const QueryBarTopRow = React.memo(
                 iconType={props.iconType}
                 nonKqlMode={props.nonKqlMode}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-                disableLanguageSwitcher={!showLanguageSwitcher}
+                disableLanguageSwitcher={true}
               />
             </EuiFlexItem>
           )}
