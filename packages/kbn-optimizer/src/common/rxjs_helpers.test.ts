@@ -70,12 +70,13 @@ describe('maybeMap()', () => {
 });
 
 describe('debounceTimeBuffer()', () => {
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useRealTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    jest.useFakeTimers();
   });
 
   it('buffers items until there is n milliseconds of silence, then flushes buffer to stream', async () => {
@@ -91,18 +92,18 @@ describe('debounceTimeBuffer()', () => {
     foo$.next(1);
     expect(dest.getValue()).toBe(undefined);
 
-    // only wait 99 milliseconds before sending the next value
-    jest.advanceTimersByTime(99);
+    // only wait 50 milliseconds before sending the next value
+    await delay(50);
     foo$.next(1);
     expect(dest.getValue()).toBe(undefined);
 
     // only wait 99 milliseconds before sending the next value
-    jest.advanceTimersByTime(99);
+    await delay(99);
     foo$.next(1);
     expect(dest.getValue()).toBe(undefined);
 
     // send the next value after 100 milliseconds and observe that it was forwarded
-    jest.advanceTimersByTime(100);
+    await delay(500);
     foo$.next(1);
     expect(dest.getValue()).toBe(3);
 
