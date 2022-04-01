@@ -106,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/126873
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -292,7 +292,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineEsQueryAlert(alertName);
 
       // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+      await testSubjects.setValue('queryJsonEditor', '');
+      await testSubjects.setValue('queryJsonEditor', JSON.stringify({ query: { foo: {} } }), {
         clearWithKeyboard: true,
       });
       await testSubjects.click('testQuery');
