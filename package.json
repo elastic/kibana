@@ -376,7 +376,7 @@
     "redux-actions": "^2.6.5",
     "redux-devtools-extension": "^2.13.8",
     "redux-logger": "^3.0.6",
-    "redux-observable": "^1.2.0",
+    "redux-observable": "2.0.0",
     "redux-saga": "^1.1.3",
     "redux-thunk": "^2.3.0",
     "redux-thunks": "^1.0.0",
