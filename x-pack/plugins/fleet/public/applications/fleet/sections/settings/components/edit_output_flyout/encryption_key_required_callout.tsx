@@ -28,10 +28,10 @@ export const EncryptionKeyRequiredCallout: React.FunctionComponent = () => {
         id="xpack.fleet.encryptionKeyRequired.calloutDescription"
         defaultMessage="To configure logstash output, set a value of {key} in your {file} file. {link}"
         values={{
-          key: <EuiCode>xpack.encryptedSavedObjects.encryption</EuiCode>,
+          key: <EuiCode>xpack.encryptedSavedObjects.encryptionKey</EuiCode>,
           file: <EuiCode>kibana.yml</EuiCode>,
           link: (
-            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
+            <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank" external>
               <FormattedMessage
                 id="xpack.fleet.encryptionKeyRequired.link"
                 defaultMessage="Learn more"
