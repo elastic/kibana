@@ -15,6 +15,7 @@ import { CoreSetup, Logger } from 'src/core/server';
 import { APMConfig } from '../..';
 import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
 import { registerRoutes } from './register_apm_server_routes';
+import { of } from 'rxjs';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 
@@ -105,9 +106,7 @@ const initApi = (
         query: {},
         body: null,
         events: {
-          aborted$: {
-            toPromise: () => new Promise(() => {}),
-          },
+          aborted$: of({}),
         },
         ...request,
       },

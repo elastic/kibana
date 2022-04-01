@@ -14,6 +14,7 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { merge } from 'lodash';
 
+import { defer } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
@@ -39,22 +40,20 @@ export const setSearchResponseLatency = (ms: number) => {
 };
 
 spySearchQuery.mockImplementation(() => {
-  return {
-    toPromise: () => {
-      if (searchResponseDelay === 0) {
-        // no delay, it is synchronous
-        return spySearchQueryResponse();
-      }
+  return defer(() => {
+    if (searchResponseDelay === 0) {
+      // no delay, it is synchronous
+      return spySearchQueryResponse();
+    }
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(undefined);
-        }, searchResponseDelay);
-      }).then(() => {
-        return spySearchQueryResponse();
-      });
-    },
-  };
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(undefined);
+      }, searchResponseDelay);
+    }).then(() => {
+      return spySearchQueryResponse();
+    });
+  });
 });
 search.search = spySearchQuery;
 

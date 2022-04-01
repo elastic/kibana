@@ -48,6 +48,7 @@ import {
   TIE_BREAKER,
   USER,
 } from '../../../../../lists/common/constants.mock';
+import { of } from 'rxjs';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -156,9 +157,7 @@ describe('alert actions', () => {
       ...dataPluginMock.createStartContract().search,
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
-      search: jest
-        .fn()
-        .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
+      search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
       searchSource: {} as ISearchStart['searchSource'],
     };
 
