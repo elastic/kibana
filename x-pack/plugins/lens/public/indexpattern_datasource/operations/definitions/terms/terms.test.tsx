@@ -146,6 +146,29 @@ describe('terms', () => {
       );
     });
 
+    it('should add shard size if accuracy mode enabled', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const getEsAggsFnArgs = (accuracyMode: boolean, size: number) =>
+        termsOperation.toEsAggsFn(
+          {
+            ...termsColumn,
+            params: { ...termsColumn.params, otherBucket: true, accuracyMode, size },
+          },
+          'col1',
+          {} as IndexPattern,
+          layer,
+          uiSettingsMock,
+          []
+        ).arguments;
+
+      const smallSize = 5;
+      const bigSize = 900;
+
+      expect(getEsAggsFnArgs(true, smallSize).shardSize?.[0]).toEqual(1000);
+      expect(getEsAggsFnArgs(true, bigSize).shardSize?.[0]).toEqual(1360);
+      expect(getEsAggsFnArgs(false, smallSize).shardSize).not.toBeDefined();
+    });
+
     it('should reflect rare terms params correctly', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(
