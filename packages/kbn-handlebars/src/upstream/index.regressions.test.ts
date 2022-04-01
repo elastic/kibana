@@ -5,8 +5,8 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import { HelperOptions } from '.';
-import { expectTemplate } from './__jest__/test_bench';
+import { HelperOptions } from '..';
+import { expectTemplate } from '../__jest__/test_bench';
 
 describe('Regressions', () => {
   it('GH-94: Cannot read property of undefined', () => {

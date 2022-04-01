@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import { expectTemplate } from './__jest__/test_bench';
+import { expectTemplate } from '../__jest__/test_bench';
 
 describe('strict', () => {
   describe('strict mode', () => {

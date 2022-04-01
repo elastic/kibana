@@ -508,7 +508,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-handlebars/src/index.*.test.{js,mjs,ts,tsx}'],
+      files: ['packages/kbn-handlebars/src/upstream/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',

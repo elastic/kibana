@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import Handlebars from '.';
-import { expectTemplate } from './__jest__/test_bench';
+import Handlebars from '..';
+import { expectTemplate } from '../__jest__/test_bench';
 
 describe('builtin helpers', () => {
   describe('#if', () => {

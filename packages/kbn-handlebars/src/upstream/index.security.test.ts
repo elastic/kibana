@@ -5,8 +5,8 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars from '.';
-import { expectTemplate } from './__jest__/test_bench';
+import Handlebars from '..';
+import { expectTemplate } from '../__jest__/test_bench';
 
 describe('security issues', () => {
   describe('GH-1495: Prevent Remote Code Execution via constructor', () => {

@@ -5,8 +5,8 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { HelperOptions } from '.';
-import { expectTemplate } from './__jest__/test_bench';
+import Handlebars, { HelperOptions } from '..';
+import { expectTemplate } from '../__jest__/test_bench';
 
 describe('data', () => {
   it('passing in data to a compiled function that expects data - works with helpers', () => {
