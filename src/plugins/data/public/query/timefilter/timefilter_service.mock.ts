@@ -18,6 +18,7 @@ const createSetupContractMock = () => {
     isAutoRefreshSelectorEnabled: jest.fn(),
     isTimeRangeSelectorEnabled: jest.fn(),
     isTimeTouched: jest.fn(),
+    isRefreshIntervalTouched: jest.fn(),
     getEnabledUpdated$: jest.fn(),
     getTimeUpdate$: jest.fn(),
     getRefreshIntervalUpdate$: jest.fn(),

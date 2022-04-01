@@ -7,3 +7,5 @@
  */
 
 export { NoDataCard, ElasticAgentCard } from './no_data_card';
+export { NoDataPage } from './no_data_page';
+export type { NoDataPageProps } from './types';
