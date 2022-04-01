@@ -9,9 +9,7 @@ exports[`ElasticAgentCard renders 1`] = `
 <SharedUxServicesProvider
   application={
     Object {
-      "currentAppId$": Observable {
-        "_isScalar": false,
-      },
+      "currentAppId$": Observable {},
       "navigateToUrl": [Function],
     }
   }
@@ -147,20 +145,12 @@ exports[`ElasticAgentCard renders 1`] = `
   <ElasticAgentCard>
     <ElasticAgentCardComponent
       canAccessFleet={true}
-      currentAppId$={
-        Observable {
-          "_isScalar": false,
-        }
-      }
+      currentAppId$={Observable {}}
       href="/app/integrations/browse"
       navigateToUrl={[Function]}
     >
       <RedirectAppLinks
-        currentAppId$={
-          Observable {
-            "_isScalar": false,
-          }
-        }
+        currentAppId$={Observable {}}
         navigateToUrl={[Function]}
       >
         <div>

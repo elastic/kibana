@@ -19,9 +19,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
 <SharedUxServicesProvider
   application={
     Object {
-      "currentAppId$": Observable {
-        "_isScalar": false,
-      },
+      "currentAppId$": Observable {},
       "navigateToUrl": [Function],
     }
   }
