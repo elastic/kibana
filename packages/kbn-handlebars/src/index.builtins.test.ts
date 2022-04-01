@@ -1,9 +1,8 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
 /* eslint-disable max-classes-per-file */
