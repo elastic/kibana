@@ -36,7 +36,7 @@ import {
 import {
   isValidHash,
   getDuplicateFields,
-} from '../../../../../../common/endpoint/service/trusted_apps/validations';
+} from '../../../../../../common/endpoint/service/artifacts/validations';
 
 import {
   isGlobalEffectScope,

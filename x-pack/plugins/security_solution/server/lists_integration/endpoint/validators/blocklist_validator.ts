@@ -16,7 +16,7 @@ import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
-import { isValidHash } from '../../../../common/endpoint/service/trusted_apps/validations';
+import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];

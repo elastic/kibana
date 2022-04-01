@@ -19,7 +19,7 @@ import { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/e
 import {
   getDuplicateFields,
   isValidHash,
-} from '../../../../common/endpoint/service/trusted_apps/validations';
+} from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 const ProcessHashField = schema.oneOf([
