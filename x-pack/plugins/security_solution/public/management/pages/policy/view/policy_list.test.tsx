@@ -39,6 +39,36 @@ describe('When on the policy list page', () => {
     jest.clearAllMocks();
   });
 
+  describe('and there are no policies', () => {
+    beforeEach(async () => {
+      getPackagePolicies.mockImplementation(() =>
+        sendGetEndpointSpecificPackagePoliciesMock({
+          page: 1,
+          perPage: 20,
+          count: 0,
+        })
+      );
+      render();
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalled();
+      });
+    });
+    afterEach(() => {
+      getPackagePolicies.mockReset();
+    });
+    it('should show the empty page', () => {
+      expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
+    });
+    it('should show instruction text and a button to add the Endpoint Security integration', () => {
+      expect(
+        renderResult.findByText(
+          'From this page, you’ll be able to view and manage the Endpoint Security Integration policies in your environment running Endpoint Security.'
+        )
+      ).toBeTruthy();
+      expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
+    });
+  });
+
   describe('and data exists', () => {
     let policies: GetPolicyListResponse;
     beforeEach(async () => {
