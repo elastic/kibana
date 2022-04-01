@@ -99,7 +99,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -219,7 +218,6 @@ exports[`after fetch initialFilter 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -338,7 +336,6 @@ exports[`after fetch renders all table rows 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -457,7 +454,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -587,7 +583,6 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -706,7 +701,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
@@ -795,7 +789,6 @@ exports[`after fetch showWriteControls 1`] = `
     theme={
       Object {
         "theme$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
       }
