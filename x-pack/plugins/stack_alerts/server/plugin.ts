@@ -29,6 +29,7 @@ export class AlertingBuiltinsPlugin
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
+      core,
     });
   }
 
