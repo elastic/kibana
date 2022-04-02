@@ -42,6 +42,8 @@ export interface ComponentOpts {
   disableRule: () => Promise<void>;
   snoozeRule: (snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
+  isEditable: boolean;
+  direction?: 'column' | 'row';
 }
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
@@ -51,6 +53,8 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   enableRule,
   snoozeRule,
   unsnoozeRule,
+  isEditable,
+  direction = 'column',
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
@@ -68,6 +72,9 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
+      if (item.enabled === enable) {
+        return;
+      }
       setIsUpdating(true);
       if (enable) {
         await enableRule();
@@ -78,7 +85,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       onRuleChanged();
       setIsUpdating(false);
     },
-    [setIsUpdating, isEnabled, setIsEnabled, onRuleChanged, enableRule, disableRule]
+    [item.enabled, isEnabled, onRuleChanged, enableRule, disableRule]
   );
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
@@ -128,10 +135,11 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   return (
     <EuiFlexGroup
-      direction="column"
-      alignItems="flexStart"
+      direction={direction}
+      alignItems={direction === 'row' ? 'center' : 'flexStart'}
       justifyContent="flexStart"
-      gutterSize="s"
+      gutterSize={direction === 'row' ? 's' : 'xs'}
+      responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiPopover
@@ -247,7 +255,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     },
   ];
 
-  return <EuiContextMenu initialPanelId={0} panels={panels} />;
+  return <EuiContextMenu data-test-subj="ruleStatusMenu" initialPanelId={0} panels={panels} />;
 };
 
 interface SnoozePanelProps {
@@ -317,7 +325,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={onClickApplyButton}>
+          <EuiButton onClick={onClickApplyButton} data-test-subj="ruleSnoozeApply">
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
               defaultMessage: 'Apply',
             })}
@@ -368,7 +376,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiLink onClick={onApplyIndefinite}>
+          <EuiLink onClick={onApplyIndefinite} data-test-subj="ruleSnoozeIndefiniteApply">
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
               defaultMessage: 'Snooze indefinitely',
             })}
@@ -380,7 +388,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiButton color="danger" onClick={onCancelSnooze}>
+              <EuiButton color="danger" onClick={onCancelSnooze} data-test-subj="ruleSnoozeCancel">
                 Cancel snooze
               </EuiButton>
             </EuiFlexItem>
