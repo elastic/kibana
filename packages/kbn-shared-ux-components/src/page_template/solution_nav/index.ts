@@ -5,5 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { KibanaSolutionAvatar } from './solution_avatar';
-export type { KibanaSolutionAvatarProps } from './solution_avatar';
+
+export type { KibanaPageTemplateSolutionNavProps } from './solution_nav';
+export { KibanaPageTemplateSolutionNav } from './solution_nav';
+export type { KibanaPageTemplateSolutionNavCollapseButtonProps } from './solution_nav_collapse_button';
+export { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
