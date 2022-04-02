@@ -8,6 +8,7 @@
 import React, { RefObject } from 'react';
 import userEvent from '@testing-library/user-event';
 import {
+  mockAlerts,
   processMock,
   childProcessMock,
   sessionViewAlertProcessMock,
@@ -23,6 +24,7 @@ describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+
   const props: ProcessDeps = {
     process: processMock,
     scrollerRef: {
@@ -96,6 +98,13 @@ describe('ProcessTreeNode component', () => {
     });
 
     it('calls onChangeJumpToEventVisibility with isVisible false if jumpToEvent is not visible', async () => {
+      const processWithAlerts: typeof processMock = {
+        ...processMock,
+        getAlerts: () => {
+          return mockAlerts;
+        },
+      };
+
       const onChangeJumpToEventVisibility = jest.fn();
       const scrollerRef = {
         current: {
@@ -111,17 +120,15 @@ describe('ProcessTreeNode component', () => {
       renderResult = mockedContext.render(
         <ProcessTreeNode
           {...props}
-          jumpToEntityId={processMock.id}
+          process={processWithAlerts}
+          investigatedAlertId={mockAlerts[0].kibana?.alert.uuid}
           scrollerRef={scrollerRef}
           onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
         />
       );
 
-      if (scrollerRef.current) {
-        scrollerRef.current.scrollTop = 1;
-      }
+      jest.advanceTimersByTime(DEBOUNCE_TIMEOUT);
 
-      jest.advanceTimersByTime(DEBOUNCE_TIMEOUT * 2);
       expect(onChangeJumpToEventVisibility).toHaveBeenCalled();
     });
 

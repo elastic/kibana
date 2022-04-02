@@ -163,7 +163,6 @@ export interface Process {
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
-  hasAlert(alertUuid: string | undefined): boolean;
   getAlerts(): ProcessEvent[];
   updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap): void;
   hasExec(): boolean;

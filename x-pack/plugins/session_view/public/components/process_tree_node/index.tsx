@@ -100,7 +100,7 @@ export function ProcessTreeNode({
       },
       [onChangeJumpToEventVisibility]
     ),
-    shouldAddListener: process && process.hasAlert(investigatedAlertId),
+    shouldAddListener: hasInvestigatedAlert,
   });
 
   // Automatically expand alerts list when investigating an alert

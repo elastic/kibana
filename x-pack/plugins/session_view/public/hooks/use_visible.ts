@@ -59,8 +59,6 @@ export function useVisible({
       viewPortEl?.addEventListener('scroll', onScroll);
     }
 
-    onScroll();
-
     return () => {
       if (shouldAddListener) {
         viewPortEl?.removeEventListener('scroll', onScroll);
