@@ -25,7 +25,7 @@ export const createListsIndex = () => {
   });
 };
 
-export const waitForListsIndexToBeCreated = () => {
+export const waitForListsIndex = () => {
   cy.request({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
     if (response.status !== 200) {
       cy.wait(7500);
@@ -118,6 +118,7 @@ export const uploadListItemData = (
       'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
     },
     body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
+    retryOnStatusCodeFailure: true,
   });
 };
 

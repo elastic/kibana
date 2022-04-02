@@ -38,9 +38,6 @@ describe('Inspect', () => {
     before(() => {
       visitHostDetailsPage('test.local');
     });
-    afterEach(() => {
-      closesModal();
-    });
 
     it(`inspects the host details`, () => {
       clickInspectButton(HOST_OVERVIEW);

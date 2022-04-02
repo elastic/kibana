@@ -20,6 +20,7 @@ import {
   importValueList,
   deleteValueListsFile,
   exportValueList,
+  waitForListsIndex,
 } from '../../tasks/lists';
 import {
   VALUE_LISTS_TABLE,
@@ -35,6 +36,7 @@ describe('value lists', () => {
     beforeEach(() => {
       createListsIndex();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      waitForListsIndex();
       waitForValueListsModalToBeLoaded();
     });
 

@@ -13,6 +13,7 @@ export const closesModal = () => {
 
 export const clickInspectButton = (container: string) => {
   cy.get(`${container} ${INSPECT_BUTTON_ICON}`).should('exist');
+  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).invoke('show');
   cy.get(`${container} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
 };
 
