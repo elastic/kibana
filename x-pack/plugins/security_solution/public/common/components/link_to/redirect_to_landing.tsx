@@ -7,5 +7,4 @@
 
 import { appendSearch } from './helpers';
 
-export const getAppLandingUrl = (path: string, search?: string) =>
-  `${path}${appendSearch(search)}`;
+export const getAppLandingUrl = (path: string, search?: string) => `${path}${appendSearch(search)}`;
