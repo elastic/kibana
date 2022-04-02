@@ -183,7 +183,7 @@ describe('rule_details', () => {
       ];
 
       expect(
-        shallow(
+        mountWithIntl(
           <RuleDetails
             rule={rule}
             ruleType={ruleType}
@@ -234,7 +234,7 @@ describe('rule_details', () => {
         },
       ];
 
-      const details = shallow(
+      const details = mountWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
 
