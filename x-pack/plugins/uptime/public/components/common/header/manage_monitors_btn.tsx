@@ -58,7 +58,7 @@ export const ManageMonitorsBtn = () => {
       >
         <FormattedMessage
           id="xpack.uptime.page_header.manageMonitors"
-          defaultMessage="Manage monitors"
+          defaultMessage="Monitor Management"
         />
       </EuiHeaderLink>
     </EuiTourStep>
@@ -66,5 +66,5 @@ export const ManageMonitorsBtn = () => {
 };
 
 const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.try.label', {
-  defaultMessage: 'Try manage monitors',
+  defaultMessage: 'Try Monitor Management',
 });

@@ -235,7 +235,7 @@ const getRoutes = (): RouteProps[] => {
     },
     {
       title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
-        defaultMessage: 'Manage Monitors | {baseTitle}',
+        defaultMessage: 'Monitor Management | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITOR_MANAGEMENT_ROUTE + '/:type',
@@ -252,7 +252,7 @@ const getRoutes = (): RouteProps[] => {
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorManagement.pageHeader.title"
-                defaultMessage="Manage monitors"
+                defaultMessage="Monitor Management"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
