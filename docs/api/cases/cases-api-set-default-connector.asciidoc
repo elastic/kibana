@@ -22,8 +22,8 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 === {api-description-title}
 
 Connectors are used to interface with external systems. Before you can set the
-default connector for your cases, you must create it (refer to
-<<register-connector>>).
+default connector for your cases, you must create it.
+//Refer to <<register-connector>>.
 
 If you do not set a default connector, you can simply provide the connector
 details when you <<cases-api-create,create>> or <<cases-api-update,update>> a
