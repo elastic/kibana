@@ -311,7 +311,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={false}>
               {uniqueActions && uniqueActions.length ? (
                 <EuiFlexGroup responsive={false} gutterSize="xs">
                   <EuiFlexItem>
@@ -338,7 +338,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFlexGroup wrap gutterSize="s">
+                    <EuiFlexGroup gutterSize="xs">
                       {uniqueActions.map((action, index) => (
                         <EuiFlexItem key={index} grow={false}>
                           <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
