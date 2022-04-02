@@ -260,6 +260,8 @@ describe('formatExecutionLogResult', () => {
     ).toEqual({
       total: 0,
       data: [],
+      errors: [],
+      totalErrors: 0,
     });
   });
   test('should format results correctly', () => {
