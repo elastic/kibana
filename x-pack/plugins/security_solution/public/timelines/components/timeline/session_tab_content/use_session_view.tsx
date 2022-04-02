@@ -196,7 +196,7 @@ export const useSessionView = ({
   const sessionViewComponent = useMemo(() => {
     return sessionViewConfig
       ? sessionView.getSessionView({
-          sessionEntityId: sessionViewConfig.sessionEntityId,
+          ...sessionViewConfig,
           loadAlertDetails: openDetailsPanel,
         })
       : null;

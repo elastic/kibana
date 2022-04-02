@@ -109,7 +109,7 @@ export const buildProcessTree = (
 
   // with this new page of events processed, lets try re-parent any orphans
   orphans?.forEach((process) => {
-    const parentProcessId = process.getDetails().process.parent?.entity_id;
+    const parentProcessId = process.getDetails()?.process?.parent?.entity_id;
 
     if (parentProcessId) {
       const parentProcess = processMap[parentProcessId];

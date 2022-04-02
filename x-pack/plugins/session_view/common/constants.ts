@@ -13,7 +13,7 @@ export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-default';
 export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
-export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSS';
+export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSSSSS';
 export const ALERT_STATUS = {
   OPEN: 'open',
   ACKNOWLEDGED: 'acknowledged',
@@ -33,7 +33,7 @@ export const ALERT_STATUS = {
 //    if not 100s of thousands of events, and to be required to page through these sessions to find more search matches is not a great experience. Future iterations of the
 //    search functionality will instead use a separate ES backend search to avoid this.
 // 3. Fewer round trips to the backend!
-export const PROCESS_EVENTS_PER_PAGE = 1000;
+export const PROCESS_EVENTS_PER_PAGE = 2000;
 
 // As an initial approach, we won't be implementing pagination for alerts.
 // Instead we will load this fixed amount of alerts as a maximum for a session.

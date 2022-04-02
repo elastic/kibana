@@ -79,6 +79,10 @@ export class ProcessImpl implements Process {
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
       return children.filter((child) => {
+        if (child.events.length === 0) {
+          return false;
+        }
+
         const { group_leader: groupLeader, session_leader: sessionLeader } =
           child.getDetails().process;
 
@@ -107,6 +111,14 @@ export class ProcessImpl implements Process {
 
   hasAlerts() {
     return !!this.alerts.length;
+  }
+
+  hasAlert(alertUuid: string | undefined) {
+    if (!alertUuid) {
+      return false;
+    }
+
+    return !!this.alerts.find((event) => event.kibana?.alert.uuid === alertUuid);
   }
 
   getAlerts() {
@@ -143,6 +155,10 @@ export class ProcessImpl implements Process {
   // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
+
+    if (!event) {
+      return false;
+    }
 
     const {
       pid,
@@ -192,7 +208,6 @@ export class ProcessImpl implements Process {
 
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
-    // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
     return filtered[filtered.length - 1];
   });
 }
@@ -212,6 +227,8 @@ export const useProcessTree = ({
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
+    fakeLeaderEvent.user = fakeLeaderEvent.process.entry_leader.user;
+    fakeLeaderEvent.group = fakeLeaderEvent.process.entry_leader.group;
     fakeLeaderEvent.process = {
       ...fakeLeaderEvent.process,
       ...fakeLeaderEvent.process.entry_leader,
@@ -267,7 +284,8 @@ export const useProcessTree = ({
     // currently we are loading a single page of alerts, with no pagination
     // so we only need to add these alert events to processMap once.
     if (!alertsProcessed) {
-      updateProcessMap(processMap, alerts);
+      const updatedProcessMap = updateProcessMap(processMap, alerts);
+      setProcessMap({ ...updatedProcessMap });
       setAlertsProcessed(true);
     }
   }, [processMap, alerts, alertsProcessed]);

@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 
@@ -27,7 +27,7 @@ export const ALERT_LIST_ITEM_TIMESTAMP_TEST_ID = 'sessionView:detailPanelAlertLi
 interface DetailPanelAlertsListItemDeps {
   event: ProcessEvent;
   onShowAlertDetails: (alertId: string) => void;
-  onProcessSelected: (process: Process) => void;
+  onJumpToEvent: (event: ProcessEvent) => void;
   isInvestigated?: boolean;
   minimal?: boolean;
 }
@@ -37,7 +37,7 @@ interface DetailPanelAlertsListItemDeps {
  */
 export const DetailPanelAlertListItem = ({
   event,
-  onProcessSelected,
+  onJumpToEvent,
   onShowAlertDetails,
   isInvestigated,
   minimal,
@@ -67,7 +67,7 @@ export const DetailPanelAlertListItem = ({
           <DetailPanelAlertActions
             css={styles.minimalContextMenu}
             event={event}
-            onProcessSelected={onProcessSelected}
+            onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
           />
         </EuiFlexItem>
@@ -102,7 +102,7 @@ export const DetailPanelAlertListItem = ({
       extraAction={
         <DetailPanelAlertActions
           event={event}
-          onProcessSelected={onProcessSelected}
+          onJumpToEvent={onJumpToEvent}
           onShowAlertDetails={onShowAlertDetails}
         />
       }

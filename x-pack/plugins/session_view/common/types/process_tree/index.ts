@@ -121,7 +121,7 @@ export interface ProcessEventAlert {
   reason: string;
   workflow_status: string;
   status: string;
-  original_time: Date;
+  original_time: string;
   original_event: {
     action: string;
   };
@@ -163,6 +163,7 @@ export interface Process {
   clearSearch(): void;
   hasOutput(): boolean;
   hasAlerts(): boolean;
+  hasAlert(alertUuid: string | undefined): boolean;
   getAlerts(): ProcessEvent[];
   updateAlertsStatus(updatedAlertsStatus: AlertStatusEventEntityIdMap): void;
   hasExec(): boolean;

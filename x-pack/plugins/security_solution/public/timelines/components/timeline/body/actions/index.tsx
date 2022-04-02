@@ -130,7 +130,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
 
   const sessionViewConfig = useMemo(() => {
-    const { process, _id } = ecsData;
+    const { process, _id, timestamp } = ecsData;
     const sessionEntityId = process?.entry_leader?.entity_id?.[0];
 
     if (sessionEntityId === undefined) {
@@ -138,8 +138,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
 
     const jumpToEntityId = process?.entity_id?.[0];
-    const jumpToCursor = process?.start?.[0];
     const investigatedAlertId = eventType === 'signal' ? _id : undefined;
+
+    let jumpToCursor = timestamp;
+    if (investigatedAlertId) {
+      jumpToCursor = ecsData.kibana?.alert.original_time?.[0];
+    }
 
     return {
       sessionEntityId,
