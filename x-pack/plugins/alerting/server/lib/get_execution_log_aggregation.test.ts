@@ -248,8 +248,6 @@ describe('formatExecutionLogResult', () => {
     expect(formatExecutionLogResult({ aggregations: undefined })).toEqual({
       total: 0,
       data: [],
-      errors: [],
-      totalErrors: 0,
     });
   });
   test('should return empty results if aggregations.excludeExecuteStart are undefined', () => {
@@ -260,8 +258,6 @@ describe('formatExecutionLogResult', () => {
     ).toEqual({
       total: 0,
       data: [],
-      errors: [],
-      totalErrors: 0,
     });
   });
   test('should format results correctly', () => {

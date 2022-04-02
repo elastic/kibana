@@ -227,7 +227,6 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         data-test-subj="RuleErrorLog"
         loading={isLoading}
         items={logList ?? []}
-        itemId="id"
         columns={columns}
         sorting={{ sort }}
         pagination={pagination}
