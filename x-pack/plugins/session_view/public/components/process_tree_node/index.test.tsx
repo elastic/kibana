@@ -111,13 +111,17 @@ describe('ProcessTreeNode component', () => {
       renderResult = mockedContext.render(
         <ProcessTreeNode
           {...props}
-          jumpToEventID={processMock.id}
+          jumpToEntityId={processMock.id}
           scrollerRef={scrollerRef}
           onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
         />
       );
 
-      jest.advanceTimersByTime(DEBOUNCE_TIMEOUT);
+      if (scrollerRef.current) {
+        scrollerRef.current.scrollTop = 1;
+      }
+
+      jest.advanceTimersByTime(DEBOUNCE_TIMEOUT * 2);
       expect(onChangeJumpToEventVisibility).toHaveBeenCalled();
     });
 

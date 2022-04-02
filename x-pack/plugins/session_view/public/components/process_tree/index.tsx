@@ -207,7 +207,7 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
-            jumpToEventID={jumpToEntityId}
+            jumpToEntityId={jumpToEntityId}
             investigatedAlertId={investigatedAlertId}
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}

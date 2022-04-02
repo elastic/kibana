@@ -49,7 +49,11 @@ describe('ProcessTree component', () => {
         expect(process?.id).toBe(jumpToEvent.process.entity_id);
       });
       renderResult = mockedContext.render(
-        <ProcessTree {...props} jumpToEvent={jumpToEvent} onProcessSelected={onProcessSelected} />
+        <ProcessTree
+          {...props}
+          jumpToEntityId={jumpToEvent.process.entity_id}
+          onProcessSelected={onProcessSelected}
+        />
       );
       expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();

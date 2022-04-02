@@ -37,7 +37,7 @@ export interface ProcessDeps {
   isSessionLeader?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
-  jumpToEventID?: string;
+  jumpToEntityId?: string;
   investigatedAlertId?: string;
   selectedProcessId?: string;
   timeStampOn?: boolean;
@@ -56,7 +56,7 @@ export function ProcessTreeNode({
   isSessionLeader = false,
   depth = 0,
   onProcessSelected,
-  jumpToEventID,
+  jumpToEntityId,
   investigatedAlertId,
   selectedProcessId,
   timeStampOn = true,
@@ -94,9 +94,12 @@ export function ProcessTreeNode({
 
   const nodeRef = useVisible({
     viewPortEl: scrollerRef.current,
-    visibleCallback: (isVisible, isAbove) => {
-      onChangeJumpToEventVisibility(isVisible, isAbove);
-    },
+    visibleCallback: useCallback(
+      (isVisible, isAbove) => {
+        onChangeJumpToEventVisibility(isVisible, isAbove);
+      },
+      [onChangeJumpToEventVisibility]
+    ),
     shouldAddListener: process && process.hasAlert(investigatedAlertId),
   });
 
@@ -305,7 +308,7 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
-                jumpToEventID={jumpToEventID}
+                jumpToEntityId={jumpToEntityId}
                 investigatedAlertId={investigatedAlertId}
                 selectedProcessId={selectedProcessId}
                 timeStampOn={timeStampOn}

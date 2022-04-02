@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useRef, MutableRefObject, useEffect } from 'react';
+import { useRef, MutableRefObject, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../common/constants';
 
@@ -34,32 +34,39 @@ export function useVisible({
 }: IUseVisibleDeps): MutableRefObject<HTMLDivElement | null> {
   const currentElement = useRef<HTMLDivElement | null>(null);
 
-  const onScroll = debounce(() => {
-    if (!currentElement.current || !viewPortEl) {
-      return;
-    }
+  const onScroll = useMemo(
+    () =>
+      debounce(() => {
+        if (!currentElement.current || !viewPortEl) {
+          return;
+        }
 
-    const { height: elHeight, y: elTop } = currentElement.current.getBoundingClientRect();
-    const { y: viewPortElTop } = viewPortEl.getBoundingClientRect();
+        const { height: elHeight, y: elTop } = currentElement.current.getBoundingClientRect();
+        const { y: viewPortElTop } = viewPortEl.getBoundingClientRect();
 
-    const viewPortElBottom = viewPortElTop + viewPortEl.clientHeight;
-    const elBottom = elTop + elHeight;
-    const isVisible = elBottom + offset >= viewPortElTop && elTop - offset <= viewPortElBottom;
+        const viewPortElBottom = viewPortElTop + viewPortEl.clientHeight;
+        const elBottom = elTop + elHeight;
+        const isVisible = elBottom + offset >= viewPortElTop && elTop - offset <= viewPortElBottom;
 
-    // if elBottom + offset < viewPortElTop, the currentElement is above the current scroll window
-    visibleCallback(isVisible, elBottom + offset < viewPortElTop);
-  }, debounceTimeout);
+        // if elBottom + offset < viewPortElTop, the currentElement is above the current scroll window
+        visibleCallback(isVisible, elBottom + offset < viewPortElTop);
+      }, debounceTimeout),
+    [debounceTimeout, offset, viewPortEl, visibleCallback]
+  );
 
   useEffect(() => {
     if (shouldAddListener) {
       viewPortEl?.addEventListener('scroll', onScroll);
     }
+
+    onScroll();
+
     return () => {
       if (shouldAddListener) {
         viewPortEl?.removeEventListener('scroll', onScroll);
       }
     };
-  });
+  }, [onScroll, viewPortEl, shouldAddListener]);
 
   return currentElement;
 }
