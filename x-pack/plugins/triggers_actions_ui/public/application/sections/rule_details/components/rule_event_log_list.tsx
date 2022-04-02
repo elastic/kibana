@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@elastic/datemath';
 import {
@@ -233,6 +233,8 @@ const updateButtonProps = {
 export type RuleEventLogListProps = {
   rule: Rule;
   localStorageKey?: string;
+  refreshToken?: number;
+  requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
 export const RuleEventLogList = (props: RuleEventLogListProps) => {
@@ -240,6 +242,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     rule,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     loadExecutionLogAggregations,
+    refreshToken,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -276,6 +279,8 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         })) || []
     );
   });
+
+  const isInitialized = useRef(false);
 
   // Main cell renderer, renders durations, statuses, etc.
   const renderCell = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
@@ -405,6 +410,14 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
+
+  useEffect(() => {
+    if (isInitialized.current) {
+      loadEventLogs();
+    }
+    isInitialized.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
 
   useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
