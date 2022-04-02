@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
+  const retry = getService('retry');
 
   describe('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -31,8 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/126414
-    describe.skip('with a missing comma in query', () => {
+    describe('with a missing comma in query', () => {
       const LINE_NUMBER = 4;
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
@@ -46,6 +46,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
 
+        await retry.waitForWithTimeout('text area to contain comma', 25000, async () => {
+          const textAreaString = await PageObjects.console.getAllVisibleText();
+          return textAreaString.includes(',');
+        });
+
         const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
@@ -56,6 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
+
+        await retry.waitForWithTimeout('text area to contain comma', 25000, async () => {
+          const textAreaString = await PageObjects.console.getAllVisibleText();
+          return textAreaString.includes(',');
+        });
 
         const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
