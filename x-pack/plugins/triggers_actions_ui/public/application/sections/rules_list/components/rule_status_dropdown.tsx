@@ -43,7 +43,6 @@ export interface ComponentOpts {
   snoozeRule: (snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
   isEditable: boolean;
-  previousSnoozeInterval: string | null;
 }
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
