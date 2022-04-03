@@ -61,7 +61,7 @@
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
-    "xpack.uptime": ["plugins/uptime"],
+    "xpack.uptime": ["plugins/synthetics"],
     "xpack.ux": ["plugins/ux"],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
     "xpack.watcher": "plugins/watcher",

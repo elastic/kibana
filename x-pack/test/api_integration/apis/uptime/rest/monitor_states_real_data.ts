@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { MonitorSummariesResultType } from '../../../../../plugins/synthetics/common/runtime_types';
+import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
 
 interface ExpectedMonitorStatesPage {
   response: any;

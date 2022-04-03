@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import { SimpleSavedObject } from 'kibana/public';
-import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
+import { MonitorFields } from '../../../../../plugins/synthetics/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
-import { formatSecrets } from '../../../../../plugins/uptime/server/lib/synthetics_service/utils/secrets';
+import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
+import { formatSecrets } from '../../../../../plugins/synthetics/server/lib/synthetics_service/utils/secrets';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {

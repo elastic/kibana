@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
+} from '../../../../plugins/synthetics/server/lib/saved_objects/uptime_settings';
 
 const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 

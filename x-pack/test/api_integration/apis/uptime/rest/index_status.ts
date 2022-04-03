@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('docCount query', () => {

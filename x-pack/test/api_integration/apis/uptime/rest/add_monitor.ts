@@ -6,10 +6,10 @@
  */
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import { secretKeys } from '../../../../../plugins/uptime/common/constants/monitor_management';
-import { HTTPFields } from '../../../../../plugins/uptime/common/runtime_types';
+import { secretKeys } from '../../../../../plugins/synthetics/common/constants/monitor_management';
+import { HTTPFields } from '../../../../../plugins/synthetics/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {

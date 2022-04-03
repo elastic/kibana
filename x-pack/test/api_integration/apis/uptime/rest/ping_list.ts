@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { PingsResponseType } from '../../../../../plugins/uptime/common/runtime_types';
+import { PingsResponseType } from '../../../../../plugins/synthetics/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
 
 function decodePingsResponseData(response: any) {
   const decoded = PingsResponseType.decode(response);

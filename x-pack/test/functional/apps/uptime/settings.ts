@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DynamicSettings } from '../../../../plugins/uptime/common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../plugins/uptime/common/constants';
+import { DynamicSettings } from '../../../../plugins/synthetics/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../plugins/synthetics/common/constants';
 import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
