@@ -132,7 +132,9 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                           <EuiButtonEmptyTo
                             className="eui-fullWidth"
                             to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/${
-                              hasMultipleConnectorOptions(sourceData) ? '' : 'connect'
+                              hasMultipleConnectorOptions(sourceData) && isOrganization
+                                ? ''
+                                : 'connect'
                             }`}
                           >
                             {!connected

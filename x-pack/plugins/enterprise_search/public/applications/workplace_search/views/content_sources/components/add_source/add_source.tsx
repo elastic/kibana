@@ -58,7 +58,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   useEffect(() => {
     // We can land on this page from a choice page for multiple types of connectors
     // If that's the case we want to skip the intro and configuration, if the external & internal connector have already been configured
-    const goToConnect = externalConnectorAvailable && externalConfigured && configured;
+    // Otherwise, we skip to connect if the source is already configured
+    const goToConnect = externalConnectorAvailable ? externalConfigured && configured : configured;
     initializeAddSource(goToConnect ? { ...props, connect: true } : props);
     return resetSourceState;
   }, [configured]);
