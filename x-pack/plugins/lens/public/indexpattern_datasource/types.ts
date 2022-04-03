@@ -37,6 +37,7 @@ export type {
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './operations';
 
 export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';

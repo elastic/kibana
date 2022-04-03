@@ -293,3 +293,9 @@ export interface DataViewSpec {
 export interface SourceFilter {
   value: string;
 }
+
+export interface HasDataService {
+  hasESData: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
+  hasDataView: () => Promise<boolean>;
+}

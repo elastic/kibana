@@ -160,7 +160,7 @@ export interface ApplicationStart {
         deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
-    navigateToUrl(url: string): Promise<void>;
+    navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 }
 
 // @public
@@ -778,7 +778,14 @@ export interface NavigateToAppOptions {
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
+    skipAppLeave?: boolean;
     state?: unknown;
+}
+
+// @public
+export interface NavigateToUrlOptions {
+    forceRedirect?: boolean;
+    skipAppLeave?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -828,6 +835,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
+    // (undocumented)
+    outsideClickCloses?: boolean;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
@@ -962,6 +971,7 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export interface ResolvedSimpleSavedObject<T = unknown> {
+    alias_purpose?: SavedObjectsResolveResponse['alias_purpose'];
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
@@ -1347,6 +1357,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
     alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
@@ -1532,6 +1543,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:183:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -64,6 +64,13 @@ export const NAVIGATION_HOST_RISK_TITLE = i18n.translate(
   }
 );
 
+export const NAVIGATION_SESSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.sessionsTitle',
+  {
+    defaultMessage: 'Sessions',
+  }
+);
+
 export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
   'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
   {

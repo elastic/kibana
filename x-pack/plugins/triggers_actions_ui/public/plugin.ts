@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
+import { PluginInitializerContext } from 'kibana/public';
 import { FeaturesPluginStart } from '../../features/public';
 import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
@@ -31,6 +32,12 @@ import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAlertsTableLazy } from './common/get_alerts_table';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 
 import type {
   ActionTypeModel,
@@ -39,7 +46,9 @@ import type {
   RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
+  AlertsTableProps,
 } from './types';
+import { TriggersActionsUiConfigType } from '../common/types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -61,6 +70,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditAlertFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
+  getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
 }
 
 interface PluginsSetup {
@@ -89,15 +99,21 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
+  private config: TriggersActionsUiConfigType;
+  readonly experimentalFeatures: ExperimentalFeatures;
 
-  constructor() {
+  constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    this.config = ctx.config.get();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
       defaultMessage: 'Rules and Connectors',
@@ -201,6 +217,9 @@ export class Plugin
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
         });
+      },
+      getAlertsTable: (props: AlertsTableProps) => {
+        return getAlertsTableLazy(props);
       },
     };
   }

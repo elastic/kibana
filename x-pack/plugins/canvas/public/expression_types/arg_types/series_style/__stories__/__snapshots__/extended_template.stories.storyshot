@@ -71,7 +71,9 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                   className="euiFormControlLayoutCustomIcon__icon"
                   data-euiicon-type="arrowDown"
                   size="s"
-                />
+                >
+                  
+                </span>
               </span>
             </div>
           </div>
@@ -165,7 +167,9 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -251,7 +255,9 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -337,7 +343,9 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>

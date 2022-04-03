@@ -30,7 +30,7 @@ const config = {
     alertingExperience: { enabled: true },
     cases: { enabled: true },
     overviewNext: { enabled: false },
-    rules: { enabled: false },
+    rules: { enabled: true },
   },
 };
 
@@ -46,6 +46,7 @@ export const render = (component: React.ReactNode) => {
             config,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
+            kibanaFeatures: [],
           }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>

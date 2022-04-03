@@ -21,12 +21,13 @@ import {
   storedPackagePoliciesToAgentPermissions,
   DEFAULT_CLUSTER_PERMISSIONS,
 } from '../package_policies_to_agent_permissions';
-import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
+import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { storedPackagePoliciesToAgentInputs } from './';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -86,7 +87,8 @@ export async function getFullAgentPolicy(
         return acc;
       }, {}),
     },
-    inputs: storedPackagePoliciesToAgentInputs(
+    inputs: await storedPackagePoliciesToAgentInputs(
+      soClient,
       agentPolicy.package_policies as PackagePolicy[],
       getOutputIdForAgentPolicy(dataOutput)
     ),
@@ -177,7 +179,7 @@ export function transformOutputToFullPolicyOutput(
     ...configJs,
     type,
     hosts,
-    ca_sha256,
+    ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };

@@ -25,6 +25,7 @@ import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContract } from '../../../../cases/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -39,7 +40,7 @@ jest.mock('../../common/components/query_bar', () => ({
 jest.mock('../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
-
+const mockNavigateToApp = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -48,6 +49,10 @@ jest.mock('../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
         cases: {
           ...mockCasesContract(),
         },
@@ -79,6 +84,9 @@ const mockHistory = {
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('it renders the Setup Instructions text when no index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
@@ -91,7 +99,8 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
@@ -99,14 +108,14 @@ describe('Hosts - rendering', () => {
       indicesExist: true,
       indexPattern: {},
     });
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
   test('it should render tab navigation', async () => {

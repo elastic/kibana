@@ -525,9 +525,9 @@ export class SettingsPageObject extends FtrService {
     await this.common.scrollKibanaBodyTop();
 
     // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
       return;
     }
 
@@ -535,9 +535,9 @@ export class SettingsPageObject extends FtrService {
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
     }
-    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView2 = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView2) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
     }
   }
 

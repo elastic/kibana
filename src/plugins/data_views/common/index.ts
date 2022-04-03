@@ -11,7 +11,6 @@ export {
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
 } from './constants';
 export type { IFieldType, IIndexPatternFieldList } from './fields';
 export {
@@ -52,11 +51,16 @@ export type {
   DataViewFieldMap,
   DataViewSpec,
   SourceFilter,
+  HasDataService,
 } from './types';
 export { DataViewType } from './types';
 export type { IndexPatternsContract, DataViewsContract } from './data_views';
 export { IndexPatternsService, DataViewsService } from './data_views';
-export type { DataViewListItem, TimeBasedDataView } from './data_views';
+export type {
+  DataViewListItem,
+  DataViewsServicePublicMethods,
+  TimeBasedDataView,
+} from './data_views';
 export { IndexPattern, DataView } from './data_views';
 export {
   DuplicateDataViewError,

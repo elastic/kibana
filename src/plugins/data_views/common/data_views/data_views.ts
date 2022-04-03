@@ -74,6 +74,44 @@ export interface DataViewsServiceDeps {
   getCanSave: () => Promise<boolean>;
 }
 
+export interface DataViewsServicePublicMethods {
+  clearCache: (id?: string | undefined) => void;
+  create: (spec: DataViewSpec, skipFetchFields?: boolean) => Promise<DataView>;
+  createAndSave: (
+    spec: DataViewSpec,
+    override?: boolean,
+    skipFetchFields?: boolean
+  ) => Promise<DataView>;
+  createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  delete: (indexPatternId: string) => Promise<{}>;
+  ensureDefaultDataView: EnsureDefaultDataView;
+  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  find: (search: string, size?: number) => Promise<DataView[]>;
+  get: (id: string) => Promise<DataView>;
+  getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
+  getCanSave: () => Promise<boolean>;
+  getDefault: () => Promise<DataView | null>;
+  getDefaultId: () => Promise<string | null>;
+  getDefaultDataView: () => Promise<DataView | null>;
+  getFieldsForIndexPattern: (
+    indexPattern: DataView | DataViewSpec,
+    options?: GetFieldsOptions | undefined
+  ) => Promise<FieldSpec[]>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  getIds: (refresh?: boolean) => Promise<string[]>;
+  getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  getTitles: (refresh?: boolean) => Promise<string[]>;
+  hasUserDataView: () => Promise<boolean>;
+  refreshFields: (indexPattern: DataView) => Promise<void>;
+  savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
+  setDefault: (id: string | null, force?: boolean) => Promise<void>;
+  updateSavedObject: (
+    indexPattern: DataView,
+    saveAttempts?: number,
+    ignoreErrors?: boolean
+  ) => Promise<void | Error>;
+}
+
 export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;

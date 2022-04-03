@@ -134,8 +134,11 @@ export class CoreSystem {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
+      const theme = this.theme.setup({ injectedMetadata });
+
       this.fatalErrorsSetup = this.fatalErrors.setup({
         injectedMetadata,
+        theme,
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
@@ -149,7 +152,6 @@ export class CoreSystem {
       });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const theme = this.theme.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });

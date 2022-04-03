@@ -92,8 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/126642
-  describe.skip('create_filters', function () {
+  describe('create_filters', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
@@ -108,12 +107,13 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       const { testTitle, user, requestBody, expected } = testData;
       it(`${testTitle}`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .put(`/api/ml/filters`)
           .auth(user, ml.securityCommon.getPasswordForUser(user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(expected.responseCode);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(expected.responseCode, status, body);
+
         if (body.error === undefined) {
           // Validate the important parts of the response.
           const expectedResponse = testData.expected.responseBody;

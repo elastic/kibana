@@ -191,24 +191,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
-  const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
-    (groupAcc, [groupName, groupValue]) => {
-      return {
-        ...groupAcc,
-        [groupName]: {
-          fields: Object.entries(groupValue.fields ?? {}).reduce<
-            Record<string, Partial<BrowserField>>
-          >((fieldAcc, [fieldName, fieldValue]) => {
-            if (fieldValue.aggregatable === true) {
-              fieldAcc[fieldName] = fieldValue;
-            }
-            return fieldAcc;
-          }, {}),
-        } as Partial<BrowserField>,
-      };
-    },
-    {}
-  );
+  const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
 
   const [
     threatIndexPatternsLoading,
@@ -307,14 +290,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
-        browserFields={aggregatableFields}
+        browserFields={fields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [aggregatableFields]
+    [fields]
   );
 
   const ThreatMatchInputChildren = useCallback(
@@ -514,6 +497,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             threatIndex,
             threatMapping: formThreatMapping,
             machineLearningJobId,
+            queryBar: formQuery ?? initialState.queryBar,
           })}
           query={formQuery}
           ruleType={ruleType}
@@ -534,3 +518,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 };
 
 export const StepDefineRule = memo(StepDefineRuleComponent);
+
+export function aggregatableFields(browserFields: BrowserFields): BrowserFields {
+  const result: Record<string, Partial<BrowserField>> = {};
+  for (const [groupName, groupValue] of Object.entries(browserFields)) {
+    const fields: Record<string, Partial<BrowserField>> = {};
+    if (groupValue.fields) {
+      for (const [fieldName, fieldValue] of Object.entries(groupValue.fields)) {
+        if (fieldValue.aggregatable === true) {
+          fields[fieldName] = fieldValue;
+        }
+      }
+    }
+    result[groupName] = {
+      fields,
+    };
+  }
+  return result;
+}

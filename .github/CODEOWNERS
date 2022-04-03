@@ -41,6 +41,7 @@
 /src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_xy/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
@@ -118,7 +119,11 @@
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 
 # Fleet
+/fleet_packages.json @elastic/fleet
 /x-pack/plugins/fleet/ @elastic/fleet
+/x-pack/test/fleet_api_integration @elastic/fleet
+/x-pack/test/fleet_cypress @elastic/fleet
+/x-pack/test/fleet_functional @elastic/fleet
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -227,6 +232,7 @@
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /packages/kbn-generate/ @elastic/kibana-operations
+/packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
@@ -348,6 +354,8 @@
 #CC# /x-pack/plugins/stack_alerts @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
+/x-pack/test/functional/services/cases/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -474,5 +482,6 @@ x-pack/plugins/session_view @elastic/awp-platform
 
 ## Shared UX
 /src/plugins/shared_ux/ @elastic/shared-ux
+/packages/shared-ux-*/ @elastic/shared-ux
 /src/plugins/kibana_react/ @elastic/shared-ux
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
+/src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation

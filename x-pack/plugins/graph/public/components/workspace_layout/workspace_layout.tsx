@@ -17,7 +17,7 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../src/plugins/data_views/public';
 import {
   ControlType,
   IndexPatternProvider,
@@ -89,7 +89,7 @@ export const WorkspaceLayoutComponent = ({
   sharingSavedObjectProps,
   spaces,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [showInspect, setShowInspect] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
@@ -112,7 +112,7 @@ export const WorkspaceLayoutComponent = ({
   }, []);
 
   const onIndexPatternChange = useCallback(
-    (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
+    (indexPattern?: DataView) => setCurrentIndexPattern(indexPattern),
     []
   );
 

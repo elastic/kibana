@@ -8,9 +8,17 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
 import React, { Component, ReactElement } from 'react';
-import { CoreStart } from 'src/core/public';
+import {
+  DocLinksStart,
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+  OverlayStart,
+  SavedObjectsStart,
+} from 'kibana/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
@@ -32,18 +40,18 @@ function getServiceMocks() {
       get: (key: string) => {
         return 10;
       },
-    } as CoreStart['uiSettings'],
-    savedObjects: {} as CoreStart['savedObjects'],
-    notifications: {} as CoreStart['notifications'],
+    } as IUiSettingsClient,
+    savedObjects: {} as SavedObjectsStart,
+    notifications: {} as NotificationsStart,
     docLinks: {
       links: {
         query: {
           kueryQuerySyntax: '',
         },
       },
-    } as CoreStart['docLinks'],
-    http: {} as CoreStart['http'],
-    overlays: {} as CoreStart['overlays'],
+    } as DocLinksStart,
+    http: {} as HttpStart,
+    overlays: {} as OverlayStart,
     storage: {
       get: () => {},
     },
@@ -80,12 +88,12 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as IndexPattern)),
+      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as DataView)),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
-    onIndexPatternChange: (indexPattern?: IndexPattern) => {
+    onIndexPatternChange: (indexPattern?: DataView) => {
       instance.setProps({
         ...defaultProps,
         currentIndexPattern: indexPattern,

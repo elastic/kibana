@@ -6,7 +6,7 @@
  */
 
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import { ConditionEntry } from '../../types';
+import { TrustedAppConditionEntry } from '../../types';
 
 const HASH_LENGTHS: readonly number[] = [
   32, // MD5
@@ -18,8 +18,8 @@ const INVALID_CHARACTERS_PATTERN = /[^0-9a-f]/i;
 export const isValidHash = (value: string) =>
   HASH_LENGTHS.includes(value.length) && !INVALID_CHARACTERS_PATTERN.test(value);
 
-export const getDuplicateFields = (entries: ConditionEntry[]) => {
-  const groupedFields = new Map<ConditionEntryField, ConditionEntry[]>();
+export const getDuplicateFields = (entries: TrustedAppConditionEntry[]) => {
+  const groupedFields = new Map<ConditionEntryField, TrustedAppConditionEntry[]>();
 
   entries.forEach((entry) => {
     // With the move to the Exception Lists api, the server side now validates individual
