@@ -39,6 +39,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    dockerCrossCompile: false,
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {
