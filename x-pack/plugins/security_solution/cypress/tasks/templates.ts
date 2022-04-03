@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CUSTOM_TEMPLATES } from '../screens/templates';
+import { CUSTOM_TEMPLATES, NUMBER_OF_ROWS } from '../screens/templates';
 
 export const selectCustomTemplates = () => {
   cy.get(CUSTOM_TEMPLATES).click({ force: true });
+  cy.get(NUMBER_OF_ROWS).should('have.length', '1');
 };

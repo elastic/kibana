@@ -19,10 +19,12 @@ export const clickInspectButton = (container: string) => {
 
 export const openStatsAndTables = (table: InspectButtonMetadata) => {
   if (table.tabId) {
+    cy.get(table.tabId).invoke('show');
     cy.get(table.tabId).click({ force: true });
   }
   cy.get(table.id);
   if (table.altInspectId) {
+    cy.get(table.altInspectId).invoke('show');
     cy.get(table.altInspectId).trigger('click', {
       force: true,
     });
