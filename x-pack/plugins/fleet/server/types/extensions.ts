@@ -39,11 +39,11 @@ export type PutPackagePolicyUpdateCallback = (
 ) => Promise<UpdatePackagePolicy>;
 
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
-export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
   PostPackagePolicyPostCreateCallback
 ];
+export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 
 /**

@@ -869,16 +869,24 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy: PackagePolicy | NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy | void> {
+  ): Promise<PackagePolicy | NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
       return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
@@ -1276,10 +1284,18 @@ export interface PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
 
