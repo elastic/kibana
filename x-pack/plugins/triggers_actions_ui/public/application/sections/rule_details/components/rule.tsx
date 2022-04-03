@@ -12,14 +12,16 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiStat,
   EuiIconTip,
   EuiTabbedContent,
+  EuiText,
 } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
@@ -47,6 +49,7 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 
 const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
+const RuleErrorLogWithApi = lazy(() => import('./rule_error_log'));
 
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 
@@ -56,6 +59,7 @@ type RuleProps = {
   readOnly: boolean;
   ruleSummary: RuleSummary;
   requestRefresh: () => Promise<void>;
+  refreshToken?: number;
   numberOfExecutions: number;
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;
@@ -64,6 +68,7 @@ type RuleProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
 
 export function RuleComponent({
   rule,
@@ -73,6 +78,7 @@ export function RuleComponent({
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
+  refreshToken,
   numberOfExecutions,
   onChangeDuration,
   durationEpoch = Date.now(),
@@ -116,10 +122,13 @@ export function RuleComponent({
     {
       id: EVENT_LOG_LIST_TAB,
       name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'Execution History',
+        defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: suspendedComponentWithProps(RuleEventLogListWithApi, 'xl')({ rule }),
+      content: suspendedComponentWithProps(
+        RuleEventLogListWithApi,
+        'xl'
+      )({ requestRefresh, rule, refreshToken }),
     },
     {
       id: ALERT_LIST_TAB,
@@ -128,6 +137,17 @@ export function RuleComponent({
       }),
       'data-test-subj': 'ruleAlertListTab',
       content: renderRuleAlertList(),
+    },
+    {
+      id: EVENT_ERROR_LOG_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.errorLogTabText', {
+        defaultMessage: 'Error log',
+      }),
+      'data-test-subj': 'errorLogTab',
+      content: suspendedComponentWithProps(
+        RuleErrorLogWithApi,
+        'xl'
+      )({ requestRefresh, rule, refreshToken }),
     },
   ];
 
@@ -141,29 +161,51 @@ export function RuleComponent({
 
   return (
     <>
-      <EuiHorizontalRule />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiPanel color="subdued" hasBorder={false}>
-            <EuiStat
-              data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-              titleSize="xs"
-              title={
-                <EuiHealth
+            <EuiFlexGroup
+              gutterSize="none"
+              direction="column"
+              justifyContent="spaceBetween"
+              responsive={false}
+              style={{ height: '100%' }}
+            >
+              <EuiFlexItem>
+                <EuiStat
                   data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-                  textSize="inherit"
-                  color={healthColor}
-                >
-                  {statusMessage}
-                </EuiHealth>
-              }
-              description={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription',
-                {
-                  defaultMessage: `Last response`,
-                }
-              )}
-            />
+                  titleSize="xs"
+                  title={
+                    <EuiHealth
+                      data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
+                      textSize="inherit"
+                      color={healthColor}
+                    >
+                      {statusMessage}
+                    </EuiHealth>
+                  }
+                  description={i18n.translate(
+                    'xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription',
+                    {
+                      defaultMessage: `Last response`,
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <p>
+                  <EuiText size="xs">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.ruleLastExecutionUpdatedAt"
+                      defaultMessage="Updated"
+                    />
+                  </EuiText>
+                  <EuiText color="subdued" size="xs">
+                    {moment(rule.executionStatus.lastExecutionDate).fromNow()}
+                  </EuiText>
+                </p>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -217,6 +259,7 @@ export function RuleComponent({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer size="xl" />
       <input
         type="hidden"

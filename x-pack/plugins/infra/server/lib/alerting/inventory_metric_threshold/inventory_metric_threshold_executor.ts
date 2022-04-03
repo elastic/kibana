@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
-import moment from 'moment';
 import {
   ActionGroup,
   ActionGroupIdsOf,
@@ -98,8 +97,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           group: '*',
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
+          timestamp: startedAt.toISOString(),
           viewInAppUrl,
-          timestamp: moment().toISOString(),
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
@@ -128,6 +127,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          executionTimestamp: startedAt,
           logger,
         })
       )
@@ -218,8 +218,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             group,
             alertState: stateToAlertMessage[nextState],
             reason,
+            timestamp: startedAt.toISOString(),
             viewInAppUrl,
-            timestamp: moment().toISOString(),
             value: mapToConditionsLookup(results, (result) =>
               formatMetric(result[group].metric, result[group].currentValue)
             ),
