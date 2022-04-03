@@ -359,7 +359,6 @@ export const RulesList: React.FunctionComponent = () => {
         item={item}
         onRuleChanged={() => loadRulesData()}
         isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
-        previousSnoozeInterval={previousSnoozeInterval}
       />
     );
   };
