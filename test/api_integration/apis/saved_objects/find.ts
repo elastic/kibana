@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
             'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           ]);
+          expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
         }));
 
@@ -124,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
                 namespaces: so.namespaces,
               }))
             ).to.eql([{ id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab', namespaces: [SPACE_ID] }]);
+            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
           }));
     });

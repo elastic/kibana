@@ -2950,6 +2950,7 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
+          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
         });

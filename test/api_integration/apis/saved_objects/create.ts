@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             id: resp.body.id,
             type: 'visualization',
+            migrationVersion: resp.body.migrationVersion,
             coreMigrationVersion: '8.8.0',
             typeMigrationVersion: resp.body.typeMigrationVersion,
             updated_at: resp.body.updated_at,
@@ -60,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             references: [],
             namespaces: ['default'],
           });
+          expect(resp.body.migrationVersion).to.be.ok();
           expect(resp.body.typeMigrationVersion).to.be.ok();
         });
     });

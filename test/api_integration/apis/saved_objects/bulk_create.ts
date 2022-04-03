@@ -70,6 +70,9 @@ export default function ({ getService }: FtrProviderContext) {
                 attributes: {
                   title: 'A great new dashboard',
                 },
+                migrationVersion: {
+                  dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
+                },
                 coreMigrationVersion: '8.8.0',
                 typeMigrationVersion: resp.body.saved_objects[1].typeMigrationVersion,
                 references: [],
