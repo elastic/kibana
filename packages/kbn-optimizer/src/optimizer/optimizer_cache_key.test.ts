@@ -12,6 +12,14 @@ import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import { getOptimizerCacheKey } from './optimizer_cache_key';
 import { OptimizerConfig } from './optimizer_config';
 
+jest.mock('@kbn/synthetic-package-map', () => {
+  return {
+    readHashOfPackageMap() {
+      return '<hash of package map>';
+    },
+  };
+});
+
 jest.mock('../common/hashes', () => {
   return {
     Hashes: class MockHashes {
@@ -68,6 +76,7 @@ describe('getOptimizerCacheKey()', () => {
         "checksums": Object {
           "foo": "bar",
         },
+        "synthPackages": "<hash of package map>",
         "workerConfig": Object {
           "browserslistEnv": "dev",
           "dist": false,

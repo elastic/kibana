@@ -8,7 +8,7 @@
 
 import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
-import { getPluginSearchPaths } from './plugins';
+import { getPluginSearchPaths } from '@kbn/plugin-discovery';
 import { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */

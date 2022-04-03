@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
+    "stripInternal": false,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "index.d.ts"
+  ]
+}

@@ -31,7 +31,9 @@ NPM_MODULE_EXTRA_FILES = [
 
 RUNTIME_DEPS = [
   "//packages/kbn-dev-utils",
+  "//packages/kbn-eslint-plugin-imports",
   "//packages/kbn-utility-types",
+  "//packages/kbn-utils",
   "@npm//glob",
   "@npm//listr",
   "@npm//normalize-path",
@@ -39,7 +41,9 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-eslint-plugin-imports:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//tslib",
   "@npm//@types/glob",
   "@npm//@types/jest",

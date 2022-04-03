@@ -15,22 +15,23 @@ import { asyncMapWithLimit } from '@kbn/std';
 import { BazelPackage } from './bazel_package';
 import { BAZEL_PACKAGE_DIRS } from './bazel_package_dirs';
 
-/**
- * Search the local Kibana repo for bazel packages and return an array of BazelPackage objects
- * representing each package found.
- */
-export async function discoverBazelPackages() {
-  const packageJsons = globby.sync(
-    BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/package.json`),
-    {
-      cwd: REPO_ROOT,
-      absolute: true,
-    }
-  );
+export function discoverBazelPackageLocations(repoRoot: string) {
+  return globby
+    .sync(
+      BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/package.json`),
+      {
+        cwd: repoRoot,
+        absolute: true,
+      }
+    )
+    .sort((a, b) => a.localeCompare(b))
+    .map((path) => Path.dirname(path));
+}
 
+export async function discoverBazelPackages(repoRoot: string = REPO_ROOT) {
   return await asyncMapWithLimit(
-    packageJsons.sort((a, b) => a.localeCompare(b)),
+    discoverBazelPackageLocations(repoRoot),
     100,
-    async (path) => await BazelPackage.fromDir(Path.dirname(path))
+    async (dir) => await BazelPackage.fromDir(dir)
   );
 }

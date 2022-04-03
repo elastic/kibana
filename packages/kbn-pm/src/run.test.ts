@@ -15,7 +15,11 @@ import { log } from './utils/log';
 
 log.setLogLevel('silent');
 
-const rootPath = resolve(`${__dirname}/utils/__fixtures__/kibana`);
+const rootPath = resolve(__dirname, 'utils/__fixtures__/kibana');
+
+jest.mock('./utils/regenerate_package_json');
+jest.mock('./utils/regenerate_synthetic_package_map');
+jest.mock('./utils/regenerate_base_tsconfig');
 
 function getExpectedProjectsAndGraph(runMock: any) {
   const [fullProjects, fullProjectGraph] = (runMock as jest.Mock<any>).mock.calls[0];
