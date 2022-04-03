@@ -18,7 +18,6 @@ import {
 
 export const navigateToHostRiskDetailTab = () => {
   cy.get(RISK_DETAILS_NAV).click();
-  cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
 };
 
