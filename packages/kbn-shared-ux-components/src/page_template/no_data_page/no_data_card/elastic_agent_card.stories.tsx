@@ -15,7 +15,7 @@ import {
 } from './elastic_agent_card.component';
 
 export default {
-  title: 'Elastic Agent Data Card',
+  title: 'Page Template/No Data Page/Elastic Agent Data Card',
   description: 'A solution-specific wrapper around NoDataCard, to be used on NoData page',
 };
 
