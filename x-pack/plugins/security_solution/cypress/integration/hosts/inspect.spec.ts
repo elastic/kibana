@@ -13,6 +13,7 @@ import { clickInspectButton, closesModal, openStatsAndTables } from '../../tasks
 import { login, visit, visitHostDetailsPage } from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
+import { waitForPageToBeLoaded } from '../../tasks/common';
 
 describe('Inspect', () => {
   before(() => {
@@ -21,6 +22,7 @@ describe('Inspect', () => {
   context('Hosts stats and tables', () => {
     before(() => {
       visit(HOSTS_URL);
+      waitForPageToBeLoaded();
     });
     afterEach(() => {
       closesModal();

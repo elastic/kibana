@@ -27,6 +27,7 @@ import {
   VALUE_LISTS_ROW,
   VALUE_LISTS_MODAL_ACTIVATOR,
 } from '../../screens/lists';
+import { waitForPageToBeLoaded } from '../../tasks/common';
 
 describe('value lists', () => {
   describe('management modal', () => {
@@ -36,6 +37,7 @@ describe('value lists', () => {
     beforeEach(() => {
       createListsIndex();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      waitForPageToBeLoaded();
       waitForListsIndex();
       waitForValueListsModalToBeLoaded();
     });

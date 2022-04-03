@@ -6,7 +6,7 @@
  */
 
 import { INSPECT_MODAL, INSPECT_NETWORK_BUTTONS_IN_SECURITY } from '../../screens/inspect';
-import { LOADING_SPINNER } from '../../screens/network/main';
+import { waitForPageToBeLoaded } from '../../tasks/common';
 
 import { closesModal, openStatsAndTables } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
@@ -18,8 +18,7 @@ describe('Inspect', () => {
     before(() => {
       login();
       visit(NETWORK_URL);
-      cy.get(LOADING_SPINNER).should('exist');
-      cy.get(LOADING_SPINNER).should('not.exist');
+      waitForPageToBeLoaded();
     });
     afterEach(() => {
       closesModal();
