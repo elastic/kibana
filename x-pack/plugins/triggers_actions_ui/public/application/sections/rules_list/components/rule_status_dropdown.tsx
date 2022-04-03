@@ -54,7 +54,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
   isEditable,
-  previousSnoozeInterval,
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
@@ -160,7 +159,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               isEnabled={isEnabled}
               isSnoozed={isSnoozed}
               snoozeEndTime={item.snoozeEndTime}
-              previousSnoozeInterval={previousSnoozeInterval}
             />
           </EuiPopover>
         ) : (
