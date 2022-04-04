@@ -11,10 +11,10 @@ import React from 'react';
 
 import { generatePath } from 'react-router-dom';
 
-import { EuiBasicTable, EuiButton, EuiButtonIcon, HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, HorizontalAlignment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 
 import { SEARCH_INDEX_OVERVIEW_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
@@ -30,13 +30,10 @@ export const SearchIndices: React.FC = () => {
       }),
       sortable: true,
       truncateText: true,
-      // TypeScript does not like 'string' as a type for the 'name' render param. Not sure why.
-      // The linter states it is looking for an 'IndexItem' type here. Falling back to it makes
-      // the linter happy. We can revisit once we have an API and live data instead of the mock.
-      render: (name: string | IndexItem) => (
+      render: (name: string, { indexSlug }: SearchIndex) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug: 'foo123' })}
+          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
         >
           {name}
         </EuiLinkTo>
@@ -83,11 +80,11 @@ export const SearchIndices: React.FC = () => {
       }),
       actions: [
         {
-          render: () => (
-            <EuiButtonIcon
+          render: ({ indexSlug }: SearchIndex) => (
+            <EuiButtonIconTo
               iconType="eye"
               data-test-subj="view-search-index-button"
-              href={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug: 'foo123' })}
+              to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
             />
           ),
         },
