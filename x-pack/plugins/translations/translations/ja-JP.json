@@ -187,7 +187,6 @@
     "xpack.lens.datatypes.histogram": "ヒストグラム",
     "xpack.lens.datatypes.ipAddress": "IP",
     "xpack.lens.datatypes.number": "数字",
-    "xpack.lens.datatypes.murmur3": "murmur3",
     "xpack.lens.datatypes.record": "レコード",
     "xpack.lens.datatypes.string": "文字列",
     "xpack.lens.deleteLayerAriaLabel": "レイヤー {index} を削除",
