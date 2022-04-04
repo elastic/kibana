@@ -8,6 +8,7 @@
 jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
+    useFleetStatus: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
 });
@@ -21,6 +22,16 @@ jest.mock('../../hooks/use_request', () => {
     sendGetOneAgentPolicy: jest.fn(),
     useGetAgents: jest.fn(),
     useGetAgentPolicies: jest.fn(),
+  };
+});
+
+jest.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy', () => {
+  const module = jest.requireActual(
+    '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'
+  );
+  return {
+    ...module,
+    useFleetServerUnhealthy: jest.fn(),
   };
 });
 
@@ -57,18 +68,21 @@ jest.mock('./steps', () => {
   const module = jest.requireActual('./steps');
   return {
     ...module,
-    AgentPolicySelectionStep: jest.fn(),
-    AgentEnrollmentKeySelectionStep: jest.fn(),
-    ViewDataStep: jest.fn(),
-    DownloadStep: jest.fn(),
-  };
-});
-
-jest.mock('@elastic/eui', () => {
-  const module = jest.requireActual('@elastic/eui');
-  return {
-    ...module,
-    EuiSteps: 'eui-steps',
+    AgentPolicySelectionStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'agent-policy-selection-step',
+      title: 'agent-policy-selection-step',
+    }),
+    AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'agent-enrollment-key-selection-step',
+      title: 'agent-enrollment-key-selection-step',
+    }),
+    ViewDataStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'view-data-step',
+      title: 'view-data-step',
+    }),
+    DownloadStep: jest
+      .fn()
+      .mockReturnValue({ 'data-test-subj': 'download-step', title: 'download-step' }),
   };
 });
 

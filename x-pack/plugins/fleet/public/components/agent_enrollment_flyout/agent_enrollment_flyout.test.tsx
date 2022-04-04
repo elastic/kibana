@@ -16,22 +16,18 @@ import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { AgentPolicy } from '../../../common';
-import {
-  useGetSettings,
-  sendGetFleetStatus,
-  sendGetOneAgentPolicy,
-  useGetAgents,
-} from '../../hooks/use_request';
+import { useGetSettings, sendGetOneAgentPolicy, useGetAgents } from '../../hooks/use_request';
 import {
   FleetStatusProvider,
   ConfigContext,
   useAgentEnrollmentFlyoutData,
   KibanaVersionContext,
+  useFleetStatus,
 } from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 
-import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep } from './steps';
+import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
 import type { Props } from '.';
 import { AgentEnrollmentFlyout } from '.';
@@ -87,8 +83,10 @@ describe('<AgentEnrollmentFlyout />', () => {
       data: { item: { fleet_server_hosts: ['test'] } },
     });
 
-    (sendGetFleetStatus as jest.Mock).mockResolvedValue({
-      data: { isReady: true },
+    (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
+    (useFleetServerUnhealthy as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isUnhealthy: false,
     });
 
     (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
@@ -147,9 +145,10 @@ describe('<AgentEnrollmentFlyout />', () => {
   describe('managed instructions', () => {
     it('uses the agent policy selection step', async () => {
       const { exists } = testBed;
+
       expect(exists('agentEnrollmentFlyout')).toBe(true);
-      expect(AgentPolicySelectionStep).toHaveBeenCalled();
-      expect(AgentEnrollmentKeySelectionStep).not.toHaveBeenCalled();
+      expect(exists('agent-policy-selection-step')).toBe(true);
+      expect(exists('agent-enrollment-key-selection-step')).toBe(false);
     });
 
     describe('with a specific policy', () => {
@@ -167,8 +166,8 @@ describe('<AgentEnrollmentFlyout />', () => {
       it('uses the configure enrollment step, not the agent policy selection step', () => {
         const { exists } = testBed;
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(AgentPolicySelectionStep).not.toHaveBeenCalled();
-        expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
+        expect(exists('agent-policy-selection-step')).toBe(false);
+        expect(exists('agent-enrollment-key-selection-step')).toBe(true);
       });
     });
 
@@ -187,7 +186,7 @@ describe('<AgentEnrollmentFlyout />', () => {
       it('should not show fleet server instructions', () => {
         const { exists } = testBed;
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
+        expect(exists('agent-enrollment-key-selection-step')).toBe(true);
       });
     });
 
@@ -232,13 +231,17 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
   });
 
-  describe('standalone instructions', () => {
+  // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
+  // to provide value around the new flyout structure
+  describe.skip('standalone instructions', () => {
     it('uses the agent policy selection step', async () => {
       const { exists, actions } = testBed;
+
       actions.goToStandaloneTab();
+
       expect(exists('agentEnrollmentFlyout')).toBe(true);
-      expect(AgentPolicySelectionStep).toHaveBeenCalled();
-      expect(AgentEnrollmentKeySelectionStep).not.toHaveBeenCalled();
+      expect(exists('agent-policy-selection-step')).toBe(true);
+      expect(exists('agent-enrollment-key-selection-step')).toBe(false);
     });
 
     describe('with a specific policy', () => {
@@ -256,10 +259,12 @@ describe('<AgentEnrollmentFlyout />', () => {
       it('does not use either of the agent policy selection or enrollment key steps', () => {
         const { exists, actions } = testBed;
         jest.clearAllMocks();
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
+
         actions.goToStandaloneTab();
-        expect(AgentPolicySelectionStep).not.toHaveBeenCalled();
-        expect(AgentEnrollmentKeySelectionStep).not.toHaveBeenCalled();
+
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(exists('agent-policy-selection-step')).toBe(false);
+        expect(exists('agent-enrollment-key-selection-step')).toBe(false);
       });
     });
   });
