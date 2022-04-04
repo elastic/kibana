@@ -89,6 +89,10 @@ To navigate between different Kibana apps without a page reload there are APIs i
 * [core.application.navigateToApp](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md)
 * [core.application.navigateToUrl](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md)
 
+Both methods offer customization such as opening the target in a new page, with an `options` parameter. All the options are optional be default.
+* [core.application.navigateToApp options](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.navigatetoappoptions.md)
+* [core.application.navigateToUrl options](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.navigatetourloptions.md)
+
 *Rendering a link to a different app on its own would also cause a full page reload:*
 
 ```jsx

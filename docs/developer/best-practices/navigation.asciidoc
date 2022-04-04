@@ -91,6 +91,8 @@ To navigate between different {kib} apps without a page reload (by default) ther
 * {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md[core.application.navigateToUrl]
 
 Both methods offer customization such as opening the target in a new page, with an `options` parameter. All the options are optional be default.
+* {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.navigatetoappoptions.md[core.application.navigateToApp options]
+* {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.navigatetourloptions.md[core.application.navigateToUrl options]
 
 *Rendering a link to a different {kib} app on its own would also cause a full page reload:*
 
