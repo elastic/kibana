@@ -234,7 +234,6 @@ export const useFleetServerInstructions = (policyId?: string) => {
     }
 
     return getInstallCommandForPlatform(
-      platform,
       esHost,
       serviceToken,
       policyId,
@@ -242,15 +241,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
       deploymentMode === 'production',
       sslCATrustedFingerprint
     );
-  }, [
-    serviceToken,
-    esHost,
-    platform,
-    policyId,
-    fleetServerHost,
-    deploymentMode,
-    sslCATrustedFingerprint,
-  ]);
+  }, [serviceToken, esHost, policyId, fleetServerHost, deploymentMode, sslCATrustedFingerprint]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);

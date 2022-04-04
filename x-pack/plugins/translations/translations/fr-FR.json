@@ -23323,7 +23323,6 @@
     "xpack.stackAlerts.esQuery.actionVariableContextTitleLabel": "Titre pour l'alerte.",
     "xpack.stackAlerts.esQuery.actionVariableContextValueLabel": "Valeur ayant rempli la condition de seuil.",
     "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "Le nombre de documents correspondants est {thresholdComparator} {threshold}",
-    "xpack.stackAlerts.esQuery.alertTypeContextMessageDescription": "l'alerte \"{name}\" est active :\n\n- Valeur : {value}\n- Conditions remplies : {conditions} sur {window}\n- Horodatage : {date}",
     "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "l'alerte \"{name}\" correspond à la recherche",
     "xpack.stackAlerts.esQuery.alertTypeTitle": "Recherche Elasticsearch",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "thresholdComparator spécifié non valide : {comparator}",

@@ -16,14 +16,8 @@ import {
   FilterOptions,
   SortFieldCase,
 } from '../../../common/ui/types';
-import {
-  CaseStatuses,
-  CommentRequestAlertType,
-  caseStatuses,
-  CommentType,
-} from '../../../common/api';
+import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { useGetCases } from '../../containers/use_get_cases';
-import { usePostComment } from '../../containers/use_post_comment';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
@@ -33,7 +27,6 @@ import { EuiBasicTableOnChange } from './types';
 import { CasesTable } from './table';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { CaseAttachments } from '../../types';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -52,28 +45,14 @@ const getSortField = (field: string): SortFieldCase =>
   field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
 
 export interface AllCasesListProps {
-  /**
-   * @deprecated Use the attachments prop instead
-   */
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: Case) => void;
-  updateCase?: (newCase: Case) => void;
   doRefresh?: () => void;
-  attachments?: CaseAttachments;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
-  ({
-    alertData,
-    attachments,
-    hiddenStatuses = [],
-    isSelectorView = false,
-    onRowClick,
-    updateCase,
-    doRefresh,
-  }) => {
+  ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
     const { owner, userCanCrud } = useCasesContext();
     const hasOwner = !!owner.length;
     const availableSolutions = useAvailableCasesOwners();
@@ -97,8 +76,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases,
     } = useGetCases({ initialFilterOptions });
 
-    // Post Comment to Case
-    const { postComment, isLoading: isCommentUpdating } = usePostComment();
     const { connectors } = useConnectors();
 
     const sorting = useMemo(
@@ -181,19 +158,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const showActions = userCanCrud && !isSelectorView;
 
-    // TODO remove the deprecated alertData field when cleaning up
-    // code https://github.com/elastic/kibana/issues/123183
-    // This code is to support the deprecated alertData prop
-    const toAttach = useMemo((): CaseAttachments | undefined => {
-      if (attachments !== undefined || alertData !== undefined) {
-        const _toAttach = attachments ?? [];
-        if (alertData !== undefined) {
-          _toAttach.push({ ...alertData, type: CommentType.alert });
-        }
-        return _toAttach;
-      }
-    }, [alertData, attachments]);
-
     const columns = useCasesColumns({
       dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
@@ -204,9 +168,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       userCanCrud,
       connectors,
       onRowClick,
-      attachments: toAttach,
-      postComment,
-      updateCase,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
 
@@ -243,7 +204,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={(isCasesLoading || isLoading || isCommentUpdating) && !isDataEmpty}
+          $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
@@ -270,7 +231,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           goToCreateCase={onRowClick}
           handleIsLoading={handleIsLoading}
           isCasesLoading={isCasesLoading}
-          isCommentUpdating={isCommentUpdating}
+          isCommentUpdating={isCasesLoading}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
           onChange={tableOnChangeCallback}
