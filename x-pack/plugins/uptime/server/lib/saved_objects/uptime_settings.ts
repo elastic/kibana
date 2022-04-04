@@ -43,4 +43,20 @@ export const umDynamicSettings: SavedObjectsType = {
         defaultMessage: 'Uptime Settings - Index',
       }),
   },
+  migrations: {
+    // Takes a pre 8.2.0 doc, and converts it to 8.2.0
+    '8.2.0': (doc) => {
+      const { heartbeatIndices } = doc.attributes;
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          heartbeatIndices: heartbeatIndices.includes('synthetics-*')
+            ? heartbeatIndices
+            : heartbeatIndices + ',synthetics-*',
+        },
+      };
+    },
+  },
 };
