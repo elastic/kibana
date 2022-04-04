@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaPageTemplateInner custom template 1`] = `
+<EuiPageTemplate
+  className="kbnPageTemplate kbnPageTemplate--centeredContent"
+  template="centeredContent"
+>
+  <EuiEmptyPrompt
+    actions={
+      Array [
+        "test",
+      ]
+    }
+    body={
+      <p>
+        test
+      </p>
+    }
+    iconColor=""
+    iconType="test"
+  />
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplateInner isEmpty no pageHeader 1`] = `
+<EuiPageTemplate
+  className="kbnPageTemplate kbnPageTemplate--centeredBody"
+  template="centeredBody"
+/>
+`;
+
+exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
+<EuiPageTemplate
+  className="kbnPageTemplate kbnPageTemplate--centeredContent"
+  pageHeader={
+    Object {
+      "description": "test",
+      "iconType": "test",
+      "rightSideItems": Array [
+        "test",
+      ],
+      "title": "test",
+    }
+  }
+  template="centeredContent"
+>
+  <div
+    data-test-subj="child"
+  >
+    Child element
+  </div>
+</EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplateInner isEmpty pageHeader & no children 1`] = `
+<EuiPageTemplate
+  className="kbnPageTemplate kbnPageTemplate--centeredBody"
+  template="centeredBody"
+>
+  <EuiEmptyPrompt
+    actions={
+      Array [
+        "test",
+      ]
+    }
+    body={
+      <p>
+        test
+      </p>
+    }
+    iconColor=""
+    iconType="test"
+  />
+</EuiPageTemplate>
+`;
