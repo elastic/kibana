@@ -17,7 +17,6 @@ import type {
  * produce 'number')
  */
 export function normalizeOperationDataType(type: DataType) {
-  if (type === 'murmur3') return 'tokenSearchType';
   if (type === 'histogram') return 'number';
   return type === 'document' ? 'number' : type;
 }
