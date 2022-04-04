@@ -9,10 +9,12 @@
 const { join } = require('path');
 const { name, build } = require('../../package.json');
 const { initApm } = require('@kbn/apm-config-loader');
+const { initWhoBlocked } = require('@kbn/who-blocked');
 
 const rootDir = join(__dirname, '../..');
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
 module.exports = function (serviceName = name) {
   initApm(process.argv, rootDir, isKibanaDistributable, serviceName);
+  initWhoBlocked();
 };

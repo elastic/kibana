@@ -89,6 +89,7 @@ filegroup(
     "//packages/kbn-ui-theme:build",
     "//packages/kbn-utility-types:build",
     "//packages/kbn-utils:build",
+    "//packages/kbn-who-blocked:build",
   ],
 )
 
@@ -163,6 +164,7 @@ filegroup(
     "//packages/kbn-ui-theme:build_types",
     "//packages/kbn-utility-types:build_types",
     "//packages/kbn-utils:build_types",
+    "//packages/kbn-who-blocked:build_types",
   ],
 )
 
