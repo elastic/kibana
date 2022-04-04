@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiSelect,
-  EuiFieldNumber,
-  EuiExpression,
-  EuiFieldText,
   EuiButtonIcon,
-  EuiFormRow,
   EuiComboBox,
+  EuiExpression,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from 'src/plugins/data_views/common';
-import { isNumber, isFinite } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+import { isFinite, isNumber } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import {
   Comparator,
-  Criterion as CriterionType,
   ComparatorToi18nMap,
+  Criterion as CriterionType,
 } from '../../../../../common/alerting/logs/log_threshold/types';
+import type { ResolvedLogViewField } from '../../../../../common/log_views';
 
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
@@ -55,7 +54,7 @@ const criterionComparatorValueTitle = i18n.translate(
   }
 );
 
-const getCompatibleComparatorsForField = (fieldInfo: DataViewField | undefined) => {
+const getCompatibleComparatorsForField = (fieldInfo: ResolvedLogViewField | undefined) => {
   if (fieldInfo?.type === 'number') {
     return [
       { value: Comparator.GT, text: ComparatorToi18nMap[Comparator.GT] },
@@ -83,7 +82,10 @@ const getCompatibleComparatorsForField = (fieldInfo: DataViewField | undefined) 
   }
 };
 
-const getFieldInfo = (fields: DataViewField[], fieldName: string): DataViewField | undefined => {
+const getFieldInfo = (
+  fields: ResolvedLogViewField[],
+  fieldName: string
+): ResolvedLogViewField | undefined => {
   return fields.find((field) => {
     return field.name === fieldName;
   });
@@ -91,7 +93,7 @@ const getFieldInfo = (fields: DataViewField[], fieldName: string): DataViewField
 
 interface Props {
   idx: number;
-  fields: DataViewField[];
+  fields: ResolvedLogViewField[];
   criterion: Partial<CriterionType>;
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
@@ -117,7 +119,7 @@ export const Criterion: React.FC<Props> = ({
     });
   }, [fields]);
 
-  const fieldInfo: DataViewField | undefined = useMemo(() => {
+  const fieldInfo: ResolvedLogViewField | undefined = useMemo(() => {
     if (criterion.field) {
       return getFieldInfo(fields, criterion.field);
     } else {

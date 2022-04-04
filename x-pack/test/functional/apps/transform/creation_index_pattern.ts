@@ -21,8 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/126812
-  describe.skip('creation_index_pattern', function () {
+  describe('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -417,6 +416,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        destinationDataViewTimeField: 'order_date',
         discoverAdjustSuperDatePicker: true,
         expected: {
           latestPreview: {
@@ -591,6 +591,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays the create data view switch');
           await transform.wizard.assertCreateDataViewSwitchExists();
           await transform.wizard.assertCreateDataViewSwitchCheckState(true);
+
+          if (testData.destinationDataViewTimeField) {
+            await transform.testExecution.logTestStep('sets the data view time field');
+            await transform.wizard.assertDataViewTimeFieldInputExists();
+            await transform.wizard.setDataViewTimeField(testData.destinationDataViewTimeField);
+          }
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();

@@ -54,6 +54,8 @@ export const find = async (
       sortByField: queryParams.sortField,
       status: queryParams.status,
       owner: queryParams.owner,
+      from: queryParams.from,
+      to: queryParams.to,
     };
 
     const statusStatsOptions = constructQueryOptions({
