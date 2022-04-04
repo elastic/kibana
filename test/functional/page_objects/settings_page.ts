@@ -164,10 +164,10 @@ export class SettingsPageObject extends FtrService {
     return this.testSubjects.find('createIndexPatternNameInput');
   }
 
-  async setNameField(indexPatternName: string) {
+  async setNameField(dataViewName: string) {
     const field = await this.getNameField();
     field.clearValue();
-    field.type(indexPatternName);
+    field.type(dataViewName);
   }
 
   async getSaveIndexPatternButton() {
@@ -414,7 +414,7 @@ export class SettingsPageObject extends FtrService {
     // null to bypass default value
     timefield: string | null = '@timestamp',
     isStandardIndexPattern = true,
-    indexPatternName?: string
+    dataViewName?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -445,8 +445,8 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
-      if (indexPatternName) {
-        await this.setNameField(indexPatternName);
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
       }
       await (await this.getSaveIndexPatternButton()).click();
     });
@@ -474,7 +474,7 @@ export class SettingsPageObject extends FtrService {
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    indexPatternName?: string
+    dataViewName?: string
   ) {
     if (!indexPatternName) {
       throw new Error('No Data View name provided for edit');
@@ -490,8 +490,8 @@ export class SettingsPageObject extends FtrService {
     if (timefield) {
       await this.selectTimeFieldOption(timefield);
     }
-    if (indexPatternName) {
-      await this.setNameField(indexPatternName);
+    if (dataViewName) {
+      await this.setNameField(dataViewName);
     }
     await (await this.getSaveIndexPatternButton()).click();
 

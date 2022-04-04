@@ -108,7 +108,7 @@ export interface DataViewsServicePublicMethods {
     indexPattern: DataView,
     saveAttempts?: number,
     ignoreErrors?: boolean
-  ) => Promise<void | Error>;
+  ) => Promise<DataView | void | Error>;
 }
 
 export class DataViewsService {

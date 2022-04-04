@@ -120,12 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('edit index pattern', () => {
       it('edit index pattern details on edit click', async () => {
-        await PageObjects.settings.editIndexPattern(
-          'logstash-*',
-          '@timestamp',
-          'Logstash Star',
-          'Logstash Star description'
-        );
+        await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
