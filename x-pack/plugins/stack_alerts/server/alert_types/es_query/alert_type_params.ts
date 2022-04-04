@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
-import { AlertTypeState } from '../../../../alerting/server';
+import { RuleTypeState } from '../../../../alerting/server';
 import { Comparator } from '../../../common/comparator_types';
 import { ComparatorFnNames } from '../lib';
 
@@ -16,7 +16,7 @@ export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
 // alert type parameters
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
-export interface EsQueryAlertState extends AlertTypeState {
+export interface EsQueryAlertState extends RuleTypeState {
   latestTimestamp: string | undefined;
 }
 

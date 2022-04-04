@@ -9,7 +9,7 @@ import { TimestampOverrideOrUndefined } from '../../../../../common/detection_en
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { Logger } from '../../../../../../../../src/core/server';
 import { BuildRuleMessage } from '../rule_messages';
@@ -20,7 +20,7 @@ interface FindPreviousThresholdSignalsParams {
   from: string;
   to: string;
   indexPattern: string[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
   bucketByFields: string[];

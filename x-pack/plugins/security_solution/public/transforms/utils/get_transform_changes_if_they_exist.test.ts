@@ -35,7 +35,7 @@ describe('get_transform_changes_if_they_exist', () => {
     test('returns transformed settings if our settings is enabled', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: { ...getTransformConfigSchemaMock(), enabled: true }, // sets enabled to true
           filterQuery: undefined,
@@ -47,15 +47,15 @@ describe('get_transform_changes_if_they_exist', () => {
           },
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-        indices: ['.estc_all_user_ent*'],
-        factoryQueryType: HostsQueries.authenticationsEntities,
+        indices: ['.estc_all_host_ent*'],
+        factoryQueryType: HostsQueries.hostsEntities,
       });
     });
 
     test('returns regular settings if our settings is disabled', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: { ...getTransformConfigSchemaMock(), enabled: false }, // sets enabled to false
           filterQuery: undefined,
@@ -68,7 +68,7 @@ describe('get_transform_changes_if_they_exist', () => {
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
         indices: ['auditbeat-*'],
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType: HostsQueries.hosts,
       });
     });
   });
@@ -77,7 +77,7 @@ describe('get_transform_changes_if_they_exist', () => {
     test('returns regular settings if filter is set to something other than match_all', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: {
@@ -97,14 +97,14 @@ describe('get_transform_changes_if_they_exist', () => {
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
         indices: ['auditbeat-*'],
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType: HostsQueries.hosts,
       });
     });
 
     test('returns transformed settings if filter is set to something such as match_all', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: {
@@ -123,15 +123,15 @@ describe('get_transform_changes_if_they_exist', () => {
           },
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-        indices: ['.estc_all_user_ent*'],
-        factoryQueryType: HostsQueries.authenticationsEntities,
+        indices: ['.estc_all_host_ent*'],
+        factoryQueryType: HostsQueries.hostsEntities,
       });
     });
 
     test('returns transformed settings if filter is set to undefined', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: undefined, // undefined should return transform
@@ -143,8 +143,8 @@ describe('get_transform_changes_if_they_exist', () => {
           },
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-        indices: ['.estc_all_user_ent*'],
-        factoryQueryType: HostsQueries.authenticationsEntities,
+        indices: ['.estc_all_host_ent*'],
+        factoryQueryType: HostsQueries.hostsEntities,
       });
     });
   });
@@ -153,7 +153,7 @@ describe('get_transform_changes_if_they_exist', () => {
     test('returns regular settings if timerange is less than an hour', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: undefined,
@@ -166,14 +166,14 @@ describe('get_transform_changes_if_they_exist', () => {
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
         indices: ['auditbeat-*'],
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType: HostsQueries.hosts,
       });
     });
 
     test('returns regular settings if timerange is invalid', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: undefined,
@@ -186,14 +186,14 @@ describe('get_transform_changes_if_they_exist', () => {
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
         indices: ['auditbeat-*'],
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType: HostsQueries.hosts,
       });
     });
 
     test('returns transformed settings if timerange is greater than an hour', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['auditbeat-*'],
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: undefined,
@@ -205,8 +205,8 @@ describe('get_transform_changes_if_they_exist', () => {
           },
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-        indices: ['.estc_all_user_ent*'],
-        factoryQueryType: HostsQueries.authenticationsEntities,
+        indices: ['.estc_all_host_ent*'],
+        factoryQueryType: HostsQueries.hostsEntities,
       });
     });
   });
@@ -215,7 +215,7 @@ describe('get_transform_changes_if_they_exist', () => {
     test('it returns regular settings if settings do not match', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: ['should-not-match-*'], // index doesn't match anything
           transformSettings: getTransformConfigSchemaMock(),
           filterQuery: undefined,
@@ -228,14 +228,14 @@ describe('get_transform_changes_if_they_exist', () => {
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
         indices: ['should-not-match-*'],
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType: HostsQueries.hosts,
       });
     });
 
     test('it returns transformed settings if settings do match', () => {
       expect(
         getTransformChangesIfTheyExist({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: HostsQueries.hosts,
           indices: [
             'auditbeat-*',
             'endgame-*',
@@ -255,8 +255,8 @@ describe('get_transform_changes_if_they_exist', () => {
           },
         })
       ).toMatchObject<Partial<ReturnTypeGetTransformChangesIfTheyExist>>({
-        indices: ['.estc_all_user_ent*'],
-        factoryQueryType: HostsQueries.authenticationsEntities,
+        indices: ['.estc_all_host_ent*'],
+        factoryQueryType: HostsQueries.hostsEntities,
       });
     });
   });

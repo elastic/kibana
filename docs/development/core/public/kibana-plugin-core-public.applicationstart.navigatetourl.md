@@ -15,7 +15,7 @@ Then a SPA navigation will be performed using `navigateToApp` using the correspo
 <b>Signature:</b>
 
 ```typescript
-navigateToUrl(url: string): Promise<void>;
+navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 ```
 
 ## Parameters
@@ -23,6 +23,7 @@ navigateToUrl(url: string): Promise<void>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  url | string | an absolute URL, an absolute path or a relative path, to navigate to. |
+|  options | NavigateToUrlOptions |  |
 
 <b>Returns:</b>
 
