@@ -22,7 +22,7 @@ import endpointPng from '../../images/endpoint.png';
 import siemPng from '../../images/siem.png';
 import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../lib/kibana';
 
 const imgUrls = {
   siem: siemPng,
