@@ -980,6 +980,48 @@ class TimeseriesChartIntl extends Component {
       this.props;
     const data = contextChartData;
 
+    const focusAnnotationData = Array.isArray(annotationData)
+      ? [...annotationData].sort((a, b) => a.timestamp - b.timestamp)
+      : [];
+
+    // Since there might be lots of annotations which is hard to view
+    // we should merge overlapping annotations into bigger annotation "blocks"
+    let mergedAnnotations = [];
+    if (focusAnnotationData.length > 0) {
+      mergedAnnotations = [
+        {
+          start: focusAnnotationData[0].timestamp,
+          end: focusAnnotationData[0].end_timestamp,
+          annotations: [focusAnnotationData[0]],
+        },
+      ];
+      let lastEndTime = focusAnnotationData[0].end_timestamp;
+
+      // Since annotations/intervals are already sorted from earliest to latest
+      // we can keep checking if next annotation starts before the last merged end_timestamp
+      for (let i = 1; i < focusAnnotationData.length; i++) {
+        if (focusAnnotationData[i].timestamp < lastEndTime) {
+          // If it overlaps with last annotation block, update block with latest end_timestamp
+          const itemToMerge = mergedAnnotations.pop();
+          const newMergedItem = {
+            ...itemToMerge,
+            end: lastEndTime,
+            // and add to list of annotations for that block
+            annotations: [...itemToMerge.annotations, focusAnnotationData[i]],
+          };
+          mergedAnnotations.push(newMergedItem);
+        } else {
+          // If annotation does not overlap with previous block, add it as a new block
+          mergedAnnotations.push({
+            start: focusAnnotationData[i].timestamp,
+            end: focusAnnotationData[i].end_timestamp,
+            annotations: [focusAnnotationData[i]],
+          });
+        }
+        lastEndTime = focusAnnotationData[i].end_timestamp;
+      }
+    }
+
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
     const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
@@ -1106,7 +1148,7 @@ class TimeseriesChartIntl extends Component {
     const ctxAnnotations = cxtGroup
       .select('.mlContextAnnotations')
       .selectAll('g.mlContextAnnotation')
-      .data(annotationData, (d) => d._id || '');
+      .data(mergedAnnotations, (d) => `${d.start}-${d.end}` || '');
 
     ctxAnnotations.enter().append('g').classed('mlContextAnnotation', true);
 
@@ -1118,14 +1160,14 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('rect')
       .on('mouseover', function (d) {
-        showFocusChartTooltip(d, this);
+        showFocusChartTooltip(d.annotations.length === 1 ? d.annotations[0] : d, this);
       })
       .on('mouseout', () => hideFocusChartTooltip())
       .classed('mlContextAnnotationRect', true);
 
     ctxAnnotationRects
-      .attr('x', (d) => {
-        const date = moment(d.timestamp);
+      .attr('x', (item) => {
+        const date = moment(item.start);
         let xPos = this.contextXScale(date);
 
         if (xPos - ANNOTATION_SYMBOL_HEIGHT <= contextXRangeStart) {
@@ -1140,11 +1182,11 @@ class TimeseriesChartIntl extends Component {
       .attr('y', cxtChartHeight + swlHeight + 2)
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', (d) => {
-        const start = Math.max(this.contextXScale(moment(d.timestamp)) + 1, contextXRangeStart);
+        const start = Math.max(this.contextXScale(moment(d.start)) + 1, contextXRangeStart);
         const end = Math.min(
           contextXRangeEnd,
-          typeof d.end_timestamp !== 'undefined'
-            ? this.contextXScale(moment(d.end_timestamp)) - 1
+          typeof d.end !== 'undefined'
+            ? this.contextXScale(moment(d.end)) - 1
             : start + ANNOTATION_MIN_WIDTH
         );
         const width = Math.max(ANNOTATION_MIN_WIDTH, end - start);
@@ -1519,16 +1561,18 @@ class TimeseriesChartIntl extends Component {
             valueAccessor: 'typical',
           });
         } else {
-          tooltipData.push({
-            label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel', {
-              defaultMessage: 'value',
-            }),
-            value: formatValue(marker.value, marker.function, fieldFormat),
-            seriesIdentifier: {
-              key: seriesKey,
-            },
-            valueAccessor: 'value',
-          });
+          if (marker.value !== undefined) {
+            tooltipData.push({
+              label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.valueLabel', {
+                defaultMessage: 'value',
+              }),
+              value: formatValue(marker.value, marker.function, fieldFormat),
+              seriesIdentifier: {
+                key: seriesKey,
+              },
+              valueAccessor: 'value',
+            });
+          }
           if (marker.byFieldName !== undefined && marker.numberOfCauses !== undefined) {
             const numberOfCauses = marker.numberOfCauses;
             // If numberOfCauses === 1, won't go into this block as actual/typical copied to top level fields.
@@ -1554,45 +1598,47 @@ class TimeseriesChartIntl extends Component {
           }
         }
       } else {
-        tooltipData.push({
-          label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.actualLabel',
-            {
-              defaultMessage: 'actual',
-            }
-          ),
-          value: formatValue(marker.actual, marker.function, fieldFormat),
-          seriesIdentifier: {
-            key: seriesKey,
-          },
-          valueAccessor: 'actual',
-        });
-        tooltipData.push({
-          label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.upperBoundsLabel',
-            {
-              defaultMessage: 'upper bounds',
-            }
-          ),
-          value: formatValue(marker.upper, marker.function, fieldFormat),
-          seriesIdentifier: {
-            key: seriesKey,
-          },
-          valueAccessor: 'upper_bounds',
-        });
-        tooltipData.push({
-          label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.lowerBoundsLabel',
-            {
-              defaultMessage: 'lower bounds',
-            }
-          ),
-          value: formatValue(marker.lower, marker.function, fieldFormat),
-          seriesIdentifier: {
-            key: seriesKey,
-          },
-          valueAccessor: 'lower_bounds',
-        });
+        if (!marker.annotations) {
+          tooltipData.push({
+            label: i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.actualLabel',
+              {
+                defaultMessage: 'actual',
+              }
+            ),
+            value: formatValue(marker.actual, marker.function, fieldFormat),
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'actual',
+          });
+          tooltipData.push({
+            label: i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.upperBoundsLabel',
+              {
+                defaultMessage: 'upper bounds',
+              }
+            ),
+            value: formatValue(marker.upper, marker.function, fieldFormat),
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'upper_bounds',
+          });
+          tooltipData.push({
+            label: i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.modelPlotEnabled.lowerBoundsLabel',
+              {
+                defaultMessage: 'lower bounds',
+              }
+            ),
+            value: formatValue(marker.lower, marker.function, fieldFormat),
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'lower_bounds',
+          });
+        }
       }
     } else {
       // TODO - need better formatting for small decimals.
@@ -1611,22 +1657,24 @@ class TimeseriesChartIntl extends Component {
           valueAccessor: 'prediction',
         });
       } else {
-        tooltipData.push({
-          label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',
-            {
-              defaultMessage: 'value',
-            }
-          ),
-          value: formatValue(marker.value, marker.function, fieldFormat),
-          seriesIdentifier: {
-            key: seriesKey,
-          },
-          valueAccessor: 'value',
-        });
+        if (marker.value !== undefined) {
+          tooltipData.push({
+            label: i18n.translate(
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',
+              {
+                defaultMessage: 'value',
+              }
+            ),
+            value: formatValue(marker.value, marker.function, fieldFormat),
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'value',
+          });
+        }
       }
 
-      if (modelPlotEnabled === true) {
+      if (!marker.annotations && modelPlotEnabled === true) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScoreAndModelPlotEnabled.upperBoundsLabel',
@@ -1694,6 +1742,25 @@ class TimeseriesChartIntl extends Component {
           key: seriesKey,
         },
         valueAccessor: 'timespan',
+      });
+    }
+
+    if (marker.annotations?.length > 1) {
+      marker.annotations.forEach((annotation) => {
+        let timespan = moment(annotation.timestamp).format('MMMM Do YYYY, HH:mm');
+
+        if (typeof annotation.end_timestamp !== 'undefined') {
+          timespan += ` - ${moment(annotation.end_timestamp).format('HH:mm')}`;
+        }
+        tooltipData.push({
+          label: timespan,
+          value: `${annotation.annotation}`,
+          seriesIdentifier: {
+            key: 'anomaly_timeline',
+            specId: annotation._id ?? `${annotation.annotation}-${annotation.timestamp}-label`,
+          },
+          valueAccessor: 'annotation',
+        });
       });
     }
 

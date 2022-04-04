@@ -11,7 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { rulesClientMock } from '../rules_client.mock';
-import { IExecutionLogWithErrorsResult } from '../rules_client';
+import { IExecutionLogWithErrorsResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -38,6 +38,7 @@ describe('getRuleExecutionLogRoute', () => {
         num_new_alerts: 5,
         num_recovered_alerts: 0,
         num_triggered_actions: 5,
+        num_scheduled_actions: 5,
         num_succeeded_actions: 5,
         num_errored_actions: 0,
         total_search_duration_ms: 0,
@@ -56,6 +57,7 @@ describe('getRuleExecutionLogRoute', () => {
         num_new_alerts: 5,
         num_recovered_alerts: 5,
         num_triggered_actions: 5,
+        num_scheduled_actions: 5,
         num_succeeded_actions: 5,
         num_errored_actions: 0,
         total_search_duration_ms: 0,
