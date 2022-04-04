@@ -586,6 +586,15 @@ describe('alert actions', () => {
             filters: [
               {
                 meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: '"{"query":"placeholder"}"',
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'host.name': 'placeholder' } },
+              },
+              {
+                meta: {
                   alias: 'Exceptions',
                   disabled: false,
                   negate: true,
@@ -701,6 +710,17 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            filters: [
+              {
+                meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: '"{"query":"placeholder"}"',
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'host.name': 'placeholder' } },
+              },
+            ],
             dataProviders: [
               {
                 and: [],

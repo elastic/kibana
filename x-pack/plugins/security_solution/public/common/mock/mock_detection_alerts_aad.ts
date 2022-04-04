@@ -48,7 +48,17 @@ export const mockAADEcsDataWithAlert: Ecs = {
         enabled: [true],
         false_positives: ['test-1'],
         parameters: {
-          filters: [],
+          filters: [
+            {
+              meta: {
+                key: 'host.name',
+                negate: false,
+                params: '"{"query":"placeholder"}"',
+                type: 'phrase',
+              },
+              query: { match_phrase: { 'host.name': 'placeholder' } },
+            },
+          ],
           language: ['kuery'],
           query: ['user.id:1'],
         },

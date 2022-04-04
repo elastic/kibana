@@ -158,16 +158,6 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   return { to, from };
 };
 
-const getFiltersFromRule = (filters: string[]): Filter[] =>
-  filters.reduce((acc, filterString) => {
-    try {
-      const objFilter: Filter = JSON.parse(filterString);
-      return [...acc, objFilter];
-    } catch (e) {
-      return acc;
-    }
-  }, [] as Filter[]);
-
 const calculateFromTimeFallback = (thresholdData: Ecs, originalTime: moment.Moment) => {
   // relative time that the rule's time range starts at (e.g. now-1h)
 
@@ -425,7 +415,7 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
-    const filters = getFiltersFromRule(params.filters ?? alertDoc.signal?.rule?.filters) ?? [];
+    const filters = params.filters ?? alertDoc.signal?.rule?.filters;
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
     const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
