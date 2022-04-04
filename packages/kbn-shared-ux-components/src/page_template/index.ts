@@ -8,3 +8,5 @@
 
 export { NoDataCard, ElasticAgentCard } from './no_data_page';
 export { NoDataPage } from './no_data_page';
+export { KibanaPageTemplate } from './page_template';
+export type { KibanaPageTemplateProps } from './types';
