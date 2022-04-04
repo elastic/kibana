@@ -12,10 +12,10 @@ import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from './../lib/error_handler';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../../common';
@@ -77,14 +77,14 @@ export const updateAlertRoute = (
               schedule,
               tags,
               throttle,
-              notifyWhen: notifyWhen as AlertNotifyWhenType,
+              notifyWhen: notifyWhen as RuleNotifyWhenType,
             },
           });
           return res.ok({
             body: alertRes,
           });
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;
