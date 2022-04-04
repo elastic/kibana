@@ -31,7 +31,9 @@ interface EndPointConfig<
 
 type EndPointFunc = () => void;
 
-type EndPoint<Config, Secrets, Params> = EndPointConfig<Config, Secrets, Params> | EndPointFunc;
+export type EndPoint<Config, Secrets, Params> =
+  | EndPointConfig<Config, Secrets, Params>
+  | EndPointFunc;
 
 export interface HTTPConnectorType<
   Config extends Record<string, any> = Record<string, any>,
@@ -48,3 +50,5 @@ export interface HTTPConnectorType<
   };
   endpoints: Record<string, EndPoint<Config, Secrets, Params>>;
 }
+
+export type HandlerReturnType = Record<string, unknown> | Array<Record<string, unknown>>;

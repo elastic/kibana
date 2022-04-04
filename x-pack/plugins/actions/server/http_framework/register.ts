@@ -20,14 +20,12 @@ export const register = <Config, Secrets, Params>({
   connector: HTTPConnectorType<Config, Secrets, Params>;
   logger: Logger;
 }) => {
-  const httpExecutor = buildExecutor({ connector, logger });
+  const executor = buildExecutor<Config, Secrets, Params>({ connector, logger });
 
   actionTypeRegistry.register({
     id: connector.id,
     name: connector.name,
     minimumLicenseRequired: connector.minimumLicenseRequired,
-    executor: async ({ actionId }) => {
-      return { status: 'ok', data: {}, actionId };
-    },
+    executor,
   });
 };
