@@ -13,7 +13,7 @@ import { StartPlugins } from '../../../../types';
  * provided to the Security Solution plugin.
  */
 export const SecuritySolutionStartDependenciesContext = React.createContext<
-  undefined | StartPlugins
+  undefined | Pick<StartPlugins, 'data' | 'fleet'>
 >(undefined);
 
 /**
@@ -21,6 +21,8 @@ export const SecuritySolutionStartDependenciesContext = React.createContext<
  * security solution, as is the case with UI extensions that are rendered within the Fleet
  * pages.
  */
-export const useSecuritySolutionStartDependencies = (): undefined | StartPlugins => {
+export const useSecuritySolutionStartDependencies = ():
+  | undefined
+  | Pick<StartPlugins, 'data' | 'fleet'> => {
   return useContext(SecuritySolutionStartDependenciesContext);
 };
