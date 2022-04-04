@@ -101,7 +101,11 @@ const MonitoringApp: React.FC<{
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
       <ExternalConfigContext.Provider value={externalConfig}>
-        <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
+        <GlobalStateProvider
+          query={plugins.data.query}
+          toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
+        >
           <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
             <MonitoringTimeContainer.Provider>
               <BreadcrumbContainer.Provider history={history}>

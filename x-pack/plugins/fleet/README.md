@@ -60,17 +60,17 @@ _The following is adapted from the Fleet Server [README](https://github.com/elas
 server.host: 0.0.0.0
 xpack.fleet.agents.enabled: true
 xpack.fleet.packages:
-    - name: fleet_server
-      version: latest
+  - name: fleet_server
+    version: latest
 xpack.fleet.agentPolicies:
-    - name: Fleet Server policy
-      id: fleet-server-policy
-      description: Fleet server policy
-      namespace: default
-      package_policies:
-          - name: Fleet Server
-            package:
-                name: fleet_server
+  - name: Fleet Server policy
+    id: fleet-server-policy
+    description: Fleet server policy
+    namespace: default
+    package_policies:
+      - name: Fleet Server
+        package:
+          name: fleet_server
 ```
 
 2. Append the following option to the command you use to start Elasticsearch
@@ -141,18 +141,27 @@ Fleet contains [Storybook](https://storybook.js.org/) stories for developing UI 
 $ yarn storybook fleet
 ```
 
-Write stories by creating `.stories.tsx` files colocated with the components you're working on. Consult the [Storybook docs](https://storybook.js.org/docs/react/get-started/introduction) for more information. 
+Write stories by creating `.stories.tsx` files colocated with the components you're working on. Consult the [Storybook docs](https://storybook.js.org/docs/react/get-started/introduction) for more information.
 
 ## Dependent applications using Fleet
 
 The projects below are dependent on Fleet, most using Fleet API as well. In case of breaking changes in Fleet functionality/API, the project owners have to be notified to make sure they can plan for the necessary changes on their end to avoid unexpected break in functionality.
 
- * [Elastic Agent](https://github.com/elastic/beats/blob/master/x-pack/elastic-agent): uses Fleet API to enroll agents. [Check here](https://github.com/elastic/beats/blob/master/x-pack/elastic-agent/pkg/agent/cmd/container.go)
- * [Fleet Server](https://github.com/elastic/fleet-server): uses Fleet API to enroll fleet server [Check here](https://github.com/elastic/fleet-server/blob/master/cmd/fleet/router.go)
- * [elastic-package](https://github.com/elastic/elastic-package): command line tool, uses Fleet with docker compose and Fleet API [Check here](https://github.com/elastic/elastic-package/tree/master/internal/kibana)
- * [Azure VM extension](https://github.com/elastic/azure-vm-extension): automation tool for Azure VMs, uses Fleet API to enroll agents [Check here](https://github.com/elastic/azure-vm-extension/blob/main/src/handler/windows/scripts/enable.ps1)
- * [e2e-testing](https://github.com/elastic/e2e-testing): internal project that runs Fleet and tests Fleet API [Check here](https://github.com/elastic/e2e-testing/tree/main/internal/kibana)
- * [observability-test-environments](https://github.com/elastic/observability-test-environments): internal project, uses Fleet API [Check here](https://github.com/elastic/observability-test-environments/blob/master/ansible/tasks-fleet-config.yml)
-  * [ECK](https://github.com/elastic/cloud-on-k8s): Elastic Cloud on Kubernetes, orchestrates Elastic Stack applications, including Kibana with Fleet (no direct dependency, has examples that include Fleet config) [Check here](https://github.com/elastic/cloud-on-k8s/blob/main/docs/orchestrating-elastic-stack-applications/agent-fleet.asciidoc)
-  * [APM Server](https://github.com/elastic/apm-server) APM Server, receives data from Elastic APM agents. Using docker compose for testing. [Check here](https://github.com/elastic/apm-server/pull/7227/files) 
-  * [APM Integration Testing](https://github.com/elastic/apm-integration-testing) APM integration testing. [Check here](https://github.com/elastic/apm-integration-testing/blob/53ec49f80bb8dc8175e21e9ac26452fa8c3b7cf0/docker/apm-server/managed/main.go#L188)
+- [Elastic Agent](https://github.com/elastic/beats/blob/master/x-pack/elastic-agent): uses Fleet API to enroll agents. [Check here](https://github.com/elastic/beats/blob/master/x-pack/elastic-agent/pkg/agent/cmd/container.go)
+- [Fleet Server](https://github.com/elastic/fleet-server): uses Fleet API to enroll fleet server [Check here](https://github.com/elastic/fleet-server/blob/master/cmd/fleet/router.go)
+- [elastic-package](https://github.com/elastic/elastic-package): command line tool, uses Fleet with docker compose and Fleet API [Check here](https://github.com/elastic/elastic-package/tree/master/internal/kibana)
+- [Azure VM extension](https://github.com/elastic/azure-vm-extension): automation tool for Azure VMs, uses Fleet API to enroll agents [Check here](https://github.com/elastic/azure-vm-extension/blob/main/src/handler/windows/scripts/enable.ps1)
+- [e2e-testing](https://github.com/elastic/e2e-testing): internal project that runs Fleet and tests Fleet API [Check here](https://github.com/elastic/e2e-testing/tree/main/internal/kibana)
+- [observability-test-environments](https://github.com/elastic/observability-test-environments): internal project, uses Fleet API [Check here](https://github.com/elastic/observability-test-environments/blob/master/ansible/tasks-fleet-config.yml)
+- [ECK](https://github.com/elastic/cloud-on-k8s): Elastic Cloud on Kubernetes, orchestrates Elastic Stack applications, including Kibana with Fleet (no direct dependency, has examples that include Fleet config) [Check here](https://github.com/elastic/cloud-on-k8s/blob/main/docs/orchestrating-elastic-stack-applications/agent-fleet.asciidoc)
+- [APM Server](https://github.com/elastic/apm-server) APM Server, receives data from Elastic APM agents. Using docker compose for testing. [Check here](https://github.com/elastic/apm-server/pull/7227/files)
+- [APM Integration Testing](https://github.com/elastic/apm-integration-testing) APM integration testing. [Check here](https://github.com/elastic/apm-integration-testing/blob/53ec49f80bb8dc8175e21e9ac26452fa8c3b7cf0/docker/apm-server/managed/main.go#L188)
+
+## Bundled Packages
+
+Fleet supports shipping integrations as `.zip` archives with Kibana's source code through a concept referred to as _bundled packages_. This allows integrations like APM, which is enabled by default in Cloud, to reliably provide upgrade paths without internet access, and generally improves stability around Fleet's installation/setup processes for several common integrations.
+
+The set of bundled packages included with Kibana is dictated by a top-level `fleet_packages.json` file in the Kibana repo. This file includes a list of packages with a pinned version that Kibana will consider bundled. When the Kibana distributable is built, a [build task](https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/bundle_fleet_packages.ts) will resolve these packages from the Elastic Package Registry, download the appropriate version as a `.zip` archive, and place it in a directory configurable by a `xpack.fleet.bundledPackageLocation` value in `kibana.yml`. By default, these archives are stored in `x-pack/plugins/fleet/.target/bundled_packages/`. In CI/CD, we [override](https://github.com/elastic/kibana/blob/main/x-pack/test/fleet_api_integration/config.ts#L20) this default with `/tmp/fleet_bundled_packages`.
+
+Until further automation is added, this `fleet_packages.json` file should be updated as part of the release process to ensure the latest compatible version of each bundled package is included with that Kibana version. **This must be done before the final BC for a release is built.**
+Tracking issues should be opened and tracked by the Fleet UI team. See https://github.com/elastic/kibana/issues/129309 as an example.

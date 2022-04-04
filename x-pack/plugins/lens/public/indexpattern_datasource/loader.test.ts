@@ -589,7 +589,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
@@ -640,7 +639,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
@@ -727,11 +725,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          {
-            name: 'indexpattern-datasource-current-indexpattern',
-            id: 'conflictId',
-            type: 'index-pattern',
-          },
           { name: 'indexpattern-datasource-layer-layerb', id: 'conflictId', type: 'index-pattern' },
         ],
         indexPatternsService: mockIndexPatternsServiceWithConflict(),
@@ -800,11 +793,6 @@ describe('loader', () => {
       expect(savedObjectReferences).toMatchInlineSnapshot(`
         Array [
           Object {
-            "id": "b",
-            "name": "indexpattern-datasource-current-indexpattern",
-            "type": "index-pattern",
-          },
-          Object {
             "id": "id-index-pattern-a",
             "name": "indexpattern-datasource-layer-a",
             "type": "index-pattern",
@@ -821,13 +809,6 @@ describe('loader', () => {
     it('should restore layers', () => {
       const { savedObjectReferences, state: persistedState } = extractReferences(state);
       expect(injectReferences(persistedState, savedObjectReferences).layers).toEqual(state.layers);
-    });
-
-    it('should restore current index pattern', () => {
-      const { savedObjectReferences, state: persistedState } = extractReferences(state);
-      expect(injectReferences(persistedState, savedObjectReferences).currentIndexPatternId).toEqual(
-        state.currentIndexPatternId
-      );
     });
   });
 

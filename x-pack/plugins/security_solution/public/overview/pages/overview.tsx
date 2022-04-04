@@ -17,7 +17,6 @@ import { useFetchIndex } from '../../common/containers/source';
 
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
-import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors } from '../../common/store';
@@ -34,6 +33,7 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -173,7 +173,7 @@ const OverviewComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <OverviewEmpty />
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.overview} />
