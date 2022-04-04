@@ -40,24 +40,19 @@ export function getRuleType(): RuleTypeModel {
     documentationUrl: null,
     ruleParamsExpression: SqlRuleExpression,
     requiresAppContext: false,
-    validate: (params: Params) => {
-      const validationResult = {
-        errors: {
-          query: new Array<string>(),
-        },
-      };
-      return validationResult;
-    },
+    validate: (params: Params) => ({ errors: { query: [] } }),
   };
 }
 
 export const SqlRuleExpression: React.FunctionComponent<RuleTypeParamsExpressionProps<Params>> = ({
   ruleParams,
   setRuleParams,
-  actionGroups,
-  defaultActionGroupId,
 }) => {
-  const { query = DefaultQuery } = ruleParams;
+  let { query } = ruleParams;
+  if (query == null) {
+    query = DefaultQuery;
+    setRuleParams('query', query);
+  }
 
   return (
     <Fragment>

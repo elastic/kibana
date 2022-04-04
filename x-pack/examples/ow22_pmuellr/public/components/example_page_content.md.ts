@@ -10,62 +10,41 @@ export const x = 'a';
 export const content = `
 # sql_rule 
 
-Kibana alerting rule that uses SQL. with the resultant SQL columns selecting both the alert id (nee: alert instance id, like a host name) and context variables.
+Adds a Kibana alerting rule that uses SQL, with the resulting SQL columns selecting both the alert id (AKA alert instance id, like a host name) and context variables.
 
 The column named \`instanceId\` must be included in the selected columns, and will be used as the instance id of the alert.  The SQL query should only return one row for each value.
 
 The remaining columns will be used as context variables for the alert.
 
-As an example, we'll build a rule which does a query over an index with documents in the following shape:
+As an example, we'll build a rule which does a query over an index with documents in the following fields:
 
-    {
-      "@timestamp": "2022-04-04T14:47:08.265Z",
-      "host": {"name": "host-1"},
-      "system": {
-        "cpu": {
-          "total": {
-            "norm": {"pct": 0.5}
-          }
-        },
-        "memory": {
-          "actual": {"free": 200000},
-          "total": 1000000
-        }
-      }
-    }
+- \`@timestamp\`
+- \`host.name\`
+- \`system.cpu.total.norm.pct\` _(between 0.0 and 1.0)_
+- \`system.memory.actual.free\` _(bytes)_
+- \`system.memory.total\` _(bytes)_
 
 A command-line tool[\`es-apm-sys-sim\`](https://github.com/pmuellr/es-apm-sys-sim) can be used to generate these documents with values changing over time. 
 
-    curl -H 'kbn-xsrf: foo' -H 'content-type: application/json' $KBN_URL/api/alerting/rule -d '{
-      "name": "sql rule example",
-      "rule_type_id": "ow22-sql",
-      "schedule": { "interval": "1s" },
-      "notify_when": "onActiveAlert",
-      "enabled": true,
-      "consumer": "stackAlerts",
-      "params": {
-        "query": "SELECT TOP 10 host.name AS instanceId, AVG(system.cpu.total.norm.pct) AS cpu, AVG(system.memory.actual.free) AS freemem FROM \\"es-apm-sys-sim\\" WHERE (\\"@timestamp\\" > (NOW() - INTERVAL 5 SECONDS)) GROUP BY host.name HAVING AVG(system.cpu.total.norm.pct) > 0.80"
-      },
-      "actions": [
-        { "group": "found", "id": "server-log", "params": { "message": "rule {{alertName}} triggered for {{alertInstanceId}}; cpu: {{context.cpu}}; free memory: {{context.freemem}}" } }
-      ]
-    }'
-
-A nicely formatted version of this SQL query is:
+Here's a query you can use with the new rule, which you'll find grouped with the other Alerting Example rule types, at the top of the list.  Assuming you've launched Kibana with \`--run-examples\`.
 
     SELECT 
       TOP 10 
       host.name AS instanceId, 
       AVG(system.cpu.total.norm.pct) AS cpu, 
       AVG(system.memory.actual.free) AS freemem 
-    FROM \"es-apm-sys-sim\" 
+    FROM "es-apm-sys-sim" 
     WHERE 
-      (\"@timestamp\" > (NOW() - INTERVAL 5 SECONDS)) 
+      ("@timestamp" > (NOW() - INTERVAL 5 SECONDS)) 
     GROUP BY host.name 
     HAVING 
       AVG(system.cpu.total.norm.pct) > 0.80
 
-This is basically the same thing as the index threshold query where:
+Add an action, such as server log, with the following value for the message:
+
+    rule {{alertName}} triggered for {{alertInstanceId}}; cpu: {{context.cpu}}; free memory: {{context.freemem}}      
+
+This SQL query rule is basically the same thing as the index threshold query where:
 
     when:          average()
     of:            system.cpu.total.norm.pct
@@ -77,14 +56,7 @@ The human version: alert when the average of a host's CPU over 5 seconds is > 80
 
 One nice difference is the sql rule assigns context variables from the column names; so in this case, we have both \`cpu\` and \`freemem\` as context variables, but with the index threshold rule we'll only have the cpu value available as \`context.value\`.
 
-Note this expects a server log action with the id of <tt>server-log</tt> to be available, which you can make happen with the following kibana.dev.yml:
-
-    xpack.actions.preconfigured:
-      server-log:
-        name: 'server log'
-        actionTypeId: '.server-log'
-
-Because this is using a 1s interval, you can avoid warnings about that with the config setting:
+Because this is using a 1s interval, you can avoid warnings about that overly short interval with the config setting:
 
     xpack.alerting.rules.minimumScheduleInterval.value: '1s'
 
