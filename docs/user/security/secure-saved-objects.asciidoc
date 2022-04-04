@@ -16,7 +16,7 @@ xpack.encryptedSavedObjects:
 
 [IMPORTANT]
 ============================================================================
-If you don't specify an encryption key, {kib} might disable features that rely on the encrypted saved objects.
+If you don't specify an encryption key, {kib} might disable features that rely on encrypted saved objects.
 ============================================================================
 
 [[encryption-key-rotation]]
