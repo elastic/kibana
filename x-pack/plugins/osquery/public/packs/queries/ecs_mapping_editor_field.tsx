@@ -17,7 +17,7 @@ import {
   map,
   reduce,
   trim,
-  get
+  get,
 } from 'lodash';
 import React, {
   forwardRef,
