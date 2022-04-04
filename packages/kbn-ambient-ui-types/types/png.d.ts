@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-// Importing MDX files requires a type definition not currently included in the stack.
-declare module '*.mdx' {
-  let MDXComponent: (props: any) => JSX.Element;
-  // eslint-disable-next-line import/no-default-export
-  export default MDXComponent;
+declare module '*.png' {
+  const content: string;
+
+  export default content;
 }

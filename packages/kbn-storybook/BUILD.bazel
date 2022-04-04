@@ -54,6 +54,7 @@ TYPES_DEPS = [
   "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "//packages/kbn-ui-shared-deps-src:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-ambient-ui-types",
   "@npm//@elastic/eui",
   "@npm//@emotion/cache",
   "@npm//@storybook/addons",

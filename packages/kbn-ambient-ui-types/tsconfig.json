@@ -11,6 +11,6 @@
     ]
   },
   "include": [
-    "*.d.ts"
+    "types/**/*.d.ts"
   ]
 }

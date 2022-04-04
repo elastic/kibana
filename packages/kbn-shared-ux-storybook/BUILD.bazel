@@ -55,6 +55,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-shared-ux-services:npm_module_types",
   "//packages/kbn-storybook:npm_module_types",
+  "//packages/kbn-ambient-ui-types",
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@storybook/react",
