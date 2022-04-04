@@ -14,14 +14,10 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     return manageRulesPage.getAttribute('href');
   };
 
-  const goToMangeRulesPage = async () => {
+  const clickMangeRulesPage = async () => {
     const manageRulesButton = await testSubjects.find('manageRulesPages');
     return manageRulesButton.click();
   };
 
-  const getCreateRuleButton = async () => {
-    return await testSubjects.exists('createRuleButton');
-  };
-
-  return { getManageRulesPageHref, goToMangeRulesPage, getCreateRuleButton };
+  return { getManageRulesPageHref, clickMangeRulesPage };
 }

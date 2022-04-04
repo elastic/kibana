@@ -39,14 +39,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Create rules', () => {
       it('Create Rules button is visible when user has permissions', async () => {
-        await observability.alerts.rulesPage.goToMangeRulesPage();
+        await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
           'Create Rule button is visible',
-          async () => await observability.alerts.rulesPage.getCreateRuleButton()
+          async () => await testSubjects.exists('createRuleButton')
         );
       });
 
-      it(`Does not allow to create a rule in the Rules page`, async () => {
+      it(`Does not allow to create a when user has no permissions`, async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             observabilityCases: ['read'],
