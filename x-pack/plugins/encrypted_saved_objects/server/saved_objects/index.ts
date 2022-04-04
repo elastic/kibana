@@ -117,7 +117,7 @@ export function setupSavedObjects({
 
         async function* encryptedFinder() {
           for await (const res of finderAsyncGenerator) {
-            const encryptedSavedObjects = pMap(res.saved_objects, async (savedObject) => ({
+            const encryptedSavedObjects = await pMap(res.saved_objects, async (savedObject) => ({
               ...savedObject,
               attributes: (await service.decryptAttributes(
                 {
@@ -132,7 +132,7 @@ export function setupSavedObjects({
                 savedObject.attributes as Record<string, unknown>
               )) as T,
             }));
-            yield { ...res, save_objects: encryptedSavedObjects };
+            yield { ...res, saved_objects: encryptedSavedObjects };
           }
         }
 

@@ -138,7 +138,7 @@ describe('#setupSavedObjects', () => {
       const mockSavedObject: SavedObject = {
         id: 'some-id',
         type: 'known-type',
-        attributes: { attrOne: 'one', attrSecret: 'secret' },
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
       };
       mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
@@ -191,12 +191,14 @@ describe('#setupSavedObjects', () => {
       });
 
       for await (const res of finder.find()) {
-        expect(res.saved_objects).toEqual([
-          {
-            ...mockSavedObject,
-            //   attributes: { attrOne: 'one', attrSecret: 'secret' },
-          },
-        ]);
+        expect(res).toEqual({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              attributes: { attrOne: 'one', attrSecret: 'secret' },
+            },
+          ],
+        });
       }
 
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
@@ -234,7 +236,14 @@ describe('#setupSavedObjects', () => {
       });
 
       for await (const res of finder.find()) {
-        expect(res.saved_objects).toEqual([mockSavedObject]);
+        expect(res).toEqual({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              attributes: { attrOne: 'one', attrSecret: 'secret' },
+            },
+          ],
+        });
       }
 
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
