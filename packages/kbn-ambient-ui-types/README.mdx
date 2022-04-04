@@ -6,4 +6,7 @@ These types will automatically be included for plugins.
 
 ## Packages
 
-To include in a package, add `"//packages/kbn-ambient-ui-types"` to the `RUNTIME_DEPS` portion of the `BUILD.bazel` file.
+To include these types in a package:
+
+- add `"//packages/kbn-ambient-ui-types"` to the `RUNTIME_DEPS` portion of the `BUILD.bazel` file.
+- add `"@kbn/ambient-ui-types"` to the `types` portion of the `tsconfig.json` file.
