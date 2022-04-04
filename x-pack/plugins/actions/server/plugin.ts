@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
@@ -90,6 +91,7 @@ import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
+import { createHTTPConnectorFramework } from './http_framework';
 
 export interface PluginSetupContract {
   registerType<
@@ -298,6 +300,27 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         core,
       });
     }
+
+    const httpFramework = createHTTPConnectorFramework({ actionTypeRegistry });
+    httpFramework.registerConnector({
+      id: '.test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic',
+      schema: {
+        config: schema.object({ apiUrl: schema.string() }),
+        secrets: schema.object({ password: schema.string() }),
+        params: schema.object({ category: schema.string() }),
+      },
+      endpoints: {
+        createIncident: {
+          method: 'post',
+          responseSchema: schema.object({ id: schema.string() }),
+          getPath: (config) => `${config.apiUrl}/api/test`,
+          preFetch: (res) => {},
+          postFetch: (res) => {},
+        },
+      },
+    });
 
     // Routes
     defineRoutes(
