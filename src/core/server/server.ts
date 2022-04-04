@@ -32,6 +32,7 @@ import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
 import { ExecutionContextService } from './execution_context';
 import { DocLinksService } from './doc_links';
+import { EventLoopBlockDetectionService } from './event_loop_block_detection';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -41,6 +42,7 @@ import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
+import { config as eventLoopBlockDetectionConfig } from './event_loop_block_detection';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import {
@@ -84,6 +86,7 @@ export class Server {
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
+  private readonly eventLoopBlockDetection: EventLoopBlockDetectionService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -123,6 +126,7 @@ export class Server {
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
+    this.eventLoopBlockDetection = new EventLoopBlockDetectionService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -134,6 +138,7 @@ export class Server {
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const environmentPreboot = await this.environment.preboot();
+    await this.eventLoopBlockDetection.preboot();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({ environment: environmentPreboot });
@@ -387,6 +392,7 @@ export class Server {
       pidConfig,
       i18nConfig,
       deprecationConfig,
+      eventLoopBlockDetectionConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

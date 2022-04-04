@@ -10,8 +10,6 @@ import apm from 'elastic-apm-node';
 import { createHook } from 'async_hooks';
 import util from 'util';
 
-const thresholdNs = 10 * 1e6; // 10 ms
-
 interface CacheEntry {
   hrtime: [number, number];
   transaction: apm.Transaction | null;
@@ -46,8 +44,9 @@ function formatSpan(span: apm.Span | null) {
   };
 }
 
-export function initWhoBlocked() {
+export function initWhoBlocked(thresholdMs) {
   const cache = new Map<number, CacheEntry>();
+  const thresholdNs = thresholdMs * 1e6;
 
   function before(asyncId: number) {
     cache.set(asyncId, {
