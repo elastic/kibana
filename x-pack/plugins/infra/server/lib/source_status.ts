@@ -7,7 +7,6 @@
 
 import type { InfraPluginRequestHandlerContext } from '../types';
 import { InfraSources } from './sources';
-import { ResolvedLogSourceConfiguration } from '../../common/log_sources';
 
 export class InfraSourceStatus {
   constructor(
@@ -42,16 +41,6 @@ export class InfraSourceStatus {
       sourceConfiguration.configuration.metricAlias
     );
     return hasAlias;
-  }
-  public async getLogIndexStatus(
-    requestContext: InfraPluginRequestHandlerContext,
-    resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration
-  ): Promise<SourceIndexStatus> {
-    const indexStatus = await this.adapter.getIndexStatus(
-      requestContext,
-      resolvedLogSourceConfiguration.indices
-    );
-    return indexStatus;
   }
   public async hasMetricIndices(
     requestContext: InfraPluginRequestHandlerContext,

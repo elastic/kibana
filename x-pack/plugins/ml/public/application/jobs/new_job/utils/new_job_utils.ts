@@ -66,6 +66,20 @@ export function createSearchItems(
       }
       const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
+      if (combinedQuery.bool === undefined) {
+        combinedQuery.bool = {};
+        // toElasticsearchQuery may add a single multi_match item to the
+        // root of its returned query, rather than putting it inside
+        // a bool.should
+        // in this case, move it to a bool.should
+        if (combinedQuery.multi_match !== undefined) {
+          combinedQuery.bool.should = {
+            multi_match: combinedQuery.multi_match,
+          };
+          delete combinedQuery.multi_match;
+        }
+      }
+
       if (Array.isArray(combinedQuery.bool.filter) === false) {
         combinedQuery.bool.filter =
           combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];

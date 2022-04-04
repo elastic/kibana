@@ -360,6 +360,7 @@ export const RulesList: React.FunctionComponent = () => {
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
         item={item}
         onRuleChanged={() => loadRulesData()}
+        isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
         previousSnoozeInterval={previousSnoozeInterval}
       />
     );
@@ -833,7 +834,10 @@ export const RulesList: React.FunctionComponent = () => {
       },
       {
         field: 'enabled',
-        name: '',
+        name: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.triggerActionsTitle',
+          { defaultMessage: 'Trigger actions' }
+        ),
         sortable: true,
         truncateText: false,
         width: '10%',
