@@ -102,13 +102,11 @@ export default function ({
     spaces.forEach(({ space, basePath }) => {
       describe('space ' + space + ' ecommerce', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'maps',
-            'map/' + '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-            {
-              basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.home.launchSampleMap('ecommerce');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map');
@@ -132,13 +130,11 @@ export default function ({
       });
       describe('space ' + space + ' flights', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'maps',
-            'map/' + '5dd88580-1906-11e9-919b-ffe5949a18d2',
-            {
-              basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.home.launchSampleMap('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map');
@@ -158,13 +154,11 @@ export default function ({
       });
       describe('space ' + space + ' web logs', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'maps',
-            'map/' + 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            {
-              basePath,
-            }
-          );
+          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+            basePath,
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.home.launchSampleMap('logs');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map');
