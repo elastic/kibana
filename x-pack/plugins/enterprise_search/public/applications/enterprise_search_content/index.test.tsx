@@ -19,9 +19,9 @@ import { shallow } from 'enzyme';
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { Settings } from './components/connector_settings';
 import { ErrorConnecting } from './components/error_connecting';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 
 import {
   EnterpriseSearchContent,

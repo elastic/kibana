@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/constants';
 import { generateNavLink } from '../../../shared/layout';
 
-import { ROOT_PATH, SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../routes';
+import { ROOT_PATH, SEARCH_INDICES_PATH, CONNECTOR_SETTINGS_PATH } from '../../routes';
 
 import { useSearchIndicesNav } from '../search_index/index_nav';
 
@@ -56,12 +56,12 @@ export const useEnterpriseSearchContentNav = () => {
             }),
           },
           {
-            id: 'search_indices',
-            name: i18n.translate('xpack.enterpriseSearch.content.nav.settingsTitle', {
-              defaultMessage: 'Settings',
+            id: 'connector_settings',
+            name: i18n.translate('xpack.enterpriseSearch.content.nav.connectorSettingsTitle', {
+              defaultMessage: 'Connector settings',
             }),
             ...generateNavLink({
-              to: SETTINGS_PATH,
+              to: CONNECTOR_SETTINGS_PATH,
               isRoot: true,
             }),
           },

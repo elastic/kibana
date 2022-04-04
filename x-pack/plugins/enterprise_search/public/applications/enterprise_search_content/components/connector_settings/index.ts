@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Settings } from './settings';
+export { ConnectorSettings } from './connector_settings';
