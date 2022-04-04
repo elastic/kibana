@@ -17,3 +17,7 @@ node scripts/build "$RELEASE_ARG" --all-platforms --debug --docker-cross-compile
 
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$VERSION.csv"
+
+cd target
+buildkite-agent artifact upload "*"
+cd -
