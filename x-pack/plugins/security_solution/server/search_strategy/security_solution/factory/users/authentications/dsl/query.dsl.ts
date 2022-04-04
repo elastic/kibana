@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
+import { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
@@ -28,11 +28,12 @@ export const auditdFieldsMap: Readonly<Record<string, string>> = {
 
 export const buildQuery = ({
   filterQuery,
+  stackByField,
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
   docValueFields,
-}: HostAuthenticationsRequestOptions) => {
+}: UserAuthenticationsRequestOptions) => {
   const esFields = reduceFields(authenticationsFields, {
     ...hostFieldsMap,
     ...sourceFieldsMap,
@@ -52,14 +53,6 @@ export const buildQuery = ({
     },
   ];
 
-  const agg = {
-    user_count: {
-      cardinality: {
-        field: 'user.name',
-      },
-    },
-  };
-
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
@@ -67,11 +60,15 @@ export const buildQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
-        ...agg,
-        group_by_users: {
+        stack_by_count: {
+          cardinality: {
+            field: stackByField,
+          },
+        },
+        stack_by: {
           terms: {
             size: querySize,
-            field: 'user.name',
+            field: stackByField,
             order: [
               { 'successes.doc_count': 'desc' as const },
               { 'failures.doc_count': 'desc' as const },

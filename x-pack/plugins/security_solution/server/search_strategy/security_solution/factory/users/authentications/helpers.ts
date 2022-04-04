@@ -21,7 +21,7 @@ export const authenticationsFields = [
   '_id',
   'failures',
   'successes',
-  'user.name',
+  'stackedValue',
   'lastSuccess.timestamp',
   'lastSuccess.source.ip',
   'lastSuccess.host.id',
@@ -46,7 +46,7 @@ export const formatAuthenticationData = (
         ...flattenedFields.node,
         ...{
           _id: hit._id,
-          user: { name: [hit.user] },
+          stackedValue: [hit.stackedValue],
           failures: hit.failures,
           successes: hit.successes,
         },
@@ -69,9 +69,7 @@ export const formatAuthenticationData = (
         failures: 0,
         successes: 0,
         _id: '',
-        user: {
-          name: [''],
-        },
+        stackedValue: [''],
       },
       cursor: {
         value: '',
@@ -81,7 +79,7 @@ export const formatAuthenticationData = (
   );
 
 export const getHits = <T extends FactoryQueryTypes>(response: StrategyResponseType<T>) =>
-  getOr([], 'aggregations.group_by_users.buckets', response.rawResponse).map(
+  getOr([], 'aggregations.stack_by.buckets', response.rawResponse).map(
     (bucket: AuthenticationBucket) => ({
       _id: getOr(
         `${bucket.key}+${bucket.doc_count}`,
@@ -92,14 +90,14 @@ export const getHits = <T extends FactoryQueryTypes>(response: StrategyResponseT
         lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
         lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
       },
-      user: bucket.key,
+      stackedValue: bucket.key,
       failures: bucket.failures.doc_count,
       successes: bucket.successes.doc_count,
     })
   );
 
 export const getHitsEntities = <T extends FactoryQueryTypes>(response: StrategyResponseType<T>) =>
-  getOr([], 'aggregations.group_by_users.buckets', response.rawResponse).map(
+  getOr([], 'aggregations.stack_by.buckets', response.rawResponse).map(
     (bucket: AuthenticationBucket) => ({
       _id: getOr(
         `${bucket.key}+${bucket.doc_count}`,
@@ -110,7 +108,7 @@ export const getHitsEntities = <T extends FactoryQueryTypes>(response: StrategyR
         lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
         lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
       },
-      user: bucket.key,
+      stackedValue: bucket.key,
       failures: bucket.failures.value,
       successes: bucket.successes.value,
     })
@@ -130,7 +128,7 @@ export const formatAuthenticationEntitiesData = (
         ...flattenedFields.node,
         ...{
           _id: hit._id,
-          user: { name: [hit.user] },
+          stackedValue: [hit.stackedValue],
           failures: hit.failures,
           successes: hit.successes,
         },
@@ -153,9 +151,7 @@ export const formatAuthenticationEntitiesData = (
         failures: 0,
         successes: 0,
         _id: '',
-        user: {
-          name: [''],
-        },
+        stackedValue: [''],
       },
       cursor: {
         value: '',

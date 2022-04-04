@@ -11,12 +11,12 @@ import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/d
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
-  HostsQueries,
-  AuthenticationsEdges,
-  HostAuthenticationsRequestOptions,
-  HostAuthenticationsStrategyResponse,
   AuthenticationHit,
-} from '../../../../../../common/search_strategy/security_solution/hosts';
+  AuthenticationsEdges,
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsStrategyResponse,
+} from '../../../../../../common/search_strategy';
+import { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
@@ -32,8 +32,8 @@ import {
   getHitsEntities,
 } from './helpers';
 
-export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
-  buildDsl: (options: HostAuthenticationsRequestOptions) => {
+export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
+  buildDsl: (options: UserAuthenticationsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -41,11 +41,11 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     return buildAuthenticationQuery(options);
   },
   parse: async (
-    options: HostAuthenticationsRequestOptions,
+    options: UserAuthenticationsRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<HostAuthenticationsStrategyResponse> => {
+  ): Promise<UserAuthenticationsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
+    const totalCount = getOr(0, 'aggregations.stack_by_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
@@ -72,8 +72,8 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
   },
 };
 
-export const authenticationsEntities: SecuritySolutionFactory<HostsQueries.authentications> = {
-  buildDsl: (options: HostAuthenticationsRequestOptions) => {
+export const authenticationsEntities: SecuritySolutionFactory<UsersQueries.authentications> = {
+  buildDsl: (options: UserAuthenticationsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -81,11 +81,11 @@ export const authenticationsEntities: SecuritySolutionFactory<HostsQueries.authe
     return buildAuthenticationQueryEntities(options);
   },
   parse: async (
-    options: HostAuthenticationsRequestOptions,
+    options: UserAuthenticationsRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<HostAuthenticationsStrategyResponse> => {
+  ): Promise<UserAuthenticationsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
+    const totalCount = getOr(0, 'aggregations.stack_by_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHitsEntities(response);

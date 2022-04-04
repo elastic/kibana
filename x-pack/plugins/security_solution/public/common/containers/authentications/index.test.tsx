@@ -6,9 +6,10 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { AuthStackByField } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
+import { HostsType } from '../../../hosts/store/model';
 import { useAuthentications } from './index';
-import { HostsType } from '../../store/model';
 
 describe('authentications', () => {
   it('skip = true will cancel any running request', () => {
@@ -19,6 +20,9 @@ describe('authentications', () => {
       indexNames: ['cool'],
       type: HostsType.page,
       skip: false,
+      stackByField: AuthStackByField.hostName,
+      activePage: 0,
+      limit: 10,
     };
     const { rerender } = renderHook(() => useAuthentications(localProps), {
       wrapper: TestProviders,

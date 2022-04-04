@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { noop, pick } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
-  HostAuthenticationsRequestOptions,
-  HostAuthenticationsStrategyResponse,
   AuthenticationsEdges,
-  PageInfoPaginated,
-  DocValueFields,
-  SortField,
-} from '../../../../common/search_strategy';
+  AuthStackByField,
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsStrategyResponse,
+  UsersQueries,
+} from '../../../../common/search_strategy/security_solution';
+import { PageInfoPaginated, DocValueFields, SortField } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -30,17 +28,12 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
-import { hostsModel, hostsSelectors } from '../../store';
-
 import * as i18n from './translations';
 import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-export const ID = 'hostsAuthenticationsQuery';
-
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
-  id: string;
   inspect: InspectResponse;
   isInspected: boolean;
   loading: boolean;
@@ -56,8 +49,10 @@ interface UseAuthentications {
   endDate: string;
   indexNames: string[];
   startDate: string;
-  type: hostsModel.HostsType;
   skip: boolean;
+  stackByField: AuthStackByField;
+  activePage: number;
+  limit: number;
 }
 
 export const useAuthentications = ({
@@ -66,20 +61,18 @@ export const useAuthentications = ({
   endDate,
   indexNames,
   startDate,
-  type,
+  activePage,
+  limit,
   skip,
+  stackByField,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
-  const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const { activePage, limit } = useDeepEqualSelector((state) =>
-    pick(['activePage', 'limit'], getAuthenticationsSelector(state, type))
-  );
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] =
-    useState<HostAuthenticationsRequestOptions | null>(null);
+    useState<UserAuthenticationsRequestOptions | null>(null);
   const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
@@ -101,7 +94,6 @@ export const useAuthentications = ({
 
   const [authenticationsResponse, setAuthenticationsResponse] = useState<AuthenticationArgs>({
     authentications: [],
-    id: ID,
     inspect: {
       dsl: [],
       response: [],
@@ -119,7 +111,7 @@ export const useAuthentications = ({
   });
 
   const authenticationsSearch = useCallback(
-    (request: HostAuthenticationsRequestOptions | null) => {
+    (request: UserAuthenticationsRequestOptions | null) => {
       if (request == null || skip) {
         return;
       }
@@ -128,7 +120,7 @@ export const useAuthentications = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
+          .search<UserAuthenticationsRequestOptions, UserAuthenticationsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -171,7 +163,7 @@ export const useAuthentications = ({
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
       const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType: UsersQueries.authentications,
         indices: indexNames,
         filterQuery,
         timerange: {
@@ -187,6 +179,7 @@ export const useAuthentications = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType,
         filterQuery: createFilter(filterQuery),
+        stackByField,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange,
         sort: {} as SortField,
@@ -202,6 +195,7 @@ export const useAuthentications = ({
     endDate,
     filterQuery,
     indexNames,
+    stackByField,
     limit,
     startDate,
     getTransformChangesIfTheyExist,

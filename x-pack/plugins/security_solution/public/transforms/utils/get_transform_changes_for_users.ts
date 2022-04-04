@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsQueries } from '../../../common/search_strategy';
+import { UsersQueries } from '../../../common/search_strategy';
 import { createIndicesFromPrefix } from './create_indices_from_prefix';
 import { GetTransformChanges } from './types';
 
@@ -16,18 +16,18 @@ import { GetTransformChanges } from './types';
  * @param settings The settings configuration to get the prefix from
  * @returns The transform type if we have one, otherwise undefined
  */
-export const getTransformChangesForHosts: GetTransformChanges = ({
+export const getTransformChangesForUsers: GetTransformChanges = ({
   factoryQueryType,
   settings,
 }) => {
   switch (factoryQueryType) {
-    case HostsQueries.hosts: {
+    case UsersQueries.authentications: {
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['host_ent*'],
+          transformIndices: ['user_ent*'],
         }),
-        factoryQueryType: HostsQueries.hostsEntities,
+        factoryQueryType: UsersQueries.authenticationsEntities,
       };
     }
     default: {
