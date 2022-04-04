@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../alerting/common';
 import { SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { CreateNotificationParams, LegacyRuleNotificationAlertTypeParams } from './legacy_types';
@@ -22,7 +22,7 @@ export const legacyCreateNotifications = async ({
   ruleAlertId,
   interval,
   name,
-}: CreateNotificationParams): Promise<SanitizedAlert<LegacyRuleNotificationAlertTypeParams>> =>
+}: CreateNotificationParams): Promise<SanitizedRule<LegacyRuleNotificationAlertTypeParams>> =>
   rulesClient.create<LegacyRuleNotificationAlertTypeParams>({
     data: {
       name,

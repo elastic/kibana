@@ -1268,7 +1268,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
       i18n.translate('core.euiSelectable.searchResults', {
-        defaultMessage: '{resultsLength, plural, one {# result} other {# results}}',
+        defaultMessage: '{resultsLength, plural, one {# result} other {# results}} available',
         values: { resultsLength },
       }),
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
