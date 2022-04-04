@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
   CommentType,
