@@ -9,12 +9,12 @@ import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
-  AlertExecutorOptions,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusWarningReasons,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -96,7 +96,7 @@ describe('Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-  const services = alertsMock.createAlertServices();
+  const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -282,9 +282,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -386,9 +386,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -499,9 +499,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -550,9 +550,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -607,9 +607,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -667,9 +667,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -707,9 +707,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -797,9 +797,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -865,9 +865,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -940,9 +940,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1057,9 +1057,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1210,9 +1210,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1294,9 +1294,9 @@ describe('Task Runner', () => {
       ruleTypeWithCustomRecovery.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1356,9 +1356,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1567,9 +1567,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1806,9 +1806,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1957,9 +1957,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2065,9 +2065,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2169,9 +2169,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2349,9 +2349,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2578,9 +2578,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2608,9 +2608,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2652,7 +2652,7 @@ describe('Task Runner', () => {
     };
 
     const warning = {
-      reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
       message: translations.taskRunner.warning.maxExecutableActions,
     };
 
@@ -2662,9 +2662,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2820,7 +2820,7 @@ describe('Task Runner', () => {
         status: 'warning',
         numberOfTriggeredActions: ruleTypeWithConfig.config.execution.actions.max,
         numberOfScheduledActions: mockActions.length,
-        reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
         consumer: 'bar',
       })
@@ -2852,9 +2852,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string

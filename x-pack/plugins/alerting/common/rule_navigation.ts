@@ -6,10 +6,10 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-export interface AlertUrlNavigation {
+export interface RuleUrlNavigation {
   path: string;
 }
-export interface AlertStateNavigation {
+export interface RuleStateNavigation {
   state: JsonObject;
 }
-export type AlertNavigation = AlertUrlNavigation | AlertStateNavigation;
+export type RuleNavigation = RuleUrlNavigation | RuleStateNavigation;

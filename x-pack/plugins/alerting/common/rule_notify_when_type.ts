@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-const AlertNotifyWhenTypeValues = [
+const RuleNotifyWhenTypeValues = [
   'onActionGroupChange',
   'onActiveAlert',
   'onThrottleInterval',
 ] as const;
-export type AlertNotifyWhenType = typeof AlertNotifyWhenTypeValues[number];
+export type RuleNotifyWhenType = typeof RuleNotifyWhenTypeValues[number];
 
 export function validateNotifyWhenType(notifyWhen: string) {
-  if (AlertNotifyWhenTypeValues.includes(notifyWhen as AlertNotifyWhenType)) {
+  if (RuleNotifyWhenTypeValues.includes(notifyWhen as RuleNotifyWhenType)) {
     return;
   }
-  return `string is not a valid AlertNotifyWhenType: ${notifyWhen}`;
+  return `string is not a valid RuleNotifyWhenType: ${notifyWhen}`;
 }
