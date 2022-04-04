@@ -50,7 +50,8 @@ export const DetailPanelAlertListItem = ({
   }
 
   const timestamp = event['@timestamp'];
-  const { uuid, name } = event.kibana?.alert?.rule ?? {};
+  const rule = { ...event.kibana?.alert?.rule, uuid: '', name: '' };
+  const { uuid, name } = rule;
   const { args } = event.process ?? {};
 
   const forceState = !isInvestigated ? 'open' : undefined;
@@ -86,7 +87,7 @@ export const DetailPanelAlertListItem = ({
     </div>
   ) : (
     <EuiAccordion
-      id={uuid ?? ''}
+      id={uuid}
       data-test-subj={ALERT_LIST_ITEM_TEST_ID}
       arrowDisplay={isInvestigated ? 'right' : 'none'}
       buttonContent={

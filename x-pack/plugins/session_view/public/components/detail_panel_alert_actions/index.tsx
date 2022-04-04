@@ -61,7 +61,7 @@ export const DetailPanelAlertActions = ({
     return null;
   }
 
-  const { uuid } = event.kibana?.alert ?? {};
+  const uuid = event.kibana?.alert?.uuid ?? '';
 
   const menuItems = [
     <EuiContextMenuItem key="details" data-test-subj={SHOW_DETAILS_TEST_ID} onClick={onShowDetails}>

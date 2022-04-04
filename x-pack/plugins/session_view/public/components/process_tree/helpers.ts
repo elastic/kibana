@@ -32,7 +32,7 @@ export const updateAlertEventStatus = (
         alert: {
           ...event.kibana.alert,
           workflow_status:
-            updatedAlertsStatus[event.kibana?.alert?.uuid ?? '']?.status ??
+            updatedAlertsStatus[event.kibana.alert?.uuid ?? '']?.status ??
             event.kibana.alert?.workflow_status,
         },
       },
@@ -57,7 +57,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
 
     if (event.event?.kind === EventKind.signal) {
       process.addAlert(event);
-    } else {
+    } else if (event.event?.kind === EventKind.event) {
       process.addEvent(event);
     }
   });
