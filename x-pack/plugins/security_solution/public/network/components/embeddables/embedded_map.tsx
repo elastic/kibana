@@ -13,6 +13,7 @@ import styled, { css } from 'styled-components';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
@@ -22,7 +23,6 @@ import { createEmbeddable } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useKibana } from '../../../common/lib/kibana';
 import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../common/store/sourcerer';

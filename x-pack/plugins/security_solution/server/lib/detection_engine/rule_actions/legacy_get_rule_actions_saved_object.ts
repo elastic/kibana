@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptionsReference } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 // eslint-disable-next-line no-restricted-imports

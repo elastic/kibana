@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import {
   Logger,
   SavedObjectsClient,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
 import { InternalArtifactCompleteSchema } from '../../schemas';

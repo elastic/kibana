@@ -7,8 +7,8 @@
 
 import { SavedObjectReference } from '@kbn/core/server';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-// eslint-disable-next-line no-restricted-imports
 import { RuleAction } from '@kbn/alerting-plugin/common';
+// eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';

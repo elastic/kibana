@@ -8,10 +8,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { StepDefineRule } from '.';
+import { StepDefineRule, aggregatableFields } from '.';
 import mockBrowserFields from './mock_browser_fields.json';
-
-import { aggregatableFields } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 

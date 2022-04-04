@@ -8,8 +8,7 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger } from '@kbn/core/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';

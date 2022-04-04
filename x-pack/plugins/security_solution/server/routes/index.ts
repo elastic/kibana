@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import { StartServicesAccessor, Logger } from '@kbn/core/server';
 import { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { SecuritySolutionPluginRouter } from '../types';

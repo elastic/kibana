@@ -6,12 +6,13 @@
  */
 
 import {
+  CoreSetup,
+  CoreStart,
   IContextProvider,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { CoreSetup, CoreStart } from '@kbn/core/server';
 
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {

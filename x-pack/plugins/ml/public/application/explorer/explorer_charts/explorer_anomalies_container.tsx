@@ -9,9 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-// @ts-ignore
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+// @ts-expect-error
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,

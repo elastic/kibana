@@ -12,12 +12,12 @@ import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from '@kbn/core/public';
 
-// @ts-ignore
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+// @ts-expect-error
 import { PipelineEditor } from './components/pipeline_editor';
-// @ts-ignore
+// @ts-expect-error
 import { Pipeline } from '../models/pipeline';
-// @ts-ignore
+// @ts-expect-error
 import * as Breadcrumbs from './breadcrumbs';
 
 const usePipeline = (

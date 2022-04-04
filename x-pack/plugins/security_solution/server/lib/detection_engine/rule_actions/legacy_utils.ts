@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, Logger } from '@kbn/core/server';
 
 import { RuleAction } from '@kbn/alerting-plugin/common';
 

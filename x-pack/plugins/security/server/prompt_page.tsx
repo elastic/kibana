@@ -14,13 +14,12 @@ import type { ReactNode } from 'react';
 import React from 'react';
 
 import type { IBasePath } from '@kbn/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '@kbn/core/server/rendering/views/fonts';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 // Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
 // in advance the first time this page is rendered server-side. If not, the

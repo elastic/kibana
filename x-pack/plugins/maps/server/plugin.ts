@@ -14,13 +14,13 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-// @ts-ignore
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
+// @ts-expect-error
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
-// @ts-ignore
+// @ts-expect-error
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
-// @ts-ignore
+// @ts-expect-error
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
@@ -70,7 +70,7 @@ export class MapsPlugin implements Plugin {
       dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
       oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
       embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-      // @ts-ignore
+      // @ts-expect-error
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,
@@ -99,7 +99,7 @@ export class MapsPlugin implements Plugin {
       dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
       oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
       embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
-      // @ts-ignore
+      // @ts-expect-error
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: true,
@@ -126,7 +126,7 @@ export class MapsPlugin implements Plugin {
       dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
       oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
       embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-      // @ts-ignore
+      // @ts-expect-error
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,

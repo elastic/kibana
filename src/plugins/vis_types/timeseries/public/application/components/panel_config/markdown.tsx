@@ -24,8 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-// @ts-expect-error not typed yet
 import { CodeEditor, CssLang } from '@kbn/kibana-react-plugin/public';
+// @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';

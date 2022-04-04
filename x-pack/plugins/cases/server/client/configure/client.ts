@@ -12,6 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '@kbn/actions-plugin/server/types';
 import { ActionType } from '@kbn/actions-plugin/common';
 import {
@@ -36,7 +37,6 @@ import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';

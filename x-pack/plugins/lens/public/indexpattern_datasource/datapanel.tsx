@@ -34,6 +34,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type {
@@ -62,7 +63,6 @@ export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'co
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { FieldGroups, FieldList } from './field_list';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {

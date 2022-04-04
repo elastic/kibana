@@ -15,6 +15,7 @@ import {
   RuleTypeState,
   parseDuration,
 } from '@kbn/alerting-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import { Alert } from '@kbn/alerting-plugin/server';
 import type { StartPlugins } from '../../../../plugin';
@@ -40,7 +41,6 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';

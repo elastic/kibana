@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error not typed yet
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+// @ts-expect-error not typed yet
 import { getAggValue } from './get_agg_value';
 import type { Metric } from '../../../../common/types';
 import type { PanelDataArray } from '../../../../common/types/vis_data';

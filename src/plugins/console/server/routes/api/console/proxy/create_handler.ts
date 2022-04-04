@@ -13,6 +13,9 @@ import { SemVer } from 'semver';
 
 import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
+// TODO: find a better way to get information from the request like remoteAddress and remotePort
+// for forwarding.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ensureRawRequest } from '@kbn/core/server/http/router';
 import { ESConfigForProxy } from '../../../../types';
 import {
@@ -21,10 +24,6 @@ import {
   proxyRequest,
   setHeaders,
 } from '../../../../lib';
-
-// TODO: find a better way to get information from the request like remoteAddress and remotePort
-// for forwarding.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 import { RouteDependencies } from '../../..';
 

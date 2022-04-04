@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { Assign, Ensure } from '@kbn/utility-types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ISearchOptions, ISearchSource } from '../../../public';
 
 import { IAggType } from './agg_type';

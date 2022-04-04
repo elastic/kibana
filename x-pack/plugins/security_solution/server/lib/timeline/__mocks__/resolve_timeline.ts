@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
-import { ResolvedTimelineWithOutcomeSavedObject } from '../../../../common/types/timeline';
+import {
+  TimelineStatus,
+  TimelineType,
+  ResolvedTimelineWithOutcomeSavedObject,
+} from '../../../../common/types/timeline';
 
 export const mockResolvedSavedObject = {
   saved_object: {

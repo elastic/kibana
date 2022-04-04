@@ -10,6 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { CoreSetup, ExecutionContextStart } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider, useExecutionContext } from './shared_imports';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
@@ -17,8 +18,6 @@ import { rollupJobsStore } from './crud_app/store';
 import { App } from './crud_app/app';
 
 import './index.scss';
-
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 const AppWithExecutionContext = ({
   history,

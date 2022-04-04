@@ -16,6 +16,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
+import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
@@ -27,7 +28,6 @@ import {
   txtUrlTemplateEncodeDescription,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
-import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
