@@ -184,6 +184,10 @@ export function getIndexPatternDatasource({
       return extractReferences(state);
     },
 
+    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
+      return state.currentIndexPatternId;
+    },
+
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
       return {
         ...state,

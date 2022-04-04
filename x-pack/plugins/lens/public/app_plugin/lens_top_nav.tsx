@@ -244,6 +244,7 @@ export const LensTopNavMenu = ({
   );
 
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
   const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -307,6 +308,12 @@ export const LensTopNavMenu = ({
     indexPatterns,
     dataViews,
   ]);
+
+  useEffect(() => {
+    if (indexPatterns.length > 0) {
+      setCurrentIndexPattern(indexPatterns[0]);
+    }
+  }, [indexPatterns]);
 
   useEffect(() => {
     return () => {
@@ -603,7 +610,7 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
-  const currentIndexPattern = indexPatterns[0];
+  // const currentIndexPattern = indexPatterns[0];
 
   const setDatasourceState: StateSetter<unknown> = useMemo(() => {
     return (updater) => {
@@ -702,7 +709,11 @@ export const LensTopNavMenu = ({
     currentDataViewId: currentIndexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView: (newIndexPatternId: string) =>
+    onChangeDataView: (newIndexPatternId: string) => {
+      const currentDataView = indexPatterns.find(
+        (indexPattern) => indexPattern.id === newIndexPatternId
+      );
+      setCurrentIndexPattern(currentDataView);
       handleIndexPatternChange({
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
@@ -714,7 +725,8 @@ export const LensTopNavMenu = ({
         datasourceStates,
         indexPatternId: newIndexPatternId,
         setDatasourceState,
-      }),
+      });
+    },
   };
 
   return (

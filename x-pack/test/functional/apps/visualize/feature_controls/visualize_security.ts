@@ -139,7 +139,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
 
         await savedQueryManagementComponent.deleteSavedQuery('foo');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
