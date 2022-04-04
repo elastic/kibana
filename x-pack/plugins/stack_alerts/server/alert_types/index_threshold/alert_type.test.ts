@@ -13,6 +13,7 @@ import { getAlertType, ActionGroupId } from './alert_type';
 import { ActionContext } from './action_context';
 import { Params } from './alert_type_params';
 import { AlertServicesMock, alertsMock } from '../../../../alerting/server/mocks';
+import { Comparator } from '../../../common/comparator_types';
 
 describe('alertType', () => {
   const logger = loggingSystemMock.create().get();
@@ -118,7 +119,7 @@ describe('alertType', () => {
       groupBy: 'all',
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: '<',
+      thresholdComparator: Comparator.LT,
       threshold: [0],
     };
 
@@ -136,7 +137,7 @@ describe('alertType', () => {
       groupBy: 'all',
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: '>',
+      thresholdComparator: Comparator.GT,
       threshold: [0],
     };
 
@@ -163,7 +164,7 @@ describe('alertType', () => {
       groupBy: 'all',
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: '<',
+      thresholdComparator: Comparator.LT,
       threshold: [1],
     };
 
@@ -225,7 +226,7 @@ describe('alertType', () => {
       groupBy: 'all',
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: '<',
+      thresholdComparator: Comparator.LT,
       threshold: [1],
     };
 
@@ -291,7 +292,7 @@ describe('alertType', () => {
       groupBy: 'all',
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: '<',
+      thresholdComparator: Comparator.LT,
       threshold: [1],
     };
 
