@@ -47,6 +47,15 @@ export class Root {
   }
 
   public async setup() {
+    console.log();
+    console.log();
+    console.log();
+    console.log('========================SETUP PHASE========================');
+    console.log(process.env);
+    console.log();
+    console.log();
+    console.log();
+    console.log();
     try {
       this.log.debug('setting up root');
       return await this.server.setup();
