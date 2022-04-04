@@ -14,9 +14,7 @@ import {
   AlertExecutorOptions,
 } from '../../../../plugins/alerting/server';
 
-// ts compile error on next line, so inlining ...
-// import { STACK_ALERTS_FEATURE_ID } from '../../../../plugins/stack_alerts/common';
-const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+import { RuleProducer, SqlRuleId, SqlRuleActionGroupId, SqlRuleName } from '../../common';
 
 type Params = TypeOf<typeof ParamsSchema>;
 
@@ -28,30 +26,28 @@ interface ActionContext extends AlertInstanceContext {
   message: string;
 }
 
-export const RuleId = 'ow22-sql';
-export const ActionGroupId = 'found';
-
-export const ruleType: RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> = {
-  id: RuleId,
-  name: 'Alerting rule that runs an sql query and creates alerts from rows',
-  actionGroups: [{ id: ActionGroupId, name: ActionGroupId }],
-  executor,
-  defaultActionGroupId: ActionGroupId,
-  validate: {
-    params: ParamsSchema,
-  },
-  actionVariables: {
-    context: [{ name: 'message', description: 'A pre-constructed message for the alert.' }],
-    params: [{ name: 'query', description: 'SQL query to run.' }],
-  },
-  minimumLicenseRequired: 'basic',
-  isExportable: true,
-  producer: STACK_ALERTS_FEATURE_ID,
-  doesSetRecoveryContext: true,
-};
+export const ruleType: RuleType<Params, never, {}, {}, ActionContext, typeof SqlRuleActionGroupId> =
+  {
+    id: SqlRuleId,
+    name: SqlRuleName,
+    actionGroups: [{ id: SqlRuleActionGroupId, name: SqlRuleActionGroupId }],
+    executor,
+    defaultActionGroupId: SqlRuleActionGroupId,
+    validate: {
+      params: ParamsSchema,
+    },
+    actionVariables: {
+      context: [{ name: 'message', description: 'A pre-constructed message for the alert.' }],
+      params: [{ name: 'query', description: 'SQL query to run.' }],
+    },
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    producer: RuleProducer,
+    doesSetRecoveryContext: true,
+  };
 
 async function executor(
-  options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+  options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof SqlRuleActionGroupId>
 ) {
   const { services, params } = options;
   const { alertFactory, scopedClusterClient } = services;
@@ -64,7 +60,7 @@ async function executor(
   const objects = sqlResultToObjects(result);
 
   for (const object of objects) {
-    alertFactory.create(object.instanceId).scheduleActions(ActionGroupId, object);
+    alertFactory.create(object.instanceId).scheduleActions(SqlRuleActionGroupId, object);
   }
 }
 

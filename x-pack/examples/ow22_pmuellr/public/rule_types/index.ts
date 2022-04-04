@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const PluginId = 'Ow22pmuellr';
-export const AppId = PluginId;
-
-export const AppTitle = 'On-Week 2022 stuff from Patrick Mueller';
+export { getRuleType as getRuleTypeSql } from './sql_rule';

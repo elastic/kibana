@@ -22,8 +22,9 @@ import {
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 
-import { AppId, AppTitle } from '../common/constants';
+import { AppId, AppTitle, AppDescription } from '../common';
 import { examplePage } from './components/example_page';
+import { getRuleTypeSql } from './rule_types';
 
 export type Setup = void;
 export type Start = void;
@@ -58,10 +59,12 @@ export class Ow22pmuellrPlugin
       },
     });
 
+    triggersActionsUi.ruleTypeRegistry.register(getRuleTypeSql());
+
     developerExamples.register({
       appId: AppId,
       title: AppTitle,
-      description: 'bits and bobs',
+      description: AppDescription,
     });
   }
 

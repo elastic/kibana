@@ -12,6 +12,10 @@ export const content = `
 
 Kibana alerting rule that uses SQL. with the resultant SQL columns selecting both the alert id (nee: alert instance id, like a host name) and context variables.
 
+The column named \`instanceId\` must be included in the selected columns, and will be used as the instance id of the alert.  The SQL query should only return one row for each value.
+
+The remaining columns will be used as context variables for the alert.
+
 As an example, we'll build a rule which does a query over an index with documents in the following shape:
 
     {
@@ -69,6 +73,10 @@ This is basically the same thing as the index threshold query where:
     condition:     is above 0.8
     for the last:  5 seconds
 
+The human version: alert when the average of a host's CPU over 5 seconds is > 80%.
+
+One nice difference is the sql rule assigns context variables from the column names; so in this case, we have both \`cpu\` and \`freemem\` as context variables, but with the index threshold rule we'll only have the cpu value available as \`context.value\`.
+
 Note this expects a server log action with the id of <tt>server-log</tt> to be available, which you can make happen with the following kibana.dev.yml:
 
     xpack.actions.preconfigured:
@@ -80,8 +88,7 @@ Because this is using a 1s interval, you can avoid warnings about that with the 
 
     xpack.alerting.rules.minimumScheduleInterval.value: '1s'
 
-Once this rule has been added, and the cpu for some of the hosts goes over 0.80,
-the following server logs will be generated:
+Once this rule has been added, and the cpu for some of the hosts goes over 0.80, the following server logs will be generated:
 
     Server log: rule sql rule example triggered for host-1; cpu: 0.8500000238418579; free memory: 340000
     Server log: rule sql rule example triggered for host-2; cpu: 0.949999988079071; free memory: 380000
@@ -102,7 +109,5 @@ Kibana alerting rule that runs the rule as a node Worker.
 
 # task_grapher 
 
-Looking for some visualizations of task activity over time, but
-most likely looking purely at alerting rules / connectors, since they have good
-timing info in the event log, but there is not really anything for task manager.
+Looking for some visualizations of task activity over time, but most likely looking purely at alerting rules / connectors, since they have good timing info in the event log, but there is not really anything for task manager.
 `;
