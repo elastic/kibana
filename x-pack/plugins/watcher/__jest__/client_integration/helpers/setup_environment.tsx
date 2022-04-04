@@ -15,7 +15,9 @@ import { setHttpClient, setSavedObjectsClient } from '../../../public/applicatio
 
 const mockSavedObjectsClient = () => {
   return {
-    find: (_params?: any) => {},
+    find: (_params?: any) => ({
+      savedObjects: [],
+    }),
   };
 };
 

@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { HttpSetup } from 'src/core/public';
 import { registerTestBed, findTestSubject, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 
 import { registerRouter } from '../../../public/application/lib/navigation';

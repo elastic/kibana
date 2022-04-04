@@ -14,7 +14,6 @@ import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH, WATCH_ID } from './helpers/jest_constants';
 import { API_BASE_PATH } from '../../common/constants';
 
-
 const { setup } = pageHelpers.watchEdit;
 
 describe('<WatchEdit />', () => {
