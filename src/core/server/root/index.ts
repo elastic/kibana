@@ -47,14 +47,8 @@ export class Root {
   }
 
   public async setup() {
-    console.log();
-    console.log();
-    console.log();
-    console.log('========================SETUP PHASE========================');
-    console.log(process.env);
-    console.log();
-    console.log();
-    console.log();
+    this.log.error('TESTING NODE ENV ON CLOUD');
+    this.log.error(JSON.stringify(process.env));
     try {
       this.log.debug('setting up root');
       return await this.server.setup();
