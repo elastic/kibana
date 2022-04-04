@@ -20,13 +20,9 @@ import {
   SeriesIdentifier,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import {
-  LegendToggle,
-  ClickTriggerEvent,
-  ChartsPluginSetup,
-  PaletteRegistry,
-} from '../../../../charts/public';
+import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
+import { getColumnByAccessor } from '../../../../visualizations/common/utils';
 import {
   Datatable,
   DatatableColumn,
@@ -51,7 +47,6 @@ import {
   getPartitionTheme,
   getColumns,
   getSplitDimensionAccessor,
-  getColumnByAccessor,
   isLegendFlat,
   shouldShowLegend,
   generateFormatters,
@@ -63,10 +58,12 @@ import { VisualizationNoResults } from './visualization_noresults';
 import { VisTypePiePluginStartDependencies } from '../plugin';
 import {
   partitionVisWrapperStyle,
-  partitionVisContainerStyleFactory,
+  partitionVisContainerStyle,
+  partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
+import { FilterEvent } from '../types';
 
 declare global {
   interface Window {
@@ -93,7 +90,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { visData, visParams: preVisParams, visType, services, syncColors } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
 
-  const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
@@ -103,8 +99,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const formatters = useMemo(
-    () => generateFormatters(visParams, visData, services.fieldFormats.deserialize),
-    [services.fieldFormats.deserialize, visData, visParams]
+    () => generateFormatters(visData, services.fieldFormats.deserialize),
+    [services.fieldFormats.deserialize, visData]
   );
 
   const showLegendDefault = useCallback(() => {
@@ -113,6 +109,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [bucketColumns, props.uiState, visParams.legendDisplay, visType]);
 
   const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
+
+  const showToggleLegendElement = props.uiState !== undefined;
 
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
 
@@ -128,9 +126,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   useEffect(() => {
     const legendShow = showLegendDefault();
-    setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+    const showLegendDef = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+    if (showLegendDef !== legendShow) {
+      setShowLegend(legendShow);
+      props.uiState?.set('vis.legendOpen', legendShow);
+    }
+  }, [showLegendDefault, props.uiState, visParams.legendDisplay, visType, bucketColumns]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -157,11 +158,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         splitChartDimension,
         splitChartFormatter
       );
-      const event = {
-        name: 'filterBucket',
-        data: { data },
-      };
-      props.fireEvent(event);
+      props.fireEvent({ name: 'filter', data: { data } });
     },
     [props]
   );
@@ -169,11 +166,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   // handles legend action event data
   const getLegendActionEventData = useCallback(
     (vData: Datatable) =>
-      (series: SeriesIdentifier): ClickTriggerEvent | null => {
+      (series: SeriesIdentifier): FilterEvent => {
         const data = getFilterEventData(vData, series);
 
         return {
-          name: 'filterBucket',
+          name: 'filter',
           data: {
             negate: false,
             data,
@@ -184,7 +181,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const handleLegendAction = useCallback(
-    (event: ClickTriggerEvent, negate = false) => {
+    (event: FilterEvent, negate = false) => {
       props.fireEvent({
         ...event,
         data: {
@@ -230,9 +227,21 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { splitColumn, splitRow } = visParams.dimensions;
 
   const splitChartFormatter = splitColumn
-    ? getFormatter(splitColumn[0], formatters, defaultFormatter)
+    ? getFormatter(
+        typeof splitColumn[0] === 'string'
+          ? getColumnByAccessor(splitColumn[0], visData.columns)!
+          : splitColumn[0],
+        formatters,
+        defaultFormatter
+      )
     : splitRow
-    ? getFormatter(splitRow[0], formatters, defaultFormatter)
+    ? getFormatter(
+        typeof splitRow[0] === 'string'
+          ? getColumnByAccessor(splitRow[0], visData.columns)!
+          : splitRow[0],
+        formatters,
+        defaultFormatter
+      )
     : undefined;
 
   const percentFormatter = services.fieldFormats.deserialize({
@@ -304,9 +313,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     : undefined;
 
   const splitChartDimension = splitColumn
-    ? getColumnByAccessor(splitColumn[0].accessor, visData.columns)
+    ? getColumnByAccessor(splitColumn[0], visData.columns)
     : splitRow
-    ? getColumnByAccessor(splitRow[0].accessor, visData.columns)
+    ? getColumnByAccessor(splitRow[0], visData.columns)
     : undefined;
 
   /**
@@ -317,6 +326,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     () => visData.rows.every((row) => row[metricColumn.id] === 0),
     [visData.rows, metricColumn]
   );
+
+  const isEmpty = visData.rows.length === 0;
+  const isMetricEmpty = visData.rows.every((row) => !row[metricColumn.id]);
 
   /**
    * Checks whether data have negative values.
@@ -330,14 +342,23 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       }),
     [visData.rows, metricColumn]
   );
+
   const flatLegend = isLegendFlat(visType, splitChartDimension);
-  const canShowPieChart = !isAllZeros && !hasNegative;
+
+  const canShowPieChart = !isEmpty && !isMetricEmpty && !isAllZeros && !hasNegative;
+
+  const { euiTheme } = useEuiTheme();
+
+  const chartContainerStyle = showToggleLegendElement
+    ? partitionVisContainerWithToggleStyleFactory(euiTheme)
+    : partitionVisContainerStyle;
+
   const partitionType = getPartitionType(visType);
 
   return (
-    <div css={partitionVisContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
+    <div css={chartContainerStyle} data-test-subj="partitionVisChart">
       {!canShowPieChart ? (
-        <VisualizationNoResults hasNegativeValues={hasNegative} />
+        <VisualizationNoResults hasNegativeValues={hasNegative} chartType={visType} />
       ) : (
         <div css={partitionVisWrapperStyle} ref={parentRef}>
           <LegendColorPickerWrapperContext.Provider
@@ -351,11 +372,13 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               distinctColors: visParams.distinctColors ?? false,
             }}
           >
-            <LegendToggle
-              onClick={toggleLegend}
-              showLegend={showLegend}
-              legendPosition={legendPosition}
-            />
+            {showToggleLegendElement && (
+              <LegendToggle
+                onClick={toggleLegend}
+                showLegend={showLegend}
+                legendPosition={legendPosition}
+              />
+            )}
             <Chart size="100%">
               <ChartSplit
                 splitColumnAccessor={splitChartColumnAccessor}
@@ -363,8 +386,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               />
               <Settings
                 debugState={window._echDebugStateFlag ?? false}
-                showLegend={showLegend}
+                showLegend={
+                  showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
+                }
                 legendPosition={legendPosition}
+                legendSize={visParams.legendSize}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
@@ -384,6 +410,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   getLegendActionEventData(visData),
                   handleLegendAction,
                   visParams,
+                  visData,
                   services.data.actions,
                   services.fieldFormats
                 )}

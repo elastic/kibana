@@ -45,7 +45,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.hasLegacyData).to.be(false);
         expect(response.body.items.length).to.be(0);
       });
     }
@@ -97,9 +96,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         return synthtrace.index([
-          ...transactionInterval
+          transactionInterval
             .rate(config.multiple.prod.rps)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...multipleEnvServiceProdInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
@@ -107,9 +106,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize(),
             ]),
-          ...transactionInterval
+          transactionInterval
             .rate(config.multiple.dev.rps)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...multipleEnvServiceDevInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
@@ -117,9 +116,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .failure()
                 .serialize(),
             ]),
-          ...transactionInterval
+          transactionInterval
             .rate(config.multiple.prod.rps)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...multipleEnvServiceDevInstance
                 .transaction('non-request', 'rpc')
                 .timestamp(timestamp)
@@ -127,7 +126,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize(),
             ]),
-          ...metricInterval.rate(1).flatMap((timestamp) => [
+          metricInterval.rate(1).spans((timestamp) => [
             ...metricOnlyInstance
               .appMetrics({
                 'system.memory.actual.free': 1,
@@ -138,9 +137,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .serialize(),
           ]),
-          ...errorInterval
+          errorInterval
             .rate(1)
-            .flatMap((timestamp) => [
+            .spans((timestamp) => [
               ...errorOnlyInstance.error('Foo').timestamp(timestamp).serialize(),
             ]),
         ]);

@@ -69,6 +69,9 @@ export class SampleDataViewDataButton extends React.Component {
         onClick: createAppNavigationHandler(path),
       };
     });
+
+    /** @typedef {import('@elastic/eui').EuiContextMenuProps['panels']} EuiContextMenuPanels */
+    /** @type {EuiContextMenuPanels} */
     const panels = [
       {
         id: 0,
@@ -80,6 +83,7 @@ export class SampleDataViewDataButton extends React.Component {
             icon: <EuiIcon type="dashboardApp" size="m" />,
             href: prefixedDashboardPath,
             onClick: createAppNavigationHandler(dashboardPath),
+            'data-test-subj': `viewSampleDataSet${this.props.id}-dashboard`,
           },
           ...additionalItems,
         ],

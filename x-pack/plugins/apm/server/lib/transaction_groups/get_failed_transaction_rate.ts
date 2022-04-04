@@ -30,34 +30,43 @@ import {
   getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
 } from '../helpers/transaction_error_rate';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getFailedTransactionRate({
   environment,
   kuery,
   serviceName,
-  transactionType,
+  transactionTypes,
   transactionName,
   setup,
   searchAggregatedTransactions,
   start,
   end,
   numBuckets,
+  offset,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  transactionType?: string;
+  transactionTypes: string[];
   transactionName?: string;
   setup: Setup;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
   numBuckets?: number;
+  offset?: string;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
 }> {
   const { apmEventClient } = setup;
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -66,10 +75,10 @@ export async function getFailedTransactionRate({
         [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
       },
     },
+    { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
-    ...termQuery(TRANSACTION_TYPE, transactionType),
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
-    ...rangeQuery(start, end),
+    ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
@@ -89,13 +98,13 @@ export async function getFailedTransactionRate({
           date_histogram: {
             field: '@timestamp',
             fixed_interval: getBucketSizeForAggregatedTransactions({
-              start,
-              end,
+              start: startWithOffset,
+              end: endWithOffset,
               searchAggregatedTransactions,
               numBuckets,
             }).intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             outcomes,

@@ -18,11 +18,17 @@ import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
-import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { getValueOrEmpty } from '../../../../../common/empty_label';
+import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
+
+import {
+  createCachedFieldValueFormatter,
+  getFieldsForTerms,
+  getMultiFieldLabel,
+  MULTI_FIELD_VALUES_SEPARATOR,
+} from '../../../../../common/fields_utils';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -49,12 +55,7 @@ function sanitizeUrl(url) {
 class TableVis extends Component {
   constructor(props) {
     super(props);
-
-    const fieldFormatsService = getFieldFormats();
-    const DateFormat = fieldFormatsService.getType(FIELD_FORMAT_IDS.DATE);
-
-    this.dateFormatter = new DateFormat({}, this.props.getConfig);
-
+    this.fieldFormatsService = getFieldFormats();
     this.state = {
       accessDeniedDrilldownUrl: null,
     };
@@ -74,17 +75,21 @@ class TableVis extends Component {
     }
   };
 
-  renderRow = (row) => {
+  renderRow = (row, pivotIds, fieldValuesFormatter) => {
     const { model, fieldFormatMap, getConfig } = this.props;
 
-    let rowDisplay = getValueOrEmpty(
-      model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key
-    );
+    let rowDisplay = row.key;
 
-    // we should skip url field formatting for key if tsvb have drilldown_url
-    if (fieldFormatMap?.[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
-      const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, 'html');
-      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />; // eslint-disable-line react/no-danger
+    if (pivotIds.length) {
+      rowDisplay = pivotIds
+        .map((item, index) => {
+          const value = [row.key ?? null].flat()[index];
+          const formatted = fieldValuesFormatter(item, value, 'html');
+
+          // eslint-disable-next-line react/no-danger
+          return <span dangerouslySetInnerHTML={{ __html: formatted ?? value }} />;
+        })
+        .reduce((prev, curr) => [prev, MULTI_FIELD_VALUES_SEPARATOR, curr]);
     }
 
     if (model.drilldown_url) {
@@ -150,7 +155,7 @@ class TableVis extends Component {
     );
   };
 
-  renderHeader() {
+  renderHeader(pivotIds) {
     const { model, uiState, onUiState, visData } = this.props;
     const stateKey = `${model.type}.sort`;
     const sort = uiState.get(stateKey, {
@@ -210,7 +215,7 @@ class TableVis extends Component {
         </th>
       );
     });
-    const label = visData.pivot_label || model.pivot_label || model.pivot_id;
+    const label = visData.pivot_label || model.pivot_label || getMultiFieldLabel(pivotIds);
     let sortIcon;
     if (sort.column === '_default_') {
       sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
@@ -240,13 +245,26 @@ class TableVis extends Component {
   closeExternalUrlErrorModal = () => this.setState({ accessDeniedDrilldownUrl: null });
 
   render() {
-    const { visData } = this.props;
+    const { visData, model, indexPattern } = this.props;
     const { accessDeniedDrilldownUrl } = this.state;
-    const header = this.renderHeader();
+    const fields = (model.pivot_type ? [model.pivot_type ?? null].flat() : []).map(
+      (type, index) => ({
+        name: [model.pivot_id ?? null].flat()[index],
+        type,
+      })
+    );
+    const fieldValuesFormatter = createCachedFieldValueFormatter(
+      indexPattern,
+      fields,
+      this.fieldFormatsService,
+      model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
+    );
+    const pivotIds = getFieldsForTerms(model.pivot_id);
+    const header = this.renderHeader(pivotIds);
     let rows = null;
 
     if (isArray(visData.series) && visData.series.length) {
-      rows = visData.series.map(this.renderRow);
+      rows = visData.series.map((item) => this.renderRow(item, pivotIds, fieldValuesFormatter));
     }
 
     return (
@@ -285,6 +303,7 @@ TableVis.propTypes = {
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
+  indexPattern: PropTypes.object,
 };
 
 // default export required for React.Lazy

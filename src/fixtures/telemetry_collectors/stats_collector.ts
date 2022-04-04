@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CollectorSet } from '../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../core/server/logging/logger.mock';
+import { createUsageCollectionSetupMock } from '../../plugins/usage_collection/server/mocks';
 
-const { makeStatsCollector } = new CollectorSet({
-  logger: loggerMock.create(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+const { makeStatsCollector } = createUsageCollectionSetupMock();
 
 interface Usage {
   some_field: string;
@@ -23,7 +19,7 @@ interface Usage {
  * We should collect them when the schema is defined.
  */
 
-export const myCollectorWithSchema = makeStatsCollector<Usage, false>({
+export const myCollectorWithSchema = makeStatsCollector<Usage>({
   type: 'my_stats_collector_with_schema',
   isReady: () => true,
   fetch() {

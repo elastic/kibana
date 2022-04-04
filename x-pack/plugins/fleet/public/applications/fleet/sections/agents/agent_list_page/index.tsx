@@ -525,7 +525,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicies={agentPolicies}
             agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
             onClose={() => setEnrollmentFlyoutState({ isOpen: false })}
           />

@@ -10,7 +10,11 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
-import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+import {
+  configuredSources,
+  contentSources,
+  externalConfiguredConnector,
+} from '../../__mocks__/content_sources.mock';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
@@ -18,6 +22,7 @@ jest.mock('../../app_logic', () => ({
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
+import { staticSourceData } from './source_data';
 import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
 
 describe('SourcesLogic', () => {
@@ -32,13 +37,14 @@ describe('SourcesLogic', () => {
   const defaultValues = {
     contentSources: [],
     privateContentSources: [],
-    sourceData: [],
-    availableSources: [],
+    sourceData: staticSourceData.map((data) => ({ ...data, connected: false })),
+    availableSources: staticSourceData.map((data) => ({ ...data, connected: false })),
     configuredSources: [],
     serviceTypes: [],
     permissionsModal: null,
     dataLoading: true,
     serverStatuses: null,
+    externalConfigured: false,
   };
 
   const serverStatuses = [
@@ -316,8 +322,17 @@ describe('SourcesLogic', () => {
     it('availableSources & configuredSources have correct length', () => {
       SourcesLogic.actions.onInitializeSources(serverResponse);
 
-      expect(SourcesLogic.values.availableSources).toHaveLength(1);
+      expect(SourcesLogic.values.availableSources).toHaveLength(14);
       expect(SourcesLogic.values.configuredSources).toHaveLength(5);
+    });
+    it('externalConfigured is set to true if external is configured', () => {
+      const externalConfiguredResponse = {
+        contentSources,
+        privateContentSources: contentSources,
+        serviceTypes: [...configuredSources, externalConfiguredConnector],
+      };
+      SourcesLogic.actions.onInitializeSources(externalConfiguredResponse);
+      expect(SourcesLogic.values.externalConfigured).toEqual(true);
     });
   });
 

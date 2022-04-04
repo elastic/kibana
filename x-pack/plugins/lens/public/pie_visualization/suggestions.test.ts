@@ -8,7 +8,14 @@
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../types';
-import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
+import {
+  CategoryDisplay,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieLayerState,
+  PieVisualizationState,
+} from '../../common';
 import { layerTypes } from '../../common';
 
 describe('suggestions', () => {
@@ -53,16 +60,16 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'pie',
+            shape: PieChartTypes.PIE,
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: [],
                 metric: 'a',
-                numberDisplay: 'hidden',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -168,7 +175,7 @@ describe('suggestions', () => {
             changeType: 'initial',
           },
           state: {
-            shape: 'mosaic',
+            shape: PieChartTypes.MOSAIC,
             layers: [{} as PieLayerState],
           },
           keptLayerIds: ['first'],
@@ -380,7 +387,7 @@ describe('suggestions', () => {
 
       expect(results).toContainEqual(
         expect.objectContaining({
-          state: expect.objectContaining({ shape: 'donut' }),
+          state: expect.objectContaining({ shape: PieChartTypes.DONUT }),
         })
       );
     });
@@ -412,7 +419,7 @@ describe('suggestions', () => {
 
       expect(results).toContainEqual(
         expect.objectContaining({
-          state: expect.objectContaining({ shape: 'pie' }),
+          state: expect.objectContaining({ shape: PieChartTypes.PIE }),
         })
       );
     });
@@ -542,7 +549,7 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'treemap',
+            shape: PieChartTypes.TREEMAP,
             palette,
             layers: [
               {
@@ -551,9 +558,9 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'inside',
-                legendDisplay: 'show',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.INSIDE,
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,
@@ -566,7 +573,7 @@ describe('suggestions', () => {
       ).toContainEqual(
         expect.objectContaining({
           state: {
-            shape: 'donut',
+            shape: PieChartTypes.DONUT,
             palette,
             layers: [
               {
@@ -575,8 +582,8 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'inside',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: 'show',
                 percentDecimals: 0,
                 legendMaxLines: 1,
@@ -601,7 +608,7 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'treemap',
+            shape: PieChartTypes.TREEMAP,
             layers: [
               {
                 layerId: 'first',
@@ -609,9 +616,9 @@ describe('suggestions', () => {
                 groups: [],
                 metric: 'a',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -651,16 +658,16 @@ describe('suggestions', () => {
             changeType: 'extended',
           },
           state: {
-            shape: 'treemap',
+            shape: PieChartTypes.TREEMAP,
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'e',
-                numberDisplay: 'value',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.VALUE,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -700,16 +707,16 @@ describe('suggestions', () => {
             changeType: 'initial',
           },
           state: {
-            shape: 'treemap',
+            shape: PieChartTypes.TREEMAP,
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'e',
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -737,7 +744,7 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'pie',
+            shape: PieChartTypes.PIE,
             layers: [
               {
                 layerId: 'first',
@@ -745,9 +752,9 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'inside',
-                legendDisplay: 'show',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.INSIDE,
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,
@@ -760,7 +767,7 @@ describe('suggestions', () => {
       ).toContainEqual(
         expect.objectContaining({
           state: {
-            shape: 'treemap',
+            shape: PieChartTypes.TREEMAP,
             layers: [
               {
                 layerId: 'first',
@@ -768,8 +775,8 @@ describe('suggestions', () => {
                 groups: ['a'],
                 metric: 'b',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'default', // This is changed
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.DEFAULT, // This is changed
                 legendDisplay: 'show',
                 percentDecimals: 0,
                 legendMaxLines: 1,
@@ -794,7 +801,7 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'mosaic',
+            shape: PieChartTypes.MOSAIC,
             layers: [
               {
                 layerId: 'first',
@@ -802,9 +809,9 @@ describe('suggestions', () => {
                 groups: [],
                 metric: 'a',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -836,7 +843,7 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'treemap',
+            shape: PieChartTypes.TREEMAP,
             layers: [
               {
                 layerId: 'first',
@@ -844,9 +851,9 @@ describe('suggestions', () => {
                 groups: ['a', 'b'],
                 metric: 'c',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'inside',
-                legendDisplay: 'show',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.INSIDE,
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,
@@ -871,7 +878,7 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'waffle',
+            shape: PieChartTypes.WAFFLE,
             layers: [
               {
                 layerId: 'first',
@@ -879,9 +886,9 @@ describe('suggestions', () => {
                 groups: [],
                 metric: 'a',
 
-                numberDisplay: 'hidden',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
               },
             ],
           },
@@ -909,16 +916,16 @@ describe('suggestions', () => {
             changeType: 'unchanged',
           },
           state: {
-            shape: 'pie',
+            shape: PieChartTypes.PIE,
             layers: [
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
                 metric: 'c',
-                numberDisplay: 'hidden',
-                categoryDisplay: 'inside',
-                legendDisplay: 'show',
+                numberDisplay: NumberDisplay.HIDDEN,
+                categoryDisplay: CategoryDisplay.INSIDE,
+                legendDisplay: LegendDisplay.SHOW,
                 percentDecimals: 0,
                 legendMaxLines: 1,
                 truncateLegend: true,

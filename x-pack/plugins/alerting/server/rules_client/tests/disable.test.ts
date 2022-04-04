@@ -42,6 +42,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -328,6 +329,12 @@ describe('disable()', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            consumer: 'myApp',
+            rule_type_id: '123',
+          },
+        },
         alerting: {
           action_group_id: 'default',
           action_subgroup: 'newSubgroup',
@@ -342,6 +349,7 @@ describe('disable()', () => {
             type_id: 'myType',
           },
         ],
+        space_ids: ['default'],
       },
       message: "instance '1' has recovered due to the rule was disabled",
       rule: {

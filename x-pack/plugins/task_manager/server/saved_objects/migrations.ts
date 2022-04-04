@@ -13,6 +13,7 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '../../../../../src/core/server';
+import { REMOVED_TYPES } from '../task_type_dictionary';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {
@@ -38,7 +39,7 @@ export function getMigrations(): SavedObjectMigrationMap {
       '8.0.0'
     ),
     '8.2.0': executeMigrationWithErrorHandling(
-      pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule),
+      pipeMigrations(resetAttemptsAndStatusForTheTasksWithoutSchedule, resetUnrecognizedStatus),
       '8.2.0'
     ),
   };
@@ -141,6 +142,29 @@ function moveIntervalIntoSchedule({
         : {}),
     },
   };
+}
+
+function resetUnrecognizedStatus(
+  doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>
+): SavedObjectUnsanitizedDoc<ConcreteTaskInstance> {
+  const status = doc?.attributes?.status;
+  if (status && status === 'unrecognized') {
+    const taskType = doc.attributes.taskType;
+    // If task type is in the REMOVED_TYPES list, maintain "unrecognized" status
+    if (REMOVED_TYPES.indexOf(taskType) >= 0) {
+      return doc;
+    }
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        status: 'idle',
+      },
+    } as SavedObjectUnsanitizedDoc<ConcreteTaskInstance>;
+  }
+
+  return doc;
 }
 
 function pipeMigrations(...migrations: TaskInstanceMigration[]): TaskInstanceMigration {

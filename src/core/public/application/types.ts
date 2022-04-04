@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { History } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -411,6 +411,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * This string should not include the base path from HTTP.
    *
    * @deprecated Use {@link AppMountParameters.history} instead.
+   * @removeBy 8.8.0
    *
    * @example
    *
@@ -488,6 +489,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    *
    * @deprecated {@link ScopedHistory.block} should be used instead.
+   * @removeBy 8.8.0
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
 
@@ -557,6 +559,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  *
  * @public
  * @deprecated {@link AppMountParameters.onAppLeave} has been deprecated in favor of {@link ScopedHistory.block}
+ * @removeBy 8.8.0
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,
@@ -597,6 +600,8 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  confirmButtonText?: string;
+  buttonColor?: ButtonColor;
   callback?: () => void;
 }
 
@@ -621,9 +626,17 @@ export interface AppLeaveActionFactory {
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
    * @param callback (optional) to know that the user want to stay on the page
+   * @param confirmButtonText (optional) text for the confirmation button
+   * @param buttonColor (optional) color for the confirmation button
    * so we can show to the user the right UX for him to saved his/her/their changes
    */
-  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
+  confirm(
+    text: string,
+    title?: string,
+    callback?: () => void,
+    confirmButtonText?: string,
+    buttonColor?: ButtonColor
+  ): AppLeaveConfirmAction;
 
   /**
    * Returns a default action, resulting on executing the default behavior when
@@ -727,6 +740,26 @@ export interface NavigateToAppOptions {
    * if true, will open the app in new tab, will share session information via window.open if base
    */
   openInNewTab?: boolean;
+
+  /**
+   * if true, will bypass the default onAppLeave behavior
+   */
+  skipAppLeave?: boolean;
+}
+
+/**
+ * Options for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}
+ * @public
+ */
+export interface NavigateToUrlOptions {
+  /**
+   * if true, will bypass the default onAppLeave behavior
+   */
+  skipAppLeave?: boolean;
+  /**
+   * if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)
+   */
+  forceRedirect?: boolean;
 }
 
 /** @public */
@@ -768,7 +801,7 @@ export interface ApplicationStart {
    * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
-   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.
    *
    * @example
    * ```ts
@@ -789,8 +822,7 @@ export interface ApplicationStart {
    *
    * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
    */
-  navigateToUrl(url: string): Promise<void>;
-
+  navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
   /**
    * Returns the absolute path (or URL) to a given app, including the global base path.
    *

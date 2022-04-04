@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from 'kibana/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../types';
+import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
@@ -16,7 +16,7 @@ import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
-import { getTopSuggestionForField, switchToSuggestion, Suggestion } from './suggestion_helpers';
+import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import {
   useLensSelector,
@@ -79,7 +79,7 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiEvent('drop_onto_workspace');
-        switchToSuggestion(dispatchLens, suggestion, true);
+        switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
       }
     },
     [getSuggestionForField, dispatchLens]

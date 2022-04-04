@@ -131,6 +131,7 @@ export default function (providerContext: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
+
   describe('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {

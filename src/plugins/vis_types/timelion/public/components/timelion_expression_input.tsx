@@ -83,11 +83,17 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   );
 
   useEffect(() => {
+    const abortController = new AbortController();
     if (kibana.services.http) {
-      kibana.services.http.get<ITimelionFunction[]>('../api/timelion/functions').then((data) => {
-        functionList.current = data;
-      });
+      kibana.services.http
+        .get<ITimelionFunction[]>('../api/timelion/functions', { signal: abortController.signal })
+        .then((data) => {
+          functionList.current = data;
+        });
     }
+    return () => {
+      abortController.abort();
+    };
   }, [kibana.services.http]);
 
   return (

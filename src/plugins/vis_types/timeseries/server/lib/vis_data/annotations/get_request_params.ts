@@ -31,6 +31,7 @@ export async function getAnnotationRequestParams(
     capabilities,
     uiSettings,
     cachedIndexPatternFetcher,
+    buildSeriesMetaParams,
   }: AnnotationServices
 ): Promise<EsSearchRequest> {
   const annotationIndex = await cachedIndexPatternFetcher(annotation.index_pattern);
@@ -43,6 +44,7 @@ export async function getAnnotationRequestParams(
     annotationIndex,
     capabilities,
     uiSettings,
+    getMetaParams: () => buildSeriesMetaParams(annotationIndex, Boolean(panel.use_kibana_indexes)),
   });
 
   return {

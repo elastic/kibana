@@ -802,9 +802,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
+    const groupBy = await this.testSubjects.find('groupBySelect');
     return await this.comboBox.isOptionSelected(groupBy, value);
   }
 

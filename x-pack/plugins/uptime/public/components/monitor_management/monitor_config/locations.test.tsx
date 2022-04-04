@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { ServiceLocations, LOCATIONS_LABEL } from './locations';
-import userEvent from '@testing-library/user-event';
+import { ServiceLocations } from './locations';
 
-describe('<ActionBar />', () => {
+describe('<ServiceLocations />', () => {
   const setLocations = jest.fn();
   const location = {
     label: 'US Central',
@@ -22,6 +21,7 @@ describe('<ActionBar />', () => {
     },
     url: 'url',
   };
+  const locationTestSubId = `syntheticsServiceLocation--${location.id}`;
   const state = {
     monitorManagementList: {
       locations: [location],
@@ -52,47 +52,7 @@ describe('<ActionBar />', () => {
       { state }
     );
 
-    expect(screen.getByText(LOCATIONS_LABEL)).toBeInTheDocument();
-    expect(screen.queryByText('US Central')).not.toBeInTheDocument();
-  });
-
-  it('shows location options when clicked', async () => {
-    render(
-      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
-      { state }
-    );
-
-    userEvent.click(screen.getByRole('button'));
-
-    expect(screen.getByText('US Central')).toBeInTheDocument();
-  });
-
-  it('prevents bad inputs', async () => {
-    render(
-      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
-      { state }
-    );
-
-    userEvent.click(screen.getByRole('button'));
-    userEvent.type(screen.getByRole('textbox'), 'fake location');
-
-    expect(screen.getByText("doesn't match any options")).toBeInTheDocument();
-
-    userEvent.keyboard(`{enter}`);
-
-    expect(screen.getByText('"fake location" is not a valid option')).toBeInTheDocument();
-  });
-
-  it('calls setLocations', async () => {
-    render(
-      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
-      { state }
-    );
-
-    userEvent.click(screen.getByRole('button'));
-    userEvent.click(screen.getByText('US Central'));
-
-    expect(setLocations).toBeCalledWith([location]);
+    expect(screen.queryByText('US Central')).toBeInTheDocument();
   });
 
   it('shows invalid error', async () => {
@@ -102,5 +62,36 @@ describe('<ActionBar />', () => {
     );
 
     expect(screen.getByText('At least one service location must be specified')).toBeInTheDocument();
+  });
+
+  it('checks unchecks location', () => {
+    const { getByTestId } = render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={true} />,
+      { state }
+    );
+
+    const checkbox = getByTestId(locationTestSubId) as HTMLInputElement;
+    expect(checkbox.checked).toEqual(false);
+    fireEvent.click(checkbox);
+
+    expect(setLocations).toHaveBeenCalled();
+  });
+
+  it('calls onBlur', () => {
+    const onBlur = jest.fn();
+    const { getByTestId } = render(
+      <ServiceLocations
+        selectedLocations={[]}
+        setLocations={setLocations}
+        isInvalid={true}
+        onBlur={onBlur}
+      />,
+      { state }
+    );
+
+    const checkbox = getByTestId(locationTestSubId) as HTMLInputElement;
+    fireEvent.click(checkbox);
+    fireEvent.blur(checkbox);
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

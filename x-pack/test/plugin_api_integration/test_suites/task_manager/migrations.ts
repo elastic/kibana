@@ -104,5 +104,37 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(hit!._source!.task.attempts).to.be(0);
       expect(hit!._source!.task.status).to.be(TaskStatus.Idle);
     });
+
+    it('8.2.0 migrates tasks with unrecognized status to idle if task type is removed', async () => {
+      const response = await es.get<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          id: 'task:ce7e1250-3322-11eb-94c1-db6995e84f6d',
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.task.taskType).to.eql(
+        `alerting:0359d7fcc04da9878ee9aadbda38ba55`
+      );
+      expect(response.body._source?.task.status).to.eql(`idle`);
+    });
+
+    it('8.2.0 does not migrate tasks with unrecognized status if task type is valid', async () => {
+      const response = await es.get<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          id: 'task:fe7e1250-3322-11eb-94c1-db6395e84f6e',
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.task.taskType).to.eql(`sampleTaskRemovedType`);
+      expect(response.body._source?.task.status).to.eql(`unrecognized`);
+    });
   });
 }

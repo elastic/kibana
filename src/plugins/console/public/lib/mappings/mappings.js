@@ -14,7 +14,10 @@ let pollTimeoutId;
 
 let perIndexTypes = {};
 let perAliasIndexes = [];
-let templates = [];
+let legacyTemplates = [];
+let indexTemplates = [];
+let componentTemplates = [];
+let dataStreams = [];
 
 const mappingObj = {};
 
@@ -46,8 +49,20 @@ export function expandAliases(indicesOrAliases) {
   return ret.length > 1 ? ret : ret[0];
 }
 
-export function getTemplates() {
-  return [...templates];
+export function getLegacyTemplates() {
+  return [...legacyTemplates];
+}
+
+export function getIndexTemplates() {
+  return [...indexTemplates];
+}
+
+export function getComponentTemplates() {
+  return [...componentTemplates];
+}
+
+export function getDataStreams() {
+  return [...dataStreams];
 }
 
 export function getFields(indices, types) {
@@ -118,7 +133,9 @@ export function getTypes(indices) {
 export function getIndices(includeAliases) {
   const ret = [];
   $.each(perIndexTypes, function (index) {
-    ret.push(index);
+    if (!index.startsWith('.ds')) {
+      ret.push(index);
+    }
   });
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
     $.each(perAliasIndexes, function (alias) {
@@ -182,8 +199,20 @@ function getFieldNamesFromProperties(properties = {}) {
   });
 }
 
-function loadTemplates(templatesObject = {}) {
-  templates = Object.keys(templatesObject);
+export function loadLegacyTemplates(templatesObject = {}) {
+  legacyTemplates = Object.keys(templatesObject);
+}
+
+export function loadIndexTemplates(data) {
+  indexTemplates = (data.index_templates ?? []).map(({ name }) => name);
+}
+
+export function loadComponentTemplates(data) {
+  componentTemplates = (data.component_templates ?? []).map(({ name }) => name);
+}
+
+export function loadDataStreams(data) {
+  dataStreams = (data.data_streams ?? []).map(({ name }) => name);
 }
 
 export function loadMappings(mappings) {
@@ -235,14 +264,19 @@ export function loadAliases(aliases) {
 export function clear() {
   perIndexTypes = {};
   perAliasIndexes = {};
-  templates = [];
+  legacyTemplates = [];
+  indexTemplates = [];
+  componentTemplates = [];
 }
 
 function retrieveSettings(settingsKey, settingsToRetrieve) {
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
-    templates: '_template',
+    legacyTemplates: '_template',
+    indexTemplates: '_index_template',
+    componentTemplates: '_component_template',
+    dataStreams: '_data_stream',
   };
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
@@ -289,36 +323,72 @@ export function clearSubscriptions() {
 export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
+  const templatesSettingToRetrieve = {
+    ...settingsToRetrieve,
+    legacyTemplates: settingsToRetrieve.templates,
+    indexTemplates: settingsToRetrieve.templates,
+    componentTemplates: settingsToRetrieve.templates,
+  };
+
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
   const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
-  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
+  const legacyTemplatesPromise = retrieveSettings('legacyTemplates', templatesSettingToRetrieve);
+  const indexTemplatesPromise = retrieveSettings('indexTemplates', templatesSettingToRetrieve);
+  const componentTemplatesPromise = retrieveSettings(
+    'componentTemplates',
+    templatesSettingToRetrieve
+  );
+  const dataStreamsPromise = retrieveSettings('dataStreams', settingsToRetrieve);
 
-  $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
+  $.when(
+    mappingPromise,
+    aliasesPromise,
+    legacyTemplatesPromise,
+    indexTemplatesPromise,
+    componentTemplatesPromise,
+    dataStreamsPromise
+  ).done((mappings, aliases, legacyTemplates, indexTemplates, componentTemplates, dataStreams) => {
     let mappingsResponse;
-    if (mappings) {
-      const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-      if (maxMappingSize) {
-        console.warn(
-          `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
-        );
-        mappingsResponse = '[{}]';
-      } else {
-        mappingsResponse = mappings[0];
+    try {
+      if (mappings && mappings.length) {
+        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+        if (maxMappingSize) {
+          console.warn(
+            `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
+          );
+          mappingsResponse = '[{}]';
+        } else {
+          mappingsResponse = mappings[0];
+        }
+        loadMappings(JSON.parse(mappingsResponse));
       }
-      loadMappings(JSON.parse(mappingsResponse));
-    }
 
-    if (aliases) {
-      loadAliases(JSON.parse(aliases[0]));
-    }
+      if (aliases) {
+        loadAliases(JSON.parse(aliases[0]));
+      }
 
-    if (templates) {
-      loadTemplates(JSON.parse(templates[0]));
-    }
+      if (legacyTemplates) {
+        loadLegacyTemplates(JSON.parse(legacyTemplates[0]));
+      }
 
-    if (mappings && aliases) {
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+      if (indexTemplates) {
+        loadIndexTemplates(JSON.parse(indexTemplates[0]));
+      }
+
+      if (componentTemplates) {
+        loadComponentTemplates(JSON.parse(componentTemplates[0]));
+      }
+
+      if (dataStreams) {
+        loadDataStreams(JSON.parse(dataStreams[0]));
+      }
+
+      if (mappings && aliases) {
+        // Trigger an update event with the mappings, aliases
+        $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
+      }
+    } catch (error) {
+      console.error(error);
     }
 
     // Schedule next request.

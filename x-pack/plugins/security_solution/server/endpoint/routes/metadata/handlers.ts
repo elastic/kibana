@@ -192,7 +192,7 @@ export function getMetadataTransformStatsHandler(
         allow_no_match: true,
       });
       return response.ok({
-        body: transformStats.body,
+        body: transformStats,
       });
     } catch (error) {
       return errorHandler(logger, response, error);
@@ -366,6 +366,6 @@ async function legacyListMetadataQuery(
   });
 
   const result = await esClient.search<HostMetadata>(queryParams);
-  const hostListQueryResult = queryResponseToHostListResult(result.body);
+  const hostListQueryResult = queryResponseToHostListResult(result);
   return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
 }

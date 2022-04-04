@@ -6,11 +6,11 @@
  */
 
 import { getSearchAggregatedTransactions } from '.';
-import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import { Setup } from '../setup_request';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 
 export async function getIsUsingTransactionEvents({
   setup: { config, apmEventClient },
@@ -23,20 +23,6 @@ export async function getIsUsingTransactionEvents({
   start?: number;
   end?: number;
 }): Promise<boolean> {
-  const searchAggregatedTransactions = config.searchAggregatedTransactions;
-
-  if (
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.never
-  ) {
-    return false;
-  }
-  if (
-    !kuery &&
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.always
-  ) {
-    return false;
-  }
-
   const searchesAggregatedTransactions = await getSearchAggregatedTransactions({
     config,
     start,
@@ -45,7 +31,11 @@ export async function getIsUsingTransactionEvents({
     kuery,
   });
 
-  if (!searchesAggregatedTransactions) {
+  if (
+    !searchesAggregatedTransactions &&
+    config.searchAggregatedTransactions !==
+      SearchAggregatedTransactionSetting.never
+  ) {
     // if no aggregrated transactions, check if any transactions at all
     return await getHasTransactions({
       start,
@@ -74,6 +64,7 @@ async function getHasTransactions({
       events: [ProcessorEvent.transaction],
     },
     body: {
+      size: 0,
       query: {
         bool: {
           filter: [

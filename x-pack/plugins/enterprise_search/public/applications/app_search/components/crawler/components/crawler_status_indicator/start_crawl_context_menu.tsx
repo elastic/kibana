@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../../crawler_logic';
 
+import { CrawlCustomSettingsFlyoutLogic } from '../crawl_custom_settings_flyout/crawl_custom_settings_flyout_logic';
 import { CrawlSelectDomainsModalLogic } from '../crawl_select_domains_modal/crawl_select_domains_modal_logic';
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
 export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }) => {
   const { startCrawl } = useActions(CrawlerLogic);
   const { showModal: showCrawlSelectDomainsModal } = useActions(CrawlSelectDomainsModalLogic);
-
+  const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -69,6 +70,20 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
               'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlSelectDomainsMenuLabel',
               {
                 defaultMessage: 'Crawl select domains',
+              }
+            )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="crawl with custom settings"
+            onClick={() => {
+              closePopover();
+              showCrawlCustomSettingsFlyout();
+            }}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlCustomSettingsMenuLabel',
+              {
+                defaultMessage: 'Crawl with custom settings',
               }
             )}
           </EuiContextMenuItem>,

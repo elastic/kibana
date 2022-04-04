@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { DataStream } from '../../common/runtime_types/monitor_management';
+import { byTestId } from './utils';
+
+const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
 const basicMonitorDetails = {
-  location: 'US Central',
-  schedule: '@every 3m',
+  location: customLocation || 'US Central',
+  schedule: '3',
 };
-const httpName = 'http monitor';
-const icmpName = 'icmp monitor';
-const tcpName = 'tcp monitor';
-const browserName = 'browser monitor';
+const httpName = `http monitor ${uuid.v4()}`;
+const icmpName = `icmp monitor ${uuid.v4()}`;
+const tcpName = `tcp monitor ${uuid.v4()}`;
+const browserName = `browser monitor ${uuid.v4()}`;
 
 const configuration = {
   [DataStream.HTTP]: {
@@ -88,22 +92,18 @@ const createMonitorJourney = ({
   monitorDetails: Record<string, string>;
 }) => {
   journey(
-    `MonitorManagement-${monitorType}`,
+    `MonitorManagement-monitor-${monitorType}`,
     async ({ page, params }: { page: Page; params: any }) => {
       const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
       const isRemote = process.env.SYNTHETICS_REMOTE_ENABLED;
-      const deleteMonitor = async () => {
-        await uptime.navigateToMonitorManagement();
-        const isSuccessful = await uptime.deleteMonitor();
-        expect(isSuccessful).toBeTruthy();
-      };
 
       before(async () => {
         await uptime.waitForLoadingToFinish();
       });
 
       after(async () => {
-        await deleteMonitor();
+        await uptime.navigateToMonitorManagement();
+        await uptime.enableMonitorManagement(false);
       });
 
       step('Go to monitor-management', async () => {
@@ -119,13 +119,14 @@ const createMonitorJourney = ({
       });
 
       step(`create ${monitorType} monitor`, async () => {
+        await uptime.enableMonitorManagement();
         await uptime.clickAddMonitor();
         await uptime.createMonitor({ monitorConfig, monitorType });
         const isSuccessful = await uptime.confirmAndSave();
         expect(isSuccessful).toBeTruthy();
       });
 
-      step(`view ${monitorType} details in monitor management UI`, async () => {
+      step(`view ${monitorType} details in Monitor Management UI`, async () => {
         await uptime.navigateToMonitorManagement();
         const hasFailure = await uptime.findMonitorConfiguration(monitorDetails);
         expect(hasFailure).toBeFalsy();
@@ -137,6 +138,12 @@ const createMonitorJourney = ({
           await page.waitForSelector(`text=${monitorName}`, { timeout: 160 * 1000 });
         });
       }
+
+      step('delete monitor', async () => {
+        await uptime.navigateToMonitorManagement();
+        const isSuccessful = await uptime.deleteMonitors();
+        expect(isSuccessful).toBeTruthy();
+      });
     }
   );
 };
@@ -153,14 +160,18 @@ Object.keys(configuration).forEach((type) => {
 journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page; params: any }) => {
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const defaultMonitorDetails = {
-    name: 'Sample monitor',
+    name: `Sample monitor ${uuid.v4()}`,
     location: 'US Central',
-    schedule: '@every 3m',
+    schedule: '3',
     apmServiceName: 'service',
   };
 
   before(async () => {
     await uptime.waitForLoadingToFinish();
+  });
+
+  after(async () => {
+    await uptime.enableMonitorManagement(false);
   });
 
   step('Go to monitor-management', async () => {
@@ -173,13 +184,14 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
 
   step('Check breadcrumb', async () => {
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
-    expect(lastBreadcrumb).toEqual('Monitor management');
+    expect(lastBreadcrumb).toEqual('Monitor Management');
   });
 
   step('check breadcrumbs', async () => {
+    await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
     const breadcrumbs = await page.$$('[data-test-subj="breadcrumb"]');
-    expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
+    expect(await breadcrumbs[1].textContent()).toEqual('Monitor Management');
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
     expect(lastBreadcrumb).toEqual('Add monitor');
   });
@@ -197,15 +209,17 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
 
   step('edit http monitor and check breadcrumb', async () => {
     await uptime.editMonitor();
+    // breadcrumb is available before edit page is loaded, make sure its edit view
+    await page.waitForSelector(byTestId('monitorManagementMonitorName'), { timeout: 60 * 1000 });
     const breadcrumbs = await page.$$('[data-test-subj=breadcrumb]');
-    expect(await breadcrumbs[1].textContent()).toEqual('Monitor management');
+    expect(await breadcrumbs[1].textContent()).toEqual('Monitor Management');
     const lastBreadcrumb = await (await uptime.findByTestSubj('"breadcrumb last"')).textContent();
     expect(lastBreadcrumb).toEqual('Edit monitor');
   });
 
   step('delete monitor', async () => {
     await uptime.navigateToMonitorManagement();
-    const isSuccessful = await uptime.deleteMonitor();
+    const isSuccessful = await uptime.deleteMonitors();
     expect(isSuccessful).toBeTruthy();
   });
 });

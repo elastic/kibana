@@ -63,6 +63,8 @@ export { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 
+export type { ElasticsearchClientMock } from './elasticsearch/client/mocks';
+
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
 export function pluginInitializerContextConfigMock<T>(config: T) {

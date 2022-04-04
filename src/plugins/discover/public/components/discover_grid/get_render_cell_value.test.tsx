@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { flattenHit } from 'src/plugins/data/common';
+import { flattenHit } from 'src/plugins/data/public';
 import { ElasticSearchHit } from '../../types';
 
 jest.mock('../../utils/use_discover_services', () => {
@@ -84,6 +84,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes"
         isDetails={false}
         isExpanded={false}
@@ -106,6 +107,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes"
         isDetails={true}
         isExpanded={false}
@@ -128,6 +130,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes"
         isDetails={true}
         isExpanded={false}
@@ -150,6 +153,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={false}
         isExpanded={false}
@@ -223,6 +227,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={true}
         isExpanded={false}
@@ -265,6 +270,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={false}
         isExpanded={false}
@@ -343,6 +349,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={false}
         isExpanded={false}
@@ -420,6 +427,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="_source"
         isDetails={true}
         isExpanded={false}
@@ -467,6 +475,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object"
         isDetails={false}
         isExpanded={false}
@@ -508,6 +517,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object"
         isDetails={false}
         isExpanded={false}
@@ -548,6 +558,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object"
         isDetails={true}
         isExpanded={false}
@@ -582,6 +593,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="object.value"
         isDetails={false}
         isExpanded={false}
@@ -614,6 +626,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={1}
+        colIndex={1}
         columnId="bytes"
         isDetails={false}
         isExpanded={false}
@@ -636,6 +649,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="bytes-invalid"
         isDetails={false}
         isExpanded={false}
@@ -671,6 +685,7 @@ describe('Discover grid cell rendering', function () {
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="unmapped"
         isDetails={false}
         isExpanded={false}
@@ -693,6 +708,7 @@ describe('Discover grid cell rendering', function () {
     const componentWithDetails = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
+        colIndex={0}
         columnId="unmapped"
         isDetails={true}
         isExpanded={false}

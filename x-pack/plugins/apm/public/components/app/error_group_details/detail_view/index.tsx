@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -72,7 +71,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
-  const { detailTab, comparisonType, comparisonEnabled } = urlParams;
+  const { detailTab, offset, comparisonEnabled } = urlParams;
 
   if (!error) {
     return null;
@@ -100,16 +99,14 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
           </h3>
         </EuiTitle>
         <DiscoverErrorLink error={error} kuery={kuery}>
-          <EuiButtonEmpty iconType="discoverApp">
-            {i18n.translate(
-              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
-              {
-                defaultMessage:
-                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
-                values: { occurrencesCount },
-              }
-            )}
-          </EuiButtonEmpty>
+          {i18n.translate(
+            'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+            {
+              defaultMessage:
+                'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
+              values: { occurrencesCount },
+            }
+          )}
         </DiscoverErrorLink>
       </HeaderContainer>
 
@@ -141,7 +138,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
                 transactionName={transaction.transaction.name}
                 transactionType={transaction.transaction.type}
                 serviceName={transaction.service.name}
-                comparisonType={comparisonType}
+                offset={offset}
                 comparisonEnabled={comparisonEnabled}
               >
                 <EuiIcon type="merge" />

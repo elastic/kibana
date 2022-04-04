@@ -17,10 +17,11 @@ import {
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { UI_SETTINGS } from '../../../data/common';
+import { UI_SETTINGS } from '../../../data/public';
 import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
 import { LocalStorageMock } from './local_storage_mock';
+import { fieldFormatsMock } from '../../../field_formats/common/mocks';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = {
@@ -45,10 +46,7 @@ export const discoverServiceMock = {
       save: true,
     },
   },
-  fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-  },
+  fieldFormats: fieldFormatsMock,
   filterManager: dataPlugin.query.filterManager,
   uiSettings: {
     get: jest.fn((key: string) => {

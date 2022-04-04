@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Scheduled Tasks AT Command Enabled",
-  "query": "registry where \n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\Configuration\\\\EnableAt\" and registry.data.strings == \"1\"\n",
+  "query": "registry where \n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\Configuration\\\\EnableAt\" and \n registry.data.strings : (\"1\", \"0x00000001\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-scheduledjob"
   ],
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

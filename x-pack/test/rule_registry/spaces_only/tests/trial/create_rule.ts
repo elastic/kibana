@@ -29,7 +29,7 @@ import {
   deleteAlert,
 } from '../../../common/lib/helpers';
 import { AlertDef, AlertParams } from '../../../common/types';
-import { Alert } from '../../../../../plugins/alerting/common';
+import { Rule } from '../../../../../plugins/alerting/common';
 import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
 import { obsOnly } from '../../../common/lib/authentication/users';
 
@@ -39,7 +39,8 @@ const SPACE_ID = 'space1';
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
-  describe('Rule Registry API', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Rule Registry API', () => {
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
         const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
@@ -57,7 +58,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
 
       describe('when creating a rule', () => {
         let createResponse: {
-          alert: Alert;
+          alert: Rule;
           status: number;
         };
         before(async () => {

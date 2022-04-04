@@ -6,10 +6,10 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
-import type { IndexPatternField } from 'src/plugins/data/common';
+import type { DataViewField } from 'src/plugins/data_views/common';
 import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
@@ -42,10 +42,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
       const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
 
-      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const [{ savedObjects, elasticsearch }, { dataViews }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
-      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+      const indexPatternsService = await dataViews.dataViewsServiceFactory(
         savedObjectsClient,
         esClient
       );
@@ -80,16 +80,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const runtimeMappings = indexPattern.fields
-          .filter((f) => f.runtimeField)
-          .reduce((acc, f) => {
-            if (!f.runtimeField) return acc;
-            acc[f.name] = f.runtimeField;
-            return acc;
-          }, {} as Record<string, estypes.MappingRuntimeField>);
+        const runtimeMappings = indexPattern.getRuntimeMappings();
 
         const search = async (aggs: Record<string, estypes.AggregationsAggregationContainer>) => {
-          const { body: result } = await requestClient.search({
+          const result = await requestClient.search({
             index: indexPattern.title,
             track_total_hits: true,
             body: {
@@ -147,7 +141,7 @@ export async function getNumberHistogram(
   aggSearchWithBody: (
     aggs: Record<string, estypes.AggregationsAggregationContainer>
   ) => Promise<unknown>,
-  field: IndexPatternField,
+  field: DataViewField,
   useTopHits = true
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -256,7 +250,7 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
-  field: IndexPatternField,
+  field: DataViewField,
   size = 10
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -296,7 +290,7 @@ export async function getStringSamples(
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: (aggs: Record<string, estypes.AggregationsAggregationContainer>) => unknown,
-  field: IndexPatternField,
+  field: DataViewField,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -338,7 +332,7 @@ export async function getDateHistogram(
   };
 }
 
-function getFieldRef(field: IndexPatternField) {
+function getFieldRef(field: DataViewField) {
   return field.scripted
     ? {
         script: {

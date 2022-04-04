@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import * as React from 'react';
 import { EuiAccordion, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,12 +17,20 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
+  isMonitorSaved: boolean;
+  onDone: () => void;
 }
-export const BrowserTestRunResult = ({ monitorId }: Props) => {
-  const { data, loading, stepEnds, journeyStarted, summaryDoc, stepListData } =
+export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Props) => {
+  const { data, loading, stepsLoading, stepEnds, journeyStarted, summaryDoc, stepListData } =
     useBrowserRunOnceMonitors({
       configId: monitorId,
     });
+
+  useEffect(() => {
+    if (Boolean(summaryDoc)) {
+      onDone();
+    }
+  }, [summaryDoc, onDone]);
 
   const hits = data?.hits.hits;
   const doc = hits?.[0]?._source as JourneyStep;
@@ -50,6 +59,10 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
     </div>
   );
 
+  const isStepsLoading =
+    journeyStarted && stepEnds.length === 0 && (!summaryDoc || (summaryDoc && stepsLoading));
+  const isStepsLoadingFailed = summaryDoc && stepEnds.length === 0 && !isStepsLoading;
+
   return (
     <AccordionWrapper
       id={monitorId}
@@ -59,13 +72,18 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
       buttonContent={buttonContent}
       paddingSize="s"
       data-test-subj="expandResults"
+      initialIsOpen={true}
     >
-      {summaryDoc && stepEnds.length === 0 && <EuiText color="danger">{FAILED_TO_RUN}</EuiText>}
-      {!summaryDoc && journeyStarted && stepEnds.length === 0 && <EuiText>{LOADING_STEPS}</EuiText>}
+      {isStepsLoading && <EuiText>{LOADING_STEPS}</EuiText>}
+      {isStepsLoadingFailed && (
+        <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+      )}
+
       {stepEnds.length > 0 && stepListData?.steps && (
         <StepsList
           data={stepListData.steps}
           compactView={true}
+          showStepDurationTrend={isMonitorSaved}
           loading={Boolean(loading)}
           error={undefined}
         />

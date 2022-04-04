@@ -76,7 +76,6 @@ export const searchAfterAndBulkCreate = async ({
             to: tuple.to.toISOString(),
             services,
             logger,
-            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
@@ -165,7 +164,7 @@ export const searchAfterAndBulkCreate = async ({
               success: bulkSuccess,
               createdSignalsCount: createdCount,
               createdSignals: createdItems,
-              bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
+              bulkCreateTimes: [bulkDuration],
               errors: bulkErrors,
             }),
           ]);
@@ -176,7 +175,13 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`enrichedEvents.hits.hits: ${enrichedEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(logger, eventsTelemetry, enrichedEvents, buildRuleMessage);
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            enrichedEvents,
+            createdItems,
+            buildRuleMessage
+          );
         }
 
         if (!hasSortId) {

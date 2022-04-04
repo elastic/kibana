@@ -9,14 +9,14 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Alert } from '../../../../../../alerting/server/alert';
 
 export const alertInstanceFactoryStub = <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceState extends AlertInstanceState,
   TInstanceContext extends AlertInstanceContext,
   TActionGroupIds extends string = ''
@@ -27,13 +27,13 @@ export const alertInstanceFactoryStub = <
     return {} as unknown as TInstanceState;
   },
   replaceState(state: TInstanceState) {
-    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>({
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
   },
   scheduleActions(actionGroup: TActionGroupIds, alertcontext: TInstanceContext) {
-    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>({
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
@@ -43,9 +43,21 @@ export const alertInstanceFactoryStub = <
     subgroup: string,
     alertcontext: TInstanceContext
   ) {
-    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>({
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
       state: {} as TInstanceState,
       meta: { lastScheduledActions: { group: 'default', date: new Date() } },
     });
+  },
+  setContext(alertContext: TInstanceContext) {
+    return new Alert<TInstanceState, TInstanceContext, TActionGroupIds>('', {
+      state: {} as TInstanceState,
+      meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    });
+  },
+  getContext() {
+    return {} as unknown as TInstanceContext;
+  },
+  hasContext() {
+    return false;
   },
 });

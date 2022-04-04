@@ -86,7 +86,7 @@ export const useBrowserRunOnceMonitors = ({
 
   const { data, loading } = useBrowserEsResults({ configId, testRunId, lastRefresh });
 
-  const { data: stepListData } = useFetcher(() => {
+  const { data: stepListData, loading: stepsLoading } = useFetcher(() => {
     if (checkGroupId && !skipDetails) {
       return fetchJourneySteps({
         checkGroup: checkGroupId,
@@ -122,6 +122,7 @@ export const useBrowserRunOnceMonitors = ({
     data,
     stepEnds,
     loading,
+    stepsLoading,
     stepListData,
     summaryDoc: summary,
     journeyStarted: Boolean(checkGroupId),

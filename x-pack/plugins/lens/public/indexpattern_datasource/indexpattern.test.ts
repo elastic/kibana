@@ -8,10 +8,11 @@
 import React from 'react';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
-import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
+import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -23,6 +24,8 @@ import {
   MovingAverageIndexPatternColumn,
   MathIndexPatternColumn,
   FormulaIndexPatternColumn,
+  RangeIndexPatternColumn,
+  FiltersIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
@@ -184,6 +187,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
@@ -290,7 +294,6 @@ describe('IndexPattern Data Source', () => {
           },
         },
         savedObjectReferences: [
-          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -431,7 +434,7 @@ describe('IndexPattern Data Source', () => {
                             "1d",
                           ],
                           "min_doc_count": Array [
-                            0,
+                            1,
                           ],
                           "schema": Array [
                             "segment",
@@ -491,13 +494,13 @@ describe('IndexPattern Data Source', () => {
       `);
     });
 
-    it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
+    it('should put all time fields used in date_histograms to the esaggs timeFields parameter if not ignoring global time range', async () => {
       const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
             indexPatternId: '1',
-            columnOrder: ['col1', 'col2', 'col3'],
+            columnOrder: ['col1', 'col2', 'col3', 'col4'],
             columns: {
               col1: {
                 label: 'Count of records',
@@ -524,6 +527,17 @@ describe('IndexPattern Data Source', () => {
                 sourceField: 'another_datefield',
                 params: {
                   interval: 'auto',
+                },
+              } as DateHistogramIndexPatternColumn,
+              col4: {
+                label: 'Date 3',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'yet_another_datefield',
+                params: {
+                  interval: '2d',
+                  ignoreTimeRange: true,
                 },
               } as DateHistogramIndexPatternColumn,
             },
@@ -1204,7 +1218,11 @@ describe('IndexPattern Data Source', () => {
 
     describe('getTableSpec', () => {
       it('should include col1', () => {
-        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1' }]);
+        expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ columnId: 'col1' })]);
+      });
+
+      it('should include fields prop for each column', () => {
+        expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ fields: ['op'] })]);
       });
 
       it('should skip columns that are being referenced', () => {
@@ -1241,7 +1259,98 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
 
-        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2' }]);
+        expect(publicAPI.getTableSpec()).toEqual([expect.objectContaining({ columnId: 'col2' })]);
+      });
+
+      it('should collect all fields (also from referenced columns)', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
+                    references: ['col1'],
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        // The cumulative sum column has no field, but it references a sum column (hidden) which has it
+        // The getTableSpec() should walk the reference tree and assign all fields to the root column
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2', fields: ['test'] }]);
+      });
+
+      it('should collect and organize fields per visible column', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
+                    references: ['col1'],
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                  col3: {
+                    label: 'My Op',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'op',
+                    params: {
+                      size: 5,
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+
+        // col1 is skipped as referenced but its field gets inherited by col2
+        expect(publicAPI.getTableSpec()).toEqual([
+          { columnId: 'col2', fields: ['test'] },
+          { columnId: 'col3', fields: ['op'] },
+        ]);
       });
     });
 
@@ -1252,7 +1361,8 @@ describe('IndexPattern Data Source', () => {
           dataType: 'string',
           isBucketed: true,
           isStaticValue: false,
-        } as Operation);
+          hasTimeShift: false,
+        } as OperationDescriptor);
       });
 
       it('should return null for non-existant columns', () => {
@@ -1293,6 +1403,785 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getOperationForColumnId('col1')).toEqual(null);
+      });
+    });
+
+    describe('getSourceId', () => {
+      it('should basically return the datasource internal id', () => {
+        expect(publicAPI.getSourceId()).toEqual('1');
+      });
+    });
+
+    describe('getFilters', () => {
+      it('should return all filters in metrics, grouped by language', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: 'bytes > 1000' },
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'lucene', query: 'memory' },
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [[{ language: 'kuery', query: 'bytes > 1000' }]],
+            lucene: [[{ language: 'lucene', query: 'memory' }]],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should ignore empty filtered metrics', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: '' },
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.dest',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'geo.src: *' }],
+              [
+                { language: 'kuery', query: 'geo.dest: *' },
+                { language: 'kuery', query: 'myField: *' },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('shuold collect top values fields and terms as kuery filters if data is provided', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.dest',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        const data = {
+          first: {
+            type: 'datatable' as const,
+            columns: [
+              { id: 'col1', name: 'geo.src', meta: { type: 'string' as const } },
+              { id: 'col2', name: 'geo.dest > myField', meta: { type: 'string' as const } },
+            ],
+            rows: [
+              { col1: 'US', col2: { keys: ['IT', 'MyValue'] } },
+              { col1: 'IN', col2: { keys: ['DE', 'MyOtherValue'] } },
+            ],
+          },
+        };
+        expect(publicAPI.getFilters(data)).toEqual({
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'geo.src: "US"' },
+                { language: 'kuery', query: 'geo.src: "IN"' },
+              ],
+              [
+                { language: 'kuery', query: 'geo.dest: "IT" AND myField: "MyValue"' },
+                { language: 'kuery', query: 'geo.dest: "DE" AND myField: "MyOtherValue"' },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('shuold collect top values fields and terms and carefully handle empty string values', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.dest',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        const data = {
+          first: {
+            type: 'datatable' as const,
+            columns: [
+              { id: 'col1', name: 'geo.src', meta: { type: 'string' as const } },
+              { id: 'col2', name: 'geo.dest > myField', meta: { type: 'string' as const } },
+            ],
+            rows: [
+              { col1: 'US', col2: { keys: ['IT', ''] } },
+              { col1: 'IN', col2: { keys: ['DE', 'MyOtherValue'] } },
+            ],
+          },
+        };
+        expect(publicAPI.getFilters(data)).toEqual({
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'geo.src: "US"' },
+                { language: 'kuery', query: 'geo.src: "IN"' },
+              ],
+              [
+                { language: 'kuery', query: `geo.dest: "IT" AND myField: ""` },
+                { language: 'kuery', query: `geo.dest: "DE" AND myField: "MyOtherValue"` },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should ignore top values fields if other/missing option is enabled', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      otherBucket: true,
+                    },
+                  } as TermsIndexPatternColumn,
+                  col2: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      missingBucket: true,
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should collect custom ranges as kuery filters', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Single range',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ from: 100, to: 150, label: 'Range 1' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                  col2: {
+                    label: 'Multiple ranges',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [
+                        { from: 200, to: 300, label: 'Range 2' },
+                        { from: 300, to: 400, label: 'Range 3' },
+                      ],
+                    },
+                  } as RangeIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes >= 100 AND bytes <= 150' }],
+              [
+                { language: 'kuery', query: 'bytes >= 200 AND bytes <= 300' },
+                { language: 'kuery', query: 'bytes >= 300 AND bytes <= 400' },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should collect custom ranges as kuery filters as partial', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3'],
+                columns: {
+                  col1: {
+                    label: 'Empty range',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ label: 'Empty range' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                  col2: {
+                    label: 'From range',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ from: 100, label: 'Partial range 1' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                  col3: {
+                    label: 'To ranges',
+                    dataType: 'number',
+                    isBucketed: true,
+                    operationType: 'range',
+                    sourceField: 'bytes',
+                    params: {
+                      type: 'range',
+                      ranges: [{ to: 300, label: 'Partial Range 2' }],
+                    },
+                  } as RangeIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes >= 100' }],
+              [{ language: 'kuery', query: 'bytes <= 300' }],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should collect filters within filters operation grouped by language', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3'],
+                columns: {
+                  col1: {
+                    label: 'kuery Filter',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [{ label: '', input: { language: 'kuery', query: 'bytes > 1000' } }],
+                    },
+                  } as FiltersIndexPatternColumn,
+                  col2: {
+                    label: 'Lucene Filter',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [{ label: '', input: { language: 'lucene', query: 'memory' } }],
+                    },
+                  } as FiltersIndexPatternColumn,
+                  col3: {
+                    label: 'Mixed filters',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [
+                        { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
+                        { label: '', input: { language: 'kuery', query: 'memory > 500000' } },
+                        { label: '', input: { language: 'lucene', query: 'phpmemory' } },
+                        { label: '', input: { language: 'lucene', query: 'memory: 5000000' } },
+                      ],
+                    },
+                  } as FiltersIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes > 1000' }],
+              [
+                { language: 'kuery', query: 'bytes > 5000' },
+                { language: 'kuery', query: 'memory > 500000' },
+              ],
+            ],
+            lucene: [
+              [{ language: 'lucene', query: 'memory' }],
+              [
+                { language: 'lucene', query: 'phpmemory' },
+                { language: 'lucene', query: 'memory: 5000000' },
+              ],
+            ],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+      it('should ignore filtered metrics if at least one metric is unfiltered', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: 'bytes > 1000' },
+                  } as GenericIndexPatternColumn,
+                  col2: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as GenericIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [[{ language: 'kuery', query: 'bytes > 1000' }]], lucene: [] },
+        });
+      });
+      it('should ignore filtered metrics if at least one metric is unfiltered in formula', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['formula'],
+                columns: {
+                  formula: {
+                    label: 'Formula',
+                    dataType: 'number',
+                    operationType: 'formula',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      formula: "count(kql='memory > 5000') + count()",
+                      isFormulaBroken: false,
+                    },
+                    references: ['math'],
+                  } as FormulaIndexPatternColumn,
+                  countX0: {
+                    label: 'countX0',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                    filter: { language: 'kuery', query: 'memory > 5000' },
+                  },
+                  countX1: {
+                    label: 'countX1',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                  },
+                  math: {
+                    label: 'math',
+                    dataType: 'number',
+                    operationType: 'math',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      tinymathAst: {
+                        type: 'function',
+                        name: 'add',
+                        args: ['countX0', 'countX1'] as unknown as TinymathAST[],
+                        location: {
+                          min: 0,
+                          max: 17,
+                        },
+                        text: "count(kql='memory > 5000') + count()",
+                      },
+                    },
+                    references: ['countX0', 'countX1'],
+                    customLabel: true,
+                  } as MathIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [[{ language: 'kuery', query: 'memory > 5000' }]], lucene: [] },
+        });
+      });
+      it('should support complete scenarios', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2', 'col3', 'col4'],
+                columns: {
+                  col1: {
+                    label: 'Mixed filters',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'filters',
+                    scale: 'ordinal',
+                    params: {
+                      filters: [
+                        { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
+                        { label: '', input: { language: 'kuery', query: 'memory > 500000' } },
+                        { label: '', input: { language: 'lucene', query: 'phpmemory' } },
+                        { label: '', input: { language: 'lucene', query: 'memory: 5000000' } },
+                      ],
+                    },
+                  } as FiltersIndexPatternColumn,
+                  col2: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'kuery', query: 'bytes > 1000' },
+                  } as GenericIndexPatternColumn,
+                  col3: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                    filter: { language: 'lucene', query: 'memory' },
+                  } as GenericIndexPatternColumn,
+                  col4: {
+                    label: 'Terms',
+                    dataType: 'string',
+                    isBucketed: true,
+                    operationType: 'terms',
+                    sourceField: 'geo.src',
+                    params: {
+                      orderBy: { type: 'alphabetical' },
+                      orderDirection: 'asc',
+                      size: 10,
+                      secondaryFields: ['myField'],
+                    },
+                  } as TermsIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes > 1000' }],
+              [
+                { language: 'kuery', query: 'bytes > 5000' },
+                { language: 'kuery', query: 'memory > 500000' },
+              ],
+              [
+                { language: 'kuery', query: 'geo.src: *' },
+                { language: 'kuery', query: 'myField: *' },
+              ],
+            ],
+            lucene: [
+              [{ language: 'lucene', query: 'memory' }],
+              [
+                { language: 'lucene', query: 'phpmemory' },
+                { language: 'lucene', query: 'memory: 5000000' },
+              ],
+            ],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
+      });
+
+      it('should avoid duplicate filters when formula has a global filter', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['formula'],
+                columns: {
+                  formula: {
+                    label: 'Formula',
+                    dataType: 'number',
+                    operationType: 'formula',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    filter: { language: 'kuery', query: 'bytes > 4000' },
+                    params: {
+                      formula: "count(kql='memory > 5000') + count()",
+                      isFormulaBroken: false,
+                    },
+                    references: ['math'],
+                  } as FormulaIndexPatternColumn,
+                  countX0: {
+                    label: 'countX0',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                    filter: { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
+                  },
+                  countX1: {
+                    label: 'countX1',
+                    dataType: 'number',
+                    operationType: 'count',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    sourceField: '___records___',
+                    customLabel: true,
+                    filter: { language: 'kuery', query: 'bytes > 4000' },
+                  },
+                  math: {
+                    label: 'math',
+                    dataType: 'number',
+                    operationType: 'math',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      tinymathAst: {
+                        type: 'function',
+                        name: 'add',
+                        args: ['countX0', 'countX1'] as unknown as TinymathAST[],
+                        location: {
+                          min: 0,
+                          max: 17,
+                        },
+                        text: "count(kql='memory > 5000') + count()",
+                      },
+                    },
+                    references: ['countX0', 'countX1'],
+                    customLabel: true,
+                  } as MathIndexPatternColumn,
+                },
+              },
+            },
+          },
+          layerId: 'first',
+        });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
+                { language: 'kuery', query: 'bytes > 4000' },
+              ],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
+        });
       });
     });
   });
@@ -1633,6 +2522,63 @@ describe('IndexPattern Data Source', () => {
       });
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
+    it('should return false if date histogram exists but is detached from global time range in every layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['bucket1', 'bucket2', 'metric2'],
+            columns: {
+              metric2: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+              bucket1: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: '1d',
+                  ignoreTimeRange: true,
+                },
+              } as DateHistogramIndexPatternColumn,
+              bucket2: {
+                label: 'Terms',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 10,
+                },
+              } as TermsIndexPatternColumn,
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
     it('should return false if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',
@@ -1679,9 +2625,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
         })
       ).toBe(state);
     });
@@ -1708,9 +2652,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
           staticValue: 0, // use a falsy value to check also this corner case
         })
       ).toEqual({
@@ -1762,14 +2704,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const currentIndexPatternReference = {
-      id: 'some-id',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    };
-
     const references1: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -1778,7 +2713,6 @@ describe('IndexPattern Data Source', () => {
     ];
 
     const references2: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

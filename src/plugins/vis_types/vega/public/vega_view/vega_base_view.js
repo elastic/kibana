@@ -8,7 +8,7 @@
 
 import $ from 'jquery';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 scheme('elastic', euiPaletteColorBlind());
@@ -156,11 +156,11 @@ export class VegaBaseView {
    * @returns {Promise<string>} index id
    */
   async findIndex(index) {
-    const { indexPatterns } = getData();
+    const dataViews = getDataViews();
     let idxObj;
 
     if (index) {
-      [idxObj] = await indexPatterns.find(index);
+      [idxObj] = await dataViews.find(index);
       if (!idxObj) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
@@ -175,7 +175,7 @@ export class VegaBaseView {
       );
 
       if (!idxObj) {
-        const defaultIdx = await indexPatterns.getDefault();
+        const defaultIdx = await dataViews.getDefault();
 
         if (defaultIdx) {
           idxObj = defaultIdx;
@@ -262,16 +262,19 @@ export class VegaBaseView {
     }
   }
 
-  resize() {
+  async resize(dimensions) {
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view);
-      return this._view.runAsync();
+      this.updateVegaSize(this._view, dimensions);
+      await this._view.runAsync();
+
+      // The derived class should create this method
+      this.onViewContainerResize?.();
     }
   }
 
-  updateVegaSize(view) {
-    const width = Math.floor(Math.max(0, this._$container.width()));
-    const height = Math.floor(Math.max(0, this._$container.height()));
+  updateVegaSize(view, dimensions) {
+    const width = Math.floor(Math.max(0, dimensions?.width ?? this._$container.width()));
+    const height = Math.floor(Math.max(0, dimensions?.height ?? this._$container.height()));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);

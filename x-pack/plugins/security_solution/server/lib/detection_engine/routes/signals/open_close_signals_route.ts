@@ -99,7 +99,7 @@ export const setSignalsStatusRoute = (
         };
       }
       try {
-        const { body } = await esClient.updateByQuery({
+        const body = await esClient.updateByQuery({
           index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
           conflicts: conflicts ?? 'abort',
           // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2

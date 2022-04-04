@@ -8,6 +8,6 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "ruleRegistry"],
   "requiredPlugins": ["alerting", "data", "triggersActionsUi"],
-  "optionalPlugins": ["security"],
+  "optionalPlugins": ["security", "spaces"],
   "server": true
 }

@@ -1,6 +1,5 @@
-[discrete]
 [[logging-config-changes]]
-=== Logging configuration changes
+== Logging configuration changes
 
 WARNING: {kib} 8.0.0 and later uses a new logging system. Before you upgrade, read the documentation for your {kib} version.
 
@@ -43,4 +42,3 @@ WARNING: {kib} 8.0.0 and later uses a new logging system. Before you upgrade, re
 | error | `{ message, name, stack }` | `{ message, name, stack, code, signal }`
 
 |===
-

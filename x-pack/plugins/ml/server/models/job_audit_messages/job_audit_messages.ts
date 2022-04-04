@@ -11,7 +11,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
-import type { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 import type { JobMessage } from '../../../common/types/audit_message';
 import { AuditMessage } from '../../../common/types/anomaly_detection_jobs';
@@ -66,7 +66,7 @@ export function jobAuditMessagesProvider(
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
   async function getJobAuditMessages(
-    jobSavedObjectService: JobSavedObjectService,
+    mlSavedObjectService: MLSavedObjectService,
     {
       jobId,
       from,
@@ -82,8 +82,8 @@ export function jobAuditMessagesProvider(
     let gte = null;
     if (jobId !== undefined && from === undefined) {
       const jobs = await mlClient.getJobs({ job_id: jobId });
-      if (jobs.body.count > 0 && jobs.body.jobs !== undefined) {
-        gte = moment(jobs.body.jobs[0].create_time).valueOf();
+      if (jobs.count > 0 && jobs.jobs !== undefined) {
+        gte = moment(jobs.jobs[0].create_time).valueOf();
       }
     } else if (from !== undefined) {
       gte = `now-${from}`;
@@ -150,7 +150,7 @@ export function jobAuditMessagesProvider(
       });
     }
 
-    const { body } = await asInternalUser.search<JobMessage>({
+    const body = await asInternalUser.search<JobMessage>({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: SIZE,
@@ -174,7 +174,7 @@ export function jobAuditMessagesProvider(
         messages.push(hit._source!);
       });
     }
-    messages = await jobSavedObjectService.filterJobsForSpace<JobMessage>(
+    messages = await mlSavedObjectService.filterJobsForSpace<JobMessage>(
       'anomaly-detector',
       messages,
       'job_id'
@@ -222,7 +222,7 @@ export function jobAuditMessagesProvider(
       },
     };
 
-    const { body } = await asInternalUser.search({
+    const body = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: 0,
@@ -428,7 +428,7 @@ export function jobAuditMessagesProvider(
     jobIds: string[],
     earliestMs?: number
   ): Promise<JobsErrorsResponse> {
-    const { body } = await asInternalUser.search({
+    const body = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
       size: 0,

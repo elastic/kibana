@@ -33,6 +33,8 @@ import { getResultsForJobId, ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './ut
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 import type { MlApiServices } from '../application/services/ml_api_service';
 
+const RESULT_LIMIT = 1000;
+
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
   typicalActual: MlAnomalyLayersType;
@@ -59,7 +61,7 @@ export class AnomalySource implements IVectorSource {
   constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
     this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
   }
-  // TODO: implement query awareness
+
   async getGeoJsonWithMeta(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
@@ -77,7 +79,7 @@ export class AnomalySource implements IVectorSource {
       data: results,
       meta: {
         // Set this to true if data is incomplete (e.g. capping number of results to first 1k)
-        areResultsTrimmed: false,
+        areResultsTrimmed: results.features.length === RESULT_LIMIT,
       },
     };
   }
@@ -147,8 +149,23 @@ export class AnomalySource implements IVectorSource {
     return null;
   }
 
-  getSourceStatus() {
-    return { tooltipContent: null, areResultsTrimmed: true };
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+
+    if (meta?.areResultsTrimmed) {
+      return {
+        tooltipContent: i18n.translate('xpack.ml.maps.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {count} documents.`,
+          values: { count: RESULT_LIMIT },
+        }),
+        areResultsTrimmed: true,
+      };
+    }
+
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
   }
 
   getType(): string {
@@ -222,12 +239,13 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceStatus {
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     return {
       tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
         defaultMessage: 'Shows anomalies',
       }),
       // set to true if data is incomplete (we limit to first 1000 results)
-      areResultsTrimmed: true,
+      areResultsTrimmed: meta?.areResultsTrimmed ?? false,
     };
   }
 
@@ -251,13 +269,7 @@ export class AnomalySource implements IVectorSource {
         continue;
       }
       if (properties.hasOwnProperty(key)) {
-        const label = ANOMALY_SOURCE_FIELDS[key]?.label;
-        if (label) {
-          tooltipProperties.push(new AnomalySourceTooltipProperty(label, properties[key]));
-        } else if (!ANOMALY_SOURCE_FIELDS[key]) {
-          // partition field keys will be different each time so won't be in ANOMALY_SOURCE_FIELDS
-          tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
-        }
+        tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
       }
     }
     return tooltipProperties;

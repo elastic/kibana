@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EuiResizableContainer } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiFlyout,
+  EuiSpacer,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
 
@@ -19,7 +27,7 @@ import { MonitorFields } from './monitor_fields';
 import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
 
-export const MonitorConfig = () => {
+export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
   const { monitorType } = usePolicyConfigContext();
 
   /* raw policy config compatible with the UI. Save this to saved objects */
@@ -36,47 +44,77 @@ export const MonitorConfig = () => {
     defaultConfig: defaultConfig[monitorType],
   });
 
+  const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
+  const [isTestRunInProgress, setIsTestRunInProgress] = useState<boolean>(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
 
-  const onTestNow = () => {
+  const handleFormSubmit = () => {
+    setHasBeenSubmitted(true);
+  };
+
+  const handleTestNow = () => {
     if (config) {
       setTestRun({ id: uuidv4(), monitor: config as MonitorFieldsType });
+      setIsTestRunInProgress(true);
+      setIsFlyoutOpen(true);
     }
   };
 
+  const handleTestDone = useCallback(() => {
+    setIsTestRunInProgress(false);
+  }, [setIsTestRunInProgress]);
+
+  const handleFlyoutClose = useCallback(() => {
+    handleTestDone();
+    setIsFlyoutOpen(false);
+  }, [handleTestDone, setIsFlyoutOpen]);
+
+  const flyout = isFlyoutOpen && config && (
+    <EuiFlyout
+      type="push"
+      size="m"
+      paddingSize="m"
+      maxWidth="44%"
+      aria-labelledby={TEST_RESULT}
+      onClose={handleFlyoutClose}
+    >
+      <EuiFlyoutHeader>
+        <EuiSpacer size="xl" />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <TestNowMode testRun={testRun} isMonitorSaved={isEdit} onDone={handleTestDone} />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty iconType="cross" onClick={handleFlyoutClose} flush="left">
+          {CLOSE_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+
   return (
     <>
-      <EuiResizableContainer>
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
-            <EuiResizablePanel
-              initialSize={55}
-              minSize="30%"
-              mode={[
-                'collapsible',
-                {
-                  position: 'top',
-                },
-              ]}
-            >
-              <MonitorFields />
-            </EuiResizablePanel>
+      <MonitorFields isFormSubmitted={hasBeenSubmitted} />
 
-            <EuiResizableButton />
-
-            <EuiResizablePanel initialSize={45} minSize="200px" mode="main">
-              {config && <TestNowMode testRun={testRun} />}
-            </EuiResizablePanel>
-          </>
-        )}
-      </EuiResizableContainer>
+      {flyout}
 
       <ActionBarPortal
         monitor={policyConfig[monitorType]}
         isValid={isValid}
-        onTestNow={onTestNow}
+        onTestNow={handleTestNow}
         testRun={testRun}
+        isTestRunInProgress={isTestRunInProgress}
+        onSave={handleFormSubmit}
       />
     </>
   );
 };
+
+const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', {
+  defaultMessage: 'Test result',
+});
+
+const CLOSE_LABEL = i18n.translate('xpack.uptime.monitorManagement.closeButtonLabel', {
+  defaultMessage: 'Close',
+});

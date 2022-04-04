@@ -18,7 +18,13 @@ To roll back after a failed upgrade migration, you must also rollback the saved 
 . Before proceeding, {ref}/snapshots-take-snapshot.html[take a snapshot] that contains the `kibana` feature state.
    By default, snapshots include the `kibana` feature state.
 . To make sure no {kib} instances are performing an upgrade migration, shut down all {kib} instances.
-. To delete all saved object indices, use `DELETE /.kibana*`.
+. To delete all saved object indices, enter:
++
+[source,sh]
+--------------------------------------------
+DELETE /.kibana*
+--------------------------------------------
+
 . {ref}/snapshots-restore-snapshot.html[Restore] the `kibana` feature state from the snapshot.
 . Start all {kib} instances on the older version you want to rollback to.
 
@@ -30,12 +36,29 @@ To roll back after a failed upgrade migration, you must also rollback the saved 
 . Delete the version-specific indices created by the failed upgrade migration.
 +
 For example, to rollback from a failed upgrade
-to v7.12.0, use `DELETE /.kibana_7.12.0_*,.kibana_task_manager_7.12.0_*`.
+to v7.12.0, enter:
++
+[source,sh]
+--------------------------------------------
+DELETE /.kibana_7.12.0_*,.kibana_task_manager_7.12.0_*
+--------------------------------------------
+
 . Inspect the output of `GET /_cat/aliases`.
 +
 If the `.kibana` or `.kibana_task_manager` aliases are missing, you must create them manually.
 Find the latest index from the output of `GET /_cat/indices` and create the missing alias to point to the latest index.
-For example, if the `.kibana` alias is missing, and the latest index is `.kibana_3`, create a new alias using `POST /.kibana_3/_aliases/.kibana`.
-. To remove the write block from the roll back indices, use
-`PUT /.kibana,.kibana_task_manager/_settings {"index.blocks.write": false}`
-. Start {kib} on the older version you want to rollback to.
+For example, if the `.kibana` alias is missing, and the latest index is `.kibana_3`, create a new alias using:
++
+[source,sh]
+--------------------------------------------
+POST /.kibana_3/_aliases/.kibana
+--------------------------------------------
+
+. To remove the write block from the roll back indices, enter:
++
+[source,sh]
+--------------------------------------------
+PPUT /.kibana,.kibana_task_manager/_settings {"index.blocks.write": false}
+--------------------------------------------
+
+. Start {kib} on the older version you want to roll back to.

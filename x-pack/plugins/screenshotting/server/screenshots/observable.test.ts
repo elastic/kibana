@@ -8,7 +8,6 @@
 import { interval, throwError, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
-import type { ConditionalHeaders } from '../browsers';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
 import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable';
@@ -24,10 +23,7 @@ describe('ScreenshotObservableHandler', () => {
     layout = createMockLayout();
     logger = { error: jest.fn() } as unknown as jest.Mocked<Logger>;
     options = {
-      conditionalHeaders: {
-        headers: { testHeader: 'testHeadValue' },
-        conditions: {} as unknown as ConditionalHeaders['conditions'],
-      },
+      headers: { testHeader: 'testHeadValue' },
       timeouts: {
         loadDelay: 5000,
         openUrl: 30000,

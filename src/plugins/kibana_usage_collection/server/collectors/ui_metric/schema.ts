@@ -54,14 +54,18 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
-  securitySolution: commonSchema,
-  'securitySolution:overview': commonSchema,
-  'securitySolution:detections': commonSchema,
-  'securitySolution:hosts': commonSchema,
-  'securitySolution:network': commonSchema,
-  'securitySolution:timelines': commonSchema,
-  'securitySolution:case': commonSchema,
-  'securitySolution:administration': commonSchema,
+  securitySolutionUI: commonSchema,
+  'securitySolutionUI:overview': commonSchema,
+  'securitySolutionUI:detections': commonSchema,
+  'securitySolutionUI:hosts': commonSchema,
+  'securitySolutionUI:network': commonSchema,
+  'securitySolutionUI:timelines': commonSchema,
+  'securitySolutionUI:case': commonSchema,
+  'securitySolutionUI:administration': commonSchema,
+  /**
+   * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
+   * @removeBy 9.0.0
+   */
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,

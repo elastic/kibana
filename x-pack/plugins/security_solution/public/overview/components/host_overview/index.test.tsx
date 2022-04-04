@@ -12,11 +12,11 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from './index';
-import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
+import { useHostRiskScore } from '../../../risk_score/containers/all';
 
-jest.mock('../../../hosts/containers/host_risk_score', () => ({
+jest.mock('../../../risk_score/containers/all', () => ({
   useHostRiskScore: jest.fn().mockReturnValue([
     true,
     {

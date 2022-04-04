@@ -44,7 +44,7 @@ describe('RepositoryEsClient', () => {
 
   it('transform elasticsearch errors into saved objects errors', async () => {
     expect.assertions(1);
-    client.bulk = jest.fn().mockRejectedValue(new Error('reason'));
+    client.bulk.mockRejectedValue(new Error('reason'));
     try {
       await repositoryClient.bulk({ body: [] });
     } catch (e) {

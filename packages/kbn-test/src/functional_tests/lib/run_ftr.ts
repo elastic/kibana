@@ -27,6 +27,7 @@ export interface CreateFtrOptions {
   };
   updateSnapshots?: boolean;
   esVersion: EsVersion;
+  dryRun?: boolean;
 }
 
 export interface CreateFtrParams {
@@ -45,6 +46,7 @@ async function createFtr({
     suiteTags,
     updateSnapshots,
     esVersion,
+    dryRun,
   },
 }: CreateFtrParams) {
   const config = await readConfigFile(log, esVersion, configPath);
@@ -58,6 +60,7 @@ async function createFtr({
         mochaOpts: {
           bail: !!bail,
           grep,
+          dryRun: !!dryRun,
         },
         kbnTestServer: {
           installDir,

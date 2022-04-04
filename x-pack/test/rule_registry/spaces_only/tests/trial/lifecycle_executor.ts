@@ -31,15 +31,12 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../plugins/alerting/server';
+import { RuleExecutorOptions } from '../../../../../plugins/alerting/server';
 import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function createLifecycleExecutorApiTest({ getService }: FtrProviderContext) {
-  // The getService('es') client returns the body of the transport requests.
-  // Where the client provided by Kibana returns the request response with headers, body, statusCode... etc.
-  // This cluster client will behave like the KibanaClient.
-  const es = getService('cluster_client');
+  const es = getService('es');
 
   const log = getService('log');
 
@@ -62,7 +59,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     return Promise.resolve(client);
   };
 
-  describe('createLifecycleExecutor', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
     before(async () => {
       // First we need to setup the data service. This happens within the

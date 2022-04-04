@@ -10,7 +10,15 @@ import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { CoreSetup, CoreStart, CoreTheme, ScopedHistory } from 'src/core/public';
+import {
+  ApplicationStart,
+  CoreTheme,
+  FatalErrorsStart,
+  ScopedHistory,
+  DocLinksStart,
+  IUiSettingsClient,
+  ExecutionContextStart,
+} from 'src/core/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 
 import { ExtensionsService } from '../services';
@@ -20,8 +28,9 @@ const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   core: {
-    fatalErrors: CoreStart['fatalErrors'];
-    getUrlForApp: CoreStart['application']['getUrlForApp'];
+    fatalErrors: FatalErrorsStart;
+    getUrlForApp: ApplicationStart['getUrlForApp'];
+    executionContext: ExecutionContextStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
@@ -35,9 +44,9 @@ export interface AppDependencies {
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  uiSettings: CoreSetup['uiSettings'];
+  uiSettings: IUiSettingsClient;
   url: SharePluginStart['url'];
-  docLinks: CoreStart['docLinks'];
+  docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
 }

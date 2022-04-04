@@ -121,6 +121,7 @@ export const EventSchema = schema.maybe(
           schema.object({
             rule: schema.maybe(
               schema.object({
+                consumer: ecsString(),
                 execution: schema.maybe(
                   schema.object({
                     uuid: ecsString(),
@@ -129,13 +130,17 @@ export const EventSchema = schema.maybe(
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsNumber(),
+                        number_of_scheduled_actions: ecsNumber(),
+                        number_of_searches: ecsNumber(),
                         total_indexing_duration_ms: ecsNumber(),
+                        es_search_duration_ms: ecsNumber(),
                         total_search_duration_ms: ecsNumber(),
                         execution_gap_duration_s: ecsNumber(),
                       })
                     ),
                   })
                 ),
+                rule_type_id: ecsString(),
               })
             ),
           })

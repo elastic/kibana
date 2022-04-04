@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
@@ -15,7 +15,8 @@ import type { Writable } from 'stream';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type {
-  ScreenshotOptions as BaseScreenshotOptions,
+  PngScreenshotOptions as BasePngScreenshotOptions,
+  PdfScreenshotOptions as BasePdfScreenshotOptions,
   ScreenshottingStart,
 } from '../../screenshotting/server';
 import type {
@@ -29,29 +30,30 @@ import type { CancellationToken } from '../common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
-import type { LevelLogger } from './lib';
 import type { ReportTaskParams } from './lib/tasks';
 
-/*
- * Plugin Contract
+/**
+ * Plugin Setup Contract
  */
-
 export interface ReportingSetup {
+  /**
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   */
   usesUiCapabilities: () => boolean;
 }
 
-export type ReportingStart = ReportingSetup;
-
-/*
- * Internal Types
+/**
+ * Plugin Start Contract
  */
-
+export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type { BaseParams, BasePayload };
+/**
+ * Internal Types
+ */
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
@@ -69,12 +71,12 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
 
 export type CreateJobFnFactory<CreateJobFnType> = (
   reporting: ReportingCore,
-  logger: LevelLogger
+  logger: Logger
 ) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
-  logger: LevelLogger
+  logger: Logger
 ) => RunTaskFnType;
 
 export interface ExportTypeDefinition<
@@ -91,9 +93,6 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-/*
- * @internal
- */
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
@@ -103,9 +102,6 @@ export interface ReportingSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-/*
- * @internal
- */
 export interface ReportingStartDeps {
   data: DataPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -115,22 +111,19 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-/**
- * @internal
- */
 export interface ReportingRequestHandlerContext {
   reporting: ReportingStart | null;
   core: RequestHandlerContext['core'];
 }
 
-/**
- * @internal
- */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
-/**
- * @internal
- */
-export interface ScreenshotOptions extends Omit<BaseScreenshotOptions, 'timeouts' | 'urls'> {
+export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
+
+export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
+  urls: UrlOrUrlLocatorTuple[];
+}
+
+export type { BaseParams, BasePayload };

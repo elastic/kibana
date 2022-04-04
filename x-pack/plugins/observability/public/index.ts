@@ -27,12 +27,14 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   enableInfrastructureView,
+  enableServiceGroups,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
 export interface ConfigSchema {
   unsafe: {
     alertingExperience: { enabled: boolean };
+    rules: { enabled: boolean };
     cases: { enabled: boolean };
     overviewNext: { enabled: boolean };
   };
@@ -50,6 +52,7 @@ export const plugin: PluginInitializer<
 export * from './components/shared/action_menu/';
 
 export type { UXMetrics } from './components/shared/core_web_vitals/';
+export { DatePickerContextProvider } from './context/date_picker_context';
 export {
   getCoreVitalsComponent,
   HeaderMenuPortal,
@@ -81,7 +84,7 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
-export { useRulesLink } from './hooks/use_rules_link';
+export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';
 

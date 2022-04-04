@@ -111,7 +111,11 @@ export const PositiveRateAgg = (props) => {
             restrict={[KBN_FIELD_TYPES.NUMBER]}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
             uiRestrictions={props.uiRestrictions}
             fullWidth
           />

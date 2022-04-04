@@ -13,10 +13,15 @@ import { HOSTS_PATH } from '../../../common/constants';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}`;
 
-export const navTabsHosts = (
-  hasMlUserPermissions: boolean,
-  isRiskyHostsEnabled: boolean
-): HostsNavTab => {
+export const navTabsHosts = ({
+  hasMlUserPermissions,
+  isRiskyHostsEnabled,
+  isUsersEnabled,
+}: {
+  hasMlUserPermissions: boolean;
+  isRiskyHostsEnabled: boolean;
+  isUsersEnabled: boolean;
+}): HostsNavTab => {
   const hiddenTabs = [];
   const hostsNavTabs = {
     [HostsTableType.hosts]: {
@@ -61,6 +66,12 @@ export const navTabsHosts = (
       href: getTabsOnHostsUrl(HostsTableType.risk),
       disabled: false,
     },
+    [HostsTableType.sessions]: {
+      id: HostsTableType.sessions,
+      name: i18n.NAVIGATION_SESSIONS_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.sessions),
+      disabled: false,
+    },
   };
 
   if (!hasMlUserPermissions) {
@@ -69,6 +80,10 @@ export const navTabsHosts = (
 
   if (!isRiskyHostsEnabled) {
     hiddenTabs.push(HostsTableType.risk);
+  }
+
+  if (isUsersEnabled) {
+    hiddenTabs.push(HostsTableType.authentications);
   }
 
   return omit(hiddenTabs, hostsNavTabs);

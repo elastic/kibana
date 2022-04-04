@@ -25,7 +25,9 @@ the most up-to-date saved object indices.
 When you start a new {kib} installation, an upgrade migration is performed before starting plugins or serving HTTP traffic.
 Before you upgrade, shut down old nodes to prevent losing acknowledged writes.
 To reduce the likelihood of old nodes losing acknowledged writes, {kib} 7.12.0 and later
-adds a write block to the outdated index. Table 1 lists the saved objects indices used by previous {kib} versions.
+adds a write block to the outdated index.
+
+The following tables lists the saved objects indices used by previous {kib} versions.
 
 .Saved object indices and aliases per {kib} version
 [options="header"]

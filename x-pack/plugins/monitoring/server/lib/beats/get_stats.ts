@@ -28,10 +28,10 @@ export function handleResponse(response: BeatsElasticsearchResponse) {
 export async function getStats(req: LegacyRequest, beatsIndexPattern: string, clusterUuid: string) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in getBeats');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const maxBucketSize = config.ui.max_bucket_size;
 
   const params = {
     index: beatsIndexPattern,

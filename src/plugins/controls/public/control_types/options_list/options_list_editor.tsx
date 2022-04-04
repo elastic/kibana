@@ -38,6 +38,8 @@ export const OptionsListEditor = ({
   initialInput,
   setValidState,
   setDefaultTitle,
+  getRelevantDataViewId,
+  setLastUsedDataViewId,
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   // Controls Services Context
   const { dataViews } = pluginServices.getHooks();
@@ -54,7 +56,8 @@ export const OptionsListEditor = ({
     if (state.fieldName) setDefaultTitle(state.fieldName);
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
-      const initialId = initialInput?.dataViewId ?? (await getDefaultId());
+      const initialId =
+        initialInput?.dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       let dataView: DataView | undefined;
       if (initialId) {
         onChange({ dataViewId: initialId });
@@ -76,11 +79,12 @@ export const OptionsListEditor = ({
   const { dataView, fieldName } = state;
   return (
     <>
-      <EuiFormRow fullWidth label={OptionsListStrings.editor.getDataViewTitle()}>
+      <EuiFormRow label={OptionsListStrings.editor.getDataViewTitle()}>
         <DataViewPicker
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
+            setLastUsedDataViewId?.(dataViewId);
             onChange({ dataViewId });
             get(dataViewId).then((newDataView) =>
               setState((s) => ({ ...s, dataView: newDataView }))
@@ -91,7 +95,7 @@ export const OptionsListEditor = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth label={OptionsListStrings.editor.getFieldTitle()}>
+      <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <FieldPicker
           filterPredicate={(field) =>
             (field.aggregatable && field.type === 'string') || field.type === 'boolean'
@@ -105,7 +109,7 @@ export const OptionsListEditor = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth>
+      <EuiFormRow>
         <EuiSwitch
           label={OptionsListStrings.editor.getAllowMultiselectTitle()}
           checked={!state.singleSelect}

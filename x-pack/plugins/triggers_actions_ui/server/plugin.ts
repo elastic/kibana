@@ -6,19 +6,19 @@
  */
 
 import { Logger, Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { PluginSetupContract as AlertsPluginSetup } from '../../alerting/server';
+import { PluginSetupContract as AlertingPluginSetup } from '../../alerting/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { getService, register as registerDataService } from './data';
-import { createHealthRoute } from './routes/health';
+import { createHealthRoute, createConfigRoute } from './routes';
+import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../common';
 
-const BASE_ROUTE = '/api/triggers_actions_ui';
 export interface PluginStartContract {
   data: ReturnType<typeof getService>;
 }
 
 interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  alerting?: AlertsPluginSetup;
+  alerting?: AlertingPluginSetup;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
@@ -36,10 +36,21 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       logger: this.logger,
       data: this.data,
       router,
-      baseRoute: BASE_ROUTE,
+      baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
     });
 
-    createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerting !== undefined);
+    createHealthRoute(
+      this.logger,
+      router,
+      BASE_TRIGGERS_ACTIONS_UI_API_PATH,
+      plugins.alerting !== undefined
+    );
+    createConfigRoute(
+      this.logger,
+      router,
+      BASE_TRIGGERS_ACTIONS_UI_API_PATH,
+      plugins.alerting?.getConfig()
+    );
   }
 
   public start(): PluginStartContract {

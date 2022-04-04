@@ -53,11 +53,15 @@ export const eqlSearchStrategyProvider = (
               ...request.params,
             };
         const response = id
-          ? await client.get({ ...params, id }, { ...request.options, signal: options.abortSignal })
+          ? await client.get(
+              { ...params, id },
+              { ...request.options, signal: options.abortSignal, meta: true }
+            )
           : // @ts-expect-error optional key cannot be used since search doesn't expect undefined
             await client.search(params as EqlSearchStrategyRequest['params'], {
               ...request.options,
               abortController: { signal: options.abortSignal },
+              meta: true,
             });
 
         return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);

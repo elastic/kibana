@@ -38,6 +38,7 @@ export class SessionTimeout {
 
   private isVisible = document.visibilityState !== 'hidden';
   private isFetchingSessionInfo = false;
+  private consecutiveErrorCount = 0;
   private snoozedWarningState?: SessionState;
 
   private sessionState$ = new BehaviorSubject<SessionState>({
@@ -218,7 +219,8 @@ export class SessionTimeout {
     return (
       !this.isFetchingSessionInfo &&
       !this.warningToast &&
-      Date.now() > lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS
+      Date.now() >
+        lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS * Math.exp(this.consecutiveErrorCount)
     );
   }
 
@@ -229,6 +231,7 @@ export class SessionTimeout {
         method: extend ? 'POST' : 'GET',
         asSystemRequest: !extend,
       });
+      this.consecutiveErrorCount = 0;
       if (sessionInfo) {
         const { expiresInMs, canBeExtended } = sessionInfo;
         const nextState: SessionState = {
@@ -243,7 +246,7 @@ export class SessionTimeout {
         return nextState;
       }
     } catch (error) {
-      // ignore
+      this.consecutiveErrorCount++;
     } finally {
       this.isFetchingSessionInfo = false;
     }

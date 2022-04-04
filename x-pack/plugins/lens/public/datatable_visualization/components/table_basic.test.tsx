@@ -84,6 +84,7 @@ function sampleArgs() {
     ],
     sortingColumnId: '',
     sortingDirection: 'none',
+    rowHeightLines: 1,
   };
 
   return { data, args };
@@ -210,7 +211,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
       },
     });
   });
@@ -256,7 +256,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'b',
       },
     });
   });
@@ -301,6 +300,7 @@ describe('DatatableComponent', () => {
       ],
       sortingColumnId: '',
       sortingDirection: 'none',
+      rowHeightLines: 1,
     };
 
     const wrapper = mountWithIntl(
@@ -341,7 +341,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       },
     });
   });
@@ -618,7 +617,9 @@ describe('DatatableComponent', () => {
     wrapper.setProps({ data: newData });
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toEqual(
+    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
+    // which can't be seen, but shows in the text content
+    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toContain(
       'new a'
     );
   });

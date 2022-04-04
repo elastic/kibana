@@ -196,7 +196,15 @@ describe('createRouter', () => {
     it('throws an error if the given path does not match any routes', () => {
       expect(() => {
         router.getParams('/service-map', history.location);
-      }).toThrowError('No matching route found for /service-map');
+      }).toThrowError('/service-map does not match current path /');
+
+      expect(() => {
+        router.getParams('/services/{serviceName}', history.location);
+      }).toThrowError('/services/{serviceName} does not match current path /');
+
+      expect(() => {
+        router.getParams('/service-map', '/services/{serviceName}', history.location);
+      }).toThrowError('None of /service-map, /services/{serviceName} match current path /');
     });
 
     it('does not throw an error if the given path does not match any routes but is marked as optional', () => {
@@ -248,7 +256,7 @@ describe('createRouter', () => {
 
       expect(() => {
         router.matchRoutes('/traces', history.location);
-      }).toThrowError('No matching route found for /traces');
+      }).toThrowError('/traces does not match current path /service-map');
     });
 
     it('applies defaults', () => {

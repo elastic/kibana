@@ -12,7 +12,7 @@ import { useQueryAlerts } from '../../detections/containers/detection_engine/ale
 import { Ecs } from '../../../../cases/common';
 import { buildAlertsQuery, formatAlertToEcsSignal, SignalHit } from '../../common/utils/alerts';
 
-export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, Ecs>] => {
+export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 

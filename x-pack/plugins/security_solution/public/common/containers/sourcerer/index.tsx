@@ -21,10 +21,10 @@ import {
   ALERTS_PATH,
   CASES_PATH,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  UEBA_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -100,15 +100,17 @@ export const useInitSourcerer = (
     activeDataViewIds.forEach((id) => {
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
-        indexFieldsSearch(
-          id,
-          id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
-          id === scopeDataViewId
-            ? selectedPatterns.length === 0 && missingPatterns.length === 0
-            : timelineDataViewId === id
-            ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
-            : false
-        );
+        indexFieldsSearch({
+          dataViewId: id,
+          scopeId:
+            id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
+          needToBeInit:
+            id === scopeDataViewId
+              ? selectedPatterns.length === 0 && missingPatterns.length === 0
+              : timelineDataViewId === id
+              ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+              : false,
+        });
       }
     });
   }, [
@@ -188,7 +190,7 @@ export const useInitSourcerer = (
           if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
-            indexFieldsSearch(response.defaultDataView.id);
+            indexFieldsSearch({ dataViewId: response.defaultDataView.id });
           }
           dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
@@ -396,7 +398,7 @@ export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${UEBA_PATH}/:id`, `${CASES_PATH}/:detailName`],
+    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`],
     strict: false,
   }) == null
     ? SourcererScopeName.default
@@ -406,9 +408,9 @@ export const sourcererPaths = [
   ALERTS_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
+  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
-  UEBA_PATH,
 ];
 
 export const showSourcererByPath = (pathname: string): boolean =>

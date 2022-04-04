@@ -559,36 +559,34 @@ describe('execute()', () => {
     const scopedClusterClient = elasticsearchClientMock
       .createClusterClient()
       .asScoped().asCurrentUser;
-    scopedClusterClient.bulk.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        took: 0,
-        errors: true,
-        items: [
-          {
-            index: {
-              _index: 'indexme',
-              _id: '7buTjHQB0SuNSiS9Hayt',
-              status: 400,
-              error: {
-                type: 'mapper_parsing_exception',
-                reason: 'failed to parse',
-                caused_by: {
-                  type: 'illegal_argument_exception',
-                  reason: 'field name cannot be an empty string',
-                },
+    scopedClusterClient.bulk.mockResponse({
+      took: 0,
+      errors: true,
+      items: [
+        {
+          index: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'failed to parse',
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason: 'field name cannot be an empty string',
               },
             },
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     expect(await actionType.executor({ actionId, config, secrets, params, services }))
       .toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
         "message": "error indexing documents",
-        "serviceMessage": "Cannot destructure property 'body' of '(intermediate value)' as it is undefined.",
+        "serviceMessage": "Cannot read properties of undefined (reading 'items')",
         "status": "error",
       }
     `);

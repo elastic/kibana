@@ -144,8 +144,6 @@ describe('getFullAgentPolicy', () => {
         default: {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
-          ca_sha256: undefined,
-          api_key: undefined,
         },
       },
       inputs: [],
@@ -177,8 +175,6 @@ describe('getFullAgentPolicy', () => {
         default: {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
-          ca_sha256: undefined,
-          api_key: undefined,
         },
       },
       inputs: [],
@@ -212,8 +208,6 @@ describe('getFullAgentPolicy', () => {
         default: {
           type: 'elasticsearch',
           hosts: ['http://127.0.0.1:9201'],
-          ca_sha256: undefined,
-          api_key: undefined,
         },
       },
       inputs: [],
@@ -315,13 +309,10 @@ describe('transformOutputToFullPolicyOutput', () => {
       is_default_monitoring: false,
       name: 'test output',
       type: 'elasticsearch',
-      api_key: 'apikey123',
     });
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "api_key": "apikey123",
-        "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
         ],
@@ -337,7 +328,6 @@ describe('transformOutputToFullPolicyOutput', () => {
       is_default_monitoring: false,
       name: 'test output',
       type: 'elasticsearch',
-      api_key: 'apikey123',
       ca_trusted_fingerprint: 'fingerprint123',
       config_yaml: `
 test: 1234      
@@ -347,8 +337,6 @@ ssl.test: 123
 
     expect(policyOutput).toMatchInlineSnapshot(`
       Object {
-        "api_key": "apikey123",
-        "ca_sha256": undefined,
         "hosts": Array [
           "http://host.fr",
         ],
@@ -356,6 +344,54 @@ ssl.test: 123
         "ssl.test": 123,
         "test": 1234,
         "type": "elasticsearch",
+      }
+    `);
+  });
+
+  it('should return placeholder ES_USERNAME and ES_PASSWORD for elasticsearch output type in standalone ', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+      },
+      true
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "password": "{ES_PASSWORD}",
+        "type": "elasticsearch",
+        "username": "{ES_USERNAME}",
+      }
+    `);
+  });
+
+  it('should not return placeholder ES_USERNAME and ES_PASSWORD for logstash output type in standalone ', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['host.fr:3332'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'logstash',
+      },
+      true
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "host.fr:3332",
+        ],
+        "type": "logstash",
       }
     `);
   });

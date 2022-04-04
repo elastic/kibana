@@ -11,11 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiDataGridColumn, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
-import type { DataView } from '../../../../data/common';
+import type { DataView } from '../../../../data_views/public';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
 import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
+import { buildCopyColumnNameButton } from './copy_column_name_button';
 
 export function getLeadControlColumns() {
   return [
@@ -80,6 +81,7 @@ export function buildEuiGridColumn(
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
+      additional: columnName === '_source' ? undefined : [buildCopyColumnNameButton(columnName)],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
   };

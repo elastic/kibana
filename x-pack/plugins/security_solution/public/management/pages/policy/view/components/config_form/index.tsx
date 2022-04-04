@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { ThemeContext } from 'styled-components';
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { OS_TITLES } from '../../../../../common/translations';
 
 const TITLES = {

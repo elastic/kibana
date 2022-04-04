@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiFieldText,
-  prettyDuration,
+  usePrettyDuration,
   EuiIconProps,
   EuiSuperUpdateButton,
   OnRefreshProps,
@@ -92,12 +92,12 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
     return valueAsMoment.toISOString();
   }
 
-  const dateRangePretty = prettyDuration(
-    toAbsoluteString(from),
-    toAbsoluteString(to),
-    [],
-    dateFormat
-  );
+  const dateRangePretty = usePrettyDuration({
+    timeFrom: toAbsoluteString(from),
+    timeTo: toAbsoluteString(to),
+    quickRanges: [],
+    dateFormat,
+  });
 
   return (
     <div
@@ -284,7 +284,6 @@ export const QueryBarTopRow = React.memo(
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
       });
 

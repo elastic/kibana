@@ -181,59 +181,6 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
   return [...acc.values()];
 }
 
-interface IndexStats {
-  indices: {
-    [indexName: string]: {
-      total: {
-        docs: {
-          count: number;
-          deleted: number;
-        };
-        store: {
-          size_in_bytes: number;
-        };
-      };
-    };
-  };
-}
-
-interface IndexMappings {
-  [indexName: string]: {
-    mappings: {
-      _meta?: {
-        beat?: string;
-
-        // Ingest Manager provided metadata
-        package?: {
-          name?: string;
-        };
-        managed_by?: string; // Typically "ingest-manager"
-      };
-      properties: {
-        data_stream?: {
-          properties: {
-            dataset?: {
-              type: string;
-              value?: string;
-            };
-            type?: {
-              type: string;
-              value?: string;
-            };
-          };
-        };
-        ecs?: {
-          properties: {
-            version?: {
-              type: string;
-            };
-          };
-        };
-      };
-    };
-  };
-}
-
 export async function getDataTelemetry(esClient: ElasticsearchClient) {
   try {
     const index = [
@@ -271,9 +218,9 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
       metric: ['docs', 'store'],
       filter_path: ['indices.*.total'],
     };
-    const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
-      esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
-      esClient.indices.stats<IndexStats>(indicesStatsParams),
+    const [indexMappings, indexStats] = await Promise.all([
+      esClient.indices.getMapping(indexMappingsParams),
+      esClient.indices.stats(indicesStatsParams),
     ]);
 
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
@@ -281,6 +228,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
+        // @ts-expect-error 'properties' does not exist on type 'MappingMatchOnlyTextProperty'
         isECS: !!indexMappings[name]?.mappings?.properties?.ecs?.properties?.version?.type,
         shipper: indexMappings[name]?.mappings?._meta?.beat,
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,

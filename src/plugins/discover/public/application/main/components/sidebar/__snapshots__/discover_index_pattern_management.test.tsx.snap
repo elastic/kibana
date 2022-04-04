@@ -654,6 +654,7 @@ exports[`Discover DataView Management renders correctly 1`] = `
           "_type",
           "_source",
         ],
+        "namespaces": Array [],
         "originalSavedObjectBody": Object {},
         "resetOriginalSavedObjectBody": [Function],
         "runtimeFieldMap": Object {},
@@ -706,7 +707,6 @@ exports[`Discover DataView Management renders correctly 1`] = `
               aria-label="Data view settings"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
               data-test-subj="discoverIndexPatternActions"
-              disabled={false}
               onClick={[Function]}
               type="button"
             >

@@ -181,7 +181,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
     initialPageSize: pageSize,
     totalItemCount: groupsList.length,
     pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   const sorting = {

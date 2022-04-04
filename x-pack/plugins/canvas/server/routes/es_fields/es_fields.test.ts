@@ -33,29 +33,27 @@ describe('Retrieve ES Fields', () => {
   it(`returns 200 with fields from existing index/data view`, async () => {
     const index = 'test';
     const mockResults = {
-      body: {
-        indices: ['test'],
-        fields: {
-          '@timestamp': {
-            date: {
-              type: 'date',
-              searchable: true,
-              aggregatable: true,
-            },
+      indices: ['test'],
+      fields: {
+        '@timestamp': {
+          date: {
+            type: 'date',
+            searchable: true,
+            aggregatable: true,
           },
-          name: {
-            text: {
-              type: 'text',
-              searchable: true,
-              aggregatable: false,
-            },
+        },
+        name: {
+          text: {
+            type: 'text',
+            searchable: true,
+            aggregatable: false,
           },
-          products: {
-            object: {
-              type: 'object',
-              searchable: false,
-              aggregatable: false,
-            },
+        },
+        products: {
+          object: {
+            type: 'object',
+            searchable: false,
+            aggregatable: false,
           },
         },
       },
@@ -87,7 +85,7 @@ describe('Retrieve ES Fields', () => {
 
   it(`returns 200 with empty object when index/data view has no fields`, async () => {
     const index = 'test';
-    const mockResults = { body: { indices: [index], fields: {} } };
+    const mockResults = { indices: [index], fields: {} };
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
       path,
@@ -111,10 +109,8 @@ describe('Retrieve ES Fields', () => {
     const index = 'test';
 
     const mockResults = {
-      body: {
-        indices: [index],
-        fields: {},
-      },
+      indices: [index],
+      fields: {},
     };
 
     const request = httpServerMock.createKibanaRequest({

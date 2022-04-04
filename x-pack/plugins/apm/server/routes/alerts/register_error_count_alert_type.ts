@@ -18,6 +18,7 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { getAlertUrlErrorCount } from '../../../common/utils/formatters';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
@@ -52,6 +53,7 @@ export function registerErrorCountAlertType({
   logger,
   ruleDataClient,
   config$,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -74,6 +76,8 @@ export function registerErrorCountAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
+          apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
@@ -82,11 +86,11 @@ export function registerErrorCountAlertType({
       executor: async ({ services, params }) => {
         const config = await config$.pipe(take(1)).toPromise();
         const ruleParams = params;
+
         const indices = await getApmIndices({
           config,
           savedObjectsClient: services.savedObjectsClient,
         });
-
         const searchParams = {
           index: indices.error,
           size: 0,
@@ -139,6 +143,25 @@ export function registerErrorCountAlertType({
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
             const { serviceName, environment, errorCount } = result;
+            const alertReason = formatErrorCountReason({
+              serviceName,
+              threshold: ruleParams.threshold,
+              measured: errorCount,
+              windowSize: ruleParams.windowSize,
+              windowUnit: ruleParams.windowUnit,
+            });
+
+            const relativeViewInAppUrl = getAlertUrlErrorCount(
+              serviceName,
+              getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]
+            );
+
+            const viewInAppUrl = basePath.publicBaseUrl
+              ? new URL(
+                  basePath.prepend(relativeViewInAppUrl),
+                  basePath.publicBaseUrl
+                ).toString()
+              : relativeViewInAppUrl;
 
             services
               .alertWithLifecycle({
@@ -151,13 +174,7 @@ export function registerErrorCountAlertType({
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-                  [ALERT_REASON]: formatErrorCountReason({
-                    serviceName,
-                    threshold: ruleParams.threshold,
-                    measured: errorCount,
-                    windowSize: ruleParams.windowSize,
-                    windowUnit: ruleParams.windowUnit,
-                  }),
+                  [ALERT_REASON]: alertReason,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -166,6 +183,8 @@ export function registerErrorCountAlertType({
                 threshold: ruleParams.threshold,
                 triggerValue: errorCount,
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                reason: alertReason,
+                viewInAppUrl,
               });
           });
 

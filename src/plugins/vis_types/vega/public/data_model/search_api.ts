@@ -15,6 +15,7 @@ import {
   DataPublicPluginStart,
   IEsSearchResponse,
 } from '../../../../data/public';
+import type { DataViewsPublicPluginStart } from '../../../../data_views/public';
 import { search as dataPluginSearch } from '../../../../data/public';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 import type { RequestResponder } from '../../../../inspector/public';
@@ -32,7 +33,7 @@ export const extendSearchParamsWithRuntimeFields = async (
       const indexPattern = (await indexPatterns.find(indexPatternString)).find(
         (index) => index.title === indexPatternString
       );
-      runtimeMappings = indexPattern?.getComputedFields().runtimeFields;
+      runtimeMappings = indexPattern?.getRuntimeMappings();
     }
 
     return {
@@ -48,7 +49,7 @@ export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
   injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
-  indexPatterns: DataPublicPluginStart['indexPatterns'];
+  indexPatterns: DataViewsPublicPluginStart;
 }
 
 export class SearchAPI {

@@ -16,7 +16,15 @@ export type ManagementLinkFn = () => ManagementLink;
 
 export interface LocatorParams<P extends SerializableRecord = SerializableRecord> {
   id: string;
+
+  /**
+   * Kibana version used to create the params
+   */
   version: string;
+
+  /**
+   * Data to recreate the user's state in the application
+   */
   params: P;
 }
 

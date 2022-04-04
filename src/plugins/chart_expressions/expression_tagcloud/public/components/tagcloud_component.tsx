@@ -12,14 +12,15 @@ import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
 import type { PaletteRegistry, PaletteOutput } from '../../../../charts/public';
-import {
-  Datatable,
-  DatatableColumn,
-  IInterpreterRenderHandlers,
-} from '../../../../expressions/public';
+import { IInterpreterRenderHandlers } from '../../../../expressions/public';
 import { getFormatService } from '../format_service';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import {
+  getColumnByAccessor,
+  getAccessor,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import { TagcloudRendererConfig } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 
 import './tag_cloud.scss';
 
@@ -60,29 +61,18 @@ const getColor = (
 };
 
 const ORIENTATIONS = {
-  single: {
+  [Orientation.SINGLE]: {
     endAngle: 0,
     angleCount: 360,
   },
-  'right angled': {
+  [Orientation.RIGHT_ANGLED]: {
     endAngle: 90,
     angleCount: 2,
   },
-  multiple: {
+  [Orientation.MULTIPLE]: {
     endAngle: -90,
     angleCount: 12,
   },
-};
-
-const getColumn = (
-  accessor: ExpressionValueVisDimension['accessor'],
-  columns: Datatable['columns']
-): DatatableColumn => {
-  if (typeof accessor === 'number') {
-    return columns[accessor];
-  }
-
-  return columns.filter(({ id }) => id === accessor.id)[0];
 };
 
 export const TagCloudChart = ({
@@ -95,11 +85,15 @@ export const TagCloudChart = ({
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
-  const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
+
+  const bucketFormatter = bucket
+    ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
+    : null;
 
   const tagCloudData = useMemo(() => {
-    const tagColumn = bucket ? getColumn(bucket.accessor, visData.columns).id : null;
-    const metricColumn = getColumn(metric.accessor, visData.columns).id;
+    const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
+    const tagColumn = bucket ? bucketColumn!.id : null;
+    const metricColumn = getColumnByAccessor(metric, visData.columns)!.id;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);
     const values = bucket && tagColumn !== null ? visData.rows.map((row) => row[tagColumn]) : [];
@@ -120,7 +114,7 @@ export const TagCloudChart = ({
   }, [
     bucket,
     bucketFormatter,
-    metric.accessor,
+    metric,
     palette,
     palettesRegistry,
     syncColors,
@@ -129,8 +123,8 @@ export const TagCloudChart = ({
   ]);
 
   const label = bucket
-    ? `${getColumn(bucket.accessor, visData.columns).name} - ${
-        getColumn(metric.accessor, visData.columns).name
+    ? `${getColumnByAccessor(bucket, visData.columns)!.name} - ${
+        getColumnByAccessor(metric, visData.columns)!.name
       }`
     : '';
 
@@ -156,7 +150,7 @@ export const TagCloudChart = ({
       if (!bucket) {
         return;
       }
-      const termsBucketId = getColumn(bucket.accessor, visData.columns).id;
+      const termsBucketId = getColumnByAccessor(bucket, visData.columns)!.id;
       const clickedValue = elements[0][0].text;
 
       const rowIndex = visData.rows.findIndex((row) => {
@@ -176,7 +170,7 @@ export const TagCloudChart = ({
           data: [
             {
               table: visData,
-              column: bucket.accessor,
+              column: getAccessor(bucket),
               row: rowIndex,
             },
           ],
@@ -210,7 +204,7 @@ export const TagCloudChart = ({
               maxFontSize={visParams.maxFontSize}
               spiral="archimedean"
               data={tagCloudData}
-              weightFn={scale === 'square root' ? 'squareRoot' : scale}
+              weightFn={scale === ScaleOptions.SQUARE_ROOT ? 'squareRoot' : scale}
               outOfRoomCallback={() => {
                 setWarning(true);
               }}

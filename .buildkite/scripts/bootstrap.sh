@@ -15,17 +15,19 @@ if ! yarn kbn bootstrap; then
   rm -rf node_modules
 
   echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap
+  yarn kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  verify_no_git_changes 'yarn kbn bootstrap'
+  check_for_changed_files 'yarn kbn bootstrap'
 fi
 
 ###
 ### upload ts-refs-cache artifacts as quickly as possible so they are available for download
 ###
 if [[ "${BUILD_TS_REFS_CACHE_CAPTURE:-}" == "true" ]]; then
+  echo "--- Build ts-refs-cache"
+  node scripts/build_ts_refs.js --ignore-type-failures
   echo "--- Upload ts-refs-cache"
   cd "$KIBANA_DIR/target/ts_refs_cache"
   gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'

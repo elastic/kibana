@@ -156,14 +156,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     };
     try {
       // @ts-expect-error authentication.email can be optional
-      tokens = (
-        await this.options.client.asInternalUser.security.getToken({
-          body: {
-            grant_type: '_kerberos',
-            kerberos_ticket: kerberosTicket,
-          },
-        })
-      ).body;
+      tokens = await this.options.client.asInternalUser.security.getToken({
+        body: {
+          grant_type: '_kerberos',
+          kerberos_ticket: kerberosTicket,
+        },
+      });
     } catch (err) {
       this.logger.debug(
         `Failed to exchange SPNEGO token for an access token: ${getDetailedErrorMessage(err)}`

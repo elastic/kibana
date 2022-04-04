@@ -237,7 +237,9 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
             color="inherit"
             data-euiicon-type="plusInCircle"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
         <button
           aria-label="Remove Color"
@@ -252,7 +254,9 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
             color="inherit"
             data-euiicon-type="minusInCircle"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
       </div>
     </div>
@@ -318,7 +322,9 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
-            />
+            >
+              
+            </span>
           </div>
         </div>
       </button>
@@ -526,12 +532,13 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -541,7 +548,9 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -778,7 +787,6 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="Add Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -788,7 +796,9 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
@@ -803,7 +813,9 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -848,7 +860,9 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
-            />
+            >
+              
+            </span>
           </div>
         </div>
       </button>
@@ -972,12 +986,13 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
@@ -987,7 +1002,9 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
           color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>

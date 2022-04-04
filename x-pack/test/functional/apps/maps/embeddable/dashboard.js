@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }) {
           'meta_for_geoshape_data_reader',
           'global_dashboard_read',
         ],
-        false
+        { skipBrowserRefresh: true }
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',

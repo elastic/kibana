@@ -86,3 +86,11 @@ export type MlGetDFAParams =
   | Parameters<MlClient['getDataFrameAnalytics']>
   | Parameters<MlClient['getDataFrameAnalyticsStats']>
   | Parameters<MlClient['putDataFrameAnalytics']>;
+
+export type MlGetTrainedModelParams =
+  | Parameters<MlClient['putTrainedModel']>
+  | Parameters<MlClient['deleteTrainedModel']>
+  | Parameters<MlClient['getTrainedModels']>
+  | Parameters<MlClient['getTrainedModelsStats']>
+  | Parameters<MlClient['startTrainedModelDeployment']>
+  | Parameters<MlClient['stopTrainedModelDeployment']>;

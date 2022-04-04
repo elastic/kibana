@@ -90,3 +90,127 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:ce7e1250-3322-11eb-94c1-db6995e84f6d",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.16.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "unrecognized",
+        "taskType": "alerting:0359d7fcc04da9878ee9aadbda38ba55"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:fe7e1250-3322-11eb-94c1-db6395e84f6e",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.16.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\"}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "unrecognized",
+        "taskType": "sampleTaskRemovedType"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:ge7e1250-3322-11eb-94c1-db6395e84f6g",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.16.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\",\"waitForParams\":false}",
+        "retryAt": null,
+        "runAt": "2020-11-30T16:00:00.000Z",
+        "scheduledAt": "2020-11-30T15:00:00.000Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "idle",
+        "taskType": "sampleTask"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:ie7e1250-3322-11eb-94c1-db6395e84f6i",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.16.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"spaceId\":\"user1\",\"alertId\":\"0359d7fcc04da9878ee9aadbda38ba55\",\"waitForParams\":false}",
+        "retryAt": "2020-11-30T17:00:00.000Z",
+        "runAt": "2020-11-30T16:00:00.000Z",
+        "scheduledAt": "2020-11-30T15:00:00.000Z",
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "running",
+        "taskType": "sampleTask"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}

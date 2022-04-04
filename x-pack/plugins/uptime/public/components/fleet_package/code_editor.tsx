@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { EuiPanel } from '@elastic/eui';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { CodeEditor as MonacoCodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 import { MonacoEditorLangId } from './types';
@@ -28,7 +29,11 @@ interface Props {
 export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value }: Props) => {
   return (
     <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
-      <div id={`${id}-editor`} aria-label={ariaLabel} data-test-subj="codeEditorContainer">
+      <MonacoCodeContainer
+        id={`${id}-editor`}
+        aria-label={ariaLabel}
+        data-test-subj="codeEditorContainer"
+      >
         <MonacoCodeEditor
           languageId={languageId}
           width="100%"
@@ -41,7 +46,13 @@ export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value }: Props
           isCopyable={true}
           allowFullScreen={true}
         />
-      </div>
+      </MonacoCodeContainer>
     </CodeEditorContainer>
   );
 };
+
+const MonacoCodeContainer = euiStyled.div`
+  & > .kibanaCodeEditor {
+    z-index: 0;
+  }
+`;

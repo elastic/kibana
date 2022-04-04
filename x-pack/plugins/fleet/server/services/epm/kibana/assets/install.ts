@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setTimeout } from 'timers/promises';
+
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
@@ -13,7 +15,6 @@ import type {
   Logger,
 } from 'src/core/server';
 import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
-
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
@@ -51,7 +52,10 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
+  [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
+    KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
+  [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -166,7 +170,40 @@ export async function getKibanaAssets(
   return result;
 }
 
-async function installKibanaSavedObjects({
+const isImportConflictError = (e: SavedObjectsImportFailure) => e?.error?.type === 'conflict';
+/**
+ * retry saved object import if only conflict errors are encountered
+ */
+async function retryImportOnConflictError(
+  importCall: () => ReturnType<SavedObjectsImporterContract['import']>,
+  {
+    logger,
+    maxAttempts = 50,
+    _attempt = 0,
+  }: { logger?: Logger; _attempt?: number; maxAttempts?: number } = {}
+): ReturnType<SavedObjectsImporterContract['import']> {
+  const result = await importCall();
+
+  const errors = result.errors ?? [];
+  if (_attempt < maxAttempts && errors.length && errors.every(isImportConflictError)) {
+    const retryCount = _attempt + 1;
+    const retryDelayMs = 1000 + Math.floor(Math.random() * 3000); // 1s + 0-3s of jitter
+
+    logger?.debug(
+      `Retrying import operation after [${
+        retryDelayMs * 1000
+      }s] due to conflict errors: ${JSON.stringify(errors)}`
+    );
+
+    await setTimeout(retryDelayMs);
+    return retryImportOnConflictError(importCall, { logger, _attempt: retryCount });
+  }
+
+  return result;
+}
+
+// only exported for testing
+export async function installKibanaSavedObjects({
   savedObjectsImporter,
   kibanaAssets,
   logger,
@@ -179,19 +216,27 @@ async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
-  let allSuccessResults = [];
+  let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
-    const { successResults: importSuccessResults = [], errors: importErrors = [] } =
-      await savedObjectsImporter.import({
+    const {
+      successResults: importSuccessResults = [],
+      errors: importErrors = [],
+      success,
+    } = await retryImportOnConflictError(() =>
+      savedObjectsImporter.import({
         overwrite: true,
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
-      });
+      })
+    );
 
-    allSuccessResults = importSuccessResults;
+    if (success) {
+      allSuccessResults = importSuccessResults;
+    }
+
     const [referenceErrors, otherErrors] = partition(
       importErrors,
       (e) => e?.error?.type === 'missing_references'
@@ -204,10 +249,11 @@ async function installKibanaSavedObjects({
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
       );
     }
+
     /*
     A reference error here means that a saved object reference in the references
     array cannot be found. This is an error in the package its-self but not a fatal
-    one. For example a dashboard may still refer to the legacy `metricbeat-*` index 
+    one. For example a dashboard may still refer to the legacy `metricbeat-*` index
     pattern. We ignore reference errors here so that legacy version of a package
     can still be installed, but if a warning is logged it should be reported to
     the integrations team. */
@@ -218,20 +264,22 @@ async function installKibanaSavedObjects({
         } reference errors creating saved objects: ${formatImportErrorsForLog(referenceErrors)}`
       );
 
-      const idsToResolve = new Set(referenceErrors.map(({ id }) => id));
-
-      const resolveSavedObjects = toBeSavedObjects.filter(({ id }) => idsToResolve.has(id));
-      const retries = referenceErrors.map(({ id, type }) => ({
-        id,
-        type,
-        ignoreMissingReferences: true,
-        replaceReferences: [],
-        overwrite: true,
-      }));
+      const retries = toBeSavedObjects.map(({ id, type }) => {
+        if (referenceErrors.find(({ id: idToSearch }) => idToSearch === id)) {
+          return {
+            id,
+            type,
+            ignoreMissingReferences: true,
+            replaceReferences: [],
+            overwrite: true,
+          };
+        }
+        return { id, type, overwrite: true, replaceReferences: [] };
+      });
 
       const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =
         await savedObjectsImporter.resolveImportErrors({
-          readStream: createListStream(resolveSavedObjects),
+          readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
           retries,
         });
@@ -244,7 +292,7 @@ async function installKibanaSavedObjects({
         );
       }
 
-      allSuccessResults = [...allSuccessResults, ...resolveSuccessResults];
+      allSuccessResults = allSuccessResults.concat(resolveSuccessResults);
     }
 
     return allSuccessResults;

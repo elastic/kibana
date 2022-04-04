@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from 'src/plugins/data/common';
+import type { DataViewField } from 'src/plugins/data_views/public';
 import type { Action } from 'src/plugins/ui_actions/public';
 import { getVisualizeInformation } from './visualize_trigger_utils';
 

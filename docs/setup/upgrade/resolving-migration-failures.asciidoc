@@ -5,7 +5,7 @@ Migrating {kib} primarily involves migrating saved object documents to be compat
 with the new version.
 
 [float]
-==== Resolve saved object migration failures
+==== Saved object migration failures
 
 If {kib} unexpectedly terminates while migrating a saved object index, {kib} automatically attempts to
 perform the migration again when the process restarts. Do not delete any saved objects indices to
@@ -21,14 +21,14 @@ If you're unable to resolve a failed migration, contact Support.
 
 [float]
 [[upgrade-migrations-old-indices]]
-==== Handle old `.kibana_N` indices
+==== Old `.kibana_N` indices
 
 After the migrations complete, multiple {kib} indices are created in {es}: (`.kibana_1`, `.kibana_2`, `.kibana_7.12.0` etc).
 {kib} only uses the index that the `.kibana` and `.kibana_task_manager` aliases point to.
 The other {kib} indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling {kib} back to a previous version.
 
 [float]
-==== Handle known issues with {fleet} beta
+==== Known issues with {fleet} beta
 If you see a`timeout_exception` or `receive_timeout_transport_exception` error,
 it might be from a known known issue in 7.12.0 if you tried the {fleet} beta.
 Upgrade migrations fail because of a large number of documents in the `.kibana` index,
@@ -45,7 +45,7 @@ For instructions on how to mitigate the known issue, refer to https://github.com
 
 
 [float]
-==== Handle corrupt saved objects
+==== Corrupt saved objects
 To find and remedy problems caused by corrupt documents, we highly recommend testing your {kib} upgrade in a development cluster,
 especially when there are custom integrations that create saved objects in your environment.
 
@@ -87,13 +87,13 @@ The dashboard with the `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` ID that belongs to
 
 [float]
 [[unknown-saved-object-types]]
-==== Handle documents for unknown saved objects
+==== Documents for unknown saved objects
 Migrations will fail if saved objects belong to an unknown
 saved object type. Unknown saved objects are typically caused by
 to the {es} index, or by disabling a plugin that had previously
 created a saved object.
 
-We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant] 
+We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant]
 to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
 object types will also log the following warning message:
 
@@ -110,7 +110,7 @@ Unable to complete saved object migrations for the [.kibana] index: Migration fa
 --------------------------------------------
 
 [float]
-==== Handle incompatible settings or mappings
+==== Incompatible settings or mappings
 Matching index templates that specify `settings.refresh_interval` or
 `mappings` are known to interfere with {kib} upgrades.
 This can happen when index templates are defined manually.
@@ -118,7 +118,7 @@ This can happen when index templates are defined manually.
 To make sure the index templates won't apply to new `.kibana*` indices, narrow down the {data-sources} of any user-defined index templates.
 
 [float]
-==== Handle incompatible `xpack.tasks.index` configuration setting
+==== Incompatible `xpack.tasks.index` configuration setting
 In {kib} 7.5.0 and earlier, when the task manager index is set to `.tasks`
 with the configuration setting `xpack.tasks.index: ".tasks"`,
 upgrade migrations fail. In {kib} 7.5.1 and later, the incompatible configuration

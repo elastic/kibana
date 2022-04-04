@@ -116,7 +116,7 @@ describe('createTransport', () => {
     });
 
     describe('`meta` option', () => {
-      it('adds `meta: true` to the options when not provided', async () => {
+      it('does not adds `meta: true` to the options when not provided', async () => {
         const transportClass = createTransportClass();
         const transport = new transportClass(baseConstructorParams);
         const requestOptions = { method: 'GET', path: '/' };
@@ -126,7 +126,7 @@ describe('createTransport', () => {
         expect(transportRequestMock).toHaveBeenCalledTimes(1);
         expect(transportRequestMock).toHaveBeenCalledWith(
           expect.any(Object),
-          expect.objectContaining({
+          expect.not.objectContaining({
             meta: true,
           })
         );

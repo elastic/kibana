@@ -10,6 +10,7 @@ import { FlowTarget } from '../../../../common/search_strategy';
 
 import { HostsType } from '../../../hosts/store/model';
 import { NetworkType } from '../../../network/store/model';
+import { UsersType } from '../../../users/store/model';
 
 export interface Source {
   job_id: string;
@@ -62,35 +63,46 @@ export interface Anomalies {
 
 export type NarrowDateRange = (score: Anomaly, interval: string) => void;
 
-export interface AnomaliesByHost {
-  hostName: string;
+export interface AnomaliesBy {
   anomaly: Anomaly;
+}
+
+export interface AnomaliesByHost extends AnomaliesBy {
+  hostName: string;
 }
 
 export type DestinationOrSource = 'source.ip' | 'destination.ip';
 
-export interface AnomaliesByNetwork {
+export interface AnomaliesByNetwork extends AnomaliesBy {
   type: DestinationOrSource;
   ip: string;
-  anomaly: Anomaly;
 }
 
-export interface HostOrNetworkProps {
+export interface AnomaliesByUser extends AnomaliesBy {
+  userName: string;
+}
+
+export interface AnomaliesTableCommonProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
   skip: boolean;
 }
 
-export type AnomaliesHostTableProps = HostOrNetworkProps & {
+export type AnomaliesHostTableProps = AnomaliesTableCommonProps & {
   hostName?: string;
   type: HostsType;
 };
 
-export type AnomaliesNetworkTableProps = HostOrNetworkProps & {
+export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
   ip?: string;
   type: NetworkType;
   flowTarget?: FlowTarget;
+};
+
+export type AnomaliesUserTableProps = AnomaliesTableCommonProps & {
+  userName?: string;
+  type: UsersType;
 };
 
 const sourceOrDestination = ['source.ip', 'destination.ip'];

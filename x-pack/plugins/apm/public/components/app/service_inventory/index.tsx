@@ -5,62 +5,64 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import uuid from 'uuid';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useUpgradeAssistantHref } from '../../shared/links/kibana';
 import { SearchBar } from '../../shared/search_bar';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { joinByKey } from '../../../../common/utils/join_by_key';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { orderServiceItems } from './service_list/order_service_items';
 
 const initialData = {
   requestId: '',
-  mainStatisticsData: {
-    items: [],
-    hasHistoricalData: true,
-    hasLegacyData: false,
-  },
+  items: [],
+  hasHistoricalData: true,
+  hasLegacyData: false,
 };
-
-let hasDisplayedToast = false;
 
 function useServicesFetcher() {
   const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useLegacyUrlParams();
-
-  const {
-    query: { rangeFrom, rangeTo, environment, kuery },
-  } = useAnyOfApmParams('/services/{serviceName}', '/services');
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      offset,
+      comparisonEnabled,
+    },
+  } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { core } = useApmPluginContext();
-  const upgradeAssistantHref = useUpgradeAssistantHref();
+  const sortedAndFilteredServicesFetch = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/sorted_and_filtered_services', {
+        params: {
+          query: {
+            start,
+            end,
+            environment,
+            kuery,
+            serviceGroup,
+          },
+        },
+      });
+    },
+    [start, end, environment, kuery, serviceGroup]
+  );
 
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
-
-  const { data = initialData, status: mainStatisticsStatus } = useFetcher(
+  const mainStatisticsFetch = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/services', {
@@ -70,22 +72,23 @@ function useServicesFetcher() {
               kuery,
               start,
               end,
+              serviceGroup,
             },
           },
         }).then((mainStatisticsData) => {
           return {
             requestId: uuid(),
-            mainStatisticsData,
+            ...mainStatisticsData,
           };
         });
       }
     },
-    [environment, kuery, start, end]
+    [environment, kuery, start, end, serviceGroup]
   );
 
-  const { mainStatisticsData, requestId } = data;
+  const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
 
-  const { data: comparisonData } = useFetcher(
+  const comparisonFetch = useFetcher(
     (callApmApi) => {
       if (start && end && mainStatisticsData.items.length) {
         return callApmApi('GET /internal/apm/services/detailed_statistics', {
@@ -101,7 +104,7 @@ function useServicesFetcher() {
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
-              offset,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         });
@@ -109,54 +112,23 @@ function useServicesFetcher() {
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, offset],
+    [mainStatisticsData.requestId, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
-  useEffect(() => {
-    if (mainStatisticsData.hasLegacyData && !hasDisplayedToast) {
-      hasDisplayedToast = true;
-
-      core.notifications.toasts.addWarning({
-        title: i18n.translate('xpack.apm.serviceInventory.toastTitle', {
-          defaultMessage:
-            'Legacy data was detected within the selected time range',
-        }),
-        text: toMountPoint(
-          <p>
-            {i18n.translate('xpack.apm.serviceInventory.toastText', {
-              defaultMessage:
-                "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in ",
-            })}
-
-            <EuiLink href={upgradeAssistantHref}>
-              {i18n.translate(
-                'xpack.apm.serviceInventory.upgradeAssistantLinkText',
-                {
-                  defaultMessage: 'the upgrade assistant',
-                }
-              )}
-            </EuiLink>
-          </p>
-        ),
-      });
-    }
-  }, [
-    mainStatisticsData.hasLegacyData,
-    upgradeAssistantHref,
-    core.notifications.toasts,
-  ]);
-
   return {
-    mainStatisticsData,
-    mainStatisticsStatus,
-    comparisonData,
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+    comparisonFetch,
   };
 }
 
 export function ServiceInventory() {
-  const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
-    useServicesFetcher();
+  const {
+    sortedAndFilteredServicesFetch,
+    mainStatisticsFetch,
+    comparisonFetch,
+  } = useServicesFetcher();
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
@@ -169,8 +141,13 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
-  const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
+  const isLoading =
+    sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
+    (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
+      sortedAndFilteredServicesFetch.data?.services.length === 0 &&
+      mainStatisticsFetch.status === FETCH_STATUS.LOADING);
+
+  const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (
     <EuiEmptyPrompt
       title={
@@ -182,6 +159,40 @@ export function ServiceInventory() {
       }
       titleSize="s"
     />
+  );
+
+  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
+  const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
+
+  const displayHealthStatus = [
+    ...mainStatisticsItems,
+    ...preloadedServices,
+  ].some((item) => 'healthStatus' in item);
+
+  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
+    apmServiceInventoryOptimizedSorting
+  )
+    ? ServiceInventoryFieldName.ServiceName
+    : ServiceInventoryFieldName.Throughput;
+
+  const initialSortField = displayHealthStatus
+    ? ServiceInventoryFieldName.HealthStatus
+    : tiebreakerField;
+
+  const initialSortDirection =
+    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
+
+  const items = joinByKey(
+    [
+      // only use preloaded services if tiebreaker field is service.name,
+      // otherwise ignore them to prevent re-sorting of the table
+      // once the tiebreaking metric comes in
+      ...(tiebreakerField === ServiceInventoryFieldName.ServiceName
+        ? preloadedServices
+        : []),
+      ...mainStatisticsItems,
+    ],
+    'serviceName'
   );
 
   return (
@@ -201,8 +212,23 @@ export function ServiceInventory() {
           <ServiceList
             isLoading={isLoading}
             isFailure={isFailure}
-            items={mainStatisticsData.items}
-            comparisonData={comparisonData}
+            items={items}
+            comparisonDataLoading={
+              comparisonFetch.status === FETCH_STATUS.LOADING ||
+              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+            }
+            displayHealthStatus={displayHealthStatus}
+            initialSortField={initialSortField}
+            initialSortDirection={initialSortDirection}
+            sortFn={(itemsToSort, sortField, sortDirection) => {
+              return orderServiceItems({
+                items: itemsToSort,
+                primarySortField: sortField,
+                sortDirection,
+                tiebreakerField,
+              });
+            }}
+            comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />
         </EuiFlexItem>

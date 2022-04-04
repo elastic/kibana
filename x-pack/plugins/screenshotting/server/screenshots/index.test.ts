@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of, throwError, NEVER } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import type { Logger } from 'src/core/server';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
@@ -37,7 +37,7 @@ describe('Screenshot Observable Pipeline', () => {
     } as unknown as jest.Mocked<Logger>;
     options = {
       browserTimezone: 'UTC',
-      conditionalHeaders: {},
+      headers: {},
       layout: {},
       timeouts: {
         loadDelay: 2000,
@@ -86,6 +86,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -147,6 +148,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -198,6 +200,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -228,7 +231,7 @@ describe('Screenshot Observable Pipeline', () => {
           "timeRange": "Default GetTimeRange Result",
         },
       ]
-  `);
+    `);
 
     expect(driver.open).toHaveBeenCalledTimes(2);
     expect(driver.open).nthCalledWith(
@@ -282,6 +285,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
@@ -324,6 +328,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
@@ -356,8 +361,7 @@ describe('Screenshot Observable Pipeline', () => {
         of({
           driver,
           unexpectedExit$: throwError('Instant timeout has fired!'),
-          metrics$: NEVER,
-          close: () => of(undefined),
+          close: () => of({}),
         })
       );
 
@@ -396,6 +400,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": undefined,
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {

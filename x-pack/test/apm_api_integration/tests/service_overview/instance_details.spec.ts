@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import url from 'url';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { getServiceNodeIds } from './get_service_node_ids';
-import { createApmApiClient } from '../../common/apm_api_supertest';
 
 type ServiceOverviewInstanceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
-  const apmApiSupertest = createApmApiClient(supertest);
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -30,16 +27,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles empty state', async () => {
-          const response = await supertest.get(
-            url.format({
-              pathname:
-                '/internal/apm/services/opbeans-java/service_overview_instances/details/foo',
+          const response = await apmApiClient.readUser({
+            endpoint:
+              'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+            params: {
+              path: { serviceName: 'opbeans-java', serviceNodeName: 'foo' },
               query: {
                 start,
                 end,
               },
-            })
-          );
+            },
+          });
 
           expect(response.status).to.be(200);
           expect(response.body).to.eql({});
@@ -62,16 +60,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let serviceNodeIds: string[];
 
         before(async () => {
-          serviceNodeIds = await getServiceNodeIds({ apmApiSupertest, start, end });
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeIds[0]}`,
+          serviceNodeIds = await getServiceNodeIds({
+            apmApiClient,
+            start,
+            end,
+          });
+
+          response = await apmApiClient.readUser({
+            endpoint:
+              'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+            params: {
+              path: { serviceName: 'opbeans-node', serviceNodeName: serviceNodeIds[0] },
               query: {
                 start,
                 end,
               },
-            })
-          );
+            },
+          });
         });
 
         it('returns the instance details', () => {
@@ -90,15 +95,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       it('handles empty state when instance id not found', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: '/internal/apm/services/opbeans-java/service_overview_instances/details/foo',
+        const response = await apmApiClient.readUser({
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+          params: {
+            path: { serviceName: 'opbeans-java', serviceNodeName: 'foo' },
             query: {
               start,
               end,
             },
-          })
-        );
+          },
+        });
         expect(response.status).to.be(200);
         expect(response.body).to.eql({});
       });

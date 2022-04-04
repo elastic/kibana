@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { getInputIndex, GetInputIndex } from './get_input_output_index';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 describe('get_input_output_index', () => {
-  let servicesMock: AlertServicesMock;
+  let servicesMock: RuleExecutorServicesMock;
 
   beforeAll(() => {
     jest.resetAllMocks();
@@ -22,7 +22,7 @@ describe('get_input_output_index', () => {
   });
   let defaultProps: GetInputIndex;
   beforeEach(() => {
-    servicesMock = alertsMock.createAlertServices();
+    servicesMock = alertsMock.createRuleExecutorServices();
     servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
       id,
       type,
@@ -84,22 +84,6 @@ describe('get_input_output_index', () => {
     });
 
     test('Returns a saved object inputIndex default from constants if inputIndex passed in is null and the key is also null', async () => {
-      servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
-        id,
-        type,
-        references: [],
-        attributes: {
-          [DEFAULT_INDEX_KEY]: null,
-        },
-      }));
-      const inputIndex = await getInputIndex({
-        ...defaultProps,
-        index: null,
-      });
-      expect(inputIndex).toEqual(DEFAULT_INDEX_PATTERN);
-    });
-
-    test('Returns a saved object inputIndex default along with technical preview features when uebaEnabled=true', async () => {
       servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
         id,
         type,

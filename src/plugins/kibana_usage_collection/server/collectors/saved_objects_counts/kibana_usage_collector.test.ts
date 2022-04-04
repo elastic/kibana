@@ -31,7 +31,7 @@ describe('kibana_usage', () => {
     const fetchParamsMock = createCollectorFetchContextMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     // @ts-expect-error for the sake of the tests, we only require `hits`
-    esClient.search.mockResolvedValue({ body: { hits: { hits } } });
+    esClient.search.mockResponse({ hits: { hits } });
     fetchParamsMock.esClient = esClient;
     return fetchParamsMock;
   };
@@ -58,9 +58,9 @@ describe('kibana_usage', () => {
 
 function mockGetSavedObjectsCounts<TBody>(params: TBody) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.search.mockResolvedValue(
+  esClient.search.mockResponse(
     // @ts-expect-error we only care about the response body
-    { body: { ...params } }
+    { ...params }
   );
   return esClient;
 }

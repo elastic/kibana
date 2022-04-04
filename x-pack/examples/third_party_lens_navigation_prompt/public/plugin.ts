@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DiscoverSetup } from 'src/plugins/discover/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataViewsPublicPluginStart, DataView } from '../../../../src/plugins/data_views/public';
@@ -22,7 +21,6 @@ import image from './image.png';
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
   lens: LensPublicSetup;
-  discover: DiscoverSetup;
 }
 
 export interface StartDependencies {
@@ -94,10 +92,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
 export class EmbeddedLensExamplePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
-  public setup(
-    core: CoreSetup<StartDependencies>,
-    { developerExamples, lens, discover }: SetupDependencies
-  ) {
+  public setup(core: CoreSetup<StartDependencies>, { developerExamples, lens }: SetupDependencies) {
     core.application.register({
       id: 'third_party_lens_navigation_prompt',
       title: 'Third party Lens navigation prompt',
@@ -123,7 +118,7 @@ export class EmbeddedLensExamplePlugin
       appId: 'third_party_lens_navigation_prompt',
       title: 'Third party Lens navigation prompt',
       description:
-        'Add custom menu entries to the Lens editor, like the "Go to discover" link in this example.',
+        'Add custom menu entries to the Lens editor, like the "Debug in Playground" link in this example.',
       image,
       links: [
         {
@@ -136,33 +131,54 @@ export class EmbeddedLensExamplePlugin
       ],
     });
 
-    if (!discover.locator) return;
-    lens.registerTopNavMenuEntryGenerator(({ datasourceStates, query, filters }) => {
-      if (!datasourceStates.indexpattern.state) return;
+    lens.registerTopNavMenuEntryGenerator(
+      ({ visualizationId, visualizationState, datasourceStates, query, filters }) => {
+        if (!datasourceStates.indexpattern.state || !visualizationState) return;
 
-      return {
-        label: 'Go to discover',
-        iconType: 'discoverApp',
-        run: async () => {
-          const [, { data }] = await core.getStartServices();
-          const firstLayer = Object.values(
-            (datasourceStates.indexpattern.state as IndexPatternPersistedState).layers
-          )[0] as PersistedIndexPatternLayer & { indexPatternId: string };
-          discover.locator!.navigate({
-            indexPatternId: firstLayer.indexPatternId,
-            timeRange: data.query.timefilter.timefilter.getTime(),
-            filters,
-            query,
-            columns: firstLayer.columnOrder
-              .map((columnId) => {
-                const column = firstLayer.columns[columnId];
-                if ('sourceField' in column) return column.sourceField;
-              })
-              .filter(Boolean) as string[],
-          });
-        },
-      };
-    });
+        return {
+          label: 'Debug in Playground',
+          iconType: 'wrench',
+          run: async () => {
+            const [coreStart] = await core.getStartServices();
+            const datasourceState = datasourceStates.indexpattern
+              .state as IndexPatternPersistedState;
+            const layersIds = Object.keys(datasourceState.layers);
+            const layers = Object.values(datasourceState.layers) as Array<
+              PersistedIndexPatternLayer & { indexPatternId: string }
+            >;
+            const serializedFilters = JSON.parse(JSON.stringify(filters));
+            coreStart.application.navigateToApp('testing_embedded_lens', {
+              state: {
+                visualizationType: visualizationId,
+                title: 'Lens visualization',
+                references: [
+                  {
+                    id: layers[0].indexPatternId,
+                    name: 'indexpattern-datasource-current-indexpattern',
+                    type: 'index-pattern',
+                  },
+                  ...layers.map(({ indexPatternId }, i) => ({
+                    id: indexPatternId,
+                    name: `indexpattern-datasource-layer-${layersIds[i]}`,
+                    type: 'index-pattern',
+                  })),
+                ],
+                state: {
+                  datasourceStates: {
+                    indexpattern: {
+                      layers: datasourceState.layers,
+                    },
+                  },
+                  visualization: visualizationState,
+                  filters: serializedFilters,
+                  query,
+                },
+              },
+            });
+          },
+        };
+      }
+    );
   }
 
   public start() {}

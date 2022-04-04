@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBatchResponse,
   ApplicationStart,
+  DocLinksStart,
 } from 'src/core/public';
 
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
@@ -30,7 +31,8 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { PRIVACY_STATEMENT_URL } from '../common/constants';
+import { HomePublicPluginSetup } from '../../home/public';
+import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
  * Publicly exposed APIs from the Telemetry Service
@@ -65,6 +67,11 @@ export interface TelemetryPluginSetup {
 /**
  * Public's start exposed APIs by the telemetry plugin
  */
+export interface TelemetryConstants {
+  /** Elastic's privacy statement url **/
+  getPrivacyStatementUrl: () => string;
+}
+
 export interface TelemetryPluginStart {
   /** {@link TelemetryServicePublicApis} **/
   telemetryService: TelemetryServicePublicApis;
@@ -74,14 +81,12 @@ export interface TelemetryPluginStart {
     setOptedInNoticeSeen: () => Promise<void>;
   };
   /** Set of publicly exposed telemetry constants **/
-  telemetryConstants: {
-    /** Elastic's privacy statement url **/
-    getPrivacyStatementUrl: () => string;
-  };
+  telemetryConstants: TelemetryConstants;
 }
 
 interface TelemetryPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 /**
@@ -106,6 +111,12 @@ export interface TelemetryPluginConfig {
   userCanChangeSettings?: boolean;
 }
 
+function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
+  return {
+    getPrivacyStatementUrl: () => docLinks.links.legal.privacyStatement,
+  };
+}
+
 export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
@@ -113,6 +124,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
   private canUserChangeSettings: boolean = true;
+  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -120,8 +132,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { http, notifications }: CoreSetup,
-    { screenshotMode }: TelemetryPluginSetupDependencies
+    { http, notifications, getStartServices }: CoreSetup,
+    { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
@@ -133,27 +145,61 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       currentKibanaVersion,
     });
 
-    this.telemetrySender = new TelemetrySender(this.telemetryService);
+    let telemetryConstants: TelemetryConstants;
+
+    getStartServices().then(([{ docLinks }]) => {
+      telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
+      await this.refreshConfig();
+    });
+
+    if (home) {
+      home.welcomeScreen.registerOnRendered(() => {
+        if (this.telemetryService?.userCanChangeSettings) {
+          this.telemetryNotifications?.setOptedInNoticeSeen();
+        }
+      });
+
+      home.welcomeScreen.registerTelemetryNoticeRenderer(() =>
+        renderWelcomeTelemetryNotice(
+          this.telemetryService!,
+          http.basePath.prepend,
+          telemetryConstants
+        )
+      );
+    }
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
     };
   }
 
-  public start({ http, overlays, application, savedObjects }: CoreStart): TelemetryPluginStart {
+  public start({
+    http,
+    overlays,
+    application,
+    savedObjects,
+    docLinks,
+  }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
 
     this.canUserChangeSettings = this.getCanUserChangeSettings(application);
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
+    const telemetryConstants = getTelemetryConstants(docLinks);
 
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
       telemetryService: this.telemetryService,
+      telemetryConstants,
     });
     this.telemetryNotifications = telemetryNotifications;
+
+    this.savedObjectsClient = savedObjects.client;
 
     application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
@@ -161,12 +207,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         return;
       }
 
-      // Update the telemetry config based as a mix of the config files and saved objects
-      const telemetrySavedObject = await this.getTelemetrySavedObject(savedObjects.client);
-      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
-      this.telemetryService!.config = updatedConfig;
-
-      const telemetryBanner = updatedConfig.banner;
+      // Refresh and get telemetry config
+      const updatedConfig = await this.refreshConfig();
+      const telemetryBanner = updatedConfig?.banner;
 
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
@@ -180,9 +223,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryNotifications: {
         setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
       },
-      telemetryConstants: {
-        getPrivacyStatementUrl: () => PRIVACY_STATEMENT_URL,
-      },
+      telemetryConstants,
     };
   }
 
@@ -200,6 +241,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       getCanChangeOptInStatus: () => telemetryService.getCanChangeOptInStatus(),
       fetchExample: () => telemetryService.fetchExample(),
     };
+  }
+
+  private async refreshConfig(): Promise<TelemetryPluginConfig | undefined> {
+    if (this.savedObjectsClient && this.telemetryService) {
+      // Update the telemetry config based as a mix of the config files and saved objects
+      const telemetrySavedObject = await this.getTelemetrySavedObject(this.savedObjectsClient);
+      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+      this.telemetryService.config = updatedConfig;
+      return updatedConfig;
+    }
   }
 
   /**

@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { isEmpty } from 'lodash';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
@@ -126,14 +126,12 @@ export function SpanFlyout({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DiscoverSpanLink span={span}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    {
-                      defaultMessage: 'View span in Discover',
-                    }
-                  )}
-                </EuiButtonEmpty>
+                {i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                  {
+                    defaultMessage: 'View span in Discover',
+                  }
+                )}
               </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -220,24 +218,6 @@ export function SpanFlyout({
           <EuiTabbedContent
             tabs={[
               {
-                id: 'stack-trace',
-                name: i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-                  {
-                    defaultMessage: 'Stack Trace',
-                  }
-                ),
-                content: (
-                  <Fragment>
-                    <EuiSpacer size="l" />
-                    <Stacktrace
-                      stackframes={stackframes}
-                      codeLanguage={codeLanguage}
-                    />
-                  </Fragment>
-                ),
-              },
-              {
                 id: 'metadata',
                 name: i18n.translate(
                   'xpack.apm.propertiesTable.tabs.metadataLabel',
@@ -252,6 +232,28 @@ export function SpanFlyout({
                   </Fragment>
                 ),
               },
+              ...(!isEmpty(stackframes)
+                ? [
+                    {
+                      id: 'stack-trace',
+                      name: i18n.translate(
+                        'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+                        {
+                          defaultMessage: 'Stack Trace',
+                        }
+                      ),
+                      content: (
+                        <Fragment>
+                          <EuiSpacer size="l" />
+                          <Stacktrace
+                            stackframes={stackframes}
+                            codeLanguage={codeLanguage}
+                          />
+                        </Fragment>
+                      ),
+                    },
+                  ]
+                : []),
             ]}
           />
         </EuiFlyoutBody>

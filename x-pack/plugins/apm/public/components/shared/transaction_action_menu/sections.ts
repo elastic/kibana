@@ -35,11 +35,12 @@ export const getSections = ({
   location,
   urlParams,
 }: {
-  transaction: Transaction;
+  transaction?: Transaction;
   basePath: IBasePath;
   location: Location;
   urlParams: ApmUrlParams;
 }) => {
+  if (!transaction) return [];
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
@@ -191,7 +192,7 @@ export const getSections = ({
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
         {
-          defaultMessage: 'View sample document',
+          defaultMessage: 'View transaction in Discover',
         }
       ),
       href: getDiscoverHref({

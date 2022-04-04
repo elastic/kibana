@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "elastic-apm-synthtrace"
 PKG_REQUIRE_NAME = "@elastic/apm-synthtrace"
-TYPES_PKG_REQUIRE_NAME = "@types/elastic__apm-synthtrace"
 
 SOURCE_FILES = glob(
   [
@@ -26,17 +25,18 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-datemath",
+  "//packages/kbn-datemath",
   "@npm//@elastic/elasticsearch",
   "@npm//lodash",
   "@npm//moment",
   "@npm//object-hash",
   "@npm//p-limit",
   "@npm//yargs",
+  "@npm//node-fetch",
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath:npm_module_types",
+  "//packages/kbn-datemath:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@types/jest",
   "@npm//@types/lodash",
@@ -44,6 +44,7 @@ TYPES_DEPS = [
   "@npm//@types/object-hash",
   "@npm//moment",
   "@npm//p-limit",
+  "@npm//@types/node-fetch",
 ]
 
 jsts_transpiler(
@@ -67,11 +68,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
   validate = False,
 )
@@ -103,7 +102,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

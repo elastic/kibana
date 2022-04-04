@@ -11,18 +11,18 @@ import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import { Logger } from 'src/core/server';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { RulesClient, AlertServices } from '../../../../../alerting/server';
+import { RulesClient, RuleExecutorServices } from '../../../../../alerting/server';
 
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 import { isAlertType } from '../rules/types';
-import { transformAlertToRule } from '../routes/rules/utils';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../schemas/rule_converters';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -43,7 +43,7 @@ export interface RulesErrors {
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: AlertServices['savedObjectsClient'],
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
   logger: Logger,
   isRuleRegistryEnabled: boolean
@@ -81,7 +81,7 @@ export const getExportByObjectIds = async (
 
 export const getRulesFromObjects = async (
   rulesClient: RulesClient,
-  savedObjectsClient: AlertServices['savedObjectsClient'],
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
   logger: Logger,
   isRuleRegistryEnabled: boolean
@@ -127,7 +127,7 @@ export const getRulesFromObjects = async (
     ) {
       return {
         statusCode: 200,
-        rule: transformAlertToRule(matchingRule, null, legacyActions[matchingRule.id]),
+        rule: internalRuleToAPIResponse(matchingRule, null, legacyActions[matchingRule.id]),
       };
     } else {
       return {

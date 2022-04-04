@@ -133,7 +133,7 @@ describe('migration v2', () => {
     const pitId = logRecordWithPit.right.pitId;
     expect(pitId).toBeTruthy();
 
-    const client = esServer.es.getKibanaEsClient();
+    const client = esServer.es.getClient();
     await expect(
       client.search({
         body: {

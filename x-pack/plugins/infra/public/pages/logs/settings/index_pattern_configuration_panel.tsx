@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LogIndexPatternReference } from '../../../../common/log_sources';
+import { LogDataViewReference } from '../../../../common/log_views';
 import { useLinkProps } from '../../../../../observability/public';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
@@ -19,7 +19,7 @@ import { FormValidationError } from './validation_errors';
 export const IndexPatternConfigurationPanel: React.FC<{
   isLoading: boolean;
   isReadOnly: boolean;
-  indexPatternFormElement: FormElement<LogIndexPatternReference | undefined, FormValidationError>;
+  indexPatternFormElement: FormElement<LogDataViewReference | undefined, FormValidationError>;
 }> = ({ isLoading, isReadOnly, indexPatternFormElement }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_pattern' });
   useTrackPageview({
@@ -29,11 +29,11 @@ export const IndexPatternConfigurationPanel: React.FC<{
   });
 
   const changeIndexPatternId = useCallback(
-    (indexPatternId: string | undefined) => {
-      if (indexPatternId != null) {
+    (dataViewId: string | undefined) => {
+      if (dataViewId != null) {
         indexPatternFormElement.updateValue(() => ({
-          type: 'index_pattern',
-          indexPatternId,
+          type: 'data_view',
+          dataViewId,
         }));
       } else {
         indexPatternFormElement.updateValue(() => undefined);
@@ -44,15 +44,6 @@ export const IndexPatternConfigurationPanel: React.FC<{
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.infra.logSourceConfiguration.dataViewSectionTitle"
-            defaultMessage="Data view"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
       <DataViewsInlineHelpMessage />
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
@@ -87,7 +78,7 @@ export const IndexPatternConfigurationPanel: React.FC<{
           <IndexPatternSelector
             isLoading={isLoading || indexPatternFormElement.validity.validity === 'pending'}
             isReadOnly={isReadOnly}
-            indexPatternId={indexPatternFormElement.value?.indexPatternId}
+            indexPatternId={indexPatternFormElement.value?.dataViewId}
             onChangeIndexPatternId={changeIndexPatternId}
           />
         </EuiFormRow>
@@ -105,7 +96,7 @@ const DataViewsInlineHelpMessage = React.memo(() => {
   return (
     <FormattedMessage
       id="xpack.infra.logSourceConfiguration.logDataViewHelpText"
-      defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}."
+      defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}. A single data view can target multiple indices."
       values={{
         dataViewsManagementLink: (
           <EuiLink {...dataViewsManagementLinkProps}>

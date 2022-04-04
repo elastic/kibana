@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ThrottlingFields } from './throttling_fields';
-import { DataStream, BrowserAdvancedFields, BrowserSimpleFields, Validation } from '../types';
+import {
+  DataStream,
+  BrowserAdvancedFields,
+  BrowserSimpleFields,
+  Validation,
+  ConfigKey,
+  BandwidthLimitKey,
+} from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
   BrowserSimpleFieldsContextProvider,
+  PolicyConfigContextProvider,
+  IPolicyConfigContextProvider,
+  defaultPolicyConfigValues,
   defaultBrowserAdvancedFields as defaultConfig,
   defaultBrowserSimpleFields,
 } from '../contexts';
@@ -27,20 +38,35 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('<ThrottlingFields />', () => {
+  const defaultLocation = {
+    id: 'test',
+    label: 'Test',
+    geo: { lat: 1, lon: 2 },
+    url: 'https://example.com',
+  };
+
   const WrappedComponent = ({
     defaultValues = defaultConfig,
     defaultSimpleFields = defaultBrowserSimpleFields,
+    policyConfigOverrides = {},
     validate = defaultValidation,
+    onFieldBlur,
   }: {
     defaultValues?: BrowserAdvancedFields;
     defaultSimpleFields?: BrowserSimpleFields;
+    policyConfigOverrides?: Partial<IPolicyConfigContextProvider>;
     validate?: Validation;
+    onFieldBlur?: (field: ConfigKey) => void;
   }) => {
+    const policyConfigValues = { ...defaultPolicyConfigValues, ...policyConfigOverrides };
+
     return (
       <IntlProvider locale="en">
         <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
           <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
-            <ThrottlingFields validate={validate} />
+            <PolicyConfigContextProvider {...policyConfigValues}>
+              <ThrottlingFields validate={validate} onFieldBlur={onFieldBlur} />
+            </PolicyConfigContextProvider>
           </BrowserAdvancedFieldsContextProvider>
         </BrowserSimpleFieldsContextProvider>
       </IntlProvider>
@@ -97,6 +123,39 @@ describe('<ThrottlingFields />', () => {
     });
   });
 
+  describe('calls onBlur on fields', () => {
+    const onFieldBlur = jest.fn();
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('for the enable switch', () => {
+      const { getByTestId } = render(<WrappedComponent onFieldBlur={onFieldBlur} />);
+
+      const enableSwitch = getByTestId('syntheticsBrowserIsThrottlingEnabled');
+      fireEvent.focus(enableSwitch);
+      fireEvent.blur(enableSwitch);
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.IS_THROTTLING_ENABLED);
+    });
+
+    it('for throttling inputs', () => {
+      const { getByLabelText } = render(<WrappedComponent onFieldBlur={onFieldBlur} />);
+
+      const downloadSpeed = getByLabelText('Download Speed') as HTMLInputElement;
+      const uploadSpeed = getByLabelText('Upload Speed') as HTMLInputElement;
+      const latency = getByLabelText('Latency') as HTMLInputElement;
+
+      fireEvent.blur(downloadSpeed);
+      fireEvent.blur(uploadSpeed);
+      fireEvent.blur(latency);
+
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.DOWNLOAD_SPEED);
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.UPLOAD_SPEED);
+      expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.LATENCY);
+    });
+  });
+
   describe('validates changing fields', () => {
     it('disallows negative/zero download speeds', () => {
       const { getByLabelText, queryByText } = render(<WrappedComponent />);
@@ -147,6 +206,185 @@ describe('<ThrottlingFields />', () => {
       userEvent.clear(latency);
       userEvent.type(latency, '1');
       expect(queryByText('Latency must not be negative.')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('throttling warnings', () => {
+    const throttling = {
+      [BandwidthLimitKey.DOWNLOAD]: 100,
+      [BandwidthLimitKey.UPLOAD]: 50,
+      [BandwidthLimitKey.LATENCY]: 25,
+    };
+
+    const defaultLocations = [defaultLocation];
+
+    it('shows automatic throttling warnings only when throttling is disabled', () => {
+      const { getByTestId, queryByText } = render(
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
+      );
+
+      expect(queryByText('Automatic cap')).not.toBeInTheDocument();
+      expect(
+        queryByText(
+          "When disabling throttling, your monitor will still have its bandwidth capped by the configurations of the Synthetics Nodes in which it's running."
+        )
+      ).not.toBeInTheDocument();
+
+      const enableSwitch = getByTestId('syntheticsBrowserIsThrottlingEnabled');
+      userEvent.click(enableSwitch);
+
+      expect(queryByText('Automatic cap')).toBeInTheDocument();
+      expect(
+        queryByText(
+          "When disabling throttling, your monitor will still have its bandwidth capped by the configurations of the Synthetics Nodes in which it's running."
+        )
+      ).toBeInTheDocument();
+    });
+
+    it("shows throttling warnings when exceeding the node's download limits", () => {
+      const { getByLabelText, queryByText } = render(
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
+      );
+
+      const downloadLimit = throttling[BandwidthLimitKey.DOWNLOAD];
+
+      const download = getByLabelText('Download Speed') as HTMLInputElement;
+      userEvent.clear(download);
+      userEvent.type(download, String(downloadLimit + 1));
+
+      expect(
+        queryByText(
+          `You have exceeded the download limit for Synthetic Nodes. The download value can't be larger than ${downloadLimit}Mbps.`
+        )
+      ).toBeInTheDocument();
+
+      expect(
+        queryByText("You've exceeded the Synthetics Node bandwidth limits")
+      ).toBeInTheDocument();
+
+      expect(
+        queryByText(
+          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
+        )
+      ).toBeInTheDocument();
+
+      userEvent.clear(download);
+      userEvent.type(download, String(downloadLimit - 1));
+      expect(
+        queryByText(
+          `You have exceeded the download limit for Synthetic Nodes. The download value can't be larger than ${downloadLimit}Mbps.`
+        )
+      ).not.toBeInTheDocument();
+
+      expect(
+        queryByText("You've exceeded the Synthetics Node bandwidth limits")
+      ).not.toBeInTheDocument();
+
+      expect(
+        queryByText(
+          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
+        )
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows throttling warnings when exceeding the node's upload limits", () => {
+      const { getByLabelText, queryByText } = render(
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
+      );
+
+      const uploadLimit = throttling[BandwidthLimitKey.UPLOAD];
+
+      const upload = getByLabelText('Upload Speed') as HTMLInputElement;
+      userEvent.clear(upload);
+      userEvent.type(upload, String(uploadLimit + 1));
+
+      expect(
+        queryByText(
+          `You have exceeded the upload limit for Synthetic Nodes. The upload value can't be larger than ${uploadLimit}Mbps.`
+        )
+      ).toBeInTheDocument();
+
+      expect(
+        queryByText("You've exceeded the Synthetics Node bandwidth limits")
+      ).toBeInTheDocument();
+
+      expect(
+        queryByText(
+          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
+        )
+      ).toBeInTheDocument();
+
+      userEvent.clear(upload);
+      userEvent.type(upload, String(uploadLimit - 1));
+      expect(
+        queryByText(
+          `You have exceeded the upload limit for Synthetic Nodes. The upload value can't be larger than ${uploadLimit}Mbps.`
+        )
+      ).not.toBeInTheDocument();
+
+      expect(
+        queryByText("You've exceeded the Synthetics Node bandwidth limits")
+      ).not.toBeInTheDocument();
+
+      expect(
+        queryByText(
+          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
+        )
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows latency warnings when exceeding the node's latency limits", () => {
+      const { getByLabelText, queryByText } = render(
+        <WrappedComponent
+          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
+        />
+      );
+
+      const latencyLimit = throttling[BandwidthLimitKey.LATENCY];
+
+      const latency = getByLabelText('Latency') as HTMLInputElement;
+      userEvent.clear(latency);
+      userEvent.type(latency, String(latencyLimit + 1));
+
+      expect(
+        queryByText(
+          `You have exceeded the latency limit for Synthetic Nodes. The latency value can't be larger than ${latencyLimit}ms.`
+        )
+      ).toBeInTheDocument();
+
+      expect(
+        queryByText("You've exceeded the Synthetics Node bandwidth limits")
+      ).toBeInTheDocument();
+
+      expect(
+        queryByText(
+          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
+        )
+      ).toBeInTheDocument();
+
+      userEvent.clear(latency);
+      userEvent.type(latency, String(latencyLimit - 1));
+      expect(
+        queryByText(
+          `You have exceeded the latency limit for Synthetic Nodes. The latency value can't be larger than ${latencyLimit}ms.`
+        )
+      ).not.toBeInTheDocument();
+
+      expect(
+        queryByText("You've exceeded the Synthetics Node bandwidth limits")
+      ).not.toBeInTheDocument();
+
+      expect(
+        queryByText(
+          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
+        )
+      ).not.toBeInTheDocument();
     });
   });
 

@@ -82,8 +82,8 @@ describe('ML - validateModelMemoryLimit', () => {
   // - to retrieve field capabilities used in search for split field cardinality
   const getMockMlClusterClient = (): IScopedClusterClient => {
     const callAs = {
-      search: () => Promise.resolve({ body: cardinalitySearchResponse }),
-      fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
+      search: () => Promise.resolve(cardinalitySearchResponse),
+      fieldCaps: () => Promise.resolve(fieldCapsResponse),
     };
 
     return {
@@ -96,9 +96,9 @@ describe('ML - validateModelMemoryLimit', () => {
     estimateModelMemory: estimateModelMemory,
   }: MockAPICallResponse = {}): MlClient => {
     const callAs = {
-      info: () => Promise.resolve({ body: mlInfoResponse }),
+      info: () => Promise.resolve(mlInfoResponse),
       estimateModelMemory: () =>
-        Promise.resolve({ body: estimateModelMemory || modelMemoryEstimateResponse }),
+        Promise.resolve(estimateModelMemory || modelMemoryEstimateResponse),
     };
 
     return callAs as MlClient;

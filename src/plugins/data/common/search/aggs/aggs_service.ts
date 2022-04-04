@@ -17,7 +17,6 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
-import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
@@ -67,11 +66,7 @@ export class AggsCommonService {
     };
   }
 
-  public start({
-    getConfig,
-    getIndexPattern,
-    isDefaultTimezone,
-  }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
     const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
 
@@ -86,11 +81,6 @@ export class AggsCommonService {
 
     return {
       calculateAutoTimeExpression,
-      datatableUtilities: getDatatableColumnUtilities({
-        getIndexPattern,
-        createAggConfigs,
-        aggTypesStart,
-      }),
       createAggConfigs,
       types: aggTypesStart,
     };

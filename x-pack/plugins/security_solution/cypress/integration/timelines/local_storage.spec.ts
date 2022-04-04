@@ -14,7 +14,7 @@ import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { removeColumn } from '../../tasks/timeline';
 
 // TODO: Fix bug in persisting the columns of timeline
-describe('persistent timeline', () => {
+describe.skip('persistent timeline', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);

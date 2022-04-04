@@ -6,7 +6,7 @@ When you log in, {kib} creates a session that is used to authenticate subsequent
 
 When your session expires, or you log out, {kib} will invalidate your cookie and remove session information from the index. {kib} also periodically invalidates and removes any expired sessions that weren't explicitly invalidated.
 
-To manage user sessions programmatically, {kib} exposes <<session-management-api, session management APIs>>.
+To manage user sessions programmatically, {kib} exposes <<session-management-api, session management APIs>>. For details, check out <<security-session-and-cookie-settings, Session and cookie security settings>>.
 
 [[session-idle-timeout]]
 ==== Session idle timeout

@@ -40,21 +40,15 @@ describe('query_fractions', () => {
   describe('fetchTransactionDurationFractions', () => {
     it('computes the actual percentile bucket counts and actual fractions', async () => {
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              hits: { total: { value: 3 } },
-              aggregations: {
-                latency_ranges: {
-                  buckets: [{ doc_count: 1 }, { doc_count: 2 }],
-                },
+            hits: { total: { value: 3 } },
+            aggregations: {
+              latency_ranges: {
+                buckets: [{ doc_count: 1 }, { doc_count: 2 }],
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

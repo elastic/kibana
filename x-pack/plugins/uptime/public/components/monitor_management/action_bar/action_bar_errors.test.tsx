@@ -52,14 +52,20 @@ describe('<ActionBar /> Service Errors', () => {
   it('Handles service errors', async () => {
     jest.spyOn(kibana.kibanaService.toasts, 'addWarning').mockImplementation(toast);
     useFetcher.mockReturnValue({
-      data: [
-        { locationId: 'us_central', error: { reason: 'Invalid config', status: 400 } },
-        { locationId: 'us_central', error: { reason: 'Cannot schedule', status: 500 } },
-      ],
+      data: {
+        attributes: {
+          errors: [
+            { locationId: 'us_central', error: { reason: 'Invalid config', status: 400 } },
+            { locationId: 'us_central', error: { reason: 'Cannot schedule', status: 500 } },
+          ],
+        },
+      },
       status: FETCH_STATUS.SUCCESS,
       refetch: () => {},
     });
-    render(<ActionBar monitor={monitor} isValid={true} />, { state: mockLocationsState });
+    render(<ActionBar monitor={monitor} isTestRunInProgress={false} isValid={true} />, {
+      state: mockLocationsState,
+    });
     userEvent.click(screen.getByText('Save monitor'));
 
     await waitFor(() => {

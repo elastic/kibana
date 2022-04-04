@@ -102,8 +102,8 @@ export const createIndex = ({
          * - acknowledged=true, shards_acknowledged=true, index creation complete
          */
         return Either.right({
-          acknowledged: Boolean(res.body.acknowledged),
-          shardsAcknowledged: res.body.shards_acknowledged,
+          acknowledged: Boolean(res.acknowledged),
+          shardsAcknowledged: res.shards_acknowledged,
         });
       })
       .catch((error) => {

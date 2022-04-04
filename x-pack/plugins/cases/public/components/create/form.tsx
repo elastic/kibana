@@ -23,11 +23,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import {
-  ActionConnector,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-} from '../../../common/api';
+import { ActionConnector } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -38,6 +34,7 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { CaseAttachments } from '../../types';
 
 interface ContainerProps {
   big?: boolean;
@@ -55,8 +52,6 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
   z-index: 99;
 `;
-export type SupportedCreateCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
-export type CreateCaseAttachment = SupportedCreateCaseAttachment[];
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
@@ -68,7 +63,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
-  attachments?: CreateCaseAttachment;
+  attachments?: CaseAttachments;
 }
 
 const empty: ActionConnector[] = [];

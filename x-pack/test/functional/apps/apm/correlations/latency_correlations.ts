@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('latency correlations', () => {
-    describe('space with no features disabled', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/127431
+    describe.skip('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
         await spacesService.create({
@@ -37,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
         await spacesService.delete('custom_space');
       });
 
@@ -55,10 +57,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('apmMainContainer', {
             timeout: 10000,
           });
-
-          const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
-          const apmMainContainerTextItems = apmMainContainerText[0].split('\n');
-          expect(apmMainContainerTextItems).to.contain('No services found');
         });
       });
 
