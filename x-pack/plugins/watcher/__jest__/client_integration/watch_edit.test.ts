@@ -6,39 +6,18 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
-import { getRandomString } from '@kbn/test/jest';
 
 import { getWatch } from '../../__fixtures__';
 import { defaultWatch } from '../../public/application/models/watch';
-import { setupEnvironment, pageHelpers, wrapBodyResponse } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
-import { WATCH } from './helpers/jest_constants';
-
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('../../public/application/lib/api', () => {
-  const original = jest.requireActual('../../public/application/lib/api');
-
-  return {
-    ...original,
-    loadIndexPatterns: async () => {
-      const INDEX_PATTERNS = [
-        { attributes: { title: 'index1' } },
-        { attributes: { title: 'index2' } },
-        { attributes: { title: 'index3' } },
-      ];
-      return await INDEX_PATTERNS;
-    },
-    getHttpClient: () => mockHttpClient,
-  };
-});
+import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchEdit;
 
 describe('<WatchEdit />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchEditTestBed;
 
   beforeAll(() => {
@@ -47,14 +26,13 @@ describe('<WatchEdit />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   describe('Advanced watch', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadWatchResponse(WATCH);
+      httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, WATCH);
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       testBed.component.update();
     });
 
@@ -90,31 +68,32 @@ describe('<WatchEdit />', () => {
           actions.clickSubmitButton();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
         const DEFAULT_LOGGING_ACTION_ID = 'logging_1';
         const DEFAULT_LOGGING_ACTION_TYPE = 'logging';
         const DEFAULT_LOGGING_ACTION_TEXT =
           'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
 
-        expect(latestRequest.requestBody).toEqual(
-          wrapBodyResponse({
-            id: watch.id,
-            name: EDITED_WATCH_NAME,
-            type: watch.type,
-            isNew: false,
-            isActive: true,
-            actions: [
-              {
-                id: DEFAULT_LOGGING_ACTION_ID,
-                type: DEFAULT_LOGGING_ACTION_TYPE,
-                text: DEFAULT_LOGGING_ACTION_TEXT,
-                [DEFAULT_LOGGING_ACTION_TYPE]: {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/watch/${watch.id}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              id: watch.id,
+              name: EDITED_WATCH_NAME,
+              type: watch.type,
+              isNew: false,
+              isActive: true,
+              actions: [
+                {
+                  id: DEFAULT_LOGGING_ACTION_ID,
+                  type: DEFAULT_LOGGING_ACTION_TYPE,
                   text: DEFAULT_LOGGING_ACTION_TEXT,
+                  [DEFAULT_LOGGING_ACTION_TYPE]: {
+                    text: DEFAULT_LOGGING_ACTION_TEXT,
+                  },
                 },
-              },
-            ],
-            watch: defaultWatch,
+              ],
+              watch: defaultWatch,
+            }),
           })
         );
       });
@@ -123,7 +102,7 @@ describe('<WatchEdit />', () => {
 
   describe('Threshold watch', () => {
     const watch = getWatch({
-      id: getRandomString(),
+      id: WATCH_ID,
       type: 'threshold',
       name: 'my_threshold_watch',
       timeField: '@timestamp',
@@ -138,9 +117,9 @@ describe('<WatchEdit />', () => {
     });
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadWatchResponse({ watch });
+      httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, { watch });
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       testBed.component.update();
     });
 
@@ -169,8 +148,6 @@ describe('<WatchEdit />', () => {
           actions.clickSubmitButton();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
         const {
           id,
           type,
@@ -185,25 +162,28 @@ describe('<WatchEdit />', () => {
           threshold,
         } = watch;
 
-        expect(latestRequest.requestBody).toEqual(
-          wrapBodyResponse({
-            id,
-            name: EDITED_WATCH_NAME,
-            type,
-            isNew: false,
-            isActive: true,
-            actions: [],
-            timeField,
-            triggerIntervalSize,
-            triggerIntervalUnit,
-            aggType,
-            termSize,
-            termOrder: 'desc',
-            thresholdComparator,
-            timeWindowSize,
-            timeWindowUnit,
-            hasTermsAgg: false,
-            threshold: threshold && threshold[0],
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/watch/${watch.id}`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              id,
+              name: EDITED_WATCH_NAME,
+              type,
+              isNew: false,
+              isActive: true,
+              actions: [],
+              timeField,
+              triggerIntervalSize,
+              triggerIntervalUnit,
+              aggType,
+              termSize,
+              termOrder: 'desc',
+              thresholdComparator,
+              timeWindowSize,
+              timeWindowUnit,
+              hasTermsAgg: false,
+              threshold: threshold && threshold[0],
+            }),
           })
         );
       });
