@@ -74,42 +74,49 @@ export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
     const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...localApiKeysToInvalidate];
     const errors = [...accErrors, ...localErrors];
 
-    if (conflictErrorMap.size > 0) {
-      if (retries <= 0) {
-        logger.warn(`${name} conflicts, exceeded retries`);
-
-        localRules
-          .filter((obj) => conflictErrorMap.has(obj.id))
-          .forEach((obj) => {
-            localErrors.push({
-              message: conflictErrorMap.get(obj.id)?.message ?? 'n/a',
-              rule: {
-                id: obj.id,
-                name: obj.attributes?.name ?? 'n/a',
-              },
-            });
-          });
-      } else {
-        logger.debug(`${name} conflicts, retrying ...`);
-
-        await waitBeforeNextRetry();
-        return await retryIfBulkEditConflicts(
-          logger,
-          name,
-          bulkEditObjects,
-          convertRuleIdsToKueryNode(Array.from(conflictErrorMap.keys())),
-          retries - 1,
-          apiKeysToInvalidate,
-          results,
-          errors
-        );
-      }
+    if (conflictErrorMap.size === 0) {
+      return {
+        apiKeysToInvalidate,
+        results,
+        errors,
+      };
     }
-    return {
+
+    if (retries <= 0) {
+      logger.warn(`${name} conflicts, exceeded retries`);
+
+      localRules
+        .filter((obj) => conflictErrorMap.has(obj.id))
+        .forEach((obj) => {
+          errors.push({
+            message: conflictErrorMap.get(obj.id)?.message ?? 'n/a',
+            rule: {
+              id: obj.id,
+              name: obj.attributes?.name ?? 'n/a',
+            },
+          });
+        });
+
+      return {
+        apiKeysToInvalidate,
+        results,
+        errors,
+      };
+    }
+
+    logger.debug(`${name} conflicts, retrying ...`);
+
+    await waitBeforeNextRetry();
+    return await retryIfBulkEditConflicts(
+      logger,
+      name,
+      bulkEditObjects,
+      convertRuleIdsToKueryNode(Array.from(conflictErrorMap.keys())),
+      retries - 1,
       apiKeysToInvalidate,
       results,
-      errors,
-    };
+      errors
+    );
   } catch (err) {
     throw err;
   }
