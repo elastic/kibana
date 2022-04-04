@@ -17,10 +17,10 @@ import type { ComplianceDashboardData } from '../../../common/types';
 import { CSP_KUBEBEAT_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { getResourcesTypes } from './get_resources_types';
-import { getClusters } from './get_clusters';
+import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
-import { getTrends } from './get_trends';
+import { getTrends, Trends } from './get_trends';
 
 export interface ClusterBucket {
   ordered_top_hits: AggregationsTopHitsAggregate;
@@ -75,6 +75,16 @@ const getLatestCyclesIds = async (esClient: ElasticsearchClient): Promise<string
   });
 };
 
+const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: Trends) => {
+  return clustersWithoutTrends.map((cluster) => ({
+    ...cluster,
+    trend: trends.map((trend) => [
+      trend.timestamp,
+      trend.clusters[cluster.meta.clusterId].postureScore,
+    ]),
+  }));
+};
+
 // TODO: Utilize ES "Point in Time" feature https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
 export const defineGetComplianceDashboardRoute = (
   router: CspRouter,
@@ -97,12 +107,15 @@ export const defineGetComplianceDashboardRoute = (
           },
         };
 
-        const [stats, resourcesTypes, clusters, trends] = await Promise.all([
+        const [stats, resourcesTypes, clustersWithoutTrends, trends] = await Promise.all([
           getStats(esClient, query),
           getResourcesTypes(esClient, query),
           getClusters(esClient, query),
           getTrends(esClient),
         ]);
+
+        const clusters = getClustersTrends(clustersWithoutTrends, trends);
+        const trend = trends.map((v) => [v.timestamp, v.summary.postureScore]);
 
         const body: ComplianceDashboardData = {
           stats,

@@ -6,18 +6,9 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
-import type { ComplianceDashboardData, Score } from '../../../common/types';
-import { FindingsEvaluation } from '../../../common/types';
-
-/**
- * @param value value is [0, 1] range
- */
-export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
-
-export const calculatePostureScore = (passed: number, failed: number): Score =>
-  roundScore(passed / (passed + failed));
+import { Stats } from '../../../common/types';
+import { calculatePostureScore } from './get_stats';
 
 export interface TrendsESQueryResult {
   '@timestamp': string;
@@ -44,13 +35,14 @@ export const getTrendsAggsQuery = () => ({
   },
 });
 
-type GetTrendsResult = Array<{
+export type Trends = Array<{
   timestamp: string;
-  summary: FindingsEvaluation;
-  clusters: Record<string, FindingsEvaluation>;
+  summary: Stats;
+  clusters: Record<string, Stats>;
 }>;
 
-export const getTrends = async (esClient: ElasticsearchClient): Promise<GetTrendsResult> => {
+export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
+  // TODO: remove the ignore, the sorting function used does not match ES search type
   // @ts-ignore
   const trendsQueryResult = await esClient.search<TrendsESQueryResult>(getTrendsAggsQuery(), {
     meta: true,
@@ -66,10 +58,21 @@ export const getTrends = async (esClient: ElasticsearchClient): Promise<GetTrend
       timestamp: data['@timestamp'],
       summary: {
         totalFindings: data.total_findings,
-        failedFindings: data.failed_findings,
-        passedFindings: data.passed_findings,
+        totalFailed: data.failed_findings,
+        totalPassed: data.passed_findings,
+        postureScore: calculatePostureScore(data.passed_findings, data.failed_findings),
       },
-      clusters: data.score_by_cluster_id,
+      clusters: Object.fromEntries(
+        Object.entries(data.score_by_cluster_id).map(([clusterId, cluster]) => [
+          clusterId,
+          {
+            totalFindings: cluster.total_findings,
+            totalFailed: cluster.failed_findings,
+            totalPassed: cluster.passed_findings,
+            postureScore: calculatePostureScore(cluster.passed_findings, cluster.failed_findings),
+          },
+        ])
+      ),
     };
   });
 
