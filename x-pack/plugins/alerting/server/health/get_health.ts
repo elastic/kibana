@@ -6,7 +6,7 @@
  */
 
 import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
-import { AlertsHealth, HealthStatus, RawRule, AlertExecutionStatusErrorReasons } from '../types';
+import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
@@ -27,7 +27,7 @@ export const getHealth = async (
   };
 
   const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawRule>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -45,7 +45,7 @@ export const getHealth = async (
   }
 
   const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawRule>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Execute}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -63,7 +63,7 @@ export const getHealth = async (
   }
 
   const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawRule>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Read}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',

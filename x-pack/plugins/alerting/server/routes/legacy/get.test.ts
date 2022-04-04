@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from './../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Alert } from '../../../common';
+import { Rule } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert: Alert<{
+  const mockedAlert: Rule<{
     bar: true;
   }> = {
     id: '1',

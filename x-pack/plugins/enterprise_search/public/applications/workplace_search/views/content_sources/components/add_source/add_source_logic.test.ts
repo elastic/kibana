@@ -720,7 +720,7 @@ describe('AddSourceLogic', () => {
 
         expect(http.get).toHaveBeenCalledWith(
           '/internal/workplace_search/account/sources/github/prepare',
-          { query: { index_permissions: false } }
+          { query: {} }
         );
       });
 

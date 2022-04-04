@@ -20,9 +20,14 @@ import { useIsOsqueryAvailable } from './use_is_osquery_available';
 interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
+  hideFullscreen?: true;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formType = 'simple' }) => {
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
+  agentId,
+  formType = 'simple',
+  hideFullscreen,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   const emptyPrompt = useMemo(
@@ -134,18 +139,18 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
     );
   }
 
-  return <LiveQuery formType={formType} agentId={agentId} />;
+  return <LiveQuery formType={formType} agentId={agentId} hideFullscreen={hideFullscreen} />;
 };
 
 const OsqueryAction = React.memo(OsqueryActionComponent);
 
 // @ts-expect-error update types
-const OsqueryActionWrapperComponent = ({ services, agentId, formType }) => (
+const OsqueryActionWrapperComponent = ({ services, agentId, formType, hideFullscreen }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryAction agentId={agentId} formType={formType} />
+          <OsqueryAction agentId={agentId} formType={formType} hideFullscreen={hideFullscreen} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>

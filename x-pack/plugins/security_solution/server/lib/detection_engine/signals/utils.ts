@@ -34,7 +34,7 @@ import type {
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
   parseDuration,
 } from '../../../../../alerting/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
@@ -193,7 +193,7 @@ export const hasTimestampFields = async (args: {
 };
 
 export const checkPrivileges = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
   checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
@@ -247,7 +247,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;

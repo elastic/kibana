@@ -23,6 +23,10 @@ import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } fr
 import {
   CasesByAlertId,
   CasesByAlertIDRequest,
+  CasesFindRequest,
+  CasesResponse,
+  CasesStatusRequest,
+  CasesStatusResponse,
   CommentRequestAlertType,
   CommentRequestUserType,
 } from '../common/api';
@@ -74,6 +78,10 @@ export interface RenderAppProps {
 export interface CasesUiStart {
   api: {
     getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
+    cases: {
+      find: (query: CasesFindRequest) => Promise<CasesResponse>;
+      getAllCasesMetrics: (query: CasesStatusRequest) => Promise<CasesStatusResponse>;
+    };
   };
   ui: {
     /**
