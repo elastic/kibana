@@ -14,7 +14,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { Alert, RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
