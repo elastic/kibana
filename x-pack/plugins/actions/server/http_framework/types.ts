@@ -7,8 +7,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ObjectType } from '@kbn/config-schema';
-import { LicenseType } from '../../../licensing/common/types';
+import type { AxiosBasicCredentials } from 'axios';
+import type { Type } from '@kbn/config-schema';
+import type { LicenseType } from '../../../licensing/common/types';
 
 interface EndPointConfig<
   Config extends Record<string, any> = Record<string, any>,
@@ -17,8 +18,9 @@ interface EndPointConfig<
   FetchResponse extends Record<string, any> = Record<string, any>
 > {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
-  responseSchema: ObjectType<FetchResponse>;
+  responseSchema: Type<FetchResponse>;
   getPath: (config: Config) => string;
+  getAuth: (secrets: Secrets) => AxiosBasicCredentials;
   preFetch?: (params: Params) => void;
   /**
    * Is it possible to deduct the type of res from
@@ -40,9 +42,9 @@ export interface HTTPConnectorType<
   name: string;
   minimumLicenseRequired: LicenseType;
   schema: {
-    config: ObjectType<Config>;
-    secrets: ObjectType<Secrets>;
-    params: ObjectType<Params>;
+    config: Type<Config>;
+    secrets: Type<Secrets>;
+    params: Type<Params>;
   };
   endpoints: Record<string, EndPoint<Config, Secrets, Params>>;
 }

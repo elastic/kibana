@@ -308,7 +308,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       minimumLicenseRequired: 'basic',
       schema: {
         config: schema.object({ apiUrl: schema.string() }),
-        secrets: schema.object({ password: schema.string() }),
+        secrets: schema.object({ username: schema.string(), password: schema.string() }),
         params: schema.object({ category: schema.string() }),
       },
       endpoints: {
@@ -316,6 +316,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           method: 'post',
           responseSchema: schema.object({ id: schema.string() }),
           getPath: (config) => `${config.apiUrl}/api/test`,
+          getAuth: (secrets) => {
+            return { username: secrets.username, password: secrets.password };
+          },
           preFetch: (res) => {},
           postFetch: (res) => {},
         },
