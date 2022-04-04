@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
     await PageObjects.discover.clickCreateNewDataView();
-    await testSubjects.setValue('createIndexPatternNameInput', dataViewName, {
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });

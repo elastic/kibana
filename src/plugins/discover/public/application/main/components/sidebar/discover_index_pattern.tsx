@@ -38,21 +38,21 @@ export function DiscoverIndexPattern({
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
     title: entity.attributes!.title,
-    readableTitle: entity.attributes?.readableTitle,
+    name: entity.attributes?.name,
   }));
   const {
     id: selectedId,
     title: selectedTitle,
-    readableTitle: selectedReadableTitle,
+    getName: selectedGetName,
   } = selectedIndexPattern || {};
 
   const [selected, setSelected] = useState({
     id: selectedId,
-    title: selectedReadableTitle ? selectedReadableTitle : selectedTitle || '',
+    title: selectedGetName ? selectedGetName() : selectedTitle || '',
   });
   useEffect(() => {
-    const { id, title, readableTitle } = selectedIndexPattern;
-    setSelected({ id, title: readableTitle ? readableTitle : title });
+    const { id } = selectedIndexPattern;
+    setSelected({ id, title: selectedIndexPattern.getName() });
   }, [selectedIndexPattern]);
   if (!selectedId) {
     return null;

@@ -65,7 +65,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
     })
     .concat(documentField);
 
-  const { typeMeta, title, timeFieldName, fieldFormatMap } = dataView;
+  const { typeMeta, title, timeFieldName, fieldFormatMap, getName } = dataView;
   if (typeMeta?.aggs) {
     const aggs = Object.keys(typeMeta.aggs);
     newFields.forEach((field, index) => {
@@ -85,6 +85,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
   return {
     id: dataView.id!, // id exists for sure because we got index patterns by id
     title,
+    name: getName(),
     timeFieldName,
     fieldFormatMap:
       fieldFormatMap &&

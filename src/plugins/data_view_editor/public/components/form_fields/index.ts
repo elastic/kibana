@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { ReadableTitleField } from './readable_title_field';
+export { NameField } from './name_field';
 export { TimestampField } from './timestamp_field';
 export { TypeField } from './type_field';
 export { TitleField } from './title_field';

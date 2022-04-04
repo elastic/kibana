@@ -87,8 +87,7 @@ export class DataView implements IIndexPattern {
    * prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
-  public readableTitle: string = '';
-  public readableDescription: string = '';
+  public name: string = '';
 
   constructor({ spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] }: DataViewDeps) {
     // set dependencies
@@ -117,9 +116,13 @@ export class DataView implements IIndexPattern {
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
-    this.readableTitle = spec.readableTitle || '';
-    this.readableDescription = spec.readableDescription || '';
+    this.name = spec.name || '';
   }
+
+  /**
+   * Get name of Data View
+   */
+  getName = () => (this.name ? this.name : this.title);
 
   /**
    * Get last saved saved object fields
@@ -219,8 +222,7 @@ export class DataView implements IIndexPattern {
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
       allowNoIndex: this.allowNoIndex,
-      readableTitle: this.readableTitle,
-      readableDescription: this.readableDescription,
+      name: this.name,
     };
   }
 
@@ -306,8 +308,7 @@ export class DataView implements IIndexPattern {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
-      readableTitle: this.readableTitle,
-      readableDescription: this.readableDescription,
+      name: this.name,
     };
   }
 

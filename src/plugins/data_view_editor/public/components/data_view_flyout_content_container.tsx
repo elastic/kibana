@@ -28,15 +28,9 @@ const IndexPatternFlyoutContentContainer = ({
     try {
       let indexPattern;
       if (editData) {
-        const {
-          readableTitle = '',
-          readableDescription = '',
-          timeFieldName,
-          title = '',
-        } = dataViewSpec;
+        const { name = '', timeFieldName, title = '' } = dataViewSpec;
         editData.title = title;
-        editData.readableTitle = readableTitle;
-        editData.readableDescription = readableDescription;
+        editData.name = name;
         editData.timeFieldName = timeFieldName;
         indexPattern = await dataViews.updateSavedObject(editData);
       } else {

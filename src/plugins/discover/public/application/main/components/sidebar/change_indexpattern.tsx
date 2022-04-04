@@ -76,8 +76,8 @@ export function ChangeIndexPattern({
           {...selectableProps}
           searchable
           singleSelection="always"
-          options={indexPatternRefs.map(({ title, id, readableTitle }) => ({
-            label: readableTitle ? readableTitle : title,
+          options={indexPatternRefs.map(({ title, id, name }) => ({
+            label: name ? name : title,
             key: id,
             value: id,
             checked: id === indexPatternId ? 'on' : undefined,

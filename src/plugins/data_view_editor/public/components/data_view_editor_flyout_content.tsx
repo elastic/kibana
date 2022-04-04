@@ -40,7 +40,7 @@ import {
   TimestampField,
   TypeField,
   TitleField,
-  ReadableTitleField,
+  NameField,
   schema,
   Footer,
   AdvancedParamsContent,
@@ -90,8 +90,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         ? {
             title: editData.title,
             id: editData.id,
-            readableTitle: editData.readableTitle,
-            readableDescription: editData.readableDescription,
+            name: editData.name,
             ...(editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
@@ -110,8 +109,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         title: formData.title,
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
-        readableTitle: formData.readableTitle,
-        readableDescription: formData.readableDescription,
+        name: formData.name,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -311,8 +309,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const onTypeChange = useCallback(
     (newType) => {
       form.setFieldValue('title', '');
-      form.setFieldValue('readableTitle', '');
-      form.setFieldValue('readableDescription', '');
+      form.setFieldValue('name', '');
       form.setFieldValue('timestampField', '');
       if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
         form.setFieldValue('allowHidden', false);
@@ -364,7 +361,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <ReadableTitleField editData={editData} />
+                <NameField editData={editData} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />

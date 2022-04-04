@@ -92,7 +92,7 @@ const createMatchesIndicesValidator = ({
       return;
     }
 
-    // A rollup data view needs to match one and only one rollup index.
+    // A rollup index pattern needs to match one and only one rollup index.
     const rollupIndexMatches = matchedIndicesResult.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
@@ -222,7 +222,7 @@ export const TitleField = ({
               }}
               isLoading={field.isValidating}
               fullWidth
-              data-test-subj="createIndexPatternNameInput"
+              data-test-subj="createIndexPatternTitleInput"
             />
           </EuiFormRow>
         );

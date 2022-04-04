@@ -25,7 +25,7 @@ const NoMatchStatusMessage = (allIndicesLength: number) => (
   <span>
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
-      defaultMessage="The data view you entered doesn't match any data streams, indices, or index aliases.
+      defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
   You can match {strongIndices}."
       values={{
         strongIndices: (

@@ -36,7 +36,7 @@ export function getEditBreadcrumbs(indexPattern: DataView) {
   return [
     ...getListBreadcrumbs(),
     {
-      text: indexPattern.title,
+      text: indexPattern.getName(),
       href: `/patterns/${indexPattern.id}`,
     },
   ];

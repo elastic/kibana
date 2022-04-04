@@ -153,8 +153,7 @@ export interface IndexPatternConfig {
   allowHidden: boolean;
   id?: string;
   type: INDEX_PATTERN_TYPE;
-  readableTitle?: string;
-  readableDescription?: string;
+  name?: string;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {

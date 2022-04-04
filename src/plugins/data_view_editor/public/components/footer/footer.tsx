@@ -33,7 +33,7 @@ const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButt
 });
 
 const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButtonLabel', {
-  defaultMessage: 'Edit data view',
+  defaultMessage: 'Save',
 });
 
 export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit }: FooterProps) => {

@@ -140,7 +140,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    return this.testSubjects.find('createIndexPatternNameInput');
+    return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
   async getTimeFieldNameField() {
@@ -160,28 +160,14 @@ export class SettingsPageObject extends FtrService {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
   }
 
-  async getReadableTitleField() {
-    return this.testSubjects.find('createIndexPatternReadableTitleInput');
+  async getNameField() {
+    return this.testSubjects.find('createIndexPatternNameInput');
   }
 
-  async setReadableTitleField(indexPatternTitle: string) {
-    const field = await this.getReadableTitleField();
+  async setNameField(indexPatternName: string) {
+    const field = await this.getNameField();
     field.clearValue();
-    field.type(indexPatternTitle);
-  }
-
-  async getReadableDescriptionField() {
-    const exists = await this.testSubjects.exists('showIndexPatternReadableDescriptionInput');
-    if (exists) {
-      await this.testSubjects.click('showIndexPatternReadableDescriptionInput');
-    }
-    return this.testSubjects.find('createIndexPatternReadableDescriptionInput');
-  }
-
-  async setReadableDescriptionField(indexPatternDescription: string) {
-    const field = await this.getReadableDescriptionField();
-    field.clearValue();
-    field.type(indexPatternDescription);
+    field.type(indexPatternName);
   }
 
   async getSaveIndexPatternButton() {
@@ -428,8 +414,7 @@ export class SettingsPageObject extends FtrService {
     // null to bypass default value
     timefield: string | null = '@timestamp',
     isStandardIndexPattern = true,
-    indexPatternTitle?: string,
-    indexPatternDescription?: string
+    indexPatternName?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -460,11 +445,8 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
-      if (indexPatternTitle) {
-        await this.setReadableTitleField(indexPatternTitle);
-      }
-      if (indexPatternDescription) {
-        await this.setReadableDescriptionField(indexPatternDescription);
+      if (indexPatternName) {
+        await this.setNameField(indexPatternName);
       }
       await (await this.getSaveIndexPatternButton()).click();
     });
@@ -492,8 +474,7 @@ export class SettingsPageObject extends FtrService {
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    indexPatternTitle?: string,
-    indexPatternDescription?: string
+    indexPatternName?: string
   ) {
     if (!indexPatternName) {
       throw new Error('No Data View name provided for edit');
@@ -509,11 +490,8 @@ export class SettingsPageObject extends FtrService {
     if (timefield) {
       await this.selectTimeFieldOption(timefield);
     }
-    if (indexPatternTitle) {
-      await this.setReadableTitleField(indexPatternTitle);
-    }
-    if (indexPatternDescription) {
-      await this.setReadableDescriptionField(indexPatternDescription);
+    if (indexPatternName) {
+      await this.setNameField(indexPatternName);
     }
     await (await this.getSaveIndexPatternButton()).click();
 

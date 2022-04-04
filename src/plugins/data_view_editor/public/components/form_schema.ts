@@ -25,7 +25,7 @@ export const singleAstriskValidator = (
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
-      defaultMessage: 'Data View',
+      defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
@@ -45,20 +45,11 @@ export const schema = {
       },
     ],
   },
-  readableTitle: {
-    label: i18n.translate('indexPatternEditor.editor.form.readableTitleLabel', {
-      defaultMessage: 'Title',
+  name: {
+    label: i18n.translate('indexPatternEditor.editor.form.nameLabel', {
+      defaultMessage: 'Name',
     }),
     defaultValue: '',
-  },
-  readableDescription: {
-    label: i18n.translate('indexPatternEditor.editor.form.readableDescriptionLabel', {
-      defaultMessage: 'Description',
-    }),
-    defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.readableDescriptionHelpText', {
-      defaultMessage: '150 characters max',
-    }),
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {

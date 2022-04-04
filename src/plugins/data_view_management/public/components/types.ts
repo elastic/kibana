@@ -20,4 +20,5 @@ export interface IndexPatternTableItem {
   tags?: Array<{ key: string; name: string }>;
   sort: string;
   namespaces?: string[];
+  getName: () => string;
 }

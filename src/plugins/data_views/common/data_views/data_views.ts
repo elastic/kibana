@@ -45,12 +45,12 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
 export type IndexPatternSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'readableTitle' | 'readableDescription'
+  'title' | 'type' | 'typeMeta' | 'name'
 >;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta' | 'readableTitle' | 'readableDescription'
+  'title' | 'type' | 'typeMeta' | 'name'
 >;
 
 export interface DataViewListItem {
@@ -59,8 +59,7 @@ export interface DataViewListItem {
   title: string;
   type?: string;
   typeMeta?: TypeMeta;
-  readableTitle?: string;
-  readableDescription?: string;
+  name?: string;
 }
 
 export interface DataViewsServiceDeps {
@@ -157,7 +156,7 @@ export class DataViewsService {
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      fields: ['title', 'type', 'typeMeta', 'readableTitle', 'readableDescription'],
+      fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -228,8 +227,7 @@ export class DataViewsService {
       title: obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
-      readableTitle: obj?.attributes?.readableTitle,
-      readableDescription: obj?.attributes?.readableDescription,
+      name: obj?.attributes?.name,
     }));
   };
 
@@ -437,8 +435,7 @@ export class DataViewsService {
         type,
         fieldAttrs,
         allowNoIndex,
-        readableTitle,
-        readableDescription,
+        name,
       },
     } = savedObject;
 
@@ -465,8 +462,7 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
-      readableTitle,
-      readableDescription,
+      name,
     };
   };
 

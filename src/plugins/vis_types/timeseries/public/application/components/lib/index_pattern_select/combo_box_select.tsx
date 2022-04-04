@@ -23,7 +23,7 @@ type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;
 type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];
 
 const toComboBoxOptions = (options: IdsWithTitle) =>
-  options.map(({ title, id }) => ({ label: title, id }));
+  options.map(({ name, title, id }) => ({ label: name ? name : title, id }));
 
 export const ComboBoxSelect = ({
   fetchedIndex,
@@ -55,7 +55,7 @@ export const ComboBoxSelect = ({
         options = [
           {
             id: indexPattern.id,
-            label: indexPattern.title,
+            label: indexPattern.getName(),
           },
         ];
       }

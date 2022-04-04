@@ -103,8 +103,7 @@ export interface DataViewAttributes {
    * prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
-  readableTitle?: string;
-  readableDescription?: string;
+  name?: string;
 }
 
 /**
@@ -286,8 +285,7 @@ export interface DataViewSpec {
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
   namespaces?: string[];
-  readableTitle?: string;
-  readableDescription?: string;
+  name?: string;
 }
 
 export interface SourceFilter {

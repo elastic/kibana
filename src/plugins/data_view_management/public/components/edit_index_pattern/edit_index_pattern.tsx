@@ -131,7 +131,7 @@ export const EditIndexPattern = withRouter(
       defaultMessage: 'Data view details',
     });
 
-    chrome.docTitle.change(indexPattern.title);
+    chrome.docTitle.change(indexPattern.getName());
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();

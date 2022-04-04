@@ -12,7 +12,7 @@ export { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_conte
 export { DataViewEditor } from './data_view_editor';
 
 export { schema } from './form_schema';
-export { ReadableTitleField, TimestampField, TypeField, TitleField } from './form_fields';
+export { NameField, TimestampField, TypeField, TitleField } from './form_fields';
 export { EmptyPrompts } from './empty_prompts';
 export { PreviewPanel } from './preview_panel';
 export { LoadingIndices } from './loading_indices';

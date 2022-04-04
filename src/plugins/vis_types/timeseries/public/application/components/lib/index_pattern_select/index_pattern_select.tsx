@@ -129,7 +129,7 @@ export const IndexPatternSelect = ({
         allowSwitchMode={allowIndexSwitchingMode}
         onIndexChange={onIndexChange}
         onModeChange={onModeChange}
-        placeholder={fetchedIndex.defaultIndex?.title ?? ''}
+        placeholder={fetchedIndex.defaultIndex?.getName() ?? ''}
         data-test-subj="metricsIndexPatternInput"
       />
     </EuiFormRow>

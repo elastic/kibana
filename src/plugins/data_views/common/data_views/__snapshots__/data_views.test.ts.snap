@@ -41,8 +41,7 @@ Object {
   "fields": Object {},
   "id": "id",
   "namespaces": undefined,
-  "readableDescription": "Kibana * Description",
-  "readableTitle": "Kibana *",
+  "name": "Kibana *",
   "runtimeFieldMap": Object {
     "aRuntimeField": Object {
       "script": Object {

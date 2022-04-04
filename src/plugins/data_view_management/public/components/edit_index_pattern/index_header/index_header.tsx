@@ -59,16 +59,9 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
 }) => {
   const [openActions, setOpenActions] = useState<boolean>(false);
 
-  const title = indexPattern.readableTitle ? indexPattern.readableTitle : indexPattern.title;
-
   return (
     <EuiPageHeader
-      pageTitle={<span data-test-subj="indexPatternTitle">{title}</span>}
-      description={
-        indexPattern.readableDescription ? (
-          <span data-test-subj="indexPatternDescription">{indexPattern.readableDescription}</span>
-        ) : null
-      }
+      pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
       rightSideItems={[
         <EuiPopover
           button={
@@ -124,7 +117,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             {canSave && (
               <EuiFlexItem>
                 <EuiButtonEmpty
-                  color="text"
+                  color="danger"
                   onClick={deleteIndexPatternClick}
                   iconSide="left"
                   iconType="trash"
