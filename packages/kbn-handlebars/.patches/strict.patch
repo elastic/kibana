@@ -144,81 +144,37 @@
 >         expect(error.endLineNumber).toEqual(4);
 >         expect(error.column).toEqual(5);
 >         expect(error.endColumn).toEqual(10);
-124,163c128,163
+124,128c128,130
 <   describe('assume objects', function() {
 <     it('should ignore missing property', function() {
 <       expectTemplate('{{hello}}')
 <         .withCompileOptions({ assumeObjects: true })
 <         .toCompileTo('');
-<     });
-< 
+---
+>   describe('assume objects', () => {
+>     it('should ignore missing property', () => {
+>       expectTemplate('{{hello}}').withCompileOptions({ assumeObjects: true }).toCompileTo('');
+131c133
 <     it('should ignore missing child', function() {
-<       expectTemplate('{{hello.bar}}')
-<         .withCompileOptions({ assumeObjects: true })
-<         .withInput({ hello: {} })
-<         .toCompileTo('');
-<     });
-< 
+---
+>     it('should ignore missing child', () => {
+138,141c140,141
 <     it('should error on missing object', function() {
 <       expectTemplate('{{hello.bar}}')
 <         .withCompileOptions({ assumeObjects: true })
 <         .toThrow(Error);
-<     });
-< 
-<     it('should error on missing context', function() {
-<       expectTemplate('{{hello}}')
-<         .withCompileOptions({ assumeObjects: true })
-<         .withInput(undefined)
-<         .toThrow(Error);
-<     });
-< 
-<     it('should error on missing data lookup', function() {
-<       expectTemplate('{{@hello.bar}}')
-<         .withCompileOptions({ assumeObjects: true })
-<         .withInput(undefined)
-<         .toThrow(Error);
-<     });
-< 
-<     it('should execute blockHelperMissing', function() {
-<       expectTemplate('{{^hello}}foo{{/hello}}')
-<         .withCompileOptions({ assumeObjects: true })
-<         .toCompileTo('foo');
-<     });
-<   });
 ---
->   // describe('assume objects', () => {
->   //   it('should ignore missing property', () => {
->   //     expectTemplate('{{hello}}').withCompileOptions({ assumeObjects: true }).toCompileTo('');
->   //   });
-> 
->   //   it('should ignore missing child', () => {
->   //     expectTemplate('{{hello.bar}}')
->   //       .withCompileOptions({ assumeObjects: true })
->   //       .withInput({ hello: {} })
->   //       .toCompileTo('');
->   //   });
-> 
->   //   it('should error on missing object', () => {
->   //     expectTemplate('{{hello.bar}}').withCompileOptions({ assumeObjects: true }).toThrow(Error);
->   //   });
-> 
->   //   it('should error on missing context', () => {
->   //     expectTemplate('{{hello}}')
->   //       .withCompileOptions({ assumeObjects: true })
->   //       .withInput(undefined)
->   //       .toThrow(Error);
->   //   });
-> 
->   //   it('should error on missing data lookup', () => {
->   //     expectTemplate('{{@hello.bar}}')
->   //       .withCompileOptions({ assumeObjects: true })
->   //       .withInput(undefined)
->   //       .toThrow(Error);
->   //   });
-> 
->   //   it('should execute blockHelperMissing', () => {
->   //     expectTemplate('{{^hello}}foo{{/hello}}')
->   //       .withCompileOptions({ assumeObjects: true })
->   //       .toCompileTo('foo');
->   //   });
->   // });
+>     it('should error on missing object', () => {
+>       expectTemplate('{{hello.bar}}').withCompileOptions({ assumeObjects: true }).toThrow(Error);
+144c144
+<     it('should error on missing context', function() {
+---
+>     it('should error on missing context', () => {
+151c151
+<     it('should error on missing data lookup', function() {
+---
+>     it('should error on missing data lookup', () => {
+158c158
+<     it('should execute blockHelperMissing', function() {
+---
+>     it('should execute blockHelperMissing', () => {

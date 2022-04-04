@@ -87,13 +87,10 @@
 <       ).toCompileTo('bar');
 ---
 >       expectTemplate(' \n\n{{~^if foo~}} \n\nbar \n\n{{~/if~}}\n\n ').toCompileTo('bar');
-71,72c47,48
+71,80c47,48
 <     it('should strip whitespace around complex block calls', function() {
 <       var hash = { foo: 'bar<' };
----
->     it('should strip whitespace around complex block calls', () => {
->       const hash = { foo: 'bar<' };
-74,80c50,54
+< 
 <       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}')
 <         .withInput(hash)
 <         .toCompileTo('bar');
@@ -102,16 +99,19 @@
 <         .withInput(hash)
 <         .toCompileTo('bar ');
 ---
+>     it('should strip whitespace around complex block calls', () => {
+>       const hash = { foo: 'bar<' };
+82,84c50,54
+<       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}')
+<         .withInput(hash)
+<         .toCompileTo(' bar');
+---
 >       expectTemplate('{{#if foo~}} bar {{~^~}} baz {{~/if}}').withInput(hash).toCompileTo('bar');
 >       expectTemplate('{{#if foo~}} bar {{^~}} baz {{/if}}').withInput(hash).toCompileTo('bar ');
 >       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}').withInput(hash).toCompileTo(' bar');
 >       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}').withInput(hash).toCompileTo(' bar ');
 >       expectTemplate('{{#if foo~}} bar {{~else~}} baz {{~/if}}').withInput(hash).toCompileTo('bar');
-82,90c56
-<       expectTemplate('{{#if foo}} bar {{~^~}} baz {{~/if}}')
-<         .withInput(hash)
-<         .toCompileTo(' bar');
-< 
+86,90c56
 <       expectTemplate('{{#if foo}} bar {{^~}} baz {{/if}}')
 <         .withInput(hash)
 <         .toCompileTo(' bar ');
@@ -159,7 +159,7 @@
 <       expectTemplate(
 <         '\n\n{{~#if foo~}} \n\nbar \n\n{{~^~}} \n\nbaz \n\n{{~/if~}}\n\n'
 <       ).toCompileTo('baz');
-130,150c75,81
+130,152c75
 <   it('should strip whitespace around partials', function() {
 <     expectTemplate('foo {{~> dude~}} ')
 <       .withPartials({ dude: 'bar' })
@@ -181,15 +181,7 @@
 <       .withPartials({ dude: 'bar' })
 <       .toCompileTo('foo\n bar');
 <   });
----
->   // it('should strip whitespace around partials', () => {
->   //   expectTemplate('foo {{~> dude~}} ').withPartials({ dude: 'bar' }).toCompileTo('foobar');
->   //   expectTemplate('foo {{> dude~}} ').withPartials({ dude: 'bar' }).toCompileTo('foo bar');
->   //   expectTemplate('foo {{> dude}} ').withPartials({ dude: 'bar' }).toCompileTo('foo bar ');
->   //   expectTemplate('foo\n {{~> dude}} ').withPartials({ dude: 'bar' }).toCompileTo('foobar');
->   //   expectTemplate('foo\n {{> dude}} ').withPartials({ dude: 'bar' }).toCompileTo('foo\n bar');
->   // });
-152c83
+< 
 <   it('should only strip whitespace once', function() {
 ---
 >   it('should only strip whitespace once', () => {

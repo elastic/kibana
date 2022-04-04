@@ -242,7 +242,7 @@
 <             'string params for outer helper processed correctly'
 <           );
 <           return a + b;
-214,227d182
+214,231d182
 < 
 <         blorg: function(a, options) {
 <           equals(
@@ -257,15 +257,14 @@
 <           );
 <           return a;
 <         }
-229,233c184
+<       })
 <       .withInput({
 <         foo: {},
 <         yeah: {}
-<       })
+233,248c184
 <       .toCompileTo('fooyeah');
----
->       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
-236,249c187,225
+<   });
+< 
 <   it('as hashes in string params mode', function() {
 <     expectTemplate('{{blog fun=(bork)}}')
 <       .withCompileOptions({ stringParams: true })
@@ -279,80 +278,41 @@
 <         }
 <       })
 <       .toCompileTo('val is BORK');
-<   });
 ---
->   // it('in string params mode,', () => {
->   //   expectTemplate('{{snog (blorg foo x=y) yeah a=b}}')
->   //     .withCompileOptions({ stringParams: true })
->   //     .withHelpers({
->   //       snog(a, b, options) {
->   //         expect(a).toEqual('foo');
->   //         expect(options.types.length).toEqual(2);
->   //         expect(options.types[0]).toEqual('SubExpression');
->   //         expect(options.types[1]).toEqual('PathExpression');
->   //         return a + b;
->   //       },
-> 
->   //       blorg(a, options) {
->   //         expect(options.types.length).toEqual(1);
->   //         expect(options.types[0]).toEqual('PathExpression');
->   //         return a;
->   //       },
->   //     })
->   //     .withInput({
->   //       foo: {},
->   //       yeah: {},
->   //     })
->   //     .toCompileTo('fooyeah');
->   // });
-> 
->   // it('as hashes in string params mode', () => {
->   //   expectTemplate('{{blog fun=(bork)}}')
->   //     .withCompileOptions({ stringParams: true })
->   //     .withHelpers({
->   //       blog(options) {
->   //         expect(options.hashTypes.fun).toEqual('SubExpression');
->   //         return 'val is ' + options.hash.fun;
->   //       },
->   //       bork() {
->   //         return 'BORK';
->   //       },
->   //     })
->   //     .toCompileTo('val is BORK');
->   // });
-251c227
+>       .toCompileTo('<input aria-label="Name" placeholder="Example User" />');
+251c187
 <   it('subexpression functions on the context', function() {
 ---
 >   it('subexpression functions on the context', () => {
-254c230
+254c190
 <         bar: function() {
 ---
 >         bar() {
-256c232
+256c192
 <         }
 ---
 >         },
-259c235
+259c195
 <         foo: function(val) {
 ---
 >         foo(val) {
-261c237
+261c197
 <         }
 ---
 >         },
-266c242
+266c202
 <   it("subexpressions can't just be property lookups", function() {
 ---
 >   it("subexpressions can't just be property lookups", () => {
-269c245
+269c205
 <         bar: 'LOL'
 ---
 >         bar: 'LOL',
-272c248
+272c208
 <         foo: function(val) {
 ---
 >         foo(val) {
-274c250
+274c210
 <         }
 ---
 >         },

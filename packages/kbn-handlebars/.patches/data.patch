@@ -135,7 +135,7 @@
 >         for (const prop in options.hash) {
 130d131
 <       .withMessage('data variables are inherited downstream')
-134,145c135,145
+134,147c135
 <   it('passing in data to a compiled function that expects data - works with helpers in partials', function() {
 <     expectTemplate('{{>myPartial}}')
 <       .withCompileOptions({ data: true })
@@ -148,79 +148,67 @@
 <       .withMessage('Data output by helper inside partial')
 <       .toCompileTo('happy cat');
 <   });
----
->   // it('passing in data to a compiled function that expects data - works with helpers in partials', () => {
->   //   expectTemplate('{{>myPartial}}')
->   //     .withCompileOptions({ data: true })
->   //     .withPartial('myPartial', '{{hello}}')
->   //     .withHelper('hello', function (this: any, options: HelperOptions) {
->   //       return options.data.adjective + ' ' + this.noun;
->   //     })
->   //     .withInput({ noun: 'cat' })
->   //     .withRuntimeOptions({ data: { adjective: 'happy' } })
->   //     .toCompileTo('happy cat');
->   // });
-147c147
+< 
 <   it('passing in data to a compiled function that expects data - works with helpers and parameters', function() {
 ---
 >   it('passing in data to a compiled function that expects data - works with helpers and parameters', () => {
-150c150
+150c138
 <       .withHelper('hello', function(noun, options) {
 ---
 >       .withHelper('hello', function (this: any, noun, options) {
-155d154
+155d142
 <       .withMessage('Data output by helper')
-159c158
+159c146
 <   it('passing in data to a compiled function that expects data - works with block helpers', function() {
 ---
 >   it('passing in data to a compiled function that expects data - works with block helpers', () => {
-162c161
+162c149
 <         data: true
 ---
 >         data: true,
-164c163
+164c151
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (this: any, options) {
-167c166
+167c154
 <       .withHelper('world', function(options) {
 ---
 >       .withHelper('world', function (this: any, options) {
-172d170
+172d158
 <       .withMessage('Data output by helper')
-176c174
+176c162
 <   it('passing in data to a compiled function that expects data - works with block helpers that use ..', function() {
 ---
 >   it('passing in data to a compiled function that expects data - works with block helpers that use ..', () => {
-179c177
+179c165
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-182c180
+182c168
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-187d184
+187d172
 <       .withMessage('Data output by helper')
-191c188
+191c176
 <   it('passing in data to a compiled function that expects data - data is passed to with block helpers where children use ..', function() {
 ---
 >   it('passing in data to a compiled function that expects data - data is passed to with block helpers where children use ..', () => {
-194c191
+194c179
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-197c194
+197c182
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-202d198
+202d186
 <       .withMessage('Data output by helper')
-206c202
+206c190
 <   it('you can override inherited data when invoking a helper', function() {
 ---
 >   it('you can override inherited data when invoking a helper', () => {
-209,213c205,206
+209,213c193,194
 <       .withHelper('hello', function(options) {
 <         return options.fn(
 <           { exclaim: '?', zomg: 'world' },
@@ -229,55 +217,55 @@
 ---
 >       .withHelper('hello', function (options) {
 >         return options.fn({ exclaim: '?', zomg: 'world' }, { data: { adjective: 'sad' } });
-215c208
+215c196
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-220d212
+220d200
 <       .withMessage('Overriden data output by helper')
-224c216
+224c204
 <   it('you can override inherited data when invoking a helper with depth', function() {
 ---
 >   it('you can override inherited data when invoking a helper with depth', () => {
-227c219
+227c207
 <       .withHelper('hello', function(options) {
 ---
 >       .withHelper('hello', function (options) {
-230c222
+230c210
 <       .withHelper('world', function(thing, options) {
 ---
 >       .withHelper('world', function (this: any, thing, options) {
-235d226
+235d214
 <       .withMessage('Overriden data output by helper')
-239,240c230,231
+239,240c218,219
 <   describe('@root', function() {
 <     it('the root context can be looked up via @root', function() {
 ---
 >   describe('@root', () => {
 >     it('the root context can be looked up via @root', () => {
-246,248c237
+246,248c225
 <       expectTemplate('{{@root.foo}}')
 <         .withInput({ foo: 'hello' })
 <         .toCompileTo('hello');
 ---
 >       expectTemplate('{{@root.foo}}').withInput({ foo: 'hello' }).toCompileTo('hello');
-251c240
+251c228
 <     it('passed root values take priority', function() {
 ---
 >     it('passed root values take priority', () => {
-259,260c248,249
+259,260c236,237
 <   describe('nesting', function() {
 <     it('the root context can be looked up via @root', function() {
 ---
 >   describe('nesting', () => {
 >     it('the root context can be looked up via @root', () => {
-265,266c254,255
+265,266c242,243
 <         .withHelper('helper', function(options) {
 <           var frame = Handlebars.createFrame(options.data);
 ---
 >         .withHelper('helper', function (this: any, options) {
 >           const frame = Handlebars.createFrame(options.data);
-272,273c261,262
+272,273c249,250
 <             depth: 0
 <           }
 ---
