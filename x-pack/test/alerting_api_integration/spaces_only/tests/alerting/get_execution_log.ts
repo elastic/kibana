@@ -126,6 +126,32 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       expect(response.body.errors).to.eql([]);
     });
 
+    it('gets execution log for rule that is currently running', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ rule_type_id: 'test.longRunning', params: { delay: 120000 } }))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // wait for execute-start event that signals rule has started running
+      await waitForEvents(createdRule.id, 'alerting', new Map([['execute-start', { gte: 1 }]]));
+
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+          createdRule.id
+        }/_execution_log?date_start=${dateStart}`
+      );
+
+      expect(response.status).to.eql(200);
+
+      // since these events should have been excluded from the agg, should return empty
+      expect(response.body.total).to.eql(0);
+      expect(response.body.data).to.eql([]);
+      expect(response.body.totalErrors).to.eql(0);
+      expect(response.body.errors).to.eql([]);
+    });
+
     it('gets execution log for rule that performs ES searches', async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
