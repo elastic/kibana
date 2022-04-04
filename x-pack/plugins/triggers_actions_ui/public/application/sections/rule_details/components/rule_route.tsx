@@ -77,6 +77,7 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   return ruleSummary ? (
     <Rules
       requestRefresh={requestRefresh}
+      refreshToken={refreshToken}
       rule={rule}
       ruleType={ruleType}
       readOnly={readOnly}

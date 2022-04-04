@@ -12,9 +12,9 @@ import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 import {
-  IExecutionLogResult,
   IExecutionLog,
   ExecutionLogSortFields,
+  IExecutionLogWithErrorsResult,
 } from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
@@ -36,9 +36,12 @@ const getRenamedLog = (data: IExecutionLog) => {
   };
 };
 
-const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, total }: any) => ({
+const rewriteBodyRes: RewriteRequestCase<IExecutionLogWithErrorsResult> = ({
+  data,
+  ...rest
+}: any) => ({
   data: data.map((log: IExecutionLog) => getRenamedLog(log)),
-  total,
+  ...rest,
 });
 
 const getFilter = (filter: string[] | undefined) => {
@@ -77,7 +80,7 @@ export const loadExecutionLogAggregations = async ({
 }: LoadExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
 
-  const result = await http.get<AsApiContract<IExecutionLogResult>>(
+  const result = await http.get<AsApiContract<IExecutionLogWithErrorsResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_log`,
     {
       query: {
