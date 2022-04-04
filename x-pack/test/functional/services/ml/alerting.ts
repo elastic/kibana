@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
 import { MlCommonUI } from './common_ui';
 import { ML_ALERT_TYPES } from '../../../../plugins/ml/common/constants/alerts';
-import { Alert } from '../../../../plugins/alerting/common';
+import { Rule } from '../../../../plugins/alerting/common';
 import { MlAnomalyDetectionAlertParams } from '../../../../plugins/ml/common/types/alerts';
 
 export function MachineLearningAlertingProvider(
@@ -161,9 +161,7 @@ export function MachineLearningAlertingProvider(
         .set('kbn-xsrf', 'foo');
       mlApi.assertResponseStatusCode(200, findResponseStatus, anomalyDetectionRules);
 
-      for (const rule of anomalyDetectionRules.data as Array<
-        Alert<MlAnomalyDetectionAlertParams>
-      >) {
+      for (const rule of anomalyDetectionRules.data as Array<Rule<MlAnomalyDetectionAlertParams>>) {
         const { body, status } = await supertest
           .delete(`/api/alerting/rule/${rule.id}`)
           .set('kbn-xsrf', 'foo');

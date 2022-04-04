@@ -67,7 +67,7 @@ export const ControlGroupChainingSystems: {
       const nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
       if (nextOrder >= childOrder.idsInOrder.length) return;
       setTimeout(
-        () => getChild(childOrder.idsInOrder[nextOrder]).refreshInputFromParent(),
+        () => getChild(childOrder.idsInOrder[nextOrder])?.refreshInputFromParent(),
         1 // run on next tick
       );
     },
