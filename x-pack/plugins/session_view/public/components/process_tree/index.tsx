@@ -172,9 +172,9 @@ export const ProcessTree = ({
     // after 2 pages are loaded (due to bi-directional jump to), auto select the process
     // for the jumpToEvent
     if (!selectedProcess && jumpToEvent) {
-      const process = processMap[jumpToEvent.process.entity_id];
+      const process = processMap[jumpToEvent.process?.entity_id ?? ''];
 
-      if (process) {
+      if (process && jumpToEvent.process?.entity_id) {
         onProcessSelected(process);
       } else {
         // auto selects the session leader process if jumpToEvent is not found in processMap
@@ -203,8 +203,8 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
-            jumpToEventID={jumpToEvent?.process.entity_id}
-            jumpToAlertID={jumpToEvent?.kibana?.alert.uuid}
+            jumpToEventID={jumpToEvent?.process?.entity_id}
+            jumpToAlertID={jumpToEvent?.kibana?.alert?.uuid}
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
