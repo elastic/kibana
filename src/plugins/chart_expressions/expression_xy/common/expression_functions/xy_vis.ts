@@ -27,7 +27,11 @@ import {
   ANNOTATION_LAYER,
   LayerTypes,
 } from '../constants';
-import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
 
 export const xyVisFunction: ExpressionFunctionDefinition<
@@ -192,9 +196,23 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }),
       required: false,
     },
+    splitColumnAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
+        defaultMessage: 'Specifies split column of the xy chart',
+      }),
+    },
+    splitRowAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
+        defaultMessage: 'Specifies split row of the xy chart',
+      }),
+    },
   },
   fn(data, args, handlers) {
-    const { dataLayers, referenceLineLayers, annotationLayers, ...restArgs } = args;
+    validateAccessor(args.splitRowAccessor, data.columns);
+    validateAccessor(args.splitColumnAccessor, data.columns);
+    const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
     const inputLayers: Array<XYLayerConfigResult | undefined> = [
       ...dataLayers,
       ...referenceLineLayers,

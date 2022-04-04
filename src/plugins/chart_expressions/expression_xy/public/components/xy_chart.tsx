@@ -77,9 +77,10 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common/types';
+import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
+import { SplitChart } from './split_chart';
 
 import './xy_chart.scss';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
 
 declare global {
   interface Window {
@@ -163,6 +164,8 @@ export function XYChart({
     yLeftExtent,
     yRightExtent,
     valuesInLegend,
+    splitColumnAccessor,
+    splitRowAccessor,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -530,6 +533,8 @@ export function XYChart({
               : undefined,
         },
       };
+  const isSplitChart = splitColumnAccessor || splitRowAccessor;
+  const splitTable = isSplitChart ? dataLayers[0].table : undefined;
 
   return (
     <Chart ref={chartRef}>
@@ -597,7 +602,14 @@ export function XYChart({
         style={xAxisStyle}
         timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
-
+      {isSplitChart && splitTable && (
+        <SplitChart
+          splitColumnAccessor={splitColumnAccessor}
+          splitRowAccessor={splitRowAccessor}
+          formatFactory={formatFactory}
+          columns={splitTable.columns}
+        />
+      )}
       {yAxesConfiguration.map((axis) => {
         return (
           <Axis

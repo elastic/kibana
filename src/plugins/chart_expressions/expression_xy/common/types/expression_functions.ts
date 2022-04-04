@@ -11,6 +11,7 @@ import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
 import { PaletteOutput } from '../../../../charts/common';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -198,6 +199,8 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface LayeredXYArgs {
@@ -248,6 +251,8 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface AnnotationLayerArgs {
