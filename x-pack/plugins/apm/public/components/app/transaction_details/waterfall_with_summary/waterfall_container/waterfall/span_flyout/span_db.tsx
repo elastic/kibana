@@ -18,7 +18,7 @@ export function SpanDatabase({ spanDb }: Props) {
   if (!spanDb || !spanDb.statement) {
     return null;
   }
-
+  console.log(spanDb.statement);
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -32,7 +32,12 @@ export function SpanDatabase({ spanDb }: Props) {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
+      <EuiCodeBlock
+        language="sql"
+        fontSize="m"
+        paddingSize="m"
+        overflowHeight={150}
+      >
         {spanDb.statement}
       </EuiCodeBlock>
       <EuiSpacer size="m" />
