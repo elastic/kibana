@@ -9,7 +9,7 @@
 import http, { ClientRequest } from 'http';
 import * as sinon from 'sinon';
 import { proxyRequest } from './proxy_request';
-import { URL, URLSearchParams } from 'url';
+import { URL } from 'url';
 import { fail } from 'assert';
 
 describe(`Console's send request`, () => {
@@ -102,38 +102,52 @@ describe(`Console's send request`, () => {
     });
   });
 
-  it('should decode percent-encoded uri and encode it correctly', async () => {
-    fakeRequest = {
-      abort: sinon.stub(),
-      on() {},
-      once(event: string, fn: (v: string) => void) {
-        if (event === 'response') {
-          return fn('done');
-        }
-      },
-    } as any;
-
-    const uri = new URL(
-      `http://noone.nowhere.none/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23`
-    );
-
-    const result = await proxyRequest({
-      agent: null as any,
-      headers: {},
-      method: 'get',
-      payload: null as any,
-      timeout: 30000,
-      uri,
+  describe('with percent-encoded uri pathname', () => {
+    beforeEach(() => {
+      fakeRequest = {
+        abort: sinon.stub(),
+        on() {},
+        once(event: string, fn: (v: string) => void) {
+          if (event === 'response') {
+            return fn('done');
+          }
+        },
+      } as any;
     });
 
-    expect(result).toEqual('done');
+    it('should decode percent-encoded uri pathname and encode it correctly', async () => {
+      const uri = new URL(
+        `http://noone.nowhere.none/%{[@metadata][beat]}-%{[@metadata][version]}-2020.08.23`
+      );
+      const result = await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 30000,
+        uri,
+      });
 
-    const decoded = new URLSearchParams(`path=${uri.pathname}`).get('path');
-    const encoded = decoded
-      ?.split('/')
-      .map((str) => encodeURIComponent(str))
-      .join('/');
-    const [httpRequestOptions] = stub.firstCall.args;
-    expect((httpRequestOptions as any).path).toEqual(encoded);
+      expect(result).toEqual('done');
+      const [httpRequestOptions] = stub.firstCall.args;
+      expect((httpRequestOptions as any).path).toEqual(
+        '/%25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7D-2020.08.23'
+      );
+    });
+
+    it('should issue request with date-math format', async () => {
+      const result = await proxyRequest({
+        agent: null as any,
+        headers: {},
+        method: 'get',
+        payload: null as any,
+        timeout: 30000,
+        uri: new URL(`http://noone.nowhere.none/%3Cmy-index-%7Bnow%2Fd%7D%3E`),
+      });
+
+      expect(result).toEqual('done');
+      const [httpRequestOptions] = stub.firstCall.args;
+      expect((httpRequestOptions as any).path).toEqual('/%3Cmy-index-%7Bnow%2Fd%7D%3E');
+    });
   });
 });
