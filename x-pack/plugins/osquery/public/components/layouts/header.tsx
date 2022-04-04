@@ -56,7 +56,7 @@ const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
 
 HeaderColumns.displayName = 'HeaderColumns';
 
- const HeaderComponent: React.FC<HeaderProps> = ({
+const HeaderComponent: React.FC<HeaderProps> = ({
   children,
   leftColumn,
   rightColumn,

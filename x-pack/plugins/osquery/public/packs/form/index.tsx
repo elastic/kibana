@@ -51,7 +51,11 @@ interface PackFormProps {
   isReadOnly?: boolean;
 }
 
-const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = false, isReadOnly = false }) => {
+const PackFormComponent: React.FC<PackFormProps> = ({
+  defaultValue,
+  editMode = false,
+  isReadOnly = false,
+}) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
