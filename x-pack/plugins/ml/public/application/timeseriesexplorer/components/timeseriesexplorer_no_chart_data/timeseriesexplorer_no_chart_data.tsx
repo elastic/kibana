@@ -9,13 +9,15 @@
  * React component for rendering EuiEmptyPrompt when no results were found.
  */
 
-import React from 'react';
-
+import React, { FC } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+import type { Entity } from '../entity_control/entity_control';
 
-export const TimeseriesexplorerNoChartData = ({ dataNotChartable, entities }) => (
+export const TimeseriesexplorerNoChartData: FC<{
+  dataNotChartable?: boolean;
+  entities?: Entity[];
+}> = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
     iconType="iInCircle"
     title={
@@ -32,7 +34,7 @@ export const TimeseriesexplorerNoChartData = ({ dataNotChartable, entities }) =>
             defaultMessage: `Model plot is not collected for the selected {entityCount, plural, one {entity} other {entities}}
 and the source data cannot be plotted for this detector.`,
             values: {
-              entityCount: entities.length,
+              entityCount: entities!.length,
             },
           })}
         </p>
