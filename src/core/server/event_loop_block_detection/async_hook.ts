@@ -20,12 +20,15 @@ interface CacheEntry {
 export class EventLoopBlockDetectionAsyncHook {
   readonly #asyncHook: AsyncHook;
   readonly #cache = new Map<number, CacheEntry>();
+  readonly #logger: Logger;
   readonly #thresholdNs: number;
 
   constructor(thresholdMs: number, logger: Logger) {
-    this.#thresholdNs = thresholdMs * 1e6;
     this.#asyncHook = createHook({ before: this.#before, after: this.#after });
+    this.#logger = logger;
+    this.#thresholdNs = thresholdMs * 1e6;
   }
+
   enable() {
     this.#asyncHook.enable();
   }
@@ -41,21 +44,10 @@ export class EventLoopBlockDetectionAsyncHook {
     const diffNs = diff[0] * 1e9 + diff[1];
     if (diffNs > this.#thresholdNs) {
       const time = diffNs / 1e6;
-      // eslint-disable-next-line no-console
-      console.warn(
-        util.inspect(
-          {
-            label: 'EventLoopMonitor',
-            message: `Event loop was blocked for ${time}ms`,
-            metadata: {
-              time,
-              transaction: this.#formatTransaction(cached.transaction),
-              span: this.#formatSpan(cached.span),
-            },
-          },
-          { showHidden: false, depth: 6, colors: true }
-        )
-      );
+      this.#logger.warn(this.#formatMessage(time, cached.transaction, cached.span), {
+        transaction: this.#formatTransaction(cached.transaction),
+        span: this.#formatSpan(cached.span),
+      });
     }
   };
 
@@ -66,6 +58,28 @@ export class EventLoopBlockDetectionAsyncHook {
       span: apm.currentSpan,
     });
   };
+
+  #formatMessage(blockMs: number, transaction: apm.Transaction | null, span: apm.Span | span) {
+    const parameters = [
+      this.#formatMessageParameter('transaction.name', transaction?.name),
+      this.#formatMessageParameter('transaction.type', transaction?.type),
+      this.#formatMessageParameter('transaction.result', transaction?.result),
+      this.#formatMessageParameter('span.name', transaction?.name),
+      this.#formatMessageParameter('span.type', transaction?.type),
+      this.#formatMessageParameter('span.subtype', transaction?.subtype),
+      this.#formatMessageParameter('span.action', span?.action),
+      this.#formatMessageParameter('span.outcome', span?.outcome),
+    ];
+    return `Event loop blocked for ${blockMs}ms. ${parameters.filter((p) => p != null).join(' ')}`;
+  }
+
+  #formatMessageParameter(paramName: string, paramValue: any) {
+    if (paramValue == null) {
+      return;
+    }
+
+    return `${paramName}="${paramValue}"`;
+  }
 
   #formatSpan(span: apm.Span | null) {
     if (span == null) {

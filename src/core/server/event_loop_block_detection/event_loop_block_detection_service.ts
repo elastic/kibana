@@ -18,10 +18,10 @@ export class EventLoopBlockDetectionService {
   readonly #logger: Logger;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.#logger = coreContext.logger.get('event-loop-block-detection');
     this.#config$ = coreContext.configService.atPath<EventLoopBlockDetectionConfigType>(
       config.path
     );
+    this.#logger = coreContext.logger.get('event-loop-block-detection');
   }
 
   public async preboot() {
