@@ -354,7 +354,7 @@ describe('basic context', () => {
   it("that current context path ({{.}}) doesn't hit helpers", () => {
     expectTemplate('test: {{.}}')
       .withInput(null)
-      // @ts-expect-error TODO: Should `withHelpers` support a strings as helper functions? The code supports it
+      // @ts-expect-error Setting the helper to a string instead of a function doesn't make sense normally, but here it doesn't matter
       .withHelpers({ helper: 'awesome' })
       .toCompileTo('test: ');
   });

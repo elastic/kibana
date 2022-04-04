@@ -193,7 +193,7 @@ describe('builtin helpers', () => {
           world: 'world',
         })
         .withRuntimeOptions({ data: false })
-        .withCompileOptions({ data: false }) // TODO: We do not take data on compile options into account
+        .withCompileOptions({ data: false })
         .toCompileTo('goodbye! Goodbye! GOODBYE! cruel world!');
 
       expectTemplate('{{#each .}}{{.}}{{/each}}')

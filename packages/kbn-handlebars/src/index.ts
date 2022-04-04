@@ -391,8 +391,6 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         node
       );
     } else {
-      // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
-      path.strict = true;
       this.invokeHelper(node);
     }
   }
@@ -498,27 +496,12 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return value;
   }
 
-  private setupHelper(
-    node: ProcessableNodeWithPathParts,
-    helperName: string,
-    blockHelper: boolean = false
-  ) {
+  private setupHelper(node: ProcessableNodeWithPathParts, helperName: string) {
     return {
       fn: this.container.lookupProperty(this.container.helpers, helperName),
       context: this.scopes[0],
-      params: this.setupHelperArgs(node, helperName, blockHelper),
+      params: [...this.resolveNodes(node.params), this.setupParams(node, helperName)],
     };
-  }
-
-  private setupHelperArgs(
-    node: ProcessableNodeWithPathParts,
-    helperName: string,
-    blockHelper: boolean = false
-  ): [...any[], Handlebars.HelperOptions] {
-    if (blockHelper) {
-      throw new Error('Not implemented!'); // TODO: Handle or remove this
-    }
-    return [...this.resolveNodes(node.params), this.setupParams(node, helperName)];
   }
 
   private setupParams(
