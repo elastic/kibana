@@ -64,6 +64,14 @@ import { EMSTMSSource } from '../classes/sources/ems_tms_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
+function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, source: IVectorSource) {
+  return vectorLayerDescriptor.joins
+    ? vectorLayerDescriptor.joins.map((joinDescriptor) => {
+        return new InnerJoin(joinDescriptor, source);
+      })
+    : [];
+}
+
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
   customIcons: CustomIcon[],
@@ -75,28 +83,20 @@ export function createLayerInstance(
   switch (layerDescriptor.type) {
     case LAYER_TYPE.RASTER_TILE:
       return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
-    case LAYER_TYPE.GEOJSON_VECTOR:
-      const joins: InnerJoin[] = [];
-      const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
-      if (vectorLayerDescriptor.joins) {
-        vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
-          const join = new InnerJoin(joinDescriptor, source as IVectorSource);
-          joins.push(join);
-        });
-      }
-      return new GeoJsonVectorLayer({
-        layerDescriptor: vectorLayerDescriptor,
-        source: source as IVectorSource,
-        joins,
-        customIcons,
-        chartsPaletteServiceGetColor,
-      });
     case LAYER_TYPE.EMS_VECTOR_TILE:
       return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
     case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
         source: source as ESGeoGridSource,
+      });
+    case LAYER_TYPE.GEOJSON_VECTOR:
+      return new GeoJsonVectorLayer({
+        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+        source: source as IVectorSource,
+        joins: createJoinInstances(layerDescriptor as VectorLayerDescriptor, source as IVectorSource),
+        customIcons,
+        chartsPaletteServiceGetColor,
       });
     case LAYER_TYPE.BLENDED_VECTOR:
       return new BlendedVectorLayer({
@@ -109,6 +109,7 @@ export function createLayerInstance(
       return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        joins: createJoinInstances(layerDescriptor as VectorLayerDescriptor, source as IVectorSource),
         customIcons,
       });
     default:

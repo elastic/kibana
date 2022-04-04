@@ -54,8 +54,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   readonly _source: IMvtVectorSource;
 
-  constructor({ layerDescriptor, source, customIcons }: VectorLayerArguments) {
-    super({ layerDescriptor, source, customIcons });
+  constructor({ layerDescriptor, source, customIcons, joins }: VectorLayerArguments) {
+    super({ layerDescriptor, source, customIcons, joins });
     this._source = source as IMvtVectorSource;
   }
 
@@ -361,10 +361,6 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
-  }
-
-  getJoins() {
-    return [];
   }
 
   getMinZoom() {

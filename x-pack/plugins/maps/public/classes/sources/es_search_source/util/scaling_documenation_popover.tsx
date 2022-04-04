@@ -55,7 +55,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtUseCase"
-                  defaultMessage="Use this option to display large data sets with the fastest loading times. Does not support term joins, formatted labels, and data driven styling from scripted fields."
+                  defaultMessage="Use this option to display large data sets with the fastest loading times. Does not support formatted labels and data driven styling from scripted fields."
                 />
               </p>
             </dd>
@@ -89,7 +89,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.limitUseCase"
-                  defaultMessage="Use this option to create choropleth maps that compare statistics across boundaries."
+                  defaultMessage="Use this option to dislay formatted labels."
                 />
               </p>
             </dd>
