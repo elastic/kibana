@@ -6,14 +6,11 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import uuid from 'uuid';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { parseAlertsData } from './utils';
 import { AlertsByStatusAgg } from './types';
-
-export const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status-id';
 
 export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string }) => ({
   size: 0,
@@ -38,10 +35,15 @@ export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string 
   },
 });
 
-export const useAlertsByStatus = ({ signalIndexName }: { signalIndexName: string | null }) => {
+export const useAlertsByStatus = ({
+  signalIndexName,
+  queryId,
+}: {
+  signalIndexName: string | null;
+  queryId: string;
+}) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   // create a unique, but stable (across re-renders) query id
-  const queryId = useMemo(() => `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${uuid.v4()}`, []);
 
   const {
     loading: isLoading,

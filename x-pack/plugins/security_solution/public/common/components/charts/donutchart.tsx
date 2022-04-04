@@ -24,13 +24,14 @@ export const NO_LEGEND_DATA: LegendItem[] = [];
 type DonutChartData = ParsedSeverityBucket;
 
 export interface DonutChartProps {
-  showLegend?: boolean;
   data: DonutChartData[];
-  label: string;
   height?: number;
+  isEmptyChart: boolean;
+  label: string;
   legendField?: string;
   link?: string | null;
-  sum: number | null;
+  showLegend?: boolean;
+  sum: React.ReactElement | string | number | null;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -49,16 +50,16 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 export const DonutChart = ({
   data,
   height = 90,
+  isEmptyChart,
+  label,
   legendField,
   link,
-  label,
   showLegend = true,
   sum,
 }: DonutChartProps) => {
   const theme = useTheme();
 
   const { colors, chartTheme } = useContext(ThemeContext);
-  const isEmptyChart = sum === 0;
 
   const legendItems: LegendItem[] = useMemo(
     () =>
@@ -90,9 +91,7 @@ export const DonutChart = ({
             alignItems="center"
             justifyContent="center"
           >
-            <EuiFlexItem>
-              <strong>{sum}</strong>
-            </EuiFlexItem>
+            {sum && <EuiFlexItem>{sum}</EuiFlexItem>}
             <EuiFlexItem className="eui-textTruncate">
               {isEmptyChart && (
                 <EuiTextColor color="#ABB4C4" className="eui-textTruncate">

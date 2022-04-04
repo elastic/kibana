@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import classnames from 'classnames';
@@ -28,6 +28,8 @@ import { ThemeContext } from '../../../../common/components/charts/donut_theme_c
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
 import { useAlertsByStatus } from './use_alerts_by_status';
+import { FormattedCount } from './formatted_count';
+import { ALERTS } from './translations';
 
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
@@ -41,8 +43,9 @@ interface AlertsByStatusProps {
   filterQuery: string;
   headerChildren?: React.ReactNode;
   isInitialLoading: boolean;
-  showSpacer?: boolean;
+  queryId: string;
   showInspectButton: boolean;
+  showSpacer?: boolean;
   signalIndexName: string | null;
   subtitle?: string;
   title: string;
@@ -87,6 +90,7 @@ export const AlertsByStatus = ({
   title,
   visualizationActionsOptions,
   signalIndexName,
+  queryId,
 }: Props) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
@@ -97,7 +101,7 @@ export const AlertsByStatus = ({
     items: donutData,
     isLoading: loading,
     queryId: id,
-  } = useAlertsByStatus({ signalIndexName });
+  } = useAlertsByStatus({ signalIndexName, queryId });
   const legendItems: LegendItem[] = useMemo(
     () =>
       donutData && donutData?.length > 0 && legendField
@@ -110,6 +114,11 @@ export const AlertsByStatus = ({
           }))
         : NO_LEGEND_DATA,
     [colors, donutData]
+  );
+
+  const totalAlerts = useMemo(
+    () => donutData.reduce((acc, curr) => acc + curr.doc_count, 0),
+    [donutData]
   );
   return (
     <>
@@ -173,23 +182,31 @@ export const AlertsByStatus = ({
           {isInitialLoading ? (
             <MatrixLoader />
           ) : (
-            <EuiFlexGroup>
-              {donutData?.map((data) => (
-                <EuiFlexItem key={`alerts-status-${data.key}`}>
-                  <DonutChart
-                    data={data.buckets}
-                    height={donutHeight}
-                    link={data.link}
-                    label={data.label}
-                    showLegend={false}
-                    sum={data.doc_count}
-                  />
+            <>
+              <EuiText className="eui-textCenter">
+                <FormattedCount count={totalAlerts} />
+                <> </>
+                <small>{ALERTS(totalAlerts)}</small>
+              </EuiText>
+              <EuiFlexGroup>
+                {donutData?.map((data) => (
+                  <EuiFlexItem key={`alerts-status-${data.key}`}>
+                    <DonutChart
+                      data={data.buckets}
+                      height={donutHeight}
+                      link={data.link}
+                      label={data.label}
+                      showLegend={false}
+                      isEmptyChart={data.doc_count === 0}
+                      sum={<FormattedCount count={data.doc_count} />}
+                    />
+                  </EuiFlexItem>
+                ))}
+                <EuiFlexItem>
+                  <DraggableLegend legendItems={legendItems} height={donutHeight} />
                 </EuiFlexItem>
-              ))}
-              <EuiFlexItem>
-                <DraggableLegend legendItems={legendItems} height={donutHeight} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </EuiFlexGroup>
+            </>
           )}
         </HistogramPanel>
       </HoverVisibilityContainer>

@@ -27,13 +27,13 @@ describe('AlertsByStatus', () => {
     donutData: parsedMockAlertsData,
     filterQuery: '',
     headerChildren: undefined,
-    id: 'alertsByStatus',
     isInitialLoading: true,
     loading: false,
+    queryId: 'alertsByStatus',
     showInspectButton: true,
+    signalIndexName: 'mock-signal-index',
     title: 'Alerts',
     visualizationActionsOptions: undefined,
-    signalIndexName: 'mock-signal-index',
   };
 
   beforeEach(() => {

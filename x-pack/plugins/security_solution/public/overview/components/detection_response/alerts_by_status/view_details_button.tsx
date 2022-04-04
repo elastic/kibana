@@ -10,7 +10,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 export interface ViewDetailsButtonProps {
-  onClick?: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onClick?: (e: any) => void;
   href?: string;
   name: string;
 }

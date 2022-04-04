@@ -6,6 +6,7 @@
  */
 
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   STATUS_ACKNOWLEDGED,
@@ -25,6 +26,8 @@ import {
   SeverityBucket,
   StatusBucket,
 } from './types';
+
+export const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
 const label = {
   critical: STATUS_CRITICAL_LABEL,
