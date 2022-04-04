@@ -193,7 +193,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -205,7 +205,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -217,7 +217,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -229,7 +229,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -241,7 +241,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
