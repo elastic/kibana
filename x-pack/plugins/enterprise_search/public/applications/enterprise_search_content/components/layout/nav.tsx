@@ -15,7 +15,12 @@ import {
 } from '../../../../../common/constants';
 import { generateNavLink } from '../../../shared/layout';
 
-import { ROOT_PATH, SEARCH_INDICES_PATH, CONNECTOR_SETTINGS_PATH } from '../../routes';
+import {
+  ROOT_PATH,
+  SEARCH_INDICES_PATH,
+  CONNECTOR_SETTINGS_PATH,
+  CRAWLER_SETTINGS_PATH,
+} from '../../routes';
 
 import { useSearchIndicesNav } from '../search_index/index_nav';
 
@@ -62,6 +67,16 @@ export const useEnterpriseSearchContentNav = () => {
             }),
             ...generateNavLink({
               to: CONNECTOR_SETTINGS_PATH,
+              isRoot: true,
+            }),
+          },
+          {
+            id: 'crawler_settings',
+            name: i18n.translate('xpack.enterpriseSearch.content.nav.crawlerSettingsTitle', {
+              defaultMessage: 'Web crawler settings',
+            }),
+            ...generateNavLink({
+              to: CRAWLER_SETTINGS_PATH,
               isRoot: true,
             }),
           },
