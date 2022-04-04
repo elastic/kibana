@@ -38,6 +38,9 @@ export interface EmbeddableAnomalyChartsContainerProps {
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
@@ -48,6 +51,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   refresh,
   onInputChange,
   onOutputChange,
+  onRenderComplete,
+  onError,
+  onLoading,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
@@ -94,7 +100,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     refresh,
     services,
     chartWidth,
-    severity.val
+    severity.val,
+    { onRenderComplete, onError, onLoading }
   );
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {

@@ -6,13 +6,25 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
+import {
+  TRAINED_MODEL_TYPE,
+  SUPPORTED_PYTORCH_TASKS,
+} from '../../../../../common/constants/trained_models';
+import type { SupportedPytorchTasksType } from '../../../../../common/constants/trained_models';
 
-const TESTABLE_MODEL_TYPES: estypes.MlTrainedModelType[] = [
-  TRAINED_MODEL_TYPE.PYTORCH,
-  TRAINED_MODEL_TYPE.LANG_IDENT,
-];
+const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 
 export function isTestable(model: estypes.MlTrainedModelConfig) {
-  return model.model_type && TESTABLE_MODEL_TYPES.includes(model.model_type);
+  if (
+    model.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+    PYTORCH_TYPES.includes(Object.keys(model.inference_config)[0] as SupportedPytorchTasksType)
+  ) {
+    return true;
+  }
+
+  if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
+    return true;
+  }
+
+  return false;
 }
