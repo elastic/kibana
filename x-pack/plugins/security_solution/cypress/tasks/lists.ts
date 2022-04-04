@@ -109,17 +109,21 @@ export const uploadListItemData = (
     .filter((line) => line.trim() !== '')
     .join('\n');
 
-  return cy.request({
-    method: 'POST',
-    url: `api/lists/items/_import?type=${type}`,
-    encoding: 'binary',
-    headers: {
-      'kbn-xsrf': 'upload-value-lists',
-      'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
-    },
-    body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
-    retryOnStatusCodeFailure: true,
-  });
+  return cy
+    .request({
+      method: 'POST',
+      url: `api/lists/items/_import?type=${type}`,
+      encoding: 'binary',
+      headers: {
+        'kbn-xsrf': 'upload-value-lists',
+        'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
+      },
+      body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
+      retryOnStatusCodeFailure: true,
+    })
+    .then(() => {
+      cy.wait(1000);
+    });
 };
 
 /**
