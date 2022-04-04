@@ -96,6 +96,23 @@ export const LazyIconButtonGroup = React.lazy(() =>
 export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
 
 /**
+ * The lazily loaded `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC. Consumers should use
+ * `React.Suspense` or `withSuspense` HOC to load this component.
+ */
+export const KibanaPageTemplateSolutionNavLazy = React.lazy(() =>
+  import('./page_template/solution_nav').then(({ KibanaPageTemplateSolutionNav }) => ({
+    default: KibanaPageTemplateSolutionNav,
+  }))
+);
+
+/**
+ * A `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `KibanaPageTemplateSolutionNavLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const KibanaPageTemplateSolutionNav = withSuspense(KibanaPageTemplateSolutionNavLazy);
+
+/**
  * The Lazily-loaded `KibanaSolutionAvatar` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */

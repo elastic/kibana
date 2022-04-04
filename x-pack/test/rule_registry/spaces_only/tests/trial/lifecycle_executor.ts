@@ -31,7 +31,7 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../plugins/alerting/server';
+import { RuleExecutorOptions } from '../../../../../plugins/alerting/server';
 import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
 
 // eslint-disable-next-line import/no-default-export
