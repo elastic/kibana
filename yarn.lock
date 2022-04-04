@@ -5950,10 +5950,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__ambient-ui-types@link:bazel-bin/packages/kbn-ambient-ui-types/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__analytics@link:bazel-bin/packages/kbn-analytics/npm_module_types":
   version "0.0.0"
   uid ""

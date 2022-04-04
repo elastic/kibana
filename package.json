@@ -581,7 +581,6 @@
     "@types/json5": "^0.0.30",
     "@types/kbn__ace": "link:bazel-bin/packages/kbn-ace/npm_module_types",
     "@types/kbn__alerts": "link:bazel-bin/packages/kbn-alerts/npm_module_types",
-    "@types/kbn__ambient-ui-types": "link:bazel-bin/packages/kbn-ambient-ui-types/npm_module_types",
     "@types/kbn__analytics": "link:bazel-bin/packages/kbn-analytics/npm_module_types",
     "@types/kbn__apm-config-loader": "link:bazel-bin/packages/kbn-apm-config-loader/npm_module_types",
     "@types/kbn__apm-utils": "link:bazel-bin/packages/kbn-apm-utils/npm_module_types",
