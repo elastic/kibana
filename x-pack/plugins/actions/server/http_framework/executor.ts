@@ -6,6 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
+import { ExecutorType } from '../types';
 import { HTTPConnectorType } from './types';
 
 const buildHandler = () => {};
@@ -16,4 +17,8 @@ export const buildExecutor = <Config, Secrets, Params>({
 }: {
   connector: HTTPConnectorType<Config, Secrets, Params>;
   logger: Logger;
-}) => {};
+}): ExecutorType<Config, Secrets, Params, Record<string, unknown>> => {
+  return async ({ actionId }) => {
+    return { status: 'ok', data: {}, actionId };
+  };
+};
