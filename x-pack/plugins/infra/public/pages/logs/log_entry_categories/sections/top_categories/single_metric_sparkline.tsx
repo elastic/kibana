@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
 import { TimeRange } from '../../../../../../common/time';
 
 interface TimeSeriesPoint {
@@ -33,6 +34,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   timeRange: TimeRange;
 }> = ({ metric, timeRange }) => {
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
+  const timeZone = useKibanaTimeZoneSetting();
 
   const theme = useMemo(
     () => [
@@ -60,6 +62,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
         xAccessor={timestampAccessor}
         xScaleType="time"
         yAccessors={valueAccessor}
+        timeZone={timeZone}
       />
     </Chart>
   );

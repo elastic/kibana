@@ -17,19 +17,33 @@ const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 // it will search both --inspect and --inspect-brk
 const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
-const urlPartsSchema = () =>
+const maybeRequireKeys = (keys: string[], schemas: Record<string, Joi.Schema>) => {
+  if (!keys.length) {
+    return schemas;
+  }
+
+  const withRequires: Record<string, Joi.Schema> = {};
+  for (const [key, schema] of Object.entries(schemas)) {
+    withRequires[key] = keys.includes(key) ? schema.required() : schema;
+  }
+  return withRequires;
+};
+
+const urlPartsSchema = ({ requiredKeys }: { requiredKeys?: string[] } = {}) =>
   Joi.object()
-    .keys({
-      protocol: Joi.string().valid('http', 'https').default('http'),
-      hostname: Joi.string().hostname().default('localhost'),
-      port: Joi.number(),
-      auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
-      username: Joi.string(),
-      password: Joi.string(),
-      pathname: Joi.string().regex(/^\//, 'start with a /'),
-      hash: Joi.string().regex(/^\//, 'start with a /'),
-      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
-    })
+    .keys(
+      maybeRequireKeys(requiredKeys ?? [], {
+        protocol: Joi.string().valid('http', 'https').default('http'),
+        hostname: Joi.string().hostname().default('localhost'),
+        port: Joi.number(),
+        auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
+        username: Joi.string(),
+        password: Joi.string(),
+        pathname: Joi.string().regex(/^\//, 'start with a /'),
+        hash: Joi.string().regex(/^\//, 'start with a /'),
+        certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
+      })
+    )
     .default();
 
 const appUrlPartsSchema = () =>
@@ -152,6 +166,7 @@ export const schema = Joi.object()
     mochaReporter: Joi.object()
       .keys({
         captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 
@@ -168,7 +183,9 @@ export const schema = Joi.object()
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
-        elasticsearch: urlPartsSchema(),
+        elasticsearch: urlPartsSchema({
+          requiredKeys: ['port'],
+        }),
       })
       .default(),
 

@@ -172,17 +172,17 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       if (updatedAgentPolicy) {
         setAgentPolicy(updatedAgentPolicy);
         if (packageInfo) {
-          setFormState('VALID');
+          setHasAgentPolicyError(false);
         }
       } else {
-        setFormState('INVALID');
+        setHasAgentPolicyError(true);
         setAgentPolicy(undefined);
       }
 
       // eslint-disable-next-line no-console
       console.debug('Agent policy updated', updatedAgentPolicy);
     },
-    [packageInfo, setAgentPolicy, setFormState]
+    [packageInfo, setAgentPolicy]
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
@@ -225,6 +225,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
       if (hasPackage && hasAgentPolicy && !hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]

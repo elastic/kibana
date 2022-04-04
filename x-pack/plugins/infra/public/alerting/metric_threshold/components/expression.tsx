@@ -30,6 +30,7 @@ import {
   AlertTypeParams,
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
+import { QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -42,7 +43,6 @@ import { ExpressionChart } from './expression_chart';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 type Props = Omit<
   AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,

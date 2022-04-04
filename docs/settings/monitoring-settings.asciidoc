@@ -31,6 +31,14 @@ For more information, see
 
 [cols="2*<"]
 |===
+| `monitoring.cluster_alerts.email_notifications.enabled`::
+  | deprecated:[7.11.0] 
+  When enabled, sends email notifications for Watcher alerts to the specified email address. The default is `true`. 
+
+| `monitoring.cluster_alerts.email_notifications.email_address` {ess-icon}::
+  | deprecated:[7.11.0] 
+  When enabled, specifies the email address where you want to receive cluster alert notifications.
+
 | `monitoring.enabled`
   | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
   Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
@@ -40,7 +48,6 @@ For more information, see
 
 | `monitoring.ui.ccs.enabled`
   | Set to `true` (default) to enable {ref}/modules-cross-cluster-search.html[cross-cluster search] of your monitoring data. The {ref}/modules-remote-clusters.html#remote-cluster-settings[`remote_cluster_client`] role must exist on each node.
-
 
 | `monitoring.ui.elasticsearch.hosts`
   | Specifies the location of the {es} cluster where your monitoring data is stored.
@@ -70,6 +77,9 @@ For more information, see
   both the {es} monitoring cluster and the {es} production cluster. +
   +
   If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
+
+| `monitoring.ui.elasticsearch.serviceAccountToken`
+  | Specifies a {ref}/security-api-create-service-token.html[service account token] for the {es} cluster where your monitoring data is stored when using `monitoring.ui.elasticsearch.hosts`.  This setting is an alternative to using `monitoring.ui.elasticsearch.username` and `monitoring.ui.elasticsearch.password`.
 
 | `monitoring.ui.elasticsearch.pingTimeout`
   | Specifies the time in milliseconds to wait for {es} to respond to internal
