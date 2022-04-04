@@ -675,23 +675,32 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
-  const longRunningAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
-    id: 'test.longRunning',
-    name: 'Test: Long Running',
-    actionGroups: [
-      {
-        id: 'default',
-        name: 'Default',
+  function getLongRunningRuleType() {
+    const paramsSchema = schema.object({
+      delay: schema.maybe(schema.number({ defaultValue: 5000 })),
+    });
+    type ParamsType = TypeOf<typeof paramsSchema>;
+
+    const result: RuleType<ParamsType, {}, {}, {}, {}, 'default'> = {
+      id: 'test.longRunning',
+      name: 'Test: Long Running',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      producer: 'alertsFixture',
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor(ruleExecutorOptions) {
+        const { params } = ruleExecutorOptions;
+        await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
       },
-    ],
-    producer: 'alertsFixture',
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    async executor() {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    },
-  };
+    };
+    return result;
+  }
   const exampleAlwaysFiringAlertType: RuleType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> = {
     id: 'example.always-firing',
     name: 'Always firing',
@@ -769,7 +778,7 @@ export function defineAlertTypes(
   alerting.registerType(onlyStateVariablesAlertType);
   alerting.registerType(getPatternFiringAlertType());
   alerting.registerType(throwAlertType);
-  alerting.registerType(longRunningAlertType);
+  alerting.registerType(getLongRunningRuleType());
   alerting.registerType(goldNoopAlertType);
   alerting.registerType(exampleAlwaysFiringAlertType);
   alerting.registerType(multipleSearchesRuleType);
