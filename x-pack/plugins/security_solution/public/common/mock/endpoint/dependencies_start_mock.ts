@@ -12,6 +12,7 @@ import {
 } from '../../../../../../../src/plugins/data/public/mocks';
 import type { UnifiedSearchPublicPluginStart } from '../../../../../../../src/plugins/unified_search/public';
 import { fleetMock } from '../../../../../fleet/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
@@ -56,12 +57,7 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    unifiedSearch: {
-      ui: {
-        IndexPatternSelect: jest.fn(),
-        SearchBar: jest.fn(),
-      },
-    },
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     fleet: fleetMock.createStartMock(),
   };
 };
