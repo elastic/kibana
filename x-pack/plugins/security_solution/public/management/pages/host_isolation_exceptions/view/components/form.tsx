@@ -40,7 +40,7 @@ import {
   NAME_PLACEHOLDER,
 } from './translations';
 import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { FormattedError } from '../../../../components/formatted_error/formatted_error';
+import { FormattedError } from '../../../../components/formatted_error';
 import { createEmptyHostIsolationException } from '../../utils';
 
 interface ExceptionIpEntry {

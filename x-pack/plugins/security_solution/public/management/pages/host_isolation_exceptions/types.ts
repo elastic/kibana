@@ -15,7 +15,3 @@ export interface HostIsolationExceptionsPageLocation {
   // A string with comma dlimetered list of included policy IDs
   included_policies: string;
 }
-
-export interface HostIsolationExceptionsPageState {
-  location: HostIsolationExceptionsPageLocation;
-}
