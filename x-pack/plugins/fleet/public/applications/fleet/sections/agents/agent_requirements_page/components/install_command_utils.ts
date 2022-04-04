@@ -12,7 +12,6 @@ export type CommandsByPlatform = {
 };
 
 export function getInstallCommandForPlatform(
-  platform: PLATFORM_TYPE,
   esHost: string,
   serviceToken: string,
   policyId?: string,
@@ -20,8 +19,7 @@ export function getInstallCommandForPlatform(
   isProductionDeployment?: boolean,
   sslCATrustedFingerprint?: string
 ): CommandsByPlatform {
-  const commandArguments = [];
-  const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
+  const commandArguments: Array<[string, string] | [string]> = [];
 
   if (isProductionDeployment && fleetServerHost) {
     commandArguments.push(['url', fleetServerHost]);
@@ -48,19 +46,22 @@ export function getInstallCommandForPlatform(
     commandArguments.push(['fleet-server-insecure-http']);
   }
 
-  const commandArgumentsStr = commandArguments.reduce((acc, [key, val]) => {
-    if (acc === '' && key === 'url') {
-      return `--${key}=${val}`;
-    }
-    const valOrEmpty = val ? `=${val}` : '';
-    return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
-  }, '');
+  const commandArgumentsStr = (platform?: string) => {
+    const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
+    return commandArguments.reduce((acc, [key, val]) => {
+      if (acc === '' && key === 'url') {
+        return `--${key}=${val}`;
+      }
+      const valOrEmpty = val ? `=${val}` : '';
+      return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
+    }, '');
+  };
 
   return {
-    linux: `sudo ./elastic-agent install ${commandArgumentsStr}`,
-    mac: `sudo ./elastic-agent install ${commandArgumentsStr}`,
-    windows: `.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    deb: `sudo elastic-agent enroll ${commandArgumentsStr}`,
-    rpm: `sudo elastic-agent enroll ${commandArgumentsStr}`,
+    linux: `sudo ./elastic-agent install ${commandArgumentsStr()}`,
+    mac: `sudo ./elastic-agent install ${commandArgumentsStr()}`,
+    windows: `.\\elastic-agent.exe install ${commandArgumentsStr('windows')}`,
+    deb: `sudo elastic-agent enroll ${commandArgumentsStr()}`,
+    rpm: `sudo elastic-agent enroll ${commandArgumentsStr()}`,
   };
 }
