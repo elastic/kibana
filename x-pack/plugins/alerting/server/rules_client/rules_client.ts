@@ -1443,10 +1443,13 @@ export class RulesClient {
       `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
         options.paramsModifier ? '[Function]' : undefined
       }')`,
-      this.bulkEditOcc.bind(this),
-      qNodeFilterWithAuth,
-      options.operations,
-      options.paramsModifier
+      (filterKueryNode: KueryNode) =>
+        this.bulkEditOcc({
+          filter: filterKueryNode,
+          operations: options.operations,
+          paramsModifier: options.paramsModifier,
+        }),
+      qNodeFilterWithAuth
     );
 
     if (apiKeysToInvalidate.length) {

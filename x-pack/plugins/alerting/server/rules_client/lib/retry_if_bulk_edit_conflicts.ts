@@ -18,7 +18,7 @@ import {
   SavedObjectsUpdateResponse,
 } from '../../../../../../src/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkEditError, BulkEditOptions } from '../rules_client';
+import { BulkEditError } from '../rules_client';
 import { AlertTypeParams, RawRule } from '../../types';
 
 // number of times to retry when conflicts occur
@@ -30,15 +30,7 @@ export const RetryForConflictsAttempts = 2;
 // make it harder to diagnose issues
 const RetryForConflictsDelay = 250;
 
-type BulkEditObjects = <P extends AlertTypeParams>({
-  filter,
-  operations,
-  paramsModifier,
-}: {
-  filter: KueryNode;
-  operations: BulkEditOptions<P>['operations'];
-  paramsModifier: BulkEditOptions<P>['paramsModifier'];
-}) => Promise<{
+type BulkEditObjects = (filter: KueryNode) => Promise<{
   apiKeysToInvalidate: string[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
@@ -50,12 +42,10 @@ export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
   name: string,
   bulkEditObjects: BulkEditObjects,
   filter: KueryNode,
-  operations: BulkEditOptions<P>['operations'],
-  paramsModifier: BulkEditOptions<P>['paramsModifier'],
   retries: number = RetryForConflictsAttempts,
-  apiKeysToInvalidate: string[] = [],
-  results: Array<SavedObjectsUpdateResponse<RawRule>> = [],
-  errors: BulkEditError[] = []
+  accApiKeysToInvalidate: string[] = [],
+  accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
+  accErrors: BulkEditError[] = []
 ): Promise<{
   apiKeysToInvalidate: string[];
   results: Array<SavedObjectsUpdateResponse<RawRule>>;
@@ -68,54 +58,57 @@ export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
       resultSavedObjects,
       errors: localErrors,
       rules: localRules,
-    } = await bulkEditObjects({
-      filter,
-      operations,
-      paramsModifier,
-    });
+    } = await bulkEditObjects(filter);
 
-    const idsWithConflictError = resultSavedObjects.reduce<Set<string>>((acc, item) => {
-      if (item.type === 'alert' && item?.error?.statusCode === 409) {
-        return acc.add(item.id);
-      }
-      return acc;
-    }, new Set());
+    const conflictErrorMap = resultSavedObjects.reduce<Map<string, { message: string }>>(
+      (acc, item) => {
+        if (item.type === 'alert' && item?.error?.statusCode === 409) {
+          return acc.set(item.id, { message: item.error.message });
+        }
+        return acc;
+      },
+      new Map()
+    );
 
-    if (idsWithConflictError.size > 0) {
-      const newBulkUpdateObjects = localRules.filter((obj) => idsWithConflictError.has(obj.id));
+    const results = [...accResults, ...resultSavedObjects.filter((res) => res.error === undefined)];
+    const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...localApiKeysToInvalidate];
+    const errors = [...accErrors, ...localErrors];
+
+    if (conflictErrorMap.size > 0) {
       if (retries <= 0) {
         logger.warn(`${name} conflicts, exceeded retries`);
-        newBulkUpdateObjects.forEach((obj) => {
-          localErrors.push({
-            message: '',
-            rule: {
-              id: obj.id,
-              name: obj.attributes?.name ?? '',
-            },
+
+        localRules
+          .filter((obj) => conflictErrorMap.has(obj.id))
+          .forEach((obj) => {
+            localErrors.push({
+              message: conflictErrorMap.get(obj.id)?.message ?? 'n/a',
+              rule: {
+                id: obj.id,
+                name: obj.attributes?.name ?? 'n/a',
+              },
+            });
           });
-        });
       } else {
         logger.debug(`${name} conflicts, retrying ...`);
-        const filterKueryNode = convertRuleIdsToKueryNode(Array.from(idsWithConflictError));
+
         await waitBeforeNextRetry();
         return await retryIfBulkEditConflicts(
           logger,
           name,
           bulkEditObjects,
-          filterKueryNode,
-          operations,
-          paramsModifier,
+          convertRuleIdsToKueryNode(Array.from(conflictErrorMap.keys())),
           retries - 1,
-          [...apiKeysToInvalidate, ...localApiKeysToInvalidate],
-          [...results, ...resultSavedObjects.filter((res) => res.error === undefined)],
-          [...errors, ...localErrors]
+          apiKeysToInvalidate,
+          results,
+          errors
         );
       }
     }
     return {
-      apiKeysToInvalidate: [...apiKeysToInvalidate, ...localApiKeysToInvalidate],
-      results: [...results, ...resultSavedObjects.filter((res) => res.error === undefined)],
-      errors: [...errors, ...localErrors],
+      apiKeysToInvalidate,
+      results,
+      errors,
     };
   } catch (err) {
     throw err;

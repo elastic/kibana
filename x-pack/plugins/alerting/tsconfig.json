@@ -12,7 +12,7 @@
     "server/**/*.json",
     "public/**/*",
     "common/*"
-  ],
+, "server/rules_client/lib/.ts"  ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../actions/tsconfig.json" },
