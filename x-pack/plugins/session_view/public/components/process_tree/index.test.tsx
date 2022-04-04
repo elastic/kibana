@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { mockData, mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import {
+  mockData,
+  mockAlerts,
+  nullMockData,
+  deepNullMockData,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessImpl } from './hooks';
@@ -39,6 +44,30 @@ describe('ProcessTree component', () => {
   describe('When ProcessTree is mounted', () => {
     it('should render given a valid sessionEntityId and data', () => {
       renderResult = mockedContext.render(<ProcessTree {...props} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with empty object', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={[{}]} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with empty events', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={[{ events: [{}] }]} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with null fields', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={nullMockData} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with deep nested null fields', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={deepNullMockData} />);
       expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
     });

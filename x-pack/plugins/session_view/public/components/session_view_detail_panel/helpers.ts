@@ -9,6 +9,20 @@ import { DetailPanelProcess, EuiTabProps } from '../../types';
 
 const FILTER_FORKS_EXECS = [EventAction.fork, EventAction.exec];
 
+const DEFAULT_LEADER_DATA = {
+  id: '',
+  name: '',
+  start: '',
+  userName: '',
+  groupName: '',
+  working_directory: '',
+  args: [],
+  pid: -1,
+  entryMetaType: '',
+  entryMetaSourceIp: '',
+  executable: '',
+};
+
 const getDetailPanelProcessLeader = (leader: ProcessFields | undefined) => ({
   // init values for fields that might not be available
   name: '',
@@ -26,8 +40,26 @@ const getDetailPanelProcessLeader = (leader: ProcessFields | undefined) => ({
   entryMetaSourceIp: leader?.entry_meta?.source?.ip ?? '',
 });
 
-export const getDetailPanelProcess = (process: Process) => {
-  const processData = {} as DetailPanelProcess;
+export const getDetailPanelProcess = (process: Process | undefined) => {
+  const processData = {
+    id: '',
+    start: '',
+    end: '',
+    exit_code: -1,
+    userName: '',
+    groupName: '',
+    args: [],
+    executable: [],
+    working_directory: '',
+    pid: -1,
+    entryLeader: DEFAULT_LEADER_DATA,
+    sessionLeader: DEFAULT_LEADER_DATA,
+    groupLeader: DEFAULT_LEADER_DATA,
+    parent: DEFAULT_LEADER_DATA,
+  } as DetailPanelProcess;
+  if (!process) {
+    return processData;
+  }
 
   processData.id = process.id;
   processData.start = process.events[0]?.['@timestamp'] ?? '';

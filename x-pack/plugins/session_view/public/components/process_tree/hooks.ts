@@ -197,7 +197,7 @@ export class ProcessImpl implements Process {
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1];
+    return filtered[filtered.length - 1] ?? {};
   });
 }
 

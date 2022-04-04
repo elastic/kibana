@@ -38,6 +38,17 @@ describe('SessionView component', () => {
       expect(renderResult.queryByText('8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726')).toBeVisible();
     });
 
+    it('should should default state with selectedProcess undefined', async () => {
+      renderResult = mockedContext.render(
+        <SessionViewDetailPanel
+          selectedProcess={undefined}
+          onProcessSelected={mockOnProcessSelected}
+          onShowAlertDetails={mockShowAlertDetails}
+        />
+      );
+      expect(renderResult.queryAllByText('entity_id').length).toBe(5);
+    });
+
     it('can switch tabs to show host details', async () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel
