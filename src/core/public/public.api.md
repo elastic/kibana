@@ -160,7 +160,7 @@ export interface ApplicationStart {
         deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
-    navigateToUrl(url: string): Promise<void>;
+    navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 }
 
 // @public
@@ -778,7 +778,14 @@ export interface NavigateToAppOptions {
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
+    skipAppLeave?: boolean;
     state?: unknown;
+}
+
+// @public
+export interface NavigateToUrlOptions {
+    forceRedirect?: boolean;
+    skipAppLeave?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -828,6 +835,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
+    // (undocumented)
+    outsideClickCloses?: boolean;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)

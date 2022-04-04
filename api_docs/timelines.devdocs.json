@@ -6533,7 +6533,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"alerts\" | \"events\""
+          "\"alerts\" | \"events\" | \"sessions\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
@@ -6833,7 +6833,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; }"
+          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,

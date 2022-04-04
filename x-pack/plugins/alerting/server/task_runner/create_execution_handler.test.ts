@@ -18,21 +18,16 @@ import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../types';
+import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
 
 const ruleType: NormalizedRuleType<
-  AlertTypeParams,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
@@ -66,9 +61,9 @@ const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
+    RuleTypeParams,
+    RuleTypeParams,
+    RuleTypeState,
     AlertInstanceState,
     AlertInstanceContext,
     'default' | 'other-group',
@@ -127,6 +122,7 @@ describe('Create Execution Handler', () => {
     );
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfScheduledActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
   });
@@ -512,6 +508,7 @@ describe('Create Execution Handler', () => {
 
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
+      numberOfScheduledActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
@@ -524,6 +521,7 @@ describe('Create Execution Handler', () => {
     });
 
     expect(alertExecutionStore.numberOfTriggeredActions).toBe(2);
+    expect(alertExecutionStore.numberOfScheduledActions).toBe(3);
     expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });

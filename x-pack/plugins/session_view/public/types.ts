@@ -6,17 +6,14 @@
  */
 import { ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
-import { TimelinesUIStart } from '../../timelines/public';
 import { ProcessEvent, Teletype } from '../common/types/process_tree';
 
-export type SessionViewServices = CoreStart & {
-  timelines: TimelinesUIStart;
-};
+export type SessionViewServices = CoreStart;
 
 export interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
-  height?: number;
+  height?: string;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
   jumpToEvent?: ProcessEvent;
@@ -47,7 +44,7 @@ export interface DetailPanelProcess {
   args: string[];
   executable: string[][];
   working_directory: string;
-  tty: Teletype;
+  tty?: Teletype;
   pid: number;
   entryLeader: DetailPanelProcessLeader;
   sessionLeader: DetailPanelProcessLeader;
@@ -64,10 +61,14 @@ export interface DetailPanelProcessLeader {
   userName: string;
   groupName: string;
   working_directory: string;
-  tty: Teletype;
+  tty?: Teletype;
   args: string[];
   pid: number;
   entryMetaType: string;
   entryMetaSourceIp: string;
   executable: string;
+}
+
+export interface SessionViewStart {
+  getSessionView: (props: SessionViewDeps) => JSX.Element;
 }

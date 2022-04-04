@@ -30,7 +30,9 @@ export function ProcessTreeAlerts({
   const styles = useStyles();
 
   useEffect(() => {
-    const jumpToAlert = alerts.find((alert) => alert.kibana?.alert.uuid === jumpToAlertID);
+    const jumpToAlert = alerts.find(
+      (alert) => alert.kibana?.alert?.uuid && alert.kibana?.alert?.uuid === jumpToAlertID
+    );
     if (jumpToAlertID && jumpToAlert) {
       setSelectedAlert(jumpToAlert.kibana?.alert!);
     }
@@ -78,7 +80,7 @@ export function ProcessTreeAlerts({
       data-test-subj="sessionView:sessionViewAlertDetails"
     >
       {alerts.map((alert: ProcessEvent, idx: number) => {
-        const alertUuid = alert.kibana?.alert.uuid || null;
+        const alertUuid = alert.kibana?.alert?.uuid || null;
 
         return (
           <ProcessTreeAlert

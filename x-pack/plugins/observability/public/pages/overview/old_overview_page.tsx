@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useRef, useCallback, useState } from 'react';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useTrackPageview } from '../..';
+import { useTrackPageview, useUiTracker } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
 import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
@@ -47,6 +47,7 @@ import { paths } from '../../config';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
 import { ObservabilityStatus } from '../../components/app/observability_status';
+import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
@@ -58,6 +59,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 export function OverviewPage({ routeParams }: Props) {
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
   useBreadcrumbs([
@@ -73,13 +75,14 @@ export function OverviewPage({ routeParams }: Props) {
   const { cases, docLinks, http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
 
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, refreshInterval, refreshPaused } =
-    useDatePickerContext();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
+
+  const { isGuidedSetupProgressDismissed } = useGuidedSetupProgress();
 
   const bucketSize = useMemo(
     () =>
@@ -93,6 +96,14 @@ export function OverviewPage({ routeParams }: Props) {
   const setRefetch = useCallback((ref) => {
     refetch.current = ref;
   }, []);
+
+  const handleGuidedSetupClick = useCallback(() => {
+    if (isGuidedSetupProgressDismissed) {
+      trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
+    }
+
+    setIsFlyoutVisible(true);
+  }, [trackMetric, isGuidedSetupProgressDismissed]);
 
   const onTimeRangeRefresh = useCallback(() => {
     return refetch.current && refetch.current();
@@ -123,22 +134,12 @@ export function OverviewPage({ routeParams }: Props) {
       pageHeader={
         hasData
           ? {
-              pageTitle: overviewPageTitle,
-              rightSideItems: [
-                <EuiButton color="text" iconType="wrench" onClick={() => setIsFlyoutVisible(true)}>
-                  <FormattedMessage
-                    id="xpack.observability.overview.guidedSetupButton"
-                    defaultMessage="Guided setup"
-                  />
-                </EuiButton>,
-                <DatePicker
-                  rangeFrom={relativeStart}
-                  rangeTo={relativeEnd}
-                  refreshInterval={refreshInterval}
-                  refreshPaused={refreshPaused}
+              children: (
+                <PageHeader
+                  handleGuidedSetupClick={handleGuidedSetupClick}
                   onTimeRangeRefresh={onTimeRangeRefresh}
-                />,
-              ],
+                />
+              ),
             }
           : undefined
       }
@@ -231,6 +232,41 @@ export function OverviewPage({ routeParams }: Props) {
         </EuiFlyout>
       )}
     </ObservabilityPageTemplate>
+  );
+}
+
+interface PageHeaderProps {
+  handleGuidedSetupClick: () => void;
+  onTimeRangeRefresh: () => void;
+}
+
+function PageHeader({ handleGuidedSetupClick, onTimeRangeRefresh }: PageHeaderProps) {
+  const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
+  return (
+    <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
+      <EuiFlexItem grow={1}>
+        <EuiTitle>
+          <h1 className="eui-textNoWrap">{overviewPageTitle}</h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DatePicker
+          rangeFrom={relativeStart}
+          rangeTo={relativeEnd}
+          refreshInterval={refreshInterval}
+          refreshPaused={refreshPaused}
+          onTimeRangeRefresh={onTimeRangeRefresh}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
+        <EuiButton color="text" iconType="wrench" onClick={handleGuidedSetupClick}>
+          <FormattedMessage
+            id="xpack.observability.overview.guidedSetupButton"
+            defaultMessage="Guided setup"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

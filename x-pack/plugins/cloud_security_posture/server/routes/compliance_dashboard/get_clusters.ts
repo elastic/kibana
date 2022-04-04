@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { CloudPostureStats } from '../../../common/types';
+import { ComplianceDashboardData } from '../../../common/types';
 import { getResourceTypeFromAggs, resourceTypeAggQuery } from './get_resources_types';
 import type { ResourceTypeQueryResult } from './get_resources_types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
@@ -66,7 +66,9 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
   },
 });
 
-export const getClustersFromAggs = (clusters: ClusterBucket[]): CloudPostureStats['clusters'] =>
+export const getClustersFromAggs = (
+  clusters: ClusterBucket[]
+): ComplianceDashboardData['clusters'] =>
   clusters.map((cluster) => {
     // get cluster's meta data
     const benchmarks = cluster.benchmarks.buckets;
@@ -101,7 +103,7 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): CloudPostureStat
 export const getClusters = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer
-): Promise<CloudPostureStats['clusters']> => {
+): Promise<ComplianceDashboardData['clusters']> => {
   const queryResult = await esClient.search<unknown, ClustersQueryResult>(getClustersQuery(query), {
     meta: true,
   });

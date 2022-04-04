@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react';
+import { CommonProps } from '@elastic/eui';
 import { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
 export interface CommandDefinition {
@@ -61,4 +62,15 @@ export interface CommandServiceInterface {
    * command help (`--help`)
    */
   getCommandUsage?: (command: CommandDefinition) => Promise<{ result: ReactNode }>;
+}
+
+export interface ConsoleProps extends CommonProps {
+  commandService: CommandServiceInterface;
+  prompt?: string;
+  /**
+   * For internal use only!
+   * Provided by the ConsoleManager to indicate that the console is being managed by it
+   * @private
+   */
+  managedKey?: symbol;
 }

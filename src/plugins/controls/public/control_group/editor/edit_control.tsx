@@ -20,6 +20,7 @@ import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
+import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Controls Services Context
@@ -53,6 +54,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const panel = panels[embeddableId];
     const factory = getControlFactory(panel.type);
     const embeddable = await untilEmbeddableLoaded(embeddableId);
+    const controlGroup = embeddable.getRoot() as ControlGroupContainer;
 
     let inputToReturn: Partial<ControlInput> = {};
 
@@ -93,6 +95,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           title={embeddable.getTitle()}
           onCancel={() => onCancel(flyoutInstance)}
           updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+          setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
           updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
           onTypeEditorChange={(partialInput) =>
             (inputToReturn = { ...inputToReturn, ...partialInput })
@@ -123,9 +126,14 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         reduxContainerContext
       ),
       {
-        onClose: (flyout) => onCancel(flyout),
+        outsideClickCloses: false,
+        onClose: (flyout) => {
+          setFlyoutRef(undefined);
+          onCancel(flyout);
+        },
       }
     );
+    setFlyoutRef(flyoutInstance);
   };
 
   return (
