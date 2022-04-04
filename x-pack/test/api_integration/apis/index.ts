@@ -35,5 +35,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./file_upload'));
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./watcher'));
+    loadTestFile(require.resolve('./logs_ui'));
   });
 }

@@ -34368,27 +34368,11 @@
         "references": [
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/target/types/public/functions/index.d.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/target/types/public/functions/index.d.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/types/state.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/types/state.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/target/types/types/state.d.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/target/types/types/state.d.ts"
           },
           {
             "plugin": "canvas",
@@ -34429,14 +34413,6 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/target/types/canvas_plugin_src/functions/browser/markdown.d.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/target/types/canvas_plugin_src/functions/browser/markdown.d.ts"
           },
           {
             "plugin": "visTypeXy",

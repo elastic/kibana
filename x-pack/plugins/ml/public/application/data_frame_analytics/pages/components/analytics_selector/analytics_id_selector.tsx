@@ -184,8 +184,8 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   }, [selected?.model_id, selected?.job_id]);
 
   const pagination = {
-    initialPageSize: 5,
-    pageSizeOptions: [3, 5, 8],
+    initialPageSize: 20,
+    pageSizeOptions: [5, 10, 20, 50],
   };
 
   const selectionValue = {
