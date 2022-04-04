@@ -53,6 +53,7 @@ describe('MetricVisComponent', function () {
         bgColor: false,
         labelColor: false,
       },
+      colorFullBackground: false,
       labels: {
         show: true,
         style: { spec: {}, type: 'style', css: '' },

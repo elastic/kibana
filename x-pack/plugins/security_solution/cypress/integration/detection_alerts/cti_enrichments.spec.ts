@@ -33,7 +33,7 @@ import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_det
 import { ALERTS_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
-describe.skip('CTI Enrichment', () => {
+describe('CTI Enrichment', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('threat_indicator');

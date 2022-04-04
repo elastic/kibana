@@ -70,6 +70,14 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
     [onAgentPolicyChange]
   );
 
+  const onClickCreatePolicy = () => {
+    setCreateState({ status: CREATE_STATUS.INITIAL });
+    setShowCreatePolicy(true);
+    if (withKeySelection && onKeyChange) {
+      onKeyChange(undefined);
+    }
+  };
+
   return (
     <>
       {showCreatePolicy ? (
@@ -86,7 +94,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
           onKeyChange={onKeyChange}
           onAgentPolicyChange={onAgentPolicyChange}
           excludeFleetServer={excludeFleetServer}
-          onClickCreatePolicy={() => setShowCreatePolicy(true)}
+          onClickCreatePolicy={onClickCreatePolicy}
           selectedAgentPolicy={selectedAgentPolicy}
           isFleetServerPolicy={isFleetServerPolicy}
         />

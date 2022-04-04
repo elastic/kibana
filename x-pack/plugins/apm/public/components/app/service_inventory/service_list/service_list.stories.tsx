@@ -11,6 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { ServiceList } from './';
@@ -59,6 +60,10 @@ export const Example: Story<Args> = (args) => {
 Example.args = {
   isLoading: false,
   items,
+  displayHealthStatus: true,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  sortFn: (sortItems) => sortItems,
 };
 
 export const EmptyState: Story<Args> = (args) => {
@@ -67,6 +72,10 @@ export const EmptyState: Story<Args> = (args) => {
 EmptyState.args = {
   isLoading: false,
   items: [],
+  displayHealthStatus: true,
+  initialSortField: ServiceInventoryFieldName.HealthStatus,
+  initialSortDirection: 'desc',
+  sortFn: (sortItems) => sortItems,
 };
 
 export const WithHealthWarnings: Story<Args> = (args) => {

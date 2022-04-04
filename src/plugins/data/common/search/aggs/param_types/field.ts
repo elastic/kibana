@@ -43,6 +43,7 @@ export class FieldParamType extends BaseParamType {
 
     this.filterFieldTypes = config.filterFieldTypes || '*';
     this.onlyAggregatable = config.onlyAggregatable !== false;
+    this.scriptable = config.scriptable !== false;
     this.filterField = config.filterField;
 
     if (!config.write) {

@@ -26,7 +26,8 @@ import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public'
 
 import {
   APP_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
@@ -67,30 +68,55 @@ export class EnterpriseSearchPlugin implements Plugin {
     const { cloud } = plugins;
 
     core.application.register({
-      id: ENTERPRISE_SEARCH_PLUGIN.ID,
-      title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
-      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
-      appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
+      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearch } = await import('./applications/enterprise_search');
+        const { EnterpriseSearchOverview } = await import(
+          './applications/enterprise_search_overview'
+        );
 
-        return renderApp(EnterpriseSearch, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchContent } = await import(
+          './applications/enterprise_search_content'
+        );
+
+        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
     });
 
     core.application.register({
       id: APP_SEARCH_PLUGIN.ID,
       title: APP_SEARCH_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -111,7 +137,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: WORKPLACE_SEARCH_PLUGIN.ID,
       title: WORKPLACE_SEARCH_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -134,11 +160,11 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
-        id: ENTERPRISE_SEARCH_PLUGIN.ID,
-        title: ENTERPRISE_SEARCH_PLUGIN.NAME,
+        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
         icon: 'logoEnterpriseSearch',
-        description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
+        path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
         order: 100,
       });
 

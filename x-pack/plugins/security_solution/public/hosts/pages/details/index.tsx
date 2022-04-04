@@ -36,7 +36,6 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
-import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsProps } from './types';
@@ -54,6 +53,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { LandingPageComponent } from '../../../common/components/landing_page';
 
 const HostOverviewManage = manageQuery(HostOverview);
 
@@ -198,11 +198,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHostDetails(
-                  detailName,
-                  hasMlUserPermissions(capabilities),
-                  riskyHostsFeatureEnabled
-                )}
+                navTabs={navTabsHostDetails({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  hostName: detailName,
+                })}
               />
 
               <EuiSpacer />
@@ -227,9 +227,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

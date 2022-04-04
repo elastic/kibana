@@ -32,7 +32,11 @@ import type {
 } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
+import {
+  setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
+  unpackBufferToCache,
+} from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 
@@ -276,6 +280,7 @@ async function installPackageFromRegistry({
           ],
           status: 'already_installed',
           installType,
+          installSource: 'registry',
         };
       }
     }
@@ -307,7 +312,7 @@ async function installPackageFromRegistry({
         ...telemetryEvent,
         errorMessage: err.message,
       });
-      return { error: err, installType };
+      return { error: err, installType, installSource: 'registry' };
     }
 
     const savedObjectsImporter = appContextService
@@ -338,7 +343,7 @@ async function installPackageFromRegistry({
           ...telemetryEvent,
           status: 'success',
         });
-        return { assets, status: 'installed', installType };
+        return { assets, status: 'installed', installType, installSource: 'registry' };
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
@@ -355,7 +360,7 @@ async function installPackageFromRegistry({
           ...telemetryEvent,
           errorMessage: err.message,
         });
-        return { error: err, installType };
+        return { error: err, installType, installSource: 'registry' };
       });
   } catch (e) {
     sendEvent({
@@ -365,6 +370,7 @@ async function installPackageFromRegistry({
     return {
       error: e,
       installType,
+      installSource: 'registry',
     };
   }
 }
@@ -389,7 +395,7 @@ async function installPackageByUpload({
   let installType: InstallType = 'unknown';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
   try {
-    const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
+    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
 
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
@@ -454,7 +460,7 @@ async function installPackageByUpload({
       ...telemetryEvent,
       errorMessage: e.message,
     });
-    return { error: e, installType };
+    return { error: e, installType, installSource: 'upload' };
   }
 }
 
@@ -463,9 +469,10 @@ export type InstallPackageParams = {
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
+  | ({ installSource: Extract<InstallSource, 'bundled'> } & InstallUploadedArchiveParams)
 );
 
-export async function installPackage(args: InstallPackageParams) {
+export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
@@ -487,7 +494,7 @@ export async function installPackage(args: InstallPackageParams) {
         `found bundled package for requested install of ${pkgkey} - installing from bundled package archive`
       );
 
-      const response = installPackageByUpload({
+      const response = await installPackageByUpload({
         savedObjectsClient,
         esClient,
         archiveBuffer: matchingBundledPackage.buffer,
@@ -495,11 +502,11 @@ export async function installPackage(args: InstallPackageParams) {
         spaceId,
       });
 
-      return response;
+      return { ...response, installSource: 'bundled' };
     }
 
     logger.debug(`kicking off install of ${pkgkey} from registry`);
-    const response = installPackageFromRegistry({
+    const response = await installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
@@ -510,7 +517,7 @@ export async function installPackage(args: InstallPackageParams) {
     return response;
   } else if (args.installSource === 'upload') {
     const { archiveBuffer, contentType, spaceId } = args;
-    const response = installPackageByUpload({
+    const response = await installPackageByUpload({
       savedObjectsClient,
       esClient,
       archiveBuffer,
@@ -519,7 +526,6 @@ export async function installPackage(args: InstallPackageParams) {
     });
     return response;
   }
-  // @ts-expect-error s/b impossibe b/c `never` by this point, but just in case
   throw new Error(`Unknown installSource: ${args.installSource}`);
 }
 

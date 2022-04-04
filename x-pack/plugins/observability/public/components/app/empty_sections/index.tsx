@@ -8,18 +8,19 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityAppServices } from '../../../application/types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getEmptySections } from '../../../pages/overview/empty_section';
 import { EmptySection } from './empty_section';
 
 export function EmptySections() {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
+  const appEmptySections = getEmptySections({ http }).filter(({ id }) => {
     const app = hasDataMap[id];
     if (app) {
       return app.status === FETCH_STATUS.FAILURE || !app.hasData;

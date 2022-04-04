@@ -6,21 +6,29 @@
  */
 
 import { useCallback } from 'react';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
-export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
-  const context = useCasesContext();
+type AddToNewCaseFlyoutProps = CreateCaseFlyoutProps & {
+  toastTitle?: string;
+  toastContent?: string;
+};
+
+export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps) => {
+  const { dispatch } = useCasesContext();
+  const casesToasts = useCasesToast();
 
   const closeFlyout = useCallback(() => {
-    context.dispatch({
+    dispatch({
       type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
     });
-  }, [context]);
+  }, [dispatch]);
 
   const openFlyout = useCallback(() => {
-    context.dispatch({
+    dispatch({
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
       payload: {
         ...props,
@@ -28,6 +36,19 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
           closeFlyout();
           if (props.onClose) {
             return props.onClose();
+          }
+        },
+        onSuccess: async (theCase: Case) => {
+          if (theCase) {
+            casesToasts.showSuccessAttach({
+              theCase,
+              attachments: props.attachments,
+              title: props.toastTitle,
+              content: props.toastContent,
+            });
+          }
+          if (props.onSuccess) {
+            return props.onSuccess(theCase);
           }
         },
         afterCaseCreated: async (...args) => {
@@ -38,7 +59,7 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
         },
       },
     });
-  }, [closeFlyout, context, props]);
+  }, [casesToasts, closeFlyout, dispatch, props]);
   return {
     open: openFlyout,
     close: closeFlyout,

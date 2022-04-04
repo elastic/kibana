@@ -2221,26 +2221,6 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.isAddToExistingCaseOpen",
-            "type": "boolean",
-            "tags": [],
-            "label": "isAddToExistingCaseOpen",
-            "description": [],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.TGridModel.isCreateNewCaseOpen",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCreateNewCaseOpen",
-            "description": [],
-            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
             "id": "def-public.TGridModel.isLoading",
             "type": "boolean",
             "tags": [],
@@ -3008,142 +2988,6 @@
             }
           ],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "timelines",
-          "id": "def-public.TimelinesUIStart.getAddToCaseAction",
-          "type": "Function",
-          "tags": [],
-          "label": "getAddToCaseAction",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "AddToCaseActionProps",
-            ") => React.ReactElement<",
-            "AddToCaseActionProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "timelines",
-              "id": "def-public.TimelinesUIStart.getAddToCaseAction.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "AddToCaseActionProps"
-              ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "timelines",
-          "id": "def-public.TimelinesUIStart.getAddToCasePopover",
-          "type": "Function",
-          "tags": [],
-          "label": "getAddToCasePopover",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "AddToCaseActionProps",
-            ") => React.ReactElement<",
-            "AddToCaseActionProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "timelines",
-              "id": "def-public.TimelinesUIStart.getAddToCasePopover.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "AddToCaseActionProps"
-              ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "timelines",
-          "id": "def-public.TimelinesUIStart.getAddToExistingCaseButton",
-          "type": "Function",
-          "tags": [],
-          "label": "getAddToExistingCaseButton",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "AddToCaseActionProps",
-            ") => React.ReactElement<",
-            "AddToCaseActionProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "timelines",
-              "id": "def-public.TimelinesUIStart.getAddToExistingCaseButton.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "AddToCaseActionProps"
-              ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "timelines",
-          "id": "def-public.TimelinesUIStart.getAddToNewCaseButton",
-          "type": "Function",
-          "tags": [],
-          "label": "getAddToNewCaseButton",
-          "description": [],
-          "signature": [
-            "(props: ",
-            "AddToCaseActionProps",
-            ") => React.ReactElement<",
-            "AddToCaseActionProps",
-            ", string | React.JSXElementConstructor<any>>"
-          ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
-          "children": [
-            {
-              "parentPluginId": "timelines",
-              "id": "def-public.TimelinesUIStart.getAddToNewCaseButton.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "AddToCaseActionProps"
-              ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
-              "deprecated": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -3749,6 +3593,26 @@
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.BrowserField.runtimeField",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeField",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeField",
+                "text": "RuntimeField"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -4271,6 +4135,47 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.FieldBrowserOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserOptions",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/types/fields_browser/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.FieldBrowserOptions.createFieldButton",
+            "type": "Function",
+            "tags": [],
+            "label": "createFieldButton",
+            "description": [],
+            "signature": [
+              "CreateFieldComponent",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/fields_browser/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.FieldBrowserOptions.getFieldTableColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldTableColumns",
+            "description": [],
+            "signature": [
+              "GetFieldTableColumns",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/fields_browser/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.FieldInfo",
         "type": "Interface",
         "tags": [],
@@ -4417,18 +4322,18 @@
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.HeaderActionProps.createFieldComponent",
-            "type": "Function",
+            "id": "def-common.HeaderActionProps.fieldBrowserOptions",
+            "type": "Object",
             "tags": [],
-            "label": "createFieldComponent",
+            "label": "fieldBrowserOptions",
             "description": [],
             "signature": [
               {
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.CreateFieldComponentType",
-                "text": "CreateFieldComponentType"
+                "section": "def-common.FieldBrowserOptions",
+                "text": "FieldBrowserOptions"
               },
               " | undefined"
             ],
@@ -4732,7 +4637,9 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              "; }"
+              " | ",
+              "MappingRuntimeField",
+              "[]; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false
@@ -5498,7 +5405,9 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              "; }"
+              " | ",
+              "MappingRuntimeField",
+              "[]; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false
@@ -6524,49 +6433,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.CreateFieldComponentType",
-        "type": "Type",
-        "tags": [],
-        "label": "CreateFieldComponentType",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<{ onClick: () => void; }>"
-        ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.CreateFieldComponentType.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.CreateFieldComponentType.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.DataProvidersAnd",
         "type": "Type",
         "tags": [],
@@ -6667,7 +6533,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"alerts\" | \"events\""
+          "\"alerts\" | \"events\" | \"sessions\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
@@ -6967,7 +6833,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; }"
+          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,

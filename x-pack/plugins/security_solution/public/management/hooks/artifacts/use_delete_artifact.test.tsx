@@ -49,7 +49,7 @@ describe('Delete artifact hook', () => {
     expect(fakeHttpServices.delete).toHaveBeenCalledTimes(0);
 
     await act(async () => {
-      const res = await result.mutateAsync('fakeId');
+      const res = await result.mutateAsync({ id: 'fakeId' });
       expect(res).toBe(exceptionItem);
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
@@ -82,7 +82,7 @@ describe('Delete artifact hook', () => {
 
     await act(async () => {
       try {
-        await result.mutateAsync('fakeId');
+        await result.mutateAsync({ itemId: 'fakeId' });
       } catch (err) {
         expect(err).toBe(error);
         expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);

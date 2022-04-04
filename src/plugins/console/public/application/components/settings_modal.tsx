@@ -70,6 +70,7 @@ export function DevToolsSettingsModal(props: Props) {
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
+  const [dataStreams, setDataStreams] = useState(props.settings.autocomplete.dataStreams);
   const [polling, setPolling] = useState(props.settings.polling);
   const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
@@ -97,12 +98,20 @@ export function DevToolsSettingsModal(props: Props) {
       }),
       stateSetter: setTemplates,
     },
+    {
+      id: 'dataStreams',
+      label: i18n.translate('console.settingsPage.dataStreamsLabelText', {
+        defaultMessage: 'Data streams',
+      }),
+      stateSetter: setDataStreams,
+    },
   ];
 
   const checkboxIdToSelectedMap = {
     fields,
     indices,
     templates,
+    dataStreams,
   };
 
   const onAutocompleteChange = (optionId: AutocompleteOptions) => {
@@ -120,6 +129,7 @@ export function DevToolsSettingsModal(props: Props) {
         fields,
         indices,
         templates,
+        dataStreams,
       },
       polling,
       pollInterval,
@@ -170,6 +180,7 @@ export function DevToolsSettingsModal(props: Props) {
               fields,
               indices,
               templates,
+              dataStreams,
             });
           }}
         >

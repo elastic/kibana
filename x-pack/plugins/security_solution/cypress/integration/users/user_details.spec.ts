@@ -6,7 +6,7 @@
  */
 
 import { ALERT_FLYOUT } from '../../screens/alerts_details';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -20,11 +20,11 @@ import {
 } from '../../tasks/alerts';
 import { USER_COLUMN } from '../../screens/alerts';
 
-describe.skip('user details flyout', () => {
+describe('user details flyout', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    createCustomRuleActivated(getNewRule());
+    createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
   });

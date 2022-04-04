@@ -5,7 +5,7 @@
 <titleabbrev>ServiceNow ITSM</titleabbrev>
 ++++
 
-The {sn} ITSM connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create {sn} incidents.
+The {sn} ITSM connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} incidents.
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]

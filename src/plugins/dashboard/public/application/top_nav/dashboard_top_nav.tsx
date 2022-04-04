@@ -210,16 +210,17 @@ export function DashboardTopNav({
     [stateTransferService, data.search.session, trackUiMetric]
   );
 
-  const clearAddPanel = useCallback(() => {
+  const closeAllFlyouts = useCallback(() => {
+    dashboardAppState.dashboardContainer.controlGroup?.closeAllFlyouts();
     if (state.addPanelOverlay) {
       state.addPanelOverlay.close();
       setState((s) => ({ ...s, addPanelOverlay: undefined }));
     }
-  }, [state.addPanelOverlay]);
+  }, [state.addPanelOverlay, dashboardAppState.dashboardContainer.controlGroup]);
 
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
-      clearAddPanel();
+      closeAllFlyouts();
       const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
       if (!willLoseChanges) {
@@ -231,7 +232,7 @@ export function DashboardTopNav({
         dashboardAppState.resetToLastSavedState?.()
       );
     },
-    [clearAddPanel, core.overlays, dashboardAppState, dispatchDashboardStateChange]
+    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange]
   );
 
   const runSaveAs = useCallback(async () => {
@@ -296,7 +297,7 @@ export function DashboardTopNav({
         showCopyOnSave={lastDashboardId ? true : false}
       />
     );
-    clearAddPanel();
+    closeAllFlyouts();
     showSaveModal(dashboardSaveModal, core.i18n.Context);
   }, [
     dispatchDashboardStateChange,
@@ -305,7 +306,7 @@ export function DashboardTopNav({
     dashboardAppState,
     core.i18n.Context,
     chrome.docTitle,
-    clearAddPanel,
+    closeAllFlyouts,
     kibanaVersion,
     timefilter,
     redirectTo,
@@ -468,7 +469,7 @@ export function DashboardTopNav({
   ]);
 
   UseUnmount(() => {
-    clearAddPanel();
+    closeAllFlyouts();
     setMounted(false);
   });
 
@@ -598,17 +599,16 @@ export function DashboardTopNav({
                 />
               ),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-              addFromLibraryButton: (
-                <AddFromLibraryButton
-                  onClick={addFromLibrary}
-                  data-test-subj="dashboardAddPanelButton"
-                />
-              ),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
                   dashboardContainer={dashboardAppState.dashboardContainer}
                 />,
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />,
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               ],
             }}
           </SolutionToolbar>

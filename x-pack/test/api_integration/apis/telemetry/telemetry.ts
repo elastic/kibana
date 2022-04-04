@@ -10,6 +10,7 @@ import moment from 'moment';
 import type SuperTest from 'supertest';
 import deepmerge from 'deepmerge';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { SecurityService } from '../../../../../test/common/services/security/security';
 
 import multiClusterFixture from './fixtures/multicluster.json';
 import basicClusterFixture from './fixtures/basiccluster.json';
@@ -50,50 +51,51 @@ function updateMonitoringDates(
   toTimestamp: string,
   timestamp: string
 ) {
-  return Promise.all([
-    esSupertest
-      .post('/.monitoring-es-*/_update_by_query?refresh=true')
-      .send({
-        query: {
-          range: {
-            timestamp: {
-              format: 'epoch_millis',
-              gte: moment(fromTimestamp).valueOf(),
-              lte: moment(toTimestamp).valueOf(),
-            },
+  return esSupertest
+    .post('/.monitoring-*/_update_by_query?refresh=true')
+    .send({
+      query: {
+        range: {
+          timestamp: {
+            format: 'epoch_millis',
+            gte: moment(fromTimestamp).valueOf(),
+            lte: moment(toTimestamp).valueOf(),
           },
         },
-        script: {
-          source: `ctx._source.timestamp='${timestamp}'`,
-          lang: 'painless',
-        },
-      })
-      .expect(200),
-    esSupertest
-      .post('/.monitoring-kibana-*/_update_by_query?refresh=true')
-      .send({
-        query: {
-          range: {
-            timestamp: {
-              format: 'epoch_millis',
-              gte: moment(fromTimestamp).valueOf(),
-              lte: moment(toTimestamp).valueOf(),
-            },
-          },
-        },
-        script: {
-          source: `ctx._source.timestamp='${timestamp}'`,
-          lang: 'painless',
-        },
-      })
-      .expect(200),
-  ]);
+      },
+      script: {
+        source: `ctx._source.timestamp='${timestamp}'`,
+        lang: 'painless',
+      },
+    })
+    .expect(200);
+}
+
+async function createUserWithRole(
+  security: SecurityService,
+  userName: string,
+  roleName: string,
+  role: unknown
+) {
+  await security.role.create(roleName, role);
+
+  await security.user.create(userName, {
+    password: password(userName),
+    roles: [roleName],
+    full_name: `User ${userName}`,
+  });
+}
+
+function password(userName: string) {
+  return `${userName}-password`;
 }
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth'); // We need this because `.auth` in the already authed one does not work as expected
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
+  const security = getService('security');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
     const timestamp = new Date().toISOString();
@@ -234,6 +236,115 @@ export default function ({ getService }: FtrProviderContext) {
         expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
         // Check that the fetchedAt timestamp is updated when the data is fetched
         expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
+      });
+    });
+
+    describe('Only global read+ users can fetch unencrypted telemetry', () => {
+      describe('superadmin user', () => {
+        it('should return unencrypted telemetry for the admin user', async () => {
+          await supertest
+            .post('/api/telemetry/v2/clusters/_stats')
+            .set('kbn-xsrf', 'xxx')
+            .send({ unencrypted: true })
+            .expect(200);
+        });
+
+        it('should return encrypted telemetry for the admin user', async () => {
+          await supertest
+            .post('/api/telemetry/v2/clusters/_stats')
+            .set('kbn-xsrf', 'xxx')
+            .send({ unencrypted: false })
+            .expect(200);
+        });
+      });
+
+      describe('global-read user', () => {
+        const globalReadOnlyUser = 'telemetry-global-read-only-user';
+        const globalReadOnlyRole = 'telemetry-global-read-only-role';
+
+        before('create user', async () => {
+          await createUserWithRole(security, globalReadOnlyUser, globalReadOnlyRole, {
+            kibana: [
+              {
+                spaces: ['*'],
+                base: ['read'],
+                feature: {},
+              },
+            ],
+          });
+        });
+
+        after(async () => {
+          await security.user.delete(globalReadOnlyUser);
+          await security.role.delete(globalReadOnlyRole);
+        });
+
+        it('should return encrypted telemetry for the global-read user', async () => {
+          await supertestWithoutAuth
+            .post('/api/telemetry/v2/clusters/_stats')
+            .auth(globalReadOnlyUser, password(globalReadOnlyUser))
+            .set('kbn-xsrf', 'xxx')
+            .send({ unencrypted: false })
+            .expect(200);
+        });
+
+        it('should return unencrypted telemetry for the global-read user', async () => {
+          await supertestWithoutAuth
+            .post('/api/telemetry/v2/clusters/_stats')
+            .auth(globalReadOnlyUser, password(globalReadOnlyUser))
+            .set('kbn-xsrf', 'xxx')
+            .send({ unencrypted: true })
+            .expect(200);
+        });
+      });
+
+      describe('non global-read user', () => {
+        const noGlobalUser = 'telemetry-no-global-user';
+        const noGlobalRole = 'telemetry-no-global-role';
+
+        before('create user', async () => {
+          await createUserWithRole(security, noGlobalUser, noGlobalRole, {
+            kibana: [
+              {
+                spaces: ['*'],
+                base: [],
+                feature: {
+                  // It has access to many features specified individually but not a global one
+                  discover: ['all'],
+                  dashboard: ['all'],
+                  canvas: ['all'],
+                  maps: ['all'],
+                  ml: ['all'],
+                  visualize: ['all'],
+                  dev_tools: ['all'],
+                },
+              },
+            ],
+          });
+        });
+
+        after(async () => {
+          await security.user.delete(noGlobalUser);
+          await security.role.delete(noGlobalRole);
+        });
+
+        it('should return encrypted telemetry for the read-only user', async () => {
+          await supertestWithoutAuth
+            .post('/api/telemetry/v2/clusters/_stats')
+            .auth(noGlobalUser, password(noGlobalUser))
+            .set('kbn-xsrf', 'xxx')
+            .send({ unencrypted: false })
+            .expect(200);
+        });
+
+        it('should return 403 when the read-only user requests unencrypted telemetry', async () => {
+          await supertestWithoutAuth
+            .post('/api/telemetry/v2/clusters/_stats')
+            .auth(noGlobalUser, password(noGlobalUser))
+            .set('kbn-xsrf', 'xxx')
+            .send({ unencrypted: true })
+            .expect(403);
+        });
       });
     });
   });

@@ -5,21 +5,41 @@
  * 2.0.
  */
 
+import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
 import { UsersDetailsNavTab } from './types';
 import { UsersTableType } from '../../store/model';
 import { USERS_PATH } from '../../../../common/constants';
 
-const getTabsOnUsersDetailsUrl = (hostName: string, tabName: UsersTableType) =>
-  `${USERS_PATH}/${hostName}/${tabName}`;
+const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
+  `${USERS_PATH}/${userName}/${tabName}`;
 
-export const navTabsUsersDetails = (hostName: string): UsersDetailsNavTab => {
-  return {
-    [UsersTableType.allUsers]: {
-      id: UsersTableType.allUsers,
-      name: i18n.ALL_USERS_TITLE,
-      href: getTabsOnUsersDetailsUrl(hostName, UsersTableType.allUsers),
+export const navTabsUsersDetails = (
+  userName: string,
+  hasMlUserPermissions: boolean
+): UsersDetailsNavTab => {
+  const userDetailsNavTabs = {
+    [UsersTableType.anomalies]: {
+      id: UsersTableType.anomalies,
+      name: i18n.NAVIGATION_ANOMALIES_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.anomalies),
+      disabled: false,
+    },
+    [UsersTableType.events]: {
+      id: UsersTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.events),
+      disabled: false,
+    },
+    [UsersTableType.alerts]: {
+      id: UsersTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.alerts),
       disabled: false,
     },
   };
+
+  return hasMlUserPermissions
+    ? userDetailsNavTabs
+    : omit([UsersTableType.anomalies], userDetailsNavTabs);
 };

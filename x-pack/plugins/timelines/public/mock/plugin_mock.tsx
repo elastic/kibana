@@ -24,6 +24,4 @@ export const createTGridMocks = () => ({
   getUseAddToTimeline: () => useAddToTimeline,
   getUseAddToTimelineSensor: () => useAddToTimelineSensor,
   getUseDraggableKeyboardWrapper: () => useDraggableKeyboardWrapper,
-  getAddToExistingCaseButton: () => <div data-test-subj="add-to-existing-case" />,
-  getAddToNewCaseButton: () => <div data-test-subj="add-to-new-case" />,
 });

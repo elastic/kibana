@@ -124,9 +124,13 @@ describe('Transaction error rate alert', () => {
       serviceName: 'foo',
       transactionType: 'type-foo',
       environment: 'env-foo',
+      reason:
+        'Failed transactions is 10% in the last 5 mins for foo. Alert when > 10%.',
       threshold: 10,
       triggerValue: '10',
       interval: '5m',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
     });
   });
 });

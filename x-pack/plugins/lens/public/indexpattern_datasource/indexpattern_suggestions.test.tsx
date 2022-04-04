@@ -1189,6 +1189,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -1199,6 +1200,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Count of records',
                     scale: 'ratio',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -1276,6 +1278,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -1286,6 +1289,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Count of records',
                     scale: 'ratio',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -1604,7 +1608,7 @@ describe('IndexPattern Data Source suggestions', () => {
       const updatedContext = [
         {
           ...context[0],
-          splitField: 'source',
+          splitFields: ['source'],
           splitMode: 'terms',
           termsParams: {
             size: 10,
@@ -1831,6 +1835,61 @@ describe('IndexPattern Data Source suggestions', () => {
         })
       );
     });
+
+    it('should apply a static layer if it is provided', () => {
+      const updatedContext = [
+        {
+          ...context[0],
+          metrics: [
+            {
+              agg: 'static_value',
+              isFullReference: true,
+              fieldName: 'document',
+              params: {
+                value: '10',
+              },
+              color: '#68BC00',
+            },
+          ],
+        },
+      ];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              id1: expect.objectContaining({
+                columnOrder: ['id2'],
+                columns: {
+                  id2: expect.objectContaining({
+                    operationType: 'static_value',
+                    isStaticValue: true,
+                    params: expect.objectContaining({
+                      value: '10',
+                    }),
+                  }),
+                },
+              }),
+            },
+          }),
+          table: {
+            changeType: 'initial',
+            label: undefined,
+            isMultiRow: false,
+            columns: [
+              expect.objectContaining({
+                columnId: 'id2',
+              }),
+            ],
+            layerId: 'id1',
+          },
+        })
+      );
+    });
   });
 
   describe('#getDatasourceSuggestionsForVisualizeField', () => {
@@ -1977,6 +2036,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2000,6 +2060,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2047,6 +2108,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2057,6 +2119,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2118,6 +2181,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2128,6 +2192,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2138,6 +2203,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2218,6 +2284,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2228,6 +2295,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2238,6 +2306,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2341,6 +2410,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Custom Range',
                   scale: 'ordinal',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2351,6 +2421,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'timestampLabel',
                   scale: 'interval',
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2361,6 +2432,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'Unique count of dest',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2873,6 +2945,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
               {
@@ -2883,6 +2956,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'Top 5',
                   scale: undefined,
                   isStaticValue: false,
+                  hasTimeShift: false,
                 },
               },
             ],
@@ -2947,6 +3021,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'timestampLabel',
                     scale: 'interval',
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2957,6 +3032,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Cumulative sum of Records label',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -2967,6 +3043,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: 'Cumulative sum of (incomplete)',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],
@@ -3029,6 +3106,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -3039,6 +3117,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
                 {
@@ -3049,6 +3128,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     label: '',
                     scale: undefined,
                     isStaticValue: false,
+                    hasTimeShift: false,
                   },
                 },
               ],

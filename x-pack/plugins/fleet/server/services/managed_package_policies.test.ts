@@ -45,25 +45,24 @@ describe('upgradeManagedPackagePolicies', () => {
   it('should upgrade policies for managed package', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const soClient = savedObjectsClientMock.create();
+    const packagePolicy = {
+      id: 'managed-package-id',
+      inputs: {},
+      version: '',
+      revision: 1,
+      updated_at: '',
+      updated_by: '',
+      created_at: '',
+      created_by: '',
+      package: {
+        name: 'managed-package',
+        title: 'Managed Package',
+        version: '0.0.1',
+      },
+    };
 
     (packagePolicyService.list as jest.Mock).mockResolvedValueOnce({
-      items: [
-        {
-          id: 'managed-package-id',
-          inputs: {},
-          version: '',
-          revision: 1,
-          updated_at: '',
-          updated_by: '',
-          created_at: '',
-          created_by: '',
-          package: {
-            name: 'managed-package',
-            title: 'Managed Package',
-            version: '0.0.1',
-          },
-        },
-      ],
+      items: [packagePolicy],
     });
 
     (packagePolicyService.getUpgradeDryRunDiff as jest.Mock).mockResolvedValueOnce({
@@ -89,7 +88,14 @@ describe('upgradeManagedPackagePolicies', () => {
       { packagePolicyId: 'managed-package-id', diff: [{ id: 'foo' }, { id: 'bar' }], errors: [] },
     ]);
 
-    expect(packagePolicyService.upgrade).toBeCalledWith(soClient, esClient, ['managed-package-id']);
+    expect(packagePolicyService.upgrade).toBeCalledWith(
+      soClient,
+      esClient,
+      ['managed-package-id'],
+      undefined,
+      packagePolicy,
+      '1.0.0'
+    );
   });
 
   it('should not upgrade policy if newer than installed package version', async () => {

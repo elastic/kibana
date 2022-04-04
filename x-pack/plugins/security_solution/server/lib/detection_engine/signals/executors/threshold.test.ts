@@ -9,7 +9,7 @@ import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
 import { thresholdExecutor } from './threshold';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
@@ -22,7 +22,7 @@ import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 describe('threshold_executor', () => {
   const version = '8.0.0';
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
+  let alertServices: RuleExecutorServicesMock;
   const params = getThresholdRuleParams();
 
   const thresholdCompleteRule = getCompleteRuleMock<ThresholdRuleParams>(params);
@@ -40,8 +40,8 @@ describe('threshold_executor', () => {
   });
 
   beforeEach(() => {
-    alertServices = alertsMock.createAlertServices();
-    alertServices.search.asCurrentUser.search.mockResolvedValue(
+    alertServices = alertsMock.createRuleExecutorServices();
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
     );
     logger = loggingSystemMock.createLogger();

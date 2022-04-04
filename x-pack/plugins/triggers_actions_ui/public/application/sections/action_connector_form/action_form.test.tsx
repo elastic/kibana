@@ -14,7 +14,7 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ValidationResult,
   Rule,
-  AlertAction,
+  RuleAction,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -193,7 +193,7 @@ describe('action_form', () => {
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
-    async function setup(customActions?: AlertAction[], customRecoveredActionGroup?: string) {
+    async function setup(customActions?: RuleAction[], customRecoveredActionGroup?: string) {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
@@ -283,7 +283,7 @@ describe('action_form', () => {
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
-          setActions={(_updatedActions: AlertAction[]) => {}}
+          setActions={(_updatedActions: RuleAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }

@@ -34,6 +34,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
           legacyTemplatesEs,
           cloudManagedTemplatePrefix
         );
+        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
         const body = {
@@ -92,6 +93,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
           if (indexTemplates.length > 0) {
             return response.ok({
               body: deserializeTemplate(
+                // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
                 cloudManagedTemplatePrefix
               ),

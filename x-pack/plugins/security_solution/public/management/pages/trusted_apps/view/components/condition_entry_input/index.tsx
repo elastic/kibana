@@ -16,12 +16,10 @@ import {
   EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
-
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import {
-  ConditionEntry,
-  ConditionEntryField,
+  TrustedAppConditionEntry,
   OperatorFieldIds,
-  OperatingSystem,
 } from '../../../../../../../common/endpoint/types';
 
 import {
@@ -51,19 +49,19 @@ ConditionEntryCell.displayName = 'ConditionEntryCell';
 
 export interface ConditionEntryInputProps {
   os: OperatingSystem;
-  entry: ConditionEntry;
+  entry: TrustedAppConditionEntry;
   /** controls if remove button is enabled/disabled */
   isRemoveDisabled?: boolean;
   /** If the labels for each Column in the input row should be shown. Normally set on the first row entry */
   showLabels: boolean;
-  onRemove: (entry: ConditionEntry) => void;
-  onChange: (newEntry: ConditionEntry, oldEntry: ConditionEntry) => void;
+  onRemove: (entry: TrustedAppConditionEntry) => void;
+  onChange: (newEntry: TrustedAppConditionEntry, oldEntry: TrustedAppConditionEntry) => void;
   /**
    * invoked when at least one field in the entry was visited (triggered when `onBlur` DOM event is dispatched)
    * For this component, that will be triggered only when the `value` field is visited, since that is the
    * only one needs user input.
    */
-  onVisited?: (entry: ConditionEntry) => void;
+  onVisited?: (entry: TrustedAppConditionEntry) => void;
   'data-test-subj'?: string;
 }
 

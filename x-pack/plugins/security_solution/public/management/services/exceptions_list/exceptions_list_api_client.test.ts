@@ -165,7 +165,8 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.get).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         query: {
-          id: fakeItemId,
+          item_id: fakeItemId,
+          id: undefined,
           namespace_type: 'agnostic',
         },
       });
@@ -222,7 +223,8 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
         query: {
-          id: fakeItemId,
+          item_id: fakeItemId,
+          id: undefined,
           namespace_type: 'agnostic',
         },
       });
@@ -242,6 +244,52 @@ describe('Exceptions List Api Client', () => {
           namespace_type: 'agnostic',
         },
       });
+    });
+
+    it('hasData method returns true when list has data', async () => {
+      fakeHttpServices.get.mockResolvedValue({
+        total: 1,
+      });
+
+      const exceptionsListApiClientInstance = getInstance();
+
+      await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(true);
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+        query: expect.objectContaining({
+          page: 1,
+          per_page: 1,
+        }),
+      });
+    });
+
+    it('hasData method returns false when list has no data', async () => {
+      fakeHttpServices.get.mockResolvedValue({
+        total: 0,
+      });
+
+      const exceptionsListApiClientInstance = getInstance();
+
+      await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(false);
+    });
+
+    it('return new instance when HttpCore changes', async () => {
+      const initialInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+      fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+
+      const newInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      expect(initialInstance).not.toStrictEqual(newInstance);
     });
   });
 });

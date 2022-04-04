@@ -44,6 +44,7 @@ describe('registerTransactionDurationAlertType', () => {
       windowUnit: 'm',
       transactionType: 'request',
       serviceName: 'opbeans-java',
+      aggregationType: 'avg',
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
@@ -54,6 +55,10 @@ describe('registerTransactionDurationAlertType', () => {
       threshold: 3000000,
       triggerValue: '5,500 ms',
       interval: `5m`,
+      reason:
+        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java. Alert when > 3,000 ms.',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
     });
   });
 });

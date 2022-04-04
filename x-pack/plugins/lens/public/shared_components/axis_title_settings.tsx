@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSwitch,
-  EuiSpacer,
-  EuiFieldText,
-} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AxesSettingsConfig } from '../../common/expressions';
-import { useDebouncedValue } from './';
+import { AxesSettingsConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { LabelMode, useDebouncedValue, VisLabel } from './';
+
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
 export interface AxisTitleSettingsProps {
@@ -49,49 +43,57 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
   isAxisTitleVisible,
   toggleAxisTitleVisibility,
 }) => {
-  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>({
-    value: axisTitle || '',
-    onChange: updateTitleState,
-  });
+  const { inputValue: title, handleInputChange: onTitleChange } = useDebouncedValue<string>(
+    {
+      value: axisTitle || '',
+      onChange: updateTitleState,
+    },
+    { allowFalsyValue: true }
+  );
+  const [titleMode, setTitleMode] = useState<LabelMode>(
+    !title ? 'auto' : isAxisTitleVisible ? 'custom' : 'none'
+  );
+
+  const updateVisibility = useCallback(
+    (mode: LabelMode) => {
+      const visible = mode !== 'none';
+      if (visible !== isAxisTitleVisible) {
+        toggleAxisTitleVisibility(axis, visible);
+      }
+      setTitleMode(mode);
+    },
+    [axis, isAxisTitleVisible, toggleAxisTitleVisibility]
+  );
+
   return (
     <>
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <h4>
-              {i18n.translate('xpack.lens.shared.axisNameLabel', {
-                defaultMessage: 'Axis title',
-              })}
-            </h4>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            data-test-subj={`lnsShowAxisTitleSwitch__${axis}`}
-            label={i18n.translate('xpack.lens.shared.ShowAxisTitleLabel', {
-              defaultMessage: 'Show',
-            })}
-            onChange={({ target }) => toggleAxisTitleVisibility(axis, target.checked)}
-            checked={isAxisTitleVisible}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiFieldText
-        data-test-subj={`lns${axis}AxisTitle`}
-        compressed
-        placeholder={i18n.translate('xpack.lens.shared.overwriteAxisTitle', {
-          defaultMessage: 'Overwrite axis title',
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.label.shared.axisHeader', {
+          defaultMessage: 'Axis title',
         })}
-        value={title || ''}
-        disabled={!isAxisTitleVisible || false}
-        onChange={({ target }) => onTitleChange(target.value)}
-        aria-label={i18n.translate('xpack.lens.shared.overwriteAxisTitle', {
-          defaultMessage: 'Overwrite axis title',
-        })}
-      />
-      <EuiSpacer size="m" />
+        fullWidth
+      >
+        <VisLabel
+          header={i18n.translate('xpack.lens.shared.axisNameLabel', {
+            defaultMessage: 'Axis title',
+          })}
+          dataTestSubj={`lns${axis}AxisTitle`}
+          label={title || ''}
+          mode={titleMode}
+          placeholder={i18n.translate('xpack.lens.shared.overwriteAxisTitle', {
+            defaultMessage: 'Overwrite axis title',
+          })}
+          hasAutoOption={true}
+          handleChange={({ mode, label }) => {
+            if (title !== label) {
+              onTitleChange(label);
+            }
+            updateVisibility(mode);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="s" />
     </>
   );
 };

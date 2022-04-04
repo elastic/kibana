@@ -8,7 +8,6 @@
 import { KibanaRequest } from 'src/core/server';
 import { Writable } from 'stream';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';
@@ -32,7 +31,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   parentLogger
 ) {
   const config = reporting.getConfig();
-  const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
+  const logger = parentLogger.get('execute-job');
 
   return async function runTask(_jobId, immediateJobParams, context, stream, req) {
     const job = {
@@ -82,7 +81,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     const { warnings } = result;
     if (warnings) {
       warnings.forEach((warning) => {
-        logger.warning(warning);
+        logger.warn(warning);
       });
     }
 

@@ -32,6 +32,8 @@ export interface NavigationEntry {
   onClick?: (event: React.MouseEvent<HTMLElement | HTMLButtonElement, MouseEvent>) => void;
   // shows NEW badge besides the navigation label, which will automatically disappear when menu item is clicked.
   isNewFeature?: boolean;
+  // override default path matching logic to determine if nav entry is selected
+  matchPath?: (path: string) => boolean;
 }
 
 export interface NavigationRegistry {

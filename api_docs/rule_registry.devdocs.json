@@ -102,7 +102,7 @@
               "UpdateOptions",
               "<Params>) => Promise<{ _version: string | undefined; get?: ",
               "InlineGet",
-              "<OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>>> | undefined; _id: string; _index: string; _primary_term: number; result: ",
+              "<unknown> | undefined; _id: string; _index: string; _primary_term: number; result: ",
               "Result",
               "; _seq_no: number; _shards: ",
               "ShardStatistics",
@@ -148,14 +148,10 @@
               " = never>({ ids, query, index, status, }: ",
               "BulkUpdateOptions",
               "<Params>) => Promise<",
-              "TransportResult",
-              "<",
               "BulkResponse",
-              ", unknown> | ",
-              "TransportResult",
-              "<",
+              " | ",
               "UpdateByQueryResponse",
-              ", unknown>>"
+              ">"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -375,7 +371,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "ConstructorOptions"
+                  {
+                    "pluginId": "ruleRegistry",
+                    "scope": "server",
+                    "docId": "kibRuleRegistryPluginApi",
+                    "section": "def-server.RuleDataClientConstructorOptions",
+                    "text": "RuleDataClientConstructorOptions"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
                 "deprecated": false,
@@ -1374,7 +1376,9 @@
           },
           "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
           "AlertTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; config?: ",
+          "RuleTypeConfig",
+          " | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1424,7 +1428,7 @@
           },
           "<TParams>; injectReferences: (params: TParams, references: ",
           "SavedObjectReference",
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; minimumScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; }"
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -2396,7 +2400,7 @@
             "signature": [
               "(request: ",
               "BulkRequest",
-              "<unknown>) => Promise<",
+              "<unknown, unknown>) => Promise<",
               "TransportResult",
               "<",
               "BulkResponse",
@@ -2414,7 +2418,7 @@
                 "description": [],
                 "signature": [
                   "BulkRequest",
-                  "<unknown>"
+                  "<unknown, unknown>"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                 "deprecated": false,
@@ -2482,6 +2486,36 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.LifecycleAlertServices.getAlertStartedDate",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertStartedDate",
+            "description": [],
+            "signature": [
+              "(alertId: string) => string | null"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.LifecycleAlertServices.getAlertStartedDate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alertId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2514,7 +2548,9 @@
             "label": "createdAlerts",
             "description": [],
             "signature": [
-              "(T & { _id: string; _index: string; })[]"
+              "(T & ",
+              "CommonAlertFields800",
+              " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false
@@ -2630,6 +2666,124 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.RuleDataClientConstructorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleDataClientConstructorOptions",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.indexInfo",
+            "type": "Object",
+            "tags": [],
+            "label": "indexInfo",
+            "description": [],
+            "signature": [
+              "IndexInfo"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.resourceInstaller",
+            "type": "Object",
+            "tags": [],
+            "label": "resourceInstaller",
+            "description": [],
+            "signature": [
+              "{ installCommonResources: () => Promise<void>; installIndexLevelResources: (indexInfo: ",
+              "IndexInfo",
+              ") => Promise<void>; installAndUpdateNamespaceLevelResources: (indexInfo: ",
+              "IndexInfo",
+              ", namespace: string) => Promise<void>; }"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.isWriteEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isWriteEnabled",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.isWriterCacheEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isWriterCacheEnabled",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.waitUntilReadyForReading",
+            "type": "Object",
+            "tags": [],
+            "label": "waitUntilReadyForReading",
+            "description": [],
+            "signature": [
+              "Promise<",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.WaitResult",
+                "text": "WaitResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.waitUntilReadyForWriting",
+            "type": "Object",
+            "tags": [],
+            "label": "waitUntilReadyForWriting",
+            "description": [],
+            "signature": [
+              "Promise<",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.WaitResult",
+                "text": "WaitResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataClientConstructorOptions.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3356,9 +3510,132 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchRequestPagination",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchRequestPagination",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.BASE_RAC_ALERTS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_RAC_ALERTS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/rac/alerts\""
+        ],
+        "path": "x-pack/plugins/rule_registry/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.ParsedTechnicalFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ParsedTechnicalFields",
+        "description": [],
+        "signature": [
+          "{ readonly '@timestamp': string; readonly \"kibana.alert.rule.rule_type_id\": string; readonly \"kibana.alert.rule.consumer\": string; readonly \"kibana.alert.rule.producer\": string; readonly \"kibana.space_ids\": string[]; readonly \"kibana.alert.uuid\": string; readonly \"kibana.alert.status\": string; readonly \"kibana.alert.rule.category\": string; readonly \"kibana.alert.rule.uuid\": string; readonly \"kibana.alert.rule.name\": string; readonly tags?: string[] | undefined; readonly 'event.action'?: string | undefined; readonly \"kibana.alert.rule.parameters\"?: { [key: string]: unknown; } | undefined; readonly \"kibana.alert.start\"?: string | undefined; readonly \"kibana.alert.end\"?: string | undefined; readonly \"kibana.alert.duration.us\"?: number | undefined; readonly \"kibana.alert.severity\"?: string | undefined; readonly \"kibana.version\"?: string | undefined; readonly \"ecs.version\"?: string | undefined; readonly \"kibana.alert.risk_score\"?: number | undefined; readonly \"kibana.alert.workflow_status\"?: string | undefined; readonly \"kibana.alert.workflow_user\"?: string | undefined; readonly \"kibana.alert.workflow_reason\"?: string | undefined; readonly \"kibana.alert.system_status\"?: string | undefined; readonly \"kibana.alert.action_group\"?: string | undefined; readonly \"kibana.alert.reason\"?: string | undefined; readonly \"kibana.alert.rule.author\"?: string | undefined; readonly \"kibana.alert.rule.created_at\"?: string | undefined; readonly \"kibana.alert.rule.created_by\"?: string | undefined; readonly \"kibana.alert.rule.description\"?: string | undefined; readonly \"kibana.alert.rule.enabled\"?: string | undefined; readonly \"kibana.alert.rule.execution.uuid\"?: string | undefined; readonly \"kibana.alert.rule.from\"?: string | undefined; readonly \"kibana.alert.rule.interval\"?: string | undefined; readonly \"kibana.alert.rule.license\"?: string | undefined; readonly \"kibana.alert.rule.note\"?: string | undefined; readonly \"kibana.alert.rule.references\"?: string[] | undefined; readonly \"kibana.alert.rule.rule_id\"?: string | undefined; readonly \"kibana.alert.rule.rule_name_override\"?: string | undefined; readonly \"kibana.alert.rule.tags\"?: string[] | undefined; readonly \"kibana.alert.rule.to\"?: string | undefined; readonly \"kibana.alert.rule.type\"?: string | undefined; readonly \"kibana.alert.rule.updated_at\"?: string | undefined; readonly \"kibana.alert.rule.updated_by\"?: string | undefined; readonly \"kibana.alert.rule.version\"?: string | undefined; readonly 'event.kind'?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleRegistrySearchRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchRequest",
+            "text": "IEsSearchRequest"
+          },
+          " & { featureIds: ",
+          "AlertConsumers",
+          "[]; query?: { bool: ",
+          "QueryDslBoolQuery",
+          "; } | undefined; sort?: ",
+          "SortCombinations",
+          "[] | undefined; pagination?: ",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "common",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-common.RuleRegistrySearchRequestPagination",
+            "text": "RuleRegistrySearchRequestPagination"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleRegistrySearchResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<",
+          "SearchResponse",
+          "<EcsFieldsResponse, Record<string, ",
+          "AggregationsAggregate",
+          ">>>"
+        ],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

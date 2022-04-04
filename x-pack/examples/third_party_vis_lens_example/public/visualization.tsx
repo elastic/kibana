@@ -75,7 +75,7 @@ export const getRotatingNumberVisualization = ({
   },
 
   getSuggestions: ({ state, table }) => {
-    if (table.columns.length > 1) {
+    if (!table.columns.length || table.columns.length > 1) {
       return [];
     }
     if (state && table.changeType === 'unchanged') {

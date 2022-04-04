@@ -25,6 +25,8 @@ import {
 } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
+import { useKibana } from '../../../common/lib/kibana';
+import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_context';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -99,9 +101,34 @@ describe('Details Panel Component', () => {
     timelineId: 'test',
   };
 
+  const mockSearchStrategy = jest.fn();
+
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          data: {
+            search: {
+              searchStrategyClient: jest.fn(),
+              search: mockSearchStrategy.mockReturnValue({
+                unsubscribe: jest.fn(),
+                subscribe: jest.fn(),
+              }),
+            },
+            query: jest.fn(),
+          },
+          uiSettings: {
+            get: jest.fn().mockReturnValue([]),
+          },
+          application: {
+            navigateToApp: jest.fn(),
+          },
+          cases: {
+            ui: { getCasesContext: () => mockCasesContext },
+          },
+        },
+      });
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {

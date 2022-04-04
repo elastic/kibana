@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { Direction, HostsFields, HostRiskScoreFields } from '../../../common/search_strategy';
+import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
@@ -57,10 +57,14 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: HostRiskScoreFields.riskScore,
+          field: RiskScoreFields.riskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
@@ -93,10 +97,14 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         sort: {
-          field: HostRiskScoreFields.riskScore,
+          field: RiskScoreFields.riskScore,
           direction: Direction.desc,
         },
         severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },

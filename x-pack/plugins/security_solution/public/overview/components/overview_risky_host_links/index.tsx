@@ -9,10 +9,9 @@ import React from 'react';
 
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { RiskyHostsDisabledModule } from './risky_hosts_disabled_module';
-import { useHostRiskScore } from '../../../hosts/containers/host_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useHostRiskScore, HostRiskScoreQueryId } from '../../../risk_score/containers';
 export interface RiskyHostLinksProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   timerange: { to: string; from: string };
 }

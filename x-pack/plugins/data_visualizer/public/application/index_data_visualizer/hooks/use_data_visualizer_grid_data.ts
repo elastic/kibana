@@ -53,14 +53,13 @@ export const useDataVisualizerGridData = (
   const { services } = useDataVisualizerKibana();
   const { uiSettings, data } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
-  const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
 
   const {
     currentSavedSearch,
-    currentIndexPattern,
+    currentDataView,
     currentQuery,
     currentFilters,
     visibleFieldNames,
@@ -68,7 +67,7 @@ export const useDataVisualizerGridData = (
   } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
-      currentIndexPattern: input.indexPattern,
+      currentDataView: input.dataView,
       currentQuery: input?.query,
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
@@ -80,7 +79,7 @@ export const useDataVisualizerGridData = (
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = getEsQueryFromSavedSearch({
-      indexPattern: currentIndexPattern,
+      dataView: currentDataView,
       uiSettings,
       savedSearch: currentSavedSearch,
       query: currentQuery,
@@ -107,7 +106,7 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentSavedSearch?.id,
-    currentIndexPattern.id,
+    currentDataView.id,
     dataVisualizerListState.searchString,
     dataVisualizerListState.searchQueryLanguage,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,7 +128,7 @@ export const useDataVisualizerGridData = (
   }, [uiSettings]);
 
   const timefilter = useTimefilter({
-    timeRangeSelector: currentIndexPattern?.timeFieldName !== undefined,
+    timeRangeSelector: currentDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
@@ -149,13 +148,13 @@ export const useDataVisualizerGridData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || !currentIndexPattern) return;
+      if (!buckets || !tf || !currentDataView) return;
 
       const activeBounds = tf.getActiveBounds();
 
       let earliest: number | undefined;
       let latest: number | undefined;
-      if (activeBounds !== undefined && currentIndexPattern.timeFieldName !== undefined) {
+      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
         earliest = activeBounds.min?.valueOf();
         latest = activeBounds.max?.valueOf();
       }
@@ -174,7 +173,7 @@ export const useDataVisualizerGridData = (
       const aggregatableFields: string[] = [];
       const nonAggregatableFields: string[] = [];
 
-      const fields = currentIndexPattern.fields;
+      const fields = currentDataView.fields;
       fields?.forEach((field) => {
         if (fieldsToFetch && !fieldsToFetch.includes(field.name)) {
           return;
@@ -196,9 +195,9 @@ export const useDataVisualizerGridData = (
         searchQuery,
         samplerShardSize,
         sessionId: searchSessionId,
-        index: currentIndexPattern.title,
-        timeFieldName: currentIndexPattern.timeFieldName,
-        runtimeFieldMap: currentIndexPattern.getComputedFields().runtimeFields,
+        index: currentDataView.title,
+        timeFieldName: currentDataView.timeFieldName,
+        runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
         fieldsToFetch,
@@ -208,7 +207,7 @@ export const useDataVisualizerGridData = (
     [
       _timeBuckets,
       timefilter,
-      currentIndexPattern.id,
+      currentDataView.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(searchQuery),
       samplerShardSize,
@@ -227,11 +226,11 @@ export const useDataVisualizerGridData = (
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
       .map((config) => {
-        if (config.existsInDocs === false) return;
         return {
           fieldName: config.fieldName,
           type: config.type,
           cardinality: config.stats?.cardinality ?? 0,
+          existsInDocs: config.existsInDocs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -240,11 +239,11 @@ export const useDataVisualizerGridData = (
     // Top values will be obtained on a sample if cardinality > 100000.
     const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
-        if (config.existsInDocs === false) return;
         return {
           fieldName: config.fieldName,
           type: config.type,
           cardinality: config.stats?.cardinality ?? 0,
+          existsInDocs: config.existsInDocs,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -255,7 +254,7 @@ export const useDataVisualizerGridData = (
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
-    dataVisualizerListStateRef.current
+    dataVisualizerListState
   );
 
   const combinedProgress = useMemo(
@@ -282,17 +281,14 @@ export const useDataVisualizerGridData = (
     };
   });
 
-  const indexPatternFields: DataViewField[] = useMemo(
-    () => currentIndexPattern.fields,
-    [currentIndexPattern]
-  );
+  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
     const aggregatableExistsFields: AggregatableField[] =
       overallStats.aggregatableExistsFields || [];
 
-    const allMetricFields = indexPatternFields.filter((f) => {
+    const allMetricFields = dataViewFields.filter((f) => {
       return (
         f.type === KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
@@ -326,9 +322,9 @@ export const useDataVisualizerGridData = (
 
       const metricConfig: FieldVisConfig = {
         ...fieldData,
-        fieldFormat: currentIndexPattern.getFormatterForField(field),
+        fieldFormat: currentDataView.getFormatterForField(field),
         type: JOB_FIELD_TYPES.NUMBER,
-        loading: true,
+        loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
       };
@@ -344,10 +340,10 @@ export const useDataVisualizerGridData = (
       visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
-  }, [currentIndexPattern, indexPatternFields, metricsLoaded, overallStats, showEmptyFields]);
+  }, [currentDataView, dataViewFields, metricsLoaded, overallStats, showEmptyFields]);
 
   const createNonMetricCards = useCallback(() => {
-    const allNonMetricFields = indexPatternFields.filter((f) => {
+    const allNonMetricFields = dataViewFields.filter((f) => {
       return (
         f.type !== KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
@@ -405,7 +401,7 @@ export const useDataVisualizerGridData = (
 
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
-        fieldFormat: currentIndexPattern.getFormatterForField(field),
+        fieldFormat: currentDataView.getFormatterForField(field),
         aggregatable: field.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
         deletable: field.runtimeField !== undefined,
@@ -431,7 +427,7 @@ export const useDataVisualizerGridData = (
     });
 
     setNonMetricConfigs(configs);
-  }, [currentIndexPattern, indexPatternFields, nonMetricsLoaded, overallStats, showEmptyFields]);
+  }, [currentDataView, dataViewFields, nonMetricsLoaded, overallStats, showEmptyFields]);
 
   useEffect(() => {
     createMetricCards();
@@ -439,41 +435,46 @@ export const useDataVisualizerGridData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
-  const configs = useMemo(() => {
-    const fieldStats = strategyResponse.fieldStats;
-    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
-    if (visibleFieldTypes && visibleFieldTypes.length > 0) {
-      combinedConfigs = combinedConfigs.filter(
-        (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
-      );
-    }
-    if (visibleFieldNames && visibleFieldNames.length > 0) {
-      combinedConfigs = combinedConfigs.filter(
-        (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
-      );
-    }
+  const configs = useMemo(
+    () => {
+      const fieldStats = strategyResponse.fieldStats;
+      let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+      if (visibleFieldTypes && visibleFieldTypes.length > 0) {
+        combinedConfigs = combinedConfigs.filter(
+          (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
+        );
+      }
+      if (visibleFieldNames && visibleFieldNames.length > 0) {
+        combinedConfigs = combinedConfigs.filter(
+          (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
+        );
+      }
 
-    if (fieldStats) {
-      combinedConfigs = combinedConfigs.map((c) => {
-        const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
-        return loadedFullStats
-          ? {
-              ...c,
-              loading: false,
-              stats: { ...c.stats, ...loadedFullStats },
-            }
-          : c;
-      });
-    }
-
-    return combinedConfigs;
-  }, [
-    nonMetricConfigs,
-    metricConfigs,
-    visibleFieldTypes,
-    visibleFieldNames,
-    strategyResponse.fieldStats,
-  ]);
+      if (fieldStats) {
+        combinedConfigs = combinedConfigs.map((c) => {
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          return loadedFullStats
+            ? {
+                ...c,
+                loading: false,
+                stats: { ...c.stats, ...loadedFullStats },
+              }
+            : c;
+        });
+      }
+      return combinedConfigs;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      nonMetricConfigs,
+      metricConfigs,
+      visibleFieldTypes,
+      visibleFieldNames,
+      strategyResponse.progress.loaded,
+      dataVisualizerListState.pageIndex,
+      dataVisualizerListState.pageSize,
+    ]
+  );
 
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting
@@ -492,7 +493,7 @@ export const useDataVisualizerGridData = (
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
     const actions = getActions(
-      input.indexPattern,
+      input.dataView,
       services,
       {
         searchQueryLanguage,
@@ -511,7 +512,7 @@ export const useDataVisualizerGridData = (
     };
 
     return [actionColumn];
-  }, [input.indexPattern, services, searchQueryLanguage, searchString, input.allowEditDataView]);
+  }, [input.dataView, services, searchQueryLanguage, searchString, input.allowEditDataView]);
 
   return {
     progress: combinedProgress,

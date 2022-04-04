@@ -1,5 +1,27 @@
 {
   "resources": {
+    "integrations_server": [
+      {
+        "elasticsearch_cluster_ref_id": "main-elasticsearch",
+        "region": "gcp-us-west2",
+        "plan": {
+          "cluster_topology": [
+            {
+              "instance_configuration_id": "gcp.integrationsserver.1",
+              "zone_count": 1,
+              "size": {
+                "value": 512,
+                "resource": "memory"
+              }
+            }
+          ],
+          "integrations_server": {
+            "version": null
+          }
+        },
+        "ref_id": "main-integrations_server"
+      }
+    ],
     "elasticsearch": [
       {
         "region": "gcp-us-west2",
@@ -12,7 +34,10 @@
             {
               "zone_count": 2,
               "instance_configuration_id": "gcp.coordinating.1",
-              "node_roles": ["ingest", "remote_cluster_client"],
+              "node_roles": [
+                "ingest",
+                "remote_cluster_client"
+              ],
               "id": "coordinating",
               "size": {
                 "resource": "memory",
@@ -54,7 +79,10 @@
                 "enabled_built_in_plugins": []
               },
               "instance_configuration_id": "gcp.data.highstorage.1",
-              "node_roles": ["data_warm", "remote_cluster_client"],
+              "node_roles": [
+                "data_warm",
+                "remote_cluster_client"
+              ],
               "id": "warm",
               "size": {
                 "resource": "memory",
@@ -70,7 +98,10 @@
                 "enabled_built_in_plugins": []
               },
               "instance_configuration_id": "gcp.data.highstorage.1",
-              "node_roles": ["data_cold", "remote_cluster_client"],
+              "node_roles": [
+                "data_cold",
+                "remote_cluster_client"
+              ],
               "id": "cold",
               "size": {
                 "resource": "memory",
@@ -86,7 +117,9 @@
                 "enabled_built_in_plugins": []
               },
               "instance_configuration_id": "gcp.es.datafrozen.n1.64x10x95",
-              "node_roles": ["data_frozen"],
+              "node_roles": [
+                "data_frozen"
+              ],
               "id": "frozen",
               "size": {
                 "resource": "memory",
@@ -96,7 +129,10 @@
             {
               "zone_count": 3,
               "instance_configuration_id": "gcp.master.1",
-              "node_roles": ["master", "remote_cluster_client"],
+              "node_roles": [
+                "master",
+                "remote_cluster_client"
+              ],
               "id": "master",
               "size": {
                 "resource": "memory",
@@ -109,11 +145,14 @@
             {
               "zone_count": 1,
               "instance_configuration_id": "gcp.ml.1",
-              "node_roles": ["ml", "remote_cluster_client"],
+              "node_roles": [
+                "ml",
+                "remote_cluster_client"
+              ],
               "id": "ml",
               "size": {
-                "resource": "memory",
-                "value": 0
+                "value": 1024,
+                "resource": "memory"
               },
               "elasticsearch": {
                 "enabled_built_in_plugins": []
@@ -130,7 +169,33 @@
         "ref_id": "main-elasticsearch"
       }
     ],
-    "enterprise_search": [],
+    "enterprise_search": [
+      {
+        "elasticsearch_cluster_ref_id": "main-elasticsearch",
+        "region": "gcp-us-west2",
+        "plan": {
+          "cluster_topology": [
+            {
+              "node_type": {
+                "connector": true,
+                "appserver": true,
+                "worker": true
+              },
+              "instance_configuration_id": "gcp.enterprisesearch.1",
+              "zone_count": 1,
+              "size": {
+                "resource": "memory",
+                "value": 2048
+              }
+            }
+          ],
+          "enterprise_search": {
+            "version": null
+          }
+        },
+        "ref_id": "main-enterprise_search"
+      }
+    ],
     "kibana": [
       {
         "elasticsearch_cluster_ref_id": "main-elasticsearch",
@@ -153,8 +218,7 @@
         },
         "ref_id": "main-kibana"
       }
-    ],
-    "apm": []
+    ]
   },
   "name": null,
   "metadata": {

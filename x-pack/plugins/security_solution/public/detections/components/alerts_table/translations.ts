@@ -285,3 +285,17 @@ export const TRIGGERED = i18n.translate(
     defaultMessage: 'Triggered',
   }
 );
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);

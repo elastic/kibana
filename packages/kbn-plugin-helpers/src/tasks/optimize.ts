@@ -23,26 +23,25 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
   }
 
   log.info('running @kbn/optimizer');
-  log.indent(2);
+  await log.indent(2, async () => {
+    // build bundles into target
+    const config = OptimizerConfig.create({
+      repoRoot: REPO_ROOT,
+      pluginPaths: [sourceDir],
+      cache: false,
+      dist: true,
+      filter: [plugin.manifest.id],
+    });
 
-  // build bundles into target
-  const config = OptimizerConfig.create({
-    repoRoot: REPO_ROOT,
-    pluginPaths: [sourceDir],
-    cache: false,
-    dist: true,
-    filter: [plugin.manifest.id],
+    const target = Path.resolve(sourceDir, 'target');
+
+    await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
+
+    // clean up unnecessary files
+    Fs.unlinkSync(Path.resolve(target, 'public/metrics.json'));
+    Fs.unlinkSync(Path.resolve(target, 'public/.kbn-optimizer-cache'));
+
+    // move target into buildDir
+    await asyncRename(target, Path.resolve(buildDir, 'target'));
   });
-
-  const target = Path.resolve(sourceDir, 'target');
-
-  await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();
-
-  // clean up unnecessary files
-  Fs.unlinkSync(Path.resolve(target, 'public/metrics.json'));
-  Fs.unlinkSync(Path.resolve(target, 'public/.kbn-optimizer-cache'));
-
-  // move target into buildDir
-  await asyncRename(target, Path.resolve(buildDir, 'target'));
-  log.indent(-2);
 }

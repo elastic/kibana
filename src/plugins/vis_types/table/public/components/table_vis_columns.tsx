@@ -83,7 +83,7 @@ export const createGridColumns = (
                   data-test-subj="tbvChartCell__filterForCellValue"
                   onClick={() => {
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                    closePopover();
+                    closePopover?.();
                   }}
                   iconType="plusInCircle"
                 >
@@ -119,7 +119,7 @@ export const createGridColumns = (
                   aria-label={filterOutAriaLabel}
                   onClick={() => {
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                    closePopover();
+                    closePopover?.();
                   }}
                   iconType="minusInCircle"
                 >

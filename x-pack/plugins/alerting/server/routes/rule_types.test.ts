@@ -58,7 +58,6 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'test',
         enabledInLicense: true,
-        minimumScheduleInterval: '1m',
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
       } as RegistryAlertTypeWithAuth,
@@ -77,7 +76,6 @@ describe('ruleTypesRoute', () => {
         default_schedule_interval: '10m',
         does_set_recovery_context: false,
         minimum_license_required: 'basic',
-        minimum_schedule_interval: '1m',
         is_exportable: true,
         rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
@@ -116,7 +114,6 @@ describe('ruleTypesRoute', () => {
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",
-            "minimum_schedule_interval": "1m",
             "name": "name",
             "producer": "test",
             "recovery_action_group": Object {

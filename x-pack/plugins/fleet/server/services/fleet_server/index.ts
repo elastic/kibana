@@ -16,8 +16,10 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
   const res = await esClient.search<{}, {}>({
     index: FLEET_SERVER_SERVERS_INDEX,
     ignore_unavailable: true,
+    filter_path: 'hits.total',
+    track_total_hits: true,
+    rest_total_hits_as_int: true,
   });
 
-  // @ts-expect-error value is number | TotalHits
-  return res.hits.total.value > 0;
+  return (res.hits.total as number) > 0;
 }

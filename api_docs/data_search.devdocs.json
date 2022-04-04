@@ -439,47 +439,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              ") => string | undefined; datatableUtilities: { getIndexPattern: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              " | undefined>; getAggConfig: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfig",
-                "text": "AggConfig"
-              },
-              " | undefined>; isFilterable: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => boolean; }; createAggConfigs: (indexPattern: ",
+              ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5089,7 +5049,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ getConfig, getIndexPattern, isDefaultTimezone, }: ",
+              "({ getConfig }: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -5114,7 +5074,7 @@
                 "id": "def-common.AggsCommonService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    getConfig,\n    getIndexPattern,\n    isDefaultTimezone,\n  }",
+                "label": "{ getConfig }",
                 "description": [],
                 "signature": [
                   {
@@ -5536,7 +5496,7 @@
                   "- Response to the main request"
                 ],
                 "signature": [
-                  "SearchResponse",
+                  "SearchResponseBody",
                   "<any, Record<string, ",
                   "AggregationsAggregate",
                   ">>"
@@ -9709,6 +9669,22 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggTopMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "aggTopMetrics",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics_fn.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.calcAutoIntervalLessThan",
         "type": "Function",
         "tags": [],
@@ -12669,6 +12645,30 @@
           "<any>"
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.getTopMetricsMetricAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getTopMetricsMetricAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>"
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -15985,6 +15985,52 @@
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggTopMetrics",
+            "type": "Object",
+            "tags": [],
+            "label": "aggTopMetrics",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggTopMetrics\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableRecord",
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16382,6 +16428,62 @@
             "description": [],
             "path": "src/plugins/data/common/search/aggs/metrics/cardinality.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsCardinality.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/cardinality.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsCount",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsCount",
+            "text": "AggParamsCount"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/count.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsCount.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/count.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16658,6 +16760,19 @@
                 "text": "ExtendedBounds"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsDateHistogram.extendToTimeRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "extendToTimeRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
             "deprecated": false
@@ -17454,6 +17569,19 @@
                 "text": "ExtendedBounds"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsHistogram.autoExtendBounds",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoExtendBounds",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
             "deprecated": false
@@ -18545,6 +18673,19 @@
             "description": [],
             "path": "src/plugins/data/common/search/aggs/metrics/sum.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSum.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/sum.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -18812,6 +18953,85 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.AggParamsTopMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsTopMetrics",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsTopMetrics",
+            "text": "AggParamsTopMetrics"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetrics.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.AggsCommonSetup",
         "type": "Interface",
         "tags": [],
@@ -18987,59 +19207,6 @@
                 "deprecated": false
               }
             ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggsCommonStart.datatableUtilities",
-            "type": "Object",
-            "tags": [],
-            "label": "datatableUtilities",
-            "description": [],
-            "signature": [
-              "{ getIndexPattern: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              " | undefined>; getAggConfig: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggConfig",
-                "text": "AggConfig"
-              },
-              " | undefined>; isFilterable: (column: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              ") => boolean; }"
-            ],
-            "path": "src/plugins/data/common/search/aggs/types.ts",
-            "deprecated": false
           },
           {
             "parentPluginId": "data",
@@ -20808,7 +20975,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "SearchResponse",
+              "SearchResponseBody",
               "<T, Record<string, ",
               "AggregationsAggregate",
               ">>"
@@ -22420,6 +22587,19 @@
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MetricAggParam.scriptable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scriptable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -23898,7 +24078,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined"
+              "\"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -24667,47 +24847,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => string | undefined; datatableUtilities: { getIndexPattern: (column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.IndexPattern",
-            "text": "IndexPattern"
-          },
-          " | undefined>; getAggConfig: (column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.AggConfig",
-            "text": "AggConfig"
-          },
-          " | undefined>; isFilterable: (column: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.DatatableColumn",
-            "text": "DatatableColumn"
-          },
-          ") => boolean; }; createAggConfigs: (indexPattern: ",
+          ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24798,6 +24938,20 @@
           "\"aggTopHit\""
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_hit_fn.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.aggTopMetricsFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggTopMetricsFnName",
+        "description": [],
+        "signature": [
+          "\"aggTopMetrics\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics_fn.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -27660,9 +27814,93 @@
             "section": "def-common.SortDirection",
             "text": "SortDirection"
           },
-          "; numeric_type?: \"date\" | \"long\" | \"double\" | \"date_nanos\" | undefined; }"
+          "; numeric_type?: \"date\" | \"date_nanos\" | \"long\" | \"double\" | undefined; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SQL_SEARCH_STRATEGY",
+        "type": "string",
+        "tags": [],
+        "label": "SQL_SEARCH_STRATEGY",
+        "description": [],
+        "signature": [
+          "\"sql\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SqlRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SqlRequestParams",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "SqlQueryRequest",
+          ", \"keep_alive\" | \"keep_on_completion\"> | Omit<",
+          "SqlGetAsyncRequest",
+          ", \"id\" | \"keep_alive\" | \"keep_on_completion\">"
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SqlSearchStrategyRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "SqlSearchStrategyRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SqlRequestParams",
+            "text": "SqlRequestParams"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SqlSearchStrategyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SqlSearchStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<",
+          "SqlQueryResponse",
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -28170,7 +28408,7 @@
                     "section": "def-common.EqlRawResponse",
                     "text": "EqlRawResponse"
                   },
-                  ") => { type: string; meta: { type: string; source: string; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
+                  ") => { type: string; meta: { type: string; source: string; statistics: { totalCount: number; }; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
                 ],
                 "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
                 "deprecated": false,
@@ -28252,7 +28490,7 @@
                     "section": "def-common.EsRawResponse",
                     "text": "EsRawResponse"
                   },
-                  "<unknown>) => { type: string; meta: { type: string; source: string; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
+                  "<unknown>) => { type: string; meta: { type: string; source: string; statistics: { totalCount: number | undefined; }; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
                 ],
                 "path": "src/plugins/data/common/search/expressions/es_raw_response.ts",
                 "deprecated": false,

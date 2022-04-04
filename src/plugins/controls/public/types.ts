@@ -46,6 +46,8 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput> 
 }
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
+  getRelevantDataViewId?: () => string | undefined;
+  setLastUsedDataViewId?: (newId: string) => void;
   onChange: (partial: Partial<T>) => void;
   setValidState: (valid: boolean) => void;
   setDefaultTitle: (defaultTitle: string) => void;
@@ -54,13 +56,13 @@ export interface ControlEditorProps<T extends ControlInput = ControlInput> {
 /**
  * Plugin types
  */
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ControlsPluginSetup {}
+export interface ControlsPluginSetup {
+  registerControlType: ControlsService['registerControlType'];
+}
 
 export interface ControlsPluginStart {
-  controlsService: ControlsService;
-  ContextProvider: React.FC;
+  getControlFactory: ControlsService['getControlFactory'];
+  getControlTypes: ControlsService['getControlTypes'];
 }
 
 export interface ControlsPluginSetupDeps {

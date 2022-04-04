@@ -99,13 +99,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    loading: indexPatternsLoading,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.detections);
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const ACTION_BUTTON_COUNT = 4;
+  const ACTION_BUTTON_COUNT = 5;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -307,14 +306,23 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     ]
   );
 
-  const additionalFiltersComponent = (
-    <AditionalFiltersAction
-      areEventsLoading={loadingEventIds.length > 0}
-      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
-      showBuildingBlockAlerts={showBuildingBlockAlerts}
-      onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
-      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-    />
+  const additionalFiltersComponent = useMemo(
+    () => (
+      <AditionalFiltersAction
+        areEventsLoading={loadingEventIds.length > 0}
+        onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+        showBuildingBlockAlerts={showBuildingBlockAlerts}
+        onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsChanged}
+        showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+      />
+    ),
+    [
+      loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowOnlyThreatIndicatorAlertsChanged,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+    ]
   );
 
   const defaultFiltersMemo = useMemo(() => {
@@ -358,9 +366,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 
   const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = kibana.services.cases.ui.getCasesContext();
 
-  if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
+  if (loading || isEmpty(selectedPatterns)) {
     return null;
   }
 

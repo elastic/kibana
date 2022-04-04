@@ -19,15 +19,22 @@ import { dataViewsServiceFactory } from './data_views';
 import { controlsServiceFactory } from './controls';
 import { overlaysServiceFactory } from './overlays';
 import { dataServiceFactory } from './data';
+import { httpServiceFactory } from './http';
+import { optionsListServiceFactory } from './options_list';
+import { settingsServiceFactory } from './settings';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
   KibanaPluginServiceParams<ControlsPluginStartDeps>
 > = {
+  http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
-  controls: new PluginServiceProvider(controlsServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+  settings: new PluginServiceProvider(settingsServiceFactory),
+
+  optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
+  controls: new PluginServiceProvider(controlsServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<

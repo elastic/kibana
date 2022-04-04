@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup } from '../../../../charts/public';
+import { PersistedState } from '../../../../visualizations/public';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
 import type { IFieldFormat, SerializedFieldFormat } from '../../../../field_formats/common';
 import type { GaugeExpressionProps } from './expression_functions';
 
@@ -15,6 +16,8 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 export type GaugeRenderProps = GaugeExpressionProps & {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
+  uiState: PersistedState;
 };
 
 export interface ColorStop {

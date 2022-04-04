@@ -163,7 +163,6 @@ export function resolveCopyToSpaceConflictsSuite(
                 destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
               },
               id: `cts_ip_1_${sourceSpaceId}`,
-              title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
               meta: {
                 title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
                 icon: 'indexPatternApp',
@@ -176,7 +175,6 @@ export function resolveCopyToSpaceConflictsSuite(
                 destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               },
               id: `cts_vis_3_${sourceSpaceId}`,
-              title: `CTS vis 3 from ${sourceSpaceId} space`,
               meta: {
                 title: `CTS vis 3 from ${sourceSpaceId} space`,
                 icon: 'visualizeApp',
@@ -211,7 +209,6 @@ export function resolveCopyToSpaceConflictsSuite(
               },
               id: `cts_dashboard_${sourceSpaceId}`,
               type: 'dashboard',
-              title: `This is the ${sourceSpaceId} test space CTS dashboard`,
               meta: {
                 title: `This is the ${sourceSpaceId} test space CTS dashboard`,
                 icon: 'dashboardApp',

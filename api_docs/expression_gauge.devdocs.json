@@ -5,76 +5,6 @@
     "functions": [
       {
         "parentPluginId": "expressionGauge",
-        "id": "def-public.GaugeIconHorizontal",
-        "type": "Function",
-        "tags": [],
-        "label": "GaugeIconHorizontal",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => JSX.Element"
-        ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/gauge_icon.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionGauge",
-            "id": "def-public.GaugeIconHorizontal.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/gauge_icon.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionGauge",
-        "id": "def-public.GaugeIconVertical",
-        "type": "Function",
-        "tags": [],
-        "label": "GaugeIconVertical",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => JSX.Element"
-        ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/gauge_icon.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionGauge",
-            "id": "def-public.GaugeIconVertical.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/gauge_icon.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionGauge",
         "id": "def-public.getGoalValue",
         "type": "Function",
         "tags": [],
@@ -89,9 +19,17 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          " | undefined, state?: GaugeAccessorsType | undefined) => any"
+          " | undefined, accessors?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.Accessors",
+            "text": "Accessors"
+          },
+          " | undefined) => any"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "children": [
           {
@@ -111,7 +49,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -120,12 +58,19 @@
             "id": "def-public.getGoalValue.$2",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "GaugeAccessorsType | undefined"
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.Accessors",
+                "text": "Accessors"
+              },
+              " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -149,9 +94,17 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          " | undefined, state?: GaugeAccessorsType | undefined) => number"
+          " | undefined, accessors?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.Accessors",
+            "text": "Accessors"
+          },
+          " | undefined) => number"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "children": [
           {
@@ -171,7 +124,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -180,12 +133,19 @@
             "id": "def-public.getMaxValue.$2",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "GaugeAccessorsType | undefined"
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.Accessors",
+                "text": "Accessors"
+              },
+              " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -209,9 +169,17 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          " | undefined, state?: GaugeAccessorsType | undefined) => any"
+          " | undefined, accessors?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.Accessors",
+            "text": "Accessors"
+          },
+          " | undefined) => any"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "children": [
           {
@@ -231,7 +199,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -240,12 +208,19 @@
             "id": "def-public.getMinValue.$2",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "GaugeAccessorsType | undefined"
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.Accessors",
+                "text": "Accessors"
+              },
+              " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -261,7 +236,7 @@
         "label": "getValueFromAccessor",
         "description": [],
         "signature": [
-          "(accessorName: GaugeAccessors, row?: ",
+          "(accessor: string, row?: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -269,22 +244,22 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          " | undefined, state?: GaugeAccessorsType | undefined) => any"
+          " | undefined) => any"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
             "id": "def-public.getValueFromAccessor.$1",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
-            "label": "accessorName",
+            "label": "accessor",
             "description": [],
             "signature": [
-              "GaugeAccessors"
+              "string"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -305,23 +280,79 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
-          },
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionGauge",
+        "id": "def-public.HorizontalBulletIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "HorizontalBulletIcon",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => JSX.Element"
+        ],
+        "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/horizontal_bullet_icon.tsx",
+        "deprecated": false,
+        "children": [
           {
             "parentPluginId": "expressionGauge",
-            "id": "def-public.getValueFromAccessor.$3",
+            "id": "def-public.HorizontalBulletIcon.$1",
             "type": "Object",
             "tags": [],
-            "label": "state",
+            "label": "{ title, titleId, ...props }",
             "description": [],
             "signature": [
-              "GaugeAccessorsType | undefined"
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils.ts",
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/horizontal_bullet_icon.tsx",
             "deprecated": false,
-            "isRequired": false
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionGauge",
+        "id": "def-public.VerticalBulletIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "VerticalBulletIcon",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => JSX.Element"
+        ],
+        "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/vertical_bullet_icon.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.VerticalBulletIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, titleId, ...props }",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/vertical_bullet_icon.tsx",
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -353,7 +384,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "GaugeExpressionFunctionDefinition"
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeExpressionFunctionDefinition",
+            "text": "GaugeExpressionFunctionDefinition"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/expression_functions/gauge_function.ts",
         "deprecated": false,
@@ -363,6 +400,71 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "expressionGauge",
+        "id": "def-common.Accessors",
+        "type": "Interface",
+        "tags": [],
+        "label": "Accessors",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.Accessors.min",
+            "type": "string",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.Accessors.max",
+            "type": "string",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.Accessors.metric",
+            "type": "string",
+            "tags": [],
+            "label": "metric",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.Accessors.goal",
+            "type": "string",
+            "tags": [],
+            "label": "goal",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionGauge",
         "id": "def-common.ColorStop",
@@ -597,7 +699,17 @@
                 "section": "def-common.GaugeState",
                 "text": "GaugeState"
               },
-              " & { shape: \"horizontalBullet\" | \"verticalBullet\"; colorMode: \"palette\" | \"none\"; palette?: ",
+              " & { shape: ",
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.GaugeShape",
+                "text": "GaugeShape"
+              },
+              "; colorMode: ",
+              "GaugeColorMode",
+              "; palette?: ",
               {
                 "pluginId": "charts",
                 "scope": "common",
@@ -633,52 +745,84 @@
         "children": [
           {
             "parentPluginId": "expressionGauge",
-            "id": "def-common.GaugeState.metricAccessor",
-            "type": "string",
+            "id": "def-common.GaugeState.metric",
+            "type": "CompoundType",
             "tags": [],
-            "label": "metricAccessor",
+            "label": "metric",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "expressionGauge",
-            "id": "def-common.GaugeState.minAccessor",
-            "type": "string",
+            "id": "def-common.GaugeState.min",
+            "type": "CompoundType",
             "tags": [],
-            "label": "minAccessor",
+            "label": "min",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "expressionGauge",
-            "id": "def-common.GaugeState.maxAccessor",
-            "type": "string",
+            "id": "def-common.GaugeState.max",
+            "type": "CompoundType",
             "tags": [],
-            "label": "maxAccessor",
+            "label": "max",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "expressionGauge",
-            "id": "def-common.GaugeState.goalAccessor",
-            "type": "string",
+            "id": "def-common.GaugeState.goal",
+            "type": "CompoundType",
             "tags": [],
-            "label": "goalAccessor",
+            "label": "goal",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -691,7 +835,7 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"auto\" | \"bands\""
+              "\"auto\" | \"hidden\" | \"bands\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -737,13 +881,41 @@
           },
           {
             "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.centralMajorMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "centralMajorMode",
+            "description": [],
+            "signature": [
+              "GaugeCentralMajorMode",
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.centralMajor",
+            "type": "string",
+            "tags": [],
+            "label": "centralMajor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
             "id": "def-common.GaugeState.colorMode",
             "type": "CompoundType",
             "tags": [],
             "label": "colorMode",
             "description": [],
             "signature": [
-              "\"palette\" | \"none\" | undefined"
+              "GaugeColorMode",
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -784,7 +956,41 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"horizontalBullet\" | \"verticalBullet\""
+              "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.percentageMode",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "percentageMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "visTypeGauge",
+                "path": "src/plugins/vis_types/gauge/public/to_ast.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.commonLabel",
+            "type": "string",
+            "tags": [],
+            "label": "commonLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -892,7 +1098,17 @@
             "section": "def-common.GaugeState",
             "text": "GaugeState"
           },
-          " & { shape: \"horizontalBullet\" | \"verticalBullet\"; colorMode: \"palette\" | \"none\"; palette?: ",
+          " & { shape: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeShape",
+            "text": "GaugeShape"
+          },
+          "; colorMode: ",
+          "GaugeColorMode",
+          "; palette?: ",
           {
             "pluginId": "charts",
             "scope": "common",
@@ -909,6 +1125,77 @@
             "text": "CustomPaletteState"
           },
           "> | undefined; ariaLabel?: string | undefined; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionGauge",
+        "id": "def-common.GaugeExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"gauge\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeArguments",
+            "text": "GaugeArguments"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeExpressionProps",
+            "text": "GaugeExpressionProps"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -953,6 +1240,22 @@
           },
           "; chartsThemeService: ",
           "Theme",
+          "; paletteService: ",
+          {
+            "pluginId": "charts",
+            "scope": "public",
+            "docId": "kibChartsPluginApi",
+            "section": "def-public.PaletteRegistry",
+            "text": "PaletteRegistry"
+          },
+          "; uiState: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.PersistedState",
+            "text": "PersistedState"
+          },
           "; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
@@ -967,7 +1270,7 @@
         "label": "GaugeShape",
         "description": [],
         "signature": [
-          "\"horizontalBullet\" | \"verticalBullet\""
+          "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -981,7 +1284,7 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"auto\" | \"bands\""
+          "\"auto\" | \"hidden\" | \"bands\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1055,7 +1358,7 @@
         "label": "GaugeColorModes",
         "description": [],
         "signature": [
-          "{ readonly palette: \"palette\"; readonly none: \"none\"; }"
+          "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
@@ -1069,7 +1372,7 @@
         "label": "GaugeLabelMajorModes",
         "description": [],
         "signature": [
-          "{ readonly auto: \"auto\"; readonly custom: \"custom\"; readonly none: \"none\"; }"
+          "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
@@ -1083,7 +1386,7 @@
         "label": "GaugeShapes",
         "description": [],
         "signature": [
-          "{ readonly horizontalBullet: \"horizontalBullet\"; readonly verticalBullet: \"verticalBullet\"; }"
+          "{ readonly HORIZONTAL_BULLET: \"horizontalBullet\"; readonly VERTICAL_BULLET: \"verticalBullet\"; readonly ARC: \"arc\"; readonly CIRCLE: \"circle\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
@@ -1097,7 +1400,7 @@
         "label": "GaugeTicksPositions",
         "description": [],
         "signature": [
-          "{ readonly auto: \"auto\"; readonly bands: \"bands\"; }"
+          "{ readonly HIDDEN: \"hidden\"; readonly AUTO: \"auto\"; readonly BANDS: \"bands\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,

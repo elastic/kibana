@@ -9,33 +9,32 @@
 import { i18n } from '@kbn/i18n';
 
 import { visType } from '../types';
-import { prepareLogTable, Dimension } from '../../../../visualizations/common/utils';
+import {
+  prepareLogTable,
+  Dimension,
+  validateAccessor,
+} from '../../../../visualizations/common/utils';
 import { ColorMode } from '../../../../charts/common';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
 
-const validateOptions = (
-  value: string,
-  availableOptions: Record<string, string>,
-  getErrorMessage: () => string
-) => {
-  if (!Object.values(availableOptions).includes(value)) {
-    throw new Error(getErrorMessage());
-  }
-};
-
 const errors = {
-  invalidColorModeError: () =>
-    i18n.translate('expressionMetricVis.function.errors.invalidColorModeError', {
-      defaultMessage: 'Invalid color mode is specified. Supported color modes: {colorModes}',
-      values: { colorModes: Object.values(ColorMode).join(', ') },
-    }),
-  invalidLabelPositionError: () =>
-    i18n.translate('expressionMetricVis.function.errors.invalidLabelPositionError', {
-      defaultMessage:
-        'Invalid label position is specified. Supported label positions: {labelPosition}',
-      values: { labelPosition: Object.values(LabelPosition).join(', ') },
-    }),
+  severalMetricsAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
+      {
+        defaultMessage:
+          'Full background coloring cannot be applied to a visualization with multiple metrics.',
+      }
+    ),
+  splitByBucketAndColorFullBackgroundSpecifiedError: () =>
+    i18n.translate(
+      'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
+      {
+        defaultMessage:
+          'Full background coloring cannot be applied to visualizations that have a bucket specified.',
+      }
+    ),
 };
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
@@ -59,6 +58,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
       help: i18n.translate('expressionMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
+      }),
+      strict: true,
+    },
+    colorFullBackground: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionMetricVis.function.colorFullBackground.help', {
+        defaultMessage: 'Applies the selected background color to the full visualization container',
       }),
     },
     palette: {
@@ -95,9 +102,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Label position',
       }),
       default: LabelPosition.BOTTOM,
+      strict: true,
     },
     metric: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
         defaultMessage: 'metric dimension configuration',
       }),
@@ -105,7 +113,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
     },
     bucket: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionMetricVis.function.bucket.help', {
         defaultMessage: 'bucket dimension configuration',
       }),
@@ -123,8 +131,19 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       throw new Error('Palette must be provided when using percentageMode');
     }
 
-    validateOptions(args.colorMode, ColorMode, errors.invalidColorModeError);
-    validateOptions(args.labelPosition, LabelPosition, errors.invalidLabelPositionError);
+    // currently we can allow colorize full container only for one metric
+    if (args.colorFullBackground) {
+      if (args.bucket) {
+        throw new Error(errors.splitByBucketAndColorFullBackgroundSpecifiedError());
+      }
+
+      if (args.metric.length > 1 || input.rows.length > 1) {
+        throw new Error(errors.severalMetricsAndColorFullBackgroundSpecifiedError());
+      }
+    }
+
+    args.metric.forEach((metric) => validateAccessor(metric, input.columns));
+    validateAccessor(args.bucket, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
@@ -143,7 +162,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           }),
         ]);
       }
-      const logTable = prepareLogTable(input, argsTable);
+      const logTable = prepareLogTable(input, argsTable, true);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
@@ -165,6 +184,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
                 ...args.labelFont,
               },
             },
+            colorFullBackground: args.colorFullBackground,
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,

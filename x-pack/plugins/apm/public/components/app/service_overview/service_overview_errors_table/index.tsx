@@ -15,11 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -58,9 +56,6 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
-  const {
-    urlParams: { comparisonType, comparisonEnabled },
-  } = useLegacyUrlParams();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -72,18 +67,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/overview');
+  const { query } = useApmParams('/services/{serviceName}/overview');
+
+  const { environment, kuery, rangeFrom, rangeTo, offset, comparisonEnabled } =
+    query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
@@ -131,8 +120,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       pageIndex,
       direction,
       field,
-      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
-      comparisonType,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
@@ -142,6 +131,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end) {
@@ -159,8 +149,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
+                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }
@@ -173,10 +162,15 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     { preservePreviousData: false }
   );
 
+  const errorGroupDetailedStatisticsLoading =
+    errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING;
+
   const columns = getColumns({
     serviceName,
+    errorGroupDetailedStatisticsLoading,
     errorGroupDetailedStatistics,
     comparisonEnabled,
+    query,
   });
 
   return (
@@ -197,7 +191,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ErrorOverviewLink serviceName={serviceName}>
+            <ErrorOverviewLink serviceName={serviceName} query={query}>
               {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
                 defaultMessage: 'View errors',
               })}
@@ -239,7 +233,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               pageSize: PAGE_SIZE,
               totalItemCount: totalItems,
               pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
+              showPerPageOptions: false,
             }}
             loading={status === FETCH_STATUS.LOADING}
             onChange={(newTableOptions: {

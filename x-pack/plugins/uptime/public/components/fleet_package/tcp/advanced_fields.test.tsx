@@ -24,13 +24,15 @@ describe('<TCPAdvancedFields />', () => {
   const WrappedComponent = ({
     defaultValues = defaultConfig,
     children,
+    onFieldBlur,
   }: {
     defaultValues?: TCPAdvancedFieldsType;
     children?: React.ReactNode;
+    onFieldBlur?: (field: ConfigKey) => void;
   }) => {
     return (
       <TCPAdvancedFieldsContextProvider defaultValues={defaultValues}>
-        <TCPAdvancedFields>{children}</TCPAdvancedFields>
+        <TCPAdvancedFields onFieldBlur={onFieldBlur}>{children}</TCPAdvancedFields>
       </TCPAdvancedFieldsContextProvider>
     );
   };
@@ -57,6 +59,17 @@ describe('<TCPAdvancedFields />', () => {
 
     fireEvent.change(requestPayload, { target: { value: 'success' } });
     expect(requestPayload.value).toEqual('success');
+  });
+
+  it('calls onBlur on fields', () => {
+    const onFieldBlur = jest.fn();
+    const { getByLabelText } = render(<WrappedComponent onFieldBlur={onFieldBlur} />);
+
+    const requestPayload = getByLabelText('Request payload') as HTMLInputElement;
+
+    fireEvent.change(requestPayload, { target: { value: 'success' } });
+    fireEvent.blur(requestPayload);
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.REQUEST_SEND_CHECK);
   });
 
   it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {

@@ -25,7 +25,8 @@ export const useMonitorManagementBreadcrumbs = ({
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
-      href: isAddMonitor || isEditMonitor ? `${appPath}/${MONITOR_MANAGEMENT_ROUTE}` : undefined,
+      href:
+        isAddMonitor || isEditMonitor ? `${appPath}/${MONITOR_MANAGEMENT_ROUTE}/all` : undefined,
     },
     ...(isAddMonitor
       ? [
@@ -47,7 +48,7 @@ export const useMonitorManagementBreadcrumbs = ({
 export const MONITOR_MANAGEMENT_CRUMB = i18n.translate(
   'xpack.uptime.monitorManagement.monitorManagementCrumb',
   {
-    defaultMessage: 'Monitor management',
+    defaultMessage: 'Monitor Management',
   }
 );
 

@@ -14,8 +14,10 @@ properties:
   package_version:
     type: string
   last_activity_ms:
-    type: string
+    type: number
   size_in_bytes:
+    type: number
+  size_in_bytes_formatted:
     type: string
   dashboard:
     type: array

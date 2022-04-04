@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -19,13 +19,15 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { Direction } from '../../../../../timelines/common';
-import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
-import { HostRiskScoreFields } from '../../../../common/search_strategy';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+
+import { buildHostNamesFilter, RiskScoreFields } from '../../../../common/search_strategy';
+
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { HostsComponentsQueryProps } from '../../pages/navigation/types';
 
 import { RuleLink } from '../../../detections/pages/detection_engine/rules/all/use_columns';
+import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export interface TopHostScoreContributorsProps
   extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
@@ -36,7 +38,7 @@ export interface TopHostScoreContributorsProps
 interface TableItem {
   rank: number;
   name: string;
-  id?: string; // TODO Remove the '?' when the new transform is delivered
+  id: string;
 }
 
 const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
@@ -74,16 +76,29 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     [from, to]
   );
 
-  const sort = useMemo(
-    () => ({ field: HostRiskScoreFields.timestamp, direction: Direction.desc }),
-    []
+  const sort = useMemo(() => ({ field: RiskScoreFields.timestamp, direction: Direction.desc }), []);
+
+  const { toggleStatus, setToggleStatus } = useQueryToggle(QUERY_ID);
+  const [querySkip, setQuerySkip] = useState(!toggleStatus);
+  useEffect(() => {
+    setQuerySkip(!toggleStatus);
+  }, [toggleStatus]);
+
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
   );
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     timerange,
     onlyLatest: false,
     sort,
+    skip: querySkip,
     pagination: {
       querySize: 1,
       cursorStart: 0,
@@ -100,7 +115,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
   const tablePagination = useMemo(
     () => ({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageSize: PAGE_SIZE,
       totalItemCount: items.length,
     }),
@@ -121,24 +136,37 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
       <EuiPanel hasBorder data-test-subj="topHostScoreContributors">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
-            <HeaderSection title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} hideSubtitle />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <InspectButton queryId={QUERY_ID} title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem grow={1}>
-            <EuiInMemoryTable
-              items={items}
-              columns={columns}
-              pagination={tablePagination}
-              loading={loading}
+            <HeaderSection
+              height={!toggleStatus ? 40 : undefined}
+              title={i18n.TOP_RISK_SCORE_CONTRIBUTORS}
+              hideSubtitle
+              toggleQuery={toggleQuery}
+              toggleStatus={toggleStatus}
             />
           </EuiFlexItem>
+          {toggleStatus && (
+            <EuiFlexItem grow={false}>
+              <InspectButton queryId={QUERY_ID} title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
+
+        {toggleStatus && (
+          <EuiFlexGroup
+            data-test-subj="topHostScoreContributors-table"
+            gutterSize="none"
+            direction="column"
+          >
+            <EuiFlexItem grow={1}>
+              <EuiInMemoryTable
+                items={items}
+                columns={columns}
+                pagination={tablePagination}
+                loading={loading}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
     </InspectButtonContainer>
   );

@@ -68,7 +68,7 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
 
-    ['host.name', 'user.name', 'Rule type', 'query'].forEach((fieldId) => {
+    ['host.name', 'user.name', 'Rule type', 'query', 'Source event id'].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });
@@ -129,7 +129,7 @@ describe('AlertSummaryView', () => {
     });
   });
 
-  test('DNS event renders the correct summary rows', () => {
+  test('DNS network event renders the correct summary rows', () => {
     const renderProps = {
       ...props,
       data: [
@@ -137,8 +137,8 @@ describe('AlertSummaryView', () => {
           if (item.category === 'event' && item.field === 'event.category') {
             return {
               ...item,
-              values: ['dns'],
-              originalValue: ['dns'],
+              values: ['network'],
+              originalValue: ['network'],
             };
           }
           return item;
@@ -324,6 +324,39 @@ describe('AlertSummaryView', () => {
     });
   });
 
+  test('[legacy] Machine learning events show correct fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['machine_learning'],
+            originalValue: ['machine_learning'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'signal',
+        field: 'signal.rule.machine_learning_job_id',
+        values: ['i_am_the_ml_job_id'],
+      },
+      { category: 'signal', field: 'signal.rule.anomaly_threshold', values: [2] },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['i_am_the_ml_job_id', 'signal.rule.anomaly_threshold'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test('Threat match events show correct fields', () => {
     const enhancedData = [
       ...mockAlertDetailsData.map((item) => {
@@ -338,10 +371,51 @@ describe('AlertSummaryView', () => {
       }),
       {
         category: 'kibana',
-        field: 'kibana.alert.rule.threat_index',
+        field: 'kibana.alert.rule.parameters.threat_index',
         values: ['threat_index*'],
       },
-      { category: 'kibana', field: 'kibana.alert.rule.threat_query', values: ['*query*'] },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.parameters.threat_query',
+        values: ['*query*'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    ['threat_index*', '*query*'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('[legacy] Threat match events show correct fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threat_match'],
+            originalValue: ['threat_match'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'signal',
+        field: 'signal.rule.threat_index',
+        values: ['threat_index*'],
+      },
+      {
+        category: 'signal',
+        field: 'signal.rule.threat_query',
+        values: ['*query*'],
+      },
     ] as TimelineEventsDetailsItem[];
     const renderProps = {
       ...props,

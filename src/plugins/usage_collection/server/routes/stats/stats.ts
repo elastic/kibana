@@ -15,7 +15,6 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
-  KibanaRequest,
   MetricsServiceSetup,
   SavedObjectsClientContract,
   ServiceStatus,
@@ -55,10 +54,9 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest
+    savedObjectsClient: SavedObjectsClientContract
   ): Promise<UsageObject> => {
-    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
+    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient);
     return collectorSet.toObject(usage);
   };
 
@@ -97,7 +95,7 @@ export function registerStatsRoute({
 
         const [usage, clusterUuid] = await Promise.all([
           shouldGetUsage
-            ? getUsage(asCurrentUser, savedObjectsClient, req)
+            ? getUsage(asCurrentUser, savedObjectsClient)
             : Promise.resolve<UsageObject>({}),
           getClusterUuid(asCurrentUser),
         ]);

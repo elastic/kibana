@@ -13,12 +13,137 @@
             "rule_risk": 42
           }
         ]
-      },      
+      },
       "host":{
         "name":"siem-kibana"
       },
       "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
       "risk":"Low"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb71f",
+    "index":"ml_host_risk_score_latest_default",
+    "source":{
+      "@timestamp":"2021-03-10T14:51:05.766Z",
+      "risk_stats": {
+        "risk_score": 50,
+        "rule_risks": [
+          {
+            "rule_name": "Unusual Linux Username",
+            "rule_risk": 42
+          }
+        ]
+      },
+      "host":{
+        "name":"fake-1"
+      },
+      "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
+      "risk":"Moderate"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb72f",
+    "index":"ml_host_risk_score_latest_default",
+    "source":{
+      "@timestamp":"2021-03-10T14:51:05.766Z",
+      "risk_stats": {
+        "risk_score": 50,
+        "rule_risks": [
+          {
+            "rule_name": "Unusual Linux Username",
+            "rule_risk": 42
+          }
+        ]
+      },
+      "host":{
+        "name":"fake-2"
+      },
+      "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
+      "risk":"Moderate"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb73f",
+    "index":"ml_host_risk_score_latest_default",
+    "source":{
+      "@timestamp":"2021-03-10T14:51:05.766Z",
+      "risk_stats": {
+        "risk_score": 50,
+        "rule_risks": [
+          {
+            "rule_name": "Unusual Linux Username",
+            "rule_risk": 42
+          }
+        ]
+      },
+      "host":{
+        "name":"fake-3"
+      },
+      "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
+      "risk":"Moderate"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f",
+    "index":"ml_host_risk_score_latest_default",
+    "source":{
+      "@timestamp":"2021-03-10T14:51:05.766Z",
+      "risk_stats": {
+        "risk_score": 50,
+        "rule_risks": [
+          {
+            "rule_name": "Unusual Linux Username",
+            "rule_risk": 42
+          }
+        ]
+      },
+      "host":{
+        "name":"fake-4"
+      },
+      "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
+      "risk":"Moderate"
+    }
+  }
+}
+
+{
+  "type":"doc",
+  "value":{
+    "id":"a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb75f",
+    "index":"ml_host_risk_score_latest_default",
+    "source":{
+      "@timestamp":"2021-03-10T14:51:05.766Z",
+      "risk_stats": {
+        "risk_score": 50,
+        "rule_risks": [
+          {
+            "rule_name": "Unusual Linux Username",
+            "rule_risk": 42
+          }
+        ]
+      },
+      "host":{
+        "name":"fake-5"
+      },
+      "ingest_timestamp":"2021-03-09T18:02:08.319296053Z",
+      "risk":"Moderate"
     }
   }
 }
@@ -38,7 +163,7 @@
             "rule_risk": 42
           }
         ]
-      },      
+      },
       "host":{
         "name":"siem-kibana"
       },

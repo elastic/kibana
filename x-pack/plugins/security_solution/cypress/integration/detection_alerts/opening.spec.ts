@@ -21,7 +21,7 @@ import {
   selectNumberOfAlerts,
   waitForAlerts,
 } from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -29,11 +29,11 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe.skip('Opening alerts', () => {
+describe('Opening alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(ALERTS_URL);
-    createCustomRuleActivated(getNewRule());
+    createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate(500);
     selectNumberOfAlerts(5);

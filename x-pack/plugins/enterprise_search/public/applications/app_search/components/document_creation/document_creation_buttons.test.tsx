@@ -15,7 +15,7 @@ import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiText } from '@elastic/eui';
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 
@@ -34,7 +34,7 @@ describe('DocumentCreationButtons', () => {
   it('renders', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
-    expect(wrapper.find(EuiCard)).toHaveLength(3);
+    expect(wrapper.find(EuiCard)).toHaveLength(2);
     expect(wrapper.find(EuiCardTo)).toHaveLength(1);
   });
 
@@ -45,16 +45,19 @@ describe('DocumentCreationButtons', () => {
     expect(wrapper.find(EuiCardTo).prop('isDisabled')).toEqual(true);
   });
 
+  it('renders with flyoutHeader', () => {
+    const wrapper = shallow(<DocumentCreationButtons isFlyout />);
+
+    expect(wrapper.find(EuiText)).toHaveLength(1);
+  });
+
   it('opens the DocumentCreationFlyout on click', () => {
     const wrapper = shallow(<DocumentCreationButtons />);
 
     wrapper.find(EuiCard).at(0).simulate('click');
-    expect(actions.openDocumentCreation).toHaveBeenCalledWith('text');
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('json');
 
     wrapper.find(EuiCard).at(1).simulate('click');
-    expect(actions.openDocumentCreation).toHaveBeenCalledWith('file');
-
-    wrapper.find(EuiCard).at(2).simulate('click');
     expect(actions.openDocumentCreation).toHaveBeenCalledWith('api');
   });
 
@@ -64,12 +67,12 @@ describe('DocumentCreationButtons', () => {
     expect(wrapper.find(EuiCardTo).prop('to')).toEqual('/engines/some-engine/crawler');
   });
 
-  it('calls openDocumentCreation("file") if ?method=json', () => {
+  it('calls openDocumentCreation("json") if ?method=json', () => {
     const search = '?method=json';
     (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
 
     shallow(<DocumentCreationButtons />);
-    expect(actions.openDocumentCreation).toHaveBeenCalledWith('file');
+    expect(actions.openDocumentCreation).toHaveBeenCalledWith('json');
   });
 
   it('calls openDocumentCreation("api") if ?method=api', () => {

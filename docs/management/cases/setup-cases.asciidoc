@@ -1,0 +1,28 @@
+[[setup-cases]]
+== Configure access to cases
+
+preview::[]
+
+To access cases in *{stack-manage-app}*, you must have the appropriate {kib}
+privileges:
+
+[options="header"]
+|=== 
+
+| Action | {kib} privileges
+| Give full access to manage cases 
+a|
+* `All` for the *Cases* feature under *Management*.
+* `All` for the *Actions and Connectors* feature under *Management*.
+
+NOTE: The `All` *Actions and Connectors* feature privilege is required to
+create, add, delete, and modify case connectors and to send updates to external
+systems.
+
+| Give view-only access for cases | `Read` for the *Cases* feature under *Management*.
+
+| Revoke all access to cases | `None` for the *Cases* feature under *Management*.
+
+|=== 
+
+For more details, refer to <<kibana-privileges>>.

@@ -161,7 +161,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {isCaseModalOpen &&
-        cases.getAllCasesSelectorModal({
+        cases.ui.getAllCasesSelectorModal({
           onRowClick,
           userCanCrud: userPermissions?.crud ?? false,
           owner: [APP_ID],

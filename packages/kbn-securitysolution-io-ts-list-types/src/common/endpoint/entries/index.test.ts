@@ -20,7 +20,7 @@ import { getEndpointEntryNestedMock } from '../entry_nested/index.mock';
 import { getEndpointEntriesArrayMock } from './index.mock';
 import { getEntryListMock } from '../../entries_list/index.mock';
 import { getEntryExistsMock } from '../../entries_exist/index.mock';
-import { getEndpointEntryMatchWildcard } from '../entry_match_wildcard/index.mock';
+import { getEndpointEntryMatchWildcardMock } from '../entry_match_wildcard/index.mock';
 
 describe('Endpoint', () => {
   describe('entriesArray', () => {
@@ -101,7 +101,7 @@ describe('Endpoint', () => {
     });
 
     test('it should validate an array with wildcard entry', () => {
-      const payload = [getEndpointEntryMatchWildcard()];
+      const payload = [getEndpointEntryMatchWildcardMock()];
       const decoded = endpointEntriesArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 

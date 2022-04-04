@@ -277,19 +277,3 @@ For other types of month over month calculations, use <<timelion, *Timelion*>> o
 Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
 *TSVB* requires that the duration is pre-calculated.
 ====
-
-[discrete]
-[group-on-multiple-fields]
-.*How do I group on multiple fields?*
-[%collapsible]
-====
-
-To group with multiple fields, create runtime fields in the {data-source} you are visualizing.
-
-. Create a runtime field. Refer to <<managing-data-views, Manage data views>> for more information.
-+
-[role="screenshot"]
-image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
-
-. Create a *TSVB* visualization and group by this field.
-====

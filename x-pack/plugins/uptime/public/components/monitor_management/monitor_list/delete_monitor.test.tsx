@@ -26,7 +26,7 @@ describe('<Actions />', () => {
     useFetcher.mockImplementation(originalUseFetcher);
     const deleteMonitor = jest.spyOn(fetchers, 'deleteMonitor');
     const id = 'test-id';
-    render(<DeleteMonitor id={id} onUpdate={onUpdate} />);
+    render(<DeleteMonitor id={id} name="sample name" onUpdate={onUpdate} />);
 
     expect(deleteMonitor).not.toBeCalled();
 
@@ -39,7 +39,8 @@ describe('<Actions />', () => {
 
   it('calls set refresh when deletion is successful', () => {
     const id = 'test-id';
-    render(<Actions id={id} onUpdate={onUpdate} />);
+    const name = 'sample monitor';
+    render(<Actions id={id} name={name} onUpdate={onUpdate} monitors={[]} />);
 
     userEvent.click(screen.getByLabelText('Delete monitor'));
 
@@ -53,7 +54,7 @@ describe('<Actions />', () => {
       status: FETCH_STATUS.LOADING,
       refetch: () => {},
     });
-    render(<Actions id={id} onUpdate={onUpdate} />);
+    render(<Actions id={id} name="sample name" onUpdate={onUpdate} monitors={[]} />);
 
     expect(screen.getByLabelText('Deleting monitor...')).toBeInTheDocument();
   });

@@ -10,20 +10,35 @@ import { ExpressionValueVisDimension } from '../expression_functions/vis_dimensi
 import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
 import { Datatable, DatatableColumn } from '../../../expressions/common/expression_types/specs';
 
-export type Dimension = [
-  Array<ExpressionValueVisDimension | ExpressionValueXYDimension> | undefined,
-  string
-];
+type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
+
+export type Dimension = [DimensionColumn[] | undefined, string];
 
 const isColumnEqualToAccessor = (
   column: DatatableColumn,
   columnIndex: number,
-  accessor: ExpressionValueVisDimension['accessor'] | ExpressionValueXYDimension['accessor']
+  accessor:
+    | ExpressionValueVisDimension['accessor']
+    | ExpressionValueXYDimension['accessor']
+    | string
 ) => {
+  if (typeof accessor === 'string') {
+    return accessor === column.id;
+  }
+
   if (typeof accessor === 'number') {
     return accessor === columnIndex;
   }
+
   return accessor.id === column.id;
+};
+
+const getAccessorFromDimension = (dimension: DimensionColumn) => {
+  if (typeof dimension === 'string') {
+    return dimension;
+  }
+
+  return dimension.accessor;
 };
 
 const getDimensionName = (
@@ -32,23 +47,33 @@ const getDimensionName = (
   dimensions: Dimension[]
 ) => {
   for (const dimension of dimensions) {
-    if (dimension[0]?.find((d) => isColumnEqualToAccessor(column, columnIndex, d.accessor))) {
+    if (
+      dimension[0]?.find((d) =>
+        isColumnEqualToAccessor(column, columnIndex, getAccessorFromDimension(d))
+      )
+    ) {
       return dimension[1];
     }
   }
 };
 
-export const prepareLogTable = (datatable: Datatable, dimensions: Dimension[]) => {
+export const prepareLogTable = (
+  datatable: Datatable,
+  dimensions: Dimension[],
+  removeUnmappedColumns: boolean = false
+) => {
   return {
     ...datatable,
-    columns: datatable.columns.map((column, columnIndex) => {
-      return {
-        ...column,
-        meta: {
-          ...column.meta,
-          dimensionName: getDimensionName(column, columnIndex, dimensions),
-        },
-      };
-    }),
+    columns: datatable.columns
+      .map((column, columnIndex) => {
+        return {
+          ...column,
+          meta: {
+            ...column.meta,
+            dimensionName: getDimensionName(column, columnIndex, dimensions),
+          },
+        };
+      })
+      .filter((column) => !removeUnmappedColumns || column.meta.dimensionName),
   };
 };

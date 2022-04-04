@@ -24,6 +24,7 @@ import terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
+import zlib from 'zlib';
 
 import { Task, write } from '../lib';
 
@@ -55,21 +56,29 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     log.debug('Minify JS');
     await asyncPipeline(
       vfs.src(['**/*.js'], { cwd: assetDir }),
-      gulpTerser({ compress: true, mangle: true }, terser.minify),
+      gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
       vfs.dest(assetDir)
     );
 
     log.debug('Brotli compress');
     await asyncPipeline(
       vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpBrotli(),
+      gulpBrotli({
+        params: {
+          [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+        },
+      }),
       vfs.dest(assetDir)
     );
 
     log.debug('GZip compress');
     await asyncPipeline(
       vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpGzip(),
+      gulpGzip({
+        gzipOptions: {
+          level: 9,
+        },
+      }),
       vfs.dest(assetDir)
     );
   } finally {

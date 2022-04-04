@@ -74,6 +74,7 @@ async function fetchTemplates(
   const response = isLegacy
     ? await client.indices.getTemplate({}, options)
     : await client.indices.getIndexTemplate({}, options);
+  // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
   return response;
 }
 

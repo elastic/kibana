@@ -44,7 +44,6 @@ export const mapping = {
   created_at: { type: 'date' },
   started_at: { type: 'date' },
   completed_at: { type: 'date' },
-  error_code: { type: 'keyword' },
   attempts: { type: 'short' },
   max_attempts: { type: 'short' },
   kibana_name: { type: 'keyword' },
@@ -54,6 +53,7 @@ export const mapping = {
   output: {
     type: 'object',
     properties: {
+      error_code: { type: 'keyword' },
       chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },

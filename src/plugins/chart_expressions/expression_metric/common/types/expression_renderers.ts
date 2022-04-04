@@ -20,8 +20,8 @@ import { LabelPosition } from '../constants';
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metrics: ExpressionValueVisDimension[];
-  bucket?: ExpressionValueVisDimension;
+  metrics: Array<ExpressionValueVisDimension | string>;
+  bucket?: ExpressionValueVisDimension | string;
 }
 
 export type LabelPositionType = $Values<typeof LabelPosition>;
@@ -36,6 +36,7 @@ export interface MetricVisParam {
   palette?: CustomPaletteState;
   labels: LabelsConfig;
   style: MetricStyle;
+  colorFullBackground: boolean;
   autoScale?: boolean;
 }
 

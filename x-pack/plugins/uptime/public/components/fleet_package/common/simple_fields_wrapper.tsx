@@ -6,23 +6,39 @@
  */
 
 import React from 'react';
-import { ConfigKey, Validation, CommonFields as CommonFieldsType } from '../types';
-import { CommonFields } from '../common/common_fields';
-import { Enabled } from '../common/enabled';
+import { CommonFields } from './common_fields';
+import { Enabled } from './enabled';
+import { CommonFields as CommonFieldsType, ConfigKey, Validation } from '../types';
 
 interface Props {
   validate: Validation;
   onInputChange: ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => void;
+  onFieldBlur?: (field: ConfigKey) => void;
   children: React.ReactNode;
   fields: CommonFieldsType;
 }
 
-export const SimpleFieldsWrapper = ({ validate, onInputChange, children, fields }: Props) => {
+export const SimpleFieldsWrapper = ({
+  validate,
+  onInputChange,
+  onFieldBlur,
+  children,
+  fields,
+}: Props) => {
   return (
     <>
-      <Enabled fields={fields} onChange={onInputChange} />
+      <Enabled
+        fields={fields}
+        onChange={onInputChange}
+        onBlur={() => onFieldBlur?.(ConfigKey.ENABLED)}
+      />
       {children}
-      <CommonFields fields={fields} onChange={onInputChange} validate={validate} />
+      <CommonFields
+        fields={fields}
+        validate={validate}
+        onChange={onInputChange}
+        onFieldBlur={onFieldBlur}
+      />
     </>
   );
 };

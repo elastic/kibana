@@ -19,15 +19,15 @@ while read -r config; do
     else
       export CODE_COVERAGE=''
     fi
-    
+
     echo "--- $ node scripts/jest --config $config"
     rm -f target/jest-coverage/lcov.info
 
     if [[ "$CODE_COVERAGE" == "true" ]]; then
-      node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests \
+      node --max-old-space-size=14336 ./scripts/jest --config="$config" --runInBand --coverage=false --passWithNoTests \
         --coverage --coverageReporters json --coverageDirectory target/jest-coverage
     else
-      node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests
+      node --max-old-space-size=14336 ./scripts/jest --config="$config" --runInBand --coverage=false --passWithNoTests
     fi
     lastCode=$?
 

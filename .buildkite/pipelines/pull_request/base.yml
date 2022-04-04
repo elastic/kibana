@@ -2,6 +2,8 @@ steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
 
   - wait
 
@@ -127,10 +129,10 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
-    parallelism: 2
+    parallelism: 3
     agents:
       queue: n2-4
-    timeout_in_minutes: 90
+    timeout_in_minutes: 120
     key: jest-integration
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
@@ -168,9 +170,16 @@ steps:
     key: storybooks
     timeout_in_minutes: 60
 
+  - command: .buildkite/scripts/steps/build_api_docs.sh
+    label: 'Build API Docs'
+    agents:
+      queue: n2-4
+    key: build_api_docs
+    timeout_in_minutes: 60
+
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
-      queue: n2-2
+      queue: c2-4
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60

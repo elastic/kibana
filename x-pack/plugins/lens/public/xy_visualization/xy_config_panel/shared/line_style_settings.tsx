@@ -7,20 +7,29 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiRange } from '@elastic/eui';
-import { YConfig } from '../../../../common/expressions';
-import { LineStyle } from '../../../../common/expressions/xy_chart';
+import {
+  EuiButtonGroup,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+} from '@elastic/eui';
+import { LineStyle } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+
 import { idPrefix } from '../dimension_editor';
+
+interface LineStyleConfig {
+  lineStyle?: LineStyle;
+  lineWidth?: number;
+}
 
 export const LineStyleSettings = ({
   currentConfig,
   setConfig,
-  accessor,
   isHorizontal,
 }: {
-  currentConfig?: Pick<YConfig, 'lineStyle' | 'lineWidth'>;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
-  accessor: string;
+  currentConfig?: LineStyleConfig;
+  setConfig: (config: LineStyleConfig) => void;
   isHorizontal: boolean;
 }) => {
   return (
@@ -29,60 +38,61 @@ export const LineStyleSettings = ({
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
-          defaultMessage: 'Line style',
+          defaultMessage: 'Line',
         })}
       >
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
-            defaultMessage: 'Line style',
-          })}
-          data-test-subj="lnsXY_line_style"
-          name="lineStyle"
-          buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}solid`,
-              label: i18n.translate('xpack.lens.xyChart.lineStyle.solid', {
-                defaultMessage: 'Solid',
-              }),
-              'data-test-subj': 'lnsXY_line_style_solid',
-            },
-            {
-              id: `${idPrefix}dashed`,
-              label: i18n.translate('xpack.lens.xyChart.lineStyle.dashed', {
-                defaultMessage: 'Dashed',
-              }),
-              'data-test-subj': 'lnsXY_line_style_dashed',
-            },
-            {
-              id: `${idPrefix}dotted`,
-              label: i18n.translate('xpack.lens.xyChart.lineStyle.dotted', {
-                defaultMessage: 'Dotted',
-              }),
-              'data-test-subj': 'lnsXY_line_style_dotted',
-            },
-          ]}
-          idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
-          onChange={(id) => {
-            const newMode = id.replace(idPrefix, '') as LineStyle;
-            setConfig({ forAccessor: accessor, lineStyle: newMode });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.lineThickness.label', {
-          defaultMessage: 'Line thickness',
-        })}
-      >
-        <LineThicknessSlider
-          value={currentConfig?.lineWidth || 1}
-          onChange={(value) => {
-            setConfig({ forAccessor: accessor, lineWidth: value });
-          }}
-        />
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem>
+            <LineThicknessSlider
+              value={currentConfig?.lineWidth || 1}
+              onChange={(value) => {
+                setConfig({ lineWidth: value });
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
+                defaultMessage: 'Line',
+              })}
+              data-test-subj="lnsXY_line_style"
+              name="lineStyle"
+              buttonSize="compressed"
+              options={[
+                {
+                  id: `${idPrefix}solid`,
+                  label: i18n.translate('xpack.lens.xyChart.lineStyle.solid', {
+                    defaultMessage: 'Solid',
+                  }),
+                  'data-test-subj': 'lnsXY_line_style_solid',
+                  iconType: 'lineSolid',
+                },
+                {
+                  id: `${idPrefix}dashed`,
+                  label: i18n.translate('xpack.lens.xyChart.lineStyle.dashed', {
+                    defaultMessage: 'Dashed',
+                  }),
+                  'data-test-subj': 'lnsXY_line_style_dashed',
+                  iconType: 'lineDashed',
+                },
+                {
+                  id: `${idPrefix}dotted`,
+                  label: i18n.translate('xpack.lens.xyChart.lineStyle.dotted', {
+                    defaultMessage: 'Dotted',
+                  }),
+                  'data-test-subj': 'lnsXY_line_style_dotted',
+                  iconType: 'lineDotted',
+                },
+              ]}
+              idSelected={`${idPrefix}${currentConfig?.lineStyle || 'solid'}`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as LineStyle;
+                setConfig({ lineStyle: newMode });
+              }}
+              isIconOnly
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );
@@ -108,11 +118,10 @@ const LineThicknessSlider = ({
   const [unsafeValue, setUnsafeValue] = useState<string>(String(value));
 
   return (
-    <EuiRange
-      fullWidth
+    <EuiFieldNumber
       data-test-subj="lnsXYThickness"
       value={unsafeValue}
-      showInput
+      fullWidth
       min={minRange}
       max={maxRange}
       step={1}

@@ -18,6 +18,7 @@ import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { ISearchStartSearchSource } from '../../../../../src/plugins/data/common';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -112,10 +113,12 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services: {
           alertFactory,
           savedObjectsClient: {} as any,
+          uiSettingsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
+          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
         },
         spaceId: 'spaceId',
         state,

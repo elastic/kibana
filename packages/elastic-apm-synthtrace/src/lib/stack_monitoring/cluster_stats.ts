@@ -17,13 +17,13 @@ export class ClusterStats extends Serializable<StackMonitoringFields> {
     this.fields['license.status'] = 'active';
   }
 
-  timestamp(timestamp: number) {
+  timestamp(timestamp: number): this {
     super.timestamp(timestamp);
     this.fields['cluster_stats.timestamp'] = new Date(timestamp).toISOString();
     return this;
   }
 
-  indices(count: number) {
+  indices(count: number): this {
     this.fields['cluster_stats.indices.count'] = count;
     return this;
   }

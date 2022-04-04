@@ -31,11 +31,12 @@ import {
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
-export const activatesRule = () => {
-  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
+export const enablesRule = () => {
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then(({ response }) => {
+  cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
@@ -91,7 +92,12 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXCEPTIONS_TAB).trigger('click');
+      return $el.find(ADD_EXCEPTIONS_BTN);
+    })
+    .should('be.visible');
 };
 
 export const removeException = () => {

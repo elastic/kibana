@@ -8,9 +8,15 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IconType } from '@elastic/eui';
+import {
+  IconType,
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -22,43 +28,54 @@ import {
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
-  AlertActionParam,
-  SanitizedAlert as SanitizedRule,
+  RuleActionParam,
+  SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  AlertAction,
-  AlertAggregations,
+  RuleAction,
+  RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
-  RuleTaskStateWithActions,
-  AlertSummary,
+  AlertSummary as RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
 } from '../../alerting/common';
+import { RuleRegistrySearchRequestPagination } from '../../rule_registry/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
-type Rule = SanitizedRule<RuleTypeParams>;
-type ResolvedRule = ResolvedSanitizedRule<RuleTypeParams>;
+type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+  AlertingSanitizedRule<Params>,
+  'alertTypeId'
+> & {
+  ruleTypeId: AlertingSanitizedRule['alertTypeId'];
+};
+type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+  ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+};
+type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
+};
 
 export type {
   Rule,
-  AlertAction,
-  AlertAggregations,
+  RuleAction,
+  RuleAggregations,
   RuleTaskState,
-  RuleTaskStateWithActions,
-  AlertSummary,
+  RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedRule,
+  SanitizedRule,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -95,7 +112,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   isEdit: boolean;
 }
 
-export enum AlertFlyoutCloseReason {
+export enum RuleFlyoutCloseReason {
   SAVED,
   CANCELED,
 }
@@ -103,7 +120,7 @@ export enum AlertFlyoutCloseReason {
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
-  editAction: (key: string, value: AlertActionParam, index: number) => void;
+  editAction: (key: string, value: RuleActionParam, index: number) => void;
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
@@ -224,7 +241,6 @@ export interface RuleType<
     | 'defaultActionGroupId'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
-    | 'minimumScheduleInterval'
     | 'doesSetRecoveryContext'
   > {
   actionVariables: ActionVariables;
@@ -234,14 +250,15 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type AlertUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
 
-export interface AlertTableItem extends Rule {
-  alertType: RuleType['name'];
+export interface RuleTableItem extends Rule {
+  ruleType: RuleType['name'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
+  showIntervalWarning?: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -252,7 +269,7 @@ export interface RuleTypeParamsExpressionProps<
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;
-  alertNotifyWhen: AlertNotifyWhenType;
+  alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setRuleProperty: <Prop extends keyof Rule>(
     key: Prop,
@@ -305,35 +322,81 @@ export interface ConnectorEditFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export interface AlertEditProps<MetaData = Record<string, any>> {
-  initialAlert: Rule;
+export interface RuleEditProps<MetaData = Record<string, any>> {
+  initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
+  reloadRules?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
 
-export interface AlertAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: AlertFlyoutCloseReason) => void;
-  alertTypeId?: string;
+  onClose: (reason: RuleFlyoutCloseReason) => void;
+  ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
-  reloadAlerts?: () => Promise<void>;
+  reloadRules?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
+  filteredSolutions?: string[] | undefined;
 }
 
 export enum Percentiles {
   P50 = 'P50',
   P95 = 'P95',
   P99 = 'P99',
+}
+
+export interface TriggersActionsUiConfig {
+  minimumScheduleInterval?: {
+    value: string;
+    enforce: boolean;
+  };
+}
+
+export type AlertsData = Record<string, any[]>;
+
+export interface FetchAlertData {
+  activePage: number;
+  alerts: AlertsData[];
+  alertsCount: number;
+  isInitializing: boolean;
+  isLoading: boolean;
+  getInspectQuery: () => { request: {}; response: {} };
+  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
+  refresh: () => void;
+}
+
+export interface BulkActionsObjectProp {
+  alertStatusActions?: boolean;
+  onAlertStatusActionSuccess?: void;
+  onAlertStatusActionFailure?: void;
+}
+
+export interface AlertsTableProps {
+  consumers: AlertConsumers[];
+  bulkActions: BulkActionsObjectProp;
+  columns: EuiDataGridColumn[];
+  // defaultCellActions: TGridCellAction[];
+  deletedEventIds: string[];
+  disabledCellActions: string[];
+  pageSize: number;
+  pageSizeOptions: number[];
+  leadingControlColumns: EuiDataGridControlColumn[];
+  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
+  showCheckboxes: boolean;
+  trailingControlColumns: EuiDataGridControlColumn[];
+  useFetchAlertsData: () => FetchAlertData;
+  'data-test-subj': string;
 }

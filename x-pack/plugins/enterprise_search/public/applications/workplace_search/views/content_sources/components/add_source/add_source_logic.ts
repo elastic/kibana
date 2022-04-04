@@ -10,7 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { keys, pickBy } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { HttpFetchQuery } from 'src/core/public';
 
 import {
   flashAPIErrors,
@@ -21,20 +20,18 @@ import {
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
-import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
-import {
-  SOURCES_PATH,
-  ADD_GITHUB_PATH,
-  PRIVATE_SOURCES_PATH,
-  getSourcesPath,
-} from '../../../../routes';
-import { CustomSource } from '../../../../types';
+import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
-import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
 
+import {
+  ExternalConnectorLogic,
+  isValidExternalUrl,
+} from './add_external_connector/external_connector_logic';
+
 export interface AddSourceProps {
-  sourceIndex: number;
+  sourceData: SourceDataItem;
   connect?: boolean;
   configure?: boolean;
   reAuthenticate?: boolean;
@@ -45,10 +42,9 @@ export enum AddSourceSteps {
   SaveConfigStep = 'Save Config',
   ConfigCompletedStep = 'Config Completed',
   ConnectInstanceStep = 'Connect Instance',
-  ConfigureCustomStep = 'Configure Custom',
   ConfigureOauthStep = 'Configure Oauth',
-  SaveCustomStep = 'Save Custom',
   ReauthenticateStep = 'Reauthenticate',
+  ChoiceStep = 'Choice',
 }
 
 export interface OauthParams {
@@ -71,12 +67,10 @@ export interface AddSourceActions {
   setClientIdValue(clientIdValue: string): string;
   setClientSecretValue(clientSecretValue: string): string;
   setBaseUrlValue(baseUrlValue: string): string;
-  setCustomSourceNameValue(customSourceNameValue: string): string;
   setSourceLoginValue(loginValue: string): string;
   setSourcePasswordValue(passwordValue: string): string;
   setSourceSubdomainValue(subdomainValue: string): string;
   setSourceIndexPermissionsValue(indexPermissionsValue: boolean): boolean;
-  setCustomSourceData(data: CustomSource): CustomSource;
   setPreContentSourceConfigData(data: PreContentSourceResponse): PreContentSourceResponse;
   setPreContentSourceId(preContentSourceId: string): string;
   setSelectedGithubOrganizations(option: string): string;
@@ -119,6 +113,8 @@ export interface SourceConfigData {
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
+    externalConnectorUrl?: string;
+    externalConnectorApiKey?: string;
   };
   accountContextOnly?: boolean;
 }
@@ -132,13 +128,12 @@ export interface OrganizationsMap {
   [key: string]: string | boolean;
 }
 
-interface AddSourceValues {
+export interface AddSourceValues {
   addSourceProps: AddSourceProps;
   addSourceCurrentStep: AddSourceSteps;
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
-  customSourceNameValue: string;
   clientIdValue: string;
   clientSecretValue: string;
   baseUrlValue: string;
@@ -148,7 +143,6 @@ interface AddSourceValues {
   indexPermissionsValue: boolean;
   sourceConfigData: SourceConfigData;
   sourceConnectData: SourceConnectData;
-  newCustomSource: CustomSource;
   currentServiceType: string;
   githubOrganizations: string[];
   selectedGithubOrganizationsMap: OrganizationsMap;
@@ -163,15 +157,6 @@ interface PreContentSourceResponse {
   githubOrganizations: string[];
 }
 
-/**
- * Workplace Search needs to know the host for the redirect. As of yet, we do not
- * have access to this in Kibana. We parse it from the browser and pass it as a param.
- */
-const {
-  location: { href },
-} = window;
-const kibanaHost = href.substr(0, href.indexOf(WORKPLACE_SEARCH_URL_PREFIX));
-
 export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
   actions: {
@@ -185,12 +170,10 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setClientIdValue: (clientIdValue: string) => clientIdValue,
     setClientSecretValue: (clientSecretValue: string) => clientSecretValue,
     setBaseUrlValue: (baseUrlValue: string) => baseUrlValue,
-    setCustomSourceNameValue: (customSourceNameValue: string) => customSourceNameValue,
     setSourceLoginValue: (loginValue: string) => loginValue,
     setSourcePasswordValue: (passwordValue: string) => passwordValue,
     setSourceSubdomainValue: (subdomainValue: string) => subdomainValue,
     setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
-    setCustomSourceData: (data: CustomSource) => data,
     setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
     setPreContentSourceId: (preContentSourceId: string) => preContentSourceId,
     setSelectedGithubOrganizations: (option: string) => option,
@@ -249,6 +232,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
+        getSourceConfigData: () => true,
       },
     ],
     buttonLoading: [
@@ -322,20 +306,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         resetSourceState: () => false,
       },
     ],
-    customSourceNameValue: [
-      '',
-      {
-        setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
-        resetSourceState: () => '',
-      },
-    ],
-    newCustomSource: [
-      {} as CustomSource,
-      {
-        setCustomSourceData: (_, newCustomSource) => newCustomSource,
-        resetSourceState: () => ({} as CustomSource),
-      },
-    ],
     currentServiceType: [
       '',
       {
@@ -383,7 +353,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   }),
   listeners: ({ actions, values }) => ({
     initializeAddSource: ({ addSourceProps }) => {
-      const { serviceType } = staticSourceData[addSourceProps.sourceIndex];
+      const { serviceType } = addSourceProps.sourceData;
       actions.setAddSourceProps({ addSourceProps });
       actions.setAddSourceStep(getFirstStep(addSourceProps));
       actions.getSourceConfigData(serviceType);
@@ -407,15 +377,21 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/internal/workplace_search/org/sources/${serviceType}/prepare`
         : `/internal/workplace_search/account/sources/${serviceType}/prepare`;
 
-      const query = {
-        kibana_host: kibanaHost,
-      } as HttpFetchQuery;
+      const indexPermissionsQuery = isOrganization
+        ? { index_permissions: indexPermissions }
+        : undefined;
 
-      if (isOrganization) query.index_permissions = indexPermissions;
-      if (subdomain) query.subdomain = subdomain;
+      const query = subdomain
+        ? {
+            ...indexPermissionsQuery,
+            subdomain,
+          }
+        : { ...indexPermissionsQuery };
 
       try {
-        const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
+        const response = await HttpLogic.values.http.get<SourceConnectData>(route, {
+          query,
+        });
         actions.setSourceConnectData(response);
         successCallback(response.oauthUrl);
       } catch (e) {
@@ -430,12 +406,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/internal/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/internal/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
-      const query = {
-        kibana_host: kibanaHost,
-      } as HttpFetchQuery;
-
       try {
-        const response = await HttpLogic.values.http.get<SourceConnectData>(route, { query });
+        const response = await HttpLogic.values.http.get<SourceConnectData>(route);
         actions.setSourceConnectData(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -465,6 +437,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         sourceConfigData,
       } = values;
 
+      const { externalConnectorUrl, externalConnectorApiKey } = ExternalConnectorLogic.values;
+      if (
+        serviceType === 'external' &&
+        externalConnectorUrl &&
+        !isValidExternalUrl(externalConnectorUrl)
+      ) {
+        ExternalConnectorLogic.actions.setUrlValidation(false);
+        actions.setButtonNotLoading();
+        return;
+      }
+
       const route = isUpdating
         ? `/internal/workplace_search/org/settings/connectors/${serviceType}`
         : '/internal/workplace_search/org/settings/connectors';
@@ -479,6 +462,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         private_key: sourceConfigData.configuredFields?.privateKey,
         public_key: sourceConfigData.configuredFields?.publicKey,
         consumer_key: sourceConfigData.configuredFields?.consumerKey,
+        external_connector_url: externalConnectorUrl || undefined,
+        external_connector_api_key: externalConnectorApiKey || undefined,
       };
 
       try {
@@ -507,7 +492,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const { http } = HttpLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
-      const query = { ...params, kibana_host: kibanaHost };
+      const query = { ...params };
       const route = '/internal/workplace_search/sources/create';
 
       /**
@@ -540,7 +525,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
         if (hasConfigureStep && !values.oauthConfigCompleted) {
           actions.setPreContentSourceId(preContentSourceId);
-          navigateToUrl(getSourcesPath(`${ADD_GITHUB_PATH}/configure${search}`, isOrganization));
+          navigateToUrl(
+            getSourcesPath(`${getAddPath('github')}/configure${search}`, isOrganization)
+          );
         } else {
           setAddedSource(serviceName, indexPermissions, serviceType);
           navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
@@ -559,7 +546,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       const {
         selectedGithubOrganizations: githubOrganizations,
-        customSourceNameValue,
         loginValue,
         passwordValue,
         indexPermissionsValue,
@@ -567,7 +553,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       const params = {
         service_type: serviceType,
-        name: customSourceNameValue || undefined,
         login: loginValue || undefined,
         password: passwordValue || undefined,
         organizations: githubOrganizations.length > 0 ? githubOrganizations : undefined,
@@ -580,10 +565,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
 
       try {
-        const response = await HttpLogic.values.http.post<CustomSource>(route, {
+        await HttpLogic.values.http.post(route, {
           body: JSON.stringify({ ...params }),
         });
-        actions.setCustomSourceData(response);
         successCallback();
       } catch (e) {
         flashAPIErrors(e);
@@ -596,13 +580,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 });
 
 const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
-  const { sourceIndex, connect, configure, reAuthenticate } = props;
-  const { serviceType } = staticSourceData[sourceIndex];
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
-
-  if (isCustom) return AddSourceSteps.ConfigureCustomStep;
+  const {
+    connect,
+    configure,
+    reAuthenticate,
+    sourceData: { serviceType },
+  } = props;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
+  // TODO: Re-do this once we have more than one external connector type
+  // External connectors have already shown the intro step before the choice page, so we don't want to show it again
+  if (serviceType === 'external') return AddSourceSteps.SaveConfigStep;
   return AddSourceSteps.ConfigIntroStep;
 };

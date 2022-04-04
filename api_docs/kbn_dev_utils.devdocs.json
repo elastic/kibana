@@ -12,6 +12,154 @@
     "classes": [
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.CiStatsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "CiStatsClient",
+        "description": [],
+        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.fromEnv",
+            "type": "Function",
+            "tags": [],
+            "label": "fromEnv",
+            "description": [
+              "\nCreate a CiStatsReporter by inspecting the ENV for the necessary config"
+            ],
+            "signature": [
+              "(log: ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.CiStatsClient",
+                "text": "CiStatsClient"
+              }
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsClient.fromEnv.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-utils",
+                    "scope": "server",
+                    "docId": "kibKbnDevUtilsPluginApi",
+                    "section": "def-server.Config",
+                    "text": "Config"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.CiStatsClient.getLatestTestGroupStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getLatestTestGroupStats",
+            "description": [],
+            "signature": [
+              "(options: LatestTestGroupStatsOptions) => Promise<LatestTestGroupStatsResp>"
+            ],
+            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-server.CiStatsClient.getLatestTestGroupStats.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "LatestTestGroupStatsOptions"
+                ],
+                "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.CiStatsReporter",
         "type": "Class",
         "tags": [],
@@ -781,11 +929,9 @@
             "type": "Function",
             "tags": [],
             "label": "indent",
-            "description": [
-              "\nIndent the output of the ToolingLog by some character (4 is a good choice usually).\n\nIf provided, the `block` function will be executed and once it's promise is resolved\nor rejected the indentation will be reset to its original state.\n"
-            ],
+            "description": [],
             "signature": [
-              "<T>(delta?: number, block?: (() => Promise<T>) | undefined) => Promise<T> | undefined"
+              "{ (delta: number): undefined; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
             "deprecated": false,
@@ -796,9 +942,7 @@
                 "type": "number",
                 "tags": [],
                 "label": "delta",
-                "description": [
-                  "the number of spaces to increase/decrease the indentation"
-                ],
+                "description": [],
                 "signature": [
                   "number"
                 ],
@@ -812,11 +956,9 @@
                 "type": "Function",
                 "tags": [],
                 "label": "block",
-                "description": [
-                  "a function to run and reset any indentation changes after"
-                ],
+                "description": [],
                 "signature": [
-                  "(() => Promise<T>) | undefined"
+                  "(() => T | Promise<T>) | undefined"
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
                 "deprecated": false,
@@ -1806,6 +1948,53 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-server.diffStrings",
+        "type": "Function",
+        "tags": [],
+        "label": "diffStrings",
+        "description": [
+          "\nProduces a diff string which is nicely formatted to show the differences between two strings. This will\nbe a multi-line string so it's generally a good idea to include a `\\n` before this first line of the diff\nif you are concatenating it with another message."
+        ],
+        "signature": [
+          "(expected: string, received: string) => string | undefined"
+        ],
+        "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.diffStrings.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expected",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-server.diffStrings.$2",
+            "type": "string",
+            "tags": [],
+            "label": "received",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.extract",
         "type": "Function",
         "tags": [],
@@ -2243,44 +2432,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.parseKibanaPlatformPlugin",
-        "type": "Function",
-        "tags": [],
-        "label": "parseKibanaPlatformPlugin",
-        "description": [],
-        "signature": [
-          "(manifestPath: string) => ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.KibanaPlatformPlugin",
-            "text": "KibanaPlatformPlugin"
-          }
-        ],
-        "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.parseKibanaPlatformPlugin.$1",
-            "type": "string",
-            "tags": [],
-            "label": "manifestPath",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.parseLogLevel",
         "type": "Function",
         "tags": [],
@@ -2489,52 +2640,28 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.simpleKibanaPlatformPluginDiscovery",
+        "id": "def-server.sortPackageJson",
         "type": "Function",
         "tags": [],
-        "label": "simpleKibanaPlatformPluginDiscovery",
-        "description": [
-          "\nHelper to find the new platform plugins."
-        ],
+        "label": "sortPackageJson",
+        "description": [],
         "signature": [
-          "(scanDirs: string[], pluginPaths: string[]) => ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.KibanaPlatformPlugin",
-            "text": "KibanaPlatformPlugin"
-          },
-          "[]"
+          "(json: string) => string"
         ],
-        "path": "packages/kbn-dev-utils/src/plugins/simple_kibana_platform_plugin_discovery.ts",
+        "path": "packages/kbn-dev-utils/src/sort_package_json.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.simpleKibanaPlatformPluginDiscovery.$1",
-            "type": "Array",
+            "id": "def-server.sortPackageJson.$1",
+            "type": "string",
             "tags": [],
-            "label": "scanDirs",
+            "label": "json",
             "description": [],
             "signature": [
-              "string[]"
+              "string"
             ],
-            "path": "packages/kbn-dev-utils/src/plugins/simple_kibana_platform_plugin_discovery.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.simpleKibanaPlatformPluginDiscovery.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "pluginPaths",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/simple_kibana_platform_plugin_discovery.ts",
+            "path": "packages/kbn-dev-utils/src/sort_package_json.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2779,36 +2906,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.CiStatsMetadata",
-        "type": "Interface",
-        "tags": [],
-        "label": "CiStatsMetadata",
-        "description": [
-          "Container for metadata that can be attached to different ci-stats objects"
-        ],
-        "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.CiStatsMetadata.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: string | number | boolean | string[] | undefined",
-            "description": [
-              "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
-            ],
-            "signature": [
-              "[key: string]:  string | number | boolean | string[] | undefined"
-            ],
-            "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.CiStatsMetric",
         "type": "Interface",
         "tags": [],
@@ -2895,13 +2992,7 @@
               "Arbitrary key-value pairs which can be used for additional filtering/reporting"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              },
+              "CiStatsMetadata",
               " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
@@ -3036,13 +3127,7 @@
               "\nArbitrary metadata associated with this group. We currently look for a ciGroup metadata property for highlighting that when appropriate"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              }
+              "CiStatsMetadata"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_test_group_types.ts",
             "deprecated": false
@@ -3271,13 +3356,7 @@
               "hash of key-value pairs which will be stored with the timing for additional filtering and reporting"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              },
+              "CiStatsMetadata",
               " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
@@ -3656,52 +3735,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.KibanaPlatformPlugin",
-        "type": "Interface",
-        "tags": [],
-        "label": "KibanaPlatformPlugin",
-        "description": [],
-        "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.KibanaPlatformPlugin.directory",
-            "type": "string",
-            "tags": [],
-            "label": "directory",
-            "description": [],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.KibanaPlatformPlugin.manifestPath",
-            "type": "string",
-            "tags": [],
-            "label": "manifestPath",
-            "description": [],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.KibanaPlatformPlugin.manifest",
-            "type": "Object",
-            "tags": [],
-            "label": "manifest",
-            "description": [],
-            "signature": [
-              "Manifest"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.Message",
         "type": "Interface",
         "tags": [],
@@ -3794,13 +3827,7 @@
               "Default metadata to add to each metric"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.CiStatsMetadata",
-                "text": "CiStatsMetadata"
-              },
+              "CiStatsMetadata",
               " | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",

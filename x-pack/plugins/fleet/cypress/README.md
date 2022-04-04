@@ -81,6 +81,8 @@ Cypress convention. Fixtures are used as external pieces of static data when we 
 
 Cypress convention. As a convenience, by default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs.
 
+We use the plugins file to register [tasks](https://docs.cypress.io/api/commands/task#Syntax) which are helper functions which run in the parent node process instead of the browser. Tasks can be used to make elastic commands for example.
+
 ### screens/
 
 Contains the elements we want to interact with in our tests.

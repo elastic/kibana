@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { difference, first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
 import moment from 'moment';
+import { difference, first, has, isNaN, isNumber, isObject, last, mapValues } from 'lodash';
 import {
   Aggregators,
   Comparator,

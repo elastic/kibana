@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter, DataView, ISearchSource } from 'src/plugins/data/common';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import { DataView } from 'src/plugins/data_views/public';
+import { DataPublicPluginStart, ISearchSource } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';

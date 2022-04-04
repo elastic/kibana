@@ -590,7 +590,7 @@ export function jobsProvider(
 
     if (body.jobs.length) {
       const statsForJob = body.jobs[0];
-      const time = statsForJob.data_counts.latest_record_timestamp;
+      const time = statsForJob.data_counts.latest_record_timestamp!;
       const progress = (time - start) / (end - start);
       const isJobClosed = statsForJob.state === JOB_STATE.CLOSED;
       return {
@@ -631,6 +631,7 @@ export function jobsProvider(
         results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
 
         try {
+          // @ts-expect-error type mismatch on MlPutJobRequest.body
           await mlClient.putJob({ job_id: job.job_id, body: job });
           results[job.job_id].job = { success: true };
         } catch (error) {

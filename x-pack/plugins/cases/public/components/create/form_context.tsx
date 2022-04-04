@@ -19,7 +19,7 @@ import { UsePostComment, usePostComment } from '../../containers/use_post_commen
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
-import { CreateCaseAttachment } from './form';
+import { CaseAttachments } from '../../types';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -35,7 +35,7 @@ interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
-  attachments?: CreateCaseAttachment;
+  attachments?: CaseAttachments;
 }
 
 export const FormContext: React.FC<Props> = ({

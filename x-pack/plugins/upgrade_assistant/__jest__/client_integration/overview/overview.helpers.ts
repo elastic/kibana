@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { Overview } from '../../../public/application/components/overview';
+import { HttpSetup } from 'src/core/public';
+import { Overview } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
@@ -54,9 +55,13 @@ const createActions = (testBed: TestBed) => {
 };
 
 export const setupOverviewPage = async (
+  httpSetup: HttpSetup,
   overrides?: Record<string, unknown>
 ): Promise<OverviewTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(Overview, overrides), testBedConfig);
+  const initTestBed = registerTestBed(
+    WithAppDependencies(Overview, httpSetup, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

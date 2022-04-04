@@ -273,11 +273,17 @@ for an agent policy through Fleet.
 This integration supports x64 architecture on Windows, MacOS, and Linux platforms, 
 and ARM64 architecture on Linux.
 
-NOTE: The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
+[NOTE]
+=========================
+
+* The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
 and the https://docs.elastic.co/en/integrations/osquery[Osquery]
 integration collect logs from self-managed Osquery deployments.
 The *Osquery Manager* integration manages Osquery deployments
 and supports running and scheduling queries from {kib}.
+
+* *Osquery Manager* cannot be integrated with an Elastic Agent in standalone mode.
+=========================
 
 [float]
 === Customize Osquery sub-feature privileges

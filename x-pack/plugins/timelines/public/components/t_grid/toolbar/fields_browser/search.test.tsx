@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockBrowserFields, TestProviders } from '../../../../mock';
+import { TestProviders } from '../../../../mock';
 import { Search } from './search';
 
 const timelineId = 'test';
@@ -17,7 +17,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -37,7 +36,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput={searchInput}
@@ -53,7 +51,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={true}
           onSearchInputChange={jest.fn()}
           searchInput=""
@@ -71,7 +68,6 @@ describe('Search', () => {
     const wrapper = mount(
       <TestProviders>
         <Search
-          filteredBrowserFields={mockBrowserFields}
           isSearching={false}
           onSearchInputChange={onSearchInputChange}
           searchInput=""
@@ -87,73 +83,5 @@ describe('Search', () => {
     wrapper.update();
 
     expect(onSearchInputChange).toBeCalled();
-  });
-
-  test('it returns the expected categories count when filteredBrowserFields is empty', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Search
-          filteredBrowserFields={{}}
-          isSearching={false}
-          onSearchInputChange={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
-      '0 categories'
-    );
-  });
-
-  test('it returns the expected categories count when filteredBrowserFields is NOT empty', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Search
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onSearchInputChange={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
-      '12 categories'
-    );
-  });
-
-  test('it returns the expected fields count when filteredBrowserFields is empty', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Search
-          filteredBrowserFields={{}}
-          isSearching={false}
-          onSearchInputChange={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('0 fields');
-  });
-
-  test('it returns the expected fields count when filteredBrowserFields is NOT empty', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Search
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onSearchInputChange={jest.fn()}
-          searchInput=""
-          timelineId={timelineId}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('34 fields');
   });
 });

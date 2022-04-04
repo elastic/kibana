@@ -35,12 +35,10 @@ import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
-import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import { filterHostData } from './navigation';
 import { hostsModel, hostsSelectors } from '../store';
 import { generateSeverityFilter } from '../store/helpers';
 import { HostsTableType } from '../store/model';
@@ -56,6 +54,9 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { filterHostExternalAlertData } from '../../common/components/visualization_actions/utils';
+import { LandingPageComponent } from '../../common/components/landing_page';
+import { Loader } from '../../common/components/loader';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -100,13 +101,15 @@ const HostsComponent = () => {
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters = React.useMemo(() => {
     if (tabName === HostsTableType.alerts) {
-      return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
+      return filters.length > 0
+        ? [...filters, ...filterHostExternalAlertData]
+        : filterHostExternalAlertData;
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
-      return [...severityFilter, ...filterHostData, ...filters];
+      return [...severityFilter, ...filterHostExternalAlertData, ...filters];
     }
     return filters;
   }, [severitySelection, tabName, filters]);
@@ -126,7 +129,8 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns, loading } =
+    useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -149,6 +153,7 @@ const HostsComponent = () => {
   );
 
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -175,6 +180,10 @@ const HostsComponent = () => {
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+
+  if (loading) {
+    return <Loader data-test-subj="loadingPanelExploreHosts" overlay size="xl" />;
+  }
 
   return (
     <>
@@ -212,7 +221,11 @@ const HostsComponent = () => {
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation
-                navTabs={navTabsHosts(hasMlUserPermissions(capabilities), riskyHostsFeatureEnabled)}
+                navTabs={navTabsHosts({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: riskyHostsFeatureEnabled,
+                  isUsersEnabled: usersEnabled,
+                })}
               />
 
               <EuiSpacer />
@@ -233,9 +246,7 @@ const HostsComponent = () => {
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

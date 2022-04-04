@@ -8,11 +8,12 @@
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
+import { checkA11y } from '../../../support/commands';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 
-const serviceOverviewHref = url.format({
+const serviceTransactionsHref = url.format({
   pathname: '/app/apm/services/opbeans-node/transactions',
   query: { rangeFrom: start, rangeTo: end },
 });
@@ -35,8 +36,19 @@ describe('Transactions Overview', () => {
     cy.loginAsReadOnlyUser();
   });
 
+  it('has no detectable a11y violations on load', () => {
+    cy.visit(serviceTransactionsHref);
+    cy.get('a:contains(Transactions)').should(
+      'have.attr',
+      'aria-selected',
+      'true'
+    );
+    // set skipFailures to true to not fail the test when there are accessibility failures
+    checkA11y({ skipFailures: true });
+  });
+
   it('persists transaction type selected when navigating to Overview tab', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visit(serviceTransactionsHref);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
       'have.value',
       'request'

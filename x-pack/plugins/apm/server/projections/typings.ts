@@ -11,8 +11,9 @@ import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
   body: Omit<
     Required<APMEventESSearchRequest>['body'],
-    'aggs' | 'aggregations'
+    'aggs' | 'aggregations' | 'size'
   > & {
+    size?: number;
     aggs?: {
       [key: string]: {
         terms: AggregationOptionsByType['terms'] & { field: string };

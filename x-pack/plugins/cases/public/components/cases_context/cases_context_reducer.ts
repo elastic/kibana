@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { assertNever } from '@kbn/std';
+import { AllCasesSelectorModalProps } from '../all_cases/selector_modal';
 import { CreateCaseFlyoutProps } from '../create/flyout';
 
 export const getInitialCasesContextState = (): CasesContextState => {
   return {
     createCaseFlyout: {
       isFlyoutOpen: false,
+    },
+    selectCaseModal: {
+      isModalOpen: false,
     },
   };
 };
@@ -20,18 +25,29 @@ export interface CasesContextState {
     isFlyoutOpen: boolean;
     props?: CreateCaseFlyoutProps;
   };
+  selectCaseModal: {
+    isModalOpen: boolean;
+    props?: AllCasesSelectorModalProps;
+  };
 }
 
 export enum CasesContextStoreActionsList {
   OPEN_CREATE_CASE_FLYOUT,
   CLOSE_CREATE_CASE_FLYOUT,
+  OPEN_ADD_TO_CASE_MODAL,
+  CLOSE_ADD_TO_CASE_MODAL,
 }
 export type CasesContextStoreAction =
   | {
       type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT;
       payload: CreateCaseFlyoutProps;
     }
-  | { type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT };
+  | { type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT }
+  | {
+      type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL;
+      payload: AllCasesSelectorModalProps;
+    }
+  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL };
 
 export const casesContextReducer: React.Reducer<CasesContextState, CasesContextStoreAction> = (
   state: CasesContextState,
@@ -44,7 +60,13 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
     case CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT: {
       return { ...state, createCaseFlyout: { isFlyoutOpen: false } };
     }
+    case CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL: {
+      return { ...state, selectCaseModal: { isModalOpen: true, props: action.payload } };
+    }
+    case CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL: {
+      return { ...state, selectCaseModal: { isModalOpen: false } };
+    }
     default:
-      return state;
+      assertNever(action);
   }
 };

@@ -6,23 +6,26 @@
  */
 
 import deepMerge from 'deepmerge';
-import { LogMeta } from 'src/core/server';
-import { LevelLogger } from '../level_logger';
-import { IReportingEventLogger } from './logger';
+import type { Logger, LogMeta } from 'kibana/server';
+import type { IReportingEventLogger } from './logger';
 
 /** @internal */
 export class EcsLogAdapter implements IReportingEventLogger {
   start?: Date;
   end?: Date;
 
+  private logger: Logger;
+
   /**
    * This class provides a logging system to Reporting code, using a shape similar to the EventLog service.
    * The logging action causes ECS data with Reporting metrics sent to DEBUG logs.
    *
-   * @param {LevelLogger} logger - Reporting's wrapper of the core logger
+   * @param {Logger} logger - Reporting's wrapper of the core logger
    * @param {Partial<LogMeta>} properties - initial ECS data with template for Reporting metrics
    */
-  constructor(private logger: LevelLogger, private properties: Partial<LogMeta>) {}
+  constructor(logger: Logger, private properties: Partial<LogMeta>) {
+    this.logger = logger.get('events');
+  }
 
   logEvent(message: string, properties: LogMeta) {
     if (this.start && !this.end) {
@@ -44,7 +47,7 @@ export class EcsLogAdapter implements IReportingEventLogger {
     });
 
     // sends an ECS object with Reporting metrics to the DEBUG logs
-    this.logger.debug(message, ['events'], deepMerge(newProperties, properties));
+    this.logger.debug(message, deepMerge(newProperties, properties));
   }
 
   startTiming() {

@@ -7,7 +7,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
@@ -27,6 +26,7 @@ import {
   FILTER_SELECT_OPTIONS,
   getSelectOptions,
 } from './helper';
+import { SuggestionsSelect } from '../../../../shared/suggestions_select';
 
 export function FiltersSection({
   filters,
@@ -117,15 +117,17 @@ export function FiltersSection({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFieldText
-                data-test-subj={`${key}.value`}
-                fullWidth
+              <SuggestionsSelect
+                dataTestSubj={`${key}.value`}
+                field={key}
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
-                onChange={(e) => onChangeFilter(key, e.target.value, idx)}
-                value={value}
+                onChange={(selectedValue) =>
+                  onChangeFilter(key, selectedValue as string, idx)
+                }
+                defaultValue={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
               />
             </EuiFlexItem>

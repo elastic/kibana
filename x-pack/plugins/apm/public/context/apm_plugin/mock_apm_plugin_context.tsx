@@ -19,6 +19,7 @@ import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { MlLocatorDefinition } from '../../../../ml/public';
+import { enableComparisonByDefault } from '../../../../observability/public';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -52,6 +53,7 @@ const mockCore = merge({}, coreStart, {
           pause: false,
           value: 100000,
         },
+        [enableComparisonByDefault]: true,
       };
       return uiSettings[key];
     },

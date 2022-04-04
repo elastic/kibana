@@ -179,12 +179,19 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
   indexPattern: IndexPattern,
   layer: VisualizeEditorLayersContext
 ): IndexPatternLayer | undefined {
-  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval } = layer;
+  const { timeFieldName, splitMode, splitFilters, metrics, timeInterval, dropPartialBuckets } =
+    layer;
   const dateField = indexPattern.getFieldByName(timeFieldName!);
-  const splitField = layer.splitField ? indexPattern.getFieldByName(layer.splitField) : null;
+
+  const splitFields = layer.splitFields
+    ? (layer.splitFields
+        .map((item) => indexPattern.getFieldByName(item))
+        .filter(Boolean) as IndexPatternField[])
+    : null;
+
   // generate the layer for split by terms
-  if (splitMode === 'terms' && splitField) {
-    return getSplitByTermsLayer(indexPattern, splitField, dateField, layer);
+  if (splitMode === 'terms' && splitFields?.length) {
+    return getSplitByTermsLayer(indexPattern, splitFields, dateField, layer);
     // generate the layer for split by filters
   } else if (splitMode?.includes('filter') && splitFilters && splitFilters.length) {
     return getSplitByFiltersLayer(indexPattern, dateField, layer);
@@ -197,6 +204,10 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
       layer.format,
       layer.label
     );
+    // static values layers do not need a date histogram column
+    if (Object.values(computedLayer.columns)[0].isStaticValue) {
+      return computedLayer;
+    }
 
     return insertNewColumn({
       op: 'date_histogram',
@@ -207,6 +218,7 @@ function createNewTimeseriesLayerWithMetricAggregationFromVizEditor(
       visualizationGroups: [],
       columnParams: {
         interval: timeInterval,
+        dropPartials: dropPartialBuckets,
       },
     });
   }

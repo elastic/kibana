@@ -172,8 +172,7 @@ export const alertStateActionVariableDescription = i18n.translate(
 export const reasonActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.reasonActionVariableDescription',
   {
-    defaultMessage:
-      'A description of why the alert is in this state, including which metrics have crossed which thresholds',
+    defaultMessage: 'A concise description of the reason for the alert',
   }
 );
 
@@ -205,5 +204,13 @@ export const thresholdActionVariableDescription = i18n.translate(
   {
     defaultMessage:
       'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
   }
 );

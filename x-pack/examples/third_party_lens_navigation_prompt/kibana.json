@@ -7,7 +7,6 @@
   "ui": true,
   "requiredPlugins": [
     "lens",
-    "discover",
     "data",
     "dataViews",
     "embeddable",

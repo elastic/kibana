@@ -15,7 +15,6 @@ import {
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'src/core/server';
-import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
 import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { ReportApiJSON, ReportSource } from '../../../common/types';
@@ -61,7 +60,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
   }
 
   async function execQuery<
-    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
+    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
@@ -138,7 +137,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async get(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
-        logger.warning(`No ID provided for GET`);
+        logger.warn(`No ID provided for GET`);
         return;
       }
 
@@ -163,7 +162,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
       const result = response?.hits?.hits?.[0];
       if (!result?._source) {
-        logger.warning(`No hits resulted in search`);
+        logger.warn(`No hits resulted in search`);
         return;
       }
 

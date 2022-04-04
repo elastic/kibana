@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
-import { FramePublicAPI, Operation, VisualizationDimensionEditorProps } from '../../types';
+import {
+  FramePublicAPI,
+  OperationDescriptor,
+  VisualizationDimensionEditorProps,
+} from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -218,7 +222,7 @@ describe('data table dimension editor', () => {
   it('should not show the dynamic coloring option for a bucketed operation', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true } as Operation)
+      () => ({ isBucketed: true } as OperationDescriptor)
     );
     state.columns[0].colorMode = 'cell';
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);

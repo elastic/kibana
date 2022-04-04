@@ -42,4 +42,13 @@ describe('SectionContainer', () => {
       component.getByText('An error happened when trying to fetch data. Please try again')
     ).toBeInTheDocument();
   });
+
+  it('renders section with experimental badge', () => {
+    const component = render(
+      <SectionContainer title="Foo" hasError={false} showExperimentalBadge={true}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
+    );
+    expect(component.getByText('Technical preview')).toBeInTheDocument();
+  });
 });

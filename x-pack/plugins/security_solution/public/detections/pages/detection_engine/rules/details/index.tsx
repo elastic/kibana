@@ -104,10 +104,10 @@ import {
   RuleStatusFailedCallOut,
   ruleStatusI18n,
 } from '../../../../components/rules/rule_execution_status';
-import { FailureHistory } from './failure_history';
 
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
+import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -133,7 +133,7 @@ const StyledFullHeightContainer = styled.div`
 
 enum RuleDetailTabs {
   alerts = 'alerts',
-  failures = 'failures',
+  executionLogs = 'executionLogs',
   exceptions = 'exceptions',
 }
 
@@ -151,10 +151,10 @@ const ruleDetailTabs = [
     dataTestSubj: 'exceptionsTab',
   },
   {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
+    id: RuleDetailTabs.executionLogs,
+    name: i18n.RULE_EXECUTION_LOGS,
     disabled: false,
-    dataTestSubj: 'failureHistoryTab',
+    dataTestSubj: 'executionLogsTab',
   },
 ];
 
@@ -211,7 +211,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
-  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
+  const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
     rule: maybeRule,
@@ -271,15 +271,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl(
+        spacesApi.ui.redirectLegacyUrl({
           path,
-          i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
-            {
-              defaultMessage: 'rule',
-            }
-          )
-        );
+          aliasPurpose: rule.alias_purpose,
+          objectNoun: i18nTranslate.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
+            { defaultMessage: 'rule' }
+          ),
+        });
       }
     }
   }, [rule, spacesApi]);
@@ -295,7 +294,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
               {
                 defaultMessage: 'rule',
               }
@@ -320,7 +319,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [hasIndexRead]);
 
-  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
+  const showUpdating = useMemo(
+    () => isLoadingIndexPattern || isAlertsLoading || loading,
+    [isLoadingIndexPattern, isAlertsLoading, loading]
+  );
 
   const title = useMemo(
     () => (
@@ -429,7 +431,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
+            disabled={tab.disabled || (tab.id === RuleDetailTabs.executionLogs && !isExistingRule)}
             key={tab.id}
             data-test-subj={tab.dataTestSubj}
           >
@@ -438,7 +440,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab, pageTabs]
+    [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
   const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
 
@@ -603,6 +605,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const selectAlertsTabCallback = useCallback(() => {
+    setRuleDetailTab(RuleDetailTabs.alerts);
+  }, []);
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -677,7 +683,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         enabled={isExistingRule && (rule?.enabled ?? false)}
                         onChange={handleOnChangeEnabledRule}
                       />
-                      <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
+                      <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -804,7 +810,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               onRuleChange={refreshRule}
             />
           )}
-          {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory ruleId={ruleId} />}
+          {ruleDetailTab === RuleDetailTabs.executionLogs && (
+            <ExecutionLogTable ruleId={ruleId} selectAlertsTab={selectAlertsTabCallback} />
+          )}
         </SecuritySolutionPageWrapper>
       </StyledFullHeightContainer>
 

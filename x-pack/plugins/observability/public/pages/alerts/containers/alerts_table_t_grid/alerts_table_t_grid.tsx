@@ -40,7 +40,6 @@ import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'reac
 import { pick } from 'lodash';
 import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
-  TimelinesUIStart,
   TGridType,
   TGridState,
   TGridModel,
@@ -62,9 +61,12 @@ import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
-import { CoreStart } from '../../../../../../../../src/core/public';
 import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
+import { CaseAttachments } from '../../../../../../cases/public';
+import { CommentType } from '../../../../../../cases/common';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
@@ -72,7 +74,7 @@ interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
-  kuery: string;
+  kuery?: string;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -142,13 +144,10 @@ function ObservabilityActions({
   ecsData,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
-  const { core, observabilityRuleTypeRegistry } = usePluginContext();
+  const { observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
-  const {
-    timelines,
-    application: {},
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  const { cases, http } = useKibana<ObservabilityAppServices>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -156,11 +155,6 @@ function ObservabilityActions({
   );
 
   const alert = parseObservabilityAlert(dataFieldEs);
-  const { prepend } = core.http.basePath;
-
-  const afterCaseSelection = useCallback(() => {
-    setActionsPopover(null);
-  }, []);
 
   const closeActionsPopover = useCallback(() => {
     setActionsPopover(null);
@@ -171,35 +165,59 @@ function ObservabilityActions({
   }, []);
 
   const casePermissions = useGetUserCasesPermissions();
-  const event = useMemo(() => {
-    return {
-      data,
-      _id: eventId,
-      ecs: ecsData,
-    };
-  }, [data, eventId, ecsData]);
-
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
+  const linkToRule = ruleId ? http.basePath.prepend(paths.management.ruleDetails(ruleId)) : null;
+
+  const caseAttachments: CaseAttachments = useMemo(() => {
+    return ecsData?._id
+      ? [
+          {
+            alertId: ecsData?._id ?? '',
+            index: ecsData?._index ?? '',
+            owner: observabilityFeatureId,
+            type: CommentType.alert,
+            rule: cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
+          },
+        ]
+      : [];
+  }, [ecsData, cases.helpers, data]);
+
+  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+    attachments: caseAttachments,
+  });
+
+  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
+    attachments: caseAttachments,
+  });
+
+  const handleAddToNewCaseClick = useCallback(() => {
+    createCaseFlyout.open();
+    closeActionsPopover();
+  }, [createCaseFlyout, closeActionsPopover]);
+
+  const handleAddToExistingCaseClick = useCallback(() => {
+    selectCaseModal.open();
+    closeActionsPopover();
+  }, [closeActionsPopover, selectCaseModal]);
 
   const actionsMenuItems = useMemo(() => {
     return [
       ...(casePermissions?.crud
         ? [
-            timelines.getAddToExistingCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityAppId,
-              owner: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
-            timelines.getAddToNewCaseButton({
-              event,
-              casePermissions,
-              appId: observabilityAppId,
-              owner: observabilityFeatureId,
-              onClose: afterCaseSelection,
-            }),
+            <EuiContextMenuItem
+              data-test-subj="add-to-existing-case-action"
+              onClick={handleAddToExistingCaseClick}
+              size="s"
+            >
+              {ADD_TO_EXISTING_CASE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              data-test-subj="add-to-new-case-action"
+              onClick={handleAddToNewCaseClick}
+              size="s"
+            >
+              {ADD_TO_NEW_CASE}
+            </EuiContextMenuItem>,
           ]
         : []),
 
@@ -215,7 +233,7 @@ function ObservabilityActions({
           ]
         : []),
     ];
-  }, [afterCaseSelection, casePermissions, timelines, event, linkToRule]);
+  }, [casePermissions?.crud, handleAddToExistingCaseClick, handleAddToNewCaseClick, linkToRule]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
@@ -241,7 +259,7 @@ function ObservabilityActions({
           <EuiToolTip content={translations.alertsTable.viewInAppTextLabel}>
             <EuiButtonIcon
               size="s"
-              href={prepend(alert.link ?? '')}
+              href={http.basePath.prepend(alert.link ?? '')}
               iconType="eye"
               color="text"
               aria-label={translations.alertsTable.viewInAppTextLabel}
@@ -289,7 +307,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const {
     timelines,
     application: { capabilities },
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  } = useKibana<ObservabilityAppServices>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
@@ -385,7 +403,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
-        query: kuery,
+        query: kuery ?? '',
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),

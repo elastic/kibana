@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
-import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
+import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
@@ -20,6 +20,7 @@ import { getFieldValue } from '../../../../detections/components/host_isolation/
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../../common/ecs';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -34,6 +35,7 @@ interface EventDetailsFooterProps {
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
+  refetchFlyoutData: () => Promise<void>;
 }
 
 interface AddExceptionModalWrapperData {
@@ -55,6 +57,7 @@ export const EventDetailsFooterComponent = React.memo(
     timelineId,
     globalQuery,
     timelineQuery,
+    refetchFlyoutData,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
@@ -94,12 +97,12 @@ export const EventDetailsFooterComponent = React.memo(
     }, [timelineId, globalQuery, timelineQuery]);
 
     const {
-      exceptionModalType,
+      exceptionFlyoutType,
       onAddExceptionTypeClick,
       onAddExceptionCancel,
       onAddExceptionConfirm,
       ruleIndices,
-    } = useExceptionModal({
+    } = useExceptionFlyout({
       ruleIndex,
       refetch: refetchAll,
       timelineId,
@@ -107,9 +110,17 @@ export const EventDetailsFooterComponent = React.memo(
     const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
       useEventFilterModal();
 
+    const [isOsqueryFlyoutOpenWithAgentId, setOsqueryFlyoutOpenWithAgentId] = useState<
+      null | string
+    >(null);
+
+    const closeOsqueryFlyout = useCallback(() => {
+      setOsqueryFlyoutOpenWithAgentId(null);
+    }, [setOsqueryFlyoutOpenWithAgentId]);
+
     return (
       <>
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {detailsEcsData && (
@@ -122,9 +133,11 @@ export const EventDetailsFooterComponent = React.memo(
                   onAddEventFilterClick={onAddEventFilterClick}
                   onAddExceptionTypeClick={onAddExceptionTypeClick}
                   onAddIsolationStatusClick={onAddIsolationStatusClick}
+                  refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
                   timelineId={timelineId}
+                  onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
                 />
               )}
             </EuiFlexItem>
@@ -133,19 +146,26 @@ export const EventDetailsFooterComponent = React.memo(
         {/* This is still wrong to do render flyout/modal inside of the flyout
         We need to completely refactor the EventDetails  component to be correct
       */}
-        {exceptionModalType != null &&
+        {exceptionFlyoutType != null &&
           addExceptionModalWrapperData.ruleId != null &&
           addExceptionModalWrapperData.eventId != null && (
             <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}
               ruleIndices={ruleIndices}
-              exceptionListType={exceptionModalType}
+              exceptionListType={exceptionFlyoutType}
               onCancel={onAddExceptionCancel}
               onConfirm={onAddExceptionConfirm}
             />
           )}
         {isAddEventFilterModalOpen && detailsEcsData != null && (
-          <EventFiltersFlyout data={detailsEcsData} onCancel={closeAddEventFilterModal} />
+          <EventFiltersFlyout
+            data={detailsEcsData}
+            onCancel={closeAddEventFilterModal}
+            maskProps={{ style: 'z-index: 5000' }}
+          />
+        )}
+        {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
+          <OsqueryFlyout agentId={isOsqueryFlyoutOpenWithAgentId} onClose={closeOsqueryFlyout} />
         )}
       </>
     );

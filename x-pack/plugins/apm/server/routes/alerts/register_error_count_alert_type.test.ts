@@ -142,21 +142,30 @@ describe('Error count alert', () => {
       environment: 'env-foo',
       threshold: 2,
       triggerValue: 5,
+      reason: 'Error count is 5 in the last 5 mins for foo. Alert when > 2.',
       interval: '5m',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
       environment: 'env-foo-2',
       threshold: 2,
       triggerValue: 4,
+      reason: 'Error count is 4 in the last 5 mins for foo. Alert when > 2.',
       interval: '5m',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
       environment: 'env-bar',
+      reason: 'Error count is 3 in the last 5 mins for bar. Alert when > 2.',
       threshold: 2,
       triggerValue: 3,
       interval: '5m',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
     });
   });
 });

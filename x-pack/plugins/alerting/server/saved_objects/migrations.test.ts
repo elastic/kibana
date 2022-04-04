@@ -2229,6 +2229,30 @@ describe('successful migrations', () => {
       );
     });
 
+    describe('8.2.0', () => {
+      test('migrates params to mapped_params', () => {
+        const migration820 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.2.0'];
+        const alert = getMockData(
+          {
+            params: {
+              risk_score: 60,
+              severity: 'high',
+              foo: 'bar',
+            },
+            alertTypeId: 'siem.signals',
+          },
+          true
+        );
+
+        const migratedAlert820 = migration820(alert, migrationContext);
+
+        expect(migratedAlert820.attributes.mapped_params).toEqual({
+          risk_score: 60,
+          severity: '60-high',
+        });
+      });
+    });
+
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {
         const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];

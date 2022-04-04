@@ -7,39 +7,62 @@
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpFetchError } from 'kibana/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
+import { useMemo } from 'react';
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_DEFAULT_SORT_FIELD,
+  MANAGEMENT_DEFAULT_SORT_ORDER,
+} from '../../common/constants';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
+import { MaybeImmutable } from '../../../../common/endpoint/types';
+
+const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useListArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  searcheableFields: string[],
-  options: {
+  options: Partial<{
     filter: string;
     page: number;
     perPage: number;
     policies: string[];
-  } = {
-    filter: '',
-    page: MANAGEMENT_DEFAULT_PAGE,
-    perPage: MANAGEMENT_DEFAULT_PAGE_SIZE,
-    policies: [],
-  },
-  customQueryOptions: UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
+    excludedPolicies: string[];
+  }> = DEFAULT_OPTIONS,
+  searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
+  customQueryOptions: Partial<
+    UseQueryOptions<FoundExceptionListItemSchema, HttpFetchError>
+  > = DEFAULT_OPTIONS,
+  customQueryIds: string[] = []
 ): QueryObserverResult<FoundExceptionListItemSchema, HttpFetchError> {
-  const { filter, page, perPage, policies } = options;
+  const {
+    filter = '',
+    page = MANAGEMENT_DEFAULT_PAGE + 1,
+    perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
+    policies = [],
+    excludedPolicies = [],
+  } = options;
+  const filterKuery = useMemo<string | undefined>(() => {
+    return parsePoliciesAndFilterToKql({
+      kuery: parseQueryFilterToKQL(filter, searchableFields),
+      policies,
+      excludedPolicies,
+    });
+  }, [filter, searchableFields, policies, excludedPolicies]);
 
   return useQuery<FoundExceptionListItemSchema, HttpFetchError>(
-    ['list', exceptionListApiClient, options],
-    () => {
-      return exceptionListApiClient.find({
-        filter: parsePoliciesAndFilterToKql({
-          policies,
-          kuery: parseQueryFilterToKQL(filter, searcheableFields),
-        }),
+    [...customQueryIds, 'list', exceptionListApiClient, filterKuery, page, perPage],
+    async () => {
+      const result = await exceptionListApiClient.find({
+        filter: filterKuery,
         perPage,
         page,
+        sortField: MANAGEMENT_DEFAULT_SORT_FIELD,
+        sortOrder: MANAGEMENT_DEFAULT_SORT_ORDER,
       });
+
+      return result;
     },
     {
       refetchIntervalInBackground: false,

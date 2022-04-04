@@ -9,5 +9,10 @@
 export default function () {
   return {
     testFiles: ['config.1'],
+    servers: {
+      elasticsearch: {
+        port: 1234,
+      },
+    },
   };
 }
