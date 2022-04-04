@@ -97,6 +97,8 @@ Choose the type of visualization you want to create, then use the editor to conf
 .. Select the visualization type you want to create.
 
 .. Select the data source you want to visualize.
++
+NOTE: There is no performance impact on the data source you select. For example, *Discover* saved searches perform the same as {data-sources}. 
 
 . Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
 +

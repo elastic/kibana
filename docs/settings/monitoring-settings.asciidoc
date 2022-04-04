@@ -31,6 +31,14 @@ For more information, see
 
 [cols="2*<"]
 |===
+| `monitoring.cluster_alerts.email_notifications.enabled`
+  | deprecated:[7.11.0] 
+  When enabled, sends email notifications for Watcher alerts to the specified email address. The default is `true`. 
+  
+| `monitoring.cluster_alerts.email_notifications.email_address` {ess-icon}::
+  | deprecated:[7.11.0] 
+  When enabled, specifies the email address where you want to receive cluster alert notifications.
+
 | `monitoring.enabled`
   | Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
   <<monitoring-ui-enabled, `monitoring.ui.enabled`>> setting, when this setting is `false`, the

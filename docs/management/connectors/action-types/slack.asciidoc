@@ -70,5 +70,3 @@ URL, set up an an **Incoming Webhook Integration** through the Slack console:
 image::images/slack-add-webhook-integration.png[]
 . Click *Add Incoming Webhook Integration*.
 . Copy the generated webhook URL so you can paste it into your Slack connector form.
-+
-image::images/slack-copy-webhook-url.png[]
