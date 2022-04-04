@@ -11,6 +11,7 @@ import {
   SavedObjectsServiceStart,
   PluginInitializerContext,
   IBasePath,
+  ElasticsearchServiceStart,
 } from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { RulesClient } from './rules_client';
@@ -32,6 +33,7 @@ export interface RulesClientFactoryOpts {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
+  elasticsearch: ElasticsearchServiceStart;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
@@ -55,7 +57,8 @@ export class RulesClientFactory {
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
-  private basePathService: IBasePath;
+  private basePathService!: IBasePath;
+  private elasticsearch!: ElasticsearchServiceStart;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -77,6 +80,7 @@ export class RulesClientFactory {
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
     this.basePathService = options.basePathService;
+    this.elasticsearch = options.elasticsearch;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -104,6 +108,7 @@ export class RulesClientFactory {
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       basePathService: this.basePathService,
+      elasticsearch: this.elasticsearch,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

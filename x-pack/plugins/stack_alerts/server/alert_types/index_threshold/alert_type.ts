@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { compact } from 'lodash';
 import { Logger } from 'src/core/server';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
@@ -129,6 +130,11 @@ export function getAlertType(
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    diagnostics: {
+      getIndices: (params: Params) =>
+        Array.isArray(params.index) ? params.index.join(',') : params.index,
+      getAggregatedFields: (params: Params) => compact([params.termField, params.aggField]),
+    },
   };
 
   async function executor(

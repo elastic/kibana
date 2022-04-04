@@ -389,6 +389,7 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       actions: plugins.actions,
       eventLog: plugins.eventLog,
+      elasticsearch: core.elasticsearch,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,

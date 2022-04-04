@@ -20,6 +20,7 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
   IBasePath,
+  ElasticsearchServiceStart,
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import { RuleDiagnostic } from '../lib/diagnostics/rule_diagnostic';
@@ -145,6 +146,7 @@ export interface ConstructorOptions {
   basePathService: IBasePath;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
+  elasticsearch: ElasticsearchServiceStart;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
@@ -319,6 +321,7 @@ export class RulesClient {
     unsecuredSavedObjectsClient,
     authorization,
     basePathService,
+    elasticsearch,
     taskManager,
     logger,
     spaceId,
@@ -352,7 +355,12 @@ export class RulesClient {
     this.auditLogger = auditLogger;
     this.eventLogger = eventLogger;
 
-    this.ruleDiagnostics = new RuleDiagnostic({ basePathService, spaceId, createAPIKey });
+    this.ruleDiagnostics = new RuleDiagnostic({
+      basePathService,
+      spaceId,
+      createAPIKey,
+      elasticsearch,
+    });
   }
 
   public async create<Params extends RuleTypeParams = never>({
