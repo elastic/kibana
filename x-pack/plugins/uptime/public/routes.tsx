@@ -258,7 +258,7 @@ const getRoutes = (): RouteProps[] => {
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 label="Beta"
-                tooltipContent={i18n.translate('xpack.uptime.routes.manageMonitors.betaLabel', {
+                tooltipContent={i18n.translate('xpack.uptime.routes.monitorManagement.betaLabel', {
                   defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
                 })}
               />

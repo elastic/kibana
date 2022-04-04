@@ -28880,6 +28880,7 @@
     "xpack.uptime.monitorManagement.monitorList.title": "监测管理列表",
     "xpack.uptime.monitorManagement.monitorList.URL": "URL",
     "xpack.uptime.monitorManagement.monitorLocationsLabel": "监测位置",
+    "xpack.uptime.monitorManagement.monitorManagementCrumb": "监测管理",
     "xpack.uptime.monitorManagement.monitorNameFieldError": "监测名称必填",
     "xpack.uptime.monitorManagement.monitorNameFieldLabel": "监测名称",
     "xpack.uptime.monitorManagement.pageHeader.title": "管理监测",

@@ -28849,6 +28849,7 @@
     "xpack.uptime.monitorManagement.monitorList.title": "モニター管理リスト",
     "xpack.uptime.monitorManagement.monitorList.URL": "URL",
     "xpack.uptime.monitorManagement.monitorLocationsLabel": "モニターの場所",
+    "xpack.uptime.monitorManagement.monitorManagementCrumb": "モニター管理",
     "xpack.uptime.monitorManagement.monitorNameFieldError": "モニター名は必須です",
     "xpack.uptime.monitorManagement.monitorNameFieldLabel": "モニター名",
     "xpack.uptime.monitorManagement.pageHeader.title": "モニターの管理",
