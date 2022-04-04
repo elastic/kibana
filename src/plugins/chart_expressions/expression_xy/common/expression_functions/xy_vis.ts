@@ -194,7 +194,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
-    const { dataLayers, referenceLineLayers, annotationLayers, ...restArgs } = args;
+    const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
     const inputLayers: Array<XYLayerConfigResult | undefined> = [
       ...dataLayers,
       ...referenceLineLayers,
