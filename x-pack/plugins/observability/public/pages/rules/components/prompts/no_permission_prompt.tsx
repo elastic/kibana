@@ -13,6 +13,7 @@ export function NoPermissionPrompt() {
   return (
     <EuiPageTemplate
       template="centeredContent"
+      data-test-subj="noPermissionPrompt"
       pageContentProps={{
         paddingSize: 'none',
         role: null, // For passing a11y tests in EUI docs only

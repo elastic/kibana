@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      await observability.alerts.common.navigateToTimeWithData();
+      await observability.alerts.common.navigateWithoutFilter();
     });
 
     after(async () => {
@@ -47,6 +47,24 @@ export default ({ getService }: FtrProviderContext) => {
         await retry.waitFor(
           'Create Rule button is visible',
           async () => await observability.alerts.rulesPage.getCreateRuleButton()
+        );
+        await retry.waitFor(
+          'Create Rule button is visible',
+          async () => await observability.alerts.rulesPage.getCreateRuleButton()
+        );
+      });
+
+      it(`Does not allow to create a rule in the Rules page`, async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            observabilityCases: ['read'],
+            logs: ['read'],
+          })
+        );
+        await observability.alerts.common.navigateToRulesPage();
+        await retry.waitFor(
+          'No Permissions Prompt',
+          async () => await testSubjects.exists('noPermissionPrompt')
         );
       });
     });

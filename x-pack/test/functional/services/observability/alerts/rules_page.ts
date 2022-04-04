@@ -20,7 +20,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   };
 
   const getCreateRuleButton = async () => {
-    return await testSubjects.exists('createRulButton');
+    return await testSubjects.exists('createRuleButton');
   };
 
   return { getManageRulesPageHref, goToMangeRulesPage, getCreateRuleButton };
