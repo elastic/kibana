@@ -33,6 +33,7 @@ const config = new Config(
     buildVersion: '8.0.0',
   },
   false,
+  false,
   '',
   false,
   true

@@ -28920,7 +28920,6 @@
     "xpack.uptime.page_header.analyzeData.label": "导航到“浏览数据”视图以可视化 Synthetics/用户数据",
     "xpack.uptime.page_header.defineConnector.popover.defaultLink": "定义默认连接器",
     "xpack.uptime.page_header.defineConnector.settingsLink": "设置",
-    "xpack.uptime.page_header.manageLink": "监测管理",
     "xpack.uptime.page_header.manageLink.label": "导航到 Uptime 监测管理页面",
     "xpack.uptime.page_header.settingsLink": "设置",
     "xpack.uptime.page_header.settingsLink.label": "导航到 Uptime 设置页面",

@@ -28889,7 +28889,6 @@
     "xpack.uptime.page_header.analyzeData.label": "［データの探索］ビューに移動して、合成/ユーザーデータを可視化",
     "xpack.uptime.page_header.defineConnector.popover.defaultLink": "デフォルトのコネクターを定義",
     "xpack.uptime.page_header.defineConnector.settingsLink": "設定",
-    "xpack.uptime.page_header.manageLink": "モニター管理",
     "xpack.uptime.page_header.manageLink.label": "アップタイムモニター管理ページに移動",
     "xpack.uptime.page_header.settingsLink": "設定",
     "xpack.uptime.page_header.settingsLink.label": "アップタイム設定ページに移動",
