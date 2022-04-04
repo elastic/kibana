@@ -332,7 +332,7 @@
         "tags": [],
         "label": "useExceptionListItems",
         "description": [
-          "\nHook for using to get an ExceptionList and it's ExceptionListItems\n"
+          "\nHook for using to get an ExceptionList and its ExceptionListItems\n"
         ],
         "signature": [
           "({ http, lists, pagination, filterOptions, showDetectionsListsOnly, showEndpointListsOnly, matchFilters, onError, onSuccess, }: ",
