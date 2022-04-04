@@ -7,7 +7,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { createHook, AsyncHook } from 'async_hooks';
+import { createHook, AsyncHook, executionAsyncResource, AsyncLocalStorage } from 'async_hooks';
 import util from 'util';
 import { Logger } from '../logging';
 
@@ -16,15 +16,16 @@ interface CacheEntry {
   transaction: apm.Transaction | null;
   span: apm.Span | null;
 }
-
 export class EventLoopBlockDetectionAsyncHook {
   readonly #asyncHook: AsyncHook;
+  readonly #asyncLocalStorage: AsyncLocalStorage;
   readonly #cache = new Map<number, CacheEntry>();
   readonly #logger: Logger;
   readonly #thresholdNs: number;
 
   constructor(thresholdMs: number, logger: Logger) {
     this.#asyncHook = createHook({ before: this.#before, after: this.#after });
+    this.#asyncLocalStorage = new AsyncLocalStorage();
     this.#logger = logger;
     this.#thresholdNs = thresholdMs * 1e6;
   }
@@ -44,14 +45,20 @@ export class EventLoopBlockDetectionAsyncHook {
     const diffNs = diff[0] * 1e9 + diff[1];
     if (diffNs > this.#thresholdNs) {
       const time = diffNs / 1e6;
-      this.#logger.warn(this.#formatMessage(time, cached.transaction, cached.span), {
-        transaction: this.#formatTransaction(cached.transaction),
-        span: this.#formatSpan(cached.span),
+      this.#asyncLocalStorage.run({ dontTrack: true }, () => {
+        this.#logger.warn(this.#formatMessage(time, cached.transaction, cached.span), {
+          transaction: this.#formatTransaction(cached.transaction),
+          span: this.#formatSpan(cached.span),
+        });
       });
     }
   };
 
   #before = (asyncId: number) => {
+    if (this.#asyncLocalStorage.getStore()?.dontTrack) {
+      return;
+    }
+
     this.#cache.set(asyncId, {
       hrtime: process.hrtime(),
       transaction: apm.currentTransaction,
