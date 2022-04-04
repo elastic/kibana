@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, FC } from 'react';
+import React, { useCallback, useState, FC } from 'react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHealth,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { TextField, SelectField, SuperSelectField } from '../../../components';
@@ -96,17 +97,17 @@ const valueOptions = [
 // Dynamic data that we will be loaded in the form when selecting the rule "type one"
 const processorsTypeOne = [
   {
-    name: 'foo 1',
+    name: 'DynamicTypeOne1',
     type: 'value',
     config: 'value_config_2',
   },
   {
-    name: 'foo 2',
+    name: 'DynamicTypeOne2',
     type: 'value',
     config: 'value_config_3',
   },
   {
-    name: 'foo 3',
+    name: 'DynamicTypeOne3',
     type: 'percentage',
     config: 'percentage_config_2',
   },
@@ -115,12 +116,12 @@ const processorsTypeOne = [
 // Dynamic data that we will be loaded in the form when selecting the rule "type two"
 const processorsTypeTwo = [
   {
-    name: 'Super foo 1',
+    name: 'DynamicTypeTwo1',
     type: 'percentage',
     config: 'percentage_config_2',
   },
   {
-    name: 'Super foo 2',
+    name: 'DynamicTypeTwo2',
     type: 'value',
     config: 'value_config_3',
   },
@@ -143,12 +144,16 @@ const ProcessorTypeConfigurator = ({
   const [formData] = useFormData({
     watch: [processorTypePath],
   });
+
   const processorType = get(formData, processorTypePath);
   const options = processorType === 'percentage' ? percentageOptions : valueOptions;
   const defaultOption = options[0].value;
 
   const onProcessorTypeChange = (newType: string) => {
-    getFields()[processorConfigPath].setValue(
+    const configSelectField = getFields()[processorConfigPath];
+
+    // Set the first select option from the list
+    configSelectField.setValue(
       (newType === 'percentage' ? percentageOptions : valueOptions)[0].value
     );
   };
@@ -201,11 +206,7 @@ const processorNameConfig = {
 
 const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
   return (
-    <UseArray
-      key={ruleType}
-      path="processors"
-      initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}
-    >
+    <UseArray path="processors" initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}>
       {({ items, addItem, removeItem }) => {
         return (
           <>
@@ -258,6 +259,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
 };
 
 const FormContent: FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { updateFieldValues } = useFormContext();
   const [{ ruleType }] = useFormData({ watch: 'ruleType' });
 
@@ -267,11 +269,18 @@ const FormContent: FC = () => {
         return;
       }
 
-      updateFieldValues({
-        // Set dynamically the processors based on the "ruleType" selected.
-        // In a real world scenario this would probably occur after fetching data on the server
-        processors: updatedRuleType === 'type_one' ? processorsTypeOne : processorsTypeTwo,
-      });
+      setIsLoading(true);
+
+      // Simulate HTTP latency
+      setTimeout(() => {
+        updateFieldValues({
+          // Set dynamically the processors based on the "ruleType" selected.
+          // In a real world scenario this would probably occur after fetching data on the server
+          processors: updatedRuleType === 'type_one' ? processorsTypeOne : processorsTypeTwo,
+        });
+
+        setIsLoading(false);
+      }, 500);
     },
     [updateFieldValues]
   );
@@ -296,9 +305,18 @@ const FormContent: FC = () => {
       />
       <EuiSpacer />
 
-      <EuiTitle size="s">
-        <h2>Processors</h2>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>Processors</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {isLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       {ruleType !== undefined && <ProcessorsConfigurator ruleType={ruleType} />}
     </>
