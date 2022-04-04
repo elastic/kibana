@@ -16,6 +16,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
+  const mapsHelper = getService('mapsHelper');
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -109,7 +110,7 @@ export default function ({
           await PageObjects.home.launchSampleMap('ecommerce');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleLayerVisibility('Road map');
+          await mapsHelper.toggleLayerVisibilityRoadMap();
           await PageObjects.maps.toggleLayerVisibility('United Kingdom');
           await PageObjects.maps.toggleLayerVisibility('France');
           await PageObjects.maps.toggleLayerVisibility('United States');
@@ -137,7 +138,7 @@ export default function ({
           await PageObjects.home.launchSampleMap('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleLayerVisibility('Road map');
+          await mapsHelper.toggleLayerVisibilityRoadMap();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
@@ -161,8 +162,8 @@ export default function ({
           await PageObjects.home.launchSampleMap('logs');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.maps.waitForLayersToLoad();
-          await PageObjects.maps.toggleLayerVisibility('Road map');
-          await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+          await mapsHelper.toggleLayerVisibilityRoadMap();
+          await mapsHelper.toggleLayerVisibilityTotalRequests();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
