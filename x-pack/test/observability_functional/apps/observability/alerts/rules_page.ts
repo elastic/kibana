@@ -11,14 +11,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-
-  const supertest = getService('supertest');
-  const config = getService('config');
   const retry = getService('retry');
 
-  // const objectRemover = new ObjectRemover(supertest);
-
-  describe('Observability rules pages', function () {
+  describe('Observability Rules page', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -41,13 +36,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
       });
     });
+
     describe('Create rules', () => {
       it('Create Rules button is visible when user has permissions', async () => {
         await observability.alerts.rulesPage.goToMangeRulesPage();
-        await retry.waitFor(
-          'Create Rule button is visible',
-          async () => await observability.alerts.rulesPage.getCreateRuleButton()
-        );
         await retry.waitFor(
           'Create Rule button is visible',
           async () => await observability.alerts.rulesPage.getCreateRuleButton()
