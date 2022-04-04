@@ -284,6 +284,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    frame.activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
