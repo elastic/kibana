@@ -55,7 +55,9 @@ export const reportingCsvShareProvider = ({
 
     // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
-    if (usesUiCapabilities) {
+    if (!application.capabilities.discover?.save) {
+      capabilityHasCsvReporting = false;
+    } else if (usesUiCapabilities) {
       capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
     } else {
       capabilityHasCsvReporting = true; // deprecated
