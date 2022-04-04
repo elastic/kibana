@@ -45,7 +45,7 @@ import { LicenseType } from '../../licensing/server';
 import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-export { AlertTypeParams };
+export type { AlertTypeParams };
 /**
  * @public
  */
