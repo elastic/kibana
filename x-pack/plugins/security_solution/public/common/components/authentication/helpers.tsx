@@ -44,6 +44,19 @@ export const getHostsPageAuthenticationColumns = (usersEnabled: boolean): AuthTa
   LAST_FAILED_DESTINATION_COLUMN,
 ];
 
+export const getUsersPageAuthenticationColumns = (): AuthTableColumns =>
+  getHostsPageAuthenticationColumns(true);
+
+export const getUserDetailsAuthenticationColumns = (): AuthTableColumns => [
+  HOST_COLUMN,
+  SUCCESS_COLUMN,
+  FAILURES_COLUMN,
+  LAST_SUCCESSFUL_TIME_COLUMN,
+  LAST_SUCCESSFUL_SOURCE_COLUMN,
+  LAST_FAILED_TIME_COLUMN,
+  LAST_FAILED_SOURCE_COLUMN,
+];
+
 export const rowItems: ItemsPerRow[] = [
   {
     text: i18n.ROWS_5,
@@ -176,6 +189,19 @@ const getUserColumn = (
       render: (item) => (usersEnabled ? <UserDetailsLink userName={item} /> : <>{item}</>),
     }),
 });
+
+const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
+  name: i18n.HOST,
+  truncateText: false,
+  mobileOptions: { show: true },
+  render: ({ node }) =>
+    getRowItemDraggables({
+      rowItems: node.stackedValue,
+      attrName: 'host.name',
+      idPrefix: `authentications-table-${node._id}-hostName`,
+      render: (item) => <HostDetailsLink hostName={item} />,
+    }),
+};
 
 const SUCCESS_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.SUCCESSES,

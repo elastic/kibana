@@ -14,10 +14,16 @@ export const AUTHENTICATIONS = i18n.translate(
   }
 );
 
-export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.authenticationsTable.unit', {
+export const USERS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.authenticationsTable.usersUnit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {user} other {users}}`,
+  });
+
+export const HOSTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.authenticationsTable.hostsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
   });
 
 export const LAST_SUCCESSFUL_SOURCE = i18n.translate(
@@ -72,6 +78,10 @@ export const FAILURES = i18n.translate('xpack.securitySolution.authenticationsTa
 
 export const USER = i18n.translate('xpack.securitySolution.authenticationsTable.user', {
   defaultMessage: 'User',
+});
+
+export const HOST = i18n.translate('xpack.securitySolution.authenticationsTable.host', {
+  defaultMessage: 'Host',
 });
 
 export const ROWS_5 = i18n.translate('xpack.securitySolution.authenticationsTable.rows', {

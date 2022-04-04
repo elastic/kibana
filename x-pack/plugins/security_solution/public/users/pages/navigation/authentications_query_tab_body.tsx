@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { UsersComponentsQueryProps } from './types';
 import { AuthenticationsUserTable } from '../../../common/components/authentication/authentications_user_table';
+import { AuthenticationsUserTableProps } from '../../../common/components/authentication/types';
 
 export const ID = 'usersAuthenticationsQuery';
 
@@ -21,7 +21,8 @@ export const AuthenticationsQueryTabBody = ({
   type,
   docValueFields,
   deleteQuery,
-}: UsersComponentsQueryProps) => {
+  userName,
+}: AuthenticationsUserTableProps) => {
   return (
     <AuthenticationsUserTable
       endDate={endDate}
@@ -33,6 +34,7 @@ export const AuthenticationsQueryTabBody = ({
       type={type}
       skip={skip}
       docValueFields={docValueFields}
+      userName={userName}
     />
   );
 };
