@@ -52,7 +52,7 @@ export function App() {
             <EuiFlexGroup className="eui-fullHeight" gutterSize="none" direction="column">
               <EuiFlexItem className="eui-fullHeight">
                 <div
-                  data-shared-item={(!isEmpty && !error) || null}
+                  data-shared-item={!isEmpty || !error || null}
                   data-render-error={!isEmpty && error ? error.message : null}
                   ref={elementRef}
                   className="expression"
