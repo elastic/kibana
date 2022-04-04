@@ -10,7 +10,11 @@ import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'src/core/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { Filter, ISearchSource, SearchSourceFields } from 'src/plugins/data/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../../../common';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';
 import { AppState } from '../services/discover_state';

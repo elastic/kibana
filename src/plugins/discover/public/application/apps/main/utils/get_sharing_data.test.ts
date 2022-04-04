@@ -11,7 +11,11 @@ import type { IndexPattern } from 'src/plugins/data/public';
 import type { DiscoverServices } from '../../../../build_services';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '../../../../../common';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
