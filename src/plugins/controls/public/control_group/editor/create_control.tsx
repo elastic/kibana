@@ -16,6 +16,7 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
+import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
@@ -99,9 +100,13 @@ export const CreateControlButton = ({
         ),
         {
           outsideClickCloses: false,
-          onClose: (flyout) => onCancel(flyout),
+          onClose: (flyout) => {
+            onCancel(flyout);
+            setFlyoutRef(undefined);
+          },
         }
       );
+      setFlyoutRef(flyoutInstance);
     });
 
     initialInputPromise.then(
