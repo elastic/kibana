@@ -20,7 +20,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/129224
+  registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
     () => {

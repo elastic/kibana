@@ -17,7 +17,7 @@ import {
   RULE_STATUS_DISABLED,
   RULE_STATUS_SNOOZED_INDEFINITELY,
 } from './translations';
-import { AlertExecutionStatuses } from '../../../../alerting/common';
+import { RuleExecutionStatuses } from '../../../../alerting/common';
 import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
 
 export const statusMap: Status = {
@@ -37,7 +37,7 @@ export const statusMap: Status = {
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
 
-export function getHealthColor(status: AlertExecutionStatuses) {
+export function getHealthColor(status: RuleExecutionStatuses) {
   switch (status) {
     case 'active':
       return 'success';
