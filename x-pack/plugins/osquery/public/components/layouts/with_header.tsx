@@ -31,9 +31,10 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
     <Header
       maxWidth={restrictHeaderWidth}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
-      children={headerChildren}
       {...rest}
-    />
+    >
+      {headerChildren}
+    </Header>
     <Page
       restrictWidth={restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
