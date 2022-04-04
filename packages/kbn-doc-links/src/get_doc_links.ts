@@ -243,6 +243,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
       dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
       deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+      createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
       frozenIndices: `${ELASTICSEARCH_DOCS}frozen-indices.html`,
       gettingStarted: `${ELASTICSEARCH_DOCS}getting-started.html`,
       hiddenIndices: `${ELASTICSEARCH_DOCS}multi-index.html#hidden`,

@@ -6,7 +6,7 @@
  */
 import { Dispatch, SetStateAction } from 'react';
 import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
-import { AlertExecutionStatus } from '../../../../alerting/common';
+import { RuleExecutionStatus } from '../../../../alerting/common';
 import { RuleTableItem, Rule } from '../../../../triggers_actions_ui/public';
 export interface StatusProps {
   type: RuleStatus;
@@ -44,7 +44,7 @@ export interface StatusFilterProps {
 }
 
 export interface ExecutionStatusProps {
-  executionStatus: AlertExecutionStatus;
+  executionStatus: RuleExecutionStatus;
 }
 
 export interface LastRunProps {

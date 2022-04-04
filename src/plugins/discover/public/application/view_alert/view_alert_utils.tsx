@@ -9,13 +9,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ToastsStart } from 'kibana/public';
-import type { Alert } from '../../../../../../x-pack/plugins/alerting/common';
-import type { AlertTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
+import type { Rule } from '../../../../../../x-pack/plugins/alerting/common';
+import type { RuleTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
 import { SerializedSearchSourceFields } from '../../../../data/common';
 import type { DataPublicPluginStart } from '../../../../data/public';
 import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
 
-export interface SearchThresholdAlertParams extends AlertTypeParams {
+export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
 }
 
@@ -78,7 +78,7 @@ export const getAlertUtils = (
 
   const fetchAlert = async (id: string) => {
     try {
-      return await core.http.get<Alert<SearchThresholdAlertParams>>(
+      return await core.http.get<Rule<SearchThresholdAlertParams>>(
         `${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`
       );
     } catch (error) {
@@ -92,7 +92,7 @@ export const getAlertUtils = (
     }
   };
 
-  const fetchSearchSource = async (fetchedAlert: Alert<SearchThresholdAlertParams>) => {
+  const fetchSearchSource = async (fetchedAlert: Rule<SearchThresholdAlertParams>) => {
     try {
       return await data.search.searchSource.create(fetchedAlert.params.searchConfiguration);
     } catch (error) {

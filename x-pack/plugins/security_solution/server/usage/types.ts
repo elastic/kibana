@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from 'src/core/server';
-import type { SanitizedAlert } from '../../../alerting/common/alert';
+import type { SanitizedRule } from '../../../alerting/common/';
 import type { RuleParams } from '../lib/detection_engine/schemas/rule_schemas';
 import type { SetupPlugins } from '../plugin';
 
@@ -44,7 +44,7 @@ export interface AlertAggs {
  * {@see RawRule}
  */
 export type RuleSearchResult = Omit<
-  SanitizedAlert<RuleParams>,
+  SanitizedRule<RuleParams>,
   'createdBy' | 'updatedBy' | 'createdAt' | 'updatedAt'
 > & {
   createdBy: string | null;
