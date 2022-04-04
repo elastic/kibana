@@ -60,6 +60,7 @@ import {
   ruleExecutionStatusFromRaw,
   getAlertNotifyWhenType,
   validateMutatedRuleTypeParams,
+  convertRuleIdsToKueryNode,
 } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -1369,7 +1370,7 @@ export class RulesClient {
       );
     }
 
-    const filter = ids ? this.convertIdsToFilterQuery(ids) : queryFilter;
+    const filter = ids ? convertRuleIdsToKueryNode(ids) : queryFilter;
     const qNodeFilter = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
     let authorizationTuple;
     try {
@@ -2756,10 +2757,6 @@ export class RulesClient {
     }
 
     return rule;
-  }
-
-  private convertIdsToFilterQuery(ids: string[]): string {
-    return ids.map((id) => `alert.id:"alert:${id}"`).join(' OR ');
   }
 }
 

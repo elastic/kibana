@@ -11,12 +11,13 @@
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
 
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { KueryNode } from '@kbn/es-query';
 import {
   Logger,
   SavedObjectsBulkUpdateObject,
   SavedObjectsUpdateResponse,
 } from '../../../../../../src/core/server';
+import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkEditError, BulkEditOptions } from '../rules_client';
 import { AlertTypeParams, RawRule } from '../../types';
 
@@ -95,11 +96,7 @@ export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
         });
       } else {
         logger.debug(`${name} conflicts, retrying ...`);
-        const filterKueryNode = nodeBuilder.or(
-          Array.from(idsWithConflictError).map((ruleId) =>
-            nodeBuilder.is('alert.id', `alert:${ruleId}`)
-          )
-        );
+        const filterKueryNode = convertRuleIdsToKueryNode(Array.from(idsWithConflictError));
         await waitBeforeNextRetry();
         return await retryIfBulkEditConflicts(
           logger,
