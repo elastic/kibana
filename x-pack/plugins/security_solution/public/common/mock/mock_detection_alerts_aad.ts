@@ -58,6 +58,9 @@ export const mockAADEcsDataWithAlert: Ecs = {
               },
               query: { match_phrase: { 'host.name': 'placeholder' } },
             },
+            {
+              query: { match_all: {} },
+            },
           ],
           language: ['kuery'],
           query: ['user.id:1'],
