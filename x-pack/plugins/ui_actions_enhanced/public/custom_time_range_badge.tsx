@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { prettyDuration, commonDurationRanges } from '@elastic/eui';
+import { renderToString } from 'react-dom/server';
+import { PrettyDuration } from '@elastic/eui';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
 import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
@@ -52,11 +53,12 @@ export class CustomTimeRangeBadge implements Action<TimeBadgeActionContext> {
   }
 
   public getDisplayName({ embeddable }: TimeBadgeActionContext) {
-    return prettyDuration(
-      embeddable.getInput().timeRange.from,
-      embeddable.getInput().timeRange.to,
-      commonDurationRanges,
-      this.dateFormat
+    return renderToString(
+      <PrettyDuration
+        timeFrom={embeddable.getInput().timeRange.from}
+        timeTo={embeddable.getInput().timeRange.to}
+        dateFormat={this.dateFormat}
+      />
     );
   }
 
