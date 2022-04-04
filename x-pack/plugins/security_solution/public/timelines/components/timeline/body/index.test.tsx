@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
-import { set } from '@elastic/safer-lodash-set';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
@@ -213,11 +211,23 @@ describe('Body', () => {
     test('it dispatches the `REMOVE_COLUMN` action when there is a field removed from the custom fields', async () => {
       const customFieldId = 'my.custom.runtimeField';
       const { storage } = createSecuritySolutionStorageMock();
-      const state = set<State>(cloneDeep(mockGlobalState), 'timeline.timelineById.timeline-test', {
-        ...mockGlobalState.timeline.timelineById.test,
-        id: 'timeline-test',
-        columns: [...defaultHeaders, { id: customFieldId, category: 'my' }],
-      });
+      const state: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            'timeline-test': {
+              ...mockGlobalState.timeline.timelineById.test,
+              id: 'timeline-test',
+              columns: [
+                ...defaultHeaders,
+                { id: customFieldId, category: 'my', columnHeaderType: 'not-filtered' },
+              ],
+            },
+          },
+        },
+      };
       const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       mount(
@@ -284,11 +294,21 @@ describe('Body', () => {
 
     test('Add two Note to an event', () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const state = set<State>(cloneDeep(mockGlobalState), 'timeline.timelineById.timeline-test', {
-        ...mockGlobalState.timeline.timelineById.test,
-        id: 'timeline-test',
-        pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
-      });
+      const state: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            'timeline-test': {
+              ...mockGlobalState.timeline.timelineById.test,
+              id: 'timeline-test',
+              pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
+            },
+          },
+        },
+      };
+
       const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       const Proxy = (proxyProps: Props) => (
