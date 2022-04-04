@@ -70,6 +70,7 @@ import {
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -101,6 +102,7 @@ describe('Task Runner', () => {
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+  const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
 
@@ -113,6 +115,7 @@ describe('Task Runner', () => {
   type EnqueueFunction = (options: ExecuteOptions) => Promise<void | RunNowResult>;
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
+    data: dataPlugin,
     savedObjects: savedObjectsService,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,

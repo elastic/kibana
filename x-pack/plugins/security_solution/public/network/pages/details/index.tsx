@@ -38,7 +38,6 @@ import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
@@ -50,6 +49,7 @@ import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { LandingPageComponent } from '../../../common/components/landing_page';
 export { getBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -301,9 +301,7 @@ const NetworkDetailsComponent: React.FC = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.network} />

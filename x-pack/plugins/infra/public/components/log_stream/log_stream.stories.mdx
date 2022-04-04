@@ -1,158 +1,6 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
-import { defer, of, Subject } from 'rxjs';
-import { delay } from 'rxjs/operators';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
-import { createIndexPatternMock, createIndexPatternsMock } from '../../hooks/use_kibana_index_patterns.mock';
-import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
-import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
-import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-
-import { LogStream } from './';
-
-<!-- Prework -->
-
-export const startTimestamp = 1595145600000;
-export const endTimestamp = startTimestamp + 15 * 60 * 1000;
-
-export const dataMock = {
-  indexPatterns: createIndexPatternsMock(500, [
-    createIndexPatternMock({
-      id: 'some-test-id',
-      title: 'mock-index-pattern-*',
-      timeFieldName: '@timestamp',
-      fields: [
-        {
-          name: '@timestamp',
-          type: KBN_FIELD_TYPES.DATE,
-          searchable: true,
-          aggregatable: true,
-        },
-        {
-          name: 'event.dataset',
-          type: KBN_FIELD_TYPES.STRING,
-          searchable: true,
-          aggregatable: true,
-        },
-        {
-          name: 'host.name',
-          type: KBN_FIELD_TYPES.STRING,
-          searchable: true,
-          aggregatable: true,
-        },
-        {
-          name: 'log.level',
-          type: KBN_FIELD_TYPES.STRING,
-          searchable: true,
-          aggregatable: true,
-        },
-        {
-          name: 'message',
-          type: KBN_FIELD_TYPES.STRING,
-          searchable: true,
-          aggregatable: true,
-        },
-      ],
-    })
-  ]),
-  search: {
-    search: ({ params }, options) => {
-      return defer(() => {
-        switch (options.strategy) {
-          case LOG_ENTRIES_SEARCH_STRATEGY:
-            if (params.after?.time === params.endTimestamp || params.before?.time === params.startTimestamp) {
-              return of({
-                id: 'EMPTY_FAKE_RESPONSE',
-                total: 1,
-                loaded: 1,
-                isRunning: false,
-                isPartial: false,
-                rawResponse: ENTRIES_EMPTY,
-              });
-            } else {
-              const entries = generateFakeEntries(
-                200,
-                params.startTimestamp,
-                params.endTimestamp,
-                params.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
-              );
-              return of({
-                id: 'FAKE_RESPONSE',
-                total: 1,
-                loaded: 1,
-                isRunning: false,
-                isPartial: false,
-                rawResponse: {
-                  data: {
-                    entries,
-                    topCursor: entries[0].cursor,
-                    bottomCursor: entries[entries.length - 1].cursor,
-                    hasMoreBefore: false,
-                  },
-                  errors: [],
-                }
-              });
-            }
-          default:
-            return of({
-              id: 'FAKE_RESPONSE',
-              rawResponse: {},
-            });
-        }
-      }).pipe(delay(2000));
-    },
-  },
-};
-
-
-export const fetch = async function (url, params) {
-  switch (url) {
-    case '/api/infra/log_source_configurations/default':
-      return DEFAULT_SOURCE_CONFIGURATION;
-    case '/api/infra/log_source_configurations/default/status':
-      return {
-        data: {
-          logIndexStatus: 'available',
-        }
-      };
-    default:
-      return {};
-  }
-};
-
-export const uiSettings = {
-  get: (setting) => {
-    switch (setting) {
-      case 'dateFormat':
-        return 'MMM D, YYYY @ HH:mm:ss.SSS';
-      case 'dateFormat:scaled':
-        return [['', 'HH:mm:ss.SSS']];
-    }
-  },
-  get$: () => {
-    return new Subject();
-  },
-};
-
-export const Template = (args) => <LogStream {...args} />;
-
-<Meta
-  title="infra/LogStream"
-  component={LogStream}
-  decorators={[
-    (story) => (
-      <I18nProvider>
-        <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
-          {story()}
-        </KibanaContextProvider>
-      </I18nProvider>
-    ),
-    decorateWithGlobalStorybookThemeProviders,
-  ]}
-/>
+<Meta title="infra/LogStream/Overview" />
 
 # Embeddable `<LogStream />` component
 
@@ -187,11 +35,7 @@ const startTimestamp = endTimestamp - 15 * 60 * 1000; // 15 minutes
 
 This will show a list of log entries between the specified timestamps.
 
-<Canvas>
-  <Story name="Default" args={{ startTimestamp, endTimestamp }}>
-    {Template.bind({})}
-  </Story>
-</Canvas>
+<Story id="infra-logstream--basic-date-range" />
 
 ## Query log entries
 
@@ -246,14 +90,7 @@ By default the component will load at the bottom of the list, showing the newest
 />
 ```
 
-<Canvas>
-  <Story
-    name="CenteredView"
-    args={{ startTimestamp, endTimestamp, center: { time: 1595146275000, tiebreaker: 150 } }}
-  >
-    {Template.bind({})}
-  </Story>
-</Canvas>
+<Story id="infra-logstream--centered-on-log-entry" />
 
 ## Highlight a specific entry
 
@@ -263,11 +100,7 @@ The component can highlight a specific line via the `highlight` prop. It takes t
 <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} highlight="entry-197" />
 ```
 
-<Canvas>
-  <Story name="HighlightedEntry" args={{ startTimestamp, endTimestamp, highlight: 'entry-197' }}>
-    {Template.bind({})}
-  </Story>
-</Canvas>
+<Story id="infra-logstream--highlighted-log-entry" />
 
 ## Column configuration
 
@@ -298,23 +131,7 @@ The easiest way is to specify what columns you want with the `columns` prop.
 />
 ```
 
-<Canvas>
-  <Story
-    name="CustomColumns"
-    args={{
-      startTimestamp,
-      endTimestamp,
-      columns: [
-        { type: 'timestamp' },
-        { type: 'field', field: 'log.level' },
-        { type: 'field', field: 'host.name' },
-        { type: 'message' },
-      ],
-    }}
-  >
-    {Template.bind({})}
-  </Story>
-</Canvas>
+<Story id="infra-logstream--custom-columns" />
 
 The rendering of the column headers and the cell contents can also be customized with the following properties:
 
@@ -389,57 +206,25 @@ The rendering of the column headers and the cell contents can also be customized
 />
 ```
 
-<Canvas>
-  <Story
-    name="CustomColumnRendering"
-    args={{
-      startTimestamp,
-      endTimestamp,
-      columns: [
-        { type: 'timestamp', header: 'When?' },
-        {
-          type: 'field',
-          field: 'log.level',
-          header: false,
-          width: 24,
-          render: (value) => {
-            switch (value) {
-              case 'debug':
-                return '🐞';
-              case 'info':
-                return 'ℹ️';
-              case 'warn':
-                return '⚠️';
-              case 'error':
-                return '❌';
-            }
-          },
-        },
-        { type: 'message' },
-      ],
-    }}
-  >
-    {Template.bind({})}
-  </Story>
-</Canvas>
+<Story id="infra-logstream--custom-column-rendering" />
 
-### With a source configuration
+### With a static log view configuration
 
-The infra plugin has the concept of a "source configuration", a collection of settings that apply to the logs and metrics UIs. The component uses the source configuration to determine which indices to query or what columns to show.
+The infra plugin has the concept of a "log view", a collection of settings that apply to the logs UI. The component uses the log view to determine which indices to query or what columns to show.
 
-The `<LogStream />` component will use the `"default"` source configuration. If you want to use your own configuration, you need to first create it when you initialize your plugin, and then specify it in the `<LogStream />` component with the `sourceId` prop.
+The `<LogStream />` component will use the `"default"` log view. If you want to use your own log view, you need to first create it when you initialize your plugin, and then specify it in the `<LogStream />` component with the `sourceId` prop.
 
 ```tsx
 //  Your `server/plugin.ts`
 class MyPlugin {
   // ...
   setup(core, plugins) {
-    plugins.infra.defineInternalSourceConfiguration(
-      'my_source',  // ID for your source configuration
+    plugins.infra.logViews.defineInternalLogView(
+      'my_log_view',  // ID for your log view
       {
         name: 'some-name',
         description: 'some description',
-        logIndices: { // Also accepts an `index_pattern` type with `indexPatternId`
+        logIndices: { // Also accepts a `data_view` type with `dataViewId`
           type: 'index_name',
           indexName: 'some-index',
         },

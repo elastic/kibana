@@ -13,7 +13,7 @@ exitCode=0
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
     echo "--- $ node scripts/jest --config $config"
-    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false --passWithNoTests
+    node --max-old-space-size=14336 ./scripts/jest --config="$config" --runInBand --coverage=false --passWithNoTests
     lastCode=$?
 
     if [ $lastCode -ne 0 ]; then

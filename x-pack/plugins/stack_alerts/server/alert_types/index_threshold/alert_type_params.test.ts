@@ -9,6 +9,7 @@ import { ParamsSchema, Params } from './alert_type_params';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { CoreQueryParams, MAX_GROUPS } from '../../../../triggers_actions_ui/server';
+import { Comparator } from '../../../common/comparator_types';
 
 const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',
@@ -17,7 +18,7 @@ const DefaultParams: Writable<Partial<Params>> = {
   groupBy: 'all',
   timeWindowSize: 5,
   timeWindowUnit: 'm',
-  thresholdComparator: '>',
+  thresholdComparator: Comparator.GT,
   threshold: [0],
 };
 

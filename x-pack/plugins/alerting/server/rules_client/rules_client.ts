@@ -89,13 +89,10 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogResult } from '../../common';
+import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
-import {
-  formatExecutionErrorsResult,
-  IExecutionErrorsResult,
-} from '../lib/format_execution_log_errors';
+import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -263,7 +260,6 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
-export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;
 interface ScheduleRuleOptions {
   id: string;
   consumer: string;
@@ -753,7 +749,7 @@ export class RulesClient {
             start: parsedDateStart.toISOString(),
             end: parsedDateEnd.toISOString(),
             per_page: 500,
-            filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+            filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
             sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
