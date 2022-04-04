@@ -225,6 +225,7 @@
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-eslint-plugin-imports/ @elastic/kibana-operations
 /packages/kbn-generate/ @elastic/kibana-operations
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations

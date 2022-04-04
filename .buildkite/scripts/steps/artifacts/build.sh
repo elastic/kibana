@@ -41,3 +41,7 @@ if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
     --skip-docker-ubuntu \
     --skip-docker-contexts
 fi
+
+cd target
+buildkite-agent artifact upload "*"
+cd -
