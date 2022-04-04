@@ -33,6 +33,7 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsUpdateResponse,
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
@@ -86,12 +87,12 @@ import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
 import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
-import { retryIfConflicts, retryOnBulkIfConflicts } from '../lib/retry_if_conflicts';
+import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { mapSortField, validateOperationOnAttributes } from './lib';
+import { mapSortField, validateOperationOnAttributes, retryIfBulkEditConflicts } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -1369,7 +1370,7 @@ export class RulesClient {
     }
 
     const filter = ids ? this.convertIdsToFilterQuery(ids) : queryFilter;
-
+    const qNodeFilter = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -1386,13 +1387,9 @@ export class RulesClient {
       throw error;
     }
     const { filter: authorizationFilter } = authorizationTuple;
-    const qNodeFilter =
-      (authorizationFilter && filter
-        ? nodeBuilder.and([
-            typeof filter === 'string' ? fromKueryExpression(filter) : filter,
-            authorizationFilter as KueryNode,
-          ])
-        : authorizationFilter) ?? filter;
+    const qNodeFilterWithAuth = authorizationFilter
+      ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
+      : qNodeFilter;
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
@@ -1440,12 +1437,13 @@ export class RulesClient {
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
 
-    const { apiKeysToInvalidate, results, errors } = await retryOnBulkIfConflicts(
+    const { apiKeysToInvalidate, results, errors } = await retryIfBulkEditConflicts(
       this.logger,
-      `rulesClient.update('${JSON.stringify(options.operations)}')`,
-      (rulesToUpdate) => this.unsecuredSavedObjectsClient.bulkUpdate(rulesToUpdate),
+      `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
+        options.paramsModifier ? '[Function]' : undefined
+      }')`,
       this.bulkEditOcc.bind(this),
-      qNodeFilter as KueryNode,
+      qNodeFilterWithAuth,
       options.operations,
       options.paramsModifier
     );
@@ -1482,6 +1480,7 @@ export class RulesClient {
   }): Promise<{
     apiKeysToInvalidate: string[];
     rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+    resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
     errors: BulkEditError[];
   }> {
     const rulesFinder =
@@ -1613,7 +1612,9 @@ export class RulesClient {
         { concurrency: API_KEY_GENERATE_CONCURRENCY }
       );
     }
-    return { apiKeysToInvalidate, rules, errors };
+
+    const result = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+    return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
 
   private apiKeyAsAlertAttributes(

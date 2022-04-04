@@ -11,18 +11,7 @@
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
 
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { noop } from 'lodash';
-import {
-  Logger,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkUpdateResponse,
-  SavedObjectsErrorHelpers,
-  SavedObjectsUpdateResponse,
-} from '../../../../../src/core/server';
-import { BulkEditError, BulkEditOptions } from '../rules_client';
-import { AlertTypeParams, RawRule } from '../types';
+import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 
@@ -62,105 +51,6 @@ export async function retryIfConflicts<T>(
     return await retryIfConflicts(logger, name, operation, retries - 1);
   }
 }
-
-type BulkUpdateRetry = (
-  objects: Array<SavedObjectsBulkUpdateObject<RawRule>>,
-  options?: SavedObjectsBulkUpdateOptions
-) => Promise<SavedObjectsBulkUpdateResponse<RawRule>>;
-
-type GetBulkUpdateObjects = <P extends AlertTypeParams>({
-  filter,
-  operations,
-  paramsModifier,
-}: {
-  filter: KueryNode;
-  operations: BulkEditOptions<P>['operations'];
-  paramsModifier: BulkEditOptions<P>['paramsModifier'];
-}) => Promise<{
-  apiKeysToInvalidate: string[];
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  errors: BulkEditError[];
-}>;
-
-export const retryOnBulkIfConflicts = async <P extends AlertTypeParams>(
-  logger: Logger,
-  name: string,
-  bulkUpdate: BulkUpdateRetry,
-  getBulkUpdateObjects: GetBulkUpdateObjects,
-  filter: KueryNode,
-  operations: BulkEditOptions<P>['operations'],
-  paramsModifier: BulkEditOptions<P>['paramsModifier'],
-  retries: number = RetryForConflictsAttempts,
-  apiKeysToInvalidate: string[] = [],
-  results: Array<SavedObjectsUpdateResponse<RawRule>> = [],
-  errors: BulkEditError[] = []
-): Promise<{
-  apiKeysToInvalidate: string[];
-  results: Array<SavedObjectsUpdateResponse<RawRule>>;
-  errors: BulkEditError[];
-}> => {
-  // run the operation, return if no errors or throw if not a conflict error
-  try {
-    const {
-      apiKeysToInvalidate: localApiKeysToInvalidate,
-      rules: localRules,
-      errors: localErrors,
-    } = await getBulkUpdateObjects({
-      filter,
-      operations,
-      paramsModifier,
-    });
-    const localResults = await bulkUpdate(localRules);
-    const idsWithConflictError = localResults.saved_objects.reduce<string[]>((acc, item) => {
-      if (item.type === 'alert' && item?.error?.statusCode === 409) {
-        return [...acc, item.id];
-      }
-      return acc;
-    }, []);
-
-    if (idsWithConflictError.length > 0) {
-      const newBulkUpdateObjects = localRules.filter((obj) =>
-        idsWithConflictError.includes(obj.id)
-      );
-      if (retries <= 0) {
-        newBulkUpdateObjects.forEach((obj) => {
-          localErrors.push({
-            message: '',
-            rule: {
-              id: obj.id,
-              name: obj.attributes?.name ?? '',
-            },
-          });
-        });
-      } else {
-        const filterKueryNode = nodeBuilder.or(
-          idsWithConflictError.map((ruleId) => nodeBuilder.is('alert.id', `alert:${ruleId}`))
-        );
-        await waitBeforeNextRetry();
-        return await retryOnBulkIfConflicts(
-          logger,
-          name,
-          bulkUpdate,
-          getBulkUpdateObjects,
-          filterKueryNode,
-          operations,
-          paramsModifier,
-          retries - 1,
-          [...apiKeysToInvalidate, ...localApiKeysToInvalidate],
-          [...results, ...localResults.saved_objects.filter((res) => res.error === undefined)],
-          [...errors, ...localErrors]
-        );
-      }
-    }
-    return {
-      apiKeysToInvalidate: [...apiKeysToInvalidate, ...localApiKeysToInvalidate],
-      results: [...results, ...localResults.saved_objects.filter((res) => res.error === undefined)],
-      errors: [...errors, ...localErrors],
-    };
-  } catch (err) {
-    throw err;
-  }
-};
 
 async function waitBeforeNextRetry(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, RetryForConflictsDelay));
