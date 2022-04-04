@@ -85,27 +85,26 @@ export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
     if (retries <= 0) {
       logger.warn(`${name} conflicts, exceeded retries`);
 
-      localRules
+      const conflictErrors = localRules
         .filter((obj) => conflictErrorMap.has(obj.id))
-        .forEach((obj) => {
-          errors.push({
-            message: conflictErrorMap.get(obj.id)?.message ?? 'n/a',
-            rule: {
-              id: obj.id,
-              name: obj.attributes?.name ?? 'n/a',
-            },
-          });
-        });
+        .map((obj) => ({
+          message: conflictErrorMap.get(obj.id)?.message ?? 'n/a',
+          rule: {
+            id: obj.id,
+            name: obj.attributes?.name ?? 'n/a',
+          },
+        }));
 
       return {
         apiKeysToInvalidate,
         results,
-        errors,
+        errors: [...errors, ...conflictErrors],
       };
     }
 
     logger.debug(`${name} conflicts, retrying ...`);
 
+    // delay before retry
     await waitBeforeNextRetry();
     return await retryIfBulkEditConflicts(
       logger,

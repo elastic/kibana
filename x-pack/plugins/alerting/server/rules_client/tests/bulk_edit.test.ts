@@ -387,7 +387,7 @@ describe('bulkEdit()', () => {
                 },
                 {
                   type: 'literal',
-                  value: true,
+                  value: false,
                 },
               ],
               function: 'is',
@@ -405,7 +405,7 @@ describe('bulkEdit()', () => {
                 },
                 {
                   type: 'literal',
-                  value: true,
+                  value: false,
                 },
               ],
               function: 'is',

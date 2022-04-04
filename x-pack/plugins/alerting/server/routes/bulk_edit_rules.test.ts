@@ -94,6 +94,7 @@ describe('bulkEditInternalRulesRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({
       body: {
+        total: 1,
         errors: [],
         rules: [
           expect.objectContaining({
