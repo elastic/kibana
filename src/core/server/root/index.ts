@@ -55,7 +55,6 @@ export class Root {
     console.log();
     console.log();
     console.log();
-    console.log();
     try {
       this.log.debug('setting up root');
       return await this.server.setup();
