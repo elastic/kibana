@@ -148,7 +148,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     onSubmit: async (formData, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
 
-      if (isValid) {
+      if (isValid && !!ecsFieldValue) {
         try {
           await mutateAsync(
             pickBy(
@@ -270,9 +270,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const ecsFieldProps = useMemo(
     () => ({
-      isDisabled: !permissions.writeSavedQueries,
+      isDisabled: !permissions.writeLiveQueries,
     }),
-    [permissions.writeSavedQueries]
+    [permissions.writeLiveQueries]
   );
 
   const isSavedQueryDisabled = useMemo(

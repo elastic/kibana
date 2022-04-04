@@ -274,12 +274,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: [
-        '**/*.{js,mjs,ts,tsx}',
-        '!plugins/**/*',
-        '!packages/elastic-datemath/**/*',
-        '!packages/elastic-eslint-config-kibana/**/*',
-      ],
+      files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',

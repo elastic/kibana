@@ -7,14 +7,13 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { mapValues } from 'lodash';
-import moment from 'moment';
 import { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { InfraTimerangeInput } from '../../../../common/http_api';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
-import { calcualteFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
+import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 
 type ConditionResult = InventoryMetricConditions & {
@@ -34,7 +33,7 @@ export const evaluateCondition = async ({
   compositeSize,
   filterQuery,
   lookbackSize,
-  startTime,
+  executionTimestamp,
   logger,
 }: {
   condition: InventoryMetricConditions;
@@ -45,16 +44,14 @@ export const evaluateCondition = async ({
   compositeSize: number;
   filterQuery?: string;
   lookbackSize?: number;
-  startTime?: number;
+  executionTimestamp: Date;
   logger: Logger;
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
-  const to = startTime ? moment(startTime) : moment();
-
   const timerange = {
-    to: to.valueOf(),
-    from: calcualteFromBasedOnMetric(to, condition, nodeType, metric, customMetric),
+    to: executionTimestamp.valueOf(),
+    from: calculateFromBasedOnMetric(executionTimestamp, condition, nodeType, metric, customMetric),
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;

@@ -232,6 +232,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
+        getSourceConfigData: () => true,
       },
     ],
     buttonLoading: [
