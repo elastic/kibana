@@ -12,7 +12,7 @@ import { STORYBOOK_SECTION } from '../constants';
 import { UseArray } from './use_array';
 import { useArrayStories } from './__stories__';
 
-const { UseArrayBasic, UseArrayComplex, UseArrayDynamicData } = useArrayStories;
+const { UseArrayBasic, UseArrayReorder, UseArrayComplex, UseArrayDynamicData } = useArrayStories;
 
 export default {
   component: UseArray,
@@ -28,4 +28,4 @@ export default {
   ],
 } as ComponentMeta<typeof UseArray>;
 
-export { UseArrayBasic, UseArrayComplex, UseArrayDynamicData };
+export { UseArrayBasic, UseArrayReorder, UseArrayComplex, UseArrayDynamicData };

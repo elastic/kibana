@@ -14,6 +14,7 @@ import { IsModified } from './form_is_modified';
 import { submitForm, FormWrapper } from './form_utils';
 
 import { Basic as UseArrayBasic } from './use_array_basic';
+import { Reorder as UseArrayReorder } from './use_array_reorder';
 import { Complex as UseArrayComplex } from './use_array_complex';
 import { DynamicData as UseArrayDynamicData } from './use_array_dynamic_data';
 
@@ -26,6 +27,7 @@ export const formStories = {
 
 export const useArrayStories = {
   UseArrayBasic,
+  UseArrayReorder,
   UseArrayComplex,
   UseArrayDynamicData,
 };
