@@ -7,7 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialRule } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
   normalizeMachineLearningJobIds,
@@ -85,7 +85,7 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
+}: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (rule == null) {
     return null;
   }
