@@ -72,6 +72,7 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     centralMajorMode,
     ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
     percentageMode,
+    respectRanges: true,
     commonLabel: schemas.metric?.[0]?.label,
   });
 

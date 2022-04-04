@@ -16,7 +16,7 @@ import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
-import { InfraClientStartDeps } from '../types';
+import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
@@ -24,6 +24,7 @@ import { prepareMountElement } from './common_styles';
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
+  pluginStart: InfraClientStartExports,
   { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
 ) => {
   const storage = new Storage(window.localStorage);
@@ -35,6 +36,7 @@ export const renderApp = (
       core={core}
       history={history}
       plugins={plugins}
+      pluginStart={pluginStart}
       setHeaderActionMenu={setHeaderActionMenu}
       storage={storage}
       theme$={theme$}
@@ -50,15 +52,16 @@ export const renderApp = (
 const MetricsApp: React.FC<{
   core: CoreStart;
   history: History<unknown>;
+  pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
   theme$: AppMountParameters['theme$'];
-}> = ({ core, history, plugins, setHeaderActionMenu, storage, theme$ }) => {
+}> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
-    <CoreProviders core={core} plugins={plugins} theme$={theme$}>
+    <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
       <CommonInfraProviders
         appName="Metrics UI"
         setHeaderActionMenu={setHeaderActionMenu}

@@ -14,8 +14,8 @@ import {
   RuleType,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertTypeState,
-  AlertTypeParams,
+  RuleTypeState,
+  RuleTypeParams,
 } from '../../../../../../../plugins/alerting/server';
 
 export const EscapableStrings = {
@@ -53,7 +53,7 @@ function getAlwaysFiringAlertType() {
     groupsToScheduleActionsInSeries: schema.maybe(schema.arrayOf(schema.nullable(schema.string()))),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     groupInSeriesIndex?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -63,7 +63,7 @@ function getAlwaysFiringAlertType() {
     instanceContextValue: boolean;
   }
   const result: RuleType<
-    ParamsType & AlertTypeParams,
+    ParamsType & RuleTypeParams,
     never, // Only use if defining useSavedObjectReferences hook
     State,
     InstanceState,
@@ -153,7 +153,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
 }
 
 function getCumulativeFiringAlertType() {
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     runCount?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -197,7 +197,7 @@ function getNeverFiringAlertType() {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     globalStateValue: boolean;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -401,7 +401,7 @@ function getPatternFiringAlertType() {
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     patternIndex?: number;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -470,7 +470,7 @@ function getPatternSuccessOrFailureAlertType() {
     pattern: schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()])),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     patternIndex?: number;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -510,7 +510,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     pattern: schema.arrayOf(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     patternIndex?: number;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -675,23 +675,32 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
-  const longRunningAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
-    id: 'test.longRunning',
-    name: 'Test: Long Running',
-    actionGroups: [
-      {
-        id: 'default',
-        name: 'Default',
+  function getLongRunningRuleType() {
+    const paramsSchema = schema.object({
+      delay: schema.maybe(schema.number({ defaultValue: 5000 })),
+    });
+    type ParamsType = TypeOf<typeof paramsSchema>;
+
+    const result: RuleType<ParamsType, {}, {}, {}, {}, 'default'> = {
+      id: 'test.longRunning',
+      name: 'Test: Long Running',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      producer: 'alertsFixture',
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor(ruleExecutorOptions) {
+        const { params } = ruleExecutorOptions;
+        await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
       },
-    ],
-    producer: 'alertsFixture',
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    async executor() {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    },
-  };
+    };
+    return result;
+  }
   const exampleAlwaysFiringAlertType: RuleType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> = {
     id: 'example.always-firing',
     name: 'Always firing',
@@ -769,7 +778,7 @@ export function defineAlertTypes(
   alerting.registerType(onlyStateVariablesAlertType);
   alerting.registerType(getPatternFiringAlertType());
   alerting.registerType(throwAlertType);
-  alerting.registerType(longRunningAlertType);
+  alerting.registerType(getLongRunningRuleType());
   alerting.registerType(goldNoopAlertType);
   alerting.registerType(exampleAlwaysFiringAlertType);
   alerting.registerType(multipleSearchesRuleType);
