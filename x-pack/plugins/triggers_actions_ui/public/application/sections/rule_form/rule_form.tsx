@@ -57,7 +57,7 @@ import {
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
 import {
-  AlertActionParam as RuleActionParam,
+  RuleActionParam,
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
