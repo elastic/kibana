@@ -9,7 +9,7 @@ import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
 import { Logger } from 'src/core/server';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { RulesClient, AlertServices } from '../../../../../alerting/server';
+import { RulesClient, RuleExecutorServices } from '../../../../../alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
@@ -21,7 +21,7 @@ import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_
 export const getExportAll = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: AlertServices['savedObjectsClient'],
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   logger: Logger,
   isRuleRegistryEnabled: boolean
 ): Promise<{
