@@ -18,7 +18,7 @@ import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
-  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'noEscape' | 'data'
+  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'assumeObjects' | 'noEscape' | 'data'
 >;
 export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams' | 'data'>;
 
@@ -583,7 +583,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   private resolvePath(obj: any, path: hbs.AST.PathExpression, index = 0) {
-    if (this.compileOptions.strict) {
+    if (this.compileOptions.strict || this.compileOptions.assumeObjects) {
       return this.strictLookup(obj, path);
     }
 
@@ -601,7 +601,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     const len = path.parts.length - (requireTerminal ? 1 : 0);
 
     for (let i = 0; i < len; i++) {
-      obj = obj ? this.container.lookupProperty(obj, path.parts[i]) : obj;
+      obj = this.container.lookupProperty(obj, path.parts[i]);
     }
 
     if (requireTerminal) {

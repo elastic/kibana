@@ -124,4 +124,41 @@ describe('strict', () => {
       }
     });
   });
+
+  describe('assume objects', () => {
+    it('should ignore missing property', () => {
+      expectTemplate('{{hello}}').withCompileOptions({ assumeObjects: true }).toCompileTo('');
+    });
+
+    it('should ignore missing child', () => {
+      expectTemplate('{{hello.bar}}')
+        .withCompileOptions({ assumeObjects: true })
+        .withInput({ hello: {} })
+        .toCompileTo('');
+    });
+
+    it('should error on missing object', () => {
+      expectTemplate('{{hello.bar}}').withCompileOptions({ assumeObjects: true }).toThrow(Error);
+    });
+
+    it('should error on missing context', () => {
+      expectTemplate('{{hello}}')
+        .withCompileOptions({ assumeObjects: true })
+        .withInput(undefined)
+        .toThrow(Error);
+    });
+
+    it('should error on missing data lookup', () => {
+      expectTemplate('{{@hello.bar}}')
+        .withCompileOptions({ assumeObjects: true })
+        .withInput(undefined)
+        .toThrow(Error);
+    });
+
+    it('should execute blockHelperMissing', () => {
+      expectTemplate('{{^hello}}foo{{/hello}}')
+        .withCompileOptions({ assumeObjects: true })
+        .toCompileTo('foo');
+    });
+  });
 });
