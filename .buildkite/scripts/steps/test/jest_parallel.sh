@@ -14,6 +14,7 @@ exitCode=0
 
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
+    # Coverage for unit tests only, skip for jest integration tests
     if [[ "$config" == *"jest.config.js" ]]; then
       export CODE_COVERAGE=true
     else
