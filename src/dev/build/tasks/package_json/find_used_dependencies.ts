@@ -62,7 +62,7 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
 
   const listedDependencies = Object.keys(listedPkgDependencies);
   const filteredListedDependencies = listedDependencies.filter((entry) => {
-    return whiteListedModules.some((nonEntry) => entry.includes(nonEntry));
+    return whiteListedModules.some((nonEntry) => entry === nonEntry);
   });
 
   return filteredListedDependencies.reduce((foundUsedDeps: any, usedDep) => {

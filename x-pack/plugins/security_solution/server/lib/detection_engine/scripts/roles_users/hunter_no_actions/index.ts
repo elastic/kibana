@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const wrapBodyResponse = (obj: object) => JSON.stringify({ body: JSON.stringify(obj) });
-
-export const unwrapBodyResponse = (string: string) => JSON.parse(JSON.parse(string).body);
+import * as hunterNoActionsUser from './detections_user.json';
+import * as hunterNoActionsRole from './detections_role.json';
+export { hunterNoActionsUser, hunterNoActionsRole };

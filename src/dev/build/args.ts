@@ -22,6 +22,8 @@ export function readCliArgs(argv: string[]) {
       'skip-os-packages',
       'rpm',
       'deb',
+      'docker-context-use-local-artifact',
+      'docker-cross-compile',
       'docker-images',
       'skip-docker-contexts',
       'skip-docker-ubi',
@@ -49,6 +51,8 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-context-use-local-artifact': null,
+      'docker-cross-compile': false,
       'version-qualifier': '',
     },
     unknown: (flag) => {
@@ -94,6 +98,8 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerContextUseLocalArtifact: flags['docker-context-use-local-artifact'],
+    dockerCrossCompile: Boolean(flags['docker-cross-compile']),
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
     createGenericFolders: !Boolean(flags['skip-generic-folders']),

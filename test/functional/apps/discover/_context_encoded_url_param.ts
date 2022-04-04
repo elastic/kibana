@@ -12,30 +12,32 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('context encoded id param', () => {
+  describe('encoded URL params in context page', () => {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
-        path: '/includes-plus-symbol-doc-id/_doc/1+1=2',
+        path: '/context-encoded-param/_doc/1+1=2',
         method: 'PUT',
         body: {
           username: 'Dmitry',
           '@timestamp': '2015-09-21T09:30:23',
         },
       });
-      await PageObjects.settings.createIndexPattern('includes-plus-symbol-doc-id');
+      await PageObjects.settings.createIndexPattern('context-encoded-param');
 
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
-    it('should navigate to context page correctly', async () => {
-      await PageObjects.discover.selectIndexPattern('includes-plus-symbol-doc-id');
+    it('should navigate correctly', async () => {
+      await PageObjects.discover.selectIndexPattern('context-encoded-param');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // navigate to the context view

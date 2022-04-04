@@ -50,7 +50,7 @@ function FormRow({
     if (!configEntry) {
       return null;
     }
-    const { value } = configEntry;
+    const { value, frozen } = configEntry;
     const { isValid, message } = validateSettingValue(row, value);
     return (
       <React.Fragment key={key}>
@@ -69,7 +69,12 @@ function FormRow({
               </EuiText>
             }
           >
-            <FormRowSetting row={row} onChange={onChange} value={value} />
+            <FormRowSetting
+              row={row}
+              onChange={onChange}
+              value={value}
+              isDisabled={frozen}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         {row.settings &&
