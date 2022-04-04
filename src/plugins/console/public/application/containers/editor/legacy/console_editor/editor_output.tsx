@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { VectorTile } from '@mapbox/vector-tile';
+import { VectorTile, VectorTileFeature } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -67,24 +67,44 @@ function parseResult(response: VectorTile) {
   for (const property in data) {
     if (data.hasOwnProperty(property)) {
       const propertyObject = data[property];
-      const vectorTileData = [];
       const featuresArray = [];
 
       for (let index = 0; index < propertyObject.length; index++) {
         const feature = propertyObject.feature(index);
         const properties = feature.properties;
         const geometry = feature.loadGeometry()[0];
+        const typeName = VectorTileFeature.types[feature.type];
+        let coordinates = [];
+
+        const coordinatesArray = [];
+        for (const value of geometry) {
+          coordinatesArray.push([value.x, value.y]);
+        }
+
+        switch (feature.type) {
+          case 1:
+            coordinates.push(geometry[0].x, geometry[0].y);
+            break;
+          case 2: {
+            coordinates = coordinatesArray;
+            break;
+          }
+          case 3: {
+            coordinates.push(coordinatesArray);
+            break;
+          }
+        }
 
         featuresArray.push({
           geometry: {
-            coordinates: geometry,
+            type: typeName,
+            coordinates,
           },
           properties,
         });
       }
 
-      vectorTileData.push(...featuresArray);
-      output[property] = vectorTileData;
+      output[property] = [...featuresArray];
     }
   }
 
