@@ -58,6 +58,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
           browserTimezone: 'America/Los_Angeles',
           urls: [hashUrl],
         })
+          // Pipe is required to ensure that we can subscribe to it
+          .pipe()
       )
         .then((screenshot) => {
           // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')

@@ -27,6 +27,7 @@ import {
 } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import { Subscriber } from 'rxjs';
 import { ConfigType } from '../../../config';
 import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '../';
@@ -136,146 +137,144 @@ export class HeadlessChromiumDriverFactory {
     { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
-    return new Rx.Observable((observer) => {
+    return Rx.Observable.create(async (observer: Subscriber<unknown>) => {
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
 
       const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
-      (async () => {
-        let browser: Browser | undefined;
-        try {
-          browser = await puppeteer.launch({
-            pipe: !this.config.browser.chromium.inspect,
-            userDataDir: this.userDataDir,
-            executablePath: this.binaryPath,
-            ignoreHTTPSErrors: true,
-            handleSIGHUP: false,
-            args: chromiumArgs,
+      let browser: Browser | undefined;
+      try {
+        browser = await puppeteer.launch({
+          pipe: !this.config.browser.chromium.inspect,
+          userDataDir: this.userDataDir,
+          executablePath: this.binaryPath,
+          ignoreHTTPSErrors: true,
+          handleSIGHUP: false,
+          args: chromiumArgs,
 
-            // We optionally set this at page creation to reduce the chances of
-            // browser reflow. In most cases only the height needs to be adjusted
-            // before taking a screenshot.
-            // NOTE: _.defaults assigns to the target object, so we copy it.
-            // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
-            defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
-            env: {
-              TZ: browserTimezone,
-            },
-          });
-        } catch (err) {
-          observer.error(
-            new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
-          );
-          return;
-        }
-
-        const page = await browser.newPage();
-        const devTools = await page.target().createCDPSession();
-
-        await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
-        const startMetrics = await devTools.send('Performance.getMetrics');
-
-        // Log version info for debugging / maintenance
-        const versionInfo = await devTools.send('Browser.getVersion');
-        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
-
-        await page.emulateTimezone(browserTimezone);
-
-        // Set the default timeout for all navigation methods to the openUrl timeout
-        // All waitFor methods have their own timeout config passed in to them
-        page.setDefaultTimeout(openUrlTimeout);
-
-        logger.debug(`Browser page driver created`);
-
-        const childProcess = {
-          async kill(): Promise<ClosePageResult> {
-            if (page.isClosed()) {
-              return {};
-            }
-
-            let metrics: PerformanceMetrics | undefined;
-
-            try {
-              if (devTools && startMetrics) {
-                const endMetrics = await devTools.send('Performance.getMetrics');
-                metrics = getMetrics(startMetrics, endMetrics);
-                const { cpuInPercentage, memoryInMegabytes } = metrics;
-
-                logger.debug(
-                  `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
-                );
-              }
-            } catch (error) {
-              logger.error(error);
-            }
-
-            try {
-              logger.debug('Attempting to close browser...');
-              await browser?.close();
-              logger.debug('Browser closed.');
-            } catch (err) {
-              // do not throw
-              logger.error(err);
-            }
-
-            return { metrics };
+          // We optionally set this at page creation to reduce the chances of
+          // browser reflow. In most cases only the height needs to be adjusted
+          // before taking a screenshot.
+          // NOTE: _.defaults assigns to the target object, so we copy it.
+          // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
+          defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
+          env: {
+            TZ: browserTimezone,
           },
-        };
-        const { terminate$ } = safeChildProcess(logger, childProcess);
-
-        // Ensure that the browser is closed once the observable completes.
-        observer.add(() => {
-          if (page.isClosed()) return; // avoid emitting a log unnecessarily
-          logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
-          childProcess.kill(); // ignore async
         });
-
-        // make the observer subscribe to terminate$
-        observer.add(
-          terminate$
-            .pipe(
-              tap((signal) => {
-                logger.debug(`Termination signal received: ${signal}`);
-              }),
-              ignoreElements()
-            )
-            .subscribe(observer)
+      } catch (err) {
+        observer.error(
+          new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
         );
+        return;
+      }
 
-        // taps the browser log streams and combine them to Kibana logs
-        this.getBrowserLogger(page, logger).subscribe();
-        this.getProcessLogger(browser, logger).subscribe();
+      const page = await browser.newPage();
+      const devTools = await page.target().createCDPSession();
 
-        // HeadlessChromiumDriver: object to "drive" a browser page
-        const driver = new HeadlessChromiumDriver(
-          this.screenshotMode,
-          this.config,
-          this.basePath,
-          page
-        );
+      await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
+      const startMetrics = await devTools.send('Performance.getMetrics');
 
-        // Rx.Observable<never>: stream to interrupt page capture
-        const unexpectedExit$ = this.getPageExit(browser, page);
+      // Log version info for debugging / maintenance
+      const versionInfo = await devTools.send('Browser.getVersion');
+      logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
-        observer.next({
-          driver,
-          unexpectedExit$,
-          close: () => Rx.from(childProcess.kill()),
-        });
+      await page.emulateTimezone(browserTimezone);
 
-        // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
-        observer.add(() => {
-          const userDataDir = this.userDataDir;
-          logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
-          // the unsubscribe function isn't `async` so we're going to make our best effort at
-          // deleting the userDataDir and if it fails log an error.
-          del(userDataDir, { force: true }).catch((error) => {
-            logger.error(`error deleting user data directory at [${userDataDir}]!`);
+      // Set the default timeout for all navigation methods to the openUrl timeout
+      // All waitFor methods have their own timeout config passed in to them
+      page.setDefaultTimeout(openUrlTimeout);
+
+      logger.debug(`Browser page driver created`);
+
+      const childProcess = {
+        async kill(): Promise<ClosePageResult> {
+          if (page.isClosed()) {
+            return {};
+          }
+
+          let metrics: PerformanceMetrics | undefined;
+
+          try {
+            if (devTools && startMetrics) {
+              const endMetrics = await devTools.send('Performance.getMetrics');
+              metrics = getMetrics(startMetrics, endMetrics);
+              const { cpuInPercentage, memoryInMegabytes } = metrics;
+
+              logger.debug(
+                `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
+              );
+            }
+          } catch (error) {
             logger.error(error);
-          });
+          }
+
+          try {
+            logger.debug('Attempting to close browser...');
+            await browser?.close();
+            logger.debug('Browser closed.');
+          } catch (err) {
+            // do not throw
+            logger.error(err);
+          }
+
+          return { metrics };
+        },
+      };
+      const { terminate$ } = safeChildProcess(logger, childProcess);
+
+      // Ensure that the browser is closed once the observable completes.
+      observer.add(() => {
+        if (page.isClosed()) return; // avoid emitting a log unnecessarily
+        logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
+        childProcess.kill(); // ignore async
+      });
+
+      // make the observer subscribe to terminate$
+      observer.add(
+        terminate$
+          .pipe(
+            tap((signal) => {
+              logger.debug(`Termination signal received: ${signal}`);
+            }),
+            ignoreElements()
+          )
+          .subscribe(observer)
+      );
+
+      // taps the browser log streams and combine them to Kibana logs
+      this.getBrowserLogger(page, logger).subscribe();
+      this.getProcessLogger(browser, logger).subscribe();
+
+      // HeadlessChromiumDriver: object to "drive" a browser page
+      const driver = new HeadlessChromiumDriver(
+        this.screenshotMode,
+        this.config,
+        this.basePath,
+        page
+      );
+
+      // Rx.Observable<never>: stream to interrupt page capture
+      const unexpectedExit$ = this.getPageExit(browser, page);
+
+      observer.next({
+        driver,
+        unexpectedExit$,
+        close: () => Rx.from(childProcess.kill()),
+      });
+
+      // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
+      observer.add(() => {
+        const userDataDir = this.userDataDir;
+        logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
+        // the unsubscribe function isn't `async` so we're going to make our best effort at
+        // deleting the userDataDir and if it fails log an error.
+        del(userDataDir, { force: true }).catch((error) => {
+          logger.error(`error deleting user data directory at [${userDataDir}]!`);
+          logger.error(error);
         });
-      })();
+      });
     });
   }
 
