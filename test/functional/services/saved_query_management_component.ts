@@ -161,6 +161,12 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async savedQueryExistOrFail(title: string) {
     await this.openSavedQueryManagementComponent();
+    await this.retry.waitFor('load saved query', async () => {
+      const shouldClickLoadMenu = await this.testSubjects.exists(
+        'saved-query-management-load-button'
+      );
+      return shouldClickLoadMenu === true;
+    });
     await this.testSubjects.click('saved-query-management-load-button');
     await this.testSubjects.existOrFail(`~load-saved-query-${title}-button`);
   }

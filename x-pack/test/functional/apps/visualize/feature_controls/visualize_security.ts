@@ -140,7 +140,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
-        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
         await savedQueryManagementComponent.deleteSavedQuery('foo');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
