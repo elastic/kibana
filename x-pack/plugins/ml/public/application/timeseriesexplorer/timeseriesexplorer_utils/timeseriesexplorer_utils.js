@@ -365,7 +365,7 @@ export function calculateAggregationInterval(bounds, bucketsTarget, jobs, select
   const secs = aggInterval.asSeconds();
   if (secs < bucketSpanSeconds) {
     buckets.setInterval(bucketSpanSeconds + 's');
-    aggInterval = buckets.getInterval();
+    aggInterval = buckets.getIntervaconsole.logl();
   }
 
   return aggInterval;

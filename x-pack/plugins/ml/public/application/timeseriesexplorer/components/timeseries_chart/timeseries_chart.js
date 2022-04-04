@@ -149,7 +149,6 @@ class TimeseriesChartIntl extends Component {
     const vizWidth = this.vizWidth;
 
     this.focusXScale = d3.time.scale().range([0, vizWidth]);
-    console.log('focusYScale focusHeight, focusZoomPanelHeight', focusHeight, focusZoomPanelHeight);
     this.focusYScale = d3.scale.linear().range([focusHeight, focusZoomPanelHeight]);
     const focusXScale = this.focusXScale;
     const focusYScale = this.focusYScale;
@@ -332,7 +331,6 @@ class TimeseriesChartIntl extends Component {
     // Temporarily set the domain of the focus y axis to the min / max of the full context chart
     // data range so that we can measure the maximum tick label width on temporary text elements.
     focusYScale.domain([flooredMin, ceiledMax]);
-    console.log('flooredMin, ceiledMax', flooredMin, ceiledMax, focusYScale);
 
     let maxYAxisLabelWidth = 0;
     const tempLabelText = svg.append('g').attr('class', 'temp-axis-label tick');
