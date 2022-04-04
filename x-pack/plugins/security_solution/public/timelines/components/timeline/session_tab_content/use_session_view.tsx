@@ -110,13 +110,13 @@ export const useSessionView = ({
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  console.log()
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const { graphEventId, sessionViewConfig, activeTab, prevActiveTab } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
+
   const onCloseOverlay = useCallback(() => {
     const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
     // Since EUI changes these values directly as a side effect, need to add them back on close.
