@@ -1485,10 +1485,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.2.0-canary.1":
-  version "8.2.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.2.0-canary.1.tgz#da547aaf0a39846cda4484bc021dea2117acaf0c"
-  integrity sha512-MxDCQjcKgxQulX+PJiPWdwFJwYq5J1EVycU5EaE1sDODLnnJp5dvQFPtRRla9MM5Elyy52swtfzQA5ktGixyRg==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.2.0-canary.2":
+  version "8.2.0-canary.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.2.0-canary.2.tgz#2513926cdbfe7c070e1fa6926f7829171b27cdba"
+  integrity sha512-Ki2lQ3/UlOnBaf5EjNw0WmCdXiW+J020aYtdVnIuCNhPSLoNPKoM7P+MlggdfeRnENvINlStrMy4bkYF/h6Vbw==
   dependencies:
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
@@ -9974,10 +9974,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^99.0.0:
-  version "99.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-99.0.0.tgz#fbfcc7e74991dd50962e7dd456d78eaf49f56774"
-  integrity sha512-pyB+5LuyZdb7EBPL3i5D5yucZUD+SlkdiUtmpjaEnLd9zAXp+SvD/hP5xF4l/ZmWvUo/1ZLxAI1YBdhazGTpgA==
+chromedriver@^100.0.0:
+  version "100.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-100.0.0.tgz#1b4bf5c89cea12c79f53bc94d8f5bb5aa79ed7be"
+  integrity sha512-oLfB0IgFEGY9qYpFQO/BNSXbPw7bgfJUN5VX8Okps9W2qNT4IqKh5hDwKWtpUIQNI6K3ToWe2/J5NdpurTY02g==
   dependencies:
     "@testim/chrome-version" "^1.1.2"
     axios "^0.24.0"

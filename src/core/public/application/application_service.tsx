@@ -31,6 +31,7 @@ import {
   InternalApplicationStart,
   Mounter,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
@@ -234,13 +235,19 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
+      {
+        deepLinkId,
+        path,
+        state,
+        replace = false,
+        openInNewTab = false,
+        skipAppLeave = false,
+      }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
-      const shouldNavigate = navigatingToSameApp
-        ? true
-        : await this.shouldNavigate(overlays, appId);
+      const shouldNavigate =
+        navigatingToSameApp || skipAppLeave ? true : await this.shouldNavigate(overlays, appId);
 
       const targetApp = applications$.value.get(appId);
 
@@ -304,12 +311,19 @@ export class ApplicationService {
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
-      navigateToUrl: async (url) => {
+      navigateToUrl: async (
+        url: string,
+        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+      ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
-        if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path });
-        } else {
+        if ((forceRedirect || !appInfo) === true) {
+          if (skipAppLeave) {
+            window.removeEventListener('beforeunload', this.onBeforeUnload);
+          }
           return this.redirectTo!(url);
+        }
+        if (appInfo) {
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
         }
       },
       getComponent: () => {
