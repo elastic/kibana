@@ -26,7 +26,6 @@ import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
-import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import { UsersDetailsProps } from './types';
@@ -52,6 +51,7 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { LandingPageComponent } from '../../../common/components/landing_page';
 const QUERY_ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
@@ -194,11 +194,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <HeaderPage border title={detailName} />
-
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

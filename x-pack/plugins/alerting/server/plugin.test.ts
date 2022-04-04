@@ -19,6 +19,7 @@ import { AlertingConfig } from './config';
 import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
+import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
@@ -276,6 +277,7 @@ describe('Alerting Plugin', () => {
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
+          data: dataPluginMock.createStartContract(),
         });
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -313,6 +315,7 @@ describe('Alerting Plugin', () => {
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
+          data: dataPluginMock.createStartContract(),
         });
 
         const fakeRequest = {
@@ -361,6 +364,7 @@ describe('Alerting Plugin', () => {
         licensing: licensingMock.createStart(),
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),
+        data: dataPluginMock.createStartContract(),
       });
 
       const fakeRequest = {
