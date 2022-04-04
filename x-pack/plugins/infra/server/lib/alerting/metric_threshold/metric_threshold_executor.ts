@@ -8,14 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { first, isEqual, last } from 'lodash';
-import moment from 'moment';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+import { Alert, RuleTypeState } from '../../../../../alerting/server';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
@@ -67,7 +66,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const { services, params, state } = options;
+    const { services, params, state, startedAt } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
@@ -94,7 +93,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
-        const timestamp = moment().toISOString();
+        const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
@@ -138,7 +137,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       params as EvaluatedRuleParams,
       config,
       prevGroups,
-      compositeSize
+      compositeSize,
+      { end: startedAt.valueOf() }
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
@@ -225,7 +225,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       if (reason) {
         const firstResult = first(alertResults);
-        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? startedAt.toISOString();
         const actionGroupId =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id

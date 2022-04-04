@@ -14,7 +14,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { RuleAlertType } from '../../rules/types';
 
 import type { RulesClient } from '../../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../../alerting/common';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -211,7 +211,7 @@ export const migrateRuleActions = async ({
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   rule: RuleAlertType;
-}): Promise<SanitizedAlert<RuleParams>> => {
+}): Promise<SanitizedRule<RuleParams>> => {
   const migratedRule = await legacyMigrate({
     rulesClient,
     savedObjectsClient,
