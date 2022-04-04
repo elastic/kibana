@@ -26,6 +26,7 @@ import type {
   RegistryDataStream,
   PackagePolicyInputStream,
   PackagePolicy,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -1353,6 +1354,51 @@ describe('Package policy service', () => {
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
+    });
+  });
+
+  describe('runPostPackagePolicyPostCreateCallback', () => {
+    let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+    let request: KibanaRequest;
+    const packagePolicy = createPackagePolicyMock();
+    const callbackCallingOrder: string[] = [];
+
+    beforeEach(() => {
+      context = xpackMocks.createRequestHandlerContext();
+      request = httpServerMock.createKibanaRequest();
+      appContextService.start(createAppContextStartContractMock());
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+      jest.clearAllMocks();
+      callbackCallingOrder.length = 0;
+    });
+
+    it('should execute external callbacks', async () => {
+      const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('a');
+        return ds;
+      });
+
+      const callbackB: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('b');
+        return ds;
+      });
+
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackA);
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackB);
+
+      await packagePolicyService.runExternalCallbacks(
+        'packagePolicyPostCreate',
+        packagePolicy,
+        context,
+        request
+      );
+
+      expect(callbackA).toHaveBeenCalledWith(packagePolicy, context, request);
+      expect(callbackB).toHaveBeenCalledWith(packagePolicy, context, request);
+      expect(callbackCallingOrder).toEqual(['a', 'b']);
     });
   });
 
