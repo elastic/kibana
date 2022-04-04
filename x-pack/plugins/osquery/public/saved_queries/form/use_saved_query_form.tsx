@@ -50,7 +50,7 @@ export const useSavedQueryForm = ({
     onSubmit: async (formData, isValid) => {
       const ecsFieldValue = await savedQueryFormRef?.current?.validateEcsMapping();
 
-      if (isValid) {
+      if (isValid && !!ecsFieldValue) {
         try {
           await handleSubmit({
             ...formData,
