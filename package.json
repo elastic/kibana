@@ -106,7 +106,7 @@
     "@elastic/apm-synthtrace": "link:bazel-bin/packages/elastic-apm-synthtrace",
     "@elastic/charts": "45.1.1",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.2.0-canary.1",
+    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.2.0-canary.2",
     "@elastic/ems-client": "8.2.0",
     "@elastic/eui": "53.0.1",
     "@elastic/filesaver": "1.1.2",

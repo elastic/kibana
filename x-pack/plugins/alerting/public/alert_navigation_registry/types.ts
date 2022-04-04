@@ -6,7 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { SanitizedAlert } from '../../common';
+import { SanitizedRule } from '../../common';
 
 /**
  * Returns information that can be used to navigate to a specific page to view the given rule.
@@ -17,4 +17,4 @@ import { SanitizedAlert } from '../../common';
  * originally registered to {@link PluginSetupContract.registerNavigation}.
  *
  */
-export type AlertNavigationHandler = (alert: SanitizedAlert) => JsonObject | string;
+export type AlertNavigationHandler = (rule: SanitizedRule) => JsonObject | string;

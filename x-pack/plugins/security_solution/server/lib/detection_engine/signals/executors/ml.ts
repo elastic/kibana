@@ -10,7 +10,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
@@ -41,7 +41,7 @@ export const mlExecutor = async ({
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
