@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useContext, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useContext, useMemo, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonEmpty,
@@ -80,6 +80,7 @@ export function DiscoverGridDocumentToolbarBtn({
   setSelectedDocs: (value: string[]) => void;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const getMenuItems = useCallback(() => {
     return [
@@ -154,13 +155,19 @@ export function DiscoverGridDocumentToolbarBtn({
     []
   );
 
+  const closePopover = useCallback(() => {
+    setIsSelectionPopoverOpen(false);
+    buttonRef.current?.focus();
+  }, [setIsSelectionPopoverOpen, buttonRef]);
+
   return (
     <EuiPopover
-      closePopover={() => setIsSelectionPopoverOpen(false)}
+      closePopover={closePopover}
       isOpen={isSelectionPopoverOpen}
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
+          buttonRef={buttonRef}
           size="xs"
           color="text"
           iconType="documents"
