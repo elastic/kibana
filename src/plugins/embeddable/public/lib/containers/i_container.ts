@@ -107,5 +107,5 @@ export interface IContainer<
     id: string,
     newExplicitInput: Partial<EEI>,
     newType?: string
-  ): Promise<E | ErrorEmbeddable>;
+  ): void;
 }

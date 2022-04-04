@@ -307,6 +307,21 @@ export class ControlGroupContainer extends Container<
     } as ControlPanelState<TEmbeddableInput>;
   }
 
+  protected getReplacementPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
+    id: string,
+    factory: EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>,
+    newExplicitInput: Partial<ControlInput>
+  ): ControlPanelState<TEmbeddableInput> {
+    const oldOrder = this.getInput().panels[id].order;
+    const newPanelState = super.getReplacementPanelState(
+      id,
+      factory,
+      newExplicitInput
+    ) as ControlPanelState<TEmbeddableInput>;
+    newPanelState.order = oldOrder;
+    return newPanelState;
+  }
+
   protected onRemoveEmbeddable(idToRemove: string) {
     const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
     const removedOrder = this.childOrderCache.IdsToOrder[idToRemove];

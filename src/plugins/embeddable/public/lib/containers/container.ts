@@ -132,11 +132,25 @@ export abstract class Container<
     return this.createAndSaveEmbeddable(type, panelState);
   }
 
-  public async replaceEmbeddable<
+  protected getReplacementPanelState<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(id: string, newExplicitInput: Partial<EEI>, newType?: string): Promise<E | ErrorEmbeddable> {
+  >(
+    id: string,
+    factory: EmbeddableFactory<EEI, EEO, E>,
+    newExplicitInput: Partial<EEI>
+  ): PanelState<EEI> {
+    const newPanelState = this.createNewPanelState<EEI, E>(factory, newExplicitInput);
+    newPanelState.explicitInput = { ...newPanelState.explicitInput, id };
+    return newPanelState;
+  }
+
+  public replaceEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(id: string, newExplicitInput: Partial<EEI>, newType?: string) {
     // console.log('Panels before replace: ', this.input.panels);
     if (!this.input.panels[id]) {
       throw new PanelNotFoundError();
@@ -150,9 +164,7 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(newType);
       }
       this.onPanelRemoved(id);
-      const newPanelState = this.createNewPanelState<EEI, E>(factory, newExplicitInput);
-      newPanelState.explicitInput = { ...newPanelState.explicitInput, id };
-      // console.log(newPanelState);
+      const newPanelState = this.getReplacementPanelState(id, factory, newExplicitInput);
       this.updateInput({
         panels: {
           ...this.input.panels,
@@ -163,7 +175,7 @@ export abstract class Container<
       this.onPanelAdded(this.input.panels[id]);
     }
     // console.log('Panels after replace: ', this.input.panels);
-    return await this.untilEmbeddableLoaded<E>(id);
+    // return await this.untilEmbeddableLoaded<E>(id);
   }
 
   public removeEmbeddable(embeddableId: string) {
