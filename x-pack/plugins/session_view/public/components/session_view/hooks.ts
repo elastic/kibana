@@ -108,6 +108,7 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
+      cacheTime: 0,
     }
   );
 

@@ -56,6 +56,7 @@ const previouslyRegisteredTypes = [
   'fleet-preconfiguration-deletion-record',
   'graph-workspace',
   'index-pattern',
+  'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'ingest-agent-policies',
   'ingest-outputs',

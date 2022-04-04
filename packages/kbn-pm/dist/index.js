@@ -649,13 +649,20 @@ class ToolingLog {
       return;
     }
 
-    return (async () => {
-      try {
-        return await block();
-      } finally {
-        this.indentWidth$.next(originalWidth);
-      }
-    })();
+    const maybePromise = block();
+
+    if (typeof maybePromise === 'object' && maybePromise && typeof maybePromise.then === 'function') {
+      return (async () => {
+        try {
+          return await maybePromise;
+        } finally {
+          this.indentWidth$.next(originalWidth);
+        }
+      })();
+    }
+
+    this.indentWidth$.next(originalWidth);
+    return maybePromise;
   }
 
   verbose(...args) {
@@ -9304,7 +9311,10 @@ class CiStatsReporter {
           headers,
           data: body,
           params: query,
-          adapter: _http.default
+          adapter: _http.default,
+          // if it can be serialized into a string, send it
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity
         });
         return resp.data;
       } catch (error) {

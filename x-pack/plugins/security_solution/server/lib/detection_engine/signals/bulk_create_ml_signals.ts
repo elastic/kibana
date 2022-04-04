@@ -12,7 +12,7 @@ import { Logger } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
@@ -20,11 +20,12 @@ import { BuildRuleMessage } from './rule_messages';
 import { BulkCreate, WrapHits } from './types';
 import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
+import { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
   completeRule: CompleteRule<MachineLearningRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
@@ -86,7 +87,7 @@ const transformAnomalyResultsToEcs = (
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 

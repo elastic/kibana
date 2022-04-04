@@ -72,8 +72,11 @@ export const getIndexData = async (
         );
         setTableItems(
           resp.hits.hits.map((d) =>
-            getProcessedFields(d.fields ?? {}, (key: string) =>
-              key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+            getProcessedFields(
+              d.fields ?? {},
+              (key: string) =>
+                key.startsWith(`${jobConfig.dest.results_field}.feature_importance`) ||
+                key.startsWith(`${jobConfig.dest.results_field}.feature_influence`)
             )
           )
         );

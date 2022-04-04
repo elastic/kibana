@@ -96,179 +96,189 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
 
 const aggregateResults = {
   aggregations: {
-    executionUuid: {
+    excludeExecuteStart: {
       meta: {},
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: '6705da7d-2635-499d-a6a8-1aee1ae1eac9',
-          doc_count: 27,
-          timeoutMessage: {
-            meta: {},
-            doc_count: 0,
-          },
-          alertCounts: {
-            meta: {},
-            buckets: {
-              activeAlerts: {
-                doc_count: 5,
-              },
-              newAlerts: {
-                doc_count: 5,
-              },
-              recoveredAlerts: {
-                doc_count: 0,
-              },
+      doc_count: 875,
+      executionUuid: {
+        meta: {},
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [
+          {
+            key: '6705da7d-2635-499d-a6a8-1aee1ae1eac9',
+            doc_count: 27,
+            timeoutMessage: {
+              meta: {},
+              doc_count: 0,
             },
-          },
-          ruleExecution: {
-            meta: {},
-            doc_count: 1,
-            numTriggeredActions: {
-              value: 5.0,
-            },
-            outcomeAndMessage: {
-              hits: {
-                total: {
-                  value: 1,
-                  relation: 'eq',
+            alertCounts: {
+              meta: {},
+              buckets: {
+                activeAlerts: {
+                  doc_count: 5,
                 },
-                max_score: 1.0,
-                hits: [
-                  {
-                    _index: '.kibana-event-log-8.2.0-000001',
-                    _id: 'S4wIZX8B8TGQpG7XQZns',
-                    _score: 1.0,
-                    _source: {
-                      event: {
-                        outcome: 'success',
+                newAlerts: {
+                  doc_count: 5,
+                },
+                recoveredAlerts: {
+                  doc_count: 0,
+                },
+              },
+            },
+            ruleExecution: {
+              meta: {},
+              doc_count: 1,
+              numTriggeredActions: {
+                value: 5.0,
+              },
+              numScheduledActions: {
+                value: 5.0,
+              },
+              outcomeAndMessage: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1.0,
+                  hits: [
+                    {
+                      _index: '.kibana-event-log-8.2.0-000001',
+                      _id: 'S4wIZX8B8TGQpG7XQZns',
+                      _score: 1.0,
+                      _source: {
+                        event: {
+                          outcome: 'success',
+                        },
+                        message:
+                          "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                       },
-                      message:
-                        "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                     },
+                  ],
+                },
+              },
+              scheduleDelay: {
+                value: 3.126e9,
+              },
+              totalSearchDuration: {
+                value: 0.0,
+              },
+              esSearchDuration: {
+                value: 0.0,
+              },
+              executionDuration: {
+                value: 1.056e9,
+              },
+              executeStartTime: {
+                value: 1.646667512617e12,
+                value_as_string: '2022-03-07T15:38:32.617Z',
+              },
+            },
+            actionExecution: {
+              meta: {},
+              doc_count: 5,
+              actionOutcomes: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 5,
                   },
                 ],
               },
             },
-            scheduleDelay: {
-              value: 3.126e9,
-            },
-            totalSearchDuration: {
-              value: 0.0,
-            },
-            esSearchDuration: {
-              value: 0.0,
-            },
-            executionDuration: {
-              value: 1.056e9,
-            },
-            executeStartTime: {
-              value: 1.646667512617e12,
-              value_as_string: '2022-03-07T15:38:32.617Z',
-            },
           },
-          actionExecution: {
-            meta: {},
-            doc_count: 5,
-            actionOutcomes: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'success',
+          {
+            key: '41b2755e-765a-4044-9745-b03875d5e79a',
+            doc_count: 32,
+            timeoutMessage: {
+              meta: {},
+              doc_count: 0,
+            },
+            alertCounts: {
+              meta: {},
+              buckets: {
+                activeAlerts: {
                   doc_count: 5,
                 },
-              ],
-            },
-          },
-        },
-        {
-          key: '41b2755e-765a-4044-9745-b03875d5e79a',
-          doc_count: 32,
-          timeoutMessage: {
-            meta: {},
-            doc_count: 0,
-          },
-          alertCounts: {
-            meta: {},
-            buckets: {
-              activeAlerts: {
-                doc_count: 5,
-              },
-              newAlerts: {
-                doc_count: 5,
-              },
-              recoveredAlerts: {
-                doc_count: 5,
-              },
-            },
-          },
-          ruleExecution: {
-            meta: {},
-            doc_count: 1,
-            numTriggeredActions: {
-              value: 5.0,
-            },
-            outcomeAndMessage: {
-              hits: {
-                total: {
-                  value: 1,
-                  relation: 'eq',
+                newAlerts: {
+                  doc_count: 5,
                 },
-                max_score: 1.0,
-                hits: [
-                  {
-                    _index: '.kibana-event-log-8.2.0-000001',
-                    _id: 'a4wIZX8B8TGQpG7Xwpnz',
-                    _score: 1.0,
-                    _source: {
-                      event: {
-                        outcome: 'success',
+                recoveredAlerts: {
+                  doc_count: 5,
+                },
+              },
+            },
+            ruleExecution: {
+              meta: {},
+              doc_count: 1,
+              numTriggeredActions: {
+                value: 5.0,
+              },
+              numScheduledActions: {
+                value: 5.0,
+              },
+              outcomeAndMessage: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1.0,
+                  hits: [
+                    {
+                      _index: '.kibana-event-log-8.2.0-000001',
+                      _id: 'a4wIZX8B8TGQpG7Xwpnz',
+                      _score: 1.0,
+                      _source: {
+                        event: {
+                          outcome: 'success',
+                        },
+                        message:
+                          "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                       },
-                      message:
-                        "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                     },
+                  ],
+                },
+              },
+              scheduleDelay: {
+                value: 3.345e9,
+              },
+              totalSearchDuration: {
+                value: 0.0,
+              },
+              esSearchDuration: {
+                value: 0.0,
+              },
+              executionDuration: {
+                value: 1.165e9,
+              },
+              executeStartTime: {
+                value: 1.646667545604e12,
+                value_as_string: '2022-03-07T15:39:05.604Z',
+              },
+            },
+            actionExecution: {
+              meta: {},
+              doc_count: 5,
+              actionOutcomes: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 5,
                   },
                 ],
               },
             },
-            scheduleDelay: {
-              value: 3.345e9,
-            },
-            totalSearchDuration: {
-              value: 0.0,
-            },
-            esSearchDuration: {
-              value: 0.0,
-            },
-            executionDuration: {
-              value: 1.165e9,
-            },
-            executeStartTime: {
-              value: 1.646667545604e12,
-              value_as_string: '2022-03-07T15:39:05.604Z',
-            },
           },
-          actionExecution: {
-            meta: {},
-            doc_count: 5,
-            actionOutcomes: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'success',
-                  doc_count: 5,
-                },
-              ],
-            },
-          },
-        },
-      ],
-    },
-    executionUuidCardinality: {
-      value: 374,
+        ],
+      },
+      executionUuidCardinality: {
+        value: 374,
+      },
     },
   },
 };
@@ -625,6 +635,7 @@ describe('getExecutionLogForRule()', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -643,6 +654,7 @@ describe('getExecutionLogForRule()', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
+          num_scheduled_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -731,7 +743,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -771,7 +783,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -811,7 +823,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: '2019-02-12T20:16:22.479Z',
         start: '2019-02-12T20:01:22.479Z',
@@ -852,7 +864,7 @@ describe('getExecutionLogForRule()', () => {
       ['1'],
       {
         per_page: 500,
-        filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+        filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
@@ -917,7 +929,7 @@ describe('getExecutionLogForRule()', () => {
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions]]`
+      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]]`
     );
   });
 
