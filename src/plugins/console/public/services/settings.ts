@@ -15,8 +15,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   tripleQuotes: true,
   wrapMode: true,
   autocomplete: Object.freeze({ fields: true, indices: true, templates: true, dataStreams: true }),
-  historyDisabled: false,
-  keyboardShortcutsDisabled: false,
+  isHistoryDisabled: false,
+  isKeyboardShortcutsDisabled: false,
 });
 
 export interface DevToolsSettings {
@@ -31,8 +31,8 @@ export interface DevToolsSettings {
   polling: boolean;
   pollInterval: number;
   tripleQuotes: boolean;
-  historyDisabled: boolean;
-  keyboardShortcutsDisabled: boolean;
+  isHistoryDisabled: boolean;
+  isKeyboardShortcutsDisabled: boolean;
 }
 
 enum SettingKeys {
@@ -42,8 +42,8 @@ enum SettingKeys {
   AUTOCOMPLETE_SETTINGS = 'autocomplete_settings',
   CONSOLE_POLLING = 'console_polling',
   POLL_INTERVAL = 'poll_interval',
-  DISABLE_HISTORY = 'disable_history',
-  KEYBOARD_SHORTCUTS_DISABLED = 'keyboard_shortcuts_disabled',
+  IS_HISTORY_DISABLED = 'is_history_disabled',
+  IS_KEYBOARD_SHORTCUTS_DISABLED = 'is_keyboard_shortcuts_disabled',
 }
 
 export class Settings {
@@ -94,13 +94,13 @@ export class Settings {
     return true;
   }
 
-  setHistoryDisabled(disable: boolean) {
-    this.storage.set(SettingKeys.DISABLE_HISTORY, disable);
+  setIsHistoryDisabled(isDisabled: boolean) {
+    this.storage.set(SettingKeys.IS_HISTORY_DISABLED, isDisabled);
     return true;
   }
 
-  getHistoryDisabled() {
-    return this.storage.get(SettingKeys.DISABLE_HISTORY, DEFAULT_SETTINGS.historyDisabled);
+  getIsHistoryDisabled() {
+    return this.storage.get(SettingKeys.IS_HISTORY_DISABLED, DEFAULT_SETTINGS.isHistoryDisabled);
   }
 
   setPollInterval(interval: number) {
@@ -111,15 +111,15 @@ export class Settings {
     return this.storage.get(SettingKeys.POLL_INTERVAL, DEFAULT_SETTINGS.pollInterval);
   }
 
-  setKeyboardShortcutsDisabled(disable: boolean) {
-    this.storage.set(SettingKeys.KEYBOARD_SHORTCUTS_DISABLED, disable);
+  setIsKeyboardShortcutsDisabled(disable: boolean) {
+    this.storage.set(SettingKeys.IS_KEYBOARD_SHORTCUTS_DISABLED, disable);
     return true;
   }
 
-  getKeyboardShortcutsDisabled() {
+  getIsKeyboardShortcutsDisabled() {
     return this.storage.get(
-      SettingKeys.KEYBOARD_SHORTCUTS_DISABLED,
-      DEFAULT_SETTINGS.keyboardShortcutsDisabled
+      SettingKeys.IS_KEYBOARD_SHORTCUTS_DISABLED,
+      DEFAULT_SETTINGS.isKeyboardShortcutsDisabled
     );
   }
 
@@ -131,8 +131,8 @@ export class Settings {
       fontSize: parseFloat(this.getFontSize()),
       polling: Boolean(this.getPolling()),
       pollInterval: this.getPollInterval(),
-      historyDisabled: Boolean(this.getHistoryDisabled()),
-      keyboardShortcutsDisabled: Boolean(this.getKeyboardShortcutsDisabled()),
+      isHistoryDisabled: Boolean(this.getIsHistoryDisabled()),
+      isKeyboardShortcutsDisabled: Boolean(this.getIsKeyboardShortcutsDisabled()),
     };
   }
 
@@ -143,8 +143,8 @@ export class Settings {
     autocomplete,
     polling,
     pollInterval,
-    historyDisabled,
-    keyboardShortcutsDisabled,
+    isHistoryDisabled,
+    isKeyboardShortcutsDisabled,
   }: DevToolsSettings) {
     this.setFontSize(fontSize);
     this.setWrapMode(wrapMode);
@@ -152,8 +152,8 @@ export class Settings {
     this.setAutocomplete(autocomplete);
     this.setPolling(polling);
     this.setPollInterval(pollInterval);
-    this.setHistoryDisabled(historyDisabled);
-    this.setKeyboardShortcutsDisabled(keyboardShortcutsDisabled);
+    this.setIsHistoryDisabled(isHistoryDisabled);
+    this.setIsKeyboardShortcutsDisabled(isKeyboardShortcutsDisabled);
   }
 }
 

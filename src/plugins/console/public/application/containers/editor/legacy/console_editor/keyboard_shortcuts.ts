@@ -8,7 +8,6 @@
 
 import { throttle } from 'lodash';
 import { SenseEditor } from '../../../../models/sense_editor';
-import { KEYBOARD_SHORTCUT_PREFIX } from '../../../../../../common/constants';
 
 interface Actions {
   senseEditor: SenseEditor;
@@ -29,14 +28,14 @@ export function registerCommands({
 
   coreEditor.registerKeyboardShortcut({
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    // Prefix names with '__console' which is used to identify the registered keyboard shortcuts in console
-    // Ace editor uses camelCase strings for names of the commands
-    name: `${KEYBOARD_SHORTCUT_PREFIX}SendToElasticsearch`,
-    fn: () => sendCurrentRequestToES(),
+    name: 'send to Elasticsearch',
+    fn: () => {
+      sendCurrentRequestToES();
+    },
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: `${KEYBOARD_SHORTCUT_PREFIX}OpenDocumentation`,
+    name: 'open documentation',
     keys: { win: 'Ctrl-/', mac: 'Command-/' },
     fn: () => {
       openDocumentation();
@@ -44,7 +43,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: `${KEYBOARD_SHORTCUT_PREFIX}AutoIndentRequest`,
+    name: 'auto indent request',
     keys: { win: 'Ctrl-I', mac: 'Command-I' },
     fn: () => {
       throttledAutoIndent();
@@ -52,7 +51,7 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: `${KEYBOARD_SHORTCUT_PREFIX}MoveToPreviousRequestStartOrEnd`,
+    name: 'move to previous request start or end',
     keys: { win: 'Ctrl-Up', mac: 'Command-Up' },
     fn: () => {
       senseEditor.moveToPreviousRequestEdge();
@@ -60,15 +59,36 @@ export function registerCommands({
   });
 
   coreEditor.registerKeyboardShortcut({
-    name: `${KEYBOARD_SHORTCUT_PREFIX}MoveToNextRequestStartOrEnd`,
+    name: 'move to next request start or end',
     keys: { win: 'Ctrl-Down', mac: 'Command-Down' },
     fn: () => {
       senseEditor.moveToNextRequestEdge(false);
+    },
+  });
+
+  coreEditor.registerKeyboardShortcut({
+    name: 'gotoline',
+    keys: { win: 'Ctrl-L', mac: 'Command-L' },
+    fn: (editor) => {
+      const line = parseInt(prompt('Enter line number') ?? '', 10);
+      if (!isNaN(line)) {
+        editor.gotoLine(line);
+      }
     },
   });
 }
 
 export function unregisterCommands(senseEditor: SenseEditor) {
   const coreEditor = senseEditor.getCoreEditor();
-  coreEditor.unregisterKeyboardShortcuts();
+  const commands = [
+    'send to Elasticsearch',
+    'open documentation',
+    'auto indent request',
+    'move to previous request start or end',
+    'move to next request start or end',
+    'gotoline',
+  ];
+  commands.forEach((command) => {
+    coreEditor.unregisterKeyboardShortcut(command);
+  });
 }

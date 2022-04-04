@@ -77,9 +77,9 @@ export function DevToolsSettingsModal(props: Props) {
   const [polling, setPolling] = useState(props.settings.polling);
   const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
-  const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
-  const [keyboardShortcutsDisabled, setKeyboardShortcutsDisabled] = useState(
-    props.settings.keyboardShortcutsDisabled
+  const [isHistoryDisabled, setIsHistoryDisabled] = useState(props.settings.isHistoryDisabled);
+  const [isKeyboardShortcutsDisabled, setIsKeyboardShortcutsDisabled] = useState(
+    props.settings.isKeyboardShortcutsDisabled
   );
 
   const autoCompleteCheckboxes = [
@@ -140,8 +140,8 @@ export function DevToolsSettingsModal(props: Props) {
       polling,
       pollInterval,
       tripleQuotes,
-      historyDisabled,
-      keyboardShortcutsDisabled,
+      isHistoryDisabled,
+      isKeyboardShortcutsDisabled,
     });
   }
 
@@ -153,10 +153,10 @@ export function DevToolsSettingsModal(props: Props) {
   }, []);
 
   const toggleKeyboardShortcuts = useCallback(
-    (disabled: boolean) => {
+    (isDisabled: boolean) => {
       if (props.editorInstance) {
         unregisterCommands(props.editorInstance);
-        setKeyboardShortcutsDisabled(disabled);
+        setIsKeyboardShortcutsDisabled(isDisabled);
       }
     },
     [props.editorInstance]
@@ -284,15 +284,14 @@ export function DevToolsSettingsModal(props: Props) {
           }
         >
           <EuiSwitch
-            checked={historyDisabled}
-            id="historyDisabled"
+            checked={isHistoryDisabled}
             label={
               <FormattedMessage
                 defaultMessage="Disable saving requests to history"
                 id="console.settingsPage.savingRequestsToHistoryMessage"
               />
             }
-            onChange={(e) => setHistoryDisabled(e.target.checked)}
+            onChange={(e) => setIsHistoryDisabled(e.target.checked)}
           />
         </EuiFormRow>
 
@@ -305,7 +304,7 @@ export function DevToolsSettingsModal(props: Props) {
           }
         >
           <EuiSwitch
-            checked={keyboardShortcutsDisabled}
+            checked={isKeyboardShortcutsDisabled}
             label={
               <FormattedMessage
                 defaultMessage="Disable keyboard shortcuts"

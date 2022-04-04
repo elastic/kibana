@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Editor } from 'brace';
 import { TokensProvider } from './tokens_provider';
 import { Token } from './token';
 
@@ -252,14 +253,14 @@ export interface CoreEditor {
    */
   registerKeyboardShortcut(opts: {
     keys: string | { win?: string; mac?: string };
-    fn: () => void;
+    fn: (editor: Editor) => void;
     name: string;
   }): void;
 
   /**
-   * Unregister a keyboard shortcut
+   * Unregister a keyboard shortcut and provide a command name
    */
-  unregisterKeyboardShortcuts(): void;
+  unregisterKeyboardShortcut(command: string): void;
 
   /**
    * Register a completions function that will be called when the editor

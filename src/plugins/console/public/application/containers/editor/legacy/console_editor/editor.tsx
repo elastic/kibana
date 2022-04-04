@@ -227,8 +227,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    const { keyboardShortcutsDisabled } = settings;
-    if (!keyboardShortcutsDisabled) {
+    const { isKeyboardShortcutsDisabled } = settings;
+    if (!isKeyboardShortcutsDisabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
         sendCurrentRequestToES,
@@ -239,11 +239,10 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
-
     if (editor) {
       setEditorInstance(editor);
     }
-  });
+  }, [setEditorInstance]);
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
