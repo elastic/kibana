@@ -118,7 +118,7 @@ export class ProcessImpl implements Process {
       return false;
     }
 
-    return !!this.alerts.find((event) => event.kibana?.alert.uuid === alertUuid);
+    return !!this.alerts.find((event) => event.kibana?.alert?.uuid === alertUuid);
   }
 
   getAlerts() {

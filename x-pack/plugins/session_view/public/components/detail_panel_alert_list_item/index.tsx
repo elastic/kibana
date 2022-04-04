@@ -50,8 +50,10 @@ export const DetailPanelAlertListItem = ({
   }
 
   const timestamp = event['@timestamp'];
-  const rule = { ...event.kibana?.alert?.rule, uuid: '', name: '' };
-  const { uuid, name } = rule;
+  const rule = event.kibana?.alert?.rule;
+  const uuid = rule?.uuid || '';
+  const name = rule?.name || '';
+
   const { args } = event.process ?? {};
 
   const forceState = !isInvestigated ? 'open' : undefined;

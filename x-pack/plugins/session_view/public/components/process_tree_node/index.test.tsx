@@ -121,7 +121,7 @@ describe('ProcessTreeNode component', () => {
         <ProcessTreeNode
           {...props}
           process={processWithAlerts}
-          investigatedAlertId={mockAlerts[0].kibana?.alert.uuid}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
           scrollerRef={scrollerRef}
           onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
         />

@@ -80,7 +80,7 @@ describe('ProcessTree component', () => {
       renderResult = mockedContext.render(
         <ProcessTree
           {...props}
-          jumpToEntityId={jumpToEvent.process.entity_id}
+          jumpToEntityId={jumpToEvent?.process?.entity_id}
           onProcessSelected={onProcessSelected}
         />
       );

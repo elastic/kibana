@@ -91,7 +91,7 @@ describe('DetailPanelAlertTab component', () => {
           alerts={mockAlerts}
           onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlertId={mockAlerts[0].kibana?.alert.uuid}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
         />
       );
 
@@ -108,7 +108,7 @@ describe('DetailPanelAlertTab component', () => {
           alerts={mockAlerts}
           onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlertId={mockAlerts[0].kibana?.alert.uuid}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
         />
       );
 

@@ -19,7 +19,6 @@ import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import {
   AlertStatusEventEntityIdMap,
-  EventKind,
   Process,
   ProcessEvent,
 } from '../../../common/types/process_tree';
@@ -76,10 +75,8 @@ export const SessionView = ({
       if (event.process) {
         const { entity_id: entityId } = event.process;
         if (entityId !== sessionEntityId) {
-          const cursor =
-            event.event.kind === EventKind.signal
-              ? event.kibana?.alert.original_time
-              : event['@timestamp'];
+          const alert = event.kibana?.alert;
+          const cursor = alert ? alert?.original_time : event['@timestamp'];
 
           if (cursor) {
             setCurrentJumpToEntityId(entityId);
