@@ -62,23 +62,33 @@ export class ToolingLog {
    * @param delta the number of spaces to increase/decrease the indentation
    * @param block a function to run and reset any indentation changes after
    */
-  public indent(delta: number): undefined;
+  public indent(delta: number): void;
   public indent<T>(delta: number, block: () => Promise<T>): Promise<T>;
   public indent<T>(delta: number, block: () => T): T;
-  public indent<T>(delta = 0, block?: () => T | Promise<T>) {
+  public indent<T>(delta = 0, block?: () => T | Promise<T>): void | T | Promise<T> {
     const originalWidth = this.indentWidth$.getValue();
     this.indentWidth$.next(Math.max(originalWidth + delta, 0));
     if (!block) {
       return;
     }
 
-    return (async () => {
-      try {
-        return await block();
-      } finally {
-        this.indentWidth$.next(originalWidth);
-      }
-    })();
+    const maybePromise: any = block();
+    if (
+      typeof maybePromise === 'object' &&
+      maybePromise &&
+      typeof maybePromise.then === 'function'
+    ) {
+      return (async () => {
+        try {
+          return await maybePromise;
+        } finally {
+          this.indentWidth$.next(originalWidth);
+        }
+      })();
+    }
+
+    this.indentWidth$.next(originalWidth);
+    return maybePromise;
   }
 
   public verbose(...args: any[]) {
