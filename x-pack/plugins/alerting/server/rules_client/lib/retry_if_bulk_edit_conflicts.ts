@@ -72,6 +72,7 @@ export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
       operations,
       paramsModifier,
     });
+
     const idsWithConflictError = resultSavedObjects.reduce<Set<string>>((acc, item) => {
       if (item.type === 'alert' && item?.error?.statusCode === 409) {
         return acc.add(item.id);

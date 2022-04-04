@@ -323,7 +323,24 @@ describe('bulkEdit()', () => {
             },
           },
         },
-        filter: 'alert.attributes.tags: "APM"',
+        filter: {
+          arguments: [
+            {
+              type: 'literal',
+              value: 'alert.attributes.tags',
+            },
+            {
+              type: 'literal',
+              value: 'APM',
+            },
+            {
+              type: 'literal',
+              value: true,
+            },
+          ],
+          function: 'is',
+          type: 'function',
+        },
         page: 1,
         perPage: 0,
         type: 'alert',
@@ -356,7 +373,48 @@ describe('bulkEdit()', () => {
             },
           },
         },
-        filter: 'alert.id:"alert:2" OR alert.id:"alert:3"',
+        filter: {
+          arguments: [
+            {
+              arguments: [
+                {
+                  type: 'literal',
+                  value: 'alert.id',
+                },
+                {
+                  type: 'literal',
+                  value: 'alert:2',
+                },
+                {
+                  type: 'literal',
+                  value: true,
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  type: 'literal',
+                  value: 'alert.id',
+                },
+                {
+                  type: 'literal',
+                  value: 'alert:3',
+                },
+                {
+                  type: 'literal',
+                  value: true,
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+          ],
+          function: 'or',
+          type: 'function',
+        },
         page: 1,
         perPage: 0,
         type: 'alert',
@@ -476,7 +534,24 @@ describe('bulkEdit()', () => {
       });
 
       expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith({
-        filter: 'alert.attributes.tags: "APM"',
+        filter: {
+          arguments: [
+            {
+              type: 'literal',
+              value: 'alert.attributes.tags',
+            },
+            {
+              type: 'literal',
+              value: 'APM',
+            },
+            {
+              type: 'literal',
+              value: true,
+            },
+          ],
+          function: 'is',
+          type: 'function',
+        },
         perPage: 1000,
         type: 'alert',
         namespaces: ['default'],
