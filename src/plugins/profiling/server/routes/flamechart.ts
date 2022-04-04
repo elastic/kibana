@@ -138,7 +138,7 @@ async function queryFlameGraph(
                 ],
               },
               aggs: {
-                sum_count: {
+                count: {
                   sum: {
                     field: 'Count',
                   },
@@ -157,6 +157,8 @@ async function queryFlameGraph(
           // It reduces the query time by avoiding unneeded searches.
           querystring: {
             pre_filter_shard_size: 1,
+            filter_path:
+              'aggregations.group_by.buckets.key,aggregations.group_by.buckets.count,aggregations.total_count,_shards.failures',
           },
         }
       );
@@ -164,11 +166,14 @@ async function queryFlameGraph(
   );
 
   let totalCount: number = resEvents.body.aggregations?.total_count.value;
+  let stackTraceEvents: Map<StackTraceID, number>;
 
-  const stackTraceEvents = new Map<StackTraceID, number>();
-  resEvents.body.aggregations?.group_by.buckets.forEach((item: any) => {
-    const traceid: StackTraceID = item.key.traceid;
-    stackTraceEvents.set(traceid, item.sum_count.value);
+  await logExecutionLatency(logger, 'processing events data', async () => {
+    stackTraceEvents = new Map<StackTraceID, number>();
+    resEvents.body.aggregations?.group_by.buckets.forEach((item: any) => {
+      const traceid: StackTraceID = item.key.traceid;
+      stackTraceEvents.set(traceid, item.count.value);
+    });
   });
   logger.info('events total count: ' + totalCount);
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
@@ -177,7 +182,9 @@ async function queryFlameGraph(
   if (totalCount > sampleSize * 1.1) {
     const p = sampleSize / totalCount;
     logger.info('downsampling events with p=' + p);
-    totalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
+    await logExecutionLatency(logger, 'downsampling events', async () => {
+      totalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
+    });
     logger.info('downsampled total count: ' + totalCount);
     logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
   }
