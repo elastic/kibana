@@ -27,9 +27,9 @@ function getFilterExpression(
 ) {
   const allFilters: unknown[] = [...filters];
 
-  if (hasJoins) {
+  /*if (hasJoins) {
     allFilters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
-  }
+  }*/
 
   if (timesliceMaskConfig) {
     allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);

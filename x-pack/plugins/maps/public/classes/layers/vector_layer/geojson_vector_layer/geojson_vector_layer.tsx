@@ -13,35 +13,29 @@ import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox
 import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
-  FIELD_ORIGIN,
   LAYER_TYPE,
 } from '../../../../../common/constants';
 import {
   StyleMetaDescriptor,
   Timeslice,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
 import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
 import { AbstractLayer, LayerIcon } from '../../layer';
-import { InnerJoin } from '../../../joins/inner_join';
 import {
   AbstractVectorLayer,
   noResultsIcon,
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from '../vector_layer';
 import { DataRequestAbortError } from '../../../util/data_request';
-import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 import { syncGeojsonSourceData } from './geojson_source_data';
-import { JoinState, performInnerJoins } from './perform_inner_joins';
-import { buildVectorRequestMeta } from '../../build_vector_request_meta';
+import { performInnerJoins } from './perform_inner_joins';
 
 export class GeoJsonVectorLayer extends AbstractVectorLayer {
   static createDescriptor(
@@ -258,118 +252,6 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         throw error;
       }
     }
-  }
-
-  async _syncJoin({
-    join,
-    startLoading,
-    stopLoading,
-    onLoadError,
-    registerCancelCallback,
-    dataFilters,
-    isForceRefresh,
-  }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
-    const joinSource = join.getRightJoinSource();
-    const sourceDataId = join.getSourceDataRequestId();
-    const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-
-    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
-      joinSource,
-      joinSource.getFieldNames(),
-      dataFilters,
-      joinSource.getWhereQuery(),
-      isForceRefresh
-    ) as VectorJoinSourceRequestMeta;
-
-    const prevDataRequest = this.getDataRequest(sourceDataId);
-    const canSkipFetch = await canSkipSourceUpdate({
-      source: joinSource,
-      prevDataRequest,
-      nextRequestMeta: joinRequestMeta,
-      extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
-      getUpdateDueToTimeslice: () => {
-        return true;
-      },
-    });
-
-    if (canSkipFetch) {
-      return {
-        dataHasChanged: false,
-        join,
-        propertiesMap: prevDataRequest?.getData() as PropertiesMap,
-      };
-    }
-
-    try {
-      startLoading(sourceDataId, requestToken, joinRequestMeta);
-      const leftSourceName = await this._source.getDisplayName();
-      const propertiesMap = await joinSource.getPropertiesMap(
-        joinRequestMeta,
-        leftSourceName,
-        join.getLeftField().getName(),
-        registerCancelCallback.bind(null, requestToken)
-      );
-      stopLoading(sourceDataId, requestToken, propertiesMap);
-      return {
-        dataHasChanged: true,
-        join,
-        propertiesMap,
-      };
-    } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
-      }
-      throw error;
-    }
-  }
-
-  async _syncJoins(syncContext: DataRequestContext, style: IVectorStyle) {
-    const joinSyncs = this.getValidJoins().map(async (join) => {
-      await this._syncJoinStyleMeta(syncContext, join, style);
-      await this._syncJoinFormatters(syncContext, join, style);
-      return this._syncJoin({ join, ...syncContext });
-    });
-
-    return await Promise.all(joinSyncs);
-  }
-
-  async _syncJoinStyleMeta(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
-    const joinSource = join.getRightJoinSource();
-    return this._syncStyleMeta({
-      source: joinSource,
-      style,
-      sourceQuery: joinSource.getWhereQuery(),
-      dataRequestId: join.getSourceMetaDataRequestId(),
-      dynamicStyleProps: this.getCurrentStyle()
-        .getDynamicPropertiesArray()
-        .filter((dynamicStyleProp) => {
-          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
-          return (
-            dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN &&
-            !!matchingField &&
-            dynamicStyleProp.isFieldMetaEnabled()
-          );
-        }),
-      ...syncContext,
-    });
-  }
-
-  async _syncJoinFormatters(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
-    const joinSource = join.getRightJoinSource();
-    return this._syncFormatters({
-      source: joinSource,
-      dataRequestId: join.getSourceFormattersDataRequestId(),
-      fields: style
-        .getDynamicPropertiesArray()
-        .filter((dynamicStyleProp) => {
-          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
-          return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
-        })
-        .map((dynamicStyleProp) => {
-          return dynamicStyleProp.getField()!;
-        }),
-      ...syncContext,
-    });
   }
 
   _getSourceFeatureCollection() {

@@ -74,7 +74,7 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   _onScalingTypeSelect = (optionId: SCALING_TYPES): void => {
-    if (this.props.hasJoins && optionId !== SCALING_TYPES.LIMIT) {
+    if (this.props.hasJoins && optionId === SCALING_TYPES.CLUSTERS) {
       this._openModal(optionId);
     } else {
       this._onScalingTypeChange(optionId);

@@ -54,9 +54,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   readonly _source: IMvtVectorSource;
 
-  constructor({ layerDescriptor, source, customIcons, joins }: VectorLayerArguments) {
-    super({ layerDescriptor, source, customIcons, joins });
-    this._source = source as IMvtVectorSource;
+  constructor(args: VectorLayerArguments) {
+    super(args);
+    this._source = args.source as IMvtVectorSource;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
@@ -203,6 +203,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       source: this.getSource() as IMvtVectorSource,
       syncContext,
     });
+
+    if (this.hasJoins()) {
+      await this._syncJoins(syncContext, this.getCurrentStyle());
+    }
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
@@ -223,12 +227,20 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
 
+    const joins = this.getValidJoins();
+    const promoteId = joins.length
+      ? { 
+        [this._source.getTileSourceLayer()]: joins[0].getLeftField().getName()
+      } 
+      : undefined;
+
     const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
       tiles: [sourceData.tileUrl],
       minzoom: sourceData.tileMinZoom,
       maxzoom: sourceData.tileMaxZoom,
+      promoteId, 
     });
   }
 
@@ -242,6 +254,30 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   _getMbTooManyFeaturesLayerId() {
     return this.makeMbLayerId('toomanyfeatures');
+  }
+
+  _syncFeatureState(mbMap: MbMap) {
+    const joins = this.getValidJoins();
+    if (!joins.length) {
+      return;
+    }
+
+    const join = joins[0];
+    const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+    const joinData = joinDataRequest?.getData() as PropertiesMap | undefined;
+    if (!joinData) {
+      return;
+    }
+
+    const featureIdentifier: FeatureIdentifier = {
+      source: this.getMbSourceId(),
+      sourceLayer: this._source.getTileSourceLayer(),
+      id: undefined,
+    };
+    joinData.forEach((value, key) => {
+      featureIdentifier.id = key;
+      mbMap.setFeatureState(featureIdentifier, value);
+    });
   }
 
   _syncStylePropertiesWithMb(mbMap: MbMap) {
@@ -360,6 +396,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   syncLayerWithMB(mbMap: MbMap) {
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
+    this._syncFeatureState(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
   }
 

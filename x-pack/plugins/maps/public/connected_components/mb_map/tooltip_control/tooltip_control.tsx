@@ -215,13 +215,10 @@ export class TooltipControl extends Component<Props, {}> {
         }
       }
       if (!match) {
-        // "tags" (aka properties) are optional in .mvt tiles.
-        // It's not entirely clear how mapbox-gl handles those.
-        // - As null value (as defined in https://tools.ietf.org/html/rfc7946#section-3.2)
-        // - As undefined value
-        // - As empty object literal
-        // To avoid ambiguity, normalize properties to empty object literal.
-        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
+        const mbProperties = {
+          ...(mbFeature.properties ? mbFeature.properties : {}),
+          ...(mbFeature.state ? mbFeature.state : {}),
+        };
         const actions: TooltipFeatureAction[] = isLocked
           ? this._getFeatureActions({ layerId, featureId, tooltipId })
           : [];

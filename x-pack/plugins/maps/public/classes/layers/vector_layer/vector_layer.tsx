@@ -44,6 +44,7 @@ import {
   ESTermSourceDescriptor,
   JoinDescriptor,
   StyleMetaDescriptor,
+  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
@@ -60,6 +61,9 @@ import { ITermJoinSource } from '../../sources/term_join_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
 import { syncBoundsData } from './bounds_data';
+import { JoinState } from './types';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
@@ -528,6 +532,118 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       onLoadError(dataRequestId, requestToken, error.message);
       throw error;
     }
+  }
+
+  async _syncJoin({
+    join,
+    startLoading,
+    stopLoading,
+    onLoadError,
+    registerCancelCallback,
+    dataFilters,
+    isForceRefresh,
+  }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
+    const joinSource = join.getRightJoinSource();
+    const sourceDataId = join.getSourceDataRequestId();
+    const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
+
+    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
+      joinSource,
+      joinSource.getFieldNames(),
+      dataFilters,
+      joinSource.getWhereQuery(),
+      isForceRefresh
+    ) as VectorJoinSourceRequestMeta;
+
+    const prevDataRequest = this.getDataRequest(sourceDataId);
+    const canSkipFetch = await canSkipSourceUpdate({
+      source: joinSource,
+      prevDataRequest,
+      nextRequestMeta: joinRequestMeta,
+      extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
+      getUpdateDueToTimeslice: () => {
+        return true;
+      },
+    });
+
+    if (canSkipFetch) {
+      return {
+        dataHasChanged: false,
+        join,
+        propertiesMap: prevDataRequest?.getData() as PropertiesMap,
+      };
+    }
+
+    try {
+      startLoading(sourceDataId, requestToken, joinRequestMeta);
+      const leftSourceName = await this._source.getDisplayName();
+      const propertiesMap = await joinSource.getPropertiesMap(
+        joinRequestMeta,
+        leftSourceName,
+        join.getLeftField().getName(),
+        registerCancelCallback.bind(null, requestToken)
+      );
+      stopLoading(sourceDataId, requestToken, propertiesMap);
+      return {
+        dataHasChanged: true,
+        join,
+        propertiesMap,
+      };
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  async _syncJoins(syncContext: DataRequestContext, style: IVectorStyle) {
+    const joinSyncs = this.getValidJoins().map(async (join) => {
+      await this._syncJoinStyleMeta(syncContext, join, style);
+      await this._syncJoinFormatters(syncContext, join, style);
+      return this._syncJoin({ join, ...syncContext });
+    });
+
+    return await Promise.all(joinSyncs);
+  }
+
+  async _syncJoinStyleMeta(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
+    const joinSource = join.getRightJoinSource();
+    return this._syncStyleMeta({
+      source: joinSource,
+      style,
+      sourceQuery: joinSource.getWhereQuery(),
+      dataRequestId: join.getSourceMetaDataRequestId(),
+      dynamicStyleProps: this.getCurrentStyle()
+        .getDynamicPropertiesArray()
+        .filter((dynamicStyleProp) => {
+          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
+          return (
+            dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN &&
+            !!matchingField &&
+            dynamicStyleProp.isFieldMetaEnabled()
+          );
+        }),
+      ...syncContext,
+    });
+  }
+
+  async _syncJoinFormatters(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
+    const joinSource = join.getRightJoinSource();
+    return this._syncFormatters({
+      source: joinSource,
+      dataRequestId: join.getSourceFormattersDataRequestId(),
+      fields: style
+        .getDynamicPropertiesArray()
+        .filter((dynamicStyleProp) => {
+          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
+          return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
+        })
+        .map((dynamicStyleProp) => {
+          return dynamicStyleProp.getField()!;
+        }),
+      ...syncContext,
+    });
   }
 
   async _syncSupportsFeatureEditing({
