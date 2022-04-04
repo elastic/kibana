@@ -205,14 +205,42 @@ export function processDataForFocusAnomalies(
 
 // Adds a scheduledEvents property to any points in the chart data set
 // which correspond to times of scheduled events for the job.
-export function processScheduledEventsForChart(chartData, scheduledEvents) {
+export function processScheduledEventsForChart(chartData, scheduledEvents, aggregationInterval) {
   if (scheduledEvents !== undefined) {
+    const timesToAddPointsFor = [];
+
+    // Iterate through the anomaly records making sure we have chart points for each anomaly.
+    const intervalMs = aggregationInterval.asMilliseconds();
+    let lastChartDataPointTime = undefined;
+    if (chartData !== undefined && chartData.length > 0) {
+      lastChartDataPointTime = chartData[chartData.length - 1].date.getTime();
+    }
+
+    // In case there's no chart data/sparse data during these scheduled events
+    // ensure we add chart points at every aggregation interval for these scheduled events
+    // This processing step is needed for the next block to find nearest chart point to time
     each(scheduledEvents, (events, time) => {
-      const chartPoint = findNearestChartPointToTime(chartData, time);
-      if (chartPoint !== undefined) {
+      const exactChartPoint = findChartPointForScheduledEvent(chartData, time, aggregationInterval);
+      if (exactChartPoint === undefined) {
+        const timeToAdd = Math.floor(time / intervalMs) * intervalMs;
+        if (timesToAddPointsFor.indexOf(timeToAdd) === -1 && timeToAdd !== lastChartDataPointTime) {
+          const pointToAdd = {
+            date: new Date(timeToAdd),
+            value: null,
+            scheduledEvents: events,
+          };
+
+          chartData.push(pointToAdd);
+        }
+      }
+    });
+
+    each(scheduledEvents, (events, time) => {
+      const nearestChartPoint = findNearestChartPointToTime(chartData, time);
+      if (nearestChartPoint !== undefined) {
         // Note if the scheduled event coincides with an absence of the underlying metric data,
         // we don't worry about plotting the event.
-        chartPoint.scheduledEvents = events;
+        nearestChartPoint.scheduledEvents = events;
       }
     });
   }
@@ -295,6 +323,22 @@ export function findChartPointForAnomalyTime(chartData, anomalyTime, aggregation
     }
 
     chartPoint = foundItem;
+  }
+
+  return chartPoint;
+}
+
+export function findChartPointForScheduledEvent(chartData, anomalyTime) {
+  let chartPoint;
+  if (chartData === undefined) {
+    return chartPoint;
+  }
+
+  for (let i = 0; i < chartData.length; i++) {
+    if (chartData[i].date.getTime() === anomalyTime) {
+      chartPoint = chartData[i];
+      break;
+    }
   }
 
   return chartPoint;
