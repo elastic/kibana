@@ -144,9 +144,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.sleep(5000);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
-        // await testSubjects.click('showQueryBarMenu');
-        // await savedQueryManagementComponent.deleteSavedQuery('foo');
-        // await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
+        await testSubjects.click('showQueryBarMenu');
+        await savedQueryManagementComponent.deleteSavedQuery('foo');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
       });
 
       it('allow saving changes to a currently loaded query via the saved query management component', async () => {
@@ -180,6 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           true,
           false
         );
+        await PageObjects.common.sleep(5000);
         await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
         await savedQueryManagementComponent.deleteSavedQuery('ok2');
       });
