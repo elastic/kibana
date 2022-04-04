@@ -6,8 +6,7 @@
  */
 
 import type { Request } from '@hapi/hapi';
-import { compact } from 'lodash';
-import { asyncForEach } from '@kbn/std';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DiagnosticResult, RuleTypeParams } from '../../types';
 import { addSpaceIdToPath } from '../../../../spaces/server';
 import {
@@ -20,6 +19,10 @@ import type { CreateAPIKeyResult } from '../../rules_client/rules_client';
 
 export type CustomDiagnostic<Params extends RuleTypeParams> = (params: Params) => DiagnosticResult;
 
+const CARDINALITY_OVERALL_THRESHOLD = 10000;
+type CardinalityAgg = estypes.AggregationsAggregateBase & {
+  [property: string]: estypes.AggregationsCardinalityAggregate;
+};
 export interface Diagnostics<Params extends RuleTypeParams> {
   // This function should return the indices that the rule
   // expects to operate over
@@ -75,6 +78,18 @@ function getIndexAccessError(index: string, username: string, err: Error): Diagn
   return {
     name: 'Index access error',
     message: `Unable to query index ${index} as user ${username} - ${err.message}`,
+  };
+}
+
+function getIndexCardinalityError(
+  index: string,
+  field: string,
+  cardinality: number,
+  range: string
+): DiagnosticResult {
+  return {
+    name: 'Index cardinality error',
+    message: `"${field}" in index ${index} has a cardinality of ${cardinality} ${range}. Using this in your rule may lead to poor performance.`,
   };
 }
 export class RuleDiagnostic {
@@ -186,13 +201,16 @@ export class RuleDiagnostic {
       }
     }
 
-    await this.diagnoseIndexFields({
+    const indexCardinalityResult = await this.diagnoseIndexFields({
       indices: successfulIndices.join(','),
       fields,
       esClient,
       username,
       params,
     });
+    if (indexCardinalityResult) {
+      rejectedResults.push(...indexCardinalityResult);
+    }
 
     return rejectedResults.length > 0 ? rejectedResults : null;
   }
@@ -200,15 +218,51 @@ export class RuleDiagnostic {
   private async diagnoseIndexFields<Params extends RuleTypeParams>({
     indices,
     fields,
-    username,
     esClient,
   }: DiagnoseIndicesOpts<Params>): Promise<DiagnosticResult[] | null> {
-    console.log(`fields ${fields}`);
-    const body = await esClient.fieldCaps({ index: indices, fields });
+    const fieldsToUse = fields === '*' ? fields : fields.split(',');
+    const body = await esClient.fieldCaps({ index: indices, fields: fieldsToUse });
 
-    console.log(JSON.stringify(body));
+    const indexFields = body.fields ?? {};
 
-    return null;
+    const aggs = Object.keys(indexFields).reduce((acc, field) => {
+      const fieldCapData = indexFields[field];
+      const path = Object.keys(fieldCapData)[0];
+      const isAggregatable = indexFields[field][path].aggregatable;
+
+      return isAggregatable
+        ? {
+            ...acc,
+            [field]: {
+              cardinality: {
+                field,
+              },
+            },
+          }
+        : acc;
+    }, {});
+
+    const cardinalityResults = await esClient.search({
+      index: indices,
+      body: {
+        size: 0,
+        query: {
+          match_all: {},
+        },
+        aggs,
+      },
+    });
+
+    const cardinalities = cardinalityResults.aggregations as CardinalityAgg;
+
+    const results: DiagnosticResult[] = [];
+    Object.keys(cardinalities).forEach((f) => {
+      const cardinality = cardinalities[f].value;
+      if (cardinality > CARDINALITY_OVERALL_THRESHOLD) {
+        results.push(getIndexCardinalityError(indices, f, cardinality, 'over all time'));
+      }
+    });
+    return results.length > 0 ? results : null;
   }
 
   private apiKeyAsString(apiKey: CreateAPIKeyResult | null): string | null {
