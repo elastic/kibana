@@ -11,10 +11,10 @@ import {
   SavedObjectsResolveResponse,
 } from 'kibana/server';
 import { RuleExecutionMetrics } from '.';
-import { AlertNotifyWhenType } from './alert_notify_when_type';
+import { RuleNotifyWhenType } from './rule_notify_when_type';
 
-export type AlertTypeState = Record<string, unknown>;
-export type AlertTypeParams = Record<string, unknown>;
+export type RuleTypeState = Record<string, unknown>;
+export type RuleTypeParams = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -22,7 +22,7 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 
 // for the `typeof ThingValues[number]` types below, become string types that
 // only accept the values in the associated string arrays
-export const AlertExecutionStatusValues = [
+export const RuleExecutionStatusValues = [
   'ok',
   'active',
   'error',
@@ -30,9 +30,9 @@ export const AlertExecutionStatusValues = [
   'unknown',
   'warning',
 ] as const;
-export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
+export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
-export enum AlertExecutionStatusErrorReasons {
+export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
   Execute = 'execute',
@@ -42,38 +42,38 @@ export enum AlertExecutionStatusErrorReasons {
   Disabled = 'disabled',
 }
 
-export enum AlertExecutionStatusWarningReasons {
+export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
 }
 
-export interface AlertExecutionStatus {
-  status: AlertExecutionStatuses;
+export interface RuleExecutionStatus {
+  status: RuleExecutionStatuses;
   numberOfTriggeredActions?: number;
   numberOfScheduledActions?: number;
   metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
-    reason: AlertExecutionStatusErrorReasons;
+    reason: RuleExecutionStatusErrorReasons;
     message: string;
   };
   warning?: {
-    reason: AlertExecutionStatusWarningReasons;
+    reason: RuleExecutionStatusWarningReasons;
     message: string;
   };
 }
 
-export type AlertActionParams = SavedObjectAttributes;
-export type AlertActionParam = SavedObjectAttribute;
+export type RuleActionParams = SavedObjectAttributes;
+export type RuleActionParam = SavedObjectAttribute;
 
-export interface AlertAction {
+export interface RuleAction {
   group: string;
   id: string;
   actionTypeId: string;
-  params: AlertActionParams;
+  params: RuleActionParams;
 }
 
-export interface AlertAggregations {
+export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
@@ -87,15 +87,15 @@ export interface MappedParamsProperties {
 
 export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
-export interface Alert<Params extends AlertTypeParams = never> {
+export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
   name: string;
   tags: string[];
-  alertTypeId: string;
+  alertTypeId: string; // this is persisted in the Rule saved object so we would need a migration to change this to ruleTypeId
   consumer: string;
   schedule: IntervalSchedule;
-  actions: AlertAction[];
+  actions: RuleAction[];
   params: Params;
   mapped_params?: MappedParams;
   scheduledTaskId?: string;
@@ -106,20 +106,20 @@ export interface Alert<Params extends AlertTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyWhen: AlertNotifyWhenType | null;
+  notifyWhen: RuleNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
-  executionStatus: AlertExecutionStatus;
+  executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeEndTime?: Date | null; // Remove ? when this parameter is made available in the public API
 }
 
-export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
-export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
+export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
 export type SanitizedRuleConfig = Pick<
-  SanitizedAlert,
+  SanitizedRule,
   | 'name'
   | 'tags'
   | 'consumer'
