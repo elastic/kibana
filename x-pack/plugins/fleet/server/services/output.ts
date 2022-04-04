@@ -242,10 +242,7 @@ class OutputService {
       id: options?.id ? outputIdToUuid(options.id) : undefined,
     });
 
-    return {
-      id: options?.id ?? newSo.id,
-      ...newSo.attributes,
-    };
+    return outputSavedObjectToOutput(newSo);
   }
 
   public async bulkGet(
