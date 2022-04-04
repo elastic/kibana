@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
-import React, { useEffect, useState } from 'react';
-import { AuthenticationTable } from '../../components/authentications_table';
-import { manageQuery } from '../../../common/components/page/manage_query';
-import { useAuthentications } from '../../containers/authentications';
+import React from 'react';
 import { HostsComponentsQueryProps } from './types';
 import {
   MatrixHistogramOption,
@@ -22,11 +18,9 @@ import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { authenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/hosts/authentication';
 import { LensAttributes } from '../../../common/components/visualization_actions/types';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { AuthenticationsHostTable } from '../../../common/components/authentication/authentications_host_table';
 
-const AuthenticationTableManage = manageQuery(AuthenticationTable);
-
-const ID = 'authenticationsHistogramQuery';
+const HISTOGRAM_QUERY_ID = 'authenticationsHistogramQuery';
 
 const authenticationsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -77,59 +71,28 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
   startDate,
   type,
 }) => {
-  const { toggleStatus } = useQueryToggle(ID);
-  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
-  useEffect(() => {
-    setQuerySkip(skip || !toggleStatus);
-  }, [skip, toggleStatus]);
-  const [
-    loading,
-    { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useAuthentications({
-    docValueFields,
-    endDate,
-    filterQuery,
-    indexNames,
-    skip: querySkip,
-    startDate,
-    type,
-  });
-
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-  }, [deleteQuery]);
-
   return (
     <>
       <MatrixHistogram
         endDate={endDate}
         filterQuery={filterQuery}
-        id={ID}
+        id={HISTOGRAM_QUERY_ID}
         indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}
       />
 
-      <AuthenticationTableManage
-        data={authentications}
-        deleteQuery={deleteQuery}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        id={id}
-        inspect={inspect}
-        isInspect={isInspected}
-        loading={loading}
-        loadPage={loadPage}
-        refetch={refetch}
-        setQuerySkip={setQuerySkip}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      <AuthenticationsHostTable
+        endDate={endDate}
+        filterQuery={filterQuery}
+        indexNames={indexNames}
         setQuery={setQuery}
-        totalCount={totalCount}
+        deleteQuery={deleteQuery}
+        startDate={startDate}
         type={type}
+        skip={skip}
+        docValueFields={docValueFields}
       />
     </>
   );

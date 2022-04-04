@@ -169,6 +169,7 @@ export class KibanaFramework {
         } as estypes.MsearchRequest);
         break;
       case 'fieldCaps':
+        // @ts-expect-error FieldCapsRequest.fields is not optional, CallWithRequestParams.fields is
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
           ...params,
         });
