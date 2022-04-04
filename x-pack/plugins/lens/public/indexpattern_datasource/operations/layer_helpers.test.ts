@@ -36,7 +36,7 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { TinymathAST } from 'packages/kbn-tinymath';
+import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from 'kibana/public';
 
 jest.mock('../operations');

@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { mergeTables } from './index';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExpressionValueSearchContext } from 'src/plugins/data/public';
 import {
   Datatable,
