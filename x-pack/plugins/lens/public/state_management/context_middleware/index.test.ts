@@ -24,7 +24,13 @@ const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppSt
     },
   });
   const store = {
-    getState: jest.fn(() => ({ lens: state || initialState })),
+    getState: jest.fn(() => ({
+      lens: state || {
+        ...initialState,
+        activeDatasourceId: 'testDatasource',
+        datasourceStates: { testDatasource: { state: {} } },
+      },
+    })),
     dispatch: jest.fn(),
   };
   const next = jest.fn();
@@ -95,7 +101,7 @@ describe('contextMiddleware', () => {
         },
       };
       invoke(action);
-      expect(store.dispatch).toHaveBeenCalledWith({
+      expect(store.dispatch).not.toHaveBeenCalledWith({
         payload: {
           resolvedDateRange: {
             fromDate: '2021-01-10T04:00:00.000Z',
@@ -111,6 +117,7 @@ describe('contextMiddleware', () => {
       it('only updates searchSessionId when user applies changes', () => {
         // setup
         const data = mockDataPlugin();
+        storeDeps.datasourceMap.testDatasource.isTimeBased = () => true;
         (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
         (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
           from: 'now-2m',
@@ -122,6 +129,8 @@ describe('contextMiddleware', () => {
         });
         const { invoke, store } = createMiddleware(data, {
           ...initialState,
+          activeDatasourceId: 'testDatasource',
+          datasourceStates: { testDatasource: { state: {}, isLoading: false } },
           autoApplyDisabled: true,
         });
 
