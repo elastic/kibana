@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { RuleExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 
 // alert type context provided to actions
 
-type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
+type AlertInfo = Pick<RuleExecutorOptions, 'name'>;
 
 export interface ActionContext extends EsQueryAlertActionContext {
   // a short pre-constructed message which may be used in an action field
