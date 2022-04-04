@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { searchIndices } from '../../__mocks__';
+
 import React from 'react';
 
 import { generatePath } from 'react-router-dom';
@@ -15,18 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { SEARCH_INDEX_OVERVIEW_PATH } from '../../routes';
+import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-interface IndexItem {
-  name: string;
-  indexSlug: string;
-  source_type: string;
-  elasticsearch_index_name: string;
-  search_engines: string;
-  docs: {
-    count: number;
-  };
-}
 export const SearchIndices: React.FC = () => {
   // TODO: Replace with a real list of indices
   const columns = [
@@ -76,7 +69,7 @@ export const SearchIndices: React.FC = () => {
       truncateText: true,
     },
     {
-      field: 'docs.count',
+      field: 'document_count',
       name: i18n.translate('xpack.enterpriseSearch.searchIndices.docsCount.columnTitle', {
         defaultMessage: 'Documents',
       }),
@@ -101,39 +94,6 @@ export const SearchIndices: React.FC = () => {
       ],
     },
   ];
-
-  const indices = [
-    {
-      name: 'Our API Index',
-      indexSlug: 'index-1',
-      source_type: 'API',
-      elasticsearch_index_name: 'ent-search-api-one',
-      search_engines: 'Search Engine One, Search Engine Two',
-      docs: {
-        count: 100,
-      },
-    },
-    {
-      name: 'Customer Feedback',
-      indexSlug: 'index-2',
-      source_type: 'Elasticsearch Index',
-      elasticsearch_index_name: 'es-index-two',
-      search_engines: 'Search Engine One',
-      docs: {
-        count: 100,
-      },
-    },
-    {
-      name: 'Dharma Crawler',
-      indexSlug: 'index-3',
-      source_type: 'Crawler',
-      elasticsearch_index_name: 'ent-search-crawler-one',
-      search_engines: 'Search Engine One, Search Engine Two',
-      docs: {
-        count: 100,
-      },
-    },
-  ] as IndexItem[];
 
   const createNewIndexButton = (
     <EuiLinkTo
@@ -167,7 +127,7 @@ export const SearchIndices: React.FC = () => {
         rightSideItems: [createNewIndexButton],
       }}
     >
-      <EuiBasicTable items={indices} columns={columns} />
+      <EuiBasicTable items={searchIndices} columns={columns} />
     </EnterpriseSearchContentPageTemplate>
   );
 };
