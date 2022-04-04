@@ -38,8 +38,3 @@ export class MyPlugin implements Plugin {
 NOTE: you are free to use any UI library to render a plugin application in DOM.
 However, we recommend using React and https://elastic.github.io/eui[EUI] for all your basic UI
 components to create a consistent UI experience.
-
-[[application-service-interapp-routing]]
-=== Routing between applications
-There are two api's exposed from the `applicationStart` contract use can use to route bewteen apps in {kib}: 
-{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md[`navigateToApp`] and {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md[`navigateToUrl`]. Both methods will handle SPA navigation. You can fine tune the behavior with the options they expose. Refer to the APIs for more information.

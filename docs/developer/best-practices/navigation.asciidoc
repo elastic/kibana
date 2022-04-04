@@ -85,10 +85,12 @@ const urlToADashboard = core.http.basePath.prepend(`/dashboard/my-dashboard`);
 window.location.href = urlToADashboard; 
 ----
 
-To navigate between different {kib} apps without a page reload there are APIs in `core`:
+To navigate between different {kib} apps without a page reload (by default) there are APIs in `core`:
 
 * {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md[core.application.navigateToApp]
 * {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md[core.application.navigateToUrl]
+
+Both methods offer customization such as opening the target in a new page, with an `options` parameter. All the options are optional be default.
 
 *Rendering a link to a different {kib} app on its own would also cause a full page reload:*
 
@@ -126,6 +128,23 @@ const MyApp = () =>
       <a href={urlToADashboard}>Go to Dashboard</a>
     {/*...*/}
   </RedirectAppLinks>
+----
+
+NOTE: There may be cases where you need a full page reload. While rare and should be avoided, rather than implement your own navigation, 
+you can use the `navigateToUrl` `forceRedirect` option.
+
+[source,typescript jsx]
+----
+const MyForcedPageReloadLink = () => 
+  <a 
+    href={urlToSomeSpecialApp} 
+    onClick={(e) => {
+      e.preventDefault();
+      core.application.navigateToUrl('someSpecialApp', { forceRedirect: true }); 
+    }}
+  > 
+    Go to Some Special App 
+  </a>;
 ----
 
 [[routing]]

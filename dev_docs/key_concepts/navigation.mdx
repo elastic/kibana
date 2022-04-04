@@ -124,6 +124,22 @@ const MyApp = () =>
 </RedirectAppLinks>
 ```
 
+NOTE: There may be cases where you need a full page reload. While rare and should be avoided, rather than implement your own navigation, 
+you can use the `navigateToUrl` `forceRedirect` option.
+
+```tsx
+const MyForcedPageReloadLink = () => 
+  <a 
+    href={urlToSomeSpecialApp} 
+    onClick={(e) => {
+      e.preventDefault();
+      core.application.navigateToUrl('someSpecialApp', { forceRedirect: true }); 
+    }}
+  > 
+    Go to Some Special App 
+  </a>;
+```
+
 ## Setting up internal app routing
 
 It is very common for Kibana apps to use React and React Router.
