@@ -210,7 +210,7 @@ export function ProcessTreeNode({
   const shouldRenderChildren = childrenExpanded && children?.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = !isSessionLeader && user.id && user.id !== parent.user?.id;
+  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent.user?.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec

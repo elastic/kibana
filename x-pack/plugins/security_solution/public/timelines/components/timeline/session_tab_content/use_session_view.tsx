@@ -109,6 +109,8 @@ export const useSessionView = ({
   const { sessionView } = useKibana().services;
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  console.log()
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
@@ -194,7 +196,7 @@ export const useSessionView = ({
   });
 
   const sessionViewComponent = useMemo(() => {
-    return sessionViewConfig
+    return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
           loadAlertDetails: openDetailsPanel,

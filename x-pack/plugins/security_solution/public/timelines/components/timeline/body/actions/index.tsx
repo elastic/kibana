@@ -138,12 +138,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
 
     const jumpToEntityId = process?.entity_id?.[0];
-    const investigatedAlertId = eventType === 'signal' ? _id : undefined;
-
-    let jumpToCursor = timestamp;
-    if (investigatedAlertId) {
-      jumpToCursor = ecsData.kibana?.alert.original_time?.[0];
-    }
+    const investigatedAlertId = eventType === 'signal' || eventType === 'eql' ? _id : undefined;
+    const jumpToCursor =
+      (investigatedAlertId && ecsData.kibana?.alert.original_time?.[0]) || timestamp;
 
     return {
       sessionEntityId,

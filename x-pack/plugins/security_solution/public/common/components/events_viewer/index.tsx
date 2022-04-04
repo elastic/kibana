@@ -164,7 +164,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig;
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
       <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
     ) : null;

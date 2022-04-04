@@ -134,7 +134,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     [defaultDataView.patternList, isInTimeline, timelinePatterns]
   );
 
-  if (!isInTimeline && sessionViewConfig) {
+  if (!isInTimeline && sessionViewConfig !== null) {
     if (fullScreen) {
       return (
         <FullScreenOverlayContainer data-test-subj="overlayContainer">

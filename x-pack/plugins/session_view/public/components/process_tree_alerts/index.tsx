@@ -30,8 +30,11 @@ export function ProcessTreeAlerts({
   const styles = useStyles();
 
   useEffect(() => {
-    const jumpToAlert = alerts.find((alert) => alert.kibana?.alert.uuid === investigatedAlertId);
-    if (investigatedAlertId && jumpToAlert) {
+    const jumpToAlert =
+      investigatedAlertId &&
+      alerts.find((alert) => alert.kibana?.alert.uuid === investigatedAlertId);
+
+    if (jumpToAlert) {
       setSelectedAlert(jumpToAlert.kibana?.alert!);
     }
   }, [investigatedAlertId, alerts]);
