@@ -16,6 +16,7 @@ import {
   isArray,
   map,
   reduce,
+  trim,
   get,
 } from 'lodash';
 import React, {
@@ -127,6 +128,10 @@ const StyledFieldSpan = styled.span`
   padding-bottom: 0 !important;
 `;
 
+const DescriptionWrapper = styled(EuiFlexItem)`
+  overflow: hidden;
+`;
+
 // align the icon to the inputs
 const StyledSemicolonWrapper = styled.div`
   margin-top: 8px;
@@ -181,9 +186,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
   const renderOption = useCallback(
     (option, searchValue, contentClassName) => (
       <EuiFlexGroup
-        className={`${contentClassName} euiSuggestItem`}
+        className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
-        gutterSize="xs"
+        gutterSize="none"
       >
         <EuiFlexItem grow={false}>
           {
@@ -197,11 +202,11 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
           </StyledFieldSpan>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <span className="euiSuggestItem__description euiSuggestItem__description--truncate">
+        <DescriptionWrapper grow={false}>
+          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
             {option.value.description}
-          </span>
-        </EuiFlexItem>
+          </StyledFieldSpan>
+        </DescriptionWrapper>
       </EuiFlexGroup>
     ),
     []
@@ -344,9 +349,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const renderOsqueryOption = useCallback(
     (option, searchValue, contentClassName) => (
       <EuiFlexGroup
-        className={`${contentClassName} euiSuggestItem`}
+        className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
-        gutterSize="xs"
+        gutterSize="none"
       >
         <EuiFlexItem grow={false}>
           <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
@@ -354,11 +359,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           </StyledFieldSpan>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <span className="euiSuggestItem__description euiSuggestItem__description--truncate">
+        <DescriptionWrapper grow={false}>
+          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
             {option.value.description}
-          </span>
-        </EuiFlexItem>
+          </StyledFieldSpan>
+        </DescriptionWrapper>
       </EuiFlexGroup>
     ),
     []
@@ -367,7 +372,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const handleChange = useCallback(
     (newSelectedOptions) => {
       setSelected(newSelectedOptions);
-      setValue(newSelectedOptions[0]?.label ?? '');
+      setValue(
+        isArray(newSelectedOptions)
+          ? map(newSelectedOptions, 'label')
+          : newSelectedOptions[0]?.label ?? ''
+      );
     },
     [setValue, setSelected]
   );
@@ -384,16 +393,20 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   const handleCreateOption = useCallback(
     (newOption: string) => {
+      const trimmedNewOption = trim(newOption);
+
+      if (!trimmedNewOption.length) return;
+
       if (euiFieldProps.singleSelection === false) {
-        setValue([newOption]);
+        setValue([trimmedNewOption]);
         if (resultValue.value.length) {
-          setValue([...castArray(resultValue.value), newOption]);
+          setValue([...castArray(resultValue.value), trimmedNewOption]);
         } else {
-          setValue([newOption]);
+          setValue([trimmedNewOption]);
         }
         inputRef.current?.blur();
       } else {
-        setValue(newOption);
+        setValue(trimmedNewOption);
       }
     },
     [euiFieldProps.singleSelection, resultValue.value, setValue]
@@ -415,6 +428,17 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     ),
     [onTypeChange, resultType.value]
   );
+
+  useEffect(() => {
+    if (euiFieldProps?.singleSelection && isArray(resultValue.value)) {
+      setValue(resultValue.value.join(' '));
+    }
+
+    if (!euiFieldProps?.singleSelection && !isArray(resultValue.value)) {
+      setValue(resultValue.value.length ? [resultValue.value] : []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [euiFieldProps?.singleSelection, setValue]);
 
   useEffect(() => {
     setSelected(() => {
@@ -705,7 +729,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             return { data: {}, isValid: true };
           }
 
-          validateFields(['result.value']);
+          validateFields(['result.value', 'key']);
           const isValid = await validate();
 
           return {

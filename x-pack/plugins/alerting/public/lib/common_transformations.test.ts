@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiAlert, transformAlert } from './common_transformations';
-import { AlertExecutionStatusErrorReasons } from '../../common';
+import { ApiRule, transformRule } from './common_transformations';
+import { RuleExecutionStatusErrorReasons } from '../../common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -16,8 +16,8 @@ const dateUpdated = new Date(dateFixed - 1000);
 const dateExecuted = new Date(dateFixed);
 
 describe('common_transformations', () => {
-  test('transformAlert() with all optional fields', () => {
-    const apiAlert: ApiAlert = {
+  test('transformRule() with all optional fields', () => {
+    const apiRule: ApiRule = {
       id: 'some-id',
       name: 'some-name',
       enabled: true,
@@ -50,12 +50,12 @@ describe('common_transformations', () => {
         last_duration: 42,
         status: 'error',
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.Unknown,
           message: 'this is just a test',
         },
       },
     };
-    expect(transformAlert(apiAlert)).toMatchInlineSnapshot(`
+    expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -120,8 +120,8 @@ describe('common_transformations', () => {
     `);
   });
 
-  test('transformAlert() with no optional fields', () => {
-    const apiAlert: ApiAlert = {
+  test('transformRule() with no optional fields', () => {
+    const apiRule: ApiRule = {
       id: 'some-id',
       name: 'some-name',
       enabled: true,
@@ -153,7 +153,7 @@ describe('common_transformations', () => {
         status: 'error',
       },
     };
-    expect(transformAlert(apiAlert)).toMatchInlineSnapshot(`
+    expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
