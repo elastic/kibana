@@ -749,7 +749,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsNamingScheme: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly upgradeElasticAgent: string; readonly upgradeElasticAgent712lower: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly upgradeElasticAgent: string; readonly upgradeElasticAgent712lower: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
@@ -775,7 +775,7 @@
             "label": "clients",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly goOverview: string; readonly javaIndex: string; readonly jsIntro: string; readonly netGuide: string; readonly perlGuide: string; readonly phpGuide: string; readonly pythonGuide: string; readonly rubyOverview: string; readonly rustGuide: string; }"
+              "{ readonly guide: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly perlGuide: string; readonly phpGuide: string; readonly phpConnecting: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false
