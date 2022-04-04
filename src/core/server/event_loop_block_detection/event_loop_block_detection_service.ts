@@ -9,15 +9,16 @@
 import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { EventLoopBlockDetectionAsyncHook } from './async_hook';
-import { config } from './config';
+import { config, EventLoopBlockDetectionConfigType } from './config';
+import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
 export class EventLoopBlockDetectionService {
-  readonly #asyncHook?: AsyncHook;
+  #asyncHook?: EventLoopBlockDetectionAsyncHook;
   readonly #config$: Observable<EventLoopBlockDetectionConfigType>;
   readonly #logger: Logger;
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(coreContext: CoreContext) {
     this.#config$ = coreContext.configService.atPath<EventLoopBlockDetectionConfigType>(
       config.path
     );
