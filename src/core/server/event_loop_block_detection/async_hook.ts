@@ -32,6 +32,7 @@ interface LogWarningMeta {
     type: string | null;
     subtype: string | null;
     action: string | null;
+    outcome: apm.Outcome;
   };
 }
 
@@ -98,6 +99,7 @@ export class EventLoopBlockDetectionAsyncHook {
       this.#formatMessageParameter('span.type', transaction?.type),
       this.#formatMessageParameter('span.subtype', transaction?.subtype),
       this.#formatMessageParameter('span.action', span?.action),
+      this.#formatMessageParameter('span.outcome', span?.outcome),
       this.#formatMessageParameter('transaction.id', transaction?.ids['transaction.id']),
       this.#formatMessageParameter('transaction.traceId', transaction?.ids['trace.id']),
       this.#formatMessageParameter('span.id', span?.ids['span.id']),
@@ -126,7 +128,7 @@ export class EventLoopBlockDetectionAsyncHook {
       type: span.type,
       subtype: span.subtype,
       action: span.action,
-      // _raw: span,
+      outcome: span.outcome,
     };
   }
 
@@ -141,7 +143,6 @@ export class EventLoopBlockDetectionAsyncHook {
       name: transaction.name,
       type: transaction.type,
       result: transaction.result,
-      // _raw: transaction,
     };
   }
 }
