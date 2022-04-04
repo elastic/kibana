@@ -136,7 +136,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
 
         if (allAgentsOptions?.options) {
-          onSelection([allAgentsOptions]);
+          onSelection(allAgentsOptions.options);
           defaultValueInitialized.current = true;
         }
       }
