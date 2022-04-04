@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { VectorTile, VectorTileLayer } from '@mapbox/vector-tile';
+import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -67,41 +67,30 @@ function parseResult(response: VectorTile) {
   for (const property in data) {
     if (data.hasOwnProperty(property)) {
       const propertyObject = data[property];
-
-      const vectorTileData = Object.keys(propertyObject)
-        .filter((key) => !key.includes('_') && key !== 'name')
-        .reduce(
-          (obj, key) => {
-            return Object.assign(obj, {
-              [key]: propertyObject[key as keyof VectorTileLayer],
-            });
-          },
-          { features: [] as any }
-        );
-
+      const vectorTileData = [];
       const featuresArray = [];
 
       for (let index = 0; index < propertyObject.length; index++) {
         const feature = propertyObject.feature(index);
         const properties = feature.properties;
         const geometry = feature.loadGeometry()[0];
-        const type = feature.type;
 
         featuresArray.push({
           geometry: {
             coordinates: geometry,
           },
           properties,
-          type,
         });
       }
 
-      vectorTileData.features.push(...featuresArray);
+      vectorTileData.push(...featuresArray);
       output[property] = vectorTileData;
     }
   }
 
-  return JSON.stringify(output, null, '\t');
+  const sortedOutput = Object.fromEntries(Object.entries(output).sort().reverse()); // "meta" layer is now in top of the result
+
+  return JSON.stringify(sortedOutput, null, '\t');
 }
 
 function EditorOutputUI() {
