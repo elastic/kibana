@@ -6,5 +6,10 @@
  */
 
 export { Console } from './console';
-export type { ConsoleProps } from './console';
-export type { CommandServiceInterface, CommandDefinition, Command } from './types';
+export { ConsoleManager, useConsoleManager } from './components/console_manager';
+export type { CommandServiceInterface, CommandDefinition, Command, ConsoleProps } from './types';
+export type {
+  ConsoleRegistrationInterface,
+  RegisteredConsoleClient,
+  ConsoleManagerClient,
+} from './components/console_manager/types';

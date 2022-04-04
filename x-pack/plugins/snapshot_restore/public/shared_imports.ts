@@ -33,4 +33,5 @@ export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 export {
   reactRouterNavigate,
   KibanaThemeProvider,
+  useExecutionContext,
 } from '../../../../src/plugins/kibana_react/public';
