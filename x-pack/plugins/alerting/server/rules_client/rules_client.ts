@@ -19,8 +19,10 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
+  IBasePath,
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
+import { RuleDiagnostic } from '../lib/diagnostics/rule_diagnostic';
 import {
   Rule,
   PartialRule,
@@ -89,7 +91,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogWithErrorsResult } from '../../common';
+import { DiagnosticResult, IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -140,6 +142,7 @@ export interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertingAuthorization;
+  basePathService: IBasePath;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
@@ -231,6 +234,11 @@ export interface CreateOptions<Params extends RuleTypeParams> {
   };
 }
 
+export interface DiagnoseOptions<Params extends RuleTypeParams> {
+  ruleTypeId: string;
+  params: Params;
+}
+
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
@@ -303,11 +311,14 @@ export class RulesClient {
     'snoozeEndTime',
   ];
 
+  private ruleDiagnostics: RuleDiagnostic;
+
   constructor({
     ruleTypeRegistry,
     minimumScheduleInterval,
     unsecuredSavedObjectsClient,
     authorization,
+    basePathService,
     taskManager,
     logger,
     spaceId,
@@ -340,6 +351,8 @@ export class RulesClient {
     this.kibanaVersion = kibanaVersion;
     this.auditLogger = auditLogger;
     this.eventLogger = eventLogger;
+
+    this.ruleDiagnostics = new RuleDiagnostic({ basePathService, spaceId, createAPIKey });
   }
 
   public async create<Params extends RuleTypeParams = never>({
@@ -499,6 +512,21 @@ export class RulesClient {
       false,
       true
     );
+  }
+
+  public async diagnose<Params extends RuleTypeParams = never>({
+    ruleTypeId,
+    params,
+  }: DiagnoseOptions<Params>): Promise<DiagnosticResult[]> {
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleTypeId);
+
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
+    return await this.ruleDiagnostics.diagnose({
+      params,
+      diagnostics: ruleType.diagnostics,
+      username: await this.getUserName(),
+      ruleTypeId: ruleType.id,
+    });
   }
 
   public async get<Params extends RuleTypeParams = never>({

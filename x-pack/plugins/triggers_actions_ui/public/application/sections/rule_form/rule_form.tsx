@@ -34,6 +34,7 @@ import {
   EuiErrorBoundary,
   EuiToolTip,
   EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
@@ -76,6 +77,7 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
+import { isValidRule } from './rule_errors';
 
 const ENTER_KEY = 13;
 
@@ -96,6 +98,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredSolutions?: string[] | undefined;
+  onShowPreview: () => void;
 }
 
 export const RuleForm = ({
@@ -111,6 +114,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredSolutions,
+  onShowPreview,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -527,6 +531,35 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
+      {selectedRuleType?.hasDiagnostics && (
+        <>
+          <EuiHorizontalRule />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem>
+              <EuiTitle size="s" data-test-subj="selectedRuleTypeHasDiagnostic">
+                <h5 id="selectedRuleTypeHasDiagnostic">Preview Rule</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s" data-test-subj="ruleDiagnosticDescription">
+                Preview rule execution and diagnose potential issues
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {!isValidRule(rule, errors, []) && (
+            <EuiCallOut
+              title="Must fill out rule params before previewing"
+              color="warning"
+              iconType="help"
+              size="s"
+            />
+          )}
+          <EuiButton onClick={() => onShowPreview()}>Preview</EuiButton>
+          <EuiHorizontalRule />
+        </>
+      )}
       {canShowActions &&
       defaultActionGroupId &&
       ruleTypeModel &&

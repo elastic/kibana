@@ -10,6 +10,7 @@ import {
   Logger,
   SavedObjectsServiceStart,
   PluginInitializerContext,
+  IBasePath,
 } from 'src/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { RulesClient } from './rules_client';
@@ -35,6 +36,7 @@ export interface RulesClientFactoryOpts {
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  basePathService: IBasePath;
 }
 
 export class RulesClientFactory {
@@ -53,6 +55,7 @@ export class RulesClientFactory {
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
+  private basePathService: IBasePath;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -73,6 +76,7 @@ export class RulesClientFactory {
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
+    this.basePathService = options.basePathService;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -99,6 +103,7 @@ export class RulesClientFactory {
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      basePathService: this.basePathService,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

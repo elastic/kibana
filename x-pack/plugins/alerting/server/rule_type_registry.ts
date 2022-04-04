@@ -61,6 +61,7 @@ export interface RegistryRuleType
   > {
   id: string;
   enabledInLicense: boolean;
+  hasDiagnostics: boolean;
 }
 
 /**
@@ -348,6 +349,7 @@ export class RuleTypeRegistry {
             ruleTaskTimeout,
             defaultScheduleInterval,
             doesSetRecoveryContext,
+            diagnostics,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -367,6 +369,7 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
+          hasDiagnostics: !!diagnostics,
         })
       )
     );

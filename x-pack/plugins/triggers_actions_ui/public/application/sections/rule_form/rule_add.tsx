@@ -7,7 +7,15 @@
 
 import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiPortal,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
@@ -21,6 +29,7 @@ import {
   TriggersActionsUiConfig,
 } from '../../../types';
 import { RuleForm } from './rule_form';
+import { RulePreview } from './rule_preview';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
 import { createRule, loadRuleTypes } from '../../lib/rule_api';
@@ -79,6 +88,7 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
+  const [isPreviewFlyoutVisible, setIsPreviewFlyoutVisible] = useState<boolean>(false);
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setRule = (value: InitialRule) => {
@@ -231,7 +241,7 @@ const RuleAdd = ({
         onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutRuleAddTitle"
         size="m"
-        maxWidth={620}
+        maxWidth={isPreviewFlyoutVisible ? 1400 : 620}
         ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
@@ -247,23 +257,35 @@ const RuleAdd = ({
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={false}>
             <EuiFlyoutBody>
-              <RuleForm
-                rule={rule}
-                config={config}
-                dispatch={dispatch}
-                errors={ruleErrors}
-                canChangeTrigger={canChangeTrigger}
-                operation={i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleAdd.operationName',
-                  {
-                    defaultMessage: 'create',
-                  }
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <RuleForm
+                    rule={rule}
+                    config={config}
+                    dispatch={dispatch}
+                    errors={ruleErrors}
+                    canChangeTrigger={canChangeTrigger}
+                    operation={i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleAdd.operationName',
+                      {
+                        defaultMessage: 'create',
+                      }
+                    )}
+                    actionTypeRegistry={actionTypeRegistry}
+                    ruleTypeRegistry={ruleTypeRegistry}
+                    metadata={metadata}
+                    filteredSolutions={filteredSolutions}
+                    onShowPreview={() => {
+                      setIsPreviewFlyoutVisible(true);
+                    }}
+                  />
+                </EuiFlexItem>
+                {isPreviewFlyoutVisible && (
+                  <EuiFlexItem>
+                    <RulePreview rule={rule as RulePreview} />
+                  </EuiFlexItem>
                 )}
-                actionTypeRegistry={actionTypeRegistry}
-                ruleTypeRegistry={ruleTypeRegistry}
-                metadata={metadata}
-                filteredSolutions={filteredSolutions}
-              />
+              </EuiFlexGroup>
             </EuiFlyoutBody>
             <RuleAddFooter
               isSaving={isSaving}

@@ -27,6 +27,10 @@ export interface AlertingFrameworkHealth {
   hasPermanentEncryptionKey: boolean;
   alertingFrameworkHealth: AlertsHealth;
 }
+export interface DiagnosticResult {
+  name: string;
+  message: string;
+}
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';

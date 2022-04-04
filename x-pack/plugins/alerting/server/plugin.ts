@@ -386,6 +386,7 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request);
       },
+      basePathService: core.http.basePath,
       actions: plugins.actions,
       eventLog: plugins.eventLog,
       kibanaVersion: this.kibanaVersion,

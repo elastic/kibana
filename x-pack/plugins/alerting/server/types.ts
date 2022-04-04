@@ -44,6 +44,7 @@ import {
 import { LicenseType } from '../../licensing/server';
 import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
 import { RuleTypeConfig } from './config';
+import { Diagnostics } from './lib/diagnostics/rule_diagnostic';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -173,6 +174,7 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   config?: RuleTypeConfig;
+  diagnostics?: Diagnostics;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

@@ -39,6 +39,7 @@ export interface RuleType<
   doesSetRecoveryContext?: boolean;
   enabledInLicense: boolean;
   authorizedConsumers: Record<string, ConsumerPrivileges>;
+  hasDiagnostics: boolean;
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {
