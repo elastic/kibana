@@ -14,6 +14,7 @@ import {
   AsyncTestBedConfig,
   delay,
 } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { BASE_PATH } from '../../../public/application/constants';
 import { WithAppDependencies } from './setup_environment';
@@ -25,8 +26,6 @@ const testBedConfig: AsyncTestBedConfig = {
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(WithAppDependencies(SnapshotRestoreHome), testBedConfig);
 
 export interface HomeTestBed extends TestBed {
   actions: {
@@ -40,7 +39,11 @@ export interface HomeTestBed extends TestBed {
   };
 }
 
-export const setup = async (): Promise<HomeTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<HomeTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(SnapshotRestoreHome, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
   const REPOSITORY_TABLE = 'repositoryTable';
   const SNAPSHOT_TABLE = 'snapshotTable';

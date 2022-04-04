@@ -10,7 +10,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 
 const rulesClient = rulesClientMock.create();
 
@@ -67,7 +67,7 @@ describe('disableRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.disable.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.disable.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

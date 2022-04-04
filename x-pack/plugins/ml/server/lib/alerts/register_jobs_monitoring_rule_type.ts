@@ -24,9 +24,9 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../alerting/common';
-import type { AlertExecutorOptions } from '../../../../alerting/server';
+import type { RuleExecutorOptions } from '../../../../alerting/server';
 import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
@@ -85,7 +85,7 @@ export const REALTIME_ISSUE_DETECTED: ActionGroup<AnomalyDetectionJobRealtimeIss
   }),
 };
 
-export type JobsHealthExecutorOptions = AlertExecutorOptions<
+export type JobsHealthExecutorOptions = RuleExecutorOptions<
   AnomalyDetectionJobsHealthRuleParams,
   Record<string, unknown>,
   Record<string, unknown>,
@@ -101,7 +101,7 @@ export function registerJobsMonitoringRuleType({
   alerting.registerType<
     AnomalyDetectionJobsHealthRuleParams,
     never, // Only use if defining useSavedObjectReferences hook
-    AlertTypeState,
+    RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
     AnomalyDetectionJobRealtimeIssue
