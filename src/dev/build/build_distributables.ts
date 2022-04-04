@@ -13,6 +13,7 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
   downloadFreshNode: boolean;
   initialize: boolean;
