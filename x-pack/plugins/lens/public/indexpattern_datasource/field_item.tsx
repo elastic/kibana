@@ -460,7 +460,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
-  } else if (field.type.includes('range')) {
+  } else if (field.type.includes('range') || field.type === 'murmur3') {
     return (
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
