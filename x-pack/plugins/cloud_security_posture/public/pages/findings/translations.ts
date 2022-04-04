@@ -189,5 +189,5 @@ export const NO_FINDINGS = i18n.translate('xpack.csp.findings.nonFindingsLabel',
 
 export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.csp.findings.searchBar.searchPlaceholder',
-  { defaultMessage: 'Search findings (eg. resource.type : "API Server")' }
+  { defaultMessage: 'Search findings (eg. resource.section : "API Server")' }
 );
