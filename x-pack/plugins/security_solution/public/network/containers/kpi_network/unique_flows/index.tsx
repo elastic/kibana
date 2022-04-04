@@ -29,7 +29,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiUniqueFlowsQuery';
+export const ID = 'networkKpiUniqueFlowsQuery';
 
 export interface NetworkKpiUniqueFlowsArgs {
   uniqueFlowId: number;
@@ -84,7 +84,6 @@ export const useNetworkKpiUniqueFlows = ({
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         searchSubscription$.current = data.search
           .search<NetworkKpiUniqueFlowsRequestOptions, NetworkKpiUniqueFlowsStrategyResponse>(
             request,
@@ -154,6 +153,14 @@ export const useNetworkKpiUniqueFlows = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiUniqueFlowsRequest, networkKpiUniqueFlowsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiUniqueFlowsResponse];
 };

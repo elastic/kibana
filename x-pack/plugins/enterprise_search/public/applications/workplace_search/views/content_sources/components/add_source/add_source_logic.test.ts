@@ -29,6 +29,7 @@ import { FeatureIds } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
+import { ExternalConnectorLogic } from './add_external_connector/external_connector_logic';
 import {
   AddSourceLogic,
   AddSourceSteps,
@@ -38,7 +39,6 @@ import {
   AddSourceValues,
   AddSourceProps,
 } from './add_source_logic';
-import { ExternalConnectorLogic } from './external_connector_logic';
 
 describe('AddSourceLogic', () => {
   const { mount } = new LogicMounter(AddSourceLogic);
@@ -720,7 +720,7 @@ describe('AddSourceLogic', () => {
 
         expect(http.get).toHaveBeenCalledWith(
           '/internal/workplace_search/account/sources/github/prepare',
-          { query: { index_permissions: false } }
+          { query: {} }
         );
       });
 

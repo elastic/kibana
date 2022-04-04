@@ -21,7 +21,8 @@ import React, {
   useMemo,
   RefObject,
 } from 'react';
-import { EuiButton, EuiIcon, formatDate } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
 import { useVisible } from '../../hooks/use_visible';
@@ -41,10 +42,10 @@ export interface ProcessDeps {
   selectedProcessId?: string;
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
+  searchResults?: Process[];
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
-  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
-  handleOnAlertDetailsClosed: (alertUuid: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 /**
@@ -60,10 +61,10 @@ export function ProcessTreeNode({
   selectedProcessId,
   timeStampOn = true,
   verboseModeOn = true,
+  searchResults,
   scrollerRef,
   onChangeJumpToEventVisibility,
-  loadAlertDetails,
-  handleOnAlertDetailsClosed,
+  onShowAlertDetails,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -85,7 +86,8 @@ export function ProcessTreeNode({
       ),
     [hasAlerts, alerts, jumpToAlertID]
   );
-  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert });
+  const isSelected = selectedProcessId === process.id;
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
   const buttonStyles = useButtonStyles({});
 
   const nodeRef = useVisible({
@@ -144,6 +146,45 @@ export function ProcessTreeNode({
   );
 
   const processDetails = process.getDetails();
+  const hasExec = process.hasExec();
+
+  const processIcon = useMemo(() => {
+    if (!process.parent) {
+      return 'unlink';
+    } else if (hasExec) {
+      return 'console';
+    } else {
+      return 'branch';
+    }
+  }, [hasExec, process.parent]);
+
+  const iconTooltip = useMemo(() => {
+    if (!process.parent) {
+      return i18n.translate('xpack.sessionView.processNode.tooltipOrphan', {
+        defaultMessage: 'Process missing parent (orphan)',
+      });
+    } else if (hasExec) {
+      return i18n.translate('xpack.sessionView.processNode.tooltipExec', {
+        defaultMessage: "Process exec'd",
+      });
+    } else {
+      return i18n.translate('xpack.sessionView.processNode.tooltipFork', {
+        defaultMessage: 'Process forked (no exec)',
+      });
+    }
+  }, [hasExec, process.parent]);
+
+  const children = useMemo(() => {
+    if (searchResults) {
+      // noop
+      // Only used to break cache on this memo when search changes. We need this ref
+      // to avoid complaints from the useEffect dependency eslint rule.
+      // This fixes an issue when verbose mode is OFF and there are matching results on
+      // hidden processes.
+    }
+
+    return process.getChildren(verboseModeOn);
+  }, [process, verboseModeOn, searchResults]);
 
   if (!processDetails?.process) {
     return null;
@@ -161,19 +202,15 @@ export function ProcessTreeNode({
     start,
   } = processDetails.process;
 
-  const children = process.getChildren(verboseModeOn);
-  const childCount = process.getChildren(true).length;
-  const shouldRenderChildren = childrenExpanded && children && children.length > 0;
+  const shouldRenderChildren = childrenExpanded && children?.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = user.id !== parent.user.id;
+  const showUserEscalation = user.id && user.id !== parent.user?.id;
   const interactiveSession = !!tty;
-  const sessionIcon = interactiveSession ? 'consoleApp' : 'compute';
-  const hasExec = process.hasExec();
+  const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
-  const processIcon = hasExec ? 'console' : 'branch';
 
   const timeStampsNormal = formatDate(start, KIBANA_DATE_FORMAT);
 
@@ -200,7 +237,9 @@ export function ProcessTreeNode({
             </>
           ) : (
             <span>
-              <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
+              <EuiToolTip position="top" content={iconTooltip}>
+                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
+              </EuiToolTip>{' '}
               <span ref={textRef}>
                 <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
                 <span css={styles.darkText}>{args[0]}</span>&nbsp;
@@ -211,16 +250,12 @@ export function ProcessTreeNode({
                     [exit_code: {exitCode}]
                   </small>
                 )}
-                {timeStampOn && (
-                  <span
-                    data-test-subj="sessionView:processTreeNodeTimestamp"
-                    css={styles.timeStamp}
-                  >
-                    {timeStampsNormal}
-                  </span>
-                )}
-                ;
               </span>
+              {timeStampOn && (
+                <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
+                  {timeStampsNormal}
+                </span>
+              )}
             </span>
           )}
 
@@ -236,7 +271,7 @@ export function ProcessTreeNode({
               <span css={buttonStyles.userChangedButtonUsername}>{user.name}</span>
             </EuiButton>
           )}
-          {!isSessionLeader && childCount > 0 && (
+          {!isSessionLeader && children.length > 0 && (
             <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
           )}
           {alerts.length > 0 && (
@@ -255,8 +290,7 @@ export function ProcessTreeNode({
           jumpToAlertID={jumpToAlertID}
           isProcessSelected={selectedProcessId === process.id}
           onAlertSelected={onProcessClicked}
-          loadAlertDetails={loadAlertDetails}
-          handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+          onShowAlertDetails={onShowAlertDetails}
         />
       )}
 
@@ -274,10 +308,10 @@ export function ProcessTreeNode({
                 selectedProcessId={selectedProcessId}
                 timeStampOn={timeStampOn}
                 verboseModeOn={verboseModeOn}
+                searchResults={searchResults}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
-                loadAlertDetails={loadAlertDetails}
-                handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+                onShowAlertDetails={onShowAlertDetails}
               />
             );
           })}

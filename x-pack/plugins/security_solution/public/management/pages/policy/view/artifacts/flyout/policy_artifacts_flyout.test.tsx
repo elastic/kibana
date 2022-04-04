@@ -38,8 +38,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     namespace_type: ['agnostic'],
     page: MANAGEMENT_DEFAULT_PAGE + 1,
     per_page: MAX_ALLOWED_RESULTS,
-    sort_field: undefined,
-    sort_order: undefined,
+    sort_field: 'created_at',
+    sort_order: 'desc',
   },
 });
 const getEmptyList = () => ({

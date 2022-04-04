@@ -318,6 +318,34 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                        defaultMessage="Data retention settings"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
+                        values={{
+                          learnMore: (
+                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
+                  >
+                    <div />
+                  </EuiFormRow>
+                </EuiFlexItem>
                 {/* Advanced vars */}
                 {advancedVars.map((varDef) => {
                   const { name: varName, type: varType } = varDef;

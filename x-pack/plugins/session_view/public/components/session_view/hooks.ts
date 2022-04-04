@@ -15,9 +15,11 @@ import {
   ProcessEventResults,
 } from '../../../common/types/process_tree';
 import {
+  ALERTS_ROUTE,
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
   ALERT_STATUS_ROUTE,
+  QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
 } from '../../../common/constants';
 
@@ -28,9 +30,10 @@ export const useFetchSessionViewProcessEvents = (
   const { http } = useKibana<CoreStart>().services;
   const [isJumpToFirstPage, setIsJumpToFirstPage] = useState<boolean>(false);
   const jumpToCursor = jumpToEvent && jumpToEvent.process.start;
+  const cachingKeys = [QUERY_KEY_PROCESS_EVENTS, sessionEntityId];
 
   const query = useInfiniteQuery(
-    'sessionViewProcessEvents',
+    cachingKeys,
     async ({ pageParam = {} }) => {
       let { cursor } = pageParam;
       const { forward } = pageParam;
@@ -52,18 +55,18 @@ export const useFetchSessionViewProcessEvents = (
       return { events, cursor };
     },
     {
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
         if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
+            cursor: lastPage.events[lastPage.events.length - 1].process.start,
             forward: true,
           };
         }
       },
-      getPreviousPageParam: (firstPage, pages) => {
+      getPreviousPageParam: (firstPage) => {
         if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: firstPage.events[0]['@timestamp'],
+            cursor: firstPage.events[0].process.start,
             forward: false,
           };
         }
@@ -80,6 +83,33 @@ export const useFetchSessionViewProcessEvents = (
       setIsJumpToFirstPage(true);
     }
   }, [jumpToEvent, query, isJumpToFirstPage]);
+
+  return query;
+};
+
+export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
+  const { http } = useKibana<CoreStart>().services;
+  const cachingKeys = [QUERY_KEY_ALERTS, sessionEntityId];
+  const query = useQuery(
+    cachingKeys,
+    async () => {
+      const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
+        query: {
+          sessionEntityId,
+        },
+      });
+
+      const events = res.events.map((event: any) => event._source as ProcessEvent);
+
+      return events;
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      cacheTime: 0,
+    }
+  );
 
   return query;
 };
@@ -118,6 +148,7 @@ export const useFetchAlertStatus = (
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
+      cacheTime: 0,
     }
   );
 

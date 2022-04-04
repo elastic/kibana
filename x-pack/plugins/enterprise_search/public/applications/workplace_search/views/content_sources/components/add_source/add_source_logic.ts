@@ -25,7 +25,10 @@ import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { SourcesLogic } from '../../sources_logic';
 
-import { ExternalConnectorLogic, isValidExternalUrl } from './external_connector_logic';
+import {
+  ExternalConnectorLogic,
+  isValidExternalUrl,
+} from './add_external_connector/external_connector_logic';
 
 export interface AddSourceProps {
   sourceData: SourceDataItem;
@@ -229,6 +232,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
+        getSourceConfigData: () => true,
       },
     ],
     buttonLoading: [
@@ -372,12 +376,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const route = isOrganization
         ? `/internal/workplace_search/org/sources/${serviceType}/prepare`
         : `/internal/workplace_search/account/sources/${serviceType}/prepare`;
+
+      const indexPermissionsQuery = isOrganization
+        ? { index_permissions: indexPermissions }
+        : undefined;
+
       const query = subdomain
         ? {
-            index_permissions: indexPermissions,
+            ...indexPermissionsQuery,
             subdomain,
           }
-        : { index_permissions: indexPermissions };
+        : { ...indexPermissionsQuery };
 
       try {
         const response = await HttpLogic.values.http.get<SourceConnectData>(route, {

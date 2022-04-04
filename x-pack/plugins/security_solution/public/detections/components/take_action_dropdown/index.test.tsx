@@ -35,6 +35,12 @@ jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () =
 }));
 jest.mock('../../../cases/components/use_insert_timeline');
 
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
@@ -78,6 +84,7 @@ describe('take action dropdown', () => {
     refetch: jest.fn(),
     refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
+    onOsqueryClick: jest.fn(),
   };
 
   beforeAll(() => {
@@ -89,8 +96,11 @@ describe('take action dropdown', () => {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
           cases: mockCasesContract(),
+          osquery: {
+            isOsqueryAvailable: jest.fn().mockReturnValue(true),
+          },
           application: {
-            capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+            capabilities: { siem: { crud_alerts: true, read_alerts: true }, osquery: true },
           },
         },
       };
@@ -188,6 +198,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
         ).toEqual('Investigate in timeline');
+      });
+    });
+    test('should render "Run Osquery"', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="osquery-action-item"]').first().text()).toEqual(
+          'Run Osquery'
+        );
       });
     });
   });

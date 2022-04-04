@@ -8,10 +8,7 @@
 import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import {
-  AlertActionParam as RuleActionParam,
-  IntervalSchedule,
-} from '../../../../../alerting/common';
+import { RuleActionParam, IntervalSchedule } from '../../../../../alerting/common';
 import { Rule, RuleAction } from '../../../types';
 
 export type InitialRule = Partial<Rule> &

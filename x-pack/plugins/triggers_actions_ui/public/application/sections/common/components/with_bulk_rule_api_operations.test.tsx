@@ -10,6 +10,8 @@ import { shallow, mount } from 'enzyme';
 import uuid from 'uuid';
 import { withBulkRuleOperations, ComponentOpts } from './with_bulk_rule_api_operations';
 import * as ruleApi from '../../../lib/rule_api';
+import { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';
+
 import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
@@ -37,6 +39,7 @@ describe('with_bulk_rule_api_operations', () => {
       expect(typeof props.loadRule).toEqual('function');
       expect(typeof props.loadRuleTypes).toEqual('function');
       expect(typeof props.resolveRule).toEqual('function');
+      expect(typeof props.loadExecutionLogAggregations).toEqual('function');
       return <div />;
     };
 
@@ -245,6 +248,40 @@ describe('with_bulk_rule_api_operations', () => {
 
     expect(ruleApi.loadRuleTypes).toHaveBeenCalledTimes(1);
     expect(ruleApi.loadRuleTypes).toHaveBeenCalledWith({ http });
+  });
+
+  it('loadExecutionLogAggregations calls the loadExecutionLogAggregations api', () => {
+    const { http } = useKibanaMock().services;
+
+    const sortTimestamp = {
+      timestamp: {
+        order: 'asc',
+      },
+    } as SortField;
+
+    const callProps = {
+      id: 'test-id',
+      dateStart: '2022-03-23T16:17:53.482Z',
+      dateEnd: '2022-03-23T16:17:53.482Z',
+      filter: ['success', 'unknown'],
+      perPage: 10,
+      page: 0,
+      sort: [sortTimestamp],
+    };
+
+    const ComponentToExtend = ({ loadExecutionLogAggregations }: ComponentOpts) => {
+      return <button onClick={() => loadExecutionLogAggregations(callProps)}>{'call api'}</button>;
+    };
+
+    const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
+    const component = mount(<ExtendedComponent />);
+    component.find('button').simulate('click');
+
+    expect(ruleApi.loadExecutionLogAggregations).toHaveBeenCalledTimes(1);
+    expect(ruleApi.loadExecutionLogAggregations).toHaveBeenCalledWith({
+      ...callProps,
+      http,
+    });
   });
 });
 
