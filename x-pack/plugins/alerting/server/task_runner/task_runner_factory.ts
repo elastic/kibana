@@ -32,10 +32,12 @@ import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { InMemoryMetrics } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
+  data: DataPluginStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
