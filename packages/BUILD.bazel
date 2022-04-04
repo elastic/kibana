@@ -102,7 +102,6 @@ filegroup(
     "//packages/elastic-safer-lodash-set:build_types",
     "//packages/kbn-ace:build_types",
     "//packages/kbn-alerts:build_types",
-    "//packages/kbn-ambient-ui-types:build_types",
     "//packages/kbn-analytics:build_types",
     "//packages/kbn-apm-config-loader:build_types",
     "//packages/kbn-apm-utils:build_types",

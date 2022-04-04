@@ -4,7 +4,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": "src",
     "stripInternal": false,
     "types": [
       "jest",
@@ -12,6 +11,6 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "*.d.ts"
   ]
 }
