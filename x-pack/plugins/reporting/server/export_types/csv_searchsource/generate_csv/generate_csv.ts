@@ -27,14 +27,9 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '../../../../../../../src/plugins/field_formats/common';
-import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
-import {
-  AuthenticationExpiredError,
-  ReportingError,
-  UnknownError,
-} from '../../../../common/errors';
+import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
@@ -368,15 +363,15 @@ export class CsvGenerator {
       }
     } catch (err) {
       this.logger.error(err);
-      if (err instanceof KbnServerError && err.errBody) {
-        throw JSON.stringify(err.errBody.error);
-      }
-
-      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
-        reportingError = new AuthenticationExpiredError();
-        warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+      if (err instanceof esErrors.ResponseError) {
+        if ([401, 403].includes(err.statusCode ?? 0)) {
+          reportingError = new AuthenticationExpiredError();
+          warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+        } else {
+          warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
+        }
       } else {
-        throw new UnknownError(err.message);
+        warnings.push(i18nTexts.unknownError(err?.message));
       }
     } finally {
       // clear scrollID

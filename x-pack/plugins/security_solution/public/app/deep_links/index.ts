@@ -97,7 +97,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     id: SecurityPageName.landing,
     title: GETTING_STARTED,
     path: LANDING_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
+    navLinkStatus: AppNavLinkStatus.hidden,
     features: [FEATURE.general],
     keywords: [
       i18n.translate('xpack.securitySolution.search.getStarted', {
