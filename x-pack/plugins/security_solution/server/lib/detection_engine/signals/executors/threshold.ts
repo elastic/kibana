@@ -13,7 +13,7 @@ import { Logger } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
@@ -60,7 +60,7 @@ export const thresholdExecutor = async ({
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
