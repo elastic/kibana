@@ -10,7 +10,12 @@
       "jest",
       "node",
       "@emotion/react/types/css-prop"
-    ]
+    ],
+    "paths": {
+      "@emotion/core": [
+        "node_modules/@emotion/react"
+      ]
+    }
   },
   "include": [
     "src/**/*"
