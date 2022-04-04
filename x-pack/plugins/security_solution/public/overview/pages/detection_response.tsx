@@ -11,7 +11,6 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 // import { useGlobalTime } from '../../common/containers/use_global_time';
 
-import { OverviewEmpty } from '../components/overview_empty';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
@@ -22,6 +21,7 @@ import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { useUserInfo } from '../../detections/components/user_info';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -101,7 +101,7 @@ const DetectionResponseComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <OverviewEmpty />
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.detectionAndResponse} />

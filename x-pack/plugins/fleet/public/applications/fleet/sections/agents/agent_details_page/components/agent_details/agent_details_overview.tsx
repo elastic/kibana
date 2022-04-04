@@ -146,12 +146,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               agentPolicy?.monitoring_enabled?.includes('logs') ? (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorLogsEnabledText"
-                  defaultMessage="True"
+                  defaultMessage="Enabled"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorLogsDisabledText"
-                  defaultMessage="False"
+                  defaultMessage="Disabled"
                 />
               )
             ) : null,
@@ -164,12 +164,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               agentPolicy?.monitoring_enabled?.includes('metrics') ? (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorMetricsEnabledText"
-                  defaultMessage="True"
+                  defaultMessage="Enabled"
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorMetricsDisabledText"
-                  defaultMessage="False"
+                  defaultMessage="Disabled"
                 />
               )
             ) : null,

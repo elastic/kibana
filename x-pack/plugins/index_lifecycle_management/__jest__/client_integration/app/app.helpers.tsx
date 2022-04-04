@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test-jest-helpers';
-import { docLinksServiceMock } from 'src/core/public/mocks';
+import { docLinksServiceMock, executionContextServiceMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 import { licensingMock } from '../../../../licensing/public/mocks';
@@ -23,6 +23,7 @@ const AppWithContext = (props: any) => {
         breadcrumbService,
         license: licensingMock.createLicense(),
         docLinks: docLinksServiceMock.createStartContract(),
+        executionContext: executionContextServiceMock.createStartContract(),
       }}
     >
       <App {...props} />
