@@ -18,7 +18,7 @@ export function SpanDatabase({ spanDb }: Props) {
   if (!spanDb || !spanDb.statement) {
     return null;
   }
-  console.log(spanDb.statement);
+
   return (
     <Fragment>
       <EuiTitle size="xs">
