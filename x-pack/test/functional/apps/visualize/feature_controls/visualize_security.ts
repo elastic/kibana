@@ -28,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const globalNav = getService('globalNav');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+  const log = getService('log');
 
   describe('visualize feature controls security', () => {
     before(async () => {
@@ -139,8 +140,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await queryBar.clickQuerySubmitButton();
+        await testSubjects.click('showQueryBarMenu');
+        log.debug('Save the new query');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+        await testSubjects.click('showQueryBarMenu');
+        log.debug('delete the new query');
         await savedQueryManagementComponent.deleteSavedQuery('foo');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
       });
