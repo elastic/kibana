@@ -6,22 +6,28 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger } from 'kibana/server';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { buildExecutor } from './executor';
 import { HTTPConnectorType } from './types';
 
 export const register = <Config, Secrets, Params>({
   actionTypeRegistry,
   connector,
+  logger,
 }: {
   actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
   connector: HTTPConnectorType<Config, Secrets, Params>;
+  logger: Logger;
 }) => {
+  const httpExecutor = buildExecutor({ connector, logger });
+
   actionTypeRegistry.register({
     id: connector.id,
     name: connector.name,
     minimumLicenseRequired: connector.minimumLicenseRequired,
-    executor: async () => {
-      return { status: 'ok', data: {}, actionId: 'test' };
+    executor: async ({ actionId }) => {
+      return { status: 'ok', data: {}, actionId };
     },
   });
 };

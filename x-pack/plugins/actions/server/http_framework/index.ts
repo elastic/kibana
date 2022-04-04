@@ -6,20 +6,24 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger } from 'kibana/server';
+
 import { ActionTypeRegistry } from '../action_type_registry';
 import { register } from './register';
 import { HTTPConnectorType } from './types';
 
 export const createHTTPConnectorFramework = ({
   actionTypeRegistry,
+  logger,
 }: {
   actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
+  logger: Logger;
 }) => {
   return {
     registerConnector: <Config, Secrets, Params>(
       connector: HTTPConnectorType<Config, Secrets, Params>
     ) => {
-      register({ actionTypeRegistry, connector });
+      register({ actionTypeRegistry, logger, connector });
     },
   };
 };

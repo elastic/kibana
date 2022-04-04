@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
 import { HTTPConnectorType } from './types';
 
-const buildExecutor = (connector: HTTPConnectorType) => {
-  return {};
-};
+const buildHandler = () => {};
+
+export const buildExecutor = <Config, Secrets, Params>({
+  connector,
+  logger,
+}: {
+  connector: HTTPConnectorType<Config, Secrets, Params>;
+  logger: Logger;
+}) => {};
