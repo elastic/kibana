@@ -54,7 +54,6 @@ describe('Create a timeline from a template', () => {
     cy.wait('@timeline').its('response.statusCode').should('eq', 200);
     expandEventAction();
     clickingOnCreateTimelineFormTemplateBtn();
-    expect(1).to.eq(2);
 
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
