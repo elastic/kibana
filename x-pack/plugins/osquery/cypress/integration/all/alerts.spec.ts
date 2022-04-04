@@ -59,6 +59,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
+    cy.contains('1 agent selected.');
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
