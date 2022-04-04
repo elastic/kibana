@@ -8,6 +8,7 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 
 import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/server';
+import { ruleTypeSql } from './rule_types';
 
 // this plugin's dependencies
 export interface Ow22pmuellrDeps {
@@ -15,7 +16,9 @@ export interface Ow22pmuellrDeps {
 }
 
 export class Ow22pmuellrPlugin implements Plugin<void, void, Ow22pmuellrDeps> {
-  public setup(core: CoreSetup, { alerting }: Ow22pmuellrDeps) {}
+  public setup(core: CoreSetup, { alerting }: Ow22pmuellrDeps) {
+    alerting.registerType(ruleTypeSql);
+  }
 
   public start() {}
 

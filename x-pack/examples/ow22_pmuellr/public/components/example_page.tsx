@@ -14,8 +14,10 @@ import {
   EuiPageContentBody,
   EuiPageHeader,
   EuiTitle,
-  EuiText,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
+
+import { content } from './example_page_content.md';
 
 export function examplePage(title: string): JSX.Element {
   return (
@@ -28,33 +30,7 @@ export function examplePage(title: string): JSX.Element {
         </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>
-            <EuiText>
-              <h1>sql_rule</h1>
-
-              <p>
-                Kibana alerting rule that uses SQL. with the resultant SQL columns selecting both
-                the alert id (nee: alert instance id, like a host name) and context variables.
-              </p>
-
-              <h1>kb_profiler</h1>
-
-              <p>
-                HTTP endpoints in Kibana to run a CPU profile for specified duration, and obtain a
-                heap snapshot.
-              </p>
-
-              <h1>worker_rule</h1>
-
-              <p>Kibana alerting rule that runs the rule as a node Worker.</p>
-
-              <h1>task_grapher</h1>
-
-              <p>
-                Looking for some visualizations of task activity over time, but most likely looking
-                purely at alerting rules / connectors, since they have good timing info in the event
-                log, but there is not really anything for task manager.
-              </p>
-            </EuiText>
+            <EuiMarkdownFormat>{content}</EuiMarkdownFormat>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

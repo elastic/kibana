@@ -7,7 +7,12 @@
 
 import ReactDOM from 'react-dom';
 
-import { Plugin, CoreSetup, AppMountParameters } from '../../../../src/core/public';
+import {
+  Plugin,
+  CoreSetup,
+  AppMountParameters,
+  AppNavLinkStatus,
+} from '../../../../src/core/public';
 import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
@@ -36,7 +41,9 @@ export interface Ow22pmuellrStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class Ow22pmuellrPlugin implements Plugin<Setup, Start, Ow22pmuellrSetupDeps> {
+export class Ow22pmuellrPlugin
+  implements Plugin<Setup, Start, Ow22pmuellrSetupDeps, Ow22pmuellrStartDeps>
+{
   public setup(
     core: CoreSetup<Ow22pmuellrStartDeps, Start>,
     { alerting, triggersActionsUi, developerExamples }: Ow22pmuellrSetupDeps
@@ -44,6 +51,7 @@ export class Ow22pmuellrPlugin implements Plugin<Setup, Start, Ow22pmuellrSetupD
     core.application.register({
       id: AppId,
       title: AppTitle,
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount({ element }: AppMountParameters) {
         ReactDOM.render(examplePage(AppTitle), element);
         return () => ReactDOM.unmountComponentAtNode(element);
