@@ -147,7 +147,7 @@ const MyForcedPageReloadLink = () =>
   </a>;
 ----
 
-If you also need to bypass the default onAppLeave behavior, you can set the `skipUnload` option to `true`.
+If you also need to bypass the default onAppLeave behavior, you can set the `skipUnload` option to `true`. This option is also available in `navigateToApp`.
 
 [[routing]]
 === Setting up internal app routing
