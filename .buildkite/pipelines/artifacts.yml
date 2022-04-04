@@ -24,3 +24,9 @@ steps:
     agents:
       queue: n2-4-virt
     timeout_in_minutes: 20
+
+  - command: .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Build Context'
+    agents:
+      queue: n2-4
+    timeout_in_minutes: 20
