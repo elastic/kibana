@@ -288,7 +288,7 @@ function AlertsPage() {
             data-test-subj="statErrors"
           />,
           <Divider />,
-          <EuiButtonEmpty href={manageRulesHref}>
+          <EuiButtonEmpty href={manageRulesHref} data-test-subj="manageRulesPages">
             {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
               defaultMessage: 'Manage Rules',
             })}
