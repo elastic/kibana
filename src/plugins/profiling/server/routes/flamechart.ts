@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from 'kibana/server';
 import { chunk } from 'lodash';
+import LRUCache from 'lru-cache';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
@@ -23,19 +24,28 @@ import { logExecutionLatency } from './logger';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 
+const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
+const frameIDToFileIDCache = new LRUCache<string, FileID>({ max: 100000 });
+
 // convertFrameIDToFileID extracts the FileID from the FrameID and returns as base64url string.
 export function extractFileIDFromFrameID(frameID: string): string {
+  const fileIDChunk = frameID.slice(0, 23);
+  let fileID = frameIDToFileIDCache.get(fileIDChunk) as string;
+  if (fileID) return fileID;
+
   // Step 1: Convert the base64-encoded frameID to an array of 22 bytes.
   // We use 'base64url' instead of 'base64' because frameID is encoded URL-friendly.
   // The first 16 bytes contain the FileID.
-  const buf = Buffer.from(frameID, 'base64url');
+  const buf = Buffer.from(fileIDChunk, 'base64url');
 
   // Convert the FileID bytes into base64 with URL-friendly encoding.
   // We have to manually append '==' since we use the FileID string for
   // comparing / looking up the FileID strings in the ES indices, which have
   // the '==' appended.
   // We may want to remove '==' in the future to reduce the uncompressed storage size by 10%.
-  return buf.toString('base64url', 0, 16) + '==';
+  fileID = buf.toString('base64url', 0, 16) + '==';
+  frameIDToFileIDCache.set(fileIDChunk, fileID);
+  return fileID;
 }
 
 // extractFileIDArrayFromFrameIDArray extracts all FileIDs from the array of FrameIDs
@@ -242,6 +252,7 @@ async function queryFlameGraph(
     }
   );
 
+  let totalFrames = 0;
   await logExecutionLatency(logger, 'processing data', async () => {
     if (testing) {
       const traces = stackResponses.flatMap((response) => response.body.hits.hits);
@@ -261,29 +272,42 @@ async function queryFlameGraph(
         }
       }
     } else {
-      const traces = stackResponses.flatMap((response) => response.body.docs);
-      for (const trace of traces) {
-        // Sometimes we don't find the trace.
-        // This is due to ES delays writing (data is not immediately seen after write).
-        // Also, ES doesn't know about transactions.
-        if (trace.found) {
-          const frameIDs = trace._source.FrameID as string[];
-          const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
-          stackTraces.set(trace._id, {
-            FileID: fileIDs,
-            FrameID: frameIDs,
-            Type: trace._source.Type,
-          });
-          for (const frameID of frameIDs) {
-            stackFrameDocIDs.add(frameID);
-          }
-          for (const fileID of fileIDs) {
-            executableDocIDs.add(fileID);
+      // flatMap() is significantly slower than an explicit for loop
+      for (const res of stackResponses) {
+        for (const trace of res.body.docs) {
+          // Sometimes we don't find the trace.
+          // This is due to ES delays writing (data is not immediately seen after write).
+          // Also, ES doesn't know about transactions.
+          if (trace.found) {
+            const traceid = trace._id as StackTraceID;
+            let stackTrace = traceLRU.get(traceid) as StackTrace;
+            if (!stackTrace) {
+              const frameIDs = trace._source.FrameID as string[];
+              stackTrace = {
+                FileID: extractFileIDArrayFromFrameIDArray(frameIDs),
+                FrameID: frameIDs,
+                Type: trace._source.Type,
+              };
+              traceLRU.set(traceid, stackTrace);
+            }
+
+            totalFrames += stackTrace.FrameID.length;
+            stackTraces.set(traceid, stackTrace);
+            for (const frameID of stackTrace.FrameID) {
+              stackFrameDocIDs.add(frameID);
+            }
+            for (const fileID of stackTrace.FileID) {
+              executableDocIDs.add(fileID);
+            }
           }
         }
       }
     }
   });
+
+  if (stackTraces.size !== 0) {
+    logger.info('Average size of stacktrace: ' + totalFrames / stackTraces.size);
+  }
 
   if (stackTraces.size < stackTraceEvents.size) {
     logger.info(
