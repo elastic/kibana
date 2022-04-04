@@ -670,12 +670,8 @@ describe('AddSourceLogic', () => {
 
         beforeEach(() => {
           ExternalConnectorLogic.mount();
-          ExternalConnectorLogic.actions.setExternalConnectorApiKey(
-            sourceConfigData.configuredFields?.externalConnectorApiKey || ''
-          );
-          ExternalConnectorLogic.actions.setExternalConnectorApiKey(
-            sourceConfigData.configuredFields?.externalConnectorUrl || ''
-          );
+          ExternalConnectorLogic.actions.setExternalConnectorApiKey('asdf1234');
+          ExternalConnectorLogic.actions.setExternalConnectorUrl('https://www.elastic.co');
           AddSourceLogic.actions.setSourceConfigData(sourceConfigData);
 
           params = {
