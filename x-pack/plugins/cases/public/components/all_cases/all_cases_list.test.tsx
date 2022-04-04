@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, CommentType } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -512,46 +512,6 @@ describe('AllCasesListGeneric', () => {
       expect(wrapper.find('[data-test-subj="cases-table"]').first().prop('isSelectable')).toBe(
         false
       );
-    });
-  });
-
-  it('should call postComment when a case is selected in isSelectorView=true and has attachments', async () => {
-    const postCommentMockedValue = { status: { isLoading: false }, postComment: jest.fn() };
-    usePostCommentMock.mockReturnValueOnce(postCommentMockedValue);
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList
-          isSelectorView={true}
-          attachments={[
-            {
-              type: CommentType.alert,
-              alertId: 'alert-id-201',
-              owner: 'test',
-              index: 'index-id-1',
-              rule: {
-                id: 'rule-id-1',
-                name: 'Awesome myrule',
-              },
-            },
-          ]}
-        />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
-    await waitFor(() => {
-      expect(postCommentMockedValue.postComment).toHaveBeenCalledWith({
-        caseId: '1',
-        data: {
-          alertId: 'alert-id-201',
-          index: 'index-id-1',
-          owner: 'test',
-          rule: {
-            id: 'rule-id-1',
-            name: 'Awesome myrule',
-          },
-          type: 'alert',
-        },
-      });
     });
   });
 
