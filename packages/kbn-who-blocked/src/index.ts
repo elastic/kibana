@@ -8,6 +8,7 @@
 
 import apm from 'elastic-apm-node';
 import { createHook } from 'async_hooks';
+import util from 'util';
 
 const thresholdNs = 10 * 1e6; // 10 ms
 
@@ -15,6 +16,34 @@ interface CacheEntry {
   hrtime: [number, number];
   transaction: apm.Transaction | null;
   span: apm.Span | null;
+}
+
+function formatTransaction(transaction: apm.Transaction | null) {
+  if (transaction == null) {
+    return;
+  }
+
+  return {
+    name: transaction.name,
+    type: transaction.type,
+    result: transaction.result,
+    // _raw: transaction,
+  };
+}
+
+function formatSpan(span: apm.Span | null) {
+  if (span == null) {
+    return;
+  }
+
+  return {
+    name: span.name,
+    type: span.type,
+    subtype: span.subtype,
+    action: span.action,
+    outcome: span.outcome,
+    // _raw: span,
+  };
 }
 
 export function initWhoBlocked() {
@@ -40,15 +69,20 @@ export function initWhoBlocked() {
     if (diffNs > thresholdNs) {
       const time = diffNs / 1e6;
       // eslint-disable-next-line no-console
-      console.warn({
-        label: 'EventLoopMonitor',
-        message: `Event loop was blocked for ${time}ms`,
-        metadata: {
-          time,
-          transaction: cached.transaction,
-          span: cached.span,
-        },
-      });
+      console.warn(
+        util.inspect(
+          {
+            label: 'EventLoopMonitor',
+            message: `Event loop was blocked for ${time}ms`,
+            metadata: {
+              time,
+              transaction: formatTransaction(cached.transaction),
+              span: formatSpan(cached.span),
+            },
+          },
+          { showHidden: false, depth: 6, colors: true }
+        )
+      );
     }
   }
 
