@@ -141,12 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.clickQuerySubmitButton();
         await testSubjects.click('showQueryBarMenu');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        const contextMenuPanelTitleButton = await testSubjects.exists(
-          'contextMenuPanelTitleButton'
-        );
-        if (contextMenuPanelTitleButton) {
-          await testSubjects.click('contextMenuPanelTitleButton');
-        }
+        await PageObjects.common.sleep(5000);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         // await testSubjects.click('showQueryBarMenu');
