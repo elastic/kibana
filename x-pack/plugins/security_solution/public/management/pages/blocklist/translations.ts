@@ -113,13 +113,25 @@ export const ERRORS = {
   INVALID_HASH: i18n.translate('xpack.securitySolution.blocklists.errors.values.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
-  INVALID_PATH: i18n.translate('xpack.securitySolution.blocklists.errors.values.invalidPath', {
+  INVALID_PATH: i18n.translate('xpack.securitySolution.blocklists.warnings.values.invalidPath', {
     defaultMessage: 'Path may be formed incorrectly; verify value',
   }),
   WILDCARD_PRESENT: i18n.translate(
-    'xpack.securitySolution.blocklists.errors.values.wildcardPresent',
+    'xpack.securitySolution.blocklists.warnings.values.wildcardPresent',
     {
       defaultMessage: "A wildcard in the filename will affect the endpoint's performance",
+    }
+  ),
+  DUPLICATE_VALUE: i18n.translate(
+    'xpack.securitySolution.blocklists.warnings.values.duplicateValue',
+    {
+      defaultMessage: 'This value already exists',
+    }
+  ),
+  DUPLICATE_VALUES: i18n.translate(
+    'xpack.securitySolution.blocklists.warnings.values.duplicateValues',
+    {
+      defaultMessage: 'One or more duplicate values removed',
     }
   ),
 };

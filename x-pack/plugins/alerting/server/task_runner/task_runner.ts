@@ -391,6 +391,7 @@ export class TaskRunner<
             savedObjectsClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
+            searchSourceClient: this.context.data.search.searchSource.asScoped(fakeRequest),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
@@ -812,7 +813,7 @@ export class TaskRunner<
     } else {
       if (executionStatus.warning) {
         set(event, 'event.reason', executionStatus.warning?.reason || 'unknown');
-        set(event, 'message', event?.message || executionStatus.warning.message);
+        set(event, 'message', executionStatus.warning?.message || event?.message);
       }
       set(
         event,

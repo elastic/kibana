@@ -125,17 +125,14 @@ export const Page: FC = () => {
 
       <NodeAvailableWarning />
 
-      <SavedObjectsWarning
-        mlSavedObjectType="data-frame-analytics"
-        onCloseFlyout={refresh}
-        forceRefresh={isLoading}
-      />
+      <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
       {mapJobId || mapModelId || analyticsId ? (
         <JobMap
           analyticsId={mapJobId || analyticsId?.job_id}
           modelId={mapModelId || analyticsId?.model_id}
+          forceRefresh={isLoading}
         />
       ) : (
         getEmptyState()
