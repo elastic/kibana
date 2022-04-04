@@ -29,25 +29,24 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns
  */
-export const usePollingAgentCount = (policyId: string | undefined) => {
-  const initialIds: string[] = policyId ? [policyId] : [];
-
-  const [agentIds, setAgentIds] = useState(initialIds);
-
+export const usePollingAgentCount = (policyId: string, agentEnrolled: boolean) => {
+  const [agentIds, setAgentIds] = useState<string[]>([]);
   // Use useRef to guarantee we get the same date on each render
   const mountedAt = useRef(Date.now());
 
+  const timeout = useRef<number | undefined>(undefined);
+
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
     let isAborted = false;
 
     const poll = () => {
-      timeout = setTimeout(async () => {
+      timeout.current = window.setTimeout(async () => {
         const secSinceMounted = Math.ceil((Date.now() - mountedAt.current) / 1000);
         const request = await sendGetAgents({
           kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}" and ${AGENTS_PREFIX}.enrolled_at >= "now-${secSinceMounted}s"`,
           showInactive: false,
         });
+
         const newAgentIds = request.data?.items.map((i) => i.id) ?? agentIds;
         if (newAgentIds.some((id) => !agentIds.includes(id))) {
           setAgentIds(newAgentIds);
@@ -59,11 +58,13 @@ export const usePollingAgentCount = (policyId: string | undefined) => {
     };
 
     poll();
+
+    if (isAborted || agentEnrolled) clearTimeout(timeout.current);
     return () => {
       isAborted = true;
-      clearTimeout(timeout);
+      clearTimeout(timeout.current);
     };
-  }, [agentIds, policyId]);
+  }, [agentIds, policyId, agentEnrolled]);
   return agentIds;
 };
 

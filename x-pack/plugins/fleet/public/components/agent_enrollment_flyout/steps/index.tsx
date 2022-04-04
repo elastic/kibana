@@ -14,3 +14,4 @@ export * from './incoming_data_confirmation_step';
 export * from './install_managed_agent_step';
 export * from './install_standalone_agent_step';
 export * from './installation_mode_selection_step';
+export * from './compute_steps';

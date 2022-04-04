@@ -12,18 +12,18 @@ import { safeDump } from 'js-yaml';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { FullAgentPolicy } from '../../../common/types/models/agent_policy';
+import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
-import { StandaloneInstructions } from '../enrollment_instructions/standalone';
+import { StandaloneInstructions } from '../../enrollment_instructions/standalone';
 
 import {
   useGetOneEnrollmentAPIKey,
   useStartServices,
   useKibanaVersion,
   sendGetOneAgentPolicyFull,
-} from '../../hooks';
+} from '../../../hooks';
 
 import {
   deploymentModeStep,
@@ -31,9 +31,11 @@ import {
   FleetServerCommandStep,
   useFleetServerInstructions,
   addFleetServerHostStep,
-} from '../../applications/fleet/sections/agents/agent_requirements_page/components';
+} from '../../../applications/fleet/sections/agents/agent_requirements_page/components';
 
-import type { InstructionProps } from './types';
+import type { InstructionProps } from '../types';
+import { usePollingAgentCount } from '../confirm_agent_enrollment';
+
 import {
   InstallationModeSelectionStep,
   AgentEnrollmentKeySelectionStep,
@@ -43,9 +45,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   IncomingDataConfirmationStep,
-} from './steps';
-
-import { usePollingAgentCount } from './confirm_agent_enrollment';
+} from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicy,
@@ -209,7 +209,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
   const apiKeyData = apiKey?.data;
-  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id);
+  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '', agentEnrolled);
 
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];

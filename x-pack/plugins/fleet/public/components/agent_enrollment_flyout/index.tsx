@@ -78,7 +78,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       : findPolicyById(agentPolicies, selectedPolicyId);
 
   useEffect(() => {
-    if (agentPolicyWithPackagePolicies && isFleetServerPolicySelected) {
+    if (agentPolicyWithPackagePolicies) {
       if (
         (agentPolicyWithPackagePolicies.package_policies as PackagePolicy[]).some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE

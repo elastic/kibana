@@ -17,9 +17,11 @@ import { policyHasFleetServer } from '../../applications/fleet/sections/agents/s
 
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
+import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
+
 import type { InstructionProps } from './types';
 
-import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './compute_steps';
+import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
@@ -32,6 +34,7 @@ export const Instructions = (props: InstructionProps) => {
     mode,
   } = props;
   const fleetStatus = useFleetStatus();
+  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
 
   const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
     page: 1,
@@ -53,17 +56,20 @@ export const Instructions = (props: InstructionProps) => {
   }, [settings]);
 
   const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
-  const showingAgentEnrollment =
-    fleetStatus.isReady && (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0);
-  const showFleetMissingRequirements =
+
+  const showAgentEnrollment =
+    fleetStatus.isReady &&
+    !isFleetServerUnhealthy &&
+    (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0);
+
+  const showFleetServerEnrollment =
     fleetServers.length === 0 ||
+    isFleetServerUnhealthy ||
     (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
 
-  if (showingAgentEnrollment && isFleetServerPolicySelected) {
-    setSelectionType('tabs');
-  } else if (showingAgentEnrollment && !isFleetServerPolicySelected) {
+  if (showAgentEnrollment) {
     setSelectionType('radio');
-  } else if (showFleetMissingRequirements) {
+  } else if (showFleetServerEnrollment) {
     setSelectionType('tabs');
   }
 
@@ -71,7 +77,7 @@ export const Instructions = (props: InstructionProps) => {
     if (hasNoFleetServerHost) {
       return null;
     }
-    if (showingAgentEnrollment) {
+    if (showAgentEnrollment) {
       return (
         <>
           <EuiText>
@@ -89,9 +95,10 @@ export const Instructions = (props: InstructionProps) => {
         </>
       );
     }
+
     return (
       <>
-        {showFleetMissingRequirements ? (
+        {showFleetServerEnrollment ? (
           <FleetServerRequirementPage />
         ) : (
           <DefaultMissingRequirements />
