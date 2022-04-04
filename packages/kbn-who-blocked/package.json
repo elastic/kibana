@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/who-blocked",
-  "main": "./target_node/index.js",
-  "version": "1.0.0",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true
-}

@@ -6,20 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { initWhoBlocked } from '@kbn/who-blocked';
 import { take } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { EventLoopBlockDetectionAsyncHook } from './async_hook';
 import { config } from './config';
+import { Logger } from '../logging';
 
 export class EventLoopBlockDetectionService {
+  readonly #asyncHook?: AsyncHook;
+  readonly #config$: Observable<EventLoopBlockDetectionConfigType>;
+  readonly #logger: Logger;
+
   constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('event-loop-block-detection');
-    this.config$ = coreContext.configService.atPath<EventLoopBlockDetectionConfigType>(config.path);
+    this.#logger = coreContext.logger.get('event-loop-block-detection');
+    this.#config$ = coreContext.configService.atPath<EventLoopBlockDetectionConfigType>(
+      config.path
+    );
   }
 
   public async preboot() {
-    const eventLoopBlockDetectionConfig = await this.config$.pipe(take(1)).toPromise();
+    const eventLoopBlockDetectionConfig = await this.#config$.pipe(take(1)).toPromise();
     if (eventLoopBlockDetectionConfig.enabled) {
-      initWhoBlocked(eventLoopBlockDetectionConfig.threshold.milliseconds());
+      this.#asyncHook = new EventLoopBlockDetectionAsyncHook(
+        eventLoopBlockDetectionConfig.threshold.milliseconds(),
+        this.#logger
+      );
+      this.#asyncHook.enable();
     }
   }
 }

@@ -3220,10 +3220,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/who-blocked@link:bazel-bin/packages/kbn-who-blocked":
-  version "0.0.0"
-  uid ""
-
 "@loaders.gl/core@2.3.1", "@loaders.gl/core@^2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-2.3.1.tgz#147037e17b014528dce00187aac0ec6ccb05938b"

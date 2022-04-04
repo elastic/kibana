@@ -181,7 +181,6 @@
     "@kbn/ui-theme": "link:bazel-bin/packages/kbn-ui-theme",
     "@kbn/utility-types": "link:bazel-bin/packages/kbn-utility-types",
     "@kbn/utils": "link:bazel-bin/packages/kbn-utils",
-    "@kbn/who-blocked": "link:bazel-bin/packages/kbn-who-blocked",
     "@loaders.gl/core": "^2.3.1",
     "@loaders.gl/json": "^2.3.1",
     "@loaders.gl/shapefile": "^2.3.1",
