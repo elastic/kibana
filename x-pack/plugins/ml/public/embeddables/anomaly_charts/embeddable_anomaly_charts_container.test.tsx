@@ -49,6 +49,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
 
   const onInputChange = jest.fn();
   const onOutputChange = jest.fn();
+  const onRenderComplete = jest.fn();
+  const onLoading = jest.fn();
+  const onError = jest.fn();
 
   const mockedInput = {
     viewMode: 'view',
@@ -145,6 +148,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         refresh={refresh}
         onInputChange={onInputChange}
         onOutputChange={onOutputChange}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onError={onError}
       />,
       defaultOptions
     );
@@ -172,6 +178,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         refresh={refresh}
         onInputChange={onInputChange}
         onOutputChange={onOutputChange}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onError={onError}
       />,
       defaultOptions
     );
