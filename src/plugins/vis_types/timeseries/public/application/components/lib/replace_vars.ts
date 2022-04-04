@@ -59,6 +59,12 @@ export function replaceVars(
     /** we need add '[]' for emptyLabel because this value contains special characters.
      * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
     const template = handlebars.compileAST(str.split(emptyLabel).join(`[${emptyLabel}]`), {
+      strict: true,
+      knownHelpersOnly: true,
+      knownHelpers: {
+        rison: true,
+        encodeURIComponent: true,
+      },
       ...compileOptions,
     });
     const string = template({

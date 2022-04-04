@@ -13,6 +13,7 @@ export async function compile(
   const handlebarsTemplate = (await import('./handlebars').then((m) => m.handlebars)).compileAST(
     urlTemplate,
     {
+      strict: true,
       noEscape: true,
     }
   );
