@@ -144,7 +144,7 @@ describe('ProcessTreeNode component', () => {
           process: {
             ...processMock.getDetails().process,
             parent: {
-              ...processMock.getDetails().process.parent,
+              ...processMock.getDetails().process!.parent,
               user: {
                 name: 'test',
                 id: '1000',

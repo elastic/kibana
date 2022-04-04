@@ -52,7 +52,7 @@ export const useFetchSessionViewProcessEvents = (
         },
       });
 
-      const events = res.events.map((event: any) => event._source as ProcessEvent);
+      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return { events, cursor };
     },
@@ -107,7 +107,7 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
         },
       });
 
-      const events = res.events.map((event: any) => event._source as ProcessEvent);
+      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return events;
     },
@@ -142,12 +142,12 @@ export const useFetchAlertStatus = (
       });
 
       // TODO: add error handling
-      const events = res.events.map((event: any) => event._source as ProcessEvent);
+      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return {
         ...updatedAlertsStatus,
         [alertUuid]: {
-          status: events[0]?.kibana?.alert.workflow_status ?? '',
+          status: events[0]?.kibana?.alert?.workflow_status ?? '',
           processEntityId: events[0]?.process?.entity_id ?? '',
         },
       };

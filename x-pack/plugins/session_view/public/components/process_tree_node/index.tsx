@@ -25,6 +25,7 @@ import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { AlertButton, ChildrenProcessesButton } from './buttons';
@@ -83,7 +84,7 @@ export function ProcessTreeNode({
       !!(
         hasAlerts &&
         alerts.find(
-          (alert) => investigatedAlertId && investigatedAlertId === alert.kibana?.alert.uuid
+          (alert) => investigatedAlertId && investigatedAlertId === alert.kibana?.alert?.uuid
         )
       ),
     [hasAlerts, alerts, investigatedAlertId]
@@ -210,7 +211,7 @@ export function ProcessTreeNode({
   const shouldRenderChildren = childrenExpanded && children?.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent.user?.id;
+  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
@@ -236,9 +237,10 @@ export function ProcessTreeNode({
         >
           {isSessionLeader ? (
             <>
-              <EuiIcon type={sessionIcon} /> <b css={styles.darkText}>{name || args[0]}</b>{' '}
+              <EuiIcon type={sessionIcon} />{' '}
+              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
               <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
-              <EuiIcon type="user" /> <b css={styles.darkText}>{user.name}</b>
+              <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
             </>
           ) : (
             <span>
@@ -246,9 +248,9 @@ export function ProcessTreeNode({
                 <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
               </EuiToolTip>{' '}
               <span ref={textRef}>
-                <span css={styles.workingDir}>{workingDirectory}</span>&nbsp;
-                <span css={styles.darkText}>{args[0]}</span>&nbsp;
-                {args.slice(1).join(' ')}
+                <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>&nbsp;
+                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>&nbsp;
+                {dataOrDash(args?.slice(1).join(' '))}
                 {exitCode !== undefined && (
                   <small data-test-subj="sessionView:processTreeNodeExitCode">
                     {' '}

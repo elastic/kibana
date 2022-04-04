@@ -49,7 +49,7 @@ export interface DetailPanelProcess {
   args: string[];
   executable: string[][];
   working_directory: string;
-  tty: Teletype;
+  tty?: Teletype;
   pid: number;
   entryLeader: DetailPanelProcessLeader;
   sessionLeader: DetailPanelProcessLeader;
@@ -66,7 +66,7 @@ export interface DetailPanelProcessLeader {
   userName: string;
   groupName: string;
   working_directory: string;
-  tty: Teletype;
+  tty?: Teletype;
   args: string[];
   pid: number;
   entryMetaType: string;

@@ -63,7 +63,7 @@ describe('DetailPanelAlertActions component', () => {
       userEvent.click(renderResult.getByTestId(BUTTON_TEST_ID));
       userEvent.click(renderResult.getByTestId(SHOW_DETAILS_TEST_ID));
       expect(mockShowAlertDetails.mock.calls.length).toBe(1);
-      expect(mockShowAlertDetails.mock.results[0].value).toBe(mockEvent.kibana?.alert.uuid);
+      expect(mockShowAlertDetails.mock.results[0].value).toBe(mockEvent.kibana?.alert?.uuid);
       expect(mockOnJumpToEvent.mock.calls.length).toBe(0);
     });
 

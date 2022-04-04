@@ -211,11 +211,11 @@ describe('DetailPanelAlertTab component', () => {
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0]['@timestamp']
+        mockAlerts[0]['@timestamp']!
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0].process.args.join(' ')
+        mockAlerts[0].process!.args!.join(' ')
       );
     });
 
@@ -232,7 +232,7 @@ describe('DetailPanelAlertTab component', () => {
 
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_COUNT_TEST_ID)).toHaveTextContent('2');
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE_TEST_ID)).toHaveTextContent(
-        mockAlerts[0].kibana?.alert.rule.name || ''
+        mockAlerts[0].kibana!.alert!.rule!.name!
       );
     });
 

@@ -55,13 +55,16 @@ export const DetailPanelAlertTab = ({
   ];
 
   const investigatedAlert = useMemo(() => {
-    return alerts.find((event) => {
-      return event.kibana?.alert.uuid === investigatedAlertId;
-    });
+    return (
+      investigatedAlertId &&
+      alerts.find((event) => {
+        return event.kibana?.alert?.uuid === investigatedAlertId;
+      })
+    );
   }, [investigatedAlertId, alerts]);
 
   const groupedAlerts = useMemo(() => {
-    return groupBy(alerts, (event) => event.kibana?.alert.rule.uuid);
+    return groupBy(alerts, (event) => event.kibana?.alert?.rule?.uuid);
   }, [alerts]);
 
   if (alerts.length === 0) {
@@ -116,7 +119,7 @@ export const DetailPanelAlertTab = ({
 
       {viewMode === VIEW_MODE_LIST
         ? alerts.map((event) => {
-            const key = event.kibana?.alert.uuid;
+            const key = event.kibana?.alert?.uuid;
 
             if (event !== investigatedAlert) {
               return (
@@ -134,7 +137,7 @@ export const DetailPanelAlertTab = ({
 
             return (
               <DetailPanelAlertGroupItem
-                key={alertsByRule[0].kibana?.alert.rule.uuid}
+                key={alertsByRule[0].kibana?.alert?.rule?.uuid}
                 alerts={alertsByRule}
                 onJumpToEvent={onJumpToEvent}
                 onShowAlertDetails={onShowAlertDetails}
