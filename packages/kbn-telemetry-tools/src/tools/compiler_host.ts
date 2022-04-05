@@ -28,6 +28,7 @@ function loadTsConfigFile(path: string) {
 
 const baseTsConfig = loadTsConfigFile(Path.resolve(REPO_ROOT, 'tsconfig.base.json'));
 
+// avoid passing .css/.html/.etc paths to TypeScript
 function isTsCompatible(path: string) {
   const extname = Path.extname(path);
   return extname === '.ts' || extname === '.tsx' || extname === '.js';
