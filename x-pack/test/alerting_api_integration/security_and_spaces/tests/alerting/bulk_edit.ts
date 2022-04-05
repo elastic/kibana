@@ -23,7 +23,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle bulk edit of alerts appropriately', async () => {
+        it('should handle bulk edit of rules appropriately', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -35,15 +35,15 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          const { body: createdAlert } = await supertest
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData({ tags: ['foo'] }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const payload = {
-            ids: [createdAlert.id],
+            ids: [createdRule.id],
             operations: [
               {
                 operation: 'add',
@@ -88,7 +88,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                   {
                     message: 'Unauthorized to get actions',
                     rule: {
-                      id: createdAlert.id,
+                      id: createdRule.id,
                       name: 'abc',
                     },
                   },
@@ -115,7 +115,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 supertest,
                 spaceId: space.id,
                 type: 'alert',
-                id: createdAlert.id,
+                id: createdRule.id,
               });
               break;
             default:
@@ -123,7 +123,75 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle bulk edit of alerts when operation is invalid', async () => {
+        it('should handle bulk edit of multiple rules appropriately', async () => {
+          const rules = await Promise.all(
+            Array.from({ length: 10 }).map(() =>
+              supertest
+                .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+                .set('kbn-xsrf', 'foo')
+                .send(getTestRuleData({ tags: [`multiple-rules-edit-${scenario.id}`] }))
+                .expect(200)
+            )
+          );
+
+          rules.forEach(({ body: rule }) => {
+            objectRemover.add(space.id, rule.id, 'rule', 'alerting');
+          });
+
+          const payload = {
+            filter: `alert.attributes.tags: "multiple-rules-edit-${scenario.id}"`,
+            operations: [
+              {
+                operation: 'add',
+                field: 'tags',
+                value: ['tag-A'],
+              },
+            ],
+          };
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(payload);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to find rules for any rule types',
+                statusCode: 403,
+              });
+              expect(response.statusCode).to.eql(403);
+              break;
+            case 'global_read at space1':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to bulkEdit a "test.noop" rule for "alertsFixture"',
+                statusCode: 403,
+              });
+              expect(response.statusCode).to.eql(403);
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              response.body.rules.every((rule: { tags: string[] }) =>
+                expect(rule.tags).to.eql([`multiple-rules-edit-${scenario.id}`, 'tag-A'])
+              );
+              expect(response.body.rules).to.have.length(10);
+              expect(response.body.errors).to.have.length(0);
+              expect(response.body.total).to.be(10);
+
+              expect(response.statusCode).to.eql(200);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle bulk edit of rules when operation is invalid', async () => {
           const payload = {
             filter: '',
             operations: [
@@ -161,16 +229,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle bulk edit of alerts when operation field is invalid', async () => {
-          const { body: createdAlert } = await supertest
+        it('should handle bulk edit of rules when operation field is invalid', async () => {
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData({ tags: ['foo'] }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const payload = {
-            ids: [createdAlert.id],
+            ids: [createdRule.id],
             operations: [
               {
                 operation: 'add',
@@ -206,7 +274,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle bulk edit of alerts when operation field is invalid', async () => {
+        it('should handle bulk edit of rules when operation field is invalid', async () => {
           const payload = {
             filter: '',
             operations: [
@@ -244,7 +312,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle bulk edit of alerts when both ids and filter supplied in payload', async () => {
+        it('should handle bulk edit of rules when both ids and filter supplied in payload', async () => {
           const payload = {
             filter: 'test',
             ids: ['test-id'],
@@ -277,6 +345,52 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
               });
               expect(response.statusCode).to.eql(400);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't update rule from another space`, async () => {
+          const { body: createdRule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestRuleData())
+            .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix('other')}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              ids: [createdRule.id],
+              operations: [
+                {
+                  operation: 'add',
+                  field: 'tags',
+                  value: ['test'],
+                },
+              ],
+            });
+
+          switch (scenario.id) {
+            case 'superuser at space1':
+            case 'global_read at space1':
+              expect(response.body).to.eql({ rules: [], errors: [], total: 0 });
+              expect(response.statusCode).to.eql(200);
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to find rules for any rule types',
+                statusCode: 403,
+              });
+              expect(response.statusCode).to.eql(403);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
