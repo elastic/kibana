@@ -14,7 +14,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/mocks';
-import { castArray, omit, mapValues } from 'lodash';
+import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
@@ -272,13 +272,9 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
-        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
-          return castArray(val);
-        });
-
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ fields: stored } as any],
+            hits: [{ _source: lastOpbeansNodeDoc } as any],
             total: {
               value: 1,
               relation: 'eq',
@@ -356,13 +352,9 @@ describe('createLifecycleRuleTypeFactory', () => {
             (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
           ) as Record<string, any>;
 
-        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
-          return castArray(val);
-        });
-
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ fields: stored } as any],
+            hits: [{ _source: lastOpbeansNodeDoc } as any],
             total: {
               value: 1,
               relation: 'eq',

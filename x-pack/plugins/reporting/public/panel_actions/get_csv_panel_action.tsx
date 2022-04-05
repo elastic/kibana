@@ -88,11 +88,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
     const [{ uiSettings }, { data }] = await this.startServices$.pipe(first()).toPromise();
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(
-      savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddable.searchScope): https://github.com/elastic/kibana/issues/43977
-      { uiSettings, data }
-    );
+    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
   public isCompatible = async (context: ActionContext) => {

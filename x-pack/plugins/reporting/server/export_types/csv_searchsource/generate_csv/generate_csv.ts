@@ -12,14 +12,14 @@ import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
 import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
-import {
-  cellHasFormulas,
-  ES_SEARCH_STRATEGY,
+import type {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
-  SearchFieldValue,
-  SearchSourceFields,
+} from '../../../../../../../src/plugins/data/common';
+import {
+  cellHasFormulas,
+  ES_SEARCH_STRATEGY,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
 import {
@@ -48,23 +48,7 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
-// Function to check if the field name values can be used as the header row
-function isPlainStringArray(
-  fields: SearchFieldValue[] | string | boolean | undefined
-): fields is string[] {
-  let result = true;
-  if (Array.isArray(fields)) {
-    fields.forEach((field) => {
-      if (typeof field !== 'string' || field === '*' || field === '_source') {
-        result = false;
-      }
-    });
-  }
-  return result;
-}
-
 export class CsvGenerator {
-  private _columns?: string[];
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -140,36 +124,10 @@ export class CsvGenerator {
     };
   }
 
-  private getColumns(searchSource: ISearchSource, table: Datatable) {
-    if (this._columns != null) {
-      return this._columns;
-    }
-
-    // if columns is not provided in job params,
-    // default to use fields/fieldsFromSource from the searchSource to get the ordering of columns
-    const getFromSearchSource = (): string[] => {
-      const fieldValues: Pick<SearchSourceFields, 'fields' | 'fieldsFromSource'> = {
-        fields: searchSource.getField('fields'),
-        fieldsFromSource: searchSource.getField('fieldsFromSource'),
-      };
-      const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-      this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
-
-      const fields = fieldValues[fieldSource];
-      // Check if field name values are string[] and if the fields are user-defined
-      if (isPlainStringArray(fields)) {
-        return fields;
-      }
-
-      // Default to using the table column IDs as the fields
-      const columnIds = table.columns.map((c) => c.id);
-      // Fields in the API response don't come sorted - they need to be sorted client-side
-      columnIds.sort();
-      return columnIds;
-    };
-    this._columns = this.job.columns?.length ? this.job.columns : getFromSearchSource();
-
-    return this._columns;
+  private getColumnsFromTabify(table: Datatable) {
+    const columnIds = table.columns.map((c) => c.id);
+    columnIds.sort();
+    return columnIds;
   }
 
   private formatCellValues(formatters: Record<string, FieldFormat>) {
@@ -383,9 +341,12 @@ export class CsvGenerator {
           break;
         }
 
-        // If columns exists in the job params, use it to order the CSV columns
-        // otherwise, get the ordering from the searchSource's fields / fieldsFromSource
-        const columns = this.getColumns(searchSource, table) || [];
+        let columns: string[];
+        if (this.job.columns && this.job.columns.length > 0) {
+          columns = this.job.columns;
+        } else {
+          columns = this.getColumnsFromTabify(table);
+        }
 
         if (first) {
           first = false;
