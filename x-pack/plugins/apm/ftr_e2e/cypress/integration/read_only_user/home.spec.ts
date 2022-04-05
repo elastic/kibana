@@ -73,9 +73,8 @@ describe('Home page', () => {
 
       cy.contains('Services');
 
-      cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
-        element[0].click();
-      });
+      cy.contains('opbeans-rum').click({ force: true });
+
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'page-load'
