@@ -184,6 +184,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.osquery.packs (boolean)',
         'xpack.osquery.savedQueries (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
+        /**
+         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.js).
+         * It will be re-enabled once #102552 is completed.
+         */
+        // 'xpack.reporting.roles.enabled (boolean)',
+        // 'xpack.reporting.roles.allow (array)',
+        // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',
+        // 'xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier (number)',
+        // 'xpack.reporting.poll.jobsRefresh.interval (number)',
+        // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration)',
         'xpack.security.loginAssistanceMessage (any)',
