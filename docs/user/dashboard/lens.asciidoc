@@ -500,7 +500,7 @@ You can inspect the requests sent by the visualization to {es} using the Inspect
 .*How do I isolate a single series in a chart?*
 [%collapsible]
 ====
-For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
+For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically deselected.
 ====
 
 [discrete]
