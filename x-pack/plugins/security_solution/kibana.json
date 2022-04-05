@@ -22,10 +22,13 @@
     "licensing",
     "maps",
     "ruleRegistry",
+    "sessionView",
     "taskManager",
     "timelines",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch",
+    "sessionView"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
@@ -39,7 +42,8 @@
     "lists",
     "home",
     "telemetry",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "osquery"
   ],
   "server": true,
   "ui": true,

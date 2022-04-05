@@ -9,34 +9,21 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { DEFAULT_CONTROL_WIDTH, DEFAULT_CONTROL_STYLE } from './editor_constants';
-import { ControlsPanels } from '../types';
-import { pluginServices } from '../../services';
-import { ControlStyle, ControlWidth } from '../../types';
-import { ControlGroupStrings } from '../control_group_strings';
 import { toMountPoint } from '../../../../kibana_react/public';
-import { OverlayRef } from '../../../../../core/public';
+import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupEditor } from './control_group_editor';
+import { OverlayRef } from '../../../../../core/public';
+import { pluginServices } from '../../services';
+import { ControlGroupContainer } from '..';
+import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export interface EditControlGroupButtonProps {
-  controlStyle: ControlStyle;
-  panels?: ControlsPanels;
-  defaultControlWidth?: ControlWidth;
-  setControlStyle: (setControlStyle: ControlStyle) => void;
-  setDefaultControlWidth: (defaultControlWidth: ControlWidth) => void;
-  setAllControlWidths: (defaultControlWidth: ControlWidth) => void;
-  removeEmbeddable?: (panelId: string) => void;
+  controlGroupContainer: ControlGroupContainer;
   closePopover: () => void;
 }
 
 export const EditControlGroup = ({
-  panels,
-  defaultControlWidth,
-  controlStyle,
-  setControlStyle,
-  setDefaultControlWidth,
-  setAllControlWidths,
-  removeEmbeddable,
+  controlGroupContainer,
   closePopover,
 }: EditControlGroupButtonProps) => {
   const { overlays } = pluginServices.getServices();
@@ -45,15 +32,17 @@ export const EditControlGroup = ({
   const editControlGroup = () => {
     const PresentationUtilProvider = pluginServices.getContextProvider();
 
-    const onCancel = (ref: OverlayRef) => {
-      if (!removeEmbeddable || !panels) return;
+    const onDeleteAll = (ref: OverlayRef) => {
       openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
         confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
         cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
         title: ControlGroupStrings.management.deleteControls.getDeleteAllTitle(),
         buttonColor: 'danger',
       }).then((confirmed) => {
-        if (confirmed) Object.keys(panels).forEach((panelId) => removeEmbeddable(panelId));
+        if (confirmed)
+          Object.keys(controlGroupContainer.getInput().panels).forEach((panelId) =>
+            controlGroupContainer.removeEmbeddable(panelId)
+          );
         ref.close();
       });
     };
@@ -62,22 +51,23 @@ export const EditControlGroup = ({
       toMountPoint(
         <PresentationUtilProvider>
           <ControlGroupEditor
-            width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-            controlStyle={controlStyle ?? DEFAULT_CONTROL_STYLE}
-            setAllWidths={false}
-            controlCount={Object.keys(panels ?? {}).length}
-            updateControlStyle={setControlStyle}
-            updateWidth={setDefaultControlWidth}
-            updateAllControlWidths={setAllControlWidths}
-            onCancel={() => onCancel(flyoutInstance)}
+            initialInput={controlGroupContainer.getInput()}
+            updateInput={(changes) => controlGroupContainer.updateInput(changes)}
+            controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
+            onDeleteAll={() => onDeleteAll(flyoutInstance)}
             onClose={() => flyoutInstance.close()}
           />
         </PresentationUtilProvider>
       ),
       {
-        onClose: () => flyoutInstance.close(),
+        outsideClickCloses: false,
+        onClose: () => {
+          flyoutInstance.close();
+          setFlyoutRef(undefined);
+        },
       }
     );
+    setFlyoutRef(flyoutInstance);
   };
 
   const commonButtonProps = {

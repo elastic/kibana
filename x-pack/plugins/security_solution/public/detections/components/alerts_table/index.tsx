@@ -104,7 +104,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
   const { addWarning } = useAppToasts();
-  const ACTION_BUTTON_COUNT = 4;
+  const ACTION_BUTTON_COUNT = 5;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {

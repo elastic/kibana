@@ -11,28 +11,33 @@ import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_t
 import { ProcessTreeAlert } from '../process_tree_alert';
 import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
-interface ProcessTreeAlertsDeps {
+export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
-  jumpToAlertID?: string;
+  investigatedAlertId?: string;
   isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 export function ProcessTreeAlerts({
   alerts,
-  jumpToAlertID,
+  investigatedAlertId,
   isProcessSelected = false,
   onAlertSelected,
+  onShowAlertDetails,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
   const styles = useStyles();
 
   useEffect(() => {
-    const jumpToAlert = alerts.find((alert) => alert.kibana?.alert.uuid === jumpToAlertID);
-    if (jumpToAlertID && jumpToAlert) {
+    const jumpToAlert =
+      investigatedAlertId &&
+      alerts.find((alert) => alert.kibana?.alert?.uuid === investigatedAlertId);
+
+    if (jumpToAlert) {
       setSelectedAlert(jumpToAlert.kibana?.alert!);
     }
-  }, [jumpToAlertID, alerts]);
+  }, [investigatedAlertId, alerts]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -57,14 +62,17 @@ export function ProcessTreeAlerts({
     }
   }, []);
 
+  const handleAlertClick = useCallback(
+    (alert: ProcessEventAlert | null) => {
+      onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
+      setSelectedAlert(alert);
+    },
+    [onAlertSelected]
+  );
+
   if (alerts.length === 0) {
     return null;
   }
-
-  const handleAlertClick = (alert: ProcessEventAlert | null) => {
-    onAlertSelected(MOUSE_EVENT_PLACEHOLDER);
-    setSelectedAlert(alert);
-  };
 
   return (
     <div
@@ -73,16 +81,17 @@ export function ProcessTreeAlerts({
       data-test-subj="sessionView:sessionViewAlertDetails"
     >
       {alerts.map((alert: ProcessEvent, idx: number) => {
-        const alertUuid = alert.kibana?.alert.uuid || null;
+        const alertUuid = alert.kibana?.alert?.uuid || null;
 
         return (
           <ProcessTreeAlert
             key={`${alertUuid}-${idx}`}
             alert={alert}
-            isInvestigated={jumpToAlertID === alertUuid}
+            isInvestigated={investigatedAlertId === alertUuid}
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
             onClick={handleAlertClick}
             selectAlert={selectAlert}
+            onShowAlertDetails={onShowAlertDetails}
           />
         );
       })}

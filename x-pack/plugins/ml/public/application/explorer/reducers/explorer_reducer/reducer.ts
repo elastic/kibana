@@ -50,20 +50,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
-    case EXPLORER_ACTION.SET_CHARTS:
-      nextState = {
-        ...state,
-        chartsData: {
-          ...getDefaultChartsData(),
-          chartsPerRow: payload.chartsPerRow,
-          seriesToPlot: payload.seriesToPlot,
-          // convert truthy/falsy value to Boolean
-          tooManyBuckets: !!payload.tooManyBuckets,
-          errorMessages: payload.errorMessages,
-        },
-      };
-      break;
-
     case EXPLORER_ACTION.SET_EXPLORER_DATA:
       nextState = { ...state, ...payload };
       break;

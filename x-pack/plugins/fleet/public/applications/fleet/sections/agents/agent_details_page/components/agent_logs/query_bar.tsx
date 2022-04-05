@@ -9,7 +9,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { FieldSpec } from '../../../../../../../../../../../src/plugins/data/common';
-import { QueryStringInput } from '../../../../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../../../../../src/plugins/unified_search/public';
 import { useStartServices } from '../../../../../hooks';
 
 import {

@@ -60,7 +60,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
       ...ruleParams,
     },
     {
-      windowSize: 15,
+      windowSize: 30,
       windowUnit: 'm',
       anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
       environment: ENVIRONMENT_ALL.value,

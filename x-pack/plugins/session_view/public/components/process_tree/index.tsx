@@ -10,19 +10,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
-import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
+import {
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessEventsPage,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
 type FetchFunction = () => void;
 
-interface ProcessTreeDeps {
+export interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
 
-  jumpToEvent?: ProcessEvent;
+  jumpToEntityId?: string;
+  investigatedAlertId?: string;
   isFetching: boolean;
   hasNextPage: boolean | undefined;
   hasPreviousPage: boolean | undefined;
@@ -36,6 +43,10 @@ interface ProcessTreeDeps {
   selectedProcess?: Process | null;
   onProcessSelected: (process: Process | null) => void;
   setSearchResults?: (results: Process[]) => void;
+
+  // a map for alerts with updated status and process.entity_id
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  onShowAlertDetails: (alertUuid: string) => void;
   timeStampOn?: boolean;
   verboseModeOn?: boolean;
 }
@@ -43,7 +54,9 @@ interface ProcessTreeDeps {
 export const ProcessTree = ({
   sessionEntityId,
   data,
-  jumpToEvent,
+  alerts,
+  jumpToEntityId,
+  investigatedAlertId,
   isFetching,
   hasNextPage,
   hasPreviousPage,
@@ -53,6 +66,8 @@ export const ProcessTree = ({
   selectedProcess,
   onProcessSelected,
   setSearchResults,
+  updatedAlertsStatus,
+  onShowAlertDetails,
   timeStampOn,
   verboseModeOn,
 }: ProcessTreeDeps) => {
@@ -63,7 +78,9 @@ export const ProcessTree = ({
   const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
+    alerts,
     searchQuery,
+    updatedAlertsStatus,
   });
 
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -130,14 +147,16 @@ export const ProcessTree = ({
       if (processEl) {
         processEl.prepend(selectionAreaEl);
 
-        const cTop = scrollerRef.current.scrollTop;
-        const cBottom = cTop + scrollerRef.current.clientHeight;
+        const { height: elHeight, y: elTop } = processEl.getBoundingClientRect();
+        const { y: viewPortElTop, height: viewPortElHeight } =
+          scrollerRef.current.getBoundingClientRect();
 
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
+        const viewPortElBottom = viewPortElTop + viewPortElHeight;
+        const elBottom = elTop + elHeight;
+        const isVisible = elBottom >= viewPortElTop && elTop <= viewPortElBottom;
 
-        if (!isVisible) {
+        // jest will die when calling scrollIntoView (perhaps not part of the DOM it executes under)
+        if (!isVisible && processEl.scrollIntoView) {
           processEl.scrollIntoView({ block: 'center' });
         }
       }
@@ -152,20 +171,24 @@ export const ProcessTree = ({
   }, [selectedProcess, selectProcess]);
 
   useEffect(() => {
-    // after 2 pages are loaded (due to bi-directional jump to), auto select the process
-    // for the jumpToEvent
-    if (!selectedProcess && jumpToEvent) {
-      const process = processMap[jumpToEvent.process.entity_id];
+    if (jumpToEntityId) {
+      const process = processMap[jumpToEntityId];
+      const hasDetails = !!process?.getDetails();
 
-      if (process) {
+      if (!selectedProcess && hasDetails) {
         onProcessSelected(process);
-        selectProcess(process);
       }
     } else if (!selectedProcess) {
-      // auto selects the session leader process if no selection is made yet
       onProcessSelected(sessionLeader);
     }
-  }, [jumpToEvent, processMap, onProcessSelected, selectProcess, selectedProcess, sessionLeader]);
+  }, [
+    jumpToEntityId,
+    processMap,
+    onProcessSelected,
+    selectProcess,
+    selectedProcess,
+    sessionLeader,
+  ]);
 
   return (
     <>
@@ -184,13 +207,15 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
-            jumpToEventID={jumpToEvent?.process.entity_id}
-            jumpToAlertID={jumpToEvent?.kibana?.alert.uuid}
+            jumpToEntityId={jumpToEntityId}
+            investigatedAlertId={investigatedAlertId}
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
+            onShowAlertDetails={onShowAlertDetails}
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
+            searchResults={searchResults}
           />
         )}
         <div

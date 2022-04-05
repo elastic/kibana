@@ -26,7 +26,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -73,7 +75,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     className="euiFilePicker__icon"
                     data-euiicon-type="importAction"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <div
                     className="euiFilePicker__promptText"
                   >
@@ -122,7 +126,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                     color="subdued"
                     data-euiicon-type="importAction"
                     size="xxl"
-                  />
+                  >
+                    
+                  </span>
                 </div>
                 <div
                   className="euiEmptyPrompt__content"
@@ -224,7 +230,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -271,7 +279,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     className="euiFilePicker__icon"
                     data-euiicon-type="importAction"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <div
                     className="euiFilePicker__promptText"
                   >
@@ -380,7 +390,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="vector"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -410,7 +422,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="sortDown"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -441,7 +455,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="copyClipboard"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -468,7 +484,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="trash"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -548,7 +566,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="vector"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -578,7 +598,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="sortDown"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -609,7 +631,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="copyClipboard"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -636,7 +660,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="trash"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>

@@ -1,0 +1,14 @@
+{
+  "id": "unifiedSearch",
+  "version": "1.0.0",
+  "description": "Contains all the key functionality of Kibana's unified search experience.Contains all the key functionality of Kibana's unified search experience.",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Unified Search",
+    "githubTeam": "kibana-app-services"
+  },
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["dataViews", "data", "uiActions"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
+}
