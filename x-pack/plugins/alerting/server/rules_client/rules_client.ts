@@ -91,7 +91,12 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { AlertExecutionStatusErrorReasons, AlertExecutionStatuses, IExecutionLogWithErrorsResult, SanitizedAlert } from '../../common';
+import {
+  AlertExecutionStatusErrorReasons,
+  AlertExecutionStatuses,
+  IExecutionLogWithErrorsResult,
+  SanitizedAlert,
+} from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -604,21 +609,21 @@ export class RulesClient {
       notifyWhen,
       executionStatus: {
         status: 'pending' as AlertExecutionStatuses,
-        lastExecutionDate
+        lastExecutionDate,
       },
       monitoring: getDefaultRuleMonitoring(),
     };
 
     /* RUN simulation */
     const taskExecutionResult: RuleExecutionStatus | undefined = await this.taskManager
-      .ephemeralRunNow( {
+      .ephemeralRunNow({
         taskType: `alerting:simulation:${ruleTypeId}`,
         params: {
           alertId: id,
           spaceId: this.spaceId,
           consumer,
           rule: simulatedRule,
-          apiKey
+          apiKey,
         },
         state: {
           previousStartedAt: null,
@@ -627,41 +632,39 @@ export class RulesClient {
         },
         scope: ['alerting'],
       })
-      .then(taskExecutionResult => {
+      .then((taskExecutionResult) => {
         const executionStatus: RuleExecutionStatus = {
           status: Object.keys(taskExecutionResult.state?.alertInstances ?? {}).length
             ? 'active'
             : 'ok',
-          lastExecutionDate
+          lastExecutionDate,
         };
         return executionStatus;
       })
-      .catch(ex => {
+      .catch((ex) => {
         const executionStatus: RuleExecutionStatus = {
           status: 'error',
           lastExecutionDate,
           error: {
             reason: AlertExecutionStatusErrorReasons.Unknown,
-            message: `${ex}`
-          }
+            message: `${ex}`,
+          },
         };
         return executionStatus;
       })
       .finally(() => {
         // Avoid unused API key
-        markApiKeyForInvalidation(
-          { apiKey },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
+        markApiKeyForInvalidation({ apiKey }, this.logger, this.unsecuredSavedObjectsClient);
       });
 
-    /* END simulation */  
+    /* END simulation */
 
-    return taskExecutionResult ?? {
-      status: 'unknown',
-      lastExecutionDate
-    };
+    return (
+      taskExecutionResult ?? {
+        status: 'unknown',
+        lastExecutionDate,
+      }
+    );
   }
 
   public async get<Params extends RuleTypeParams = never>({
@@ -2450,22 +2453,31 @@ export class RulesClient {
     }
   }
 
-  private async denormalizeActions(alertActions: NormalizedAlertAction[]): Promise<{ actions: RawAlertAction[]; references: SavedObjectReference[] }> {
-    const actionResults = await this.fetchRuleActionTypes(alertActions)
-    const { actions, references } = await this.extractConnectorReferences(alertActions, actionResults)
-    return { 
+  private async denormalizeActions(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<{ actions: RawAlertAction[]; references: SavedObjectReference[] }> {
+    const actionResults = await this.fetchRuleActionTypes(alertActions);
+    const { actions, references } = await this.extractConnectorReferences(
+      alertActions,
+      actionResults
+    );
+    return {
       actions: actions.map(({ id, ...action }) => action),
-      references
+      references,
     };
   }
 
-  private async enrichNormalizedActionsWithConnectorId(alertActions: NormalizedAlertAction[]): Promise<RuleAction[]> {
-    const actionResults = await this.fetchRuleActionTypes(alertActions)
-    const { actions } = await this.extractConnectorReferences(alertActions, actionResults)
-    return actions.map(({ actionRef, ...action}) => action);
+  private async enrichNormalizedActionsWithConnectorId(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<RuleAction[]> {
+    const actionResults = await this.fetchRuleActionTypes(alertActions);
+    const { actions } = await this.extractConnectorReferences(alertActions, actionResults);
+    return actions.map(({ actionRef, ...action }) => action);
   }
 
-  private async fetchRuleActionTypes(alertActions: NormalizedAlertAction[]): Promise<ActionResult[]> {
+  private async fetchRuleActionTypes(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<ActionResult[]> {
     if (alertActions.length) {
       const actionsClient = await this.getActionsClient();
       const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];

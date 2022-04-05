@@ -6,12 +6,11 @@
  */
 import apm from 'elastic-apm-node';
 import type { Request } from '@hapi/hapi';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import {
-  ErrorWithReason, ruleExecutionStatusToRaw,
-} from '../lib';
+import { ErrorWithReason, ruleExecutionStatusToRaw } from '../lib';
 import {
   AlertExecutionStatusErrorReasons,
   RawRule,
@@ -32,10 +31,7 @@ import {
   MONITORING_HISTORY_LIMIT,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
-import {
-  RuleTaskInstance,
-} from './types';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { RuleTaskInstance } from './types';
 
 export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
@@ -54,7 +50,17 @@ export type RuleProvider<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> = PublicMethodsOf<ConcreteRuleProvider<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>>;
+> = PublicMethodsOf<
+  ConcreteRuleProvider<
+    Params,
+    ExtractedParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >
+>;
 
 export class ConcreteRuleProvider<
   Params extends AlertTypeParams,
@@ -78,7 +84,7 @@ export class ConcreteRuleProvider<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  
+
   constructor(
     ruleType: NormalizedRuleType<
       Params,
@@ -148,25 +154,34 @@ export class ConcreteRuleProvider<
   public async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    { executionStatus, monitoring } : { executionStatus?: AlertExecutionStatus; monitoring?: RuleMonitoring }
+    {
+      executionStatus,
+      monitoring,
+    }: { executionStatus?: AlertExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     const client = this.context.internalSavedObjectsRepository;
 
-    
     try {
-      await partiallyUpdateAlert(client, ruleId, {
-        ...(executionStatus ? { executionStatus: ruleExecutionStatusToRaw(executionStatus) } : {}),
-        ...(monitoring ? { monitoring } : {})
-      }, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
+      await partiallyUpdateAlert(
+        client,
+        ruleId,
+        {
+          ...(executionStatus
+            ? { executionStatus: ruleExecutionStatusToRaw(executionStatus) }
+            : {}),
+          ...(monitoring ? { monitoring } : {}),
+        },
+        {
+          ignore404: true,
+          namespace,
+          refresh: false,
+        }
+      );
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
   }
-  
+
   public async loadRuleAttributesAndRun(
     executor: (
       fakeRequest: KibanaRequest,
