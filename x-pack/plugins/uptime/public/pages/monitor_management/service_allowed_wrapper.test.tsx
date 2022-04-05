@@ -63,7 +63,7 @@ describe('ServiceAllowedWrapper', () => {
         </ServiceAllowedWrapper>
       );
 
-      expect(await findByText('Monitor management')).toBeInTheDocument();
+      expect(await findByText('Monitor Management')).toBeInTheDocument();
       expect(forNearestAnchor(getByText)('Request access')).toBeEnabled();
       expect(forNearestAnchor(getByText)('Request access')).toHaveAttribute(
         'href',
@@ -82,7 +82,7 @@ describe('ServiceAllowedWrapper', () => {
         </ServiceAllowedWrapper>
       );
 
-      expect(await findByText('Monitor management')).toBeInTheDocument();
+      expect(await findByText('Monitor Management')).toBeInTheDocument();
       expect(forNearestButton(getByText)('Request access')).toBeDisabled();
     });
 
@@ -97,7 +97,7 @@ describe('ServiceAllowedWrapper', () => {
         </ServiceAllowedWrapper>
       );
 
-      expect(await findByText('Monitor management')).toBeInTheDocument();
+      expect(await findByText('Monitor Management')).toBeInTheDocument();
     });
   });
 });
