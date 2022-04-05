@@ -526,7 +526,7 @@ export class Embeddable
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
+    const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       ...this.getOutput(),
