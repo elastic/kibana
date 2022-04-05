@@ -150,6 +150,18 @@
         "children": [
           {
             "parentPluginId": "@elastic/analytics",
+            "id": "def-server.ContextProviderOpts.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of the provider."
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
             "id": "def-server.ContextProviderOpts.context$",
             "type": "Object",
             "tags": [],
@@ -653,6 +665,40 @@
                     "text": "ContextProviderOpts"
                   },
                   "<Context>"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.removeContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "removeContextProvider",
+            "description": [
+              "\nRemoves the context provider and stop enriching the events from its context."
+            ],
+            "signature": [
+              "(contextProviderName: string) => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.removeContextProvider.$1",
+                "type": "string",
+                "tags": [],
+                "label": "contextProviderName",
+                "description": [
+                  "The name of the context provider to remove."
+                ],
+                "signature": [
+                  "string"
                 ],
                 "path": "packages/elastic-analytics/src/analytics_client/types.ts",
                 "deprecated": false,
@@ -1333,14 +1379,20 @@
           {
             "parentPluginId": "@elastic/analytics",
             "id": "def-server.TelemetryCounter.type",
-            "type": "CompoundType",
+            "type": "Enum",
             "tags": [],
             "label": "type",
             "description": [
               "\nIndicates if the event contains data about succeeded, failed or dropped events."
             ],
             "signature": [
-              "\"enqueued\" | \"sent_to_shipper\" | \"succeed\" | \"failed\" | \"dropped\""
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.TelemetryCounterType",
+                "text": "TelemetryCounterType"
+              }
             ],
             "path": "packages/elastic-analytics/src/events/types.ts",
             "deprecated": false
@@ -1388,7 +1440,7 @@
             "tags": [],
             "label": "count",
             "description": [
-              "\nThe number of events that met this event."
+              "\nThe number of events that this counter refers to."
             ],
             "path": "packages/elastic-analytics/src/events/types.ts",
             "deprecated": false
@@ -1397,7 +1449,21 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.TelemetryCounterType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
+        ],
+        "path": "packages/elastic-analytics/src/events/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@elastic/analytics",
@@ -1475,7 +1541,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/elastic-analytics/src/events/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

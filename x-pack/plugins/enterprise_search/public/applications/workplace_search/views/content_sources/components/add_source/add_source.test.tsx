@@ -87,6 +87,19 @@ describe('AddSourceList', () => {
     );
   });
 
+  it('renders default state correctly when there are not multiple connector options, and the connector has been configured', () => {
+    const sourceData = {
+      ...staticSourceData[0],
+      externalConnectorAvailable: false,
+      configured: true,
+    };
+    shallow(<AddSource sourceData={sourceData} />);
+    expect(initializeAddSource).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ connect: true })
+    );
+  });
+
   it('renders default state correctly when there are multiple connector options', () => {
     const wrapper = shallow(
       <AddSource

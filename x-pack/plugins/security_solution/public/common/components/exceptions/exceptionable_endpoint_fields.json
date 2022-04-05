@@ -116,6 +116,8 @@
   "user.hash",
   "user.id",
   "Ransomware.feature",
+  "Ransomware.files.data",
+  "Ransomware.child_processes.files.data",
   "Memory_protection.feature",
   "Memory_protection.self_injection",
   "dll.path",

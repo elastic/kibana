@@ -108,6 +108,7 @@ export type {
   PublicAppInfo,
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';

@@ -3080,11 +3080,14 @@
                 "children": [
                   {
                     "parentPluginId": "expressionXY",
-                    "id": "def-common.dataLayerConfigFunction.args.palette.default",
-                    "type": "string",
+                    "id": "def-common.dataLayerConfigFunction.args.palette.types",
+                    "type": "Array",
                     "tags": [],
-                    "label": "default",
+                    "label": "types",
                     "description": [],
+                    "signature": [
+                      "(\"palette\" | \"system_palette\")[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_xy/common/expression_functions/data_layer_config.ts",
                     "deprecated": false
                   },
@@ -3100,14 +3103,11 @@
                   },
                   {
                     "parentPluginId": "expressionXY",
-                    "id": "def-common.dataLayerConfigFunction.args.palette.types",
-                    "type": "Array",
+                    "id": "def-common.dataLayerConfigFunction.args.palette.default",
+                    "type": "string",
                     "tags": [],
-                    "label": "types",
+                    "label": "default",
                     "description": [],
-                    "signature": [
-                      "\"palette\"[]"
-                    ],
                     "path": "src/plugins/chart_expressions/expression_xy/common/expression_functions/data_layer_config.ts",
                     "deprecated": false
                   }

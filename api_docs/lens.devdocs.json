@@ -2146,7 +2146,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"percent\" | \"value\" | \"hidden\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -6192,6 +6192,23 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.TimeScaleIndexPatternColumn",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeScaleIndexPatternColumn",
+        "description": [],
+        "signature": [
+          "FormattedIndexPatternColumn",
+          " & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"normalize_by_unit\"; params: { unit?: string | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/time_scale.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.TypedLensByValueInput",
         "type": "Type",
         "tags": [],
@@ -7399,7 +7416,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"median\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"filters\" | \"count\" | \"sum\" | \"max\" | \"min\" | \"median\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -7413,7 +7430,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"avg\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"filters\" | \"count\" | \"sum\" | \"avg\" | \"max\" | \"min\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -8569,7 +8586,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"percent\" | \"value\" | \"hidden\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -9003,7 +9020,7 @@
         "label": "NumberDisplayType",
         "description": [],
         "signature": [
-          "\"percent\" | \"hidden\" | \"value\""
+          "\"percent\" | \"value\" | \"hidden\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,

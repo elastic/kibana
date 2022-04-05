@@ -2664,16 +2664,12 @@
             "path": "src/plugins/data_views/common/index.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "ux",
@@ -2736,94 +2732,6 @@
             "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/inspect_panel.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/inspect_panel.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
           },
@@ -2842,34 +2750,6 @@
           {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
           },
           {
             "plugin": "maps",
@@ -2950,22 +2830,6 @@
           {
             "plugin": "visDefaultEditor",
             "path": "src/plugins/vis_default_editor/public/components/agg_params_helper.test.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
           },
           {
             "plugin": "dataViews",
@@ -3214,54 +3078,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
           {
@@ -3271,50 +3087,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -3399,30 +3171,6 @@
           {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
           },
           {
             "plugin": "dataViews",
@@ -4342,16 +4090,16 @@
                 "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -7310,72 +7058,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.ApplyGlobalFilterActionContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "ApplyGlobalFilterActionContext",
-        "description": [],
-        "path": "src/plugins/data/public/actions/apply_filter_action.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ApplyGlobalFilterActionContext.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              "Filter",
-              "[]"
-            ],
-            "path": "src/plugins/data/public/actions/apply_filter_action.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ApplyGlobalFilterActionContext.timeFieldName",
-            "type": "string",
-            "tags": [],
-            "label": "timeFieldName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/actions/apply_filter_action.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ApplyGlobalFilterActionContext.embeddable",
-            "type": "Unknown",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/plugins/data/public/actions/apply_filter_action.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ApplyGlobalFilterActionContext.controlledBy",
-            "type": "string",
-            "tags": [],
-            "label": "controlledBy",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/actions/apply_filter_action.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.DataPublicPluginStartActions",
         "type": "Interface",
         "tags": [],
@@ -7447,79 +7129,6 @@
                 "deprecated": false
               }
             ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.DataPublicPluginStartUi",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataPublicPluginStartUi",
-        "description": [
-          "\nData plugin prewired UI components"
-        ],
-        "path": "src/plugins/data/public/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.DataPublicPluginStartUi.IndexPatternSelect",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "IndexPatternSelect",
-            "description": [],
-            "signature": [
-              "React.ComponentClass<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.IndexPatternSelectProps",
-                "text": "IndexPatternSelectProps"
-              },
-              ", any> | React.FunctionComponent<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.IndexPatternSelectProps",
-                "text": "IndexPatternSelectProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.DataPublicPluginStartUi.SearchBar",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "SearchBar",
-            "description": [],
-            "signature": [
-              "React.ComponentClass<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.StatefulSearchBarProps",
-                "text": "StatefulSearchBarProps"
-              },
-              ", any> | React.FunctionComponent<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataUiPluginApi",
-                "section": "def-public.StatefulSearchBarProps",
-                "text": "StatefulSearchBarProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/data/public/types.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -8018,8 +7627,52 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/utils.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
           },
           {
             "plugin": "dataViews",
@@ -8028,6 +7681,34 @@
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/server/utils.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/server/utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
           },
           {
             "plugin": "dataViews",
@@ -8346,6 +8027,34 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
+          },
+          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
           },
@@ -8378,20 +8087,96 @@
             "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
           }
         ],
         "children": [
@@ -9790,20 +9575,6 @@
     "misc": [
       {
         "parentPluginId": "data",
-        "id": "def-public.ACTION_GLOBAL_APPLY_FILTER",
-        "type": "string",
-        "tags": [],
-        "label": "ACTION_GLOBAL_APPLY_FILTER",
-        "description": [],
-        "signature": [
-          "\"ACTION_GLOBAL_APPLY_FILTER\""
-        ],
-        "path": "src/plugins/data/public/actions/apply_filter_action.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.AggConfigOptions",
         "type": "Type",
         "tags": [],
@@ -10322,12 +10093,40 @@
         "removeBy": "8.1",
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/lib/use_filter_manager.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/lib/use_filter_manager.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "dashboard",
@@ -10390,14 +10189,6 @@
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/variables/context_variables.ts"
           },
@@ -10414,18 +10205,6 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown.tsx"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
@@ -10434,32 +10213,72 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/test_helpers/get_stub_filter.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/test_helpers/get_stub_filter.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression.tsx"
           }
         ],
         "initialIsOpen": false
@@ -10909,28 +10728,36 @@
             "path": "src/plugins/data_views/public/index.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
           },
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
           },
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+            "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -11330,14 +11157,6 @@
           {
             "plugin": "dataEnhanced",
             "path": "x-pack/plugins/data_enhanced/server/search/session/expire_persisted_sessions.ts"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/target/types/server/search/session/types.d.ts"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/target/types/server/search/session/types.d.ts"
           }
         ],
         "initialIsOpen": false
@@ -11436,16 +11255,7 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -11624,93 +11434,19 @@
         "removeBy": "8.1",
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/locators.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/locators.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
           }
         ],
         "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.esFilters.FilterLabel",
-            "type": "Function",
-            "tags": [],
-            "label": "FilterLabel",
-            "description": [],
-            "signature": [
-              "(props: ",
-              "FilterLabelProps",
-              ") => JSX.Element"
-            ],
-            "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.esFilters.FilterLabel.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "FilterLabelProps"
-                ],
-                "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.esFilters.FilterItem",
-            "type": "Function",
-            "tags": [],
-            "label": "FilterItem",
-            "description": [],
-            "signature": [
-              "(props: ",
-              "FilterItemProps",
-              ") => JSX.Element"
-            ],
-            "path": "src/plugins/data/public/deprecated.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.esFilters.FilterItem.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "FilterItemProps"
-                ],
-                "path": "src/plugins/data/public/ui/filter_bar/index.tsx",
-                "deprecated": false
-              }
-            ]
-          },
           {
             "parentPluginId": "data",
             "id": "def-public.esFilters.FILTERS",
@@ -12820,7 +12556,7 @@
                 "label": "timeFilter",
                 "description": [],
                 "signature": [
-                  "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
+                  "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
                   "Observable",
                   "<boolean>; getTimeUpdate$: () => ",
                   "Observable",
@@ -13190,18 +12926,6 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/shared/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
           }
         ],
         "children": [
@@ -15060,7 +14784,13 @@
             "; timefilter: ",
             "TimefilterSetup",
             "; queryString: ",
-            "QueryStringContract",
+            {
+              "pluginId": "data",
+              "scope": "public",
+              "docId": "kibDataQueryPluginApi",
+              "section": "def-public.QueryStringContract",
+              "text": "QueryStringContract"
+            },
             "; state$: ",
             "Observable",
             "<{ changes: ",
@@ -15200,6 +14930,10 @@
           "deprecated": true,
           "references": [
             {
+              "plugin": "unifiedSearch",
+              "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+            },
+            {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
             },
@@ -15209,31 +14943,7 @@
             },
             {
               "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/pages/link_to/redirect_to_node_logs.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/editor.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/components/log_stream/log_stream.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/utils/logs_overview_fetchers.ts"
-            },
-            {
-              "plugin": "infra",
               "path": "x-pack/plugins/infra/public/hooks/use_kibana_index_patterns.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/pages/logs/page_providers.tsx"
             },
             {
               "plugin": "graph",
@@ -15286,10 +14996,6 @@
             {
               "plugin": "inputControlVis",
               "path": "src/plugins/input_control_vis/public/components/editor/controls_tab.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/utils/logs_overview_fetches.test.ts"
             },
             {
               "plugin": "securitySolution",
@@ -15357,10 +15063,6 @@
           "path": "src/plugins/data/public/types.ts",
           "deprecated": true,
           "references": [
-            {
-              "plugin": "discover",
-              "path": "src/plugins/discover/public/application/main/components/chart/histogram.tsx"
-            },
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/application/actions/export_csv_action.tsx"
@@ -15448,7 +15150,13 @@
               "text": "FilterManager"
             },
             "; queryString: ",
-            "QueryStringContract",
+            {
+              "pluginId": "data",
+              "scope": "public",
+              "docId": "kibDataQueryPluginApi",
+              "section": "def-public.QueryStringContract",
+              "text": "QueryStringContract"
+            },
             "; savedQueries: { createQuery: (attributes: ",
             {
               "pluginId": "data",
@@ -15544,27 +15252,6 @@
             " | undefined) => { bool: ",
             "BoolQuery",
             "; }; }"
-          ],
-          "path": "src/plugins/data/public/types.ts",
-          "deprecated": false
-        },
-        {
-          "parentPluginId": "data",
-          "id": "def-public.DataPublicPluginStart.ui",
-          "type": "Object",
-          "tags": [],
-          "label": "ui",
-          "description": [
-            "\nprewired UI components\n{@link DataPublicPluginStartUi}"
-          ],
-          "signature": [
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataPluginApi",
-              "section": "def-public.DataPublicPluginStartUi",
-              "text": "DataPublicPluginStartUi"
-            }
           ],
           "path": "src/plugins/data/public/types.ts",
           "deprecated": false
@@ -17403,16 +17090,12 @@
             "path": "src/plugins/data_views/common/index.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "ux",
@@ -17475,94 +17158,6 @@
             "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/inspect_panel.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/inspect_panel.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
           },
@@ -17581,34 +17176,6 @@
           {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
           },
           {
             "plugin": "maps",
@@ -17689,22 +17256,6 @@
           {
             "plugin": "visDefaultEditor",
             "path": "src/plugins/vis_default_editor/public/components/agg_params_helper.test.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
           },
           {
             "plugin": "dataViews",
@@ -17953,54 +17504,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
           {
@@ -18010,50 +17513,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -18138,30 +17597,6 @@
           {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
           },
           {
             "plugin": "dataViews",
@@ -19111,8 +18546,52 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/utils.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
           },
           {
             "plugin": "dataViews",
@@ -19121,6 +18600,34 @@
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/server/utils.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/server/utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
           },
           {
             "plugin": "dataViews",
@@ -19685,12 +19192,40 @@
         "removeBy": "8.1",
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/lib/use_filter_manager.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/lib/use_filter_manager.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "dashboard",
@@ -19753,14 +19288,6 @@
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/variables/context_variables.ts"
           },
@@ -19777,18 +19304,6 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown.tsx"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
@@ -19797,32 +19312,72 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/test_helpers/get_stub_filter.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/test_helpers/get_stub_filter.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression.tsx"
           }
         ],
         "initialIsOpen": false
@@ -19964,14 +19519,6 @@
           {
             "plugin": "dataEnhanced",
             "path": "x-pack/plugins/data_enhanced/server/search/session/expire_persisted_sessions.ts"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/target/types/server/search/session/types.d.ts"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/target/types/server/search/session/types.d.ts"
           }
         ],
         "initialIsOpen": false
@@ -25430,16 +24977,12 @@
             "path": "src/plugins/data_views/common/index.ts"
           },
           {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "ux",
@@ -25502,94 +25045,6 @@
             "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/inspect_panel.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/inspect_panel.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_layout.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/index_pattern_cache.ts"
-          },
-          {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
           },
@@ -25608,34 +25063,6 @@
           {
             "plugin": "uptime",
             "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
           },
           {
             "plugin": "maps",
@@ -25716,22 +25143,6 @@
           {
             "plugin": "visDefaultEditor",
             "path": "src/plugins/vis_default_editor/public/components/agg_params_helper.test.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/utils/editor_config.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_select.d.ts"
           },
           {
             "plugin": "dataViews",
@@ -25980,54 +25391,6 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/fields/es_doc_field.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/update_source_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/geo_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
           },
           {
@@ -26037,50 +25400,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/get_docvalue_source_fields.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metrics_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/components/metrics_editor/metric_editor.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/classes/sources/es_search_source/top_hits/top_hits_form.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
           },
           {
             "plugin": "visDefaultEditor",
@@ -26165,30 +25484,6 @@
           {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/agg_param_props.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
-          },
-          {
-            "plugin": "visDefaultEditor",
-            "path": "src/plugins/vis_default_editor/target/types/public/components/controls/top_sort_field.d.ts"
           },
           {
             "plugin": "dataViews",
@@ -28728,7 +28023,28 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.test.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.test.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.test.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.test.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.test.ts"
+          }
+        ],
         "returnComment": [],
         "children": [
           {
@@ -30177,8 +29493,52 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/server/utils.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
           },
           {
             "plugin": "dataViews",
@@ -30187,6 +29547,34 @@
           {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/server/utils.ts"
+          },
+          {
+            "plugin": "dataViews",
+            "path": "src/plugins/data_views/server/utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
           },
           {
             "plugin": "dataViews",
@@ -30505,6 +29893,34 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts"
           },
           {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
+          },
+          {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
           },
@@ -30537,20 +29953,96 @@
             "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/components/kuery_bar/with_kuery_autocompletion.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/target/types/public/alerts/components/param_details_form/use_derived_index_pattern.d.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
           }
         ],
         "children": [
@@ -32542,12 +32034,40 @@
         "removeBy": "8.1",
         "references": [
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/lib/use_filter_manager.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/lib/use_filter_manager.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts"
           },
           {
             "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
           },
           {
             "plugin": "dashboard",
@@ -32610,14 +32130,6 @@
             "path": "src/plugins/dashboard/public/application/embeddable/dashboard_container.tsx"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/variables/context_variables.ts"
           },
@@ -32634,18 +32146,6 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown.tsx"
           },
           {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
@@ -32654,32 +32154,72 @@
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/test_helpers/get_stub_filter.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/test_helpers/get_stub_filter.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context_state.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/classes/util/can_skip_fetch.test.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression.tsx"
           }
         ],
         "initialIsOpen": false
@@ -32740,28 +32280,6 @@
             ],
             "path": "src/plugins/data/common/types.ts",
             "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.INDEX_PATTERN_SAVED_OBJECT_TYPE",
-        "type": "string",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "INDEX_PATTERN_SAVED_OBJECT_TYPE",
-        "description": [],
-        "signature": [
-          "\"index-pattern\""
-        ],
-        "path": "src/plugins/data_views/common/constants.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -33069,28 +32587,36 @@
             "path": "src/plugins/data_views/public/index.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
           },
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
           },
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
             "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+            "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -33161,14 +32687,6 @@
           {
             "plugin": "dataEnhanced",
             "path": "x-pack/plugins/data_enhanced/server/search/session/expire_persisted_sessions.ts"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/target/types/server/search/session/types.d.ts"
-          },
-          {
-            "plugin": "dataEnhanced",
-            "path": "x-pack/plugins/data_enhanced/target/types/server/search/session/types.d.ts"
           }
         ],
         "initialIsOpen": false
@@ -33297,7 +32815,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -33378,16 +32896,7 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "discoverEnhanced",
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -33544,7 +33053,32 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [],
+        "references": [
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_label.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
