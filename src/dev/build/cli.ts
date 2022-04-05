@@ -33,21 +33,22 @@ if (showHelp) {
       build the Kibana distributable
 
       options:
-        --skip-archives         {dim Don't produce tar/zip archives}
-        --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
-        --all-platforms         {dim Produce archives for all platforms, not just this one}
-        --rpm                   {dim Only build the rpm packages}
-        --deb                   {dim Only build the deb packages}
-        --docker-images         {dim Only build the Docker images}
-        --docker-cross-compile  {dim Produce arm64 and amd64 Docker images}
-        --docker-contexts       {dim Only build the Docker build contexts}
-        --skip-docker-ubi       {dim Don't build the docker ubi image}
-        --skip-docker-ubuntu    {dim Don't build the docker ubuntu image}
-        --release               {dim Produce a release-ready distributable}
-        --version-qualifier     {dim Suffix version with a qualifier}
-        --skip-node-download    {dim Reuse existing downloads of node.js}
-        --verbose,-v            {dim Turn on verbose logging}
-        --no-debug              {dim Turn off debug logging}
+        --skip-archives                     {dim Don't produce tar/zip archives}
+        --skip-os-packages                  {dim Don't produce rpm/deb/docker packages}
+        --all-platforms                     {dim Produce archives for all platforms, not just this one}
+        --rpm                               {dim Only build the rpm packages}
+        --deb                               {dim Only build the deb packages}
+        --docker-images                     {dim Only build the Docker images}
+        --docker-context-use-local-artifact {dim Use a local artifact when building the Docker context}
+        --docker-cross-compile              {dim Produce arm64 and amd64 Docker images}
+        --docker-contexts                   {dim Only build the Docker build contexts}
+        --skip-docker-ubi                   {dim Don't build the docker ubi image}
+        --skip-docker-ubuntu                {dim Don't build the docker ubuntu image}
+        --release                           {dim Produce a release-ready distributable}
+        --version-qualifier                 {dim Suffix version with a qualifier}
+        --skip-node-download                {dim Reuse existing downloads of node.js}
+        --verbose,-v                        {dim Turn on verbose logging}
+        --no-debug                          {dim Turn off debug logging}
     `) + '\n'
   );
   process.exit(1);
