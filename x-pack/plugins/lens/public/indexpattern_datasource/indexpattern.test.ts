@@ -31,8 +31,8 @@ import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { TinymathAST } from 'packages/kbn-tinymath';
-import { SavedObjectReference } from 'kibana/server';
+import { TinymathAST } from '@kbn/tinymath';
+import { SavedObjectReference } from 'kibana/public';
 import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
