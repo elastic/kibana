@@ -196,7 +196,7 @@ class OutputService {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
       if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
         throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
-          'Logstash output need encrypted saved object api key to be set'
+          'Logstash output needs encrypted saved object api key to be set'
         );
       }
     }

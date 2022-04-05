@@ -71,7 +71,7 @@ describe('EditOutputFlyout', () => {
     expect(utils.queryByLabelText('Server SSL certificate authorities')).not.toBeNull();
   });
 
-  it('should show a callout if encrypted key are not set and the flyout if the output provided is a logstash output', async () => {
+  it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUsedFleetStatus.mockReturnValue({
       missingRequirements: ['encrypted_saved_object_encryption_key_required'],
     } as any);

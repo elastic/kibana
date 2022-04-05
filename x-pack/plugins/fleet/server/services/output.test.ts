@@ -341,7 +341,7 @@ describe('Output Service', () => {
           },
           { id: 'output-test' }
         )
-      ).rejects.toThrow(`Logstash output need encrypted saved object api key to be set`);
+      ).rejects.toThrow(`Logstash output needs encrypted saved object api key to be set`);
     });
 
     it('should work if encryptedSavedObject is  configured', async () => {
