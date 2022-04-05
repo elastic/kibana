@@ -7,4 +7,4 @@
 
 export const CUSTOM_TEMPLATES = '[data-test-subj="Custom templates"]';
 
-export const NUMBER_OF_ROWS = '.euiTableRow';
+export const ROWS = '.euiTableRow';

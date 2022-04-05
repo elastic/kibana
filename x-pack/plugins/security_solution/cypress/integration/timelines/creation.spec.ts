@@ -44,14 +44,12 @@ import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
 
 describe('Create a timeline from a template', () => {
   before(() => {
-    cy.intercept('/api/timeline*').as('timeline');
     deleteTimelines();
     createTimelineTemplate(getTimeline());
     visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
   });
   it('Should have the same query and open the timeline modal', () => {
     selectCustomTemplates();
-    cy.wait('@timeline').its('response.statusCode').should('eq', 200);
     expandEventAction();
     clickingOnCreateTimelineFormTemplateBtn();
 
