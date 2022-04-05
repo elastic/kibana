@@ -2548,7 +2548,9 @@
             "label": "createdAlerts",
             "description": [],
             "signature": [
-              "(T & { _id: string; _index: string; })[]"
+              "(T & ",
+              "CommonAlertFields800",
+              " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false
@@ -3508,7 +3510,41 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchRequestPagination",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchRequestPagination",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -3561,7 +3597,13 @@
           "; } | undefined; sort?: ",
           "SortCombinations",
           "[] | undefined; pagination?: ",
-          "RuleRegistrySearchRequestPagination",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "common",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-common.RuleRegistrySearchRequestPagination",
+            "text": "RuleRegistrySearchRequestPagination"
+          },
           " | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
