@@ -594,7 +594,7 @@ export function getIndexPatternDatasource({
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
           return (
-            Boolean(indexPatterns[layer.indexPatternId].timeFieldName) ||
+            Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
             layer.columnOrder
               .filter((colId) => layer.columns[colId].isBucketed)
               .some((colId) => {
