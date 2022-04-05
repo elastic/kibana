@@ -31,7 +31,6 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
       `?time=${startTime.getTime()}`,
     ].join('');
 
-    console.log('--- Agent Debug Links');
     console.log('Agent Metrics:');
     console.log('\u001b]1339;' + `url='${METRICS_URL}'\u0007`);
     console.log('Agent Logs:');
