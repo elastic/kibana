@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import uuid from 'uuid';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
@@ -22,7 +21,7 @@ export interface RuleAlertsItem {
 }
 
 // Raw aggregation response
-interface SeverityRuleAlertsAggsResponse {
+export interface SeverityRuleAlertsAggsResponse {
   alertsByRule: {
     buckets?: Array<{
       key: string;
@@ -101,12 +100,16 @@ const getRuleAlertsItemsFromAggs = (
   });
 };
 
-const DETECTION_RESPONSE_RULE_ALERTS_ID = 'detection-response-rule-alerts-id';
-
-export const useRuleAlertsItems = ({ signalIndexName }: { signalIndexName: string | null }) => {
+export const useRuleAlertsItems = ({
+  queryId,
+  signalIndexName,
+  skip = false,
+}: {
+  queryId: string;
+  signalIndexName: string | null;
+  skip?: boolean;
+}) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  // create a unique, but stable (across re-renders) query id
-  const queryId = useMemo(() => `${DETECTION_RESPONSE_RULE_ALERTS_ID}-${uuid.v4()}`, []);
 
   const {
     loading: isLoading,
@@ -121,6 +124,7 @@ export const useRuleAlertsItems = ({ signalIndexName }: { signalIndexName: strin
       to,
     }),
     indexName: signalIndexName,
+    skip,
   });
 
   const items = useMemo(() => {
@@ -140,10 +144,10 @@ export const useRuleAlertsItems = ({ signalIndexName }: { signalIndexName: strin
   }, [setAlertsQuery, from, to]);
 
   const refetch = useCallback(() => {
-    if (refetchQuery) {
+    if (!skip && refetchQuery) {
       refetchQuery();
     }
-  }, [refetchQuery]);
+  }, [skip, refetchQuery]);
 
   useQueryInspector({
     deleteQuery,

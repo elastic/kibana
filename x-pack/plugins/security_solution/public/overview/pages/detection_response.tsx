@@ -22,8 +22,9 @@ import { useUserInfo } from '../../detections/components/user_info';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
+const getGlobalQuery = inputsSelectors.globalQuery(); // create state-only selector from factory
+
 const DetectionResponseComponent = () => {
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
@@ -61,7 +62,7 @@ const DetectionResponseComponent = () => {
                   <>{UPDATED} </>
                   <FormattedRelative
                     data-test-subj="last-updated-at-date"
-                    key={`formatedRelative-${Date.now()}`}
+                    key={`formattedRelative-${Date.now()}`}
                     value={new Date(updatedAt)}
                   />
                 </EuiFlexItem>
@@ -79,7 +80,9 @@ const DetectionResponseComponent = () => {
               </EuiFlexItem>
 
               <EuiFlexItem>
-                <RuleAlertsTable signalIndexName={signalIndexName} />
+                {hasIndexRead && hasKibanaREAD && (
+                  <RuleAlertsTable signalIndexName={signalIndexName} />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>{'[cases table]'}</EuiFlexItem>
               <EuiFlexItem>
