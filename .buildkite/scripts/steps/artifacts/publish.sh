@@ -17,8 +17,8 @@ function download {
   sha512sum -c "$1.sha512.txt"
 }
 
-mkdir artifacts
-cd artifacts
+mkdir -p target
+cd target
 
 download "kibana-$VERSION-docker-image.tar.gz"
 download "kibana-$VERSION-docker-image-aarch64.tar.gz"
@@ -48,21 +48,21 @@ echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --pas
 trap 'docker logout docker.elastic.co' EXIT
 docker pull docker.elastic.co/infra/release-manager:latest
 
-
 # echo "--- Publish artifacts"
 # VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
 # VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
 # VAULT_ADDR="https://secrets.elastic.co:8200"
+# QUALIFIER=""
 # docker run --rm \
 #   --name release-manager \
 #   -e VAULT_ADDR \
 #   -e VAULT_ROLE_ID \
 #   -e VAULT_SECRET_ID \
-#   --mount type=bind,readonly=false,src="$PWD/artifacts",target=/artifacts \
+#   --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts \
 #   docker.elastic.co/infra/release-manager:latest \
 #     cli collect \
 #       --project kibana \
-#       --branch "$BRANCH" \
+#       --branch "$KIBANA_BASE_BRANCH" \
 #       --commit "$GIT_COMMIT" \
 #       --workflow "$WORKFLOW" \
 #       --version "$VERSION"
