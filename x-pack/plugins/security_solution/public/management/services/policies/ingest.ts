@@ -14,9 +14,9 @@ import {
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-} from '../../../../../../../fleet/common';
-import { GetPolicyResponse, UpdatePolicyResponse } from '../../types';
-import { NewPolicyData } from '../../../../../../common/endpoint/types';
+} from '../../../../../fleet/common';
+import { NewPolicyData } from '../../../../common/endpoint/types';
+import { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 
 const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
