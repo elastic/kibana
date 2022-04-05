@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ICON_SOURCE,
   MB_LOOKUP_FUNCTION,
-  VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
@@ -28,23 +27,6 @@ export function getComputedFieldName(styleName: VECTOR_STYLES, fieldName: string
 
 export function getComputedFieldNamePrefix(fieldName: string) {
   return `__kbn__dynamic__${fieldName}`;
-}
-
-export function isOnlySingleFeatureType(
-  featureType: VECTOR_SHAPE_TYPE,
-  supportedFeatures: VECTOR_SHAPE_TYPE[],
-  hasFeatureType: { [key in keyof typeof VECTOR_SHAPE_TYPE]: boolean }
-): boolean {
-  if (supportedFeatures.length === 1) {
-    return supportedFeatures[0] === featureType;
-  }
-
-  const featureTypes = Object.keys(hasFeatureType);
-  // @ts-expect-error
-  return featureTypes.reduce((accumulator: boolean, featureTypeKey: VECTOR_SHAPE_TYPE) => {
-    const hasFeature = hasFeatureType[featureTypeKey];
-    return featureTypeKey === featureType ? accumulator && hasFeature : accumulator && !hasFeature;
-  }, true);
 }
 
 export function dynamicRound(value: number | string) {

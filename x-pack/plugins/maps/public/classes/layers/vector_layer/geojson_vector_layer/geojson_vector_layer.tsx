@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
@@ -36,6 +37,7 @@ import { getFeatureCollectionBounds } from '../../../util/get_feature_collection
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
 import { syncGeojsonSourceData } from './geojson_source_data';
 import { performInnerJoins } from './perform_inner_joins';
+import { pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';
 
 export class GeoJsonVectorLayer extends AbstractVectorLayer {
   static createDescriptor(
@@ -121,7 +123,14 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     if (!style || !sourceDataRequest) {
       return null;
     }
-    return await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+
+    this.getSource(), this.getCurrentStyle()
+
+    return await pluckStyleMetaFromFeatures(
+      _.get(sourceDataRequest.getData(), 'features', []),
+      await this.getSource().getSupportedShapeTypes(),
+      this.getCurrentStyle().getDynamicPropertiesArray(),
+    );
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap) {

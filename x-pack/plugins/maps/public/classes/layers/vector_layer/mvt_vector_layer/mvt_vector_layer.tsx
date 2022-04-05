@@ -6,6 +6,7 @@
  */
 
 import type {
+  FeatureIdentifier,
   Map as MbMap,
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
@@ -30,6 +31,7 @@ import {
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 
 export const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
@@ -274,7 +276,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       sourceLayer: this._source.getTileSourceLayer(),
       id: undefined,
     };
-    joinData.forEach((value, key) => {
+    joinData.forEach((value: object, key: string) => {
       featureIdentifier.id = key;
       mbMap.setFeatureState(featureIdentifier, value);
     });
