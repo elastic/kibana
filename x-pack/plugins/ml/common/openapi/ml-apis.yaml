@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Machine learning APIs
   description: Kibana APIs for the machine learning feature
-  version: 8.3.0
+  version: '1.0'
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
@@ -13,24 +13,63 @@ paths:
     get:
       description: Synchronizes Kibana saved objects for machine learning jobs.
       parameters:
-        - name: spaceId
-          in: path
-          required: true
-          schema:
-            type: string
-            example: default
-          description: An identifier for the space.
-        - name: simulate
-          in: query
-          required: false
-          schema:
-            type: boolean
-          example: 'true'
-          description: When true, simulates the synchronization by returning only the list actions that would be performed.
+        - $ref: '#/components/parameters/spaceParam'
+        - $ref: '#/components/parameters/simulateParam'
       responses:
         '200':
-          description: Indicates a successful call.
+          description: Indicates a successful call
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
-                type: string
+                items:
+                  $ref: '#/components/schemas/syncResponse'
+  /api/ml/saved_objects/sync:
+    get:
+      description: Synchronizes Kibana saved objects for machine learning jobs.
+      parameters:
+        - $ref: '#/components/parameters/simulateParam'
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/syncResponse'
+components:
+ parameters:
+  spaceParam:
+    in: path
+    name: spaceId
+    description: An identifier for the space.
+    required: true
+    schema:
+      type: string
+  simulateParam:
+    in: query
+    name: simulate
+    description: When true, simulates the synchronization by returning only the list actions that would be performed.
+    required: false
+    schema:
+      type: boolean
+    example: 'true'
+ schemas:
+    syncResponse:
+      type: object
+      properties:
+        datafeedsAdded:
+          type: object
+          additionalProperties: true
+          description: If a saved object for an anomaly detection job is missing a datafeed identifier, it is added. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+        datafeedsRemoved:
+          type: object
+          additionalProperties: true
+          description: If saved objects exist for datafeeds that no longer exist, they are deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.
+        savedObjectsCreated:
+          type: object
+          additionalProperties: true
+          description: If saved objects are missing for machine learning jobs, they are created. This list contains the job identifiers and indicates whether the synchronization was successful.
+        savedObjectsDeleted:
+          type: object
+          additionalProperties: true
+          description: If saved objects exist for machine learning jobs that no longer exist, they are deleted. This list contains the job identifiers and indicates whether the synchronization was successful.
