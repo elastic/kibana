@@ -630,9 +630,7 @@ export class RulesClient {
       })
       .then((result) => {
         const executionStatus: RuleExecutionStatus = {
-          status: Object.keys(result.state?.alertInstances ?? {}).length
-            ? 'active'
-            : 'ok',
+          status: Object.keys(result.state?.alertInstances ?? {}).length ? 'active' : 'ok',
           lastExecutionDate,
         };
         return executionStatus;
