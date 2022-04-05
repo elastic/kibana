@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LineAnnotation, RectAnnotation } from '@elastic/charts';
+import { LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Datatable } from '../../../../expressions';
@@ -64,7 +64,7 @@ interface XCoords {
   x1: number | undefined;
 }
 
-function getAxisFromId(layerPrefix: string): YConfig['axisMode'] {
+function getAxisFromId(layerPrefix: string): Position {
   return /left/i.test(layerPrefix) ? 'left' : /right/i.test(layerPrefix) ? 'right' : 'bottom';
 }
 
@@ -72,20 +72,29 @@ const emptyCoords = { x0: undefined, x1: undefined, y0: undefined, y1: undefined
 
 describe('ReferenceLineAnnotations', () => {
   describe('with fill', () => {
-    let formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
     let defaultProps: Omit<ReferenceLineAnnotationsProps, 'data' | 'layers'>;
 
     beforeEach(() => {
-      formatters = {
-        left: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
-        right: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
-        bottom: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
-      };
-
       defaultProps = {
-        formatters,
+        xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
-        axesMap: { left: true, right: false },
+        yAxesConfiguration: [
+          {
+            groupId: 'left',
+            position: 'left',
+            series: [],
+          },
+          {
+            groupId: 'right',
+            position: 'right',
+            series: [],
+          },
+          {
+            groupId: 'bottom',
+            position: 'bottom',
+            series: [],
+          },
+        ],
         paddingMap: {},
       };
     });
@@ -98,17 +107,16 @@ describe('ReferenceLineAnnotations', () => {
     ] as Array<[string, YConfig['fill']]>)(
       'should render a RectAnnotation for a reference line with fill set: %s %s',
       (layerPrefix, fill) => {
-        const axisMode = getAxisFromId(layerPrefix);
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
-                axisMode,
                 lineStyle: 'solid',
                 fill,
                 type: 'yConfig',
+                axisId: getAxisFromId(layerPrefix),
               },
             ])}
           />
@@ -143,10 +151,10 @@ describe('ReferenceLineAnnotations', () => {
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
-                axisMode: 'bottom',
                 lineStyle: 'solid',
                 type: 'yConfig',
                 fill,
+                axisId: 'bottom',
               },
             ])}
           />
@@ -177,24 +185,23 @@ describe('ReferenceLineAnnotations', () => {
     ] as Array<[string, YConfig['fill'], YCoords, YCoords]>)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
-        const axisMode = getAxisFromId(layerPrefix);
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
-                axisMode,
                 lineStyle: 'solid',
                 type: 'yConfig',
                 fill,
+                axisId: getAxisFromId(layerPrefix),
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
-                axisMode,
                 lineStyle: 'solid',
                 type: 'yConfig',
                 fill,
+                axisId: getAxisFromId(layerPrefix),
               },
             ])}
           />
@@ -233,17 +240,17 @@ describe('ReferenceLineAnnotations', () => {
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
-                axisMode: 'bottom',
                 lineStyle: 'solid',
                 type: 'yConfig',
                 fill,
+                axisId: 'bottom',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
-                axisMode: 'bottom',
                 lineStyle: 'solid',
                 type: 'yConfig',
                 fill,
+                axisId: 'bottom',
               },
             ])}
           />
@@ -281,17 +288,17 @@ describe('ReferenceLineAnnotations', () => {
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
-                axisMode,
                 lineStyle: 'solid',
                 fill: 'above',
                 type: 'yConfig',
+                axisId: axisMode,
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
-                axisMode,
                 lineStyle: 'solid',
                 fill: 'below',
                 type: 'yConfig',
+                axisId: axisMode,
               },
             ])}
           />
@@ -330,17 +337,17 @@ describe('ReferenceLineAnnotations', () => {
             layers={createLayers([
               {
                 forAccessor: `yAccessorLeftFirstId`,
-                axisMode: 'left',
                 lineStyle: 'solid',
                 fill,
                 type: 'yConfig',
+                axisId: 'left',
               },
               {
                 forAccessor: `yAccessorRightSecondId`,
-                axisMode: 'right',
                 lineStyle: 'solid',
                 fill,
                 type: 'yConfig',
+                axisId: 'right',
               },
             ])}
           />

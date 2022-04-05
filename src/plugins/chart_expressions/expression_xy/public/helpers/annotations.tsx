@@ -9,7 +9,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import classnames from 'classnames';
-import type { IconPosition, YAxisMode, YConfig } from '../../common/types';
+import type { IconPosition, YConfig } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon } from './icon';
 import { annotationsIconSet } from './annotations_icon_set';
@@ -20,7 +20,7 @@ export const LINES_MARKER_SIZE = 20;
 
 export const getLinesCausedPaddings = (
   visualConfigs: Array<
-    Pick<YConfig, 'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'> | undefined
+    (Pick<YConfig, 'icon' | 'iconPosition' | 'textVisibility'> & { position: any }) | undefined
   >,
   axesMap: Record<'left' | 'right', unknown>
 ) => {
@@ -31,9 +31,9 @@ export const getLinesCausedPaddings = (
     if (!config) {
       return;
     }
-    const { axisMode, icon, iconPosition, textVisibility } = config;
-    if (axisMode && (hasIcon(icon) || textVisibility)) {
-      const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
+    const { position, icon, iconPosition, textVisibility } = config;
+    if (position && hasIcon(icon) || textVisibility) {
+      const placement = getBaseIconPlacement(iconPosition, axesMap, position);
       paddings[placement] = Math.max(
         paddings[placement] || 0,
         LINES_MARKER_SIZE * (textVisibility ? 2 : 1) // double the padding size if there's text
@@ -158,7 +158,7 @@ export const AnnotationIcon = ({
 };
 
 interface MarkerConfig {
-  axisMode?: YAxisMode;
+  position?: Position;
   icon?: string;
   textVisibility?: boolean;
   iconPosition?: IconPosition;

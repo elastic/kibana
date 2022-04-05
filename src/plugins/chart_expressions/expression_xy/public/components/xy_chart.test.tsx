@@ -1425,15 +1425,25 @@ describe('XYChart component', () => {
               {
                 type: 'yConfig',
                 forAccessor: 'a',
-                axisMode: 'left',
+                axisId: '1',
               },
               {
                 type: 'yConfig',
                 forAccessor: 'b',
-                axisMode: 'right',
+                axisId: '2',
               },
             ],
             table: dataWithoutFormats,
+          },
+        ],
+        axes: [
+          {
+            id: '1',
+            position: 'left',
+          },
+          {
+            id: '2',
+            position: 'right',
           },
         ],
       };
@@ -1475,15 +1485,21 @@ describe('XYChart component', () => {
               {
                 type: 'yConfig',
                 forAccessor: 'c',
-                axisMode: 'left',
+                axisId: '1',
               },
               {
                 type: 'yConfig',
                 forAccessor: 'd',
-                axisMode: 'left',
+                axisId: '1',
               },
             ],
             table: dataWithoutFormats,
+          },
+        ],
+        axes: [
+          {
+            id: '1',
+            position: 'left',
           },
         ],
       };

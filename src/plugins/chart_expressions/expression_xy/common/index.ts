@@ -11,6 +11,7 @@ export const PLUGIN_NAME = 'expressionXy';
 
 export {
   xyVisFunction,
+  axisConfigFunction,
   layeredXyVisFunction,
   yAxisConfigFunction,
   legendConfigFunction,

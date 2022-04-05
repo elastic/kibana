@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { FillStyles, IconPositions, LineStyles, YAxisModes, Y_CONFIG } from '../constants';
+import { FillStyles, IconPositions, LineStyles, Y_CONFIG } from '../constants';
 import { YConfig, YConfigResult } from '../types';
 
 export const yAxisConfigFunction: ExpressionFunctionDefinition<
@@ -29,13 +29,6 @@ export const yAxisConfigFunction: ExpressionFunctionDefinition<
       types: ['string'],
       help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
         defaultMessage: 'The accessor this configuration is for',
-      }),
-    },
-    axisMode: {
-      types: ['string'],
-      options: [...Object.values(YAxisModes)],
-      help: i18n.translate('expressionXY.yConfig.axisMode.help', {
-        defaultMessage: 'The axis mode of the metric',
       }),
     },
     color: {
@@ -81,6 +74,12 @@ export const yAxisConfigFunction: ExpressionFunctionDefinition<
       options: [...Object.values(FillStyles)],
       help: i18n.translate('expressionXY.yConfig.fill.help', {
         defaultMessage: 'Fill',
+      }),
+    },
+    axisId: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.yConfig.axisId.help', {
+        defaultMessage: 'An optional id of axis',
       }),
     },
   },

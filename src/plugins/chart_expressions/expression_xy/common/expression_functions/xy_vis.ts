@@ -26,6 +26,7 @@ import {
   EndValues,
   ANNOTATION_LAYER,
   LayerTypes,
+  AXIS_CONFIG,
 } from '../constants';
 import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
@@ -192,9 +193,16 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }),
       required: false,
     },
+    axes: {
+      types: [AXIS_CONFIG],
+      help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+        defaultMessage: 'Specifies the configs for axes',
+      }),
+      multi: true,
+    },
   },
   fn(data, args, handlers) {
-    const { dataLayers, referenceLineLayers, annotationLayers, ...restArgs } = args;
+    const { dataLayers, referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
     const inputLayers: Array<XYLayerConfigResult | undefined> = [
       ...dataLayers,
       ...referenceLineLayers,

@@ -23,6 +23,7 @@ import {
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
+  GroupsConfiguration,
 } from '../helpers';
 
 export const computeChartMargins = (
@@ -65,14 +66,14 @@ export const computeChartMargins = (
 export function getBaseIconPlacement(
   iconPosition: IconPosition | undefined,
   axesMap?: Record<string, unknown>,
-  axisMode?: YAxisMode
+  position?: Position
 ) {
   if (iconPosition === 'auto') {
-    if (axisMode === 'bottom') {
+    if (position === 'bottom') {
       return Position.Top;
     }
     if (axesMap) {
-      if (axisMode === 'left') {
+      if (position === 'left') {
         return axesMap.right ? Position.Left : Position.Right;
       }
       return axesMap.left ? Position.Right : Position.Left;
@@ -93,16 +94,16 @@ export function getBaseIconPlacement(
 
 export interface ReferenceLineAnnotationsProps {
   layers: CommonXYReferenceLineLayerConfigResult[];
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  axesMap: Record<'left' | 'right', boolean>;
+  xAxisFormatter: FieldFormat;
+  yAxesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
 }
 
 export const ReferenceLineAnnotations = ({
   layers,
-  formatters,
-  axesMap,
+  xAxisFormatter,
+  yAxesConfiguration,
   isHorizontal,
   paddingMap,
 }: ReferenceLineAnnotationsProps) => {
@@ -130,28 +131,32 @@ export const ReferenceLineAnnotations = ({
 
         return yConfigByValue.flatMap((yConfig, i) => {
           // Find the formatter for the given axis
-          const groupId =
-            yConfig.axisMode === 'bottom'
-              ? undefined
-              : yConfig.axisMode === 'right'
-              ? 'right'
-              : 'left';
+          const axisGroup = yAxesConfiguration.find(
+            (axis) =>
+              (yConfig.axisId && axis.groupId === yConfig.axisId) ||
+              axis.series.some((s) => s.accessor === yConfig.forAccessor)
+          );
 
-          const formatter = formatters[groupId || 'bottom'];
+          const formatter = axisGroup?.formatter || xAxisFormatter;
 
           const defaultColor = euiLightVars.euiColorDarkShade;
+
+          const axisMap = {
+            left: yAxesConfiguration.some((axes) => axes.position === 'left'),
+            right: yAxesConfiguration.some((axes) => axes.position === 'right'),
+          }
 
           // get the position for vertical chart
           const markerPositionVertical = getBaseIconPlacement(
             yConfig.iconPosition,
-            axesMap,
-            yConfig.axisMode
+            axisMap,
+            axisGroup?.position
           );
           // the padding map is built for vertical chart
           const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
           const props = {
-            groupId,
+            groupId: axisGroup?.groupId || 'bottom',
             marker: (
               <Marker
                 config={yConfig}
@@ -168,8 +173,8 @@ export const ReferenceLineAnnotations = ({
                     : undefined
                 }
                 isHorizontal={
-                  (!isHorizontal && yConfig.axisMode === 'bottom') ||
-                  (isHorizontal && yConfig.axisMode !== 'bottom')
+                  (!isHorizontal && axisGroup?.position === 'bottom') ||
+                  (isHorizontal && axisGroup?.position !== 'bottom')
                 }
               />
             ),
@@ -202,7 +207,7 @@ export const ReferenceLineAnnotations = ({
                 details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
               }))}
               domainType={
-                yConfig.axisMode === 'bottom'
+                axisGroup?.position === 'bottom'
                   ? AnnotationDomainType.XDomain
                   : AnnotationDomainType.YDomain
               }
@@ -231,7 +236,7 @@ export const ReferenceLineAnnotations = ({
                   const nextValue = shouldCheckNextReferenceLine
                     ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
                     : undefined;
-                  if (yConfig.axisMode === 'bottom') {
+                  if (axisGroup?.position === 'bottom') {
                     return {
                       coordinates: {
                         x0: isFillAbove ? row[yConfig.forAccessor] : nextValue,

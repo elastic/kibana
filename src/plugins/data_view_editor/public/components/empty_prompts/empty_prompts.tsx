@@ -9,7 +9,7 @@
 import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { NoDataViewsComponent } from '@kbn/shared-ux-components';
+//import { NoDataViewsComponent } from '@kbn/shared-ux-components';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { useKibana } from '../../shared_imports';
 
@@ -98,12 +98,12 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       return (
         <>
           <EuiFlyoutBody>
-            <NoDataViewsComponent
+            {/* <NoDataViewsComponent
               onClickCreate={() => setGoToForm(true)}
               canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
               dataViewsDocLink={docLinks.links.indexPatterns.introduction}
               emptyPromptColor={'subdued'}
-            />
+            /> */}
           </EuiFlyoutBody>
           <PromptFooter onCancel={onCancel} />
         </>

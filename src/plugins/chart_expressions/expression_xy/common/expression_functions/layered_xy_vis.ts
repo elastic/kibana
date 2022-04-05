@@ -16,6 +16,7 @@ import {
   FittingFunctions,
   GRID_LINES_CONFIG,
   XY_VIS_RENDERER,
+  AXIS_CONFIG,
   AXIS_EXTENT_CONFIG,
   TICK_LABELS_CONFIG,
   LABELS_ORIENTATION_CONFIG,
@@ -175,6 +176,13 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
       required: false,
+    },
+    axes: {
+      types: [AXIS_CONFIG],
+      help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+        defaultMessage: 'Specifies the configs for axes',
+      }),
+      multi: true,
     },
   },
   fn(data, args, handlers) {

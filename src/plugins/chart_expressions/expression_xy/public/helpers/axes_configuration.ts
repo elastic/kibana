@@ -8,6 +8,8 @@
 
 import { FormatFactory } from '../types';
 import {
+  AxisConfig,
+  YConfigResult,
   AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
@@ -17,6 +19,7 @@ import type {
   SerializedFieldFormat,
 } from '../../../../../plugins/field_formats/common';
 import { isDataLayer } from './visualization';
+import { Position } from '@elastic/charts';
 
 export interface Series {
   layer: number;
@@ -25,6 +28,11 @@ export interface Series {
 
 interface FormattedMetric extends Series {
   fieldFormat: SerializedFieldFormat;
+  axisId?: string;
+}
+
+interface AxesSeries {
+  [key: string]: FormattedMetric[];
 }
 
 export type GroupsConfiguration = Array<{
@@ -42,26 +50,23 @@ export function isFormatterCompatible(
 }
 
 export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>
+  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
+  axes?: AxisConfig[]
 ) {
-  const series: {
-    auto: FormattedMetric[];
-    left: FormattedMetric[];
-    right: FormattedMetric[];
-    bottom: FormattedMetric[];
-  } = {
+  const series: AxesSeries = {
     auto: [],
     left: [],
     right: [],
-    bottom: [],
   };
 
   layers.forEach((layer, index) => {
-    const { table } = layer;
+    const { table, yConfig } = layer;
     layer.accessors.forEach((accessor) => {
-      const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
+      const yConfigByAccessor = yConfig?.find((config) => config.forAccessor === accessor);
+      const axisConfigById = axes?.find(
+        (axis) => yConfigByAccessor?.axisId && axis.id === yConfigByAccessor?.axisId
+      );
+      const key = axisConfigById?.id || 'auto';
       let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
         ?.meta?.params || { id: 'number' };
       if (
@@ -76,10 +81,15 @@ export function groupAxesByType(
           },
         };
       }
-      series[mode].push({
+      if (!series[key]) {
+        series[key] = [];
+      }
+      series[key].push({
         layer: index,
         accessor,
         fieldFormat: formatter,
+        axisId: yConfigByAccessor?.axisId,
+        ...(axisConfigById || {}),
       });
     });
   });
@@ -87,27 +97,39 @@ export function groupAxesByType(
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
 
   series.auto.forEach((currentSeries) => {
-    if (
-      series.left.length === 0 ||
-      (tablesExist &&
-        series.left.every((leftSeries) =>
-          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-        ))
-    ) {
-      series.left.push(currentSeries);
-    } else if (
-      series.right.length === 0 ||
-      (tablesExist &&
-        series.left.every((leftSeries) =>
-          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-        ))
-    ) {
-      series.right.push(currentSeries);
-    } else if (series.right.length >= series.left.length) {
-      series.left.push(currentSeries);
-    } else {
-      series.right.push(currentSeries);
+    let key = Object.keys(series).find(
+      (seriesKey) =>
+        seriesKey !== 'auto' &&
+        series[seriesKey].length > 0 &&
+        series[seriesKey].every((axisSeries) =>
+          isFormatterCompatible(axisSeries.fieldFormat, currentSeries.fieldFormat)
+        )
+    );
+    if (!key) {
+      if (
+        series.left.length === 0 ||
+        (tablesExist &&
+          series.left.every((leftSeries) =>
+            isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+          ))
+      ) {
+        key = 'left';
+      } else if (
+        series.right.length === 0 ||
+        (tablesExist &&
+          series.left.every((leftSeries) =>
+            isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+          ))
+      ) {
+        key = 'right';
+      } else if (series.right.length >= series.left.length) {
+        key = 'left';
+      } else {
+        key = 'right';
+      }
     }
+
+    series[key].push(currentSeries);
   });
   return series;
 }
@@ -115,11 +137,23 @@ export function groupAxesByType(
 export function getAxesConfiguration(
   layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
   shouldRotate: boolean,
+  axes?: AxisConfig[],
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers);
+  const series = groupAxesByType(layers, axes);
 
   const axisGroups: GroupsConfiguration = [];
+
+  axes?.forEach((axis) => {
+    if (series[axis.id] && series[axis.id].length > 0) {
+      axisGroups.push({
+        groupId: axis.id,
+        position: axis.position || Position.Left,
+        formatter: formatFactory?.(series[axis.id][0].fieldFormat),
+        series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      });
+    }
+  });
 
   if (series.left.length > 0) {
     axisGroups.push({
@@ -141,6 +175,14 @@ export function getAxesConfiguration(
 
   return axisGroups;
 }
+
+export const getAxisConfig = (axesGroup?: GroupsConfiguration, yConfig?: YConfigResult) => {
+  return axesGroup?.find(
+    (axis) =>
+      (yConfig?.axisId && yConfig.axisId === axis.groupId) ||
+      axis.series.some(({ accessor }) => accessor === yConfig?.forAccessor)
+  );
+};
 
 export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
   const inclusiveZeroError =

@@ -9,6 +9,7 @@
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
 export const Y_CONFIG = 'yConfig';
+export const AXIS_CONFIG = 'axisConfig';
 export const MULTITABLE = 'lens_multitable';
 export const DATA_LAYER = 'dataLayer';
 export const EXTENDED_DATA_LAYER = 'extendedDataLayer';

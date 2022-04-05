@@ -13,6 +13,7 @@ import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public'
 import { ExpressionAstExpression } from 'src/plugins/expressions';
 import {
   State,
+  YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
@@ -20,7 +21,7 @@ import {
 import type { ValidXYDataLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { YConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { AxisConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -198,6 +199,31 @@ export const buildExpression = (
     return null;
   }
 
+  const validLayersWithYConfig = [...validDataLayers, ...validReferenceLayers];
+
+  const isLeftAxis = validLayersWithYConfig.some(({ yConfig }) =>
+    yConfig?.some((config) => config.axisMode === 'left')
+  );
+  const isRightAxis = validLayersWithYConfig.some(({ yConfig }) =>
+    yConfig?.some((config) => config.axisMode === 'right')
+  );
+
+  const axes: AxisConfig[] = [];
+
+  if (isLeftAxis) {
+    axes.push({
+      id: 'left',
+      position: 'left',
+    });
+  }
+
+  if (isRightAxis) {
+    axes.push({
+      id: 'right',
+      position: 'right',
+    });
+  }
+
   return {
     type: 'expression',
     chain: [
@@ -362,10 +388,12 @@ export const buildExpression = (
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
+          axes: [...axesToExpression(axes)],
           layers: [
             ...validDataLayers.map((layer) =>
               dataLayerToExpression(
                 layer,
+                axes,
                 datasourceLayers[layer.layerId],
                 metadata,
                 paletteService,
@@ -375,6 +403,7 @@ export const buildExpression = (
             ...validReferenceLayers.map((layer) =>
               referenceLineLayerToExpression(
                 layer,
+                axes,
                 datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId],
                 datasourceExpressionsByLayers[layer.layerId]
               )
@@ -398,8 +427,25 @@ const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpressio
   chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
 });
 
+const axesToExpression = (axes: AxisConfig[]): Ast => {
+  return axes.map((axis) => ({
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'axisConfig',
+        arguments: {
+          id: [axis.id],
+          position: [axis.position],
+        },
+      },
+    ],
+  }));
+};
+
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
+  axes: AxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   datasourceExpression: Ast
 ): Ast => {
@@ -412,7 +458,7 @@ const referenceLineLayerToExpression = (
         arguments: {
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
-                yConfigToExpression(yConfig, defaultReferenceLineColor)
+                yConfigToExpression(yConfig, axes, defaultReferenceLineColor)
               )
             : [],
           accessors: layer.accessors,
@@ -461,6 +507,7 @@ const annotationLayerToExpression = (
 
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
+  axes: AxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
@@ -493,7 +540,7 @@ const dataLayerToExpression = (
           isHistogram: [isHistogramDimension],
           splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
           yConfig: layer.yConfig
-            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
+            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig, axes))
             : [],
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
@@ -530,7 +577,7 @@ const dataLayerToExpression = (
   };
 };
 
-const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
+const yConfigToExpression = (yConfig: YConfig, axes: AxisConfig[], defaultColor?: string): Ast => {
   return {
     type: 'expression',
     chain: [
@@ -538,8 +585,8 @@ const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
         type: 'function',
         function: 'yConfig',
         arguments: {
+          axisId: [axes.find((axis) => axis.position === yConfig.axisMode)?.id],
           forAccessor: [yConfig.forAccessor],
-          axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
           color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
           lineStyle: [yConfig.lineStyle || 'solid'],
           lineWidth: [yConfig.lineWidth || 1],

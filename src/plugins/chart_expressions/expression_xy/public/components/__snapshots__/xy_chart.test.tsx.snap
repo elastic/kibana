@@ -18,8 +18,8 @@ exports[`XYChart component annotations should render basic annotation 1`] = `
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "label": "Annotation",
+          "position": "bottom",
           "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
           "type": "manual_event_annotation",
@@ -68,13 +68,13 @@ exports[`XYChart component annotations should render grouped annotations preserv
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "color": "red",
           "customTooltipDetails": [Function],
           "icon": "3",
           "label": "Event 1",
           "lineStyle": "dashed",
           "lineWidth": 3,
+          "position": "bottom",
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
@@ -127,13 +127,13 @@ exports[`XYChart component annotations should render grouped annotations with de
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "color": "#f04e98",
           "customTooltipDetails": [Function],
           "icon": "2",
           "label": "Event 1",
           "lineStyle": "solid",
           "lineWidth": 1,
+          "position": "bottom",
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
@@ -182,8 +182,8 @@ exports[`XYChart component annotations should render simplified annotation when 
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "label": "Annotation",
+          "position": "bottom",
           "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
           "type": "manual_event_annotation",

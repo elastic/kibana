@@ -71,6 +71,7 @@ import {
   computeOverallDataDomain,
   getColorAssignments,
   getLinesCausedPaddings,
+  getAxisConfig,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -163,6 +164,7 @@ export function XYChart({
     yLeftExtent,
     yRightExtent,
     valuesInLegend,
+    axes,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -208,7 +210,12 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(filteredLayers, shouldRotate, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(
+    filteredLayers,
+    shouldRotate,
+    axes,
+    formatFactory
+  );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
@@ -276,7 +283,9 @@ export function XYChart({
     xAxisFormatter
   );
   const visualConfigs = [
-    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...referenceLineLayers
+      .flatMap(({ yConfig }) => yConfig)
+      .map((config) => ({ ...config, position: getAxisConfig(yAxesConfiguration, config)?.position })),
     ...groupedAnnotations,
   ].filter(Boolean);
 
@@ -343,7 +352,7 @@ export function XYChart({
       }
     } else {
       const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
-        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+        yConfig?.some((config) => Boolean(getAxisConfig([axis], config)))
       );
       if (!fit && axisHasReferenceLine) {
         // Remove this once the chart will support automatic annotation fit for other type of charts
@@ -357,10 +366,10 @@ export function XYChart({
           min = Math.min(computedMin, min || 0);
         }
         for (const { yConfig, table } of referenceLineLayers) {
-          for (const { axisMode, forAccessor } of yConfig || []) {
-            if (axis.groupId === axisMode) {
+          for (const config of yConfig || []) {
+            if (Boolean(getAxisConfig([axis], config))) {
               for (const row of table.rows) {
-                const value = row[forAccessor];
+                const value = row[config.forAccessor];
                 // keep the 0 in view
                 max = Math.max(value, max || 0, 0);
                 min = Math.min(value, min || 0, 0);
@@ -826,7 +835,7 @@ export function XYChart({
                     ) {
                       return splitFormatter.convert(key);
                     }
-                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
+                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? null;
                   })
                   .join(' - ');
                 return result;
@@ -843,7 +852,7 @@ export function XYChart({
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
               // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
+              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? null;
             },
           };
 
@@ -910,15 +919,8 @@ export function XYChart({
       {referenceLineLayers.length ? (
         <ReferenceLineAnnotations
           layers={referenceLineLayers}
-          formatters={{
-            left: yAxesMap.left?.formatter,
-            right: yAxesMap.right?.formatter,
-            bottom: xAxisFormatter,
-          }}
-          axesMap={{
-            left: Boolean(yAxesMap.left),
-            right: Boolean(yAxesMap.right),
-          }}
+          xAxisFormatter={xAxisFormatter}
+          yAxesConfiguration={yAxesConfiguration}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
         />

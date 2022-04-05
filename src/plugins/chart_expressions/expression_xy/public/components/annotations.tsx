@@ -49,7 +49,7 @@ export interface AnnotationsProps {
 
 interface CollectiveConfig extends EventAnnotationArgs {
   roundedTimestamp: number;
-  axisMode: 'bottom';
+  position: 'bottom';
   customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }
 
@@ -136,7 +136,7 @@ export const getAnnotationsGroupedByInterval = (
     collectiveConfig = {
       ...configArr[0],
       roundedTimestamp: Number(roundedTimestamp),
-      axisMode: 'bottom',
+      position: 'bottom',
     };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);

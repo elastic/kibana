@@ -28,12 +28,27 @@ import type {
   FittingFunction,
   LabelsOrientationConfig,
   EndValue,
-  YConfig,
   YScaleType,
   XScaleType,
+  LineStyle,
+  IconPosition,
+  FillStyle,
+  YAxisMode
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
+
+export interface YConfig {
+  forAccessor: string;
+  color?: string;
+  icon?: string;
+  lineWidth?: number;
+  lineStyle?: LineStyle;
+  fill?: FillStyle;
+  iconPosition?: IconPosition;
+  textVisibility?: boolean;
+  axisMode?: YAxisMode;
+}
 
 export interface XYDataLayerConfig {
   layerId: string;
