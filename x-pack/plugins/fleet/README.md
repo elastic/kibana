@@ -101,7 +101,7 @@ Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server conta
 
 For the latest version, use `8.0.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
 
-Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `http://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes, or with Docker (recommended) see next section.
+Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `https://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes, or with Docker (recommended) see next section.
 
 ### Running Elastic Agent Locally in a Container (managed mode)
 
