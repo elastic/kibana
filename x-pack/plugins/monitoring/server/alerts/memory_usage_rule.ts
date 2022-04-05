@@ -28,13 +28,13 @@ import { RULE_MEMORY_USAGE, RULE_DETAILS } from '../../common/constants';
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { RawAlertInstance, SanitizedRule } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
 
 export class MemoryUsageRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_MEMORY_USAGE,
       name: RULE_DETAILS[RULE_MEMORY_USAGE].label,

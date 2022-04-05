@@ -7,6 +7,7 @@
 
 import type { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import type { CustomPaletteParams, LayerType, PersistableFilter } from '../../common';

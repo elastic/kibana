@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertExecutionStatus, Alert, AlertAction, RuleType } from '../../common';
+import { RuleExecutionStatus, Rule, RuleAction, RuleType } from '../../common';
 import { AsApiContract } from '../../../actions/common';
 
-function transformAction(input: AsApiContract<AlertAction>): AlertAction {
+function transformAction(input: AsApiContract<RuleAction>): RuleAction {
   const { connector_type_id: actionTypeId, ...rest } = input;
   return { actionTypeId, ...rest };
 }
 
 // AsApiContract does not deal with object properties that are dates - the
 // API version needs to be a string, and the non-API version needs to be a Date
-type ApiAlertExecutionStatus = Omit<AsApiContract<AlertExecutionStatus>, 'last_execution_date'> & {
+type ApiRuleExecutionStatus = Omit<AsApiContract<RuleExecutionStatus>, 'last_execution_date'> & {
   last_execution_date: string;
 };
 
-function transformExecutionStatus(input: ApiAlertExecutionStatus): AlertExecutionStatus {
+function transformExecutionStatus(input: ApiRuleExecutionStatus): RuleExecutionStatus {
   const { last_execution_date: lastExecutionDate, last_duration: lastDuration, ...rest } = input;
   return {
     lastExecutionDate: new Date(lastExecutionDate),
@@ -29,8 +29,8 @@ function transformExecutionStatus(input: ApiAlertExecutionStatus): AlertExecutio
 
 // AsApiContract does not deal with object properties that also
 // need snake -> camel conversion, Dates, are renamed, etc, so we do by hand
-export type ApiAlert = Omit<
-  AsApiContract<Alert>,
+export type ApiRule = Omit<
+  AsApiContract<Rule>,
   | 'execution_status'
   | 'actions'
   | 'created_at'
@@ -38,15 +38,15 @@ export type ApiAlert = Omit<
   | 'alert_type_id'
   | 'muted_instance_ids'
 > & {
-  execution_status: ApiAlertExecutionStatus;
-  actions: Array<AsApiContract<AlertAction>>;
+  execution_status: ApiRuleExecutionStatus;
+  actions: Array<AsApiContract<RuleAction>>;
   created_at: string;
   updated_at: string;
   rule_type_id: string;
   muted_alert_ids: string[];
 };
 
-export function transformAlert(input: ApiAlert): Alert {
+export function transformRule(input: ApiRule): Rule {
   const {
     rule_type_id: alertTypeId,
     created_by: createdBy,
