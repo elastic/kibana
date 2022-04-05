@@ -604,6 +604,267 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.PersistedLog",
+        "type": "Class",
+        "tags": [],
+        "label": "PersistedLog",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.PersistedLog",
+            "text": "PersistedLog"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.maxLength",
+            "type": "number",
+            "tags": [],
+            "label": "maxLength",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.filterDuplicates",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filterDuplicates",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.isDuplicate",
+            "type": "Function",
+            "tags": [],
+            "label": "isDuplicate",
+            "description": [],
+            "signature": [
+              "(oldItem: T, newItem: T) => boolean"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.PersistedLog.isDuplicate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "oldItem",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.PersistedLog.isDuplicate.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "newItem",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStorageWrapper",
+                "text": "IStorageWrapper"
+              },
+              "<any, void>"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              "T[]"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.PersistedLog.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.PersistedLog.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "PersistedLogOptions<T>"
+                ],
+                "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.PersistedLog.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "storage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "public",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-public.IStorageWrapper",
+                    "text": "IStorageWrapper"
+                  },
+                  "<any, void>"
+                ],
+                "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [],
+            "signature": [
+              "(val: any) => T[]"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.PersistedLog.add.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "val",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "() => T[]"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.PersistedLog.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<T[]>"
+            ],
+            "path": "src/plugins/data/public/query/persisted_log/persisted_log.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.TimeHistory",
         "type": "Class",
         "tags": [],
@@ -775,7 +1036,13 @@
             "text": "FilterManager"
           },
           "; queryString: ",
-          "QueryStringContract",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStringContract",
+            "text": "QueryStringContract"
+          },
           "; savedQueries: { createQuery: (attributes: ",
           {
             "pluginId": "data",
@@ -881,7 +1148,13 @@
           "; timefilter: ",
           "TimefilterSetup",
           "; queryString: ",
-          "QueryStringContract",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStringContract",
+            "text": "QueryStringContract"
+          },
           "; state$: ",
           "Observable",
           "<{ changes: ",
@@ -934,7 +1207,13 @@
                 "text": "FilterManager"
               },
               "; queryString: ",
-              "QueryStringContract",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.QueryStringContract",
+                "text": "QueryStringContract"
+              },
               "; savedQueries: { createQuery: (attributes: ",
               {
                 "pluginId": "data",
@@ -1040,7 +1319,13 @@
               "; timefilter: ",
               "TimefilterSetup",
               "; queryString: ",
-              "QueryStringContract",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.QueryStringContract",
+                "text": "QueryStringContract"
+              },
               "; state$: ",
               "Observable",
               "<{ changes: ",
@@ -1544,6 +1829,112 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.getIndexPatternFromFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternFromFilter",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          "Filter",
+          ", indexPatterns: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          "[]) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.IIndexPattern",
+            "text": "IIndexPattern"
+          },
+          " | undefined"
+        ],
+        "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getIndexPatternFromFilter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "Filter"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getIndexPatternFromFilter.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.IIndexPattern",
+                "text": "IIndexPattern"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-public.mapAndFlattenFilters",
+        "type": "Function",
+        "tags": [],
+        "label": "mapAndFlattenFilters",
+        "description": [],
+        "signature": [
+          "(filters: ",
+          "Filter",
+          "[]) => ",
+          "Filter",
+          "[]"
+        ],
+        "path": "src/plugins/data/public/query/filter_manager/lib/map_and_flatten_filters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.mapAndFlattenFilters.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "Filter",
+              "[]"
+            ],
+            "path": "src/plugins/data/public/query/filter_manager/lib/map_and_flatten_filters.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.syncQueryStateWithUrl",
         "type": "Function",
         "tags": [],
@@ -1563,7 +1954,13 @@
             "text": "FilterManager"
           },
           "; queryString: ",
-          "QueryStringContract",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStringContract",
+            "text": "QueryStringContract"
+          },
           "; savedQueries: { createQuery: (attributes: ",
           {
             "pluginId": "data",
@@ -1669,7 +2066,13 @@
           "; timefilter: ",
           "TimefilterSetup",
           "; queryString: ",
-          "QueryStringContract",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStringContract",
+            "text": "QueryStringContract"
+          },
           "; state$: ",
           "Observable",
           "<{ changes: ",
@@ -1720,7 +2123,13 @@
                 "text": "FilterManager"
               },
               "; queryString: ",
-              "QueryStringContract",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.QueryStringContract",
+                "text": "QueryStringContract"
+              },
               "; savedQueries: { createQuery: (attributes: ",
               {
                 "pluginId": "data",
@@ -1826,7 +2235,13 @@
               "; timefilter: ",
               "TimefilterSetup",
               "; queryString: ",
-              "QueryStringContract",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.QueryStringContract",
+                "text": "QueryStringContract"
+              },
               "; state$: ",
               "Observable",
               "<{ changes: ",
@@ -2347,6 +2762,56 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.QuerySetup",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySetup",
+        "description": [],
+        "signature": [
+          "{ filterManager: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.FilterManager",
+            "text": "FilterManager"
+          },
+          "; timefilter: ",
+          "TimefilterSetup",
+          "; queryString: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStringContract",
+            "text": "QueryStringContract"
+          },
+          "; state$: ",
+          "Observable",
+          "<{ changes: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStateChange",
+            "text": "QueryStateChange"
+          },
+          "; state: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryState",
+            "text": "QueryState"
+          },
+          "; }>; }"
+        ],
+        "path": "src/plugins/data/public/query/query_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.QueryStart",
         "type": "Type",
         "tags": [],
@@ -2364,7 +2829,13 @@
             "text": "FilterManager"
           },
           "; queryString: ",
-          "QueryStringContract",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.QueryStringContract",
+            "text": "QueryStringContract"
+          },
           "; savedQueries: { createQuery: (attributes: ",
           {
             "pluginId": "data",
@@ -2467,6 +2938,32 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.QueryStringContract",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryStringContract",
+        "description": [],
+        "signature": [
+          "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
+          "Query",
+          " | undefined) => ",
+          "Query",
+          "; getUpdates$: () => ",
+          "Observable",
+          "<",
+          "Query",
+          ">; getQuery: () => ",
+          "Query",
+          "; setQuery: (query: ",
+          "Query",
+          ") => void; clearQuery: () => void; }"
+        ],
+        "path": "src/plugins/data/public/query/query_string/query_string_manager.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.SavedQueryTimeFilter",
         "type": "Type",
         "tags": [],
@@ -2502,7 +2999,7 @@
         "label": "TimefilterContract",
         "description": [],
         "signature": [
-          "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
+          "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
           "Observable",
           "<boolean>; getTimeUpdate$: () => ",
           "Observable",

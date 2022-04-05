@@ -13,10 +13,7 @@ import {
 } from '../../../../../fleet/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import {
-  sendGetAgentPolicyList,
-  sendGetEndpointSecurityPackage,
-} from '../../pages/policy/store/services/ingest';
+import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import { ServerApiError } from '../../../common/types';
