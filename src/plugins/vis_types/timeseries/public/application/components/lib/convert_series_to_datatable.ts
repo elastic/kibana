@@ -11,7 +11,10 @@ import { Query } from 'src/plugins/data/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
-import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES } from '../../../../../../data/common';
+import {
+  BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES,
+  MultiFieldKey,
+} from '../../../../../../data/common';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart, getDataViewsStart } from '../../../services';
@@ -161,16 +164,20 @@ export const convertSeriesToDataTable = async (
     const filtersColumn = columns.find((col) => col.type === BUCKET_TYPES.FILTERS);
     let rows: DatatableRow[] = [];
     for (let j = 0; j < seriesPerLayer.length; j++) {
-      const { data, label, isSplitByTerms, termsSplitValue } = seriesPerLayer[j];
+      const { data, label, isSplitByTerms, termsSplitKey } = seriesPerLayer[j];
       const seriesData = data.map((rowData) => {
         let rowId = X_ACCESSOR_INDEX;
-        return {
-          [rowId++]: rowData[0],
-          [rowId++]: rowData[1],
-          ...(isGroupedByTerms || filtersColumn
-            ? { [rowId]: isSplitByTerms && termsSplitValue ? termsSplitValue : [label].flat()[0] }
-            : {}),
-        };
+        const rowsData = { [rowId++]: rowData[0], [rowId++]: rowData[1] };
+
+        let splitValue;
+        if (isGroupedByTerms || filtersColumn) {
+          const termsValue = Array.isArray(termsSplitKey)
+            ? new MultiFieldKey({ key: termsSplitKey })
+            : termsSplitKey;
+          splitValue = { [rowId]: isSplitByTerms && termsValue ? termsValue : [label].flat()[0] };
+        }
+
+        return splitValue ? { ...rowsData, ...splitValue } : rowsData;
       });
       rows = [...rows, ...seriesData];
     }

@@ -29,7 +29,7 @@ export function stdMetric(resp, panel, series, meta, extractFields) {
         label: split.label,
         splitByLabel: split.splitByLabel,
         labelFormatted: split.labelFormatted,
-        termsSplitValue: split.termsSplitValue,
+        termsSplitKey: split.termsSplitKey,
         color: split.color,
         data,
         ...decoration,

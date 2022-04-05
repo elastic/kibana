@@ -14,7 +14,6 @@ import { calculateLabel } from '../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../common/constants';
 import { getLastMetric } from './get_last_metric';
 import { formatKey } from './format_key';
-import { MultiFieldKey } from '../../../../../../data/common/search/aggs/buckets/multi_field_key';
 
 import type { Panel, Series } from '../../../../common/types';
 import type { BaseMeta } from '../request_processors/types';
@@ -27,7 +26,7 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   splitByLabel: string;
   label: string;
   labelFormatted?: string;
-  termsSplitValue?: string | MultiFieldKey;
+  termsSplitKey?: string | string[];
   color: string;
   meta: TMeta;
   timeseries: {
@@ -76,7 +75,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
         bucket.color = color.string();
         bucket.meta = meta;
-        bucket.termsSplitValue = Array.isArray(bucket.key) ? new MultiFieldKey(bucket) : bucket.key;
+        bucket.termsSplitKey = bucket.key;
         return bucket;
       });
     }
