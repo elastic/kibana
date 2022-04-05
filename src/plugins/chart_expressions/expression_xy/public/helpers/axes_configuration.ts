@@ -28,7 +28,7 @@ interface FormattedMetric extends Series {
 }
 
 export type GroupsConfiguration = Array<{
-  groupId: string;
+  groupId: 'left' | 'right';
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];

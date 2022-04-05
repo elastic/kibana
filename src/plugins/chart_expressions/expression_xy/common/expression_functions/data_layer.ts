@@ -51,6 +51,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.dataLayer.seriesType.help', {
         defaultMessage: 'The type of chart to display.',
       }),
+      required: true,
     },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],

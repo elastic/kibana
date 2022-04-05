@@ -80,6 +80,7 @@ import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../
 
 import './xy_chart.scss';
 import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
+import { SeriesTypes } from '../../common/constants';
 
 declare global {
   interface Window {
@@ -182,7 +183,9 @@ export function XYChart({
   });
 
   if (filteredLayers.length === 0) {
-    const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]?.seriesType || 'bar');
+    const icon: IconType = getIconForSeriesType(
+      getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
+    );
     return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }
 
@@ -250,7 +253,7 @@ export function XYChart({
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
 
-  const getYAxesTitles = (axisSeries: Series[], groupId: string) => {
+  const getYAxesTitles = (axisSeries: Series[], groupId: 'right' | 'left') => {
     const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
     return (
       yTitle ||
@@ -826,7 +829,7 @@ export function XYChart({
                     ) {
                       return splitFormatter.convert(key);
                     }
-                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
+                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? null;
                   })
                   .join(' - ');
                 return result;
@@ -843,7 +846,7 @@ export function XYChart({
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
               // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
+              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? null;
             },
           };
 
@@ -852,7 +855,7 @@ export function XYChart({
           const curveType = args.curveType ? CurveType[args.curveType] : undefined;
 
           switch (seriesType) {
-            case 'line':
+            case SeriesTypes.LINE:
               return (
                 <LineSeries
                   key={index}
@@ -861,12 +864,12 @@ export function XYChart({
                   curve={curveType}
                 />
               );
-            case 'bar':
-            case 'bar_stacked':
-            case 'bar_percentage_stacked':
-            case 'bar_horizontal':
-            case 'bar_horizontal_stacked':
-            case 'bar_horizontal_percentage_stacked':
+            case SeriesTypes.BAR:
+            case SeriesTypes.BAR_STACKED:
+            case SeriesTypes.BAR_PERCENTAGE_STACKED:
+            case SeriesTypes.BAR_HORIZONTAL:
+            case SeriesTypes.BAR_HORIZONTAL_STACKED:
+            case SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED:
               const valueLabelsSettings = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
@@ -883,8 +886,8 @@ export function XYChart({
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
-            case 'area_stacked':
-            case 'area_percentage_stacked':
+            case SeriesTypes.AREA_STACKED:
+            case SeriesTypes.AREA_PERCENTAGE_STACKED:
               return (
                 <AreaSeries
                   key={index}
@@ -893,7 +896,7 @@ export function XYChart({
                   curve={curveType}
                 />
               );
-            case 'area':
+            case SeriesTypes.AREA:
               return (
                 <AreaSeries
                   key={index}
