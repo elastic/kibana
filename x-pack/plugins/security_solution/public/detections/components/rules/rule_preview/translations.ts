@@ -131,14 +131,6 @@ export const QUERY_PREVIEW_DISCLAIMER = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql',
-  {
-    defaultMessage:
-      'Note: This preview excludes effects of rule exceptions and timestamp overrides, and is limited to 100 results.',
-  }
-);
-
 export const QUERY_PREVIEW_SUBTITLE_LOADING = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading',
   {

@@ -214,7 +214,7 @@ export const PreviewHistogram = ({
             <>
               <EuiSpacer />
               <EuiText size="s" color="subdued">
-                <p>{i18n.QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS}</p>
+                <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
               </EuiText>
             </>
           </EuiFlexItem>
