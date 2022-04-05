@@ -19,6 +19,8 @@ import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
+import { Loading } from '..';
+
 import type { InstructionProps } from './types';
 
 import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './steps';
@@ -32,6 +34,7 @@ export const Instructions = (props: InstructionProps) => {
     isLoadingAgentPolicies,
     setSelectionType,
     mode,
+    isIntegrationFlow,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
@@ -60,24 +63,31 @@ export const Instructions = (props: InstructionProps) => {
   const showAgentEnrollment =
     fleetStatus.isReady &&
     !isFleetServerUnhealthy &&
-    (isLoadingAgents || isLoadingAgentPolicies || fleetServers.length > 0);
+    fleetServers.length > 0 &&
+    fleetServerHosts.length > 0;
 
   const showFleetServerEnrollment =
     fleetServers.length === 0 ||
     isFleetServerUnhealthy ||
     (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
 
-  if (showAgentEnrollment) {
+  if (!isIntegrationFlow && showAgentEnrollment) {
     setSelectionType('radio');
-  } else if (showFleetServerEnrollment) {
+  } else {
     setSelectionType('tabs');
   }
 
+  if (!fleetStatus.isReady || isLoadingAgents || isLoadingAgentPolicies)
+    return <Loading size="l" />;
+
+  if (hasNoFleetServerHost) {
+    return null;
+  }
+
   if (mode === 'managed') {
-    if (hasNoFleetServerHost) {
-      return null;
-    }
-    if (showAgentEnrollment) {
+    if (showFleetServerEnrollment) {
+      return <FleetServerRequirementPage />;
+    } else if (showAgentEnrollment) {
       return (
         <>
           <EuiText>
@@ -95,16 +105,7 @@ export const Instructions = (props: InstructionProps) => {
         </>
       );
     }
-
-    return (
-      <>
-        {showFleetServerEnrollment ? (
-          <FleetServerRequirementPage />
-        ) : (
-          <DefaultMissingRequirements />
-        )}
-      </>
-    );
+    return <DefaultMissingRequirements />;
   } else {
     return <StandaloneInstructions {...props} />;
   }

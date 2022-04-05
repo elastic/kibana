@@ -204,12 +204,11 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const core = useStartServices();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
-  const [agentEnrolled, setAgentEnrollment] = useState<boolean>(false);
   const [agentDataConfirmed, setAgentDataConfirmed] = useState<boolean>(false);
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
   const apiKeyData = apiKey?.data;
-  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '', agentEnrolled);
+  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
 
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
@@ -254,12 +253,10 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           onClickViewAgents,
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
-          agentEnrolled,
-          setAgentEnrollment,
         })
       );
     }
-    if (selectedPolicy && agentEnrolled) {
+    if (selectedPolicy && enrolledAgentIds.length) {
       steps.push(
         IncomingDataConfirmationStep({
           agentsIds: enrolledAgentIds,
@@ -282,7 +279,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     apiKeyData,
     fleetServerHosts,
     isK8s,
-    agentEnrolled,
     mode,
     setMode,
     onClickViewAgents,

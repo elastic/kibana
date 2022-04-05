@@ -30,7 +30,15 @@ export interface BaseProps {
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: K8sMode;
+
+  isIntegrationFlow?: boolean;
 }
+
+export interface FlyOutProps extends BaseProps {
+  onClose: () => void;
+  defaultMode?: FlyoutMode;
+}
+
 export interface InstructionProps extends BaseProps {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;

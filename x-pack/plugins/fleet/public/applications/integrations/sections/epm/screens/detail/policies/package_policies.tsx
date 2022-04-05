@@ -390,6 +390,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             history.replace({ search: stringify(rest) });
           }}
           agentPolicy={agentPolicy}
+          isIntegrationFlow={true}
           viewDataStep={viewDataStep}
         />
       )}

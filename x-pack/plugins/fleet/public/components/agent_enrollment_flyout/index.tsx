@@ -30,25 +30,21 @@ import { Loading } from '..';
 
 import { Instructions } from './instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
-import type { BaseProps, SelectionType, FlyoutMode } from './types';
+import type { FlyOutProps, SelectionType, FlyoutMode } from './types';
 
 import { useIsK8sPolicy, useAgentPolicyWithPackagePolicies } from './hooks';
-
-export interface Props extends BaseProps {
-  onClose: () => void;
-  defaultMode?: FlyoutMode;
-}
 
 export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
 export * from './instructions';
 export * from './steps';
 
-export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
+export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
   agentPolicy,
   viewDataStep,
   defaultMode = 'managed',
+  isIntegrationFlow,
 }) => {
   const settings = useGetSettings();
   const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
@@ -71,6 +67,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+  const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
 
   const selectedPolicy =
     selectedPolicyId === agentPolicy?.id
@@ -145,15 +142,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          fleetStatus.isReady &&
-          !isLoadingInitialRequest &&
-          fleetServerHosts.length === 0 &&
-          mode === 'managed' ? (
+          hasNoFleetServerHost && !isLoadingInitialRequest && mode === 'managed' ? (
             <MissingFleetServerHostCallout />
           ) : undefined
         }
       >
-        {isLoadingInitialAgentPolicies ? (
+        {isLoadingInitialAgentPolicies || isLoadingInitialRequest ? (
           <Loading />
         ) : (
           <Instructions
@@ -171,6 +165,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             setMode={setMode}
             selectionType={selectionType}
             setSelectionType={setSelectionType}
+            isIntegrationFlow={isIntegrationFlow}
             selectedApiKeyId={selectedApiKeyId}
             setSelectedAPIKeyId={setSelectedAPIKeyId}
             onClickViewAgents={onClose}

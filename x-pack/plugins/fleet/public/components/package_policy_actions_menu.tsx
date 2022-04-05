@@ -144,6 +144,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
             agentPolicy={agentPolicy}
             viewDataStep={viewDataStep}
             onClose={onEnrollmentFlyoutClose}
+            isIntegrationFlow={true}
           />
         </EuiPortal>
       )}

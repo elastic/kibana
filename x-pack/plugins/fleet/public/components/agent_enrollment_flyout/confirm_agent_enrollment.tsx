@@ -17,8 +17,6 @@ interface Props {
   troubleshootLink: string;
   onClickViewAgents?: () => void;
   agentCount: number;
-  agentEnrolled: boolean;
-  setAgentEnrollment: (v: boolean) => void;
 }
 
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
@@ -29,8 +27,9 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns
  */
-export const usePollingAgentCount = (policyId: string, agentEnrolled: boolean) => {
+export const usePollingAgentCount = (policyId: string) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
+
   // Use useRef to guarantee we get the same date on each render
   const mountedAt = useRef(Date.now());
 
@@ -59,12 +58,12 @@ export const usePollingAgentCount = (policyId: string, agentEnrolled: boolean) =
 
     poll();
 
-    if (isAborted || agentEnrolled) clearTimeout(timeout.current);
+    if (isAborted || agentIds.length > 0) clearTimeout(timeout.current);
+
     return () => {
       isAborted = true;
-      clearTimeout(timeout.current);
     };
-  }, [agentIds, policyId, agentEnrolled]);
+  }, [agentIds, policyId]);
   return agentIds;
 };
 
@@ -73,14 +72,8 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   troubleshootLink,
   onClickViewAgents,
   agentCount,
-  agentEnrolled,
-  setAgentEnrollment,
 }) => {
-  if (policyId && agentCount > 0) {
-    setAgentEnrollment(true);
-  }
-
-  if (!agentEnrolled) {
+  if (!policyId || agentCount === 0) {
     return (
       <EuiText>
         <FormattedMessage
