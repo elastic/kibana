@@ -26,6 +26,7 @@ function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
   const { activeDatasourceId, datasourceStates } = state.lens;
   return Boolean(
     activeDatasourceId &&
+      datasourceStates[activeDatasourceId] &&
       datasourceMap[activeDatasourceId].isTimeBased?.(datasourceStates[activeDatasourceId].state)
   );
 }
