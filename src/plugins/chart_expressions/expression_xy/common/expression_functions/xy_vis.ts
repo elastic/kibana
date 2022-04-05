@@ -66,21 +66,21 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
         defaultMessage: 'Y left axis extents',
       }),
-      required: true,
+      default: `{${AXIS_EXTENT_CONFIG}}`,
     },
     yRightExtent: {
       types: [AXIS_EXTENT_CONFIG],
       help: i18n.translate('expressionXY.xyVis.yRightExtent.help', {
         defaultMessage: 'Y right axis extents',
       }),
-      required: true,
+      default: `{${AXIS_EXTENT_CONFIG}}`,
     },
     legend: {
       types: [LEGEND_CONFIG],
       help: i18n.translate('expressionXY.xyVis.legend.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
-      required: true,
+      default: `{${LEGEND_CONFIG}}`,
     },
     fittingFunction: {
       types: ['string'],
