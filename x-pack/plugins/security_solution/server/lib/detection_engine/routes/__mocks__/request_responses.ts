@@ -244,10 +244,8 @@ export const getRuleExecutionEventsRequest = () =>
       ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     },
     query: {
-      start: 'now-30',
-      end: 'now',
-      query_text: '',
-      status_filters: '',
+      start: '2022-03-31T22:02:01.622Z',
+      end: '2022-03-31T22:02:31.622Z',
     },
   });
 
