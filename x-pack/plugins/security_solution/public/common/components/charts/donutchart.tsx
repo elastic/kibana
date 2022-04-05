@@ -66,7 +66,7 @@ export const DonutChart = ({
       data != null && legendField
         ? data.map((d, i) => ({
             color: colors[i],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.group}`),
+            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
             timelineId: undefined,
             field: legendField,
             value: d.key,

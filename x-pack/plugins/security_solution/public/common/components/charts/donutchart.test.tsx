@@ -9,7 +9,7 @@ import React from 'react';
 import { Partition, Settings } from '@elastic/charts';
 import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
-import { DonutChart } from './donutchart';
+import { DonutChart, DonutChartProps } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 
 jest.mock('@elastic/charts', () => {
@@ -53,12 +53,13 @@ jest.mock('./common', () => {
   };
 });
 describe('DonutChart', () => {
-  const props = {
+  const props: DonutChartProps = {
     data: parsedMockAlertsData[0].buckets,
+    isEmptyChart: false,
     label: 'Open',
     link: null,
     legendField: 'kibana.alert.severity',
-    sum: 28149,
+    sum: <>{28149}</>,
   };
 
   beforeEach(() => {
@@ -95,6 +96,7 @@ describe('DonutChart', () => {
       ...props,
       data: parsedMockAlertsData[1].buckets,
       label: 'Acknowledged',
+      isEmptyChart: true,
       sum: 0,
     };
     const { container } = render(<DonutChart {...testProps} />);
@@ -115,21 +117,28 @@ describe('DonutChart', () => {
     expect((DraggableLegend as unknown as jest.Mock).mock.calls[0][0].legendItems).toEqual([
       {
         color: '#EF6550',
-        dataProviderId: 'draggable-legend-item-test-uuid-open',
+        dataProviderId: 'draggable-legend-item-test-uuid-critical',
+        field: 'kibana.alert.severity',
+        timelineId: undefined,
+        value: 'critical',
+      },
+      {
+        color: '#EE9266',
+        dataProviderId: 'draggable-legend-item-test-uuid-high',
         field: 'kibana.alert.severity',
         timelineId: undefined,
         value: 'high',
       },
       {
-        color: '#EE9266',
-        dataProviderId: 'draggable-legend-item-test-uuid-open',
+        color: '#F3B689',
+        dataProviderId: 'draggable-legend-item-test-uuid-medium',
         field: 'kibana.alert.severity',
         timelineId: undefined,
         value: 'medium',
       },
       {
-        color: '#F3B689',
-        dataProviderId: 'draggable-legend-item-test-uuid-open',
+        color: '#F8D9B2',
+        dataProviderId: 'draggable-legend-item-test-uuid-low',
         field: 'kibana.alert.severity',
         timelineId: undefined,
         value: 'low',
