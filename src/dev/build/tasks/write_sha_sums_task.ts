@@ -8,6 +8,7 @@
 
 import globby from 'globby';
 
+import path from 'path';
 import { getFileHash, write, GlobalTask } from '../lib';
 
 export const WriteShaSums: GlobalTask = {
@@ -21,7 +22,10 @@ export const WriteShaSums: GlobalTask = {
     });
 
     for (const artifact of artifacts) {
-      await write(`${artifact}.sha512.txt`, `${await getFileHash(artifact, 'sha512')} ${artifact}`);
+      await write(
+        `${artifact}.sha512.txt`,
+        `${await getFileHash(artifact, 'sha512')} ${path.basename(artifact)}`
+      );
     }
   },
 };
