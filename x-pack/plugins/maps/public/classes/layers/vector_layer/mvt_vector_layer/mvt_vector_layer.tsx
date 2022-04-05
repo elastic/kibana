@@ -232,9 +232,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
     const joins = this.getValidJoins();
     const promoteId = joins.length
-      ? { 
-        [this._source.getTileSourceLayer()]: joins[0].getLeftField().getName()
-      } 
+      ? {
+          [this._source.getTileSourceLayer()]: joins[0].getLeftField().getName(),
+        }
       : undefined;
 
     const mbSourceId = this.getMbSourceId();
@@ -243,7 +243,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       tiles: [sourceData.tileUrl],
       minzoom: sourceData.tileMinZoom,
       maxzoom: sourceData.tileMaxZoom,
-      promoteId, 
+      promoteId,
     });
   }
 
@@ -263,9 +263,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
     const join = joins[0];
     const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-    return joinDataRequest 
-      ? joinDataRequest.getData() as PropertiesMap | undefined
-      : undefined;
+    return joinDataRequest ? (joinDataRequest.getData() as PropertiesMap | undefined) : undefined;
   }
 
   _getMbTooManyFeaturesLayerId() {
@@ -423,7 +421,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       this._getMetaFromTiles(),
       this._getJoinPropertiesMap(),
       await this.getSource().getSupportedShapeTypes(),
-      this.getCurrentStyle().getDynamicPropertiesArray(),
+      this.getCurrentStyle().getDynamicPropertiesArray()
     );
   }
 }

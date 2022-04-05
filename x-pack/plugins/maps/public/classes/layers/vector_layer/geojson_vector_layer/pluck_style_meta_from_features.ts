@@ -6,8 +6,17 @@
  */
 
 import type { Feature } from 'geojson';
-import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import { Category, DynamicStylePropertyOptions, RangeFieldMeta, StyleMetaDescriptor } from '../../../../../common/descriptor_types';
+import {
+  GEO_JSON_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  VECTOR_SHAPE_TYPE,
+} from '../../../../../common/constants';
+import {
+  Category,
+  DynamicStylePropertyOptions,
+  RangeFieldMeta,
+  StyleMetaDescriptor,
+} from '../../../../../common/descriptor_types';
 import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
@@ -17,7 +26,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 export async function pluckStyleMetaFromFeatures(
   features: Feature[],
   supportedShapeTypes: VECTOR_SHAPE_TYPE[],
-  dynamicProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
+  dynamicProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>
 ): Promise<StyleMetaDescriptor> {
   const hasFeatureType = {
     [VECTOR_SHAPE_TYPE.POINT]: false,
@@ -33,10 +42,16 @@ export async function pluckStyleMetaFromFeatures(
         continue;
       }
 
-      if (!hasFeatureType[VECTOR_SHAPE_TYPE.POINT] && POINTS.includes(feature.geometry.type as GEO_JSON_TYPE)) {
+      if (
+        !hasFeatureType[VECTOR_SHAPE_TYPE.POINT] &&
+        POINTS.includes(feature.geometry.type as GEO_JSON_TYPE)
+      ) {
         hasFeatureType[VECTOR_SHAPE_TYPE.POINT] = true;
       }
-      if (!hasFeatureType[VECTOR_SHAPE_TYPE.LINE] && LINES.includes(feature.geometry.type as GEO_JSON_TYPE)) {
+      if (
+        !hasFeatureType[VECTOR_SHAPE_TYPE.LINE] &&
+        LINES.includes(feature.geometry.type as GEO_JSON_TYPE)
+      ) {
         hasFeatureType[VECTOR_SHAPE_TYPE.LINE] = true;
       }
       if (
@@ -95,7 +110,7 @@ export async function pluckStyleMetaFromFeatures(
 }
 
 function pluckOrdinalStyleMetaFromFeatures(
-  property: IDynamicStyleProperty<DynamicStylePropertyOptions>, 
+  property: IDynamicStyleProperty<DynamicStylePropertyOptions>,
   features: Feature[]
 ): RangeFieldMeta | null {
   if (!property.isOrdinal()) {
@@ -124,7 +139,7 @@ function pluckOrdinalStyleMetaFromFeatures(
 }
 
 export function pluckCategoricalStyleMetaFromFeatures(
-  property: IDynamicStyleProperty<DynamicStylePropertyOptions>, 
+  property: IDynamicStyleProperty<DynamicStylePropertyOptions>,
   features: Feature[]
 ): Category[] {
   const size = property.getNumberOfCategories();

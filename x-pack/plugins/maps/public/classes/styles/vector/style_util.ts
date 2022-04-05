@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ICON_SOURCE,
-  MB_LOOKUP_FUNCTION,
-  VECTOR_STYLES,
-} from '../../../../common/constants';
+import { ICON_SOURCE, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
 import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';

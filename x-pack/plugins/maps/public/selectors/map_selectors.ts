@@ -94,7 +94,10 @@ export function createLayerInstance(
       return new GeoJsonVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
-        joins: createJoinInstances(layerDescriptor as VectorLayerDescriptor, source as IVectorSource),
+        joins: createJoinInstances(
+          layerDescriptor as VectorLayerDescriptor,
+          source as IVectorSource
+        ),
         customIcons,
         chartsPaletteServiceGetColor,
       });
@@ -109,7 +112,10 @@ export function createLayerInstance(
       return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
-        joins: createJoinInstances(layerDescriptor as VectorLayerDescriptor, source as IVectorSource),
+        joins: createJoinInstances(
+          layerDescriptor as VectorLayerDescriptor,
+          source as IVectorSource
+        ),
         customIcons,
       });
     default:

@@ -6,7 +6,6 @@
  */
 
 import { VectorStyle } from './vector_style';
-import { DataRequest } from '../../util/data_request';
 import {
   FIELD_ORIGIN,
   STYLE_TYPE,

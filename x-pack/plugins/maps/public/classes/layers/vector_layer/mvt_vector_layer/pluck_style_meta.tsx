@@ -6,15 +6,21 @@
  */
 
 import { FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import { Category, DynamicStylePropertyOptions, RangeFieldMeta, StyleMetaDescriptor, TileMetaFeature } from '../../../../../common/descriptor_types';
+import {
+  Category,
+  DynamicStylePropertyOptions,
+  RangeFieldMeta,
+  StyleMetaDescriptor,
+  TileMetaFeature,
+} from '../../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
- 
+
 export async function pluckStyleMeta(
   metaFeatures: TileMetaFeature[],
   joinPropertiesMap: PropertiesMap | undefined,
   supportedShapeTypes: VECTOR_SHAPE_TYPE[],
-  dynamicProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
+  dynamicProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>
 ): Promise<StyleMetaDescriptor> {
   const styleMeta: StyleMetaDescriptor = {
     geometryTypes: {
@@ -23,8 +29,7 @@ export async function pluckStyleMeta(
       isLinesOnly:
         supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
       isPolygonsOnly:
-        supportedShapeTypes.length === 1 &&
-        supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
+        supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
     },
     fieldMeta: {},
   };
@@ -36,20 +41,19 @@ export async function pluckStyleMeta(
 
   dynamicProperties.forEach((dynamicProperty) => {
     const name = dynamicProperty.getFieldName();
-    console.log(name);
-    console.log(dynamicProperty.getFieldOrigin());
-    console.log(joinPropertiesMap);
     if (!styleMeta.fieldMeta[name]) {
       styleMeta.fieldMeta[name] = { categories: [] };
     }
 
-    const categories =
-      pluckCategoricalStyleMeta(dynamicProperty, metaFeatures, joinPropertiesMap);
+    const categories = pluckCategoricalStyleMeta(dynamicProperty, metaFeatures, joinPropertiesMap);
     if (categories.length) {
       styleMeta.fieldMeta[name].categories = categories;
     }
-    const ordinalStyleMeta =
-      pluckOrdinalStyleMeta(dynamicProperty, metaFeatures, joinPropertiesMap);
+    const ordinalStyleMeta = pluckOrdinalStyleMeta(
+      dynamicProperty,
+      metaFeatures,
+      joinPropertiesMap
+    );
     if (ordinalStyleMeta) {
       styleMeta.fieldMeta[name].range = ordinalStyleMeta;
     }
@@ -69,7 +73,7 @@ function pluckCategoricalStyleMeta(
 function pluckOrdinalStyleMeta(
   property: IDynamicStyleProperty<DynamicStylePropertyOptions>,
   metaFeatures: TileMetaFeature[],
-  joinPropertiesMap: PropertiesMap | undefined,
+  joinPropertiesMap: PropertiesMap | undefined
 ): RangeFieldMeta | null {
   const field = property.getField();
   if (!field || !property.isOrdinal()) {

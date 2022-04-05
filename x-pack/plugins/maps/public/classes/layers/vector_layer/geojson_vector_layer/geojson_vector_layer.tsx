@@ -124,12 +124,10 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       return null;
     }
 
-    this.getSource(), this.getCurrentStyle()
-
     return await pluckStyleMetaFromFeatures(
       _.get(sourceDataRequest.getData(), 'features', []),
       await this.getSource().getSupportedShapeTypes(),
-      this.getCurrentStyle().getDynamicPropertiesArray(),
+      this.getCurrentStyle().getDynamicPropertiesArray()
     );
   }
 

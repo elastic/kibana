@@ -6,13 +6,22 @@
  */
 
 import type { Feature } from 'geojson';
-import { COLOR_MAP_TYPE, FIELD_ORIGIN, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
+import {
+  COLOR_MAP_TYPE,
+  FIELD_ORIGIN,
+  VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../vector_layer/vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
 import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
 import { InlineField } from '../../../fields/inline_field';
-import { isOnlySingleFeatureType, pluckCategoricalStyleMetaFromFeatures, pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';
+import {
+  isOnlySingleFeatureType,
+  pluckCategoricalStyleMetaFromFeatures,
+  pluckStyleMetaFromFeatures,
+} from './pluck_style_meta_from_features';
 
 describe('pluckStyleMetaFromFeatures', () => {
   test('Should identify when feature collection only contains points', async () => {
@@ -30,14 +39,21 @@ describe('pluckStyleMetaFromFeatures', () => {
         geometry: {
           type: 'MultiPoint',
           coordinates: [
-            [10.0, 40.0], [40.0, 30.0], [20.0, 20.0], [30.0, 10.0]
-          ]
+            [10.0, 40.0],
+            [40.0, 30.0],
+            [20.0, 20.0],
+            [30.0, 10.0],
+          ],
         },
         properties: {},
       },
     ] as Feature[];
-    
-    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), []);
+
+    const styleMeta = await pluckStyleMetaFromFeatures(
+      features,
+      Object.values(VECTOR_SHAPE_TYPE),
+      []
+    );
     expect(styleMeta).toEqual({
       fieldMeta: {},
       geometryTypes: {
@@ -55,8 +71,10 @@ describe('pluckStyleMetaFromFeatures', () => {
         geometry: {
           type: 'LineString',
           coordinates: [
-            [30.0, 10.0], [10.0, 30.0], [40.0, 40.0]
-          ]
+            [30.0, 10.0],
+            [10.0, 30.0],
+            [40.0, 40.0],
+          ],
         },
         properties: {},
       },
@@ -65,9 +83,18 @@ describe('pluckStyleMetaFromFeatures', () => {
         geometry: {
           type: 'MultiLineString',
           coordinates: [
-            [[10.0, 10.0], [20.0, 20.0], [10.0, 40.0]], 
-            [[40.0, 40.0], [30.0, 30.0], [40.0, 20.0], [30.0, 10.0]]
-          ]
+            [
+              [10.0, 10.0],
+              [20.0, 20.0],
+              [10.0, 40.0],
+            ],
+            [
+              [40.0, 40.0],
+              [30.0, 30.0],
+              [40.0, 20.0],
+              [30.0, 10.0],
+            ],
+          ],
         },
         properties: {},
       },
@@ -82,15 +109,19 @@ describe('pluckStyleMetaFromFeatures', () => {
         },
       },
     ] as Feature[];
-    
-    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), []);
+
+    const styleMeta = await pluckStyleMetaFromFeatures(
+      features,
+      Object.values(VECTOR_SHAPE_TYPE),
+      []
+    );
     expect(styleMeta).toEqual({
       fieldMeta: {},
       geometryTypes: {
         isLinesOnly: true,
         isPointsOnly: false,
         isPolygonsOnly: false,
-      }
+      },
     });
   });
 
@@ -135,10 +166,14 @@ describe('pluckStyleMetaFromFeatures', () => {
       VECTOR_STYLES.FILL_COLOR,
       field,
       {} as unknown as IVectorLayer,
-      () => { return null }, //getFieldFormatter
+      () => {
+        return null;
+      } // getFieldFormatter
     );
 
-    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), [dynamicColorProperty]);
+    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), [
+      dynamicColorProperty,
+    ]);
     expect(styleMeta).toEqual({
       fieldMeta: {
         myDynamicFieldWithNoValues: {
@@ -149,7 +184,7 @@ describe('pluckStyleMetaFromFeatures', () => {
         isLinesOnly: false,
         isPointsOnly: true,
         isPolygonsOnly: false,
-      }
+      },
     });
   });
 
@@ -194,10 +229,14 @@ describe('pluckStyleMetaFromFeatures', () => {
       VECTOR_STYLES.FILL_COLOR,
       field,
       {} as unknown as IVectorLayer,
-      () => { return null }, //getFieldFormatter
+      () => {
+        return null;
+      } // getFieldFormatter
     );
 
-    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), [dynamicColorProperty]);
+    const styleMeta = await pluckStyleMetaFromFeatures(features, Object.values(VECTOR_SHAPE_TYPE), [
+      dynamicColorProperty,
+    ]);
     expect(styleMeta).toEqual({
       fieldMeta: {
         myDynamicField: {
@@ -206,14 +245,14 @@ describe('pluckStyleMetaFromFeatures', () => {
             delta: 9,
             max: 10,
             min: 1,
-          }
+          },
         },
       },
       geometryTypes: {
         isLinesOnly: false,
         isPointsOnly: true,
         isPolygonsOnly: false,
-      }
+      },
     });
   });
 });
@@ -235,7 +274,9 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
       VECTOR_STYLES.LINE_COLOR,
       field,
       {} as unknown as IVectorLayer,
-      () => { return null }, //getFieldFormatter
+      () => {
+        return null;
+      } // getFieldFormatter
     );
 
     const features = [
@@ -298,8 +339,8 @@ describe('pluckCategoricalStyleMetaFromFeatures', () => {
         properties: {
           foobar: 'IN',
         },
-      }
-    ] as Feature[]
+      },
+    ] as Feature[];
 
     const categories = pluckCategoricalStyleMetaFromFeatures(dynamicColorProperty, features);
 
