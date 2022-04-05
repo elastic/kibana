@@ -194,7 +194,7 @@ const SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE = i18n.translate(
   'xpack.uptime.monitorManagement.syntheticsDisableToolTip',
   {
     defaultMessage:
-      'Disabling Monitor Management with immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
+      'Disabling Monitor Management will immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
   }
 );
 
