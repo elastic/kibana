@@ -16,8 +16,7 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
   describe('APM API tests', function () {
     this.tags('ciGroup1');
 
-    const tests = glob.sync('**/anomaly_alert.spec.ts', { cwd });
-    // const tests = glob.sync('**/anomaly_charts.spec.ts', { cwd });
+    const tests = glob.sync('**/*.spec.ts', { cwd });
     tests.forEach((test) => {
       describe(test, function () {
         loadTestFile(require.resolve(`./${test}`));

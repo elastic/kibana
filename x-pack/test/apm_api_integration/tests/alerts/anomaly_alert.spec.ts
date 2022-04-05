@@ -78,10 +78,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await ml.cleanMlIndices();
         });
 
-        function sleep(ms: number) {
-          return new Promise((resolve) => setTimeout(resolve, ms));
-        }
-
         it('checks if alert is active', async () => {
           const { body: createdRule } = await supertest
             .post(`/api/alerting/rule`)
