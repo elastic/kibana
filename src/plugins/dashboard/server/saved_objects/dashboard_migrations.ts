@@ -164,6 +164,56 @@ type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
   savedVis?: Serializable;
 };
 
+/**
+ * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced
+ * with a usage of the existing hidePanelTitles key. Even though blank string titles still technically work
+ * in versions > 7.10, they are less explicit than using the hidePanelTitles key. This migration transforms all
+ * blank string titled panels to panels with the titles explicitly hidden.
+ */
+export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (doc) => {
+  const { attributes } = doc;
+
+  // Skip if panelsJSON is missing
+  if (typeof attributes?.panelsJSON !== 'string') return doc;
+
+  try {
+    const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
+    // Same here, prevent failing saved object import if ever panels aren't an array.
+    if (!Array.isArray(panels)) return doc;
+
+    const newPanels: SavedDashboardPanel[] = [];
+    panels.forEach((panel) => {
+      // Convert each panel into the dashboard panel state
+      const originalPanelState =
+        convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
+      newPanels.push(
+        convertPanelStateToSavedDashboardPanel(
+          {
+            ...originalPanelState,
+            explicitInput: {
+              ...originalPanelState.explicitInput,
+              ...(originalPanelState.explicitInput.title === '' &&
+              !originalPanelState.explicitInput.hidePanelTitles
+                ? { hidePanelTitles: true }
+                : {}),
+            },
+          },
+          panel.version
+        )
+      );
+    });
+    return {
+      ...doc,
+      attributes: {
+        ...attributes,
+        panelsJSON: JSON.stringify(newPanels),
+      },
+    };
+  } catch {
+    return doc;
+  }
+};
+
 // Runs the embeddable migrations on each panel
 const migrateByValuePanels =
   (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
@@ -257,14 +307,8 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.0.0': flow(migrations700),
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
+    '7.10.0': flow(migrateExplicitlyHiddenTitles),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
-
-    /**
-     * Any dashboard saved object migrations that come after this point will have to be wary of
-     * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
-     */
-    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
-
     '7.14.0': flow(replaceIndexPatternReference),
   };
 
