@@ -8,9 +8,8 @@
 
 const { get } = require('lodash');
 const memoizeOne = require('memoize-one');
-// eslint-disable-next-line import/no-unresolved
-const { parse: parseFn } = require('../grammar');
 const { functions: includedFunctions } = require('./functions');
+const { parse: parseFn } = require('../grammar/built_grammar.js');
 
 function parse(input, options) {
   if (input == null) {
