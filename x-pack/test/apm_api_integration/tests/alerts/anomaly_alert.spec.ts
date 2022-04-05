@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ApmApiError } from '../../common/apm_api_supertest';
-import { ServiceAnomalyTimeseries } from '../../../../plugins/apm/common/anomaly_detection/service_anomaly_timeseries';
-import { ApmMlDetectorType } from '../../../../plugins/apm/common/anomaly_detection/apm_ml_detectors';
-import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
+import expect from '@kbn/expect';
+import { range } from 'lodash';
 import { AlertType } from '../../../../plugins/apm/common/alert_types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
 import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
-  const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
   const ml = getService('ml');
   const log = getService('log');
