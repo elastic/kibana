@@ -45,6 +45,11 @@ const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
 const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
+type SyntheticsConfig = SyntheticsMonitorWithId & {
+  fields_under_root?: boolean;
+  fields?: { config_id: string };
+};
+
 export class SyntheticsService {
   private logger: Logger;
   private readonly server: UptimeServerSetup;
@@ -218,14 +223,31 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(
-    configs?: Array<
-      SyntheticsMonitorWithId & {
-        fields_under_root?: boolean;
-        fields?: { config_id: string };
-      }
-    >
-  ) {
+  async addConfig(config: SyntheticsConfig) {
+    const monitors = this.formatConfigs([config]);
+
+    this.apiKey = await this.getApiKey();
+
+    if (!this.apiKey) {
+      return null;
+    }
+
+    const data = {
+      monitors,
+      output: await this.getOutput(this.apiKey),
+    };
+
+    this.logger.debug(`1 monitor will be pushed to synthetics service.`);
+
+    try {
+      return await this.apiClient.post(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async pushConfigs(configs?: SyntheticsConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       this.logger.debug('No monitor found which can be pushed to service.');
@@ -246,21 +268,14 @@ export class SyntheticsService {
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
     try {
-      return await this.apiClient.post(data);
+      return await this.apiClient.put(data);
     } catch (e) {
       this.logger.error(e);
       throw e;
     }
   }
 
-  async runOnceConfigs(
-    configs?: Array<
-      SyntheticsMonitorWithId & {
-        fields_under_root?: boolean;
-        fields?: { run_once: boolean; config_id: string };
-      }
-    >
-  ) {
+  async runOnceConfigs(configs?: SyntheticsConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -284,15 +299,7 @@ export class SyntheticsService {
     }
   }
 
-  async triggerConfigs(
-    request?: KibanaRequest,
-    configs?: Array<
-      SyntheticsMonitorWithId & {
-        fields_under_root?: boolean;
-        fields?: { config_id: string; test_run_id: string };
-      }
-    >
-  ) {
+  async triggerConfigs(request?: KibanaRequest, configs?: SyntheticsConfig[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -328,7 +335,11 @@ export class SyntheticsService {
       monitors: this.formatConfigs(configs),
       output: await this.getOutput(this.apiKey),
     };
-    return await this.apiClient.delete(data);
+    const result = await this.apiClient.delete(data);
+    if (this.syncErrors && this.syncErrors?.length > 0) {
+      this.syncErrors = await this.pushConfigs();
+    }
+    return result;
   }
 
   async deleteAllConfigs() {

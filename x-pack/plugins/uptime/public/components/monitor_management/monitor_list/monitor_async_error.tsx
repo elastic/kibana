@@ -38,9 +38,11 @@ export const MonitorAsyncError = () => {
         <ul>
           {Object.values(syncErrors).map((e) => {
             return (
-              <li key={e.locationId}>{`${
-                locations.find((location) => location.id === e.locationId)?.label
-              } - ${STATUS_LABEL}: ${e.error.status}; ${REASON_LABEL}: ${e.error.reason}.`}</li>
+              <li key={e.locationId}>
+                {`${
+                  locations.find((location) => location.id === e.locationId)?.label
+                } - ${STATUS_LABEL}: ${e.error.status}; ${REASON_LABEL}: ${e.error.reason}.`}
+              </li>
             );
           })}
         </ul>

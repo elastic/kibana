@@ -28,6 +28,7 @@ export interface ServiceData {
     api_key: string;
   };
   runOnce?: boolean;
+  isNew?: boolean;
 }
 
 export class ServiceAPIClient {
@@ -74,7 +75,7 @@ export class ServiceAPIClient {
   }
 
   async put(data: ServiceData) {
-    return this.callAPI('POST', data);
+    return this.callAPI('PUT', data);
   }
 
   async delete(data: ServiceData) {
@@ -122,7 +123,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce }: ServiceData
+    { monitors: allMonitors, output, runOnce, isNew }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -170,6 +171,9 @@ export class ServiceAPIClient {
             catchError((err) => {
               pushErrors.push({ locationId: id, error: err.response?.data });
               this.logger.error(err);
+              if (err.response?.data?.reason) {
+                this.logger.error(err.response?.data?.reason);
+              }
               // we don't want to throw an unhandled exception here
               return of(true);
             })
