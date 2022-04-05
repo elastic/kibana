@@ -5696,6 +5696,19 @@
         },
         "attributesPerMap": {
           "properties": {
+            "customIconsCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "dataSourcesCount": {
               "properties": {
                 "min": {

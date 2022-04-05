@@ -36,7 +36,6 @@ import {
   RESOLUTION_KEYS,
   SCALING_KEYS,
 } from './types';
-import { MapSettings } from '../../../public/reducers/map';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.
@@ -63,7 +62,7 @@ export class MapStatsCollector {
       return;
     }
 
-    let mapSettings: MapSettings;
+    let mapSettings;
     try {
       const mapState = JSON.parse(attributes.mapStateJSON);
       mapSettings = mapState.settings;
