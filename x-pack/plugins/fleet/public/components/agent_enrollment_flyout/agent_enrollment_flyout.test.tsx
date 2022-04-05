@@ -29,10 +29,10 @@ import { useFleetServerInstructions } from '../../applications/fleet/sections/ag
 
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
-import type { Props } from '.';
+import type { FlyOutProps } from './types';
 import { AgentEnrollmentFlyout } from '.';
 
-const TestComponent = (props: Props) => (
+const TestComponent = (props: FlyOutProps) => (
   <KibanaContextProvider services={coreMock.createStart()}>
     <ConfigContext.Provider value={{ agents: { enabled: true, elasticsearch: {} }, enabled: true }}>
       <KibanaVersionContext.Provider value={'8.1.0'}>
@@ -44,7 +44,7 @@ const TestComponent = (props: Props) => (
   </KibanaContextProvider>
 );
 
-const setup = async (props?: Props) => {
+const setup = async (props?: FlyOutProps) => {
   const testBed = await registerTestBed(TestComponent)(props);
   const { find, component } = testBed;
 

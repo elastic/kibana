@@ -10,7 +10,7 @@ import { EuiCallOut, EuiButton, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { sendGetAgents } from '../../hooks';
+import { sendGetAgents, useLink, useStartServices } from '../../hooks';
 import { AGENTS_PREFIX } from '../../constants';
 interface Props {
   policyId?: string;
@@ -73,6 +73,15 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   onClickViewAgents,
   agentCount,
 }) => {
+  const { getHref } = useLink();
+  const { application } = useStartServices();
+
+  const onButtonClick = () => {
+    if (onClickViewAgents) onClickViewAgents();
+    const href = getHref('agent_list');
+    application.navigateToUrl(href);
+  };
+
   if (!policyId || agentCount === 0) {
     return (
       <EuiText>
@@ -109,7 +118,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
       iconType="check"
     >
       <EuiButton
-        onClick={onClickViewAgents}
+        onClick={onButtonClick}
         color="success"
         data-test-subj="ConfirmAgentEnrollmentButton"
       >
