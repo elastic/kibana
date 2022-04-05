@@ -190,7 +190,7 @@ export class MapEmbeddable
       ? this._savedMap.getAttributes().title
       : '';
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
