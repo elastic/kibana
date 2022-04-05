@@ -178,7 +178,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
-    const layers = args.layers.filter<XYExtendedLayerConfigResult>(
+    const layers = (args.layers ?? []).filter<XYExtendedLayerConfigResult>(
       (layer): layer is XYExtendedLayerConfigResult => layer !== undefined
     );
 

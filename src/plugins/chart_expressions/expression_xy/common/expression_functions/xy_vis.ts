@@ -190,7 +190,6 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
-      required: false,
     },
   },
   fn(data, args, handlers) {
@@ -218,6 +217,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
 
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
+
     return {
       type: 'render',
       as: XY_VIS_RENDERER,

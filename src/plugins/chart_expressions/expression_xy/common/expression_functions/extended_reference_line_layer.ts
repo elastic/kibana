@@ -56,6 +56,7 @@ export const extendedReferenceLineLayerFunction: ExpressionFunctionDefinition<
     return {
       type: EXTENDED_REFERENCE_LINE_LAYER,
       ...args,
+      accessors: args.accessors ?? [],
       layerType: LayerTypes.REFERENCELINE,
       table: args.table ?? input,
     };

@@ -212,7 +212,7 @@ export interface LayeredXYArgs {
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  layers: XYExtendedLayerConfigResult[];
+  layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;

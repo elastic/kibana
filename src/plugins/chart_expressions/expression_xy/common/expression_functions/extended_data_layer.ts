@@ -117,6 +117,7 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
+      accessors: args.accessors ?? [],
       layerType: LayerTypes.DATA,
       table: args.table ?? input,
     };

@@ -38,6 +38,7 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
       return {
         type: ANNOTATION_LAYER,
         ...args,
+        annotations: args.annotations ?? [],
         layerType: LayerTypes.ANNOTATIONS,
         table: input,
       };
