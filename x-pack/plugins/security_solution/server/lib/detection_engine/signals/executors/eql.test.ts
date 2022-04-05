@@ -7,7 +7,7 @@
 
 import dateMath from '@elastic/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
 import { eqlExecutor } from './eql';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
@@ -22,7 +22,7 @@ jest.mock('../../routes/index/get_index_version');
 describe('eql_executor', () => {
   const version = '8.0.0';
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
+  let alertServices: RuleExecutorServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEqlRuleParams();
   const eqlCompleteRule = getCompleteRuleMock<EqlRuleParams>(params);
@@ -33,7 +33,7 @@ describe('eql_executor', () => {
   };
 
   beforeEach(() => {
-    alertServices = alertsMock.createAlertServices();
+    alertServices = alertsMock.createRuleExecutorServices();
     logger = loggingSystemMock.createLogger();
     alertServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
       hits: {

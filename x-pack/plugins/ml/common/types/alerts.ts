@@ -7,7 +7,7 @@
 
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import type { AlertTypeParams, Alert } from '../../../alerting/common';
+import type { RuleTypeParams, Rule } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
@@ -98,14 +98,14 @@ export type MlAnomalyDetectionAlertParams = {
   includeInterim: boolean;
   lookbackInterval: string | null | undefined;
   topNBuckets: number | null | undefined;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type MlAnomalyDetectionAlertAdvancedSettings = Pick<
   MlAnomalyDetectionAlertParams,
   'lookbackInterval' | 'topNBuckets'
 >;
 
-export type MlAnomalyDetectionAlertRule = Omit<Alert<MlAnomalyDetectionAlertParams>, 'apiKey'>;
+export type MlAnomalyDetectionAlertRule = Omit<Rule<MlAnomalyDetectionAlertParams>, 'apiKey'>;
 
 export interface JobAlertingRuleStats {
   alerting_rules?: MlAnomalyDetectionAlertRule[];
@@ -140,7 +140,7 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
       | null;
     errorMessages?: CommonHealthCheckConfig | null;
   } | null;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type JobsHealthRuleTestsConfig = MlAnomalyDetectionJobsHealthRuleParams['testsConfig'];
 

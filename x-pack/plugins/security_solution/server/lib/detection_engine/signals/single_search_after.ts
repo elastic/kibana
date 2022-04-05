@@ -9,7 +9,7 @@ import { performance } from 'perf_hooks';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
 import type { SignalSearchResponse, SignalSource } from './types';
@@ -25,7 +25,7 @@ interface SingleSearchAfterParams {
   index: string[];
   from: string;
   to: string;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
   sortOrder?: estypes.SortOrder;
