@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 
-import { SEARCH_INDEX_OVERVIEW_PATH } from '../../routes';
+import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -93,10 +93,7 @@ export const SearchIndices: React.FC = () => {
   ];
 
   const createNewIndexButton = (
-    <EuiLinkTo
-      data-test-subj="create-new-index-button"
-      to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug: 'new' })}
-    >
+    <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
       <EuiButton iconType="plusInCircle" color="primary" fill>
         {i18n.translate('xpack.enterpriseSearch.searchIndices.create.buttonTitle', {
           defaultMessage: 'Create new index',
