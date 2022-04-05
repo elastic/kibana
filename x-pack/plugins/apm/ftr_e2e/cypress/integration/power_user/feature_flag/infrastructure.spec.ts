@@ -65,6 +65,7 @@ describe('Infrastracture feature flag', () => {
     it('shows infrastructure tab in service overview page', () => {
       cy.visit(serviceOverviewPath);
       cy.contains('a[role="tab"]', 'Infrastructure').click();
+      cy.contains('Infrastructure data coming soon');
     });
   });
 });
