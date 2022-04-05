@@ -53,7 +53,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
-        placeholder: i18n.translate('data.query.queryBar.indexPattern.findDataView', {
+        placeholder: i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
           defaultMessage: 'Find a data view',
         }),
         ...(selectableProps ? selectableProps.searchProps : undefined),

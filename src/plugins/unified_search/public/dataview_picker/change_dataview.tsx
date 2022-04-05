@@ -31,18 +31,24 @@ import { ChangeDataViewStyles } from './change_dataview.styles';
 
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 
-const newMenuTourTitle = i18n.translate('data.query.dataViewMenu.newMenuTour.title', {
+const newMenuTourTitle = i18n.translate('unifiedSearch.query.dataViewMenu.newMenuTour.title', {
   defaultMessage: 'A better data view menu',
 });
 
-const newMenuTourDescription = i18n.translate('data.query.dataViewMenu.newMenuTour.description', {
-  defaultMessage:
-    'This menu now offers all the tools you need to create, find, and edit your data views.',
-});
+const newMenuTourDescription = i18n.translate(
+  'unifiedSearch.query.dataViewMenu.newMenuTour.description',
+  {
+    defaultMessage:
+      'This menu now offers all the tools you need to create, find, and edit your data views.',
+  }
+);
 
-const newMenuTourDismissLabel = i18n.translate('data.query.dataViewMenu.newMenuTour.dismissLabel', {
-  defaultMessage: 'Got it',
-});
+const newMenuTourDismissLabel = i18n.translate(
+  'unifiedSearch.query.dataViewMenu.newMenuTour.dismissLabel',
+  {
+    defaultMessage: 'Got it',
+  }
+);
 
 export function ChangeDataView({
   isMissingCurrent,
@@ -164,7 +170,7 @@ export function ChangeDataView({
                       onAddField();
                     }}
                   >
-                    {i18n.translate('data.query.queryBar.indexPattern.addFieldButton', {
+                    {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addFieldButton', {
                       defaultMessage: 'Add a field to this data view',
                     })}
                   </EuiContextMenuItem>,
@@ -179,7 +185,7 @@ export function ChangeDataView({
                       });
                     }}
                   >
-                    {i18n.translate('data.query.queryBar.indexPattern.manageFieldButton', {
+                    {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
                       defaultMessage: 'Manage this data view',
                     })}
                   </EuiContextMenuItem>,
@@ -212,7 +218,7 @@ export function ChangeDataView({
                   onDataViewCreated();
                 }}
               >
-                {i18n.translate('data.query.queryBar.indexPattern.addNewDataView', {
+                {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addNewDataView', {
                   defaultMessage: 'Create a data view',
                 })}
               </EuiContextMenuItem>
