@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious SolarWinds Child Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name: (\"SolarWinds.BusinessLayerHost.exe\", \"SolarWinds.BusinessLayerHostx64.exe\") and\n not process.name : (\n        \"APMServiceControl*.exe\",\n        \"ExportToPDFCmd*.Exe\",\n        \"SolarWinds.Credentials.Orion.WebApi*.exe\",\n        \"SolarWinds.Orion.Topology.Calculator*.exe\",\n        \"Database-Maint.exe\",\n        \"SolarWinds.Orion.ApiPoller.Service.exe\",\n        \"WerFault.exe\",\n        \"WerMgr.exe\")\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html",
@@ -71,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
