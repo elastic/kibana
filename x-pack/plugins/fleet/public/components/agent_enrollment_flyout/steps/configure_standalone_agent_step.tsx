@@ -99,7 +99,12 @@ export const ConfigureStandaloneAgentStep = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <EuiCodeBlock language="yaml" style={{ maxHeight: 300 }} fontSize="m">
+            <EuiCodeBlock
+              language="yaml"
+              style={{ maxHeight: 300 }}
+              fontSize="m"
+              data-test-subj="agentPolicyCodeBlock"
+            >
               {yaml}
             </EuiCodeBlock>
           </EuiText>
