@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export * from './platform_engineer';
-export * from './reader';
-export * from './t1_analyst';
-export * from './t2_analyst';
-export * from './soc_manager';
+import * as platformEngineerUser from './user.json';
+import * as platformEngineerRole from './role.json';
+
+export { platformEngineerUser, platformEngineerRole };
