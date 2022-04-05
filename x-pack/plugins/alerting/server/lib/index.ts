@@ -10,7 +10,7 @@ export type { ILicenseState } from './license_state';
 export { LicenseState } from './license_state';
 export { validateRuleTypeParams } from './validate_rule_type_params';
 export { validateMutatedRuleTypeParams } from './validate_mutated_rule_type_params';
-export { getAlertNotifyWhenType } from './get_alert_notify_when_type';
+export { getRuleNotifyWhenType } from './get_rule_notify_when_type';
 export { verifyApiAccess } from './license_api_access';
 export { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
 export type {
