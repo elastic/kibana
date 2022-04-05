@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import { AlertStatusEventEntityIdMap, Process } from '../../../common/types/process_tree';
@@ -28,7 +29,6 @@ import {
   useFetchAlertStatus,
   useFetchSessionViewProcessEvents,
   useFetchSessionViewAlerts,
-  useLocalStorage,
 } from './hooks';
 
 /**
@@ -44,10 +44,13 @@ export const SessionView = ({
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [displayOptions, setDisplayOptions] = useLocalStorage('displayOptions', {
-    timestamp: true,
-    verboseMode: true,
-  });
+  const [displayOptions, setDisplayOptions] = useLocalStorage<DisplayOptionsState>(
+    'displayOptions',
+    {
+      timestamp: true,
+      verboseMode: true,
+    }
+  );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
 
