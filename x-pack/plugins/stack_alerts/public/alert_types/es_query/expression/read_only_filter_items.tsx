@@ -14,13 +14,13 @@ import {
   FilterItem,
   getDisplayValueFromFilter,
 } from '../../../../../../../src/plugins/data/public';
-import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { Filter, DataView } from '../../../../../../../src/plugins/data/common';
 
 const FilterItemComponent = injectI18n(FilterItem);
 
 interface ReadOnlyFilterItemsProps {
   filters: Filter[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
 }
 
 const noOp = () => {};
