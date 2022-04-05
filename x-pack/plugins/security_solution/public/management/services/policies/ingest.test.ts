@@ -10,9 +10,9 @@ import {
   sendGetPackagePolicy,
   sendGetEndpointSecurityPackage,
 } from './ingest';
-import { httpServiceMock } from '../../../../../../../../../src/core/public/mocks';
-import { EPM_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../../fleet/common';
-import { policyListApiPathHandlers } from '../test_mock_utils';
+import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { EPM_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../fleet/common';
+import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
