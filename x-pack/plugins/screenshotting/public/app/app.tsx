@@ -55,7 +55,7 @@ export function App() {
                   data-shared-item={!isEmpty || !error || null}
                   data-render-error={!isEmpty && error ? error.message : null}
                   ref={elementRef}
-                  className="expression"
+                  className="scrExpression"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
