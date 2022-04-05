@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiCode } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
 
