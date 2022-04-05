@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary gcc abuse to break out from restricted environments by spawning an interactive system shell.The gcc utility is a complier system for various languages and mainly used to complie C and C++ programs and the activity of spawning shell is not a standard use of this binary for a user or system administrator.It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via the gcc command",
+  "query": "process where event.type == \"start\" and process.name in (\"sh\", \"dash\", \"bash\")  and\n  process.parent.name == \"gcc\" and process.parent.args == \"-wrapper\" and\n  process.parent.args in (\"sh,-s\", \"bash,-s\", \"dash,-s\", \"/bin/sh,-s\", \"/bin/bash,-s\", \"/bin/dash,-s\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/gcc/"
+  ],
+  "risk_score": 47,
+  "rule_id": "da986d2c-ffbf-4fd6-af96-a88dbf68f386",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}
