@@ -58,7 +58,7 @@ import {
 import {
   validateRuleTypeParams,
   ruleExecutionStatusFromRaw,
-  getAlertNotifyWhenType,
+  getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
 } from '../lib';
@@ -1573,7 +1573,7 @@ export class RulesClient {
             const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
             // get notifyWhen
-            const notifyWhen = getAlertNotifyWhenType(
+            const notifyWhen = getRuleNotifyWhenType(
               attributes.notifyWhen,
               attributes.throttle ?? null
             );
