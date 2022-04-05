@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { catchError, map, tap } from 'rxjs/operators';
-import { firstValueFrom, of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
@@ -690,7 +690,7 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
-  return firstValueFrom(
+  return lastValueFrom(
     data.search.search(req, { sessionId }).pipe(
       tap((res) => {
         if (isCompleteResponse(res)) {

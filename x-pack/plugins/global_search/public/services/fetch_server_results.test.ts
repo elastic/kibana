@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { GlobalSearchResult } from '../../common/types';
 import { fetchServerResults } from './fetch_server_results';
-import { lastValueFrom } from 'rxjs';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {

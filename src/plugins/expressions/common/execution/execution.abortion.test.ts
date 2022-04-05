@@ -7,7 +7,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
@@ -76,7 +76,7 @@ describe('Execution abortion tests', () => {
 
     execution.start();
 
-    const { result } = await firstValueFrom(execution.result);
+    const { result } = await lastValueFrom(execution.result);
 
     execution.cancel();
 
@@ -136,7 +136,7 @@ describe('Execution abortion tests', () => {
     await waitFor(() => expect(started).toHaveBeenCalledTimes(1));
 
     execution.cancel();
-    const { result } = await firstValueFrom(execution.result);
+    const { result } = await lastValueFrom(execution.result);
     expect(result).toMatchObject({
       type: 'error',
       error: {

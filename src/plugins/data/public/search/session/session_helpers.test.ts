@@ -63,7 +63,8 @@ describe('waitUntilNextSessionCompletes$', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
-  test('emits when next session starts', () => {
+  test(
+    'emits when next session starts',
     fakeSchedulers((advance) => {
       sessionService.start();
       let untrackSearch = sessionService.trackSearch({ abort: () => {} });
@@ -86,6 +87,6 @@ describe('waitUntilNextSessionCompletes$', () => {
       advance(1000);
       expect(next).toBeCalledTimes(1);
       expect(complete).toBeCalled();
-    });
-  });
+    })
+  );
 });

@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { defaultIfEmpty } from 'rxjs/operators';
-
-import { lastValueFrom } from '../rxjs_7';
+import { lastValueFrom, defaultIfEmpty } from 'rxjs';
 import { mapWithLimit$ } from './observable';
 import { IterableInput, AsyncMapFn } from './types';
 

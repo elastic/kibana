@@ -10,7 +10,6 @@ import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import ActualWatchpack from 'watchpack';
-import { lastValueFrom } from '@kbn/std';
 
 import { Bundle, ascending } from '../common';
 import { watchBundlesForChanges$ } from '../optimizer/watch_bundles_for_changes';
@@ -66,11 +65,12 @@ afterEach(async () => {
   jest.useRealTimers();
 });
 
-it('notifies of changes and completes once all bundles have changed', async () => {
-  expect.assertions(18);
+it(
+  'notifies of changes and completes once all bundles have changed',
+  fakeSchedulers(async (advance) => {
+    expect.assertions(18);
 
-  const promise = fakeSchedulers((advance) => {
-    const _promise = lastValueFrom(
+    const promise = Rx.lastValueFrom(
       watchBundlesForChanges$(bundleCacheEvent$, Date.now()).pipe(
         map((event, i) => {
           // each time we trigger a change event we get a 'changed detected' event
@@ -131,7 +131,6 @@ it('notifies of changes and completes once all bundles have changed', async () =
     changeListener(bundleEntryPath(CAR_BUNDLE), 'deleted');
     advance(1000);
 
-    return _promise;
-  })();
-  await expect(promise).resolves.toEqual(undefined);
-});
+    await expect(promise).resolves.toEqual(undefined);
+  })
+);
