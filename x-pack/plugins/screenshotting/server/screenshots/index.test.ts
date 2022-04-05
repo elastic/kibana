@@ -8,6 +8,11 @@
 import { of, throwError } from 'rxjs';
 import type { Logger } from 'src/core/server';
 import { httpServiceMock } from 'src/core/server/mocks';
+import {
+  SCREENSHOTTING_APP_ID,
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+} from '../../common';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
@@ -248,6 +253,28 @@ describe('Screenshot Observable Pipeline', () => {
       2,
       expect.anything(),
       expect.objectContaining({ waitForSelector: '[data-shared-page="2"]' }),
+      expect.anything()
+    );
+  });
+
+  it('captures screenshot of an expression', async () => {
+    await screenshots
+      .getScreenshots({
+        ...options,
+        expression: 'kibana',
+        input: 'something',
+      } as PngScreenshotOptions)
+      .toPromise();
+
+    expect(driver.open).toHaveBeenCalledTimes(1);
+    expect(driver.open).toHaveBeenCalledWith(
+      expect.stringContaining(SCREENSHOTTING_APP_ID),
+      expect.objectContaining({
+        context: expect.objectContaining({
+          [SCREENSHOTTING_EXPRESSION]: 'kibana',
+          [SCREENSHOTTING_EXPRESSION_INPUT]: 'something',
+        }),
+      }),
       expect.anything()
     );
   });
