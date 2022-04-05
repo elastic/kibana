@@ -35,6 +35,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./get_rule_execution_events'));
       loadTestFile(require.resolve('./import_rules'));
       loadTestFile(require.resolve('./import_export_rules'));
+      loadTestFile(require.resolve('./legacy_actions_migrations'));
       loadTestFile(require.resolve('./read_rules'));
       loadTestFile(require.resolve('./resolve_read_rules'));
       loadTestFile(require.resolve('./update_rules'));

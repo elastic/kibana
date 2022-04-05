@@ -959,7 +959,7 @@ export const legacyGetSiemNotificationRuleEveryRunSOResult = (
  */
 export const legacyGetSiemNotificationRuleHourlyActionsSOResult = (
   ruleId = '123',
-  notificationId = '456'
+  connectorId = '456'
 ): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
   type: 'siem-detection-engine-rule-actions',
   id: 'ID_OF_LEGACY_SIDECAR_HOURLY_ACTIONS',
@@ -982,7 +982,7 @@ export const legacyGetSiemNotificationRuleHourlyActionsSOResult = (
   },
   references: [
     { id: ruleId, type: 'alert', name: 'alert_0' },
-    { id: notificationId, type: 'action', name: 'action_0' },
+    { id: connectorId, type: 'action', name: 'action_0' },
   ],
   migrationVersion: {
     'siem-detection-engine-rule-actions': '7.11.2',
@@ -998,7 +998,7 @@ export const legacyGetSiemNotificationRuleHourlyActionsSOResult = (
  */
 export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
   ruleId = '123',
-  notificationId = '456'
+  connectorId = '456'
 ): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
   type: 'siem-detection-engine-rule-actions',
   id: 'ID_OF_LEGACY_SIDECAR_DAILY_ACTIONS',
@@ -1009,7 +1009,7 @@ export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
         group: 'default',
         actionRef: 'action_0',
         params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count } alerts',
+          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           to: ['test@test.com'],
           subject: 'Test Actions',
         },
@@ -1021,7 +1021,7 @@ export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
   },
   references: [
     { id: ruleId, type: 'alert', name: 'alert_0' },
-    { id: notificationId, type: 'action', name: 'action_0' },
+    { id: connectorId, type: 'action', name: 'action_0' },
   ],
   migrationVersion: {
     'siem-detection-engine-rule-actions': '7.11.2',
@@ -1037,7 +1037,7 @@ export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
  */
 export const legacyGetSiemNotificationRuleWeeklyActionsSOResult = (
   ruleId = '123',
-  notificationId = '456'
+  connectorId = '456'
 ): SavedObjectsFindResult<LegacyIRuleActionsAttributes> => ({
   type: 'siem-detection-engine-rule-actions',
   id: 'ID_OF_LEGACY_SIDECAR_WEEKLY_ACTIONS',
@@ -1060,7 +1060,7 @@ export const legacyGetSiemNotificationRuleWeeklyActionsSOResult = (
   },
   references: [
     { id: ruleId, type: 'alert', name: 'alert_0' },
-    { id: notificationId, type: 'action', name: 'action_0' },
+    { id: connectorId, type: 'action', name: 'action_0' },
   ],
   migrationVersion: {
     'siem-detection-engine-rule-actions': '7.11.2',
@@ -1071,12 +1071,12 @@ export const legacyGetSiemNotificationRuleWeeklyActionsSOResult = (
   score: 0,
 });
 
-const getLegacyActionSOs = (ruleId = '123', notificationId = '456') => ({
+const getLegacyActionSOs = (ruleId = '123', connectorId = '456') => ({
   none: () => legacyGetSiemNotificationRuleNoActionsSOResult(ruleId),
   rule: () => legacyGetSiemNotificationRuleEveryRunSOResult(ruleId),
-  hourly: () => legacyGetSiemNotificationRuleHourlyActionsSOResult(ruleId, notificationId),
-  daily: () => legacyGetSiemNotificationRuleDailyActionsSOResult(ruleId, notificationId),
-  weekly: () => legacyGetSiemNotificationRuleWeeklyActionsSOResult(ruleId, notificationId),
+  hourly: () => legacyGetSiemNotificationRuleHourlyActionsSOResult(ruleId, connectorId),
+  daily: () => legacyGetSiemNotificationRuleDailyActionsSOResult(ruleId, connectorId),
+  weekly: () => legacyGetSiemNotificationRuleWeeklyActionsSOResult(ruleId, connectorId),
 });
 
 /**
@@ -1085,9 +1085,9 @@ const getLegacyActionSOs = (ruleId = '123', notificationId = '456') => ({
 export const legacyGetSiemNotificationRuleActionsSOResultWithSingleHit = (
   actionTypes: Array<'none' | 'rule' | 'daily' | 'hourly' | 'weekly'>,
   ruleId = '123',
-  notificationId = '456'
+  connectorId = '456'
 ): SavedObjectsFindResponse<LegacyIRuleActionsAttributes> => {
-  const actions = getLegacyActionSOs(ruleId, notificationId);
+  const actions = getLegacyActionSOs(ruleId, connectorId);
 
   return {
     page: 1,

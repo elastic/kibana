@@ -1,0 +1,1011 @@
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "action:c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "action" : {
+        "actionTypeId" : ".email",
+        "name" : "test",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : true,
+          "from" : "a@a.com",
+          "host" : "gmail",
+          "port" : 56,
+          "service" : "other",
+          "secure" : null
+        },
+        "secrets" : "jCv0fZczCM+rlWXIkI6Qo/ZqasgxPhplokCaNeXJrJlJYjKeCgbZgiLAEue4bpq4GUDohfye8o1BlJCQi+3HJPb2Qp6lhbcvXn+C6wUzxj9ZitwY8ZTDo34e22TX7qHFs/1mVfO4stjZ6X86ufRZttjTNu4qjchfi3Jao7nWbw=="
+      },
+      "type" : "action",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "action" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:07:27.777Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "alert:9095ee90-b075-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ no actions",
+        "tags" : [
+          "__internal_rule_id:2297be91-894c-4831-830f-b424a0ec84f0",
+          "__internal_immutable:false",
+          "auto_disabled_8.0"
+        ],
+        "alertTypeId" : "siem.queryRule",
+        "consumer" : "siem",
+        "params" : {
+          "author" : [ ],
+          "description" : "a",
+          "ruleId" : "2297be91-894c-4831-830f-b424a0ec84f0",
+          "falsePositives" : [ ],
+          "from" : "now-360s",
+          "immutable" : false,
+          "license" : "",
+          "outputIndex" : "",
+          "meta" : {
+            "from" : "1m",
+            "kibana_siem_app_url" : "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals" : 100,
+          "riskScore" : 21,
+          "riskScoreMapping" : [ ],
+          "severity" : "low",
+          "severityMapping" : [ ],
+          "threat" : [ ],
+          "to" : "now",
+          "references" : [ ],
+          "version" : 1,
+          "exceptionsList" : [ ],
+          "type" : "query",
+          "language" : "kuery",
+          "index" : [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query" : "*:*",
+          "filters" : [ ]
+        },
+        "schedule" : {
+          "interval" : "5m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:05:53.511Z",
+        "updatedAt" : "2022-03-30T22:05:53.511Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-03-31T19:53:37.507Z",
+          "error" : null,
+          "lastDuration" : 2377
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "9095ee90-b075-11ec-bb3f-1f063f8e06cf"
+      },
+      "type" : "alert",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-31T19:53:39.885Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "alert:dc6595f0-b075-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ action - every rule run",
+        "tags" : [
+          "__internal_rule_id:72a0d429-363b-4f70-905e-c6019a224d40",
+          "__internal_immutable:false",
+          "auto_disabled_8.0"
+        ],
+        "alertTypeId" : "siem.queryRule",
+        "consumer" : "siem",
+        "params" : {
+          "author" : [ ],
+          "description" : "a",
+          "ruleId" : "72a0d429-363b-4f70-905e-c6019a224d40",
+          "falsePositives" : [ ],
+          "from" : "now-360s",
+          "immutable" : false,
+          "license" : "",
+          "outputIndex" : "",
+          "meta" : {
+            "from" : "1m",
+            "kibana_siem_app_url" : "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals" : 100,
+          "riskScore" : 21,
+          "riskScoreMapping" : [ ],
+          "severity" : "low",
+          "severityMapping" : [ ],
+          "threat" : [ ],
+          "to" : "now",
+          "references" : [ ],
+          "version" : 1,
+          "exceptionsList" : [ ],
+          "type" : "query",
+          "language" : "kuery",
+          "index" : [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query" : "*:* ",
+          "filters" : [ ]
+        },
+        "schedule" : {
+          "interval" : "5m"
+        },
+        "enabled" : true,
+        "actions" : [
+          {
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "actionTypeId" : ".email",
+            "actionRef" : "action_0"
+          }
+        ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:08:00.172Z",
+        "updatedAt" : "2022-03-30T22:08:00.172Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-03-31T19:55:43.502Z",
+          "error" : null,
+          "lastDuration" : 2700
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "dc6595f0-b075-11ec-bb3f-1f063f8e06cf"
+      },
+      "type" : "alert",
+      "references" : [
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "name" : "action_0",
+          "type" : "action"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-31T19:55:46.202Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value":  {
+    "index" : ".kibana",
+    "id" : "alert:064e3160-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ action - every hour",
+        "tags" : [
+          "__internal_rule_id:4c056b05-75ac-4209-be32-82100f771eb4",
+          "__internal_immutable:false",
+          "auto_disabled_8.0"
+        ],
+        "alertTypeId" : "siem.queryRule",
+        "consumer" : "siem",
+        "params" : {
+          "author" : [ ],
+          "description" : "a",
+          "ruleId" : "4c056b05-75ac-4209-be32-82100f771eb4",
+          "falsePositives" : [ ],
+          "from" : "now-360s",
+          "immutable" : false,
+          "license" : "",
+          "outputIndex" : "",
+          "meta" : {
+            "from" : "1m",
+            "kibana_siem_app_url" : "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals" : 100,
+          "riskScore" : 21,
+          "riskScoreMapping" : [ ],
+          "severity" : "low",
+          "severityMapping" : [ ],
+          "threat" : [ ],
+          "to" : "now",
+          "references" : [ ],
+          "version" : 1,
+          "exceptionsList" : [ ],
+          "type" : "query",
+          "language" : "kuery",
+          "index" : [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query" : "*:*",
+          "filters" : [ ]
+        },
+        "schedule" : {
+          "interval" : "5m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:09:10.261Z",
+        "updatedAt" : "2022-03-30T22:09:10.261Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-03-31T19:56:43.499Z",
+          "error" : null,
+          "lastDuration" : 2815
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "064e3160-b076-11ec-bb3f-1f063f8e06cf"
+      },
+      "type" : "alert",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-31T19:56:46.314Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "alert:27639570-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ action - daily",
+        "tags" : [
+          "__internal_rule_id:8e2c8550-f13f-4e21-be0c-92148d71a5f1",
+          "__internal_immutable:false",
+          "auto_disabled_8.0"
+        ],
+        "alertTypeId" : "siem.queryRule",
+        "consumer" : "siem",
+        "params" : {
+          "author" : [ ],
+          "description" : "a",
+          "ruleId" : "8e2c8550-f13f-4e21-be0c-92148d71a5f1",
+          "falsePositives" : [ ],
+          "from" : "now-360s",
+          "immutable" : false,
+          "license" : "",
+          "outputIndex" : "",
+          "meta" : {
+            "from" : "1m",
+            "kibana_siem_app_url" : "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals" : 100,
+          "riskScore" : 21,
+          "riskScoreMapping" : [ ],
+          "severity" : "low",
+          "severityMapping" : [ ],
+          "threat" : [ ],
+          "to" : "now",
+          "references" : [ ],
+          "version" : 1,
+          "exceptionsList" : [ ],
+          "type" : "query",
+          "language" : "kuery",
+          "index" : [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query" : "*:*",
+          "filters" : [ ]
+        },
+        "schedule" : {
+          "interval" : "5m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:10:06.358Z",
+        "updatedAt" : "2022-03-30T22:10:06.358Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-03-31T19:58:13.480Z",
+          "error" : null,
+          "lastDuration" : 3023
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "27639570-b076-11ec-bb3f-1f063f8e06cf"
+      },
+      "type" : "alert",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-31T19:58:16.503Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "alert:61ec7a40-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ actions - weekly",
+        "tags" : [
+          "__internal_rule_id:05fbdd2a-e802-420b-bdc3-95ae0acca454",
+          "__internal_immutable:false",
+          "auto_disabled_8.0"
+        ],
+        "alertTypeId" : "siem.queryRule",
+        "consumer" : "siem",
+        "params" : {
+          "author" : [ ],
+          "description" : "a",
+          "ruleId" : "05fbdd2a-e802-420b-bdc3-95ae0acca454",
+          "falsePositives" : [ ],
+          "from" : "now-360s",
+          "immutable" : false,
+          "license" : "",
+          "outputIndex" : "",
+          "meta" : {
+            "from" : "1m",
+            "kibana_siem_app_url" : "https://actions.kb.us-central1.gcp.cloud.es.io:9243/app/security"
+          },
+          "maxSignals" : 100,
+          "riskScore" : 21,
+          "riskScoreMapping" : [ ],
+          "severity" : "low",
+          "severityMapping" : [ ],
+          "threat" : [ ],
+          "to" : "now",
+          "references" : [ ],
+          "version" : 1,
+          "exceptionsList" : [ ],
+          "type" : "query",
+          "language" : "kuery",
+          "index" : [
+            "apm-*-transaction*",
+            "traces-apm*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "query" : "*:*",
+          "filters" : [ ]
+        },
+        "schedule" : {
+          "interval" : "5m"
+        },
+        "enabled" : true,
+        "actions" : [ ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:11:44.516Z",
+        "updatedAt" : "2022-03-30T22:11:44.516Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-03-31T19:54:22.442Z",
+          "error" : null,
+          "lastDuration" : 2612
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "61ec7a40-b076-11ec-bb3f-1f063f8e06cf"
+      },
+      "type" : "alert",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-31T19:54:25.054Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "alert:64492ef0-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ actions - weekly",
+        "tags" : [
+          "__internal_rule_alert_id:61ec7a40-b076-11ec-bb3f-1f063f8e06cf"
+        ],
+        "alertTypeId" : "siem.notifications",
+        "consumer" : "siem",
+        "params" : {
+          "ruleAlertId" : "61ec7a40-b076-11ec-bb3f-1f063f8e06cf"
+        },
+        "schedule" : {
+          "interval" : "7d"
+        },
+        "enabled" : true,
+        "actions" : [
+          {
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "actionTypeId" : ".email",
+            "actionRef" : "action_0"
+          }
+        ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:11:48.661Z",
+        "updatedAt" : "2022-03-30T22:11:48.661Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-03-30T22:11:51.640Z",
+          "error" : null
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "64492ef0-b076-11ec-bb3f-1f063f8e06cf"
+      },
+      "type" : "alert",
+      "references" : [
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "name" : "action_0",
+          "type" : "action"
+        },
+        {
+          "id" : "61ec7a40-b076-11ec-bb3f-1f063f8e06cf",
+          "name" : "param:alert_0",
+          "type" : "alert"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:11:51.707Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+  "index" : ".kibana",
+  "id" : "alert:d42e8210-b076-11ec-bb3f-1f063f8e06cf",
+  "source" : {
+    "alert" : {
+      "name" : "test w/ action - every hour",
+      "tags" : [
+        "__internal_rule_alert_id:064e3160-b076-11ec-bb3f-1f063f8e06cf"
+      ],
+      "alertTypeId" : "siem.notifications",
+      "consumer" : "siem",
+      "params" : {
+        "ruleAlertId" : "064e3160-b076-11ec-bb3f-1f063f8e06cf"
+      },
+      "schedule" : {
+        "interval" : "1h"
+      },
+      "enabled" : true,
+      "actions" : [
+        {
+          "group" : "default",
+          "params" : {
+            "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+            "to" : [
+              "test@test.com"
+            ],
+            "subject" : "Test Actions"
+          },
+          "actionTypeId" : ".email",
+          "actionRef" : "action_0"
+        }
+      ],
+      "throttle" : null,
+      "notifyWhen" : "onActiveAlert",
+      "apiKeyOwner" : null,
+      "apiKey" : null,
+      "createdBy" : "1527796724",
+      "updatedBy" : "1527796724",
+      "createdAt" : "2022-03-30T22:14:56.318Z",
+      "updatedAt" : "2022-03-30T22:15:12.135Z",
+      "muteAll" : false,
+      "mutedInstanceIds" : [ ],
+      "executionStatus" : {
+        "status" : "pending",
+        "lastExecutionDate" : "2022-03-30T22:14:56.318Z",
+        "error" : null
+      },
+      "meta" : {
+        "versionApiKeyLastmodified" : "7.15.2"
+      },
+      "legacyId" : "d42e8210-b076-11ec-bb3f-1f063f8e06cf"
+    },
+    "type" : "alert",
+    "references" : [
+      {
+        "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+        "name" : "action_0",
+        "type" : "action"
+      },
+      {
+        "id" : "064e3160-b076-11ec-bb3f-1f063f8e06cf",
+        "name" : "param:alert_0",
+        "type" : "alert"
+      }
+    ],
+    "namespaces" : [
+      "default"
+    ],
+    "migrationVersion" : {
+      "alert" : "8.0.1"
+    },
+    "coreMigrationVersion" : "8.1.2",
+    "updated_at" : "2022-03-30T22:15:12.135Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "alert:29ba2fa0-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "alert" : {
+        "name" : "test w/ action - daily",
+        "tags" : [
+          "__internal_rule_alert_id:27639570-b076-11ec-bb3f-1f063f8e06cf"
+        ],
+        "alertTypeId" : "siem.notifications",
+        "consumer" : "siem",
+        "params" : {
+          "ruleAlertId" : "27639570-b076-11ec-bb3f-1f063f8e06cf"
+        },
+        "schedule" : {
+          "interval" : "1d"
+        },
+        "enabled" : true,
+        "actions" : [
+          {
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "actionTypeId" : ".email",
+            "actionRef" : "action_0"
+          }
+        ],
+        "throttle" : null,
+        "notifyWhen" : "onActiveAlert",
+        "apiKeyOwner" : null,
+        "apiKey" : null,
+        "createdBy" : "1527796724",
+        "updatedBy" : "1527796724",
+        "createdAt" : "2022-03-30T22:10:10.435Z",
+        "updatedAt" : "2022-03-30T22:10:10.435Z",
+        "muteAll" : false,
+        "mutedInstanceIds" : [ ],
+        "executionStatus" : {
+          "status" : "ok",
+          "lastExecutionDate" : "2022-04-01T22:10:15.478Z",
+          "error" : null,
+          "lastDuration" : 984
+        },
+        "meta" : {
+          "versionApiKeyLastmodified" : "7.15.2"
+        },
+        "scheduledTaskId" : null,
+        "legacyId" : "29ba2fa0-b076-11ec-bb3f-1f063f8e06cf",
+        "monitoring" : {
+          "execution" : {
+            "history" : [
+              {
+                "duration" : 111,
+                "success" : true,
+                "timestamp" : 1648764614215
+              },
+              {
+                "duration" : 984,
+                "success" : true,
+                "timestamp" : 1648851016462
+              }
+            ],
+            "calculated_metrics" : {
+              "p99" : 984,
+              "success_ratio" : 1,
+              "p50" : 547.5,
+              "p95" : 984
+            }
+          }
+        }
+      },
+      "type" : "alert",
+      "references" : [
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "name" : "action_0",
+          "type" : "action"
+        },
+        {
+          "id" : "27639570-b076-11ec-bb3f-1f063f8e06cf",
+          "name" : "param:alert_0",
+          "type" : "alert"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "alert" : "8.0.1"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-04-01T22:10:16.467Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "siem-detection-engine-rule-actions:926668d0-b075-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "siem-detection-engine-rule-actions" : {
+        "actions" : [ ],
+        "ruleThrottle" : "no_actions",
+        "alertThrottle" : null
+      },
+      "type" : "siem-detection-engine-rule-actions",
+      "references" : [
+        {
+          "id" : "9095ee90-b075-11ec-bb3f-1f063f8e06cf",
+          "type" : "alert",
+          "name" : "alert_0"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "siem-detection-engine-rule-actions" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:05:55.563Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "siem-detection-engine-rule-actions:dde13970-b075-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "siem-detection-engine-rule-actions" : {
+        "actions" : [
+          {
+            "actionRef" : "action_0",
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "action_type_id" : ".email"
+          }
+        ],
+        "ruleThrottle" : "rule",
+        "alertThrottle" : null
+      },
+      "type" : "siem-detection-engine-rule-actions",
+      "references" : [
+        {
+          "id" : "dc6595f0-b075-11ec-bb3f-1f063f8e06cf",
+          "type" : "alert",
+          "name" : "alert_0"
+        },
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "type" : "action",
+          "name" : "action_0"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "siem-detection-engine-rule-actions" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:08:02.207Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "siem-detection-engine-rule-actions:07aa8d10-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "siem-detection-engine-rule-actions" : {
+        "actions" : [
+          {
+            "actionRef" : "action_0",
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "action_type_id" : ".email"
+          }
+        ],
+        "ruleThrottle" : "1h",
+        "alertThrottle" : "1h"
+      },
+      "type" : "siem-detection-engine-rule-actions",
+      "references" : [
+        {
+          "id" : "064e3160-b076-11ec-bb3f-1f063f8e06cf",
+          "type" : "alert",
+          "name" : "alert_0"
+        },
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "type" : "action",
+          "name" : "action_0"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "siem-detection-engine-rule-actions" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:09:12.300Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "siem-detection-engine-rule-actions:291ae260-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "siem-detection-engine-rule-actions" : {
+        "actions" : [
+          {
+            "actionRef" : "action_0",
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "action_type_id" : ".email"
+          }
+        ],
+        "ruleThrottle" : "1d",
+        "alertThrottle" : "1d"
+      },
+      "type" : "siem-detection-engine-rule-actions",
+      "references" : [
+        {
+          "id" : "27639570-b076-11ec-bb3f-1f063f8e06cf",
+          "type" : "alert",
+          "name" : "alert_0"
+        },
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "type" : "action",
+          "name" : "action_0"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "siem-detection-engine-rule-actions" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:10:08.399Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
+    "id" : "siem-detection-engine-rule-actions:63aa2fd0-b076-11ec-bb3f-1f063f8e06cf",
+    "source" : {
+      "siem-detection-engine-rule-actions" : {
+        "actions" : [
+          {
+            "actionRef" : "action_0",
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts",
+              "to" : [
+                "test@test.com"
+              ],
+              "subject" : "Test Actions"
+            },
+            "action_type_id" : ".email"
+          }
+        ],
+        "ruleThrottle" : "7d",
+        "alertThrottle" : "7d"
+      },
+      "type" : "siem-detection-engine-rule-actions",
+      "references" : [
+        {
+          "id" : "61ec7a40-b076-11ec-bb3f-1f063f8e06cf",
+          "type" : "alert",
+          "name" : "alert_0"
+        },
+        {
+          "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+          "type" : "action",
+          "name" : "action_0"
+        }
+      ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "siem-detection-engine-rule-actions" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:11:46.643Z"
+    }
+  }
+}

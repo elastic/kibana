@@ -28,6 +28,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { SavedObjectReference } from 'kibana/server';
 import { AlertAction, AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
 import {
   DescriptionOrUndefined,
@@ -63,7 +64,11 @@ import {
 } from '../../../../common/constants';
 import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyIRuleActionsAttributes, LegacyRuleActions } from '../rule_actions/legacy_types';
+import {
+  LegacyIRuleActionsAttributes,
+  LegacyRuleActions,
+  LegacyRuleAlertSavedObjectAction,
+} from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
@@ -303,6 +308,44 @@ export const maybeMute = async ({
 };
 
 /**
+ * Translate legacy action sidecar action to rule action
+ */
+export const getUpdatedActionsParams = ({
+  rule,
+  ruleThrottle,
+  actions,
+  references,
+}: {
+  rule: SanitizedAlert<RuleParams>;
+  ruleThrottle: string | null;
+  actions: LegacyRuleAlertSavedObjectAction[];
+  references: SavedObjectReference[];
+}): Omit<SanitizedAlert<RuleParams>, 'id'> => {
+  const { id, ...restOfRule } = rule;
+
+  const actionReference = references.find((reference) => reference.name === 'action_0');
+
+  if (actionReference == null) {
+    throw new Error(
+      `An error occurred migrating legacy action for rule with id:${id}. Connector reference id not found.`
+    );
+  }
+  // If rule has an action on any other interval (other than on every
+  // rule run), need to move the action info from the sidecar/legacy action
+  // into the rule itself
+  return {
+    ...restOfRule,
+    actions: actions.map(({ actionRef, action_type_id: actionTypeId, ...resOfAction }) => ({
+      ...resOfAction,
+      id: actionReference.id,
+      actionTypeId,
+    })),
+    throttle: transformToAlertThrottle(ruleThrottle),
+    notifyWhen: transformToNotifyWhen(ruleThrottle),
+  };
+};
+
+/**
  * Determines if rule needs to be migrated from legacy actions
  * and returns necessary pieces for the updated rule
  */
@@ -368,7 +411,7 @@ export const legacyMigrate = async ({
     // If "siem-detection-engine-rule-actions" notes that `ruleThrottle` is
     // "no_actions" or "rule", rule has no actions or rule is set to run
     // action on every rule run. In these cases, sidecar deletion is the only
-    // cleanup needed to migrate rule to new actions. "siem.notification" are
+    // cleanup needed and updates to the "throttle" and "notifyWhen". "siem.notification" are
     // not created for these action types
     if (
       legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
@@ -377,25 +420,22 @@ export const legacyMigrate = async ({
       return rule;
     }
 
-    // If rule has an action on any other interval (other than on every
-    // rule run), need to move the action info from the sidecar/legacy action
-    // into the rule itself
-    const { id, ...restOfRule } = rule;
-
-    const migratedRule = {
-      ...restOfRule,
-      actions: siemNotification.data[0].actions,
-      throttle: legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle,
-      notifyWhen: transformToNotifyWhen(
-        legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle
-      ),
-    };
+    // Use "legacyRuleActionsSO" instead of "siemNotification" as "siemNotification" is not created
+    // until a rule is run and added to task manager. That means that if by chance a user has a rule
+    // with actions which they have yet to enable, the actions would be lost. Instead,
+    // "legacyRuleActionsSO" is created on rule creation (pre 7.15) and we can rely on it to be there
+    const migratedRule = getUpdatedActionsParams({
+      rule,
+      ruleThrottle: legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle,
+      actions: legacyRuleActionsSO.saved_objects[0].attributes.actions,
+      references: legacyRuleActionsSO.saved_objects[0].references,
+    });
 
     await rulesClient.update({
-      id,
+      id: rule.id,
       data: migratedRule,
     });
 
-    return { id, ...migratedRule };
+    return { id: rule.id, ...migratedRule };
   }
 };

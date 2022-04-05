@@ -2117,3 +2117,57 @@ export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<Lega
     index: '.kibana',
     q: 'type:siem-detection-engine-rule-actions',
   });
+
+/**
+ * Fetch all legacy action sidecar notification SOs from the .kibana index
+ * @param es The ElasticSearch service
+ */
+export const getLegacyActionNotificationSO = async (
+  es: Client
+): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: 'alert.alertTypeId:siem.notifications',
+  });
+
+/**
+ * Fetch legacy action sidecar SOs from the .kibana index
+ * @param es The ElasticSearch service
+ * @param id SO id
+ */
+export const getLegacyActionSOById = async (
+  es: Client,
+  id: string
+): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: `type:siem-detection-engine-rule-actions AND _id:"siem-detection-engine-rule-actions:${id}"`,
+  });
+
+/**
+ * Fetch legacy action sidecar notification SOs from the .kibana index
+ * @param es The ElasticSearch service
+ * @param id SO id
+ */
+export const getLegacyActionNotificationSOById = async (
+  es: Client,
+  id: string
+): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: `alert.alertTypeId:siem.notifications AND alert.params.ruleAlertId:"${id}"`,
+  });
+
+/**
+ * Fetch legacy action sidecar SOs from the .kibana index
+ * @param es The ElasticSearch service
+ * @param id SO id
+ */
+export const getRuleSOById = async (
+  es: Client,
+  id: string
+): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: `type:alert AND _id:"alert:${id}"`,
+  });
