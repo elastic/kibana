@@ -53,7 +53,7 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
 const PageTitle = () => (
   <EuiTitle size="l">
     <h2>
-      <FormattedMessage id="xpack.csp.findings.findingsLabel" defaultMessage="Findings" />
+      <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />
     </h2>
   </EuiTitle>
 );

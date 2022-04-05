@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import { Theme } from '@kbn/ui-theme';
+import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { CspFindingsRequest, CspFindingsResponse } from './use_findings';
@@ -14,7 +14,6 @@ import type { CspClientPluginStartDeps } from '../../types';
 import { PLUGIN_NAME } from '../../../common';
 import type { DataView } from '../../../../../../src/plugins/data/common';
 import { FINDINGS_SEARCH_PLACEHOLDER } from './translations';
-import { useTheme } from '../../common/hooks/use_theme';
 
 type SearchBarQueryProps = Pick<CspFindingsRequest, 'query' | 'filters'>;
 
@@ -31,7 +30,7 @@ export const FindingsSearchBar = ({
   status,
   setQuery,
 }: FindingsSearchBarProps & { dataView: DataView }) => {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const {
     data: {
       ui: { SearchBar },
@@ -39,7 +38,7 @@ export const FindingsSearchBar = ({
   } = useKibana<CspClientPluginStartDeps>().services;
 
   return (
-    <div css={getContainerStyle(theme.eui)}>
+    <div css={getContainerStyle(euiTheme)}>
       <SearchBar
         appName={PLUGIN_NAME}
         dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
@@ -61,8 +60,8 @@ export const FindingsSearchBar = ({
   );
 };
 
-const getContainerStyle = (theme: Theme) => css`
-  border-bottom: ${theme.euiBorderThin};
-  background-color: ${theme.euiPageBackgroundColor};
-  padding: ${theme.paddingSizes.m};
+const getContainerStyle = (theme: EuiThemeComputed) => css`
+  border-bottom: ${theme.border.thin};
+  background-color: ${theme.colors.body};
+  padding: ${theme.size.base};
 `;

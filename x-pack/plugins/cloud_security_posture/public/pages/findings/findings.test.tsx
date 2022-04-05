@@ -22,13 +22,6 @@ import type { DataView } from '../../../../../../src/plugins/data/common';
 
 jest.mock('../../common/api/use_kubebeat_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
-jest.mock('../../common/hooks/use_theme', () => ({
-  useTheme: () => ({
-    eui: {
-      paddingSizes: {},
-    },
-  }),
-}));
 
 beforeEach(() => {
   jest.restoreAllMocks();

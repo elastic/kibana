@@ -5,20 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Redirect, Switch, Route } from 'react-router-dom';
 import type { RouteProps } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { Theme, ThemeProvider } from '@emotion/react';
 import { allNavigationItems } from '../common/navigation/constants';
 import { CspNavigationItem } from '../common/navigation/types';
 import { UnknownRoute } from '../components/unknown_route';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
-  useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
 import type { CspClientPluginStartDeps } from '../types';
@@ -54,17 +51,15 @@ export const CspApp = ({ core, deps, params }: CspAppDeps) => (
       <QueryClientProvider client={queryClient}>
         <EuiErrorBoundary>
           <Router history={params.history}>
-            <CspThemeProvider>
-              <I18nProvider>
-                <Switch>
-                  {routes.map((route) => (
-                    <Route key={route.path} {...route} />
-                  ))}
-                  <Route exact path="/" component={RedirectToDashboard} />
-                  <Route path="*" component={UnknownRoute} />
-                </Switch>
-              </I18nProvider>
-            </CspThemeProvider>
+            <I18nProvider>
+              <Switch>
+                {routes.map((route) => (
+                  <Route key={route.path} {...route} />
+                ))}
+                <Route exact path="/" component={RedirectToDashboard} />
+                <Route path="*" component={UnknownRoute} />
+              </Switch>
+            </I18nProvider>
           </Router>
         </EuiErrorBoundary>
       </QueryClientProvider>
@@ -73,19 +68,3 @@ export const CspApp = ({ core, deps, params }: CspAppDeps) => (
 );
 
 const RedirectToDashboard = () => <Redirect to={allNavigationItems.dashboard.path} />;
-
-function CspThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
-  return (
-    <ThemeProvider
-      theme={(outerTheme?: Theme) => ({
-        ...outerTheme,
-        eui: darkMode ? euiDarkVars : euiLightVars,
-        darkMode,
-      })}
-    >
-      {children}
-    </ThemeProvider>
-  );
-}
