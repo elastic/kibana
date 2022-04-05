@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { FieldSpec } from '../../../../../../../../../../../src/plugins/data/common';
 import { QueryStringInput } from '../../../../../../../../../../../src/plugins/unified_search/public';
+import type { DataView } from '../../../../../../../../../../../src/plugins/data_views/public';
 import { useStartServices } from '../../../../../hooks';
 
 import {
@@ -53,12 +54,12 @@ export const LogQueryBar: React.FunctionComponent<{
       disableLanguageSwitcher={true}
       indexPatterns={
         indexPatternFields
-          ? [
+          ? ([
               {
                 title: AGENT_LOG_INDEX_PATTERN,
                 fields: indexPatternFields,
               },
-            ]
+            ] as unknown as DataView[])
           : []
       }
       query={{

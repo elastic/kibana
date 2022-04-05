@@ -11,9 +11,10 @@ import { Filter, FieldFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../data/common';
+import { isFilterable, IFieldType, IpAddress } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/common';
 
-export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
+export function getFieldFromFilter(filter: FieldFilter, indexPattern: DataView) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);
 }
 
@@ -23,7 +24,7 @@ export function getOperatorFromFilter(filter: Filter) {
   });
 }
 
-export function getFilterableFields(indexPattern: IIndexPattern) {
+export function getFilterableFields(indexPattern: DataView) {
   return indexPattern.fields.filter(isFilterable);
 }
 
@@ -57,7 +58,7 @@ export function validateParams(params: any, field: IFieldType) {
 }
 
 export function isFilterValid(
-  indexPattern?: IIndexPattern,
+  indexPattern?: DataView,
   field?: IFieldType,
   operator?: Operator,
   params?: any
