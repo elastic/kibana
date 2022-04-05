@@ -157,7 +157,7 @@ export const SessionView = ({
 
             <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
               <SessionViewDisplayOptions
-                displayOptions={displayOptions}
+                displayOptions={displayOptions!}
                 onChange={handleOptionChange}
               />
             </EuiFlexItem>
@@ -236,8 +236,8 @@ export const SessionView = ({
                       setSearchResults={setSearchResults}
                       updatedAlertsStatus={updatedAlertsStatus}
                       onShowAlertDetails={onShowAlertDetails}
-                      timeStampOn={displayOptions.timestamp}
-                      verboseModeOn={displayOptions.verboseMode}
+                      timeStampOn={displayOptions?.timestamp}
+                      verboseModeOn={displayOptions?.verboseMode}
                     />
                   </div>
                 )}

@@ -22,7 +22,6 @@ import {
   QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
 } from '../../../common/constants';
-import { DisplayOptionsState } from '../../../common/types/session_view';
 
 export const useFetchSessionViewProcessEvents = (
   sessionEntityId: string,
