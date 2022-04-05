@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error
-export { parse } from '../../../grammar';
+export { parse } from '../../../grammar/built_grammar.js';

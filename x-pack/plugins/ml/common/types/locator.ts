@@ -6,6 +6,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
