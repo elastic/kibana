@@ -41,7 +41,6 @@ import {
 } from './translations';
 import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
-import { createEmptyHostIsolationException } from '../../utils';
 
 interface ExceptionIpEntry {
   field: 'destination.ip';
@@ -53,9 +52,12 @@ interface ExceptionIpEntry {
 export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
   ({ item: exception, onChange, policies, disabled, mode, error }) => {
     const ipEntry = useMemo(() => {
-      return (
-        (exception.entries[0] as ExceptionIpEntry) || createEmptyHostIsolationException().entries[0]
-      );
+      return (exception.entries[0] || {
+        field: 'destination.ip',
+        operator: 'included',
+        type: 'match',
+        value: '',
+      }) as ExceptionIpEntry;
     }, [exception.entries]);
 
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
@@ -244,7 +246,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     // Make sure in the create flow, the OS array is set to the 3 OSs supported
     useEffect(() => {
       if (mode === 'create' && (exception.os_types?.length ?? 0) !== 3) {
-        notifyOfChange({ os_types: createEmptyHostIsolationException().os_types });
+        notifyOfChange({ os_types: ['windows', 'linux', 'macos'] });
       }
     }, [exception.os_types?.length, mode, notifyOfChange]);
 
