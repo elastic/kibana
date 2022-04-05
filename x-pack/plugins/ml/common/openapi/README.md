@@ -7,5 +7,5 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
  ## Tools
 It is possible to validate the docs before bundling them with the following command:
   ```
-    npx swagger-cli validate x-pack/plugins/ml/common/openapi/ml-apis.yaml
+    npx swagger-cli validate x-pack/plugins/ml/common/openapi/ml_apis.yaml
   ```

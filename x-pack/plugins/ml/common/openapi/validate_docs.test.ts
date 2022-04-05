@@ -6,7 +6,7 @@
  */
 import SwaggerParser from '@apidevtools/swagger-parser';
 
-// Validate the ml-apis.yaml file
+// Validate the ml_apis.yaml file
 // https://github.com/APIDevTools/swagger-parser
 
 const validateDocs = async (entrypointFile: string) => {
@@ -19,8 +19,8 @@ const validateDocs = async (entrypointFile: string) => {
 };
 
 describe('openApi', () => {
-  it('Checks that ml-apis.yaml is valid', async () => {
-    expect(await validateDocs('x-pack/plugins/ml/common/openapi/ml-apis.yaml')).toEqual(
+  it('Checks that ml_apis.yaml is valid', async () => {
+    expect(await validateDocs('x-pack/plugins/ml/common/openapi/ml_apis.yaml')).toEqual(
       'Entrypoint is valid'
     );
   });
