@@ -83,6 +83,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.layeredXyVis.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
+      strict: true,
     },
     endValue: {
       types: ['string'],
@@ -102,6 +103,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.layeredXyVis.valueLabels.help', {
         defaultMessage: 'Value labels mode',
       }),
+      strict: true,
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],
@@ -140,6 +142,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.layeredXyVis.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
+      strict: true,
     },
     fillOpacity: {
       types: ['number'],

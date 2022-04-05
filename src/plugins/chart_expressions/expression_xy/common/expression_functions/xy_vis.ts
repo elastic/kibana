@@ -88,6 +88,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
+      strict: true,
     },
     endValue: {
       types: ['string'],
@@ -95,6 +96,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.endValue.help', {
         defaultMessage: 'End value',
       }),
+      strict: true,
     },
     emphasizeFitting: {
       types: ['boolean'],
@@ -107,6 +109,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.valueLabels.help', {
         defaultMessage: 'Value labels mode',
       }),
+      strict: true,
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],

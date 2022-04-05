@@ -52,6 +52,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The type of chart to display.',
       }),
       required: true,
+      strict: true,
     },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],
@@ -59,6 +60,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The scale type of the x axis',
       }),
       default: XScaleTypes.ORDINAL,
+      strict: true,
     },
     isHistogram: {
       types: ['boolean'],
@@ -73,6 +75,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The scale type of the y axes',
       }),
       default: YScaleTypes.LINEAR,
+      strict: true,
     },
     splitAccessor: {
       types: ['string'],
