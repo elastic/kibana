@@ -85,7 +85,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
                 title: indexPattern,
                 fields: indexPatternFields,
               },
-            ] as unknown as DataView[])
+            ] as DataView[])
           : []
       }
       query={{
