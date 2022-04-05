@@ -17,7 +17,7 @@ import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  selectedProcess: Process;
+  selectedProcess: Process | undefined;
   alerts?: ProcessEvent[];
   investigatedAlert?: ProcessEvent;
   onProcessSelected: (process: Process) => void;
@@ -61,7 +61,7 @@ export const SessionViewDetailPanel = ({
         name: i18n.translate('xpack.sessionView.detailsPanel.host', {
           defaultMessage: 'Host',
         }),
-        content: <DetailPanelHostTab processHost={selectedProcess.events[0].host} />,
+        content: <DetailPanelHostTab processHost={selectedProcess?.events[0]?.host} />,
       },
       {
         id: 'alerts',
@@ -87,7 +87,7 @@ export const SessionViewDetailPanel = ({
     alerts,
     alertsCount,
     processDetail,
-    selectedProcess.events,
+    selectedProcess?.events,
     onProcessSelected,
     onShowAlertDetails,
     investigatedAlert,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'kibana/server';
 import { IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
