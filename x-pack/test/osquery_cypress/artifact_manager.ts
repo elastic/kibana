@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// import axios from 'axios';
-// import { last } from 'lodash';
+import axios from 'axios';
+import { last } from 'lodash';
 
 export async function getLatestVersion(): Promise<string> {
-  return '8.1.0-SNAPSHOT';
-  // const response: any = await axios('https://artifacts-api.elastic.co/v1/versions');
-  // return last(response.data.versions as string[]) || '8.2.0-SNAPSHOT';
+  const response: any = await axios('https://artifacts-api.elastic.co/v1/versions');
+  return last(response.data.versions as string[]) || '8.3.0-SNAPSHOT';
 }
