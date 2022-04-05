@@ -45,6 +45,7 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type { DataViewField, DataView } from '../../../../src/plugins/data_views/public';
 import { IMyStrategyResponse } from '../../common/types';
 import { AbortError } from '../../../../src/plugins/kibana_utils/common';
@@ -54,6 +55,7 @@ interface SearchExamplesAppDeps {
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 function getNumeric(fields?: DataViewField[]) {
@@ -86,8 +88,9 @@ export const SearchExamplesApp = ({
   notifications,
   navigation,
   data,
+  unifiedSearch,
 }: SearchExamplesAppDeps) => {
-  const { IndexPatternSelect } = data.ui;
+  const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
   const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();

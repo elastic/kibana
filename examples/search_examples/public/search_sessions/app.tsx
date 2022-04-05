@@ -49,6 +49,7 @@ import {
   SearchSessionState,
   TimeRange,
 } from '../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type { DataView, DataViewField } from '../../../../src/plugins/data_views/public';
 import {
   createStateContainer,
@@ -60,6 +61,7 @@ interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**
@@ -89,8 +91,9 @@ export const SearchSessionsExampleApp = ({
   notifications,
   navigation,
   data,
+  unifiedSearch,
 }: SearchSessionsExampleAppDeps) => {
-  const { IndexPatternSelect } = data.ui;
+  const { IndexPatternSelect } = unifiedSearch.ui;
 
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [request, setRequest] = useState<IEsSearchRequest | null>(null);

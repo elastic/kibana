@@ -29,7 +29,7 @@ export const FindingsSearchBar = ({
   setQuery,
 }: FindingsSearchBarProps & { dataView: DataView }) => {
   const {
-    data: {
+    unifiedSearch: {
       ui: { SearchBar },
     },
   } = useKibana<CspClientPluginStartDeps>().services;
