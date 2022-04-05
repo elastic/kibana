@@ -724,7 +724,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
               <EuiTextArea
                 placeholder={
                   this.props.placeholder ||
-                  i18n.translate('data.query.queryBar.searchInputPlaceholder', {
+                  i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
                     defaultMessage: 'Start typing to search or filter...',
                   })
                 }

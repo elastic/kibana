@@ -217,16 +217,16 @@ export function QueryBarMenuPanels({
     });
   };
 
-  const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
+  const luceneLabel = i18n.translate('unifiedSearch.query.queryBar.luceneLanguageName', {
     defaultMessage: 'Lucene',
   });
-  const kqlLabel = i18n.translate('data.query.queryBar.kqlLanguageName', {
+  const kqlLabel = i18n.translate('unifiedSearch.query.queryBar.kqlLanguageName', {
     defaultMessage: 'KQL',
   });
 
   const filtersRelatedPanels = [
     {
-      name: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
+      name: i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
         defaultMessage: 'Apply to all',
       }),
       icon: 'filter',
@@ -239,10 +239,10 @@ export function QueryBarMenuPanels({
   const queryAndFiltersRelatedPanels = [
     {
       name: savedQuery
-        ? i18n.translate('data.filter.options.loadOtherFilterSetLabel', {
+        ? i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
             defaultMessage: 'Load other filter set',
           })
-        : i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
+        : i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
             defaultMessage: 'Load filter set',
           }),
       panel: 4,
@@ -253,10 +253,10 @@ export function QueryBarMenuPanels({
     },
     {
       name: savedQuery
-        ? i18n.translate('data.filter.options.saveAsNewFilterSetLabel', {
+        ? i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
             defaultMessage: 'Save as new',
           })
-        : i18n.translate('data.filter.options.saveFilterSetLabel', {
+        : i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
             defaultMessage: 'Save filter set',
           }),
       icon: 'save',
@@ -277,7 +277,7 @@ export function QueryBarMenuPanels({
   if (showFilterBar || showQueryInput) {
     items.push(
       {
-        name: i18n.translate('data.filter.options.clearllFiltersButtonLabel', {
+        name: i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
           defaultMessage: 'Clear all',
         }),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
@@ -341,7 +341,7 @@ export function QueryBarMenuPanels({
                       fill
                       onClick={handleSave}
                       aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
                         {
                           defaultMessage: 'Save changes to {title}',
                           values: { title: savedQuery?.attributes.title },
@@ -350,7 +350,7 @@ export function QueryBarMenuPanels({
                       data-test-subj="saved-query-management-save-changes-button"
                     >
                       {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText',
                         {
                           defaultMessage: 'Save changes',
                         }
@@ -362,7 +362,7 @@ export function QueryBarMenuPanels({
                       size="s"
                       onClick={handleSaveAsNew}
                       aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
                         {
                           defaultMessage: 'Save as new saved query',
                         }
@@ -370,7 +370,7 @@ export function QueryBarMenuPanels({
                       data-test-subj="saved-query-management-save-as-new-button"
                     >
                       {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
                         {
                           defaultMessage: 'Save as new',
                         }
@@ -387,7 +387,7 @@ export function QueryBarMenuPanels({
     },
     {
       id: 1,
-      title: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
+      title: i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
         defaultMessage: 'Save current filter set',
       }),
       disabled: !Boolean(showSaveQuery),
@@ -396,12 +396,12 @@ export function QueryBarMenuPanels({
     {
       id: 2,
       initialFocusedItemIndex: 1,
-      title: i18n.translate('data.filter.options.applyAllFiltersButtonLabel', {
+      title: i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
         defaultMessage: 'Apply to all',
       }),
       items: [
         {
-          name: i18n.translate('data.filter.options.enableAllFiltersButtonLabel', {
+          name: i18n.translate('unifiedSearch.filter.options.enableAllFiltersButtonLabel', {
             defaultMessage: 'Enable all',
           }),
           icon: 'eye',
@@ -412,7 +412,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('data.filter.options.disableAllFiltersButtonLabel', {
+          name: i18n.translate('unifiedSearch.filter.options.disableAllFiltersButtonLabel', {
             defaultMessage: 'Disable all',
           }),
           'data-test-subj': 'filter-sets-disableAllFilters',
@@ -423,7 +423,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('data.filter.options.invertNegatedFiltersButtonLabel', {
+          name: i18n.translate('unifiedSearch.filter.options.invertNegatedFiltersButtonLabel', {
             defaultMessage: 'Invert inclusion',
           }),
           'data-test-subj': 'filter-sets-invertAllFilters',
@@ -434,7 +434,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('data.filter.options.pinAllFiltersButtonLabel', {
+          name: i18n.translate('unifiedSearch.filter.options.pinAllFiltersButtonLabel', {
             defaultMessage: 'Pin all',
           }),
           'data-test-subj': 'filter-sets-pinAllFilters',
@@ -445,7 +445,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('data.filter.options.unpinAllFiltersButtonLabel', {
+          name: i18n.translate('unifiedSearch.filter.options.unpinAllFiltersButtonLabel', {
             defaultMessage: 'Unpin all',
           }),
           'data-test-subj': 'filter-sets-unpinAllFilters',
@@ -459,7 +459,7 @@ export function QueryBarMenuPanels({
     },
     {
       id: 3,
-      title: i18n.translate('data.filter.options.filterLanguageLabel', {
+      title: i18n.translate('unifiedSearch.filter.options.filterLanguageLabel', {
         defaultMessage: 'Filter language',
       }),
       content: (
@@ -473,7 +473,7 @@ export function QueryBarMenuPanels({
     },
     {
       id: 4,
-      title: i18n.translate('data.filter.options.loadCurrentFilterSetLabel', {
+      title: i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
         defaultMessage: 'Load filter set',
       }),
       width: 400,

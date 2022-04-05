@@ -72,7 +72,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
     <EuiButtonIcon
       display="base"
       iconType="plusInCircleFilled"
-      aria-label={i18n.translate('data.filter.filterBar.addFilterButtonLabel', {
+      aria-label={i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
         defaultMessage: 'Add filter',
       })}
       data-test-subj="addFilter"

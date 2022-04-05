@@ -58,7 +58,7 @@ export function SaveQueryForm({
   );
 
   const titleExistsErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.titleExistsText',
+    'unifiedSearch.search.searchBar.savedQueryForm.titleExistsText',
     {
       defaultMessage: 'Name is required',
     }
@@ -201,7 +201,7 @@ export function SaveQueryForm({
           data-test-subj="savedQueryFormSaveButton"
           disabled={hasErrors}
         >
-          {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
+          {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
             defaultMessage: 'Save filter set',
           })}
         </EuiButton>

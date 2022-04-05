@@ -47,7 +47,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="euiFormControlLayout__append kqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
-      aria-label={i18n.translate('data.switchLanguage.buttonText', {
+      aria-label={i18n.translate('unifiedSearch.switchLanguage.buttonText', {
         defaultMessage: 'Switch language button.',
       })}
     />

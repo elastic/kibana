@@ -83,7 +83,7 @@ export function QueryBarMenu({
     toggleFilterBarMenuPopover(false);
   };
 
-  const buttonLabel = i18n.translate('data.filter.options.filterSetButtonLabel', {
+  const buttonLabel = i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
     defaultMessage: 'Filter set menu',
   });
 

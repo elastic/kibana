@@ -142,27 +142,6 @@ export function SavedQueryManagementList({
     fetchCountAndSavedQueries();
   }, [savedQueryService]);
 
-  // const prettifier = usePrettyDuration;
-
-  // const itemTitle = (attributes: SavedQueryAttributes) => {
-  //   let label = attributes.title;
-
-  //   if (attributes.description) {
-  //     label += `; ${attributes.description}`;
-  //   }
-
-  //   if (attributes.timefilter) {
-  //     label += `; ${prettifier({
-  //       timeFrom: attributes.timefilter?.from,
-  //       timeTo: attributes.timefilter?.to,
-  //       quickRanges: commonDurationRanges,
-  //       dateFormat: format,
-  //     })}`;
-  //   }
-
-  //   return label;
-  // };
-
   const handleLoad = useCallback(() => {
     if (selectedSavedQuery) {
       onLoad(selectedSavedQuery);
@@ -200,14 +179,14 @@ export function SavedQueryManagementList({
   );
 
   const savedQueryDescriptionText = i18n.translate(
-    'data.search.searchBar.savedQueryDescriptionText',
+    'unifiedSearch.search.searchBar.savedQueryDescriptionText',
     {
       defaultMessage: 'Save query text and filters that you want to use again.',
     }
   );
 
   const noSavedQueriesDescriptionText =
-    i18n.translate('data.search.searchBar.savedQueryNoSavedQueriesText', {
+    i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
       defaultMessage: 'There are no saved queries.',
     }) +
     ' ' +
@@ -282,9 +261,12 @@ export function SavedQueryManagementList({
               }}
               searchProps={{
                 compressed: true,
-                placeholder: i18n.translate('data.query.queryBar.indexPattern.findFilterSet', {
-                  defaultMessage: 'Find a filter set',
-                }),
+                placeholder: i18n.translate(
+                  'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
+                  {
+                    defaultMessage: 'Find a filter set',
+                  }
+                ),
               }}
               listProps={{
                 isVirtualized: true,
@@ -332,7 +314,7 @@ export function SavedQueryManagementList({
               onClick={handleLoad}
               disabled={!selectedSavedQuery}
               aria-label={i18n.translate(
-                'data.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
                   defaultMessage: 'Apply filter set',
                 }
@@ -340,32 +322,41 @@ export function SavedQueryManagementList({
               data-test-subj="saved-query-management-apply-changes-button"
             >
               {hasFiltersOrQuery
-                ? i18n.translate('data.search.searchBar.savedQueryPopoverReplaceFilterSetLabel', {
-                    defaultMessage: 'Replace with selected filter set',
-                  })
-                : i18n.translate('data.search.searchBar.savedQueryPopoverApplyFilterSetLabel', {
-                    defaultMessage: 'Apply filter set',
-                  })}
+                ? i18n.translate(
+                    'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
+                    {
+                      defaultMessage: 'Replace with selected filter set',
+                    }
+                  )
+                : i18n.translate(
+                    'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                    {
+                      defaultMessage: 'Apply filter set',
+                    }
+                  )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
       {showDeletionConfirmationModal && toBeDeletedSavedQuery && (
         <EuiConfirmModal
-          title={i18n.translate('data.search.searchBar.savedQueryPopoverConfirmDeletionTitle', {
-            defaultMessage: 'Delete "{savedQueryName}"?',
-            values: {
-              savedQueryName: toBeDeletedSavedQuery.attributes.title,
-            },
-          })}
+          title={i18n.translate(
+            'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
+            {
+              defaultMessage: 'Delete "{savedQueryName}"?',
+              values: {
+                savedQueryName: toBeDeletedSavedQuery.attributes.title,
+              },
+            }
+          )}
           confirmButtonText={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+            'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
             {
               defaultMessage: 'Delete',
             }
           )}
           cancelButtonText={i18n.translate(
-            'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+            'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
             {
               defaultMessage: 'Cancel',
             }
