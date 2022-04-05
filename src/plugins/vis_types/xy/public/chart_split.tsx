@@ -14,8 +14,7 @@ interface ChartSplitProps {
   splitRowAccessor?: Accessor | AccessorFn;
 }
 
-const CHART_SPLIT_ID = '__pie_chart_split__';
-export const SMALL_MULTIPLES_ID = '__pie_chart_sm__';
+const CHART_SPLIT_ID = '__chart_split__';
 
 export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplitProps) => {
   if (!splitColumnAccessor && !splitRowAccessor) return null;
@@ -36,19 +35,8 @@ export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplit
         sort={Predicate.DataIndex}
       />
       <SmallMultiples
-        id={SMALL_MULTIPLES_ID}
         splitVertically={splitRowAccessor ? CHART_SPLIT_ID : undefined}
         splitHorizontally={splitColumnAccessor ? CHART_SPLIT_ID : undefined}
-        style={{
-          verticalPanelPadding: {
-            outer: 0.1,
-            inner: 0.1,
-          },
-          horizontalPanelPadding: {
-            outer: 0.1,
-            inner: 0.1,
-          },
-        }}
       />
     </>
   );
