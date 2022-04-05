@@ -32,6 +32,7 @@ export const ToolbarPopover = ({ label, iconType, children, iconSide, ...popover
   const button = <ToolbarButton onClick={onButtonClick} {...{ label, iconSide, iconType }} />;
 
   return (
+    // @ts-ignore
     <EuiPopover {...{ isOpen, button, closePopover }} {...popover}>
       {children({ closePopover })}
     </EuiPopover>
