@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiComboBox, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiRadioGroup,
+} from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -135,11 +143,13 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
-const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
-  style: {
-    display: $isVisible ? 'flex' : 'none',
-  },
-}))<{ $isVisible: boolean }>``;
+const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean; $display: string }>(
+  ({ $isVisible, $display }) => ({
+    style: {
+      display: $isVisible ? $display ?? 'flex' : 'none',
+    },
+  })
+)<{ $isVisible: boolean; $display: string }>``;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -183,6 +193,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
+  const [radioIdSelected, setRadioIdSelected] = useState('dataViewId');
+
+  const onChangeRadioButton = (optionId) => {
+    setRadioIdSelected(optionId);
+  };
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const initialState = defaultValues ?? {
@@ -402,34 +417,75 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} $display={'flex-wrap'} fullWidth>
             <>
-              <UseField
-                path="dataViewId"
-                component={DataViewSelector}
-                componentProps={{
-                  kibanaDataViews,
-                }}
-              />
-              <CommonUseField
-                path="index"
-                config={{
-                  ...schema.index,
-                  labelAppend: indexModified ? (
-                    <MyLabelButton onClick={handleResetIndices} iconType="refresh">
-                      {i18n.RESET_DEFAULT_INDEX}
-                    </MyLabelButton>
-                  ) : null,
-                }}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleIndices',
-                  'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-                  euiFieldProps: {
-                    fullWidth: true,
-                    placeholder: '',
-                  },
-                }}
-              />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={1}>
+                  <EuiRadioGroup
+                    options={[
+                      {
+                        id: 'dataView',
+                        label: (
+                          <UseField
+                            path="dataViewId"
+                            component={DataViewSelector}
+                            componentProps={{
+                              kibanaDataViews,
+                            }}
+                          />
+                        ),
+                        labelProps: {
+                          style: { display: 'flex !important', width: '100%' },
+                        },
+                      },
+                    ]}
+                    idSelected={radioIdSelected}
+                    onChange={onChangeRadioButton}
+                    name="radio group"
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={1}>
+                  <EuiRadioGroup
+                    options={[
+                      {
+                        id: 'indexPatterns',
+                        label: (
+                          <EuiAccordion
+                            data-test-subj="indexPatternsAccordion"
+                            id="indexPatternsAccoridion"
+                            buttonContent={i18n.INDEX_PATTERNS}
+                          >
+                            <CommonUseField
+                              path="index"
+                              config={{
+                                ...schema.index,
+                                labelAppend: indexModified ? (
+                                  <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                                    {i18n.RESET_DEFAULT_INDEX}
+                                  </MyLabelButton>
+                                ) : null,
+                              }}
+                              componentProps={{
+                                idAria: 'detectionEngineStepDefineRuleIndices',
+                                'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+                                euiFieldProps: {
+                                  fullWidth: true,
+                                  placeholder: '',
+                                },
+                              }}
+                            />
+                          </EuiAccordion>
+                        ),
+                      },
+                    ]}
+                    idSelected={radioIdSelected}
+                    onChange={onChangeRadioButton}
+                    name="radio group"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
               {isEqlRule(ruleType) ? (
                 <UseField
                   key="EqlQueryBar"

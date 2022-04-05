@@ -25,29 +25,36 @@ interface DataViewSelectorProps {
 type Event = React.ChangeEvent<HTMLInputElement>;
 
 export const DataViewSelector = ({ kibanaDataViews = [], field }: DataViewSelectorProps) => {
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    []
+  );
   const onChangeIndexPatterns = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>) => {
       const dataView = options;
-      setSelectedOptions(options);
-      field.setValue(dataView[0].label);
+      if (dataView.length > 0) {
+        setSelectedOptions(options);
+        field.setValue(dataView[0].label);
+      }
     },
     [field]
   );
 
   return (
-    <EuiFormRow label={field.label} data-test-subj="createRuleDataViewSelector">
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            onChange={onChangeIndexPatterns}
-            options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
-            selectedOptions={selectedOptions}
-            placeholder={i18n.PICK_INDEX_PATTERNS}
-          />
-          {/* <EuiCom
+    <>
+      {/* <EuiFormRow
+      style={{ width: 'flex' }}
+      label={field.label}
+      data-test-subj="createRuleDataViewSelector"
+    > */}
+      <EuiComboBox
+        style={{ display: 'flex !important' }}
+        singleSelection={{ asPlainText: true }}
+        onChange={onChangeIndexPatterns}
+        options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
+        selectedOptions={selectedOptions}
+        placeholder={i18n.PICK_INDEX_PATTERNS}
+      />
+      {/* <EuiCom
             value={threshold}
             onChange={onThresholdChange}
             fullWidth
@@ -56,8 +63,7 @@ export const DataViewSelector = ({ kibanaDataViews = [], field }: DataViewSelect
             showTicks
             tickInterval={25}
           /> */}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+      {/* </EuiFormRow> */}
+    </>
   );
 };
