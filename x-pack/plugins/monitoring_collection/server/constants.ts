@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const TYPE_ALLOWLIST = ['rules', 'actions'];
+export const TYPE_ALLOWLIST = ['node_rules', 'cluster_rules', 'node_actions', 'cluster_actions'];

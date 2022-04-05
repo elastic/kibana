@@ -26,6 +26,7 @@
     "expressionMetric": "src/plugins/expression_metric",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
     "expressionPartitionVis": "src/plugins/chart_expressions/expression_partition_vis",
+    "expressionXY": "src/plugins/chart_expressions/expression_xy",
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressions": "src/plugins/expressions",
@@ -89,7 +90,8 @@
     "visTypeVega": "src/plugins/vis_types/vega",
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
-    "visualizations": "src/plugins/visualizations"
+    "visualizations": "src/plugins/visualizations",
+    "unifiedSearch": "src/plugins/unified_search"
   },
   "translations": []
 }

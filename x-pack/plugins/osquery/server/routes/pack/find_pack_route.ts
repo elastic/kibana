@@ -13,6 +13,7 @@ import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
+import { PackSavedObjectAttributes } from '../../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -35,12 +36,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const soClientResponse = await savedObjectsClient.find<{
-        name: string;
-        description: string;
-        queries: Array<{ name: string; interval: number }>;
-        policy_ids: string[];
-      }>({
+      const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
         type: packSavedObjectType,
         page: parseInt(request.query.pageIndex ?? '0', 10) + 1,
         perPage: request.query.pageSize ?? 20,

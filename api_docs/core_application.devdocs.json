@@ -1371,6 +1371,7 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "management",
@@ -1414,6 +1415,7 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "visualizations",
@@ -1889,6 +1891,7 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "securitySolution",

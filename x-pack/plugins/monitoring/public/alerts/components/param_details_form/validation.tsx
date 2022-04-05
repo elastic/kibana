@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParams } from '../../../../../alerting/common';
+import { RuleTypeParams } from '../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
 
-export type MonitoringAlertTypeParams = ValidateOptions & AlertTypeParams;
+export type MonitoringAlertTypeParams = ValidateOptions & RuleTypeParams;
 interface ValidateOptions {
   duration: string;
   threshold: number;

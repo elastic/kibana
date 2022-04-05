@@ -16,8 +16,8 @@ import { RunContext, TaskManagerSetupContract } from '../../task_manager/server'
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from './types';
@@ -31,6 +31,7 @@ import {
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
+import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
@@ -40,6 +41,7 @@ export interface ConstructorOptions {
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  inMemoryMetrics: InMemoryMetrics;
 }
 
 export interface RegistryRuleType
@@ -82,9 +84,9 @@ const ruleTypeIdSchema = schema.string({
 });
 
 export type NormalizedRuleType<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -119,9 +121,9 @@ export type NormalizedRuleType<
   >;
 
 export type UntypedNormalizedRuleType = NormalizedRuleType<
-  AlertTypeParams,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   string,
@@ -136,6 +138,7 @@ export class RuleTypeRegistry {
   private readonly licenseState: ILicenseState;
   private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
+  private readonly inMemoryMetrics: InMemoryMetrics;
 
   constructor({
     logger,
@@ -144,6 +147,7 @@ export class RuleTypeRegistry {
     licenseState,
     licensing,
     minimumScheduleInterval,
+    inMemoryMetrics,
   }: ConstructorOptions) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -151,6 +155,7 @@ export class RuleTypeRegistry {
     this.licenseState = licenseState;
     this.licensing = licensing;
     this.minimumScheduleInterval = minimumScheduleInterval;
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public has(id: string) {
@@ -162,9 +167,9 @@ export class RuleTypeRegistry {
   }
 
   public register<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
@@ -269,7 +274,7 @@ export class RuleTypeRegistry {
             InstanceContext,
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedRuleType, context),
+          >(normalizedRuleType, context, this.inMemoryMetrics),
       },
     });
     // No need to notify usage on basic alert types
@@ -282,9 +287,9 @@ export class RuleTypeRegistry {
   }
 
   public get<
-    Params extends AlertTypeParams = AlertTypeParams,
-    ExtractedParams extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
+    Params extends RuleTypeParams = RuleTypeParams,
+    ExtractedParams extends RuleTypeParams = RuleTypeParams,
+    State extends RuleTypeState = RuleTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
@@ -377,9 +382,9 @@ function normalizedActionVariables(actionVariables: RuleType['actionVariables'])
 }
 
 function augmentActionGroupsWithReserved<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,

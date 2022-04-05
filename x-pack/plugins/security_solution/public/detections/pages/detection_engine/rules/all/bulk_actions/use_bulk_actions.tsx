@@ -30,7 +30,7 @@ import { canEditRuleWithActions } from '../../../../../../common/utils/privilege
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
-import { executeRulesBulkAction, initRulesBulkAction } from '../actions';
+import { executeRulesBulkAction } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import { getCustomRulesCountFromCache } from './use_custom_rules_count';
@@ -239,25 +239,22 @@ export const useBulkActions = ({
           );
         }, 5 * 1000);
 
-        const rulesBulkAction = initRulesBulkAction({
+        await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.edit,
           setLoadingRules,
           toasts,
           payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
+          search: isAllSelected
+            ? {
+                query: convertRulesFilterToKQL({
+                  ...filterOptions,
+                  showCustomRules: true, // only edit custom rules, as elastic rule are immutable
+                }),
+              }
+            : { ids: customSelectedRuleIds },
         });
-
-        // only edit custom rules, as elastic rule are immutable
-        if (isAllSelected) {
-          const customRulesOnlyFilterQuery = convertRulesFilterToKQL({
-            ...filterOptions,
-            showCustomRules: true,
-          });
-          await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
-        } else {
-          await rulesBulkAction.byIds(customSelectedRuleIds);
-        }
 
         isBulkEditFinished = true;
         invalidateRules();
@@ -309,6 +306,16 @@ export const useBulkActions = ({
               'data-test-subj': 'tagsBulkEditRule',
               disabled: isEditDisabled,
               panel: 1,
+            },
+            {
+              key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
+              name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
+              'data-test-subj': 'applyTimelineTemplateBulk',
+              disabled: isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.set_timeline),
+              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
             },
             {
               key: i18n.BULK_ACTION_EXPORT,

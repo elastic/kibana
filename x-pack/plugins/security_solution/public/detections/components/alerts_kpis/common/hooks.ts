@@ -55,17 +55,16 @@ export const useInspectButton = ({
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
 };
 
-function getAggregatableFields(fields: { [fieldName: string]: Partial<BrowserField> }) {
-  return Object.entries(fields).reduce<EuiComboBoxOptionOption[]>(
-    (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
-      if (field.aggregatable === true) {
-        return [...filteredOptions, { label: key, value: key }];
-      } else {
-        return filteredOptions;
-      }
-    },
-    []
-  );
+export function getAggregatableFields(fields: {
+  [fieldName: string]: Partial<BrowserField>;
+}): EuiComboBoxOptionOption[] {
+  const result = [];
+  for (const [key, field] of Object.entries(fields)) {
+    if (field.aggregatable === true) {
+      result.push({ label: key, value: key });
+    }
+  }
+  return result;
 }
 
 export const useStackByFields = () => {
