@@ -301,7 +301,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    const httpFramework = createHTTPConnectorFramework({ actionTypeRegistry, logger: this.logger });
+    const httpFramework = createHTTPConnectorFramework({
+      actionTypeRegistry,
+      logger: this.logger,
+      actionsConfigUtils,
+    });
     httpFramework.registerConnector({
       id: '.test',
       name: 'Test',

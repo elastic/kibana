@@ -7,6 +7,7 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from 'kibana/server';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { buildExecutor } from './executor';
 import { HTTPConnectorType } from './types';
@@ -15,12 +16,18 @@ export const register = <Config, Secrets, Params>({
   actionTypeRegistry,
   connector,
   logger,
+  configurationUtilities,
 }: {
+  configurationUtilities: ActionsConfigurationUtilities;
   actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
   connector: HTTPConnectorType<Config, Secrets, Params>;
   logger: Logger;
 }) => {
-  const executor = buildExecutor<Config, Secrets, Params>({ connector, logger });
+  const executor = buildExecutor<Config, Secrets, Params>({
+    connector,
+    logger,
+    configurationUtilities,
+  });
 
   actionTypeRegistry.register({
     id: connector.id,

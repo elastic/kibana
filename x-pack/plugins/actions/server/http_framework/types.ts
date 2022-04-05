@@ -29,7 +29,7 @@ interface EndPointConfig<
   postFetch?: (res: FetchResponse) => void;
 }
 
-type EndPointFunc = () => void;
+export type EndPointFunc = () => Promise<{}>;
 
 export type EndPoint<Config, Secrets, Params> =
   | EndPointConfig<Config, Secrets, Params>
@@ -52,3 +52,4 @@ export interface HTTPConnectorType<
 }
 
 export type HandlerReturnType = Record<string, unknown> | Array<Record<string, unknown>>;
+export type HandlerFunc = () => Promise<HandlerReturnType>;
