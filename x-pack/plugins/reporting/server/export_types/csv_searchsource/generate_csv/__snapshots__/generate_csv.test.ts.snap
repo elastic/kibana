@@ -13,8 +13,8 @@ exports[`fields from job.columns (7.13+ generated) columns can be top-level fiel
 `;
 
 exports[`fields from job.columns (7.13+ generated) default column names come from tabify 1`] = `
-"\\"_id\\",\\"_index\\",\\"_score\\",category,product
-\\"my-cool-id\\",\\"my-cool-index\\",\\"'-\\",\\"cool, rad\\",coconut
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",category,product
+\\"my-cool-id\\",\\"my-cool-index\\",\\"'-\\",\\"'-\\",\\"cool, rad\\",coconut
 "
 `;
 
