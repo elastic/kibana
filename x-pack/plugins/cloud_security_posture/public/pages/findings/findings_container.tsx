@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindingsTable } from './findings_table';
@@ -28,7 +28,7 @@ const getDefaultQuery = (): CspFindingsRequest => ({
 export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
   const { urlQuery: findingsQuery, setUrlQuery, key } = useUrlQuery(getDefaultQuery);
   const findingsResult = useFindings(dataView, findingsQuery, key);
-
+  const { euiTheme } = useEuiTheme();
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -39,7 +39,7 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
       />
       <div
         css={css`
-          padding: 24px;
+          padding: ${euiTheme.size.l};
         `}
       >
         <PageTitle />
