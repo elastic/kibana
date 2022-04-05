@@ -10,11 +10,11 @@ import { Moment } from 'moment';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
+import { RuleExecutorOptions, RuleType } from '../../../../../alerting/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
   WithoutReservedActionGroups,
 } from '../../../../../alerting/common';
 import { ListClient } from '../../../../../lists/server';
@@ -35,7 +35,7 @@ import { IEventLogService } from '../../../../../event_log/server';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
 
-export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
+export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
@@ -68,7 +68,7 @@ export interface RunOpts<TParams extends RuleParams> {
 
 export type SecurityAlertType<
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
@@ -76,7 +76,7 @@ export type SecurityAlertType<
   'executor'
 > & {
   executor: (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       TParams,
       TState,
       AlertInstanceState,
@@ -102,7 +102,7 @@ export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {}
 >(
   type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>

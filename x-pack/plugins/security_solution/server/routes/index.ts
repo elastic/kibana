@@ -105,7 +105,8 @@ export const initRoutes = (
     ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
-    percolatorRuleDataClient
+    percolatorRuleDataClient,
+    getStartServices
   );
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.

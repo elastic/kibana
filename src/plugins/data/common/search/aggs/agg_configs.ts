@@ -18,6 +18,7 @@ import {
   ISearchOptions,
   ISearchSource,
   RangeFilter,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';

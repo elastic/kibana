@@ -11,7 +11,7 @@ import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../../alerting/common';
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
@@ -64,7 +64,7 @@ export function registerTransformHealthRuleType(params: RegisterParams) {
 export function getTransformHealthRuleType(): RuleType<
   TransformHealthRuleParams,
   never,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   TransformHealthAlertContext,
   TransformIssue

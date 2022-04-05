@@ -18,9 +18,7 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
-export const getSignalMatchesFromThreatList = (
-  threatList: ThreatListItem[] = []
-): SignalMatch[] => {
+export const getSignalMatchesFromThreatList = (threatList: IndicatorHit[] = []): SignalMatch[] => {
   const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
 
   threatList.forEach((threatHit) =>

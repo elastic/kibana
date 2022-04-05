@@ -8,12 +8,19 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { validateExpression } from './validation';
-import { EsQueryAlertParams } from './types';
+import { EsQueryAlertParams, SearchType } from './types';
 import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
+import { SanitizedRule } from '../../../../alerting/common';
 
-export function getAlertType(): RuleTypeModel<EsQueryAlertParams> {
+const PLUGIN_ID = 'discover';
+const ES_QUERY_ALERT_TYPE = '.es-query';
+
+export function getAlertType(alerting: AlertingSetup): RuleTypeModel<EsQueryAlertParams> {
+  registerNavigation(alerting);
+
   return {
-    id: '.es-query',
+    id: ES_QUERY_ALERT_TYPE,
     description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionText', {
       defaultMessage: 'Alert when matches are found during the latest query run.',
     }),
@@ -28,9 +35,20 @@ export function getAlertType(): RuleTypeModel<EsQueryAlertParams> {
 
 - Value: \\{\\{context.value\\}\\}
 - Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}
-- Timestamp: \\{\\{context.date\\}\\}`,
+- Timestamp: \\{\\{context.date\\}\\}
+- Link: \\{\\{context.link\\}\\}`,
       }
     ),
     requiresAppContext: false,
   };
+}
+
+function registerNavigation(alerting: AlertingSetup) {
+  alerting.registerNavigation(
+    PLUGIN_ID,
+    ES_QUERY_ALERT_TYPE,
+    (alert: SanitizedRule<EsQueryAlertParams<SearchType.searchSource>>) => {
+      return `#/viewAlert/${alert.id}`;
+    }
+  );
 }
