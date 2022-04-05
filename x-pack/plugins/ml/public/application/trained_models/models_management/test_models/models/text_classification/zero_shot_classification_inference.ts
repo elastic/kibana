@@ -9,10 +9,17 @@ import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
 import type { InferResponse, TextClassificationResponse } from './common';
 
-export class TextClassificationInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
+export class ZeroShotClassificationInference extends InferenceBase<InferResponse> {
+  public async infer(inputText: string, labelsText?: string) {
+    const inputLabels = labelsText?.split(',').map((l) => l.trim());
     const payload = {
       docs: { [this.inputField]: inputText },
+      inference_config: {
+        zero_shot_classification: {
+          labels: inputLabels,
+          multi_label: false,
+        },
+      },
     };
     const resp = (await this.trainedModelsApi.inferTrainedModel(
       this.model.model_id,

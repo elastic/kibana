@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export type {
-  TextClassificationResponse,
-  FormattedTextClassificationResponse,
-} from './text_classification_inference';
+export type { TextClassificationResponse, FormattedTextClassificationResponse } from './common';
+
 export { TextClassificationInference } from './text_classification_inference';
 export { TextClassificationOutput } from './text_classification_output';
+
+export { ZeroShotClassificationInference } from './zero_shot_classification_inference';
+export { ZeroShotClassificationInput } from './zero_shot_classification_input';

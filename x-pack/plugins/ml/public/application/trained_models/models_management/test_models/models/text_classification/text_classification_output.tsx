@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress } from '@elastic/eui';
 
-import type { FormattedTextClassificationResponse } from './text_classification_inference';
+import type { FormattedTextClassificationResponse } from './common';
 
 export const TextClassificationOutput: FC<{ result: FormattedTextClassificationResponse }> = ({
   result,

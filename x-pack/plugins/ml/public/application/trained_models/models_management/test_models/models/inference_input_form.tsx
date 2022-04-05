@@ -7,32 +7,43 @@
 
 import React, { FC, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 
 import { LangIdentInference } from './lang_ident';
 import { NerInference } from './ner';
-import { TextClassificationInference } from './text_classification';
+import {
+  TextClassificationInference,
+  ZeroShotClassificationInference,
+} from './text_classification';
 
 import type { FormattedLangIdentResponse } from './lang_ident';
 import type { FormattedNerResponse } from './ner';
-import type { TextClassificationResponse } from './text_classification';
+import type { FormattedTextClassificationResponse } from './text_classification';
 
 import { MLJobEditor } from '../../../../jobs/jobs_list/components/ml_job_editor';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { ErrorMessage } from '../inference_error';
 import { OutputLoadingContent } from '../output_loading';
 
-type InferenceResponse =
+type FormattedInferenceResponse =
   | FormattedLangIdentResponse
   | FormattedNerResponse
-  | TextClassificationResponse;
-type Inferrer = LangIdentInference | NerInference | TextClassificationInference;
+  | FormattedTextClassificationResponse;
+
+type InferResponse =
+  | ReturnType<LangIdentInference['infer']>
+  | ReturnType<NerInference['infer']>
+  | ReturnType<TextClassificationInference['infer']>
+  | ReturnType<ZeroShotClassificationInference['infer']>;
 
 interface Props {
-  inferrer: Inferrer;
-  getOutputComponent(output: any): JSX.Element;
+  getOutputComponent(output: FormattedInferenceResponse): JSX.Element;
+  getInputComponent(): JSX.Element;
+  inputText: string;
+  infer(): InferResponse;
+  isRunning: boolean;
+  setIsRunning(running: boolean): void;
 }
 
 enum TAB {
@@ -40,10 +51,15 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) => {
-  const [inputText, setInputText] = useState('');
-  const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState<InferenceResponse | null>(null);
+export const InferenceInputForm: FC<Props> = ({
+  getOutputComponent,
+  getInputComponent,
+  inputText,
+  infer,
+  isRunning,
+  setIsRunning,
+}) => {
+  const [output, setOutput] = useState<FormattedInferenceResponse | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [showOutput, setShowOutput] = useState(false);
@@ -56,7 +72,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) 
     setIsRunning(true);
     setErrorText(null);
     try {
-      const { response, rawResponse } = await inferrer.infer(inputText);
+      const { response, rawResponse } = await infer();
       setOutput(response);
       setRawOutput(JSON.stringify(rawResponse, null, 2));
     } catch (e) {
@@ -70,17 +86,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) 
 
   return (
     <>
-      <EuiTextArea
-        placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
-          defaultMessage: 'Input text',
-        })}
-        value={inputText}
-        disabled={isRunning === true}
-        fullWidth
-        onChange={(e) => {
-          setInputText(e.target.value);
-        }}
-      />
+      <>{getInputComponent()}</>
       <EuiSpacer size="m" />
       <div>
         <EuiButton

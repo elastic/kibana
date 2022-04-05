@@ -26,5 +26,5 @@ export abstract class InferenceBase<TInferResponse> {
     this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
   }
 
-  protected abstract infer(inputText: string): Promise<TInferResponse>;
+  protected abstract infer(inputText: string, inputText2?: string): Promise<TInferResponse>;
 }
