@@ -45,9 +45,15 @@ import type {
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
 import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from './analytics';
 
 /** @internal */
 export interface InternalCorePreboot {
+  analytics: AnalyticsServicePreboot;
   context: InternalContextPreboot;
   http: InternalHttpServicePreboot;
   elasticsearch: InternalElasticsearchServicePreboot;
@@ -59,6 +65,7 @@ export interface InternalCorePreboot {
 
 /** @internal */
 export interface InternalCoreSetup {
+  analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
   context: ContextSetup;
   docLinks: DocLinksServiceSetup;
@@ -82,6 +89,7 @@ export interface InternalCoreSetup {
  * @internal
  */
 export interface InternalCoreStart {
+  analytics: AnalyticsServiceStart;
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
   docLinks: DocLinksServiceStart;
