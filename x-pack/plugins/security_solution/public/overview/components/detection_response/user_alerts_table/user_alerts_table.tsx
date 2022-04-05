@@ -20,16 +20,20 @@ import React from 'react';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import * as i18n from '../translations';
 import { SEVERITY_COLOR } from '../util';
 import { AlertSeverityCounts, useUserAlertsItems } from './user_alerts_items';
 
 const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
   {
-    field: 'hostName',
-    name: 'Host name',
+    field: 'userName',
+    name: i18n.USER_ALERTS_USERNAME_COLUMN,
+    truncateText: true,
+    textOnly: true,
+
     render: (hostName: string) => (
       <EuiLink
-        data-test-subj="hostSeverityAlertsTable-hostName"
+        data-test-subj="userSeverityAlertsTable-hostName"
         href={`/app/security/rules/id/${hostName}`}
       >
         {hostName}
@@ -38,10 +42,10 @@ const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
   },
   {
     field: 'totalAlerts',
-    name: 'Alerts',
+    name: i18n.ALERTS_COLUMN,
     render: (totalAlerts: number, { userName }) => (
       <EuiLink
-        data-test-subj="hostSeverityAlertsTable-totalAlerts"
+        data-test-subj="userSeverityAlertsTable-totalAlerts"
         href={`/app/security/rules/id/${userName}`}
       >
         {totalAlerts}
@@ -50,36 +54,36 @@ const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
   },
   {
     field: 'critical',
-    name: 'Critical',
+    name: i18n.SEVERITY_CRITICAL_COLUMN,
     render: (count: number) => (
-      <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
+      <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         {count}
       </EuiHealth>
     ),
   },
   {
     field: 'high',
-    name: 'High',
+    name: i18n.SEVERITY_HIGH_COLUMN,
     render: (count: number) => (
-      <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
+      <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
         {count}
       </EuiHealth>
     ),
   },
   {
     field: 'medium',
-    name: 'Medium',
+    name: i18n.SEVERITY_MEDIUM_COLUMN,
     render: (count: number) => (
-      <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
+      <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         {count}
       </EuiHealth>
     ),
   },
   {
     field: 'low',
-    name: 'Low',
+    name: i18n.SEVERITY_LOW_COLUMN,
     render: (count: number) => (
-      <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
+      <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
         {count}
       </EuiHealth>
     ),
@@ -113,11 +117,11 @@ export const UserAlertsTable = React.memo(() => {
               console.log('redirect');
             }}
           >
-            {'View all other user alerts'}
+            {i18n.VIEW_ALL_USER_ALERTS}
           </EuiButton>
         </>
       ) : (
-        <EuiEmptyPrompt title={<h3>{'no alerts'}</h3>} titleSize="xs" />
+        <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
       )}
     </EuiPanel>
   );

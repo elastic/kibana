@@ -19,7 +19,7 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
-import { HostAlertsTable } from '../components/detection_response';
+import { HostAlertsTable, UserAlertsTable } from '../components/detection_response';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -46,7 +46,6 @@ const DetectionResponseComponent = () => {
 
   return (
     <>
-      <HostAlertsTable />
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper>
@@ -85,7 +84,9 @@ const DetectionResponseComponent = () => {
                   <EuiFlexItem>
                     <HostAlertsTable />
                   </EuiFlexItem>
-                  <EuiFlexItem>{'[users table]'}</EuiFlexItem>
+                  <EuiFlexItem>
+                    <UserAlertsTable />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

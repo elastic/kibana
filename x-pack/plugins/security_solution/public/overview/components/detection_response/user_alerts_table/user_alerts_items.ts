@@ -74,6 +74,8 @@ export const useUserAlertsItems = ({
     indexName: signalIndexName,
   });
 
+  console.log(result);
+
   const transformedResponse = useMemo(
     () => ({
       id: ID,
