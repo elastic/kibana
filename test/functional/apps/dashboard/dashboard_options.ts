@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
-    
+
     it('should be able to hide all panel titles', async () => {
       await PageObjects.dashboard.checkHideTitle();
       await retry.try(async () => {
