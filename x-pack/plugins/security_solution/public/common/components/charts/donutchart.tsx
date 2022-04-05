@@ -25,6 +25,7 @@ type DonutChartData = ParsedSeverityBucket;
 
 export interface DonutChartProps {
   data: DonutChartData[];
+  fillColor: (d: Datum) => string;
   height?: number;
   isEmptyChart: boolean;
   label: string;
@@ -56,6 +57,7 @@ export const DonutChart = ({
   link,
   showLegend = true,
   sum,
+  fillColor,
 }: DonutChartProps) => {
   const theme = useTheme();
 
@@ -64,13 +66,15 @@ export const DonutChart = ({
   const legendItems: LegendItem[] = useMemo(
     () =>
       data != null && legendField
-        ? data.map((d, i) => ({
-            color: colors[i],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
-            timelineId: undefined,
-            field: legendField,
-            value: d.key,
-          }))
+        ? data.map((d, i) => {
+            return {
+              color: colors[d.key],
+              dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
+              timelineId: undefined,
+              field: legendField,
+              value: d.key,
+            };
+          })
         : NO_LEGEND_DATA,
     [colors, data, legendField]
   );
@@ -113,7 +117,7 @@ export const DonutChart = ({
           <Chart size={height}>
             <Settings theme={chartTheme.theme} baseTheme={theme} />
             <Partition
-              id="spec_1"
+              id="donut-chart"
               data={data}
               layout={PartitionLayout.sunburst}
               valueAccessor={(d: Datum) => d.value as number}
@@ -134,12 +138,10 @@ export const DonutChart = ({
                to make the one above thinner.
                */
                 {
-                  groupByRollup: (d: Datum) => d.label,
+                  groupByRollup: (d: Datum) => d.key,
                   nodeLabel: (d: Datum) => d,
                   shape: {
-                    fillColor: (d: Datum) => {
-                      return colors[d.sortIndex];
-                    },
+                    fillColor,
                   },
                 },
               ]}

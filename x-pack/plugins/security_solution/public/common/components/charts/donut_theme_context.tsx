@@ -22,7 +22,7 @@ const donutTheme: PartialTheme = {
 };
 
 const defaultContext = {
-  colors: ['#EF6550', '#EE9266', '#F3B689', '#F8D9B2'],
+  colors: { critical: '#EF6550', high: '#EE9266', medium: '#F3B689', low: '#F8D9B2' },
   chartTheme: {
     theme: donutTheme,
   },

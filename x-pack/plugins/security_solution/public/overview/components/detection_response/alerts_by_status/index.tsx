@@ -6,10 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import classnames from 'classnames';
 import uuid from 'uuid';
+import { Datum } from '@elastic/charts';
 import { DonutChart, NO_LEGEND_DATA } from '../../../../common/components/charts/donutchart';
 import { APP_ID } from '../../../../../common/constants';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
@@ -102,11 +103,11 @@ export const AlertsByStatus = ({
     () =>
       donutData && donutData?.length > 0 && legendField
         ? (donutData[0] && donutData[0].buckets).map((d, i) => ({
-            color: colors[i],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.group}`),
+            color: colors[d.key],
+            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
             timelineId: undefined,
             field: legendField,
-            value: `${d.key}`,
+            value: d.key,
           }))
         : NO_LEGEND_DATA,
     [colors, donutData]
@@ -115,6 +116,24 @@ export const AlertsByStatus = ({
   const totalAlerts = useMemo(
     () => donutData.reduce((acc, curr) => acc + curr.doc_count, 0),
     [donutData]
+  );
+
+  const fillColor = useCallback(
+    (d: Datum) => {
+      switch (d.dataName) {
+        case 'low':
+          return colors.low;
+        case 'medium':
+          return colors.medium;
+        case 'high':
+          return colors.high;
+        case 'critical':
+          return colors.critical;
+        default:
+          return colors.low;
+      }
+    },
+    [colors.critical, colors.high, colors.low, colors.medium]
   );
   return (
     <>
@@ -188,6 +207,7 @@ export const AlertsByStatus = ({
                       showLegend={false}
                       isEmptyChart={data.doc_count === 0}
                       sum={<FormattedCount count={data.doc_count} />}
+                      fillColor={fillColor}
                     />
                   </EuiFlexItem>
                 ))}

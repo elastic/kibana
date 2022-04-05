@@ -60,6 +60,7 @@ describe('DonutChart', () => {
     link: null,
     legendField: 'kibana.alert.severity',
     sum: <>{28149}</>,
+    fillColor: jest.fn(() => '#ccc'),
   };
 
   beforeEach(() => {
