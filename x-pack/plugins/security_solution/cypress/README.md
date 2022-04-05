@@ -404,16 +404,17 @@ Similar approach should be used in defining all index patterns, rules, and queri
 ## Development Best Practices
 Below you will a set of best practices that should be followed when writing Cypress tests.
 
-### Make sure your test fail
+### Write easy to maintain tests
+Consider to extract all the elements you need to interact with to the `screens` folder. In this way in case the locator changes, we just need to update the value in one place.
 
+### Write easy to read tests
+Consider to extract all the tasks a user should perfom into the `tasks` folder. In this way is going to be easier to undertsand what are we trying to mimic from the user perspective. Also in case there is change on the way the user has to perform the action, we 
+just need to update the value in one place.
+
+### Make sure your test fail
 Before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
-### Clean up the state 
-
-Remember to clean up the state of the test after its execution, typically with the `cleanKibana` function. Be mindful of failure scenarios, as well: if your test fails, will it leave the environment in a recoverable state?
-
 ### Minimize the use of es_archive
-
 When possible, create all the data that you need for executing the tests using the application APIS or the UI.
 
 ### Speed up test execution time
@@ -424,6 +425,7 @@ taken into consideration until another solution is implemented:
 - Group the tests that are similar in different contexts.
 - For every context login only once, clean the state between tests if needed without re-loading the page.
 - All tests in a spec file must be order-independent.
+- Clean up the state and data just when needed using `cleanKibana` function.  The execution of it is expensive of time, so consider if you really need to clean the data before the execution. I.e: If you are just checking that a modal can be opened, you may not need to clean the data.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
