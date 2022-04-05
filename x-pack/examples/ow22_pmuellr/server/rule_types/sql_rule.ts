@@ -26,25 +26,31 @@ interface ActionContext extends AlertInstanceContext {
   message: string;
 }
 
-export const ruleType: RuleType<Params, never, {}, {}, ActionContext, typeof SqlRuleActionGroupId> =
-  {
-    id: SqlRuleId,
-    name: SqlRuleName,
-    actionGroups: [{ id: SqlRuleActionGroupId, name: SqlRuleActionGroupId }],
-    executor,
-    defaultActionGroupId: SqlRuleActionGroupId,
-    validate: {
-      params: ParamsSchema,
-    },
-    actionVariables: {
-      context: [{ name: 'message', description: 'A pre-constructed message for the alert.' }],
-      params: [{ name: 'query', description: 'SQL query to run.' }],
-    },
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    producer: RuleProducer,
-    doesSetRecoveryContext: true,
-  };
+export const ruleTypeSql: RuleType<
+  Params,
+  never,
+  {},
+  {},
+  ActionContext,
+  typeof SqlRuleActionGroupId
+> = {
+  id: SqlRuleId,
+  name: SqlRuleName,
+  actionGroups: [{ id: SqlRuleActionGroupId, name: SqlRuleActionGroupId }],
+  executor,
+  defaultActionGroupId: SqlRuleActionGroupId,
+  validate: {
+    params: ParamsSchema,
+  },
+  actionVariables: {
+    context: [{ name: 'message', description: 'A pre-constructed message for the alert.' }],
+    params: [{ name: 'query', description: 'SQL query to run.' }],
+  },
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  producer: RuleProducer,
+  doesSetRecoveryContext: true,
+};
 
 async function executor(
   options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof SqlRuleActionGroupId>

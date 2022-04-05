@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export { ruleType as ruleTypeSql } from './sql_rule';
+import { ruleTypeSql } from './sql_rule';
+import { ruleTypeWebhook } from './webhook_rule';
+
+// export { ruleTypeSql } from './sql_rule';
+// export { ruleTypeWebhook } from './webhook_rule';
+
+import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerting/server';
+
+export function registerRuleTypes(alerting: AlertingSetup) {
+  alerting.registerType(ruleTypeSql);
+  alerting.registerType(ruleTypeWebhook);
+}

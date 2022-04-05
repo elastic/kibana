@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/server';
+import { PluginInitializer, PluginInitializerContext } from 'kibana/server';
 import { Ow22pmuellrPlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = () => new Ow22pmuellrPlugin();
+export const plugin: PluginInitializer<void, void> = (
+  initializerContext: PluginInitializerContext
+) => new Ow22pmuellrPlugin(initializerContext);

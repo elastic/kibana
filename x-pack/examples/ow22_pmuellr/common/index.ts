@@ -18,3 +18,8 @@ export const SqlRuleActionGroupId = 'found';
 export const SqlRuleName = 'SQL query';
 export const SqlRuleDescription =
   'Alerting rule that runs an sql query and creates alerts from returned rows.';
+
+export const WebhookRuleId = 'ow22-webhook';
+export const WebhookRuleActionGroupId = 'found';
+export const WebhookRuleName = 'Webhook';
+export const WebhookRuleDescription = 'Alerting rule that runs the rule via a webhook.';

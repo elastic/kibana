@@ -24,7 +24,7 @@ import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/
 
 import { AppId, AppTitle, AppDescription } from '../common';
 import { examplePage } from './components/example_page';
-import { getRuleTypeSql } from './rule_types';
+import { registerRuleTypes } from './rule_types';
 
 export type Setup = void;
 export type Start = void;
@@ -59,13 +59,13 @@ export class Ow22pmuellrPlugin
       },
     });
 
-    triggersActionsUi.ruleTypeRegistry.register(getRuleTypeSql());
-
     developerExamples.register({
       appId: AppId,
       title: AppTitle,
       description: AppDescription,
     });
+
+    registerRuleTypes(triggersActionsUi);
   }
 
   public start() {}

@@ -6,3 +6,4 @@
  */
 
 export { getRuleType as getRuleTypeSql } from './sql_rule';
+export { getRuleType as getRuleTypeWebhook } from './webhook_rule';

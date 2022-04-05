@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'kibana/server';
 
 import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/server';
-import { ruleTypeSql } from './rule_types';
+import { registerRuleTypes } from './rule_types';
+import { registerRoutes } from './routes';
 
 // this plugin's dependencies
 export interface Ow22pmuellrDeps {
@@ -16,8 +17,17 @@ export interface Ow22pmuellrDeps {
 }
 
 export class Ow22pmuellrPlugin implements Plugin<void, void, Ow22pmuellrDeps> {
+  readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   public setup(core: CoreSetup, { alerting }: Ow22pmuellrDeps) {
-    alerting.registerType(ruleTypeSql);
+    registerRuleTypes(alerting);
+
+    const router = core.http.createRouter();
+    registerRoutes(this.logger, router);
   }
 
   public start() {}
