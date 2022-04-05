@@ -70,7 +70,8 @@ describe('Service overview: Time Comparison', () => {
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
     cy.visit(serviceOverviewPath);
-    cy.url().should('include', 'comparisonEnabled=true&offset=1d');
+    cy.url().should('include', 'comparisonEnabled=true');
+    cy.url().should('include', 'offset=1d');
   });
 
   describe('when comparison is toggled off', () => {
@@ -134,12 +135,32 @@ describe('Service overview: Time Comparison', () => {
   });
 
   it('changes comparison type when a new time range is selected', () => {
-    cy.visit(serviceOverviewPath);
+    cy.visit(serviceOverviewHref);
     cy.contains('opbeans-java');
     // Time comparison default value
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
+
+    cy.selectAbsoluteTimeRange(
+      '2021-10-10T00:00:00.000Z',
+      '2021-10-20T00:00:00.000Z'
+    );
+
+    cy.contains('Update').click();
+
+    cy.get('[data-test-subj="comparisonSelect"]').should(
+      'have.value',
+      '864000000ms'
+    );
+    cy.get('[data-test-subj="comparisonSelect"]').should(
+      'not.contain.text',
+      'Day before'
+    );
+    cy.get('[data-test-subj="comparisonSelect"]').should(
+      'not.contain.text',
+      'Week before'
+    );
 
     cy.changeTimeRange('Today');
     cy.contains('Day before');
@@ -161,20 +182,6 @@ describe('Service overview: Time Comparison', () => {
       'Day before'
     );
     cy.contains('Week before');
-
-    cy.changeTimeRange('Last 30 days');
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'have.value',
-      'period'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Day before'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Week before'
-    );
   });
 
   it('hovers over throughput chart shows previous and current period', () => {
