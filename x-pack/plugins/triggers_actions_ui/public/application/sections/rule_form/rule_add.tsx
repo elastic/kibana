@@ -255,7 +255,7 @@ const RuleAdd = ({
         );
       } else {
         toasts.addDanger(
-          simulationResult.status?.error?.message ??
+          simulationResult.result?.error?.message ??
             i18n.translate(
               'xpack.triggersActionsUI.sections.ruleAdd.simulateErrorNotificationText',
               {

@@ -7,7 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import { RuleExecutionStatus } from '../../../../../alerting/common';
 import { AsApiContract, RewriteResponseCase } from '../../../../../actions/common';
-import { Rule, RuleUpdates } from '../../../types';
+import { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 
 type RuleCreateBody = Omit<
