@@ -6,7 +6,7 @@
  */
 import { EventAction, Process, ProcessFields } from '../../../common/types/process_tree';
 import { DetailPanelProcess, EuiTabProps } from '../../types';
-import { dataOrDash } from '../../utils/data_or_dash';
+import { ProcessImpl } from '../process_tree/hooks';
 
 const FILTER_FORKS_EXECS = [EventAction.fork, EventAction.exec];
 
@@ -61,14 +61,11 @@ export const getDetailPanelProcess = (process: Process | undefined) => {
   if (!process) {
     return processData;
   }
-  const endProcessList = process.events.filter((items) => items.event.action === 'end');
+
+  const endProcesses = new ProcessImpl(process.id);
 
   processData.id = process.id;
   processData.start = process.events[0]?.['@timestamp'] ?? '';
-  processData.end =
-    endProcessList.length === 0
-      ? ''
-      : (endProcessList[endProcessList.length - 1]['@timestamp'] as string);
   processData.args = [];
   processData.executable = [];
 
@@ -102,8 +99,10 @@ export const getDetailPanelProcess = (process: Process | undefined) => {
     if (event.process?.exit_code !== undefined) {
       processData.exit_code = event.process.exit_code;
     }
+    endProcesses.addEvent(event);
   });
 
+  processData.end = endProcesses.getEndTime() as string;
   processData.entryLeader = getDetailPanelProcessLeader(process.events[0]?.process?.entry_leader);
   processData.sessionLeader = getDetailPanelProcessLeader(
     process.events[0]?.process?.session_leader
