@@ -59,7 +59,7 @@ export const LogQueryBar: React.FunctionComponent<{
                 title: AGENT_LOG_INDEX_PATTERN,
                 fields: indexPatternFields,
               },
-            ] as unknown as DataView[])
+            ] as DataView[])
           : []
       }
       query={{
