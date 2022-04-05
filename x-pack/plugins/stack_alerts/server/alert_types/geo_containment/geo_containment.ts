@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices } from '../../../../alerting/server';
+import { RuleExecutorServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
   GeoContainmentInstanceState,
@@ -87,7 +87,7 @@ export function transformResults(
 export function getActiveEntriesAndGenerateAlerts(
   prevLocationMap: Map<string, LatestEntityLocation[]>,
   currLocationMap: Map<string, LatestEntityLocation[]>,
-  alertFactory: AlertServices<
+  alertFactory: RuleExecutorServices<
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext,
     typeof ActionGroupId

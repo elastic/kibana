@@ -13,9 +13,9 @@ import { fromNullable, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
-  AlertNavigation as RuleNavigation,
-  AlertStateNavigation as RuleStateNavigation,
-  AlertUrlNavigation as RuleUrlNavigation,
+  RuleNavigation,
+  RuleStateNavigation,
+  RuleUrlNavigation,
 } from '../../../../../../alerting/common';
 import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -303,8 +303,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
-    const min = getMinValue(row, accessors);
-    const max = getMaxValue(row, accessors);
+    const min = getMinValue(row, accessors, palette?.params, args.respectRanges);
+    const max = getMaxValue(row, accessors, palette?.params, args.respectRanges);
 
     if (min === max) {
       return (
