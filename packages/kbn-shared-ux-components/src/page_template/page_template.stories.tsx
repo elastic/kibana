@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from './page_template';
 import mdx from './page_template.mdx';
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
@@ -81,13 +81,11 @@ const solutionNav = {
 };
 
 const content = (
-  <EuiFlexGroup alignItems={'center'} justifyContent={'spaceAround'}>
-    <EuiFlexItem grow={false}>
-      <div>
-        <strong>Page Content goes here</strong>
-      </div>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <EuiText textAlign="center">
+    <p>
+      <strong>Page Content goes here</strong>
+    </p>
+  </EuiText>
 );
 
 export const WithNoDataConfig = () => {
@@ -111,4 +109,20 @@ PureComponent.argTypes = {
     control: 'boolean',
     defaultValue: false,
   },
+};
+
+PureComponent.parameters = {
+  layout: 'fullscreen',
+};
+
+WithNoDataConfig.parameters = {
+  layout: 'fullscreen',
+};
+
+WithNoDataConfigAndSolutionNav.parameters = {
+  layout: 'fullscreen',
+};
+
+WithSolutionNav.parameters = {
+  layout: 'fullscreen',
 };

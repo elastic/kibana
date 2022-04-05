@@ -16,5 +16,6 @@ export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
   pageContentProps: {
     hasShadow: false,
     color: 'transparent',
+    paddingSize: 'none',
   },
 };

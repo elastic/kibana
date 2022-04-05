@@ -12,6 +12,8 @@
   }
 
   .kbnPageTemplate--centeredBody & {
-    border-right: $euiBorderThin;
+    @include euiBreakpoint('m', 'l', 'xl') {
+      border-right: $euiBorderThin;
+    }
   }
 }
