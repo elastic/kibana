@@ -6,9 +6,9 @@
  */
 
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
-import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { AlertingTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
-import { SanitizedAlert } from '../types';
+import { AlertTypeParams, SanitizedAlert } from '../types';
 
 const alert: SanitizedAlert<{
   bar: boolean;
@@ -75,7 +75,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: AlertingTaskInstance<AlertTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual({
       ...taskInstance,
@@ -181,7 +181,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: AlertingTaskInstance<AlertTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual(taskInstance);
   });
@@ -204,7 +204,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(
+    const alertTaskInsatnce: AlertingTaskInstance<AlertTypeParams> = taskInstanceToAlertTaskInstance(
       taskInstance,
       alert
     );

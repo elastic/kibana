@@ -17,6 +17,7 @@ import {
   IntervalSchedule,
   RuleExecutionState,
   RuleMonitoring,
+  RuleTaskParams,
   RuleTaskState,
   SanitizedAlert,
 } from '../../common';
@@ -40,9 +41,7 @@ export interface RuleTaskRunResult {
   schedule: IntervalSchedule | undefined;
 }
 
-export interface RuleTaskInstance extends ConcreteTaskInstance {
-  state: RuleTaskState;
-}
+export type RuleTaskInstance = ConcreteTaskInstance<RuleTaskState, RuleTaskParams>;
 
 export interface TrackAlertDurationsParams<
   InstanceState extends AlertInstanceState,
@@ -145,6 +144,7 @@ export interface CreateExecutionHandlerOptions<
   ruleParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  isEphemeralRule: boolean;
 }
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {

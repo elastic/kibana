@@ -107,6 +107,7 @@ const createExecutionHandlerParams: jest.Mocked<
     stateVal: 'My other {{state.value}} goes here',
   },
   supportsEphemeralTasks: false,
+  isEphemeralRule: false,
   maxEphemeralActionsPerRule: 10,
 };
 let alertExecutionStore: AlertExecutionStore;

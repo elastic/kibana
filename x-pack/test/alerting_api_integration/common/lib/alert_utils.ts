@@ -341,7 +341,7 @@ export function getProducerUnauthorizedErrorMessage(
   return `Unauthorized to ${operation} a "${alertType}" rule by "${producer}"`;
 }
 
-function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+export function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
   const messageTemplate = `
 alertId: {{alertId}},
 alertName: {{alertName}},

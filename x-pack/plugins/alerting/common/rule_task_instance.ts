@@ -42,6 +42,9 @@ export const ruleParamsSchema = t.intersection([
   t.partial({
     spaceId: t.string,
   }),
+  t.partial({
+    consumer: t.string,
+  }),
 ]);
 export type RuleTaskParams = t.TypeOf<typeof ruleParamsSchema>;
 

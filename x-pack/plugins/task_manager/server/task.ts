@@ -192,7 +192,14 @@ export interface IntervalSchedule {
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
  */
-export interface TaskInstance {
+export interface TaskInstance<
+  // we allow any here as unknown will break current use in other plugins
+  // this can be fixed by supporting generics in the future
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  State = Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Params = Record<string, any>
+> {
   /**
    * Optional ID that can be passed by the caller. When ID is undefined, ES
    * will auto-generate a unique id. Otherwise, ID will be used to either
@@ -242,20 +249,14 @@ export interface TaskInstance {
    * A task-specific set of parameters, used by the task's run function to tailor
    * its work. This is generally user-input, such as { sms: '333-444-2222' }.
    */
-  // we allow any here as unknown will break current use in other plugins
-  // this can be fixed by supporting generics in the future
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: Record<string, any>;
+  params: Params;
 
   /**
    * The state passed into the task's run function, and returned by the previous
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  // we allow any here as unknown will break current use in other plugins
-  // this can be fixed by supporting generics in the future
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  state: Record<string, any>;
+  state: State;
 
   /**
    * The serialized traceparent string of the current APM transaction or span.
@@ -299,7 +300,14 @@ export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 /**
  * A task instance that has an id and is ready for storage.
  */
-export interface ConcreteTaskInstance extends TaskInstance {
+export interface ConcreteTaskInstance<
+// we allow any here as unknown will break current use in other plugins
+// this can be fixed by supporting generics in the future
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+State = Record<string, any>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+Params = Record<string, any>
+> extends TaskInstance<State, Params> {
   /**
    * The id of the Elastic document that stores this instance's data. This can
    * be passed by the caller when scheduling the task.
@@ -351,16 +359,6 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * status. This value is only set when status is set to "running".
    */
   retryAt: Date | null;
-
-  /**
-   * The state passed into the task's run function, and returned by the previous
-   * run. If there was no previous run, or if the previous run did not return
-   * any state, this will be the empy object: {}
-   */
-  // we allow any here as unknown will break current use in other plugins
-  // this can be fixed by supporting generics in the future
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  state: Record<string, any>;
 
   /**
    * The random uuid of the Kibana instance which claimed ownership of the task last

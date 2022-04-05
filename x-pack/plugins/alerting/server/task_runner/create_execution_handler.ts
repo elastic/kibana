@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { transformActionParams } from './transform_action_params';
-import { asSavedObjectExecutionSource } from '../../../actions/server';
+import { asHttpRequestExecutionSource, asSavedObjectExecutionSource, EnqueueExecutionOptions } from '../../../actions/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
@@ -51,6 +51,7 @@ export function createExecutionHandler<
   ruleParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerRule,
+  isEphemeralRule
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -138,18 +139,22 @@ export function createExecutionHandler<
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
-      const enqueueOptions = {
+      const enqueueOptions: EnqueueExecutionOptions = {
         id: action.id,
         params: action.params,
         spaceId,
         apiKey: apiKey ?? null,
         consumer: ruleConsumer,
-        source: asSavedObjectExecutionSource({
-          id: ruleId,
-          type: 'alert',
-        }),
+        source: isEphemeralRule
+          ? asHttpRequestExecutionSource(request)
+          : asSavedObjectExecutionSource({
+            id: ruleId,
+            type: 'alert',
+          }),
         executionId,
-        relatedSavedObjects: [
+        relatedSavedObjects: isEphemeralRule
+        ? []
+        : [
           {
             id: ruleId,
             type: 'alert',

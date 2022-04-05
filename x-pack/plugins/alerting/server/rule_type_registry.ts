@@ -276,6 +276,20 @@ export class RuleTypeRegistry {
             RecoveryActionGroupId | RecoveredActionGroupId
           >(normalizedRuleType, context, this.inMemoryMetrics),
       },
+      [`alerting:simulation:${ruleType.id}`]: {
+        title: `Simulation:${ruleType.name}`,
+        timeout: ruleType.ruleTaskTimeout,
+        createTaskRunner: (context: RunContext) =>
+          this.taskRunnerFactory.create<
+            Params,
+            ExtractedParams,
+            State,
+            InstanceState,
+            InstanceContext,
+            ActionGroupIds,
+            RecoveryActionGroupId | RecoveredActionGroupId
+          >(normalizedRuleType, context, this.inMemoryMetrics),
+      },
     });
     // No need to notify usage on basic alert types
     if (ruleType.minimumLicenseRequired !== 'basic') {

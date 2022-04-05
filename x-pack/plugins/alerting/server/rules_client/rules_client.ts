@@ -20,7 +20,7 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
 } from '../../../../../src/core/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
+import { ActionsClient, ActionsAuthorization, ActionResult } from '../../../actions/server';
 import {
   Alert as Rule,
   PartialAlert as PartialRule,
@@ -32,6 +32,7 @@ import {
   RuleTaskState,
   AlertSummary,
   AlertExecutionStatusValues as RuleExecutionStatusValues,
+  AlertExecutionStatus as RuleExecutionStatus,
   AlertNotifyWhenType as RuleNotifyWhenType,
   AlertTypeParams as RuleTypeParams,
   ResolvedSanitizedRule,
@@ -39,6 +40,7 @@ import {
   SanitizedRuleWithLegacyId,
   PartialAlertWithLegacyId as PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
+  RawAlertAction,
 } from '../types';
 import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
 import {
@@ -89,7 +91,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogWithErrorsResult } from '../../common';
+import { AlertExecutionStatusErrorReasons, AlertExecutionStatuses, IExecutionLogWithErrorsResult, SanitizedAlert } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -228,6 +230,27 @@ export interface CreateOptions<Params extends RuleTypeParams> {
   options?: {
     id?: string;
     migrationVersion?: Record<string, string>;
+  };
+}
+
+export interface SimulateOptions<Params extends RuleTypeParams> {
+  data: Omit<
+    Rule<Params>,
+    | 'id'
+    | 'createdBy'
+    | 'updatedBy'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'apiKey'
+    | 'apiKeyOwner'
+    | 'muteAll'
+    | 'mutedInstanceIds'
+    | 'actions'
+    | 'executionStatus'
+    | 'snoozeEndTime'
+  > & { actions: NormalizedAlertAction[] };
+  options: {
+    id: string;
   };
 }
 
@@ -499,6 +522,146 @@ export class RulesClient {
       false,
       true
     );
+  }
+
+  public async simulate<Params extends RuleTypeParams = never>({
+    data,
+    options,
+  }: SimulateOptions<Params>): Promise<RuleExecutionStatus> {
+    const id = options.id;
+    const ruleTypeId = data.alertTypeId;
+    const consumer = data.consumer;
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId,
+        consumer,
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SIMULATE,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
+
+    // Throws an error if alert type isn't registered
+    const ruleType = this.ruleTypeRegistry.get(data.alertTypeId);
+
+    validateRuleTypeParams(data.params, ruleType.validate?.params);
+    const username = await this.getUserName();
+
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = data.enabled
+        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
+        : null;
+    } catch (error) {
+      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
+    }
+
+    await this.validateActions(ruleType, data.actions);
+
+    // Throw error if schedule interval is less than the minimum and we are enforcing it
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (intervalInMs < this.minimumScheduleIntervalInMs && this.minimumScheduleInterval.enforce) {
+      throw Boom.badRequest(
+        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+      );
+    }
+
+    const createTime = Date.now();
+    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+
+    const lastExecutionDate = new Date();
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.SIMULATE,
+        outcome: 'unknown',
+      })
+    );
+
+    const { apiKey, apiKeyOwner } = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+    const simulatedRule: SanitizedAlert<Params> = {
+      id,
+      ...data,
+      actions: await this.enrichNormalizedActionsWithConnectorId(data.actions),
+      apiKeyOwner,
+      createdBy: username,
+      updatedBy: username,
+      createdAt: new Date(createTime),
+      updatedAt: new Date(createTime),
+      snoozeEndTime: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+      notifyWhen,
+      executionStatus: {
+        status: 'pending' as AlertExecutionStatuses,
+        lastExecutionDate
+      },
+      monitoring: getDefaultRuleMonitoring(),
+    };
+
+    /* RUN simulation */
+    const taskExecutionResult: RuleExecutionStatus | undefined = await this.taskManager
+      .ephemeralRunNow( {
+        taskType: `alerting:simulation:${ruleTypeId}`,
+        params: {
+          alertId: id,
+          spaceId: this.spaceId,
+          consumer,
+          rule: simulatedRule,
+          apiKey
+        },
+        state: {
+          previousStartedAt: null,
+          alertTypeState: {},
+          alertInstances: {},
+        },
+        scope: ['alerting'],
+      })
+      .then(taskExecutionResult => {
+        const executionStatus: RuleExecutionStatus = {
+          status: Object.keys(taskExecutionResult.state?.alertInstances ?? {}).length
+            ? 'active'
+            : 'ok',
+          lastExecutionDate
+        };
+        return executionStatus;
+      })
+      .catch(ex => {
+        const executionStatus: RuleExecutionStatus = {
+          status: 'error',
+          lastExecutionDate,
+          error: {
+            reason: AlertExecutionStatusErrorReasons.Unknown,
+            message: `${ex}`
+          }
+        };
+        return executionStatus;
+      })
+      .finally(() => {
+        // Avoid unused API key
+        markApiKeyForInvalidation(
+          { apiKey },
+          this.logger,
+          this.unsecuredSavedObjectsClient
+        );
+      });
+
+    /* END simulation */  
+
+    return taskExecutionResult ?? {
+      status: 'unknown',
+      lastExecutionDate
+    };
   }
 
   public async get<Params extends RuleTypeParams = never>({
@@ -2287,11 +2450,22 @@ export class RulesClient {
     }
   }
 
-  private async denormalizeActions(
-    alertActions: NormalizedAlertAction[]
-  ): Promise<{ actions: RawRule['actions']; references: SavedObjectReference[] }> {
-    const references: SavedObjectReference[] = [];
-    const actions: RawRule['actions'] = [];
+  private async denormalizeActions(alertActions: NormalizedAlertAction[]): Promise<{ actions: RawAlertAction[]; references: SavedObjectReference[] }> {
+    const actionResults = await this.fetchRuleActionTypes(alertActions)
+    const { actions, references } = await this.extractConnectorReferences(alertActions, actionResults)
+    return { 
+      actions: actions.map(({ id, ...action }) => action),
+      references
+    };
+  }
+
+  private async enrichNormalizedActionsWithConnectorId(alertActions: NormalizedAlertAction[]): Promise<RuleAction[]> {
+    const actionResults = await this.fetchRuleActionTypes(alertActions)
+    const { actions } = await this.extractConnectorReferences(alertActions, actionResults)
+    return actions.map(({ actionRef, ...action}) => action);
+  }
+
+  private async fetchRuleActionTypes(alertActions: NormalizedAlertAction[]): Promise<ActionResult[]> {
     if (alertActions.length) {
       const actionsClient = await this.getActionsClient();
       const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
@@ -2301,11 +2475,25 @@ export class RulesClient {
         // Notify action type usage via "isActionTypeEnabled" function
         actionsClient.isActionTypeEnabled(id, { notifyUsage: true });
       });
+      return actionResults;
+    }
+    return [];
+  }
+
+  private async extractConnectorReferences(
+    alertActions: NormalizedAlertAction[],
+    actionConnectors: ActionResult[]
+  ): Promise<{ actions: Array<RuleAction & RawAlertAction>; references: SavedObjectReference[] }> {
+    const references: SavedObjectReference[] = [];
+    const actions: Array<RuleAction & RawAlertAction> = [];
+    if (alertActions.length) {
+      const actionsClient = await this.getActionsClient();
       alertActions.forEach(({ id, ...alertAction }, i) => {
-        const actionResultValue = actionResults.find((action) => action.id === id);
+        const actionResultValue = actionConnectors.find((action) => action.id === id);
         if (actionResultValue) {
           if (actionsClient.isPreconfigured(id)) {
             actions.push({
+              id,
               ...alertAction,
               actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
               actionTypeId: actionResultValue.actionTypeId,
@@ -2318,6 +2506,7 @@ export class RulesClient {
               type: 'action',
             });
             actions.push({
+              id,
               ...alertAction,
               actionRef,
               actionTypeId: actionResultValue.actionTypeId,
@@ -2325,6 +2514,7 @@ export class RulesClient {
           }
         } else {
           actions.push({
+            id,
             ...alertAction,
             actionRef: '',
             actionTypeId: '',

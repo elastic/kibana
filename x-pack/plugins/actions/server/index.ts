@@ -25,6 +25,11 @@ export type {
   FindActionResult,
 } from './types';
 
+
+export type {
+  ExecuteOptions as EnqueueExecutionOptions,
+} from './create_execute_function';
+
 export type {
   EmailActionTypeId,
   EmailActionParams,

@@ -15,12 +15,15 @@ import {
   ruleParamsSchema,
   ruleStateSchema,
   RuleTaskParams,
-  AlertTypeParams,
+  AlertTypeParams
 } from '../../common';
+import { RuleTaskInstance } from './types';
 
-export interface AlertTaskInstance extends ConcreteTaskInstance {
-  state: RuleTaskState;
-  params: RuleTaskParams;
+export type EphemeralAlertTaskInstance<Params extends AlertTypeParams> = ConcreteTaskInstance<RuleTaskState, RuleTaskParams & { rule: SanitizedAlert<Params>, apiKey: string | null }>;
+export type AlertingTaskInstance<Params extends AlertTypeParams> = RuleTaskInstance | EphemeralAlertTaskInstance<Params>;
+
+export function isEphemeralAlertTaskInstance<Params extends AlertTypeParams>(taskInstance: AlertingTaskInstance<AlertTypeParams>): taskInstance is EphemeralAlertTaskInstance<Params> {
+  return !!((taskInstance as EphemeralAlertTaskInstance<Params>).params.rule);
 }
 
 const enumerateErrorFields = (e: t.Errors) =>
@@ -29,7 +32,7 @@ const enumerateErrorFields = (e: t.Errors) =>
 export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
   taskInstance: ConcreteTaskInstance,
   alert?: SanitizedAlert<Params>
-): AlertTaskInstance {
+): AlertingTaskInstance<Params> {
   return {
     ...taskInstance,
     params: pipe(
