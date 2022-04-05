@@ -68,7 +68,6 @@ yarn kbn watch
 - @kbn/docs-utils
 - @kbn/es
 - @kbn/es-archiver
-- @kbn/eslint-import-resolver-kibana
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
 - @kbn/i18n
