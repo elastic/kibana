@@ -5,108 +5,72 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { pick } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-  EuiTitle,
-  EuiForm,
-  EuiSpacer,
-  EuiFieldText,
-  EuiFieldSearch,
-  EuiFlexGrid,
-  EuiFormRow,
-  EuiComboBox,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiIconTip,
-  EuiButtonIcon,
-  EuiHorizontalRule,
-  EuiEmptyPrompt,
-  EuiListGroupItem,
-  EuiListGroup,
-  EuiLink,
-  EuiText,
-  EuiNotificationBadge,
-  EuiErrorBoundary,
-  EuiToolTip,
-  EuiCallOut,
-  EuiButton,
-} from '@elastic/eui';
-import { capitalize } from 'lodash';
-import { KibanaFeature } from '../../../../../features/public';
-import {
-  formatDuration,
-  getDurationNumberInItsUnit,
-  getDurationUnitValue,
-  parseDuration,
-} from '../../../../../alerting/common/parse_duration';
-import { RuleReducerAction, InitialRule } from './rule_reducer';
-import {
-  RuleTypeModel,
-  Rule,
-  IErrorObject,
-  RuleAction,
-  RuleType,
-  RuleTypeRegistryContract,
-  ActionTypeRegistryContract,
-  TriggersActionsUiConfig,
-} from '../../../types';
-import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { ActionForm } from '../action_connector_form';
-import {
-  RuleActionParam,
-  ALERTS_FEATURE_ID,
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
-import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
-import { SolutionFilter } from './solution_filter';
-import './rule_form.scss';
+import { EuiTabbedContent, EuiForm } from '@elastic/eui';
+import { Rule } from '../../../types';
+import { DiagnoseOutput } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { recoveredActionGroupMessage } from '../../constants';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
-import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
-import { RuleNotifyWhen } from './rule_notify_when';
-import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
-import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { SectionLoading } from '../../components/section_loading';
-import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
-import { getInitialInterval } from './get_initial_interval';
-import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { diagnoseRule } from '../../lib/rule_api';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { RulePreviewWarnings } from './rule_preview_warnings';
+import { RulePreviewContent } from './rule_preview_content';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 export type RulePreview = Pick<Rule, 'params' | 'ruleTypeId'>;
 
-interface RulePreviewProps<MetaData = Record<string, any>> {
+interface RulePreviewProps {
   rule: RulePreview;
-  // config: TriggersActionsUiConfig;
-  // dispatch: React.Dispatch<RuleReducerAction>;
-  // errors: IErrorObject;
-  // ruleTypeRegistry: RuleTypeRegistryContract;
-  // actionTypeRegistry: ActionTypeRegistryContract;
-  // operation: string;
-  // canChangeTrigger?: boolean; // to hide Change trigger button
-  // setHasActionsDisabled?: (value: boolean) => void;
-  // setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  // metadata?: MetaData;
-  // filteredSolutions?: string[] | undefined;
-  // onShowPreview: () => void;
 }
 
 export const RulePreview = ({ rule }: RulePreviewProps) => {
   const { http } = useKibana().services;
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [previewOutput, setPreviewOutput] = useState<DiagnoseOutput>({} as DiagnoseOutput);
+
   useEffect(() => {
     (async () => {
-      await diagnoseRule({ http, rule: pick(rule, 'ruleTypeId', 'params') });
+      setIsLoading(true);
+      setPreviewOutput(await diagnoseRule({ http, rule: pick(rule, 'ruleTypeId', 'params') }));
+      setIsLoading(false);
     })();
   }, [http, rule]);
 
-  return <EuiForm>Yo</EuiForm>;
+  const tabs = [
+    {
+      id: 'errorsAndWarning',
+      name: 'Errors and Warnings',
+      content: suspendedComponentWithProps(
+        RulePreviewWarnings,
+        'xl'
+      )({ errorsAndWarnings: previewOutput?.errorsAndWarnings }),
+    },
+    {
+      id: 'requests',
+      name: 'Search Requests',
+      content: suspendedComponentWithProps(
+        RulePreviewContent,
+        'xl'
+      )({
+        description: `The following search requests were made while previewing your rule:`,
+        content: previewOutput?.requestAndResponses?.requests,
+      }),
+    },
+    {
+      id: 'responses',
+      name: 'Search Responses',
+      content: suspendedComponentWithProps(
+        RulePreviewContent,
+        'xl'
+      )({
+        description: `The following search responses were received while previewing your rule:`,
+        content: previewOutput?.requestAndResponses?.responses,
+      }),
+    },
+  ];
+
+  return (
+    <EuiForm>{isLoading ? <CenterJustifiedSpinner /> : <EuiTabbedContent tabs={tabs} />}</EuiForm>
+  );
 };
