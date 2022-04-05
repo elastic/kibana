@@ -623,7 +623,7 @@ export class Embeddable
       this.logError('validation');
     }
 
-    const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
+    const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       ...this.getOutput(),
