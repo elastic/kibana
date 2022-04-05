@@ -241,6 +241,7 @@ export class SyntheticsService {
 
     try {
       this.syncErrors = await this.apiClient.post(data);
+      return this.syncErrors;
     } catch (e) {
       this.logger.error(e);
       throw e;
