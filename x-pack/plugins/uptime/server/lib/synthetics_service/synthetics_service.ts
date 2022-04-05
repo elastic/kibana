@@ -47,7 +47,7 @@ const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
 type SyntheticsConfig = SyntheticsMonitorWithId & {
   fields_under_root?: boolean;
-  fields?: { config_id: string };
+  fields?: { config_id: string; run_once?: boolean; test_run_id?: string };
 };
 
 export class SyntheticsService {
