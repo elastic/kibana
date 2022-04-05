@@ -384,21 +384,20 @@ export const createRegistry = () => {
 };
 
 export const createSpySerializer = (registry: SavedObjectTypeRegistry) => {
-  const spyInstance = {
-    isRawSavedObject: jest.fn(),
-    rawToSavedObject: jest.fn(),
-    savedObjectToRaw: jest.fn(),
-    generateRawId: jest.fn(),
-    generateRawLegacyUrlAliasId: jest.fn(),
-    trimIdPrefix: jest.fn(),
-  };
-  const realInstance = new SavedObjectsSerializer(registry);
-  Object.keys(spyInstance).forEach((key) => {
-    // @ts-expect-error no proper way to do this with typing support
-    spyInstance[key].mockImplementation((...args) => realInstance[key](...args));
-  });
+  const serializer = new SavedObjectsSerializer(registry);
 
-  return spyInstance as unknown as jest.Mocked<SavedObjectsSerializer>;
+  for (const method of [
+    'isRawSavedObject',
+    'rawToSavedObject',
+    'savedObjectToRaw',
+    'generateRawId',
+    'generateRawLegacyUrlAliasId',
+    'trimIdPrefix',
+  ] as Array<keyof SavedObjectsSerializer>) {
+    jest.spyOn(serializer, method);
+  }
+
+  return serializer as jest.Mocked<SavedObjectsSerializer>;
 };
 
 export const createDocumentMigrator = (registry: SavedObjectTypeRegistry) => {
@@ -629,7 +628,6 @@ export const expectCreateResult = (obj: {
   namespaces?: string[];
 }) => ({
   ...obj,
-  migrationVersion: { [obj.type]: '1.1.1' },
   coreMigrationVersion: expect.any(String),
   typeMigrationVersion: '1.1.1',
   version: mockVersion,

@@ -6,7 +6,19 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsRawDocParseOptions } from '@kbn/core-saved-objects-server';
+import { SavedObjectsBaseOptions } from './base';
 import type { SavedObject } from '../..';
+
+/**
+ * Options for the saved objects get operation
+ *
+ * @public
+ */
+export interface SavedObjectsResolveOptions extends SavedObjectsBaseOptions {
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
+}
 
 /**
  *

@@ -118,9 +118,9 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
       .expect(200);
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
-
-    const args = savedObjectsClient.resolve.mock.calls[0];
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
+    expect(savedObjectsClient.resolve).nthCalledWith(1, 'index-pattern', 'logstash-*', {
+      migrationVersionCompatibility: 'compatible',
+    });
   });
 
   it('returns with status 400 is a type is hidden from the HTTP APIs', async () => {

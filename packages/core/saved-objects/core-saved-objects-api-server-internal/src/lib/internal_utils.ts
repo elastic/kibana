@@ -13,6 +13,7 @@ import {
   type SavedObjectsRawDocSource,
   type SavedObject,
   SavedObjectsErrorHelpers,
+  type SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -113,6 +114,14 @@ export function getExpectedVersionProperties(version?: string, document?: SavedO
 }
 
 /**
+ * @internal
+ */
+export interface GetSavedObjectFromSourceOptions {
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
+}
+
+/**
  * Gets a saved object from a raw ES document.
  *
  * @param registry
@@ -126,9 +135,19 @@ export function getSavedObjectFromSource<T>(
   registry: ISavedObjectTypeRegistry,
   type: string,
   id: string,
-  doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
+  doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource },
+  { migrationVersionCompatibility = 'raw' }: GetSavedObjectFromSourceOptions = {}
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt, created_at: createdAt } = doc._source;
+  const {
+    originId,
+    updated_at: updatedAt,
+    created_at: createdAt,
+    coreMigrationVersion,
+    typeMigrationVersion,
+    migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
+      ? { [type]: typeMigrationVersion }
+      : undefined,
+  } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -141,18 +160,15 @@ export function getSavedObjectFromSource<T>(
     id,
     type,
     namespaces,
+    migrationVersion,
+    coreMigrationVersion,
+    typeMigrationVersion,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
     ...(createdAt && { created_at: createdAt }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
-    migrationVersion:
-      doc._source.migrationVersion || !doc._source.typeMigrationVersion
-        ? doc._source.migrationVersion
-        : { [type]: doc._source.typeMigrationVersion },
-    coreMigrationVersion: doc._source.coreMigrationVersion,
-    typeMigrationVersion: doc._source.typeMigrationVersion,
   };
 }
 

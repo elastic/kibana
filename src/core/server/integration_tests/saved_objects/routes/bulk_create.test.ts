@@ -148,8 +148,8 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       .expect(200);
 
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    const args = savedObjectsClient.bulkCreate.mock.calls[0];
-    expect(args[1]).toEqual({ overwrite: true });
+    const [[, options]] = savedObjectsClient.bulkCreate.mock.calls;
+    expect(options).toEqual({ migrationVersionCompatibility: 'compatible', overwrite: true });
   });
 
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {

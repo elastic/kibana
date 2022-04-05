@@ -31,6 +31,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesObject,
@@ -39,6 +40,7 @@ import type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsGetOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
@@ -103,7 +105,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */
   async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     return await this._repository.bulkGet(objects, options);
   }
@@ -112,7 +114,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   async get<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsGetOptions = {}
   ): Promise<SavedObject<T>> {
     return await this._repository.get(type, id, options);
   }
@@ -120,7 +122,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.bulkResolve} */
   async bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     return await this._repository.bulkResolve(objects, options);
   }
@@ -129,7 +131,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   async resolve<T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsResolveOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
     return await this._repository.resolve(type, id, options);
   }

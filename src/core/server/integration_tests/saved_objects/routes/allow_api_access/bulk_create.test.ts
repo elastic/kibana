@@ -79,9 +79,10 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
       .expect(200);
 
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-
-    const args = savedObjectsClient.bulkCreate.mock.calls[0];
-    expect(args[1]).toEqual({ overwrite: true });
+    expect(savedObjectsClient.bulkCreate).nthCalledWith(1, expect.anything(), {
+      migrationVersionCompatibility: 'compatible',
+      overwrite: true,
+    });
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_create')
       .send([

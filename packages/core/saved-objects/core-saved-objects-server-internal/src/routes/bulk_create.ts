@@ -76,7 +76,10 @@ export const registerBulkCreateRoute = (
       if (!allowHttpApiAccess) {
         throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.bulkCreate(req.body, { overwrite });
+      const result = await savedObjects.client.bulkCreate(req.body, {
+        overwrite,
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: result });
     })
   );

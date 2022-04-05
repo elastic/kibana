@@ -10,8 +10,8 @@ import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
-  SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
@@ -70,7 +70,7 @@ export interface InternalBulkResolveParams {
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsBulkResolveObject[];
-  options?: SavedObjectsBaseOptions;
+  options?: SavedObjectsResolveOptions;
 }
 
 /**
@@ -115,6 +115,7 @@ export async function internalBulkResolve<T>(
   const validObjects = allObjects.filter(isRight);
 
   const namespace = normalizeNamespace(options.namespace);
+  const { migrationVersionCompatibility } = options;
 
   const aliasDocs = await fetchAndUpdateAliases(
     validObjects,
@@ -178,7 +179,9 @@ export async function internalBulkResolve<T>(
   ) {
     // Encryption
     // @ts-expect-error MultiGetHit._source is optional
-    const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc);
+    const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc, {
+      migrationVersionCompatibility,
+    });
     if (!encryptionExtension?.isEncryptableType(object.type)) {
       return object;
     }

@@ -7,6 +7,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsRawDocParseOptions } from '@kbn/core-saved-objects-server';
 import type { SavedObjectReference } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
@@ -61,4 +62,6 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: SavedObjectsRawDocParseOptions['migrationVersionCompatibility'];
 }
