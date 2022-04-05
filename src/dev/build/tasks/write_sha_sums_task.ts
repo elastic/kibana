@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import path from 'path';
 import globby from 'globby';
 
-import path from 'path';
 import { getFileHash, write, GlobalTask } from '../lib';
 
 export const WriteShaSums: GlobalTask = {
