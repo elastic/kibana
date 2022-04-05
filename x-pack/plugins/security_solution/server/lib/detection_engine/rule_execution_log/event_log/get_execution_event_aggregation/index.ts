@@ -76,7 +76,7 @@ export const getExecutionEventAggregation = ({
     );
   }
 
-  if (page < 0) {
+  if (page <= 0) {
     throw new BadRequestError(`Invalid page field "${page}" - must be greater than 0`);
   }
 

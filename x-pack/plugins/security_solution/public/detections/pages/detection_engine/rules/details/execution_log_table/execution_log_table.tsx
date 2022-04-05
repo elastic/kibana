@@ -89,7 +89,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // Index for `add filter` action and toasts for errors
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-  const { addError } = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   // Table data state
   const {
@@ -111,6 +111,11 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   });
   const items = events?.events ?? [];
   const maxEvents = events?.total ?? 0;
+
+  // Cache UUID field from data view as it can be expensive to iterate all data view fields
+  const uuidDataViewField = useMemo(() => {
+    return indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
+  }, [indexPattern]);
 
   // Callbacks
   const onTableChangeCallback = useCallback(({ page = {}, sort = {} }) => {
@@ -141,7 +146,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onRefreshChangeCallback = useCallback((props: OnRefreshChangeProps) => {
     setIsPaused(props.isPaused);
-    setRefreshInterval(props.refreshInterval);
+    // Only support auto-refresh >= 1minute -- no current ability to limit within component
+    setRefreshInterval(props.refreshInterval > 60000 ? props.refreshInterval : 60000);
   }, []);
 
   const onRefreshCallback = useCallback(
@@ -162,27 +168,31 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   }, []);
 
   const onFilterByExecutionIdCallback = useCallback(
-    (executionId: string) => {
-      const field = indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
-      if (field != null) {
+    (executionId: string, executionStart: string) => {
+      if (uuidDataViewField != null) {
         const filter = buildFilter(
           indexPattern,
-          field,
+          uuidDataViewField,
           FILTERS.PHRASE,
           false,
           false,
           executionId,
           null
         );
+        filterManager.removeAll();
         filterManager.addFilters(filter);
         selectAlertsTab();
+        addSuccess({
+          title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
+          text: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION,
+        });
       } else {
         addError(i18n.ACTIONS_FIELD_NOT_FOUND_ERROR, {
           title: i18n.ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE,
         });
       }
     },
-    [addError, filterManager, indexPattern, selectAlertsTab]
+    [addError, addSuccess, filterManager, indexPattern, selectAlertsTab, uuidDataViewField]
   );
 
   const onShowMetricColumnsCallback = useCallback(
@@ -196,7 +206,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   // Memoized state
   const pagination = useMemo(() => {
     return {
-      pageIndex,
+      pageIndex: pageIndex - 1,
       pageSize,
       totalItemCount:
         maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED ? MAX_EXECUTION_EVENTS_DISPLAYED : maxEvents,
@@ -213,6 +223,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     };
   }, [sortDirection, sortField]);
 
+  // TODO: Re-add actions once alert count is displayed in table and UX is finalized
+  // @ts-expect-error unused constant
   const actions = useMemo(
     () => [
       {
@@ -229,7 +241,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             type: 'icon',
             onClick: (executionEvent: AggregateRuleExecutionEvent) => {
               if (executionEvent?.execution_uuid) {
-                onFilterByExecutionIdCallback(executionEvent.execution_uuid);
+                onFilterByExecutionIdCallback(
+                  executionEvent.execution_uuid,
+                  executionEvent.timestamp
+                );
               }
             },
             'data-test-subj': 'action-filter-by-execution-id',
@@ -243,9 +258,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const executionLogColumns = useMemo(
     () =>
       showMetricColumns
-        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks), ...actions]
-        : [...EXECUTION_LOG_COLUMNS, ...actions],
-    [actions, docLinks, showMetricColumns]
+        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks)]
+        : [...EXECUTION_LOG_COLUMNS],
+    [docLinks, showMetricColumns]
   );
 
   return (

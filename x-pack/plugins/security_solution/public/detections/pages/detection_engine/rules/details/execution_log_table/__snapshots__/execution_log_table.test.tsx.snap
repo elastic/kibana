@@ -100,23 +100,6 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "truncateText": false,
           "width": "35%",
         },
-        Object {
-          "actions": Array [
-            Object {
-              "data-test-subj": "action-filter-by-execution-id",
-              "description": "Filter alerts by rule execution ID.",
-              "field": "",
-              "icon": "filter",
-              "isPrimary": true,
-              "name": "Edit",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "kibana.alert.rule.execution.uuid",
-          "name": "Actions",
-          "width": "5%",
-        },
       ]
     }
     items={Array []}
@@ -129,7 +112,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
     onChange={[Function]}
     pagination={
       Object {
-        "pageIndex": 1,
+        "pageIndex": 0,
         "pageSize": 5,
         "pageSizeOptions": Array [
           5,
