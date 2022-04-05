@@ -24,7 +24,7 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
      * ensures that the Policy Page is the currently display view
      */
     async ensureIsOnTrustedAppsListPage() {
-      await testSubjects.existOrFail('trustedAppsListPage');
+      await testSubjects.existOrFail('trustedAppsListPage-list');
     },
 
     /**
@@ -41,7 +41,7 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
      */
     async clickCardActionMenu() {
       await this.ensureIsOnTrustedAppsListPage();
-      await testSubjects.click('trustedAppCard-header-actions-button');
+      await testSubjects.click('trustedAppsListPage-card-header-actions-button');
     },
   };
 }
