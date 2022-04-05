@@ -26,6 +26,10 @@
       "name": "Fleet - Cypress"
     },
     {
+      "key": "xpack/cypress/apm_cypress",
+      "name": "APM - Cypress"
+    },
+    {
       "key": "xpack/cigroup",
       "name": "Default CI Group",
       "ciGroups": 27
