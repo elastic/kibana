@@ -36,7 +36,21 @@ export interface IExecutionLog {
   timed_out: boolean;
 }
 
+export interface IExecutionErrors {
+  id: string;
+  timestamp: string;
+  type: string;
+  message: string;
+}
+
+export interface IExecutionErrorsResult {
+  totalErrors: number;
+  errors: IExecutionErrors[];
+}
+
 export interface IExecutionLogResult {
   total: number;
   data: IExecutionLog[];
 }
+
+export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;

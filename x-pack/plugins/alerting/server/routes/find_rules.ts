@@ -17,7 +17,7 @@ import {
   rewriteRule,
 } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -66,7 +66,7 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
   perPage,
   data,
   ...restOfResult

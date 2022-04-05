@@ -408,7 +408,8 @@ export const SEARCH_RULES = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
-    defaultMessage: 'Search by rule name, index pattern, or MITRE ATT&CK tactic or technique',
+    defaultMessage:
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
   }
 );
 

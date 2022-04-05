@@ -70,6 +70,7 @@ export const IndexPatternTable = ({
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
+    application,
     chrome,
     dataViews,
     IndexPatternEditor,
@@ -231,6 +232,7 @@ export const IndexPatternTable = ({
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
+            capabilities={application?.capabilities}
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
             title={dataView.title}

@@ -23,4 +23,14 @@ export const i18nTexts = {
       }
     ),
   },
+  esErrorMessage: (statusCode: number, message: string) =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.esErrorMessage', {
+      defaultMessage: 'Received a {statusCode} response from Elasticsearch: {message}',
+      values: { statusCode, message },
+    }),
+  unknownError: (message: string = 'unknown') =>
+    i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.unknownErrorMessage', {
+      defaultMessage: 'Encountered an unknown error: {message}',
+      values: { message },
+    }),
 };

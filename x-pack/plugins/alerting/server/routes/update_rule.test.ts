@@ -13,10 +13,10 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
-import { AlertNotifyWhenType } from '../../common';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
+import { RuleNotifyWhenType } from '../../common';
 import { AsApiContract } from './lib';
-import { PartialAlert } from '../types';
+import { PartialRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -50,7 +50,7 @@ describe('updateRuleRoute', () => {
         },
       },
     ],
-    notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
+    notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
@@ -65,7 +65,7 @@ describe('updateRuleRoute', () => {
     ],
   };
 
-  const updateResult: AsApiContract<PartialAlert<{ otherField: boolean }>> = {
+  const updateResult: AsApiContract<PartialRule<{ otherField: boolean }>> = {
     ...updateRequest,
     id: mockedAlert.id,
     updated_at: mockedAlert.updatedAt,
@@ -201,7 +201,7 @@ describe('updateRuleRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    rulesClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.update.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

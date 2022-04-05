@@ -11,8 +11,8 @@ import { buildUp, tearDown } from '..';
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', () => {
-    before(async () => buildUp(getService));
-    after(async () => tearDown(getService));
+    before(async () => await buildUp(getService));
+    after(async () => await tearDown(getService));
 
     loadTestFile(require.resolve('./aggregate'));
     loadTestFile(require.resolve('./create'));

@@ -14,11 +14,11 @@ export { getAlertNotifyWhenType } from './get_alert_notify_when_type';
 export { verifyApiAccess } from './license_api_access';
 export { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
 export type {
-  AlertTypeDisabledReason,
+  RuleTypeDisabledReason,
   ErrorThatHandlesItsOwnResponse,
   ElasticsearchError,
 } from './errors';
-export { AlertTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
+export { RuleTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
 export {
   executionStatusFromState,
   executionStatusFromError,
