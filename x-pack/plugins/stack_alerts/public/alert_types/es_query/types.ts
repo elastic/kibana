@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 import { SerializedSearchSourceFields } from '../../../../../../src/plugins/data/common';
 
 export interface Comparator {
@@ -19,7 +19,7 @@ export enum SearchType {
   searchSource = 'searchSource',
 }
 
-export interface CommonAlertParams<T extends SearchType> extends AlertTypeParams {
+export interface CommonAlertParams<T extends SearchType> extends RuleTypeParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
