@@ -43,5 +43,6 @@ if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
 fi
 
 cd target
+sha512sum "dependencies-$VERSION.csv" > "dependencies-$VERSION.csv.sha512.txt"
 buildkite-agent artifact upload "*"
 cd -
