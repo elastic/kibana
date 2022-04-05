@@ -29,8 +29,10 @@ const DetectionResponseComponent = () => {
   const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
 
-  const queriesLoading: boolean = useShallowEqualSelector(
-    (state) => !!getGlobalQuery(state).find((query) => query.loading)
+  const globalQueries = useShallowEqualSelector(getGlobalQuery);
+  const queriesLoading: boolean = useMemo(
+    () => !!globalQueries.find((query) => query.loading),
+    [globalQueries]
   );
 
   useEffect(() => {
