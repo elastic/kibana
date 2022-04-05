@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "public/**/*",
+    "config.ts",
+    "public/**/*.json"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
+    { "path": "../usage_collection/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../field_formats/tsconfig.json" },
+  ]
+}

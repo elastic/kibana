@@ -14,6 +14,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
