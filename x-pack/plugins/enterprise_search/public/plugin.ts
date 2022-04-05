@@ -90,31 +90,28 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    /* We are gating the Content plugin to develpers only until release */
-    if (process.env.NODE_ENV === 'development') {
-      core.application.register({
-        id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
-        title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
-        euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-        appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
-        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        mount: async (params: AppMountParameters) => {
-          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-          const { chrome, http } = kibanaDeps.core;
-          chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+    core.application.register({
+      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
 
-          await this.getInitialData(http);
-          const pluginData = this.getPluginData();
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
 
-          const { renderApp } = await import('./applications');
-          const { EnterpriseSearchContent } = await import(
-            './applications/enterprise_search_content'
-          );
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchContent } = await import(
+          './applications/enterprise_search_content'
+        );
 
-          return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
-        },
-      });
-    }
+        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
+      },
+    });
 
     core.application.register({
       id: APP_SEARCH_PLUGIN.ID,

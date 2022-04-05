@@ -116,7 +116,7 @@ describe('alert_status_route.ts', () => {
     it('should return an empty events array for a non existant alert uuid', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = new AlertsClient({ ...alertsClientParams, esClient });
-      const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana?.alert.uuid!);
+      const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana!.alert!.uuid!);
 
       expect(body.events.length).toBe(0);
     });
@@ -124,7 +124,7 @@ describe('alert_status_route.ts', () => {
     it('returns results for a particular alert uuid', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient(getResponse());
       const alertsClient = new AlertsClient({ ...alertsClientParams, esClient });
-      const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana?.alert.uuid!);
+      const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana!.alert!.uuid!);
 
       expect(body.events.length).toBe(1);
     });

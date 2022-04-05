@@ -16,7 +16,7 @@ export const createPersistenceServicesMock = (): jest.Mocked<PersistenceServices
 
 export const createPersistenceExecutorOptionsMock = () => {
   return {
-    ...alertsMock.createAlertServices(),
+    ...alertsMock.createRuleExecutorServices(),
     ...createPersistenceServicesMock(),
   };
 };

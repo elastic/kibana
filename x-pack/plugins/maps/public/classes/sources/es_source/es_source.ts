@@ -279,11 +279,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_source:bounds'),
-      });
+      const { rawResponse: esResp } = await searchSource
+        .fetch$({
+          abortSignal: abortController.signal,
+          legacyHitsTotal: false,
+          executionContext: makePublicExecutionContext('es_source:bounds'),
+        })
+        .toPromise();
 
       if (!esResp.aggregations) {
         return null;
