@@ -474,7 +474,6 @@ export class JobsListView extends Component {
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
 
         <SavedObjectsWarning
-          jobType="anomaly-detector"
           onCloseFlyout={this.onRefreshClick}
           forceRefresh={loading || isRefreshing}
         />

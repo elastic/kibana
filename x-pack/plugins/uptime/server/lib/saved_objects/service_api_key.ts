@@ -63,6 +63,7 @@ export const getSyntheticsServiceAPIKey = async (client: EncryptedSavedObjectsCl
     throw getErr;
   }
 };
+
 export const setSyntheticsServiceApiKey = async (
   client: SavedObjectsClientContract,
   apiKey: SyntheticsServiceApiKey
@@ -71,4 +72,12 @@ export const setSyntheticsServiceApiKey = async (
     id: syntheticsApiKeyID,
     overwrite: true,
   });
+};
+
+export const deleteSyntheticsServiceApiKey = async (client: SavedObjectsClientContract) => {
+  try {
+    return await client.delete(syntheticsServiceApiKey.name, syntheticsApiKeyID);
+  } catch (e) {
+    throw e;
+  }
 };

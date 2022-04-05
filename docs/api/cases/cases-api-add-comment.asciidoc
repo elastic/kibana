@@ -1,0 +1,164 @@
+[[cases-api-add-comment]]
+== Add comment to case API
+++++
+<titleabbrev>Add comment</titleabbrev>
+++++
+
+Adds a comment to a case.
+
+=== Request
+
+`POST <kibana host>:<port>/api/cases/<case_id>/comments`
+
+`POST <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments`
+
+=== Prerequisite
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case you're updating.
+
+
+=== Path parameters
+
+`<case_id>`::
+(Required,string) The identifier for the case. To retrieve case IDs, use
+<<cases-api-find-cases>>.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Request body
+
+`alertId`::
+(Required*, string) The alert identifier. It is required only when `type` is
+`alert`. preview:[]
+
+`comment`::
+(Required*, string) The new comment. It is required only when `type` is `user`.
+
+`index`::
+(Required*, string) The alert index. It is required only when `type` is `alert`.
+preview:[]
+
+`owner`::
+(Required, string) The application that owns the case. Valid values are:
+`cases`, `observability`, or `securitySolution`.
+
+`rule`::
+(Required*, object) The rule that is associated with the alert. It is required
+only when `type` is `alert`. preview:[]
++
+.Properties of `rule`
+[%collapsible%open]
+====
+`id`::
+(Required, string) The rule identifier. preview:[]
+
+`name`::
+(Required, string) The rule name. preview:[]
+
+====
+
+`type`::
+(Required, string) The comment type, which must be `user` or `alert`.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Add a comment to case ID `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
+
+[source,sh]
+--------------------------------------------------
+POST api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
+{
+  "type": "user",
+  "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
+  "owner": "cases"
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns details about the case and its comments. For example:
+
+[source,json]
+--------------------------------------------------
+{
+  "comments":[
+    {
+      "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+      "version": "WzIwNDMxLDFd",
+      "type":"user",
+      "owner":"cases",
+      "comment":"That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
+      "created_at":"2022-03-24T00:49:47.716Z",
+      "created_by": {
+        "email": "moneypenny@hms.gov.uk",
+        "full_name": "Ms Moneypenny",
+        "username": "moneypenny"
+      },
+      "pushed_at":null,
+      "pushed_by":null,
+      "updated_at":null,
+      "updated_by":null
+    }
+  ],
+  "totalAlerts":0,
+  "id":"293f1bc0-74f6-11ea-b83a-553aecdb28b6",
+  "version":"WzIzMzgsMV0=",
+  "totalComment":1,
+  "title": "This case will self-destruct in 5 seconds",
+  "tags": ["phishing","social engineering"],
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants.",
+  "settings": {
+    "syncAlerts":false
+  },
+  "owner": "cases",
+  "closed_at": null,
+  "closed_by": null,
+  "created_at": "2022-03-24T00:37:03.906Z",
+  "created_by": {
+    "email": "ahunley@imf.usa.gov",
+    "full_name": "Alan Hunley",
+    "username": "ahunley"
+  },
+  "status": "open",
+  "updated_at": "2022-03-24T00:49:47.716Z",
+  "updated_by": {
+    "email": "moneypenny@hms.gov.uk",
+    "full_name": "Ms Moneypenny",
+    "username": "moneypenny"
+  },
+  "connector": {
+    "id": "none",
+    "name": "none",
+    "type": ".none",
+    "fields": null
+  },
+  "external_service": null
+} 
+--------------------------------------------------
+
+Add an alert to the case:
+
+[source,sh]
+--------------------------------------------------
+POST api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/comments
+{
+"alertId": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42",
+"index": ".internal.alerts-security.alerts-default-000001",
+"type": "alert",
+"owner": "cases",
+"rule": {
+  "id":"94d80550-aaf4-11ec-985f-97e55adae8b9",
+  "name":"security_rule"
+  }
+}
+--------------------------------------------------
+// KIBANA

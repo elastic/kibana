@@ -22,6 +22,9 @@ export const useStyles = () => {
       '&:last-child': {
         borderBottom: euiTheme.border.thin,
       },
+      dl: {
+        paddingTop: '0px',
+      },
     };
 
     const accordionButton: CSSObject = {

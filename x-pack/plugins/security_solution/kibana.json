@@ -22,10 +22,13 @@
     "licensing",
     "maps",
     "ruleRegistry",
+    "sessionView",
     "taskManager",
     "timelines",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch",
+    "sessionView"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",

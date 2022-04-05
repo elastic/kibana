@@ -6,6 +6,7 @@
  */
 
 import { camelCase } from 'lodash';
+import dateMath from '@elastic/datemath';
 import { HttpStart } from 'src/core/public';
 
 import {
@@ -24,7 +25,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 import {
   RulesSchema,
-  GetRuleExecutionEventsResponse,
+  GetAggregateRuleExecutionEventsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
 
 import {
@@ -315,21 +316,57 @@ export const exportRules = async ({
 /**
  * Fetch rule execution events (e.g. status changes) from Event Log.
  *
- * @param ruleId string Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param ruleId Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`)
+ * @param start Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
+ * @param end End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
+ * @param queryText search string in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
+ * @param statusFilters comma separated string of `statusFilters` (e.g. `succeeded,failed,partial failure`)
+ * @param page current page to fetch
+ * @param perPage number of results to fetch per page
+ * @param sortField field to sort by
+ * @param sortOrder what order to sort by (e.g. `asc` or `desc`)
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
  */
 export const fetchRuleExecutionEvents = async ({
   ruleId,
+  start,
+  end,
+  queryText,
+  statusFilters,
+  page,
+  perPage,
+  sortField,
+  sortOrder,
   signal,
 }: {
   ruleId: string;
+  start: string;
+  end: string;
+  queryText?: string;
+  statusFilters?: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
   signal?: AbortSignal;
-}): Promise<GetRuleExecutionEventsResponse> => {
+}): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
-  return KibanaServices.get().http.fetch<GetRuleExecutionEventsResponse>(url, {
+  const startDate = dateMath.parse(start);
+  const endDate = dateMath.parse(end, { roundUp: true });
+  return KibanaServices.get().http.fetch<GetAggregateRuleExecutionEventsResponse>(url, {
     method: 'GET',
+    query: {
+      start: startDate?.utc().toISOString(),
+      end: endDate?.utc().toISOString(),
+      query_text: queryText,
+      status_filters: statusFilters,
+      page,
+      per_page: perPage,
+      sort_field: sortField,
+      sort_order: sortOrder,
+    },
     signal,
   });
 };

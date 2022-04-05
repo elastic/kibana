@@ -8,10 +8,12 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +35,7 @@ const EditPackPageComponent = () => {
 
   const { isLoading, data } = usePack({ packId });
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
+  const isReadOnly = useMemo(() => !!data?.read_only, [data]);
 
   useBreadcrumbs('pack_edit', {
     packId: data?.id ?? '',
@@ -97,11 +100,36 @@ const EditPackPageComponent = () => {
     [handleDeleteClick]
   );
 
+  const HeaderContent = useMemo(
+    () =>
+      isReadOnly ? (
+        <>
+          <EuiSpacer />
+          <EuiCallOut>
+            <FormattedMessage
+              id="xpack.osquery.editPack.prebuiltPackModeDescription"
+              defaultMessage="This is a prebuilt Elastic pack. You can modify the scheduled agent policies, but you cannot edit queries in the pack."
+            />
+          </EuiCallOut>
+        </>
+      ) : null,
+    [isReadOnly]
+  );
+
   if (isLoading) return null;
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {!data ? <EuiLoadingContent lines={10} /> : <PackForm editMode={true} defaultValue={data} />}
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={RightColumn}
+      rightColumnGrow={false}
+      headerChildren={HeaderContent}
+    >
+      {!data ? (
+        <EuiLoadingContent lines={10} />
+      ) : (
+        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} />
+      )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
           title={

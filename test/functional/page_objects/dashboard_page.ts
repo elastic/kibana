@@ -668,6 +668,11 @@ export class DashboardPageObject extends FtrService {
     await this.renderable.waitForRender(parseInt(count));
   }
 
+  public async verifyNoRenderErrors() {
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    expect(errorEmbeddables.length).to.be(0);
+  }
+
   public async getSharedContainerData() {
     this.log.debug('getSharedContainerData');
     const sharedContainer = await this.find.byCssSelector('[data-shared-items-container]');

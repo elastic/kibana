@@ -28,7 +28,8 @@ export interface ProcessTreeDeps {
   data: ProcessEventsPage[];
   alerts: ProcessEvent[];
 
-  jumpToEvent?: ProcessEvent;
+  jumpToEntityId?: string;
+  investigatedAlertId?: string;
   isFetching: boolean;
   hasNextPage: boolean | undefined;
   hasPreviousPage: boolean | undefined;
@@ -54,7 +55,8 @@ export const ProcessTree = ({
   sessionEntityId,
   data,
   alerts,
-  jumpToEvent,
+  jumpToEntityId,
+  investigatedAlertId,
   isFetching,
   hasNextPage,
   hasPreviousPage,
@@ -145,14 +147,16 @@ export const ProcessTree = ({
       if (processEl) {
         processEl.prepend(selectionAreaEl);
 
-        const cTop = scrollerRef.current.scrollTop;
-        const cBottom = cTop + scrollerRef.current.clientHeight;
+        const { height: elHeight, y: elTop } = processEl.getBoundingClientRect();
+        const { y: viewPortElTop, height: viewPortElHeight } =
+          scrollerRef.current.getBoundingClientRect();
 
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
+        const viewPortElBottom = viewPortElTop + viewPortElHeight;
+        const elBottom = elTop + elHeight;
+        const isVisible = elBottom >= viewPortElTop && elTop <= viewPortElBottom;
 
-        if (!isVisible) {
+        // jest will die when calling scrollIntoView (perhaps not part of the DOM it executes under)
+        if (!isVisible && processEl.scrollIntoView) {
           processEl.scrollIntoView({ block: 'center' });
         }
       }
@@ -167,22 +171,24 @@ export const ProcessTree = ({
   }, [selectedProcess, selectProcess]);
 
   useEffect(() => {
-    // after 2 pages are loaded (due to bi-directional jump to), auto select the process
-    // for the jumpToEvent
-    if (!selectedProcess && jumpToEvent) {
-      const process = processMap[jumpToEvent.process.entity_id];
+    if (jumpToEntityId) {
+      const process = processMap[jumpToEntityId];
+      const hasDetails = !!process?.getDetails();
 
-      if (process) {
+      if (!selectedProcess && hasDetails) {
         onProcessSelected(process);
-      } else {
-        // auto selects the session leader process if jumpToEvent is not found in processMap
-        onProcessSelected(sessionLeader);
       }
     } else if (!selectedProcess) {
-      // auto selects the session leader process if no selection is made yet
       onProcessSelected(sessionLeader);
     }
-  }, [jumpToEvent, processMap, onProcessSelected, selectProcess, selectedProcess, sessionLeader]);
+  }, [
+    jumpToEntityId,
+    processMap,
+    onProcessSelected,
+    selectProcess,
+    selectedProcess,
+    sessionLeader,
+  ]);
 
   return (
     <>
@@ -201,14 +207,15 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
-            jumpToEventID={jumpToEvent?.process.entity_id}
-            jumpToAlertID={jumpToEvent?.kibana?.alert.uuid}
+            jumpToEntityId={jumpToEntityId}
+            investigatedAlertId={investigatedAlertId}
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
             onShowAlertDetails={onShowAlertDetails}
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
+            searchResults={searchResults}
           />
         )}
         <div
