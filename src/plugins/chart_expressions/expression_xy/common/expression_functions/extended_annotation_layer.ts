@@ -22,7 +22,9 @@ export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
     aliases: [],
     type: EXTENDED_ANNOTATION_LAYER,
     inputTypes: ['datatable'],
-    help: 'Annotation layer in lens',
+    help: i18n.translate('expressionXY.extendedAnnotationLayer.help', {
+      defaultMessage: `Configure an annotation layer in the xy chart`,
+    }),
     args: {
       hide: {
         types: ['boolean'],
@@ -31,12 +33,14 @@ export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
       },
       annotations: {
         types: ['manual_event_annotation'],
-        help: '',
+        help: i18n.translate('expressionXY.extendedAnnotationLayer.annotations.help', {
+          defaultMessage: 'Annotationss',
+        }),
         multi: true,
       },
       table: {
         types: ['datatable'],
-        help: i18n.translate('expressionXY.dataLayer.table.help', {
+        help: i18n.translate('expressionXY.extendedAnnotationLayer.table.help', {
           defaultMessage: 'Table',
         }),
       },

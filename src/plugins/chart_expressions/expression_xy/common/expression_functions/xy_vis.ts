@@ -43,14 +43,6 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     defaultMessage: 'An X/Y chart',
   }),
   args: {
-    title: {
-      types: ['string'],
-      help: 'The chart title.',
-    },
-    description: {
-      types: ['string'],
-      help: '',
-    },
     xTitle: {
       types: ['string'],
       help: i18n.translate('expressionXY.xyVis.xTitle.help', {

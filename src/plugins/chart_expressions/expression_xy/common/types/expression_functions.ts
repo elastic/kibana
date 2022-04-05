@@ -174,8 +174,6 @@ export interface LabelsOrientationConfig {
 
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -201,8 +199,6 @@ export interface XYArgs {
 }
 
 export interface LayeredXYArgs {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -226,8 +222,6 @@ export interface LayeredXYArgs {
 }
 
 export interface XYProps {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
