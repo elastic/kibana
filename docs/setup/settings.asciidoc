@@ -675,7 +675,7 @@ out through *Advanced Settings*. *Default: `true`*
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
 | `xpack.ccr.ui.enabled`
-Set this value to false to disable the Cross-Cluster Replication UI.
+| Set this value to false to disable the Cross-Cluster Replication UI.
 *Default: `true`*
 
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`

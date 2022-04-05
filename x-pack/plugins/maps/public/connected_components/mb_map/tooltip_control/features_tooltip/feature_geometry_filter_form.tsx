@@ -13,7 +13,7 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Geometry, Polygon } from 'geojson';
 import rison, { RisonObject } from 'rison-node';
 import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/unified_search/public';
 import {
   createSpatialFilterWithGeometry,
   PreIndexedShape,

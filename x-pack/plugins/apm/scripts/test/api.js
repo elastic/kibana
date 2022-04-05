@@ -57,6 +57,7 @@ const { argv } = yargs(process.argv.slice(2))
 const { trial, server, runner, grep, inspect } = argv;
 
 const license = trial ? 'trial' : 'basic';
+
 console.log(`License: ${license}`);
 
 let ftrScript = 'functional_tests';

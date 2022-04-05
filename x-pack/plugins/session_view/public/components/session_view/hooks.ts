@@ -29,7 +29,7 @@ export const useFetchSessionViewProcessEvents = (
 ) => {
   const { http } = useKibana<CoreStart>().services;
   const [isJumpToFirstPage, setIsJumpToFirstPage] = useState<boolean>(false);
-  const jumpToCursor = jumpToEvent && jumpToEvent.process.start;
+  const jumpToCursor = jumpToEvent && jumpToEvent.process?.start;
   const cachingKeys = [QUERY_KEY_PROCESS_EVENTS, sessionEntityId];
 
   const query = useInfiniteQuery(
@@ -50,7 +50,7 @@ export const useFetchSessionViewProcessEvents = (
         },
       });
 
-      const events = res.events.map((event: any) => event._source as ProcessEvent);
+      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return { events, cursor };
     },
@@ -58,7 +58,7 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage) => {
         if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: lastPage.events[lastPage.events.length - 1].process.start,
+            cursor: lastPage.events[lastPage.events.length - 1].process?.start,
             forward: true,
           };
         }
@@ -66,7 +66,7 @@ export const useFetchSessionViewProcessEvents = (
       getPreviousPageParam: (firstPage) => {
         if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: firstPage.events[0].process.start,
+            cursor: firstPage.events[0].process?.start,
             forward: false,
           };
         }
@@ -99,7 +99,7 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
         },
       });
 
-      const events = res.events.map((event: any) => event._source as ProcessEvent);
+      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return events;
     },
@@ -107,6 +107,7 @@ export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
+      cacheTime: 0,
     }
   );
 
@@ -133,12 +134,12 @@ export const useFetchAlertStatus = (
       });
 
       // TODO: add error handling
-      const events = res.events.map((event: any) => event._source as ProcessEvent);
+      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
       return {
         ...updatedAlertsStatus,
         [alertUuid]: {
-          status: events[0]?.kibana?.alert.workflow_status ?? '',
+          status: events[0]?.kibana?.alert?.workflow_status ?? '',
           processEntityId: events[0]?.process?.entity_id ?? '',
         },
       };
