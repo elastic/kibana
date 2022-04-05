@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './vulnerable_hosts';
+export { HostAlertsTable } from './host_alerts_table';
+export { UserAlertsTable } from './user_alerts_table';

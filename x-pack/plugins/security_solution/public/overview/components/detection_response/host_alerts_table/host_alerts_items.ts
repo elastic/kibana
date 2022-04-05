@@ -20,9 +20,9 @@ interface TimeRange {
   to: string;
 }
 
-interface AlertSeverityCounts {
+export interface AlertSeverityCounts {
   hostName: string;
-  count: number;
+  totalAlerts: number;
   low: number;
   medium: number;
   high: number;
@@ -58,7 +58,7 @@ interface UseVulnerableHostsCountersReturnType {
   refetch: (() => Promise<void>) | null;
 }
 
-export const useVulnerableHostsCounters = ({
+export const useHostAlertsItems = ({
   from,
   to,
 }: TimeRange): UseVulnerableHostsCountersReturnType => {
@@ -74,6 +74,10 @@ export const useVulnerableHostsCounters = ({
     indexName: signalIndexName,
   });
 
+  useEffect(() => {
+    setQuery(buildVulnerableHostAggregationQuery({ from, to }));
+  }, [setQuery, from, to]);
+
   const transformedResponse = useMemo(
     () => ({
       id: ID,
@@ -86,10 +90,6 @@ export const useVulnerableHostsCounters = ({
     }),
     [result]
   );
-
-  useEffect(() => {
-    setQuery(buildVulnerableHostAggregationQuery({ from, to }));
-  }, [setQuery, from, to]);
 
   const isLoading = isLoadingData && isSignalIndexLoading;
 
@@ -181,7 +181,7 @@ function pickOffCounters(
       ...accumalatedAlertsByHost,
       {
         hostName: currentHost.key,
-        count: currentHost.doc_count,
+        totalAlerts: currentHost.doc_count,
         low: currentHost.low.doc_count,
         medium: currentHost.medium.doc_count,
         high: currentHost.high.doc_count,

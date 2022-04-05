@@ -20,7 +20,7 @@ interface TimeRange {
   to: string;
 }
 
-interface AlertSeverityCounts {
+export interface AlertSeverityCounts {
   userName: string;
   count: number;
   low: number;
@@ -58,7 +58,7 @@ interface UseVulnerableUsersCountersReturnType {
   refetch: (() => Promise<void>) | null;
 }
 
-export const useVulnerableUsersCounters = ({
+export const useUserAlertsItems = ({
   from,
   to,
 }: TimeRange): UseVulnerableUsersCountersReturnType => {

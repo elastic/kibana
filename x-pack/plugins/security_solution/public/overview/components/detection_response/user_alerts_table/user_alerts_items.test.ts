@@ -6,12 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { mockVulnerableUsersBySeverityResult } from './mockData';
+import { mockVulnerableUsersBySeverityResult } from './mock_data';
 
-import {
-  buildVulnerableHostAggregationQuery,
-  useVulnerableUsersCounters,
-} from './vulnerable_users';
+import { buildVulnerableHostAggregationQuery, useUserAlertsItems } from './user_alerts_items';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: () => mockVulnerableUsersBySeverityResult,
@@ -27,7 +24,7 @@ jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_
 const from = '2022-03-02T10:13:37.853Z';
 const to = '2022-03-29T10:13:37.853Z';
 
-describe('useVulnerableUsersCounters', () => {
+describe('useUserAlertsItems', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -35,7 +32,7 @@ describe('useVulnerableUsersCounters', () => {
   it('initializes', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useVulnerableUsersCounters({ from: 'initial_date', to: 'end_date' })
+        useUserAlertsItems({ from: 'initial_date', to: 'end_date' })
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -56,7 +53,7 @@ describe('useVulnerableUsersCounters', () => {
   it('correctly transforms response', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useVulnerableUsersCounters({
+        useUserAlertsItems({
           from,
           to,
         })

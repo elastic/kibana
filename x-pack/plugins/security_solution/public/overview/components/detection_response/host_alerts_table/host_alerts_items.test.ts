@@ -6,12 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { mockVulnerableHostsBySeverityResult } from './mockData';
+import { mockVulnerableHostsBySeverityResult } from './mock_data';
 
-import {
-  buildVulnerableHostAggregationQuery,
-  useVulnerableHostsCounters,
-} from './vulnerable_hosts';
+import { buildVulnerableHostAggregationQuery, useHostAlertsItems } from './host_alerts_items';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: () => mockVulnerableHostsBySeverityResult,
@@ -35,7 +32,7 @@ describe('useVulnerableHostsCounters', () => {
   it('initializes', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useVulnerableHostsCounters({ from: 'initial_date', to: 'end_date' })
+        useHostAlertsItems({ from: 'initial_date', to: 'end_date' })
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -56,7 +53,7 @@ describe('useVulnerableHostsCounters', () => {
   it('correctly transforms response', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useVulnerableHostsCounters({
+        useHostAlertsItems({
           from,
           to,
         })

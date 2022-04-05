@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './vulnerable_users';
+export const SEVERITY_COLOR = {
+  critical: '#EF6550',
+  high: '#EE9266',
+  medium: '#F3B689',
+  low: '#F8D9B2',
+} as const;
