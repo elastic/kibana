@@ -82,6 +82,7 @@
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
+/src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
@@ -221,6 +222,7 @@
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-eslint-plugin-imports/ @elastic/kibana-operations
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
@@ -267,6 +269,7 @@
 /x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
+/packages/elastic-analytics/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core

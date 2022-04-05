@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
 import { IExecutionErrors } from '../../../../../../alerting/common';
@@ -255,6 +256,10 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
             });
           }
         }}
+      />
+      <RefineSearchPrompt
+        documentSize={pagination.totalItemCount}
+        backToTopAnchor="rule_error_log_list"
       />
     </div>
   );

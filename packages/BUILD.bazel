@@ -9,6 +9,7 @@
 filegroup(
   name = "build_pkg_code",
   srcs = [
+    "//packages/elastic-analytics:build",
     "//packages/elastic-apm-synthtrace:build",
     "//packages/elastic-eslint-config-kibana:build",
     "//packages/elastic-safer-lodash-set:build",
@@ -32,8 +33,8 @@ filegroup(
     "//packages/kbn-es-archiver:build",
     "//packages/kbn-es-query:build",
     "//packages/kbn-es:build",
-    "//packages/kbn-eslint-import-resolver-kibana:build",
     "//packages/kbn-eslint-plugin-eslint:build",
+    "//packages/kbn-eslint-plugin-imports:build",
     "//packages/kbn-expect:build",
     "//packages/kbn-field-types:build",
     "//packages/kbn-flot-charts:build",
@@ -96,6 +97,7 @@ filegroup(
 filegroup(
   name = "build_pkg_types",
   srcs = [
+    "//packages/elastic-analytics:build_types",
     "//packages/elastic-apm-synthtrace:build_types",
     "//packages/elastic-safer-lodash-set:build_types",
     "//packages/kbn-ace:build_types",
@@ -115,6 +117,7 @@ filegroup(
     "//packages/kbn-docs-utils:build_types",
     "//packages/kbn-es-archiver:build_types",
     "//packages/kbn-es-query:build_types",
+    "//packages/kbn-eslint-plugin-imports:build_types",
     "//packages/kbn-field-types:build_types",
     "//packages/kbn-generate:build_types",
     "//packages/kbn-i18n-react:build_types",
