@@ -61,6 +61,12 @@ Available icons
 [role="screenshot"]
 image::maps/images/maki-icons.png[]
 
+Custom Icons
+
+You may also use your own SVG icon to style Point features in your map. In **Layer settings** click the **Add custom icon** button from the *Icon* dropdown list to upload your icon to the map. For best results, your SVG icon should be monochrome and have limited details. Dynamic styling in **Elastic Maps** requires rendering SVG icons as PNGs using a https://en.wikipedia.org/wiki/Signed_distance_function[Signed Distance Function]. As a result, sharp corners and intricate details may not render correctly. Modifying the settings under Advanced Options may improve rendering.
+
+Custom icons can be added, edited, or deleted in the **Map settings** for your map. 
+
 [float]
 [[polygon-style-properties]]
 ==== Polygon style properties
