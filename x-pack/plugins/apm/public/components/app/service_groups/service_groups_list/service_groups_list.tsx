@@ -12,7 +12,6 @@ import { ServiceGroupsCard } from './service_group_card';
 import { SERVICE_GROUP_COLOR_DEFAULT } from '../../../../../common/service_groups';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useDefaultEnvironment } from '../../../../hooks/use_default_environment';
 
 interface Props {
