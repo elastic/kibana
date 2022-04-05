@@ -192,9 +192,7 @@ export function XYChart({
   const dataLayers: CommonXYDataLayerConfigResult[] = filteredLayers.filter(isDataLayer);
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = dataLayers[0]?.table.columns.find(
-    ({ id }) => isDataLayer(dataLayers[0]) && id === dataLayers[0].xAccessor
-  );
+  const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
   const layersAlreadyFormatted: Record<string, boolean> = {};
