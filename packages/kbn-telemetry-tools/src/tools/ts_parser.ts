@@ -223,7 +223,7 @@ export function* parseUsageCollection(
           const collectorDetails = extractCollectorDetails(node, program, sourceFile);
           yield [relativePath, collectorDetails];
         } catch (err) {
-          throw createFailError(`Error extracting collector in ${relativePath}\n${err}`);
+          throw createFailError(`Error extracting collector in ${relativePath}\n${err.stack}`);
         }
       }
     }
