@@ -23,8 +23,6 @@ import { logExecutionLatency } from './logger';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 
-let parallel = true;
-
 // convertFrameIDToFileID extracts the FileID from the FrameID and returns as base64url string.
 export function extractFileIDFromFrameID(frameID: string): string {
   // Step 1: Convert the base64-encoded frameID to an array of 22 bytes.
@@ -185,8 +183,7 @@ async function queryFlameGraph(
   }
 
   // profiling-stacktraces is configured with 16 shards
-  const nQueries = parallel ? 8 : 1;
-  parallel = !parallel;
+  const nQueries = 8;
   const stackTraces = new Map<StackTraceID, StackTrace>();
   const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
   const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
@@ -201,12 +198,7 @@ async function queryFlameGraph(
 
   const stackResponses = await logExecutionLatency(
     logger,
-    (testing ? 'search' : 'mget') +
-      ' query (' +
-      nQueries +
-      ' parallel) for ' +
-      stackTraceEvents.size +
-      ' stacktraces',
+    (testing ? 'search' : 'mget') + ' query for ' + stackTraceEvents.size + ' stacktraces',
     async () => {
       return await Promise.all(
         chunks.map((ids) => {
