@@ -8,8 +8,8 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { HttpSetup } from 'kibana/public';
 import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
+import { coreMock } from '../../../../../../src/core/public/mocks';
+import { ReactQueryClientProvider } from '../../common/containers/query_client/query_client_provider';
 
 export const getFakeListId: () => string = () => 'FAKE_LIST_ID';
 export const getFakeListDefinition: () => CreateExceptionListSchema = () => ({
