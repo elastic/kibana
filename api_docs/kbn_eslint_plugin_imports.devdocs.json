@@ -1,0 +1,244 @@
+{
+  "id": "@kbn/eslint-plugin-imports",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/eslint-plugin-imports",
+        "id": "def-server.resolveKibanaImport",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveKibanaImport",
+        "description": [
+          "\nResolve an import request. All import requests in the repository should return a result, if they don't it's a bug\nwhich should be caught by the `@kbn/import/no_unresolved` rule, which should never be disabled. If you need help\nadding support for an import style please reach out to operations.\n"
+        ],
+        "signature": [
+          "(req: string, dirname: string) => ",
+          {
+            "pluginId": "@kbn/eslint-plugin-imports",
+            "scope": "server",
+            "docId": "kibKbnEslintPluginImportsPluginApi",
+            "section": "def-server.ResolveResult",
+            "text": "ResolveResult"
+          },
+          " | null"
+        ],
+        "path": "packages/kbn-eslint-plugin-imports/src/resolve_kibana_import.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.resolveKibanaImport.$1",
+            "type": "string",
+            "tags": [],
+            "label": "req",
+            "description": [
+              "Text from an import/require, like `../../src/core/public` or `@kbn/std`"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_kibana_import.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.resolveKibanaImport.$2",
+            "type": "string",
+            "tags": [],
+            "label": "dirname",
+            "description": [
+              "The directory of the file where the req was found"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_kibana_import.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/eslint-plugin-imports",
+        "id": "def-server.FileResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileResult",
+        "description": [
+          "\nResolution result indicating that the import resolves to a specific file, possible in a nodeModule, with\nthe path of that file and the name of the nodeModule if applicable"
+        ],
+        "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.FileResult.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"file\""
+            ],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.FileResult.absolute",
+            "type": "string",
+            "tags": [],
+            "label": "absolute",
+            "description": [],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.FileResult.nodeModule",
+            "type": "string",
+            "tags": [],
+            "label": "nodeModule",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/eslint-plugin-imports",
+        "id": "def-server.IgnoreResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IgnoreResult",
+        "description": [
+          "\nResolution result indicating that the import request can't be resolved, but it shouldn't need to be\nbecause the file that is imported can't be resolved from the source alone, usually because it is explicitly\nimporting a build asset. Import requests which meet this criteria are manually added to the resolver and\ncan be trusted to exist after the build it complete or in their used location."
+        ],
+        "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.IgnoreResult.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ignore\""
+            ],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/eslint-plugin-imports",
+        "id": "def-server.TypesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "TypesResult",
+        "description": [
+          "\nResolution result indicating that the import only resolves to an @types package, including the name of\nthe @types package. We don't validate the sub-path of these import strings and assume that TS will validate\nthem, we just need to know that they don't map to actual files on the filesystem or modules which will\nend up in the build or running code."
+        ],
+        "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.TypesResult.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"@types\""
+            ],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/eslint-plugin-imports",
+            "id": "def-server.TypesResult.module",
+            "type": "string",
+            "tags": [],
+            "label": "module",
+            "description": [],
+            "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/eslint-plugin-imports",
+        "id": "def-server.ResolveResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ResolveResult",
+        "description": [
+          "\nPossible resolve result types"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/eslint-plugin-imports",
+            "scope": "server",
+            "docId": "kibKbnEslintPluginImportsPluginApi",
+            "section": "def-server.IgnoreResult",
+            "text": "IgnoreResult"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/eslint-plugin-imports",
+            "scope": "server",
+            "docId": "kibKbnEslintPluginImportsPluginApi",
+            "section": "def-server.TypesResult",
+            "text": "TypesResult"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/eslint-plugin-imports",
+            "scope": "server",
+            "docId": "kibKbnEslintPluginImportsPluginApi",
+            "section": "def-server.FileResult",
+            "text": "FileResult"
+          }
+        ],
+        "path": "packages/kbn-eslint-plugin-imports/src/resolve_result.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

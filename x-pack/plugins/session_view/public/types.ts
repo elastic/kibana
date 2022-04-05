@@ -43,14 +43,14 @@ export interface DetailPanelProcess {
   id: string;
   start: string;
   end: string;
-  exit_code: number;
+  exit_code?: number;
   userName: string;
   groupName: string;
   args: string[];
   executable: string[][];
   working_directory: string;
   tty?: Teletype;
-  pid: number;
+  pid?: number;
   entryLeader: DetailPanelProcessLeader;
   sessionLeader: DetailPanelProcessLeader;
   groupLeader: DetailPanelProcessLeader;
@@ -68,7 +68,7 @@ export interface DetailPanelProcessLeader {
   working_directory: string;
   tty?: Teletype;
   args: string[];
-  pid: number;
+  pid?: number;
   entryMetaType: string;
   entryMetaSourceIp: string;
   executable: string;
