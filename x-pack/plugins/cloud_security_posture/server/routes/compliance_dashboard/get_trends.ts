@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, SearchResponse } from 'kibana/server';
 import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
@@ -41,16 +41,18 @@ export type Trends = Array<{
   clusters: Record<string, Stats>;
 }>;
 
+type CorrectSearchResponse<TDocument> = Record<'body', SearchResponse<TDocument>>;
+
 export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
-  // TODO: remove the ignore, the sorting function used does not match ES search type
-  // @ts-ignore
-  const trendsQueryResult = await esClient.search<TrendsESQueryResult>(getTrendsAggsQuery(), {
-    meta: true,
-  });
+  const trendsQueryResult = (await esClient.search<TrendsESQueryResult>(
+    // @ts-ignore the sorting function used does not match ES search type
+    getTrendsAggsQuery(),
+    { meta: true }
+  )) as unknown as CorrectSearchResponse<TrendsESQueryResult>;
 
-  if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
+  if (!trendsQueryResult.body.hits.hits) throw new Error('missing trend results from score index');
 
-  const trends = trendsQueryResult.hits.hits.map((hit) => {
+  const trends = trendsQueryResult.body.hits.hits.map((hit) => {
     if (!hit._source) throw new Error('missing data for one or more of the trend results');
     const data = hit._source;
 

@@ -25,6 +25,10 @@ export interface ResourceType extends FindingsEvaluation {
   name: string;
 }
 
+export interface PostureTrend extends Stats {
+  timestamp: string;
+}
+
 export interface Cluster {
   meta: {
     clusterId: string;
@@ -33,18 +37,14 @@ export interface Cluster {
   };
   stats: Stats;
   resourcesTypes: ResourceType[];
-  trend: PostureTrend;
-}
-
-export interface PostureTrend {
-  trend: any;
+  trend: PostureTrend[];
 }
 
 export interface ComplianceDashboardData {
   stats: Stats;
   resourcesTypes: ResourceType[];
   clusters: Cluster[];
-  trend: PostureTrend;
+  trend: PostureTrend[];
 }
 
 export interface Benchmark {

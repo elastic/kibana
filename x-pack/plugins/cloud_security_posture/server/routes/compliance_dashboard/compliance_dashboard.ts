@@ -75,15 +75,17 @@ const getLatestCyclesIds = async (esClient: ElasticsearchClient): Promise<string
   });
 };
 
-const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: Trends) => {
-  return clustersWithoutTrends.map((cluster) => ({
+const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: Trends) =>
+  clustersWithoutTrends.map((cluster) => ({
     ...cluster,
-    trend: trends.map((trend) => [
-      trend.timestamp,
-      trend.clusters[cluster.meta.clusterId].postureScore,
-    ]),
+    trend: trends.map(({ timestamp, clusters: clustersStats }) => ({
+      timestamp,
+      ...clustersStats[cluster.meta.clusterId],
+    })),
   }));
-};
+
+const getSummaryTrend = (trends: Trends) =>
+  trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
 // TODO: Utilize ES "Point in Time" feature https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
 export const defineGetComplianceDashboardRoute = (
@@ -115,7 +117,7 @@ export const defineGetComplianceDashboardRoute = (
         ]);
 
         const clusters = getClustersTrends(clustersWithoutTrends, trends);
-        const trend = trends.map((v) => [v.timestamp, v.summary.postureScore]);
+        const trend = getSummaryTrend(trends);
 
         const body: ComplianceDashboardData = {
           stats,
