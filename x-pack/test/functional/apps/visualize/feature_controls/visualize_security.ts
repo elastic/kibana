@@ -141,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.clickQuerySubmitButton();
         await testSubjects.click('showQueryBarMenu');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await PageObjects.common.sleep(5000);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await testSubjects.click('showQueryBarMenu');
@@ -180,8 +180,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           true,
           false
         );
-        await PageObjects.common.sleep(5000);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+        await testSubjects.click('showQueryBarMenu');
         await savedQueryManagementComponent.deleteSavedQuery('ok2');
       });
     });
