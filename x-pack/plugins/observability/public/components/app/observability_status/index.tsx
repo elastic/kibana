@@ -22,6 +22,7 @@ export function ObservabilityStatus() {
     return {
       ...app,
       hasData: hasDataMap[app.id]?.hasData ?? false,
+      show: hasDataMap[app.id]?.show ?? true,
       modules: [],
     };
   });

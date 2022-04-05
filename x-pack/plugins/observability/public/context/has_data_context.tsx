@@ -24,6 +24,7 @@ export type HasDataMap = Record<
   DataContextApps,
   {
     status: FETCH_STATUS;
+    show: boolean;
     hasData?: boolean;
     indices?: string | ApmIndicesConfig;
     serviceName?: string;
@@ -38,12 +39,24 @@ export interface HasDataContextValue {
   forceUpdate: string;
 }
 
+const APP_ID_TO_CAPABILITIES: Record<DataContextApps, string> = {
+  alert: 'alert',
+  apm: 'apm',
+  ux: 'apm',
+  infra_logs: 'logs',
+  infra_metrics: 'infrastructure',
+  synthetics: 'uptime',
+};
+
 export const HasDataContext = createContext({} as HasDataContextValue);
 
 const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    http,
+    application: { capabilities },
+  } = useKibana<ObservabilityAppServices>().services;
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
@@ -69,6 +82,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                 ...prevState,
                 [app]: {
                   hasData,
+                  show: capabilities[APP_ID_TO_CAPABILITIES[app]].show || false,
                   ...(serviceName ? { serviceName } : {}),
                   ...(indices ? { indices } : {}),
                   status: FETCH_STATUS.SUCCESS,
@@ -115,6 +129,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
               ...prevState,
               [app]: {
                 hasData: undefined,
+                show: true,
                 status: FETCH_STATUS.FAILURE,
               },
             }));
@@ -133,6 +148,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
           ...prevState,
           alert: {
             hasData: alerts.length > 0,
+            show: true, // FIXME
             status: FETCH_STATUS.SUCCESS,
           },
         }));
@@ -141,6 +157,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
           ...prevState,
           alert: {
             hasData: undefined,
+            show: true, // FIXME
             status: FETCH_STATUS.FAILURE,
           },
         }));

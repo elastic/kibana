@@ -26,6 +26,7 @@ export interface ObservabilityStatusBoxProps {
   id: string;
   title: string;
   hasData: boolean;
+  show: boolean;
   description: string;
   modules: Array<{ name: string; hasData: boolean }>;
   addTitle: string;
@@ -52,6 +53,7 @@ export function CompletedStatusBox({
   addTitle,
   goToAppTitle,
   goToAppLink,
+  show,
 }: ObservabilityStatusBoxProps) {
   const { application } = useKibana().services;
   const trackMetric = useUiTracker({ app: 'observability-overview' });
@@ -109,7 +111,7 @@ export function CompletedStatusBox({
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButton color="primary" href={goToAppLink}>
+          <EuiButton color="primary" href={goToAppLink} isDisabled={!show}>
             {goToAppTitle}
           </EuiButton>
         </EuiFlexItem>
