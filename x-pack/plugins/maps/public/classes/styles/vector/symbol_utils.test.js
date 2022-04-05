@@ -48,6 +48,5 @@ describe('styleSvg', () => {
 
     const styledSvg = await styleSvg(unstyledSvgString, 'blue', 'black');
     expect(styledSvg).toMatchSnapshot();
-  })
+  });
 });
-
