@@ -15,7 +15,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Print Spooler Child Process",
-  "query": "process where event.type == \"start\" and\n process.parent.name : \"spoolsv.exe\" and\n (process.Ext.token.integrity_level_name : \"System\" or\n winlog.event_data.IntegrityLevel : \"System\") and\n\n /* exclusions for FP control below */\n not process.name : (\"splwow64.exe\", \"PDFCreator.exe\", \"acrodist.exe\", \"spoolsv.exe\", \"msiexec.exe\", \"route.exe\", \"WerFault.exe\") and\n not process.command_line : \"*\\\\WINDOWS\\\\system32\\\\spool\\\\DRIVERS*\" and\n not (process.name : \"net.exe\" and process.command_line : (\"*stop*\", \"*start*\")) and\n not (process.name : (\"cmd.exe\", \"powershell.exe\") and process.command_line : (\"*.spl*\", \"*\\\\program files*\", \"*route add*\")) and\n not (process.name : \"netsh.exe\" and process.command_line : (\"*add portopening*\", \"*rule name*\")) and\n not (process.name : \"regsvr32.exe\" and process.command_line : \"*PrintConfig.dll*\")\n",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type == \"start\" and\n process.parent.name : \"spoolsv.exe\" and\n (?process.Ext.token.integrity_level_name : \"System\" or\n ?winlog.event_data.IntegrityLevel : \"System\") and\n\n /* exclusions for FP control below */\n not process.name : (\"splwow64.exe\", \"PDFCreator.exe\", \"acrodist.exe\", \"spoolsv.exe\", \"msiexec.exe\", \"route.exe\", \"WerFault.exe\") and\n not process.command_line : \"*\\\\WINDOWS\\\\system32\\\\spool\\\\DRIVERS*\" and\n not (process.name : \"net.exe\" and process.command_line : (\"*stop*\", \"*start*\")) and\n not (process.name : (\"cmd.exe\", \"powershell.exe\") and process.command_line : (\"*.spl*\", \"*\\\\program files*\", \"*route add*\")) and\n not (process.name : \"netsh.exe\" and process.command_line : (\"*add portopening*\", \"*rule name*\")) and\n not (process.name : \"regsvr32.exe\" and process.command_line : \"*PrintConfig.dll*\")\n",
   "references": [
     "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527",
     "https://github.com/afwu/PrintNightmare"
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
