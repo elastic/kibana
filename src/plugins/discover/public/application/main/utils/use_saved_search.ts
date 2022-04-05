@@ -205,7 +205,11 @@ export const useSavedSearch = ({
       }
     });
 
-    return () => subscription.unsubscribe();
+    const abortController = refs.current.abortController;
+    return () => {
+      abortController?.abort();
+      subscription.unsubscribe();
+    };
   }, [
     data,
     data.query.queryString,
