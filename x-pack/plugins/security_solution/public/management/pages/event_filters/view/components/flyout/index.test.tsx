@@ -14,7 +14,7 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utils';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
