@@ -22,9 +22,6 @@ export const DEFAULT_TIMERANGE: TimeOptions = {
   interval: '>=10s',
 };
 
-const DEFAULT_REFRESH_INTERVAL_VALUE = 10000;
-const DEFAULT_REFRESH_INTERVAL_PAUSE = false;
-
 export const useMonitoringTime = () => {
   const { services } = useKibana<{ data: any }>();
   const state = useContext(GlobalStateContext);
@@ -35,8 +32,8 @@ export const useMonitoringTime = () => {
   };
 
   const { value, pause } = services.data?.query.timefilter.timefilter.getRefreshInterval();
-  const [refreshInterval, setRefreshInterval] = useState(value || DEFAULT_REFRESH_INTERVAL_VALUE);
-  const [isPaused, setIsPaused] = useState(pause || DEFAULT_REFRESH_INTERVAL_PAUSE);
+  const [refreshInterval, setRefreshInterval] = useState(value);
+  const [isPaused, setIsPaused] = useState(pause);
   const [currentTimerange, setTimeRange] = useState<TimeOptions>(defaultTimeRange);
   const [isDisabled, setIsDisabled] = useState(false);
 

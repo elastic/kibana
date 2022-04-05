@@ -9,15 +9,15 @@ import React from 'react';
 import { act, waitFor, fireEvent } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
 import { PolicyList } from './policy_list';
-import { sendGetAgentPolicyList } from '../store/services/ingest';
+import { sendGetAgentPolicyList } from '../../../services/policies/ingest';
 import { GetPolicyListResponse } from '../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../common/routing';
 import { APP_UI_ID } from '../../../../../common/constants';
 
 jest.mock('../../../services/policies/policies');
-jest.mock('../store/services/ingest');
+jest.mock('../../../services/policies/ingest');
 
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 
@@ -37,6 +37,36 @@ describe('When on the policy list page', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('and there are no policies', () => {
+    beforeEach(async () => {
+      getPackagePolicies.mockImplementation(() =>
+        sendGetEndpointSpecificPackagePoliciesMock({
+          page: 1,
+          perPage: 20,
+          count: 0,
+        })
+      );
+      render();
+      await waitFor(() => {
+        expect(getPackagePolicies).toHaveBeenCalled();
+      });
+    });
+    afterEach(() => {
+      getPackagePolicies.mockReset();
+    });
+    it('should show the empty page', () => {
+      expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
+    });
+    it('should show instruction text and a button to add the Endpoint Security integration', () => {
+      expect(
+        renderResult.findByText(
+          'From this page, you’ll be able to view and manage the Endpoint Security Integration policies in your environment running Endpoint Security.'
+        )
+      ).toBeTruthy();
+      expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
+    });
   });
 
   describe('and data exists', () => {

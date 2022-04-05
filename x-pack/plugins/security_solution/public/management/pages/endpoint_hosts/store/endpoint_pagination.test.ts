@@ -31,7 +31,7 @@ import {
 import { getEndpointListPath } from '../../../common/routing';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../policy/store/services/ingest', () => ({
+jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
 }));

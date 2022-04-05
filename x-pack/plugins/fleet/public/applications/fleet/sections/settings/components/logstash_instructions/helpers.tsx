@@ -26,7 +26,8 @@ output {
     hosts => "<es_host>"
     api_key => "<api_key>"
     data_stream => true
-    # ca_cert: <path-to-cert-or-pem>
+    ssl => true
+    # cacert: <path-to-cert-or-pem>
   }
 }`.replace('<api_key>', apiKey || '<api_key>');
 }

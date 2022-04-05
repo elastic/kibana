@@ -20,7 +20,7 @@ import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../../presentation_util/public';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Controls Services Context
@@ -127,9 +127,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       ),
       {
         outsideClickCloses: false,
-        onClose: (flyout) => onCancel(flyout),
+        onClose: (flyout) => {
+          setFlyoutRef(undefined);
+          onCancel(flyout);
+        },
       }
     );
+    setFlyoutRef(flyoutInstance);
   };
 
   return (

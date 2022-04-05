@@ -14,7 +14,7 @@ import {
   getFakeListDefinition,
   getFakeHttpService,
   renderQuery,
-} from './test_utils';
+} from '../test_utils';
 
 describe('List artifact hook', () => {
   let result: ReturnType<typeof useListArtifact>;
