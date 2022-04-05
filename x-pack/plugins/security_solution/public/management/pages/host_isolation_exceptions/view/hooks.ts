@@ -4,15 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useEffect, useState } from 'react';
-import { QueryObserverResult, useQuery } from 'react-query';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
-import { ServerApiError } from '../../../../common/types';
-import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
-import { SEARCHABLE_FIELDS } from '../constants';
-import { getHostIsolationExceptionItems, getHostIsolationExceptionSummary } from '../service';
+import { getHostIsolationExceptionSummary } from '../service';
 
 /**
  * Checks if the current user should be able to see the host isolation exceptions
@@ -44,41 +39,4 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   }, [http, privileges.canIsolateHost]);
 
   return canSeeMenu;
-}
-
-export function useFetchHostIsolationExceptionsList({
-  filter,
-  page,
-  perPage,
-  policies,
-  excludedPolicies = [],
-  enabled = true,
-}: {
-  filter?: string;
-  page: number;
-  perPage: number;
-  policies?: string[];
-  excludedPolicies?: string[];
-  enabled?: boolean;
-}): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
-  const http = useHttp();
-
-  return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', 'list', filter, perPage, page, policies, excludedPolicies],
-    () => {
-      const kql = parsePoliciesAndFilterToKql({
-        policies,
-        excludedPolicies,
-        kuery: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
-      });
-
-      return getHostIsolationExceptionItems({
-        http,
-        page: page + 1,
-        perPage,
-        filter: kql,
-      });
-    },
-    { enabled, keepPreviousData: true }
-  );
 }

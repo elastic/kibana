@@ -34,8 +34,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
-import { isDefaultOrMissing } from './url_routing';
-import { getArtifactListPageUrlPath } from './url_routing/artifact_list_page_routing';
+import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
