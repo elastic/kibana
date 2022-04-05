@@ -12,7 +12,6 @@ import {
 } from '../../../../../../../src/plugins/dashboard/public';
 import { setStateToKbnUrl } from '../../../../../../../src/plugins/kibana_utils/public';
 import {
-  ApplyGlobalFilterActionContext,
   APPLY_FILTER_TRIGGER,
   isQuery,
   isTimeRange,
@@ -20,6 +19,7 @@ import {
   TimeRange,
   extractTimeRange,
 } from '../../../../../../../src/plugins/data/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../../../src/plugins/unified_search/public';
 import { IEmbeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
 import {
   AbstractDashboardDrilldown,

@@ -11,7 +11,7 @@ import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
-import { DataViewsList } from '../../../../../src/plugins/data/public';
+import { DataViewsList } from '../../../../../src/plugins/unified_search/public';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;

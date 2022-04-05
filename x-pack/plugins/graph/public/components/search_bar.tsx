@@ -23,11 +23,8 @@ import {
 } from '../state_management';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  QueryStringInput,
-  IDataPluginServices,
-  Query,
-} from '../../../../../src/plugins/data/public';
+import { IDataPluginServices, Query } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
 import { TooltipWrapper } from './tooltip_wrapper';
 import type { DataView } from '../../../../../src/plugins/data_views/public';
 

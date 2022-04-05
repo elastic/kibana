@@ -25,18 +25,6 @@ describe('get_transform_changes_for_host', () => {
     });
   });
 
-  test('it gets a transform change for authentications', () => {
-    expect(
-      getTransformChangesForHosts({
-        factoryQueryType: HostsQueries.authentications,
-        settings: getTransformConfigSchemaMock().settings[0],
-      })
-    ).toEqual<ReturnTypeGetTransformChangesForHosts>({
-      factoryQueryType: HostsQueries.authenticationsEntities,
-      indices: ['.estc_all_user_ent*'],
-    });
-  });
-
   test('it returns an "undefined" for another value', () => {
     expect(
       getTransformChangesForHosts({

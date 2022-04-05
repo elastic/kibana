@@ -17,7 +17,7 @@ import {
   SavedObjectsStart,
 } from 'kibana/public';
 import { act } from 'react-dom/test-utils';
-import { QueryStringInput } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
 import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
