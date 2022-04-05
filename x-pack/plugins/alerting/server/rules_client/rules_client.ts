@@ -374,6 +374,8 @@ export class RulesClient {
       data,
       uiSettings,
       savedObjects,
+      encryptedSavedObjectsClient,
+      namespace,
     });
   }
 
@@ -563,35 +565,41 @@ export class RulesClient {
   public async diagnose<Params extends RuleTypeParams = never>(
     id: string
   ): Promise<DiagnoseOutput> {
-    let attributes: RawRule;
+    let ruleSavedObject: SavedObject<RawRule>;
     try {
-      const decryptedAlert =
-        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
+      ruleSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        'alert',
+        id,
+        {
           namespace: this.namespace,
-        });
-      attributes = decryptedAlert.attributes;
-    } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+        }
       );
+    } catch (e) {
       // Still attempt to load the attributes and version using SOC
-      const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
-      attributes = alert.attributes;
+      ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     }
 
     await this.authorization.ensureAuthorized({
-      ruleTypeId: attributes.alertTypeId,
-      consumer: attributes.consumer,
+      ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+      consumer: ruleSavedObject.attributes.consumer,
       operation: ReadOperations.Get,
       entity: AlertingAuthorizationEntity.Rule,
     });
-    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleSavedObject.attributes.alertTypeId);
 
-    const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
+    const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
     return await this.ruleDiagnostics.diagnose({
-      schedule: attributes.schedule as IntervalSchedule,
-      params: attributes.params,
+      rule: this.getPartialRuleFromRaw(
+        id,
+        ruleType,
+        ruleSavedObject.attributes,
+        ruleSavedObject.references,
+        false,
+        true
+      ) as Rule,
+      apiKey: ruleSavedObject.attributes.apiKey,
+      schedule: ruleSavedObject.attributes.schedule as IntervalSchedule,
+      params: ruleSavedObject.attributes.params,
       ruleType,
       username: await this.getUserName(),
     });

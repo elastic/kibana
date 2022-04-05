@@ -7,12 +7,6 @@
 
 import React from 'react';
 import { EuiPortal, EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { Rule } from '../../../types';
-import { DiagnoseOutput } from '../../../../../alerting/common';
-import { useKibana } from '../../../common/lib/kibana';
-import { diagnoseRule } from '../../lib/rule_api';
-import { PartialRule } from '../../lib/rule_api/diagnose';
-import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { RulePreview, RulePreviewProps } from './rule_preview';
 
 export const RulePreviewFlyout = ({ potentialRule, existingRule }: RulePreviewProps) => {

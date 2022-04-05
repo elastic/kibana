@@ -7,11 +7,14 @@
 
 import type { Request } from '@hapi/hapi';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
+import {
   DiagnosticResult,
   DiagnoseOutput,
   RuleTypeParams,
   IntervalSchedule,
+  RawRule,
+  parseDuration,
+  Rule,
 } from '../../types';
 import { addSpaceIdToPath } from '../../../../spaces/server';
 import {
@@ -29,10 +32,14 @@ import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { validateRuleTypeParams } from '../validate_rule_type_params';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import { PluginStart as DataPluginStart } from '../../../../../../src/plugins/data/server';
+import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
 
-export type CustomDiagnostic<Params extends RuleTypeParams> = (params: Params) => DiagnosticResult;
+export type CustomDiagnostic<Params extends RuleTypeParams> = (
+  params: Params
+) => DiagnosticResult[];
 
 const CARDINALITY_OVERALL_THRESHOLD = 10000;
+const ONE_MINUTE_IN_MILLISSECONDS = 60000;
 type CardinalityAgg = estypes.AggregationsAggregateBase & {
   [property: string]: estypes.AggregationsCardinalityAggregate;
 };
@@ -50,47 +57,31 @@ export interface Diagnostics<Params extends RuleTypeParams> {
   custom?: Array<CustomDiagnostic<Params>>;
 }
 
-const DIAGNOSTICS_DISABLED: DiagnosticResult = {
-  type: 'warning',
-  name: 'Diagnostics disabled',
-  message: 'Rule diagnostics have not been enabled for this rule type',
-};
-
 const NO_INDICES_SPECIFIED: DiagnosticResult = {
   type: 'error',
   name: 'No indices specified',
   message: 'Unable to determine which indices to use for diagnostic',
 };
 
-const NO_USERNAME: DiagnosticResult = {
-  type: 'error',
-  name: 'Invalid username',
-  message: 'Unable to diagnose rule without username.',
-};
-
 interface ConstructorOpts {
   basePathService: IBasePath;
   spaceId?: string;
+  namespace?: string;
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
   data: DataPluginStart;
   uiSettings: UiSettingsServiceStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
 }
 
 interface DiagnoseOpts<Params extends RuleTypeParams> {
+  rule?: Rule;
+  apiKey?: string | null;
   params: Params;
   schedule: IntervalSchedule;
   ruleType: UntypedNormalizedRuleType;
   username: string | null;
-}
-
-interface DiagnoseIndicesOpts<Params extends RuleTypeParams> {
-  params: Params;
-  indices: string;
-  username: string;
-  fields: string;
-  esClient: ElasticsearchClient;
 }
 
 interface DiagnoseExecutorOpts<Params extends RuleTypeParams> {
@@ -100,7 +91,7 @@ interface DiagnoseExecutorOpts<Params extends RuleTypeParams> {
   params: Params;
 }
 
-function getIndexAccessError(index: string, username: string, err: Error): DiagnosticResult {
+function getIndexAccessError(index: string, username: string | null, err: Error): DiagnosticResult {
   return {
     type: 'error',
     name: 'Index access error',
@@ -124,6 +115,14 @@ function getInvalidRuleParamError(err: Error): DiagnosticResult {
   };
 }
 
+function getDecryptionError(err: Error): DiagnosticResult {
+  return {
+    type: 'error',
+    name: 'Unable to decrypt',
+    message: err.message,
+  };
+}
+
 function getIndexCardinalityError(
   index: string,
   field: string,
@@ -139,142 +138,270 @@ function getIndexCardinalityError(
 
 export class RuleDiagnostic {
   private readonly basePathService: IBasePath;
+  private readonly namespace?: string;
   private readonly spaceId: string;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly elasticsearch: ElasticsearchServiceStart;
   private readonly savedObjects: SavedObjectsServiceStart;
   private readonly data: DataPluginStart;
   private readonly uiSettings: UiSettingsServiceStart;
+  private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+
+  private fakeRequest: KibanaRequest | null;
+  private scopedClusterClient: IScopedClusterClient | null;
 
   constructor({
     basePathService,
     spaceId,
+    namespace,
     createAPIKey,
     elasticsearch,
     uiSettings,
     data,
     savedObjects,
+    encryptedSavedObjectsClient,
   }: ConstructorOpts) {
     this.basePathService = basePathService;
     this.createAPIKey = createAPIKey;
     this.spaceId = spaceId ?? 'default';
+    this.namespace = namespace;
     this.elasticsearch = elasticsearch;
     this.savedObjects = savedObjects;
     this.data = data;
     this.uiSettings = uiSettings;
+    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
+
+    this.fakeRequest = null;
+    this.scopedClusterClient = null;
   }
 
   public async diagnose<Params extends RuleTypeParams>({
+    rule,
+    apiKey,
     schedule,
     params,
     ruleType,
     username,
   }: DiagnoseOpts<Params>): Promise<DiagnoseOutput> {
-    let requestAndResponses = {
-      requests: [],
-      responses: [],
-    };
+    const errorsAndWarnings: DiagnosticResult[] = [];
 
-    if (!username) {
-      return {
-        requestAndResponses,
-        errorsAndWarnings: [NO_USERNAME],
-      };
-    }
+    // Framework diagnostics
+    const frameworkDiagnosticResults = await this.runFrameworkDiagnostics({
+      params,
+      schedule,
+      ruleType,
+      ruleId: rule?.id,
+    });
+    errorsAndWarnings.push(...frameworkDiagnosticResults);
 
-    // Validate params
+    // Custom diagnostics if defined
+    const customDiagnosticResults = await this.runCustomDiagnostics({
+      params,
+      apiKey,
+      ruleType,
+      username,
+    });
+    errorsAndWarnings.push(...customDiagnosticResults);
+
+    // Sample executor results
+    const executorResults = await this.runExecutor({
+      ruleType,
+      params,
+      apiKey,
+    });
+    errorsAndWarnings.push(...executorResults.errorsAndWarnings);
+
+    // Preview results
+
+    return { errorsAndWarnings, requestAndResponses: executorResults.requestAndResponses };
+  }
+
+  /**
+   * These are diagnostics that can be performed at a framework leve
+   * They do not require opt-in by the rule type
+   */
+  public async runFrameworkDiagnostics<Params extends RuleTypeParams>({
+    params,
+    schedule,
+    ruleType,
+    ruleId,
+  }: {
+    params: Params;
+    schedule: IntervalSchedule;
+    ruleType: UntypedNormalizedRuleType;
+    ruleId?: string;
+  }) {
+    const results: DiagnosticResult[] = [];
+
+    // Validate rule params
     try {
       validateRuleTypeParams(params, ruleType.validate?.params);
     } catch (err) {
-      return {
-        requestAndResponses,
-        errorsAndWarnings: [getInvalidRuleParamError(err)],
-      };
+      results.push(getInvalidRuleParamError(err));
     }
 
-    if (!ruleType.diagnostics) {
-      return {
-        requestAndResponses,
-        errorsAndWarnings: [DIAGNOSTICS_DISABLED],
-      };
+    // If we're given a rule id for an existing rule, try to load the decrypted rule
+    if (ruleId) {
+      try {
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+          'alert',
+          ruleId,
+          {
+            namespace: this.namespace,
+          }
+        );
+      } catch (err) {
+        results.push(getDecryptionError(err));
+      }
     }
 
+    // If we're given a schedule, check that it is not too frequent
+    if (schedule && schedule.interval) {
+      if (parseDuration(schedule.interval) < ONE_MINUTE_IN_MILLISSECONDS) {
+        results.push({
+          type: 'warning',
+          name: 'Check interval too small',
+          message: 'Running rules at this check interval may affect alerting performance.',
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * These are the diagnostics that can be performed if the rule type
+   * opts into some of the diagnostic hooks provided or defines their own
+   * custom diagnostic functions
+   */
+  public async runCustomDiagnostics<Params extends RuleTypeParams>({
+    params,
+    apiKey,
+    ruleType,
+    username,
+  }: {
+    params: Params;
+    apiKey?: string | null;
+    ruleType: UntypedNormalizedRuleType;
+    username: string | null;
+  }) {
     const results: DiagnosticResult[] = [];
+    if (!ruleType.diagnostics) {
+      return results;
+    }
 
-    const fakeRequest = await this.createApiKeyAndFakeRequest(ruleType.id);
+    if (!this.fakeRequest) {
+      this.fakeRequest = await this.createFakeRequest(ruleType.id, apiKey);
+    }
+
     if (ruleType.diagnostics.getIndices) {
       const indices = ruleType.diagnostics.getIndices(params);
 
-      // Unable to determine indices to run rule over
       if (!indices || indices.length === 0) {
-        return {
-          requestAndResponses,
-          errorsAndWarnings: [NO_INDICES_SPECIFIED],
-        };
-      }
+        // Unable to determine indices to run rule over
+        results.push(NO_INDICES_SPECIFIED);
+      } else {
+        if (!this.scopedClusterClient) {
+          this.scopedClusterClient = this.elasticsearch.client.asScoped(this.fakeRequest);
 
-      const scopedClusterClient = this.elasticsearch.client.asScoped(fakeRequest);
-      const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
-        scopedClusterClient,
-        rule: {
-          name: 'preview',
-          alertTypeId: ruleType.id,
-          id: 'preview',
-          spaceId: this.spaceId,
-        },
-        abortController: new AbortController(),
-      });
-      const wrappedClusterClient = wrappedScopedClusterClient.client();
+          let fields: string = '*';
+          if (ruleType.diagnostics.getAggregatedFields) {
+            const aggFields: string[] = ruleType.diagnostics.getAggregatedFields(params);
+            if (aggFields.length > 0) {
+              fields = aggFields.join(',');
+            }
+          }
 
-      let fields: string = '*';
-      if (ruleType.diagnostics.getAggregatedFields) {
-        const aggFields: string[] = ruleType.diagnostics.getAggregatedFields(params);
-        if (aggFields.length > 0) {
-          fields = aggFields.join(',');
+          const diagnoseIndicesResults = await this.diagnoseIndices({
+            indices,
+            username,
+            esClient: this.scopedClusterClient.asCurrentUser,
+            fields,
+          });
+          results.push(...diagnoseIndicesResults);
         }
       }
-
-      const indexResults = await this.diagnoseIndices({
-        indices,
-        username,
-        params,
-        esClient: scopedClusterClient.asCurrentUser,
-        fields,
-      });
-
-      if (indexResults) results.push(...indexResults);
-
-      await this.diagnoseExecution({
-        ruleType,
-        params,
-        scopedClusterClient: wrappedClusterClient,
-        request: fakeRequest,
-      });
-
-      requestAndResponses = wrappedScopedClusterClient.getRequestAndResponse();
     }
 
-    return {
-      requestAndResponses,
-      errorsAndWarnings: results,
-    };
+    if (ruleType.diagnostics.custom) {
+      for (const customDiagnostic of ruleType.diagnostics.custom) {
+        results.push(...customDiagnostic(params));
+      }
+    }
+    return results;
   }
 
-  private async createApiKeyAndFakeRequest(ruleTypeId: string) {
-    // Create an API key and fake request for searching against indices
-    const apiKey = await this.createAPIKey(`Alerting diagnostic: ${ruleTypeId}`);
-    const apiKeyValue = this.apiKeyAsString(apiKey);
-    return this.getFakeKibanaRequest(this.spaceId, apiKeyValue);
+  public async runExecutor<Params extends RuleTypeParams>({
+    ruleType,
+    params,
+    apiKey,
+  }: {
+    params: Params;
+    apiKey?: string | null;
+    ruleType: UntypedNormalizedRuleType;
+  }) {
+    const results: DiagnosticResult[] = [];
+    if (!this.fakeRequest) {
+      this.fakeRequest = await this.createFakeRequest(ruleType.id, apiKey);
+    }
+
+    if (!this.scopedClusterClient) {
+      this.scopedClusterClient = this.elasticsearch.client.asScoped(this.fakeRequest);
+    }
+
+    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient: this.scopedClusterClient,
+      rule: {
+        name: 'preview',
+        alertTypeId: ruleType.id,
+        id: 'preview',
+        spaceId: this.spaceId,
+      },
+      abortController: new AbortController(),
+    });
+    const wrappedClusterClient = wrappedScopedClusterClient.client();
+
+    const executionResults = await this.diagnoseExecution({
+      ruleType,
+      params,
+      scopedClusterClient: wrappedClusterClient,
+      request: this.fakeRequest,
+    });
+    results.push(...executionResults);
+
+    const requestAndResponses = wrappedScopedClusterClient.getRequestAndResponse();
+    return { errorsAndWarnings: results, requestAndResponses };
   }
 
-  private async diagnoseIndices<Params extends RuleTypeParams>({
+  private async createFakeRequest(ruleTypeId: string, apiKey?: string | null) {
+    let apiKeyToUse: string | null;
+    if (!apiKey) {
+      // Create an API key and fake request for searching against indices
+      const newApiKey = await this.createAPIKey(`Alerting diagnostic: ${ruleTypeId}`);
+      apiKeyToUse = this.apiKeyAsString(newApiKey);
+    } else {
+      apiKeyToUse = apiKey;
+    }
+
+    return this.getFakeKibanaRequest(this.spaceId, apiKeyToUse);
+  }
+
+  /**
+   * Tries to identify potential issues with the indices configured for the rule
+   * Examples include missing indices and insufficient privileges.
+   */
+  private async diagnoseIndices({
     indices,
     username,
     fields,
-    params,
     esClient,
-  }: DiagnoseIndicesOpts<Params>): Promise<DiagnosticResult[] | null> {
-    const rejectedResults = [];
+  }: {
+    indices: string;
+    username: string | null;
+    fields: string;
+    esClient: ElasticsearchClient;
+  }): Promise<DiagnosticResult[]> {
+    const results = [];
 
     // test each index separately
     const indexes = indices.split(',');
@@ -286,7 +413,7 @@ export class RuleDiagnostic {
       });
 
       if (!exists) {
-        rejectedResults.push(getIndexExistsError(index));
+        results.push(getIndexExistsError(index));
       }
     }
 
@@ -308,7 +435,7 @@ export class RuleDiagnostic {
     const successfulIndices = [];
     for (let ndx = 0; ndx < indexes.length; ++ndx) {
       if (promises[ndx].status === 'rejected') {
-        rejectedResults.push(
+        results.push(
           getIndexAccessError(
             indexes[ndx],
             username,
@@ -320,29 +447,34 @@ export class RuleDiagnostic {
       }
     }
 
-    const indexCardinalityResult = await this.diagnoseIndexFields({
+    const indexFieldsResults = await this.diagnoseIndexFields({
       indices: successfulIndices.join(','),
       fields,
       esClient,
-      username,
-      params,
     });
-    if (indexCardinalityResult) {
-      rejectedResults.push(...indexCardinalityResult);
-    }
+    results.push(...indexFieldsResults);
 
-    return rejectedResults.length > 0 ? rejectedResults : null;
+    return results;
   }
 
-  private async diagnoseIndexFields<Params extends RuleTypeParams>({
+  /**
+   * Tries to identify potential issues with the index fields configured for the rule
+   * Examples include high cardinality
+   */
+  private async diagnoseIndexFields({
     indices,
     fields,
     esClient,
-  }: DiagnoseIndicesOpts<Params>): Promise<DiagnosticResult[] | null> {
+  }: {
+    indices: string;
+    fields: string;
+    esClient: ElasticsearchClient;
+  }): Promise<DiagnosticResult[]> {
     const body = await esClient.fieldCaps({ index: indices, fields });
 
     const indexFields = body.fields ?? {};
 
+    // Get cardinality aggregation for aggregatable fields
     const aggs = Object.keys(indexFields).reduce((acc, field) => {
       const fieldCapData = indexFields[field];
       const path = Object.keys(fieldCapData)[0];
@@ -359,6 +491,7 @@ export class RuleDiagnostic {
           }
         : acc;
     }, {});
+
     const cardinalityResults = await esClient.search({
       index: indices,
       body: {
@@ -382,7 +515,7 @@ export class RuleDiagnostic {
       });
     }
 
-    return results.length > 0 ? results : null;
+    return results;
   }
 
   private async diagnoseExecution<Params extends RuleTypeParams>({
@@ -391,56 +524,67 @@ export class RuleDiagnostic {
     scopedClusterClient,
     request,
   }: DiagnoseExecutorOpts<Params>) {
+    const results: DiagnosticResult[] = [];
     const savedObjectsClient = this.savedObjects.getScopedClient(request, {
       includedHiddenTypes: ['alert', 'action'],
     });
     const searchSourceClient = this.data.search.searchSource.asScoped(request);
     const uiSettingsClient = this.uiSettings.asScopedToClient(savedObjectsClient);
 
-    await ruleType.executor({
-      alertId: 'preview',
-      executionId: 'preview',
-      startedAt: new Date(),
-      previousStartedAt: null,
-      services: {
-        shouldWriteAlerts: () => true,
-        shouldStopExecution: () => false,
-        alertFactory: {
-          create: alertInstanceFactoryStub,
-          done: () => ({ getRecoveredAlerts: () => [] }),
+    try {
+      await ruleType.executor({
+        alertId: 'preview',
+        executionId: 'preview',
+        startedAt: new Date(),
+        previousStartedAt: null,
+        services: {
+          shouldWriteAlerts: () => true,
+          shouldStopExecution: () => false,
+          alertFactory: {
+            create: alertInstanceFactoryStub,
+            done: () => ({ getRecoveredAlerts: () => [] }),
+          },
+          savedObjectsClient,
+          scopedClusterClient,
+          searchSourceClient,
+          uiSettingsClient,
         },
-        savedObjectsClient,
-        scopedClusterClient,
-        searchSourceClient,
-        uiSettingsClient,
-      },
-      params,
-      state: {},
-      rule: {
+        params,
+        state: {},
+        rule: {
+          name: 'preview',
+          tags: [],
+          consumer: '',
+          producer: '',
+          ruleTypeId: ruleType.id,
+          ruleTypeName: ruleType.name,
+          enabled: true,
+          schedule: {
+            interval: '1h',
+          },
+          actions: [],
+          createdBy: null,
+          updatedBy: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          throttle: null,
+          notifyWhen: 'onActionGroupChange',
+        },
+        spaceId: this.spaceId,
         name: 'preview',
         tags: [],
-        consumer: '',
-        producer: '',
-        ruleTypeId: ruleType.id,
-        ruleTypeName: ruleType.name,
-        enabled: true,
-        schedule: {
-          interval: '1h',
-        },
-        actions: [],
         createdBy: null,
         updatedBy: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        throttle: null,
-        notifyWhen: 'onActionGroupChange',
-      },
-      spaceId: this.spaceId,
-      name: 'preview',
-      tags: [],
-      createdBy: null,
-      updatedBy: null,
-    });
+      });
+    } catch (err) {
+      results.push({
+        type: 'error',
+        name: 'Execution error',
+        message: err.message,
+      });
+    }
+
+    return results;
   }
 
   private apiKeyAsString(apiKey: CreateAPIKeyResult | null): string | null {
