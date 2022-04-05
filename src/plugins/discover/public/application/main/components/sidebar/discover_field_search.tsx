@@ -31,6 +31,8 @@ import {
   EuiPagination,
   EuiBasicTableColumn,
   EuiLink,
+  EuiText,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
@@ -370,27 +372,36 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
             display="block"
             button={helpButton}
             isOpen={isHelpOpen}
-            panelPaddingSize="m"
+            panelPaddingSize="none"
             className="dscFieldTypesHelp__popover"
             panelClassName="dscFieldTypesHelp__panel"
             closePopover={closeHelp}
+            initialFocus="#dscFieldTypesHelpBasicTableId"
           >
             <EuiPopoverTitle paddingSize="s">
               {i18n.translate('discover.fieldChooser.popoverTitle', {
                 defaultMessage: 'Field types',
               })}
             </EuiPopoverTitle>
-            <EuiBasicTable
-              tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
-                defaultMessage: 'Description of field types',
-              })}
-              items={items}
-              compressed={true}
-              rowHeader="firstName"
-              columns={columnsSidebar}
-              responsive={false}
-            />
-            <EuiSpacer size="s" />
+            <EuiPanel
+              className="eui-yScroll"
+              style={{ maxHeight: '50vh' }}
+              color="transparent"
+              paddingSize="s"
+            >
+              <EuiBasicTable
+                id="dscFieldTypesHelpBasicTableId"
+                tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
+                  defaultMessage: 'Description of field types',
+                })}
+                items={items}
+                compressed={true}
+                rowHeader="firstName"
+                columns={columnsSidebar}
+                responsive={false}
+              />
+            </EuiPanel>
+            {/* <EuiSpacer size="s" />
             {presentFieldTypes.length > FIELD_TYPES_PER_PAGE && (
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -404,16 +415,20 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            )}
-            <EuiPopoverFooter paddingSize="s">
-              Learn more about&nbsp;
-              <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
-                <FormattedMessage
-                  id="discover.fieldTypesPopover.learnMore"
-                  defaultMessage="field types"
-                />
-              </EuiLink>
-            </EuiPopoverFooter>
+            )} */}
+            <EuiPanel color="transparent" paddingSize="s">
+              <EuiText color="subdued" size="xs">
+                <p>
+                  Learn more about&nbsp;
+                  <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
+                    <FormattedMessage
+                      id="discover.fieldTypesPopover.learnMore"
+                      defaultMessage="field types"
+                    />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiPanel>
           </EuiPopover>
         </EuiFilterGroup>
       </EuiFlexItem>
