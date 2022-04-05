@@ -121,7 +121,7 @@ export const DetailPanelAlertTab = ({
         ? alerts.map((event) => {
             const key = event.kibana?.alert?.uuid;
 
-            if (event !== investigatedAlert) {
+            if (key && event !== investigatedAlert) {
               return (
                 <DetailPanelAlertListItem
                   key={key}
@@ -134,15 +134,18 @@ export const DetailPanelAlertTab = ({
           })
         : Object.keys(groupedAlerts).map((ruleId: string) => {
             const alertsByRule = groupedAlerts[ruleId];
+            const key = alertsByRule[0].kibana?.alert?.rule?.uuid;
 
-            return (
-              <DetailPanelAlertGroupItem
-                key={alertsByRule[0].kibana?.alert?.rule?.uuid}
-                alerts={alertsByRule}
-                onJumpToEvent={onJumpToEvent}
-                onShowAlertDetails={onShowAlertDetails}
-              />
-            );
+            if (key) {
+              return (
+                <DetailPanelAlertGroupItem
+                  key={key}
+                  alerts={alertsByRule}
+                  onJumpToEvent={onJumpToEvent}
+                  onShowAlertDetails={onShowAlertDetails}
+                />
+              );
+            }
           })}
     </div>
   );

@@ -6,6 +6,7 @@
  */
 import {
   AlertStatusEventEntityIdMap,
+  EventKind,
   Process,
   ProcessEvent,
   ProcessMap,
@@ -56,7 +57,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
 
     if (event.kibana?.alert) {
       process.addAlert(event);
-    } else {
+    } else if (event.event?.kind === EventKind.event) {
       process.addEvent(event);
     }
   });
