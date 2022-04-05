@@ -27,7 +27,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
   // const authorizationIndex = '.kibana-test-authorization';
 
-  describe.only('simulate', () => {
+  describe('simulate', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -60,8 +60,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
-
-          console.log(JSON.stringify(createdAction));
 
           const reference = `rule-simulation-${uuid.v4()}:${user.username}`;
 
@@ -98,11 +96,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              console.log(JSON.stringify(response));
+              // console.log(JSON.stringify(response));
               expect(response.body).to.be.an('object');
 
               // wait for executor Alert Executor to be run, which means the underlying task is running
-              console.log(await esTestIndexTool.waitForDocs('action:test.index-record', reference));
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
 
               // const searchResult = await esTestIndexTool.search(
               //   'action:test.index-record',
