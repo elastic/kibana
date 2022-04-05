@@ -13,7 +13,6 @@ jest.mock('../components/vector_style_editor', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Feature, Point } from 'geojson';
 
 import { DynamicColorProperty } from './dynamic_color_property';
 import {
@@ -206,38 +205,6 @@ describe('renderLegendDetailRow', () => {
       expect(component).toMatchSnapshot();
     });
   });
-});
-
-function makeFeatures(foobarPropValues: string[]) {
-  return foobarPropValues.map((value: string) => {
-    return {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [-10, 0],
-      } as Point,
-      properties: {
-        foobar: value,
-      },
-    } as Feature;
-  });
-}
-
-test('Should pluck the categorical style-meta', async () => {
-  const colorStyle = makeProperty({
-    type: COLOR_MAP_TYPE.CATEGORICAL,
-    colorCategory: 'palette_0',
-    fieldMetaOptions,
-  });
-
-  const features = makeFeatures(['CN', 'CN', 'US', 'CN', 'US', 'IN']);
-  const meta = colorStyle.pluckCategoricalStyleMetaFromFeatures(features);
-
-  expect(meta).toEqual([
-    { key: 'CN', count: 3 },
-    { key: 'US', count: 2 },
-    { key: 'IN', count: 1 },
-  ]);
 });
 
 test('Should pluck the categorical style-meta from fieldmeta', async () => {

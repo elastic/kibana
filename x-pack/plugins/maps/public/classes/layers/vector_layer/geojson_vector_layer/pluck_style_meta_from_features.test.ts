@@ -12,10 +12,10 @@ import { IVectorLayer } from '../../vector_layer/vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
 import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
 import { InlineField } from '../../../fields/inline_field';
-import { isOnlySingleFeatureType, pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';
+import { isOnlySingleFeatureType, pluckCategoricalStyleMetaFromFeatures, pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';
 
 describe('pluckStyleMetaFromFeatures', () => {
-  it('Should identify when feature collection only contains points', async () => {
+  test('Should identify when feature collection only contains points', async () => {
     const features = [
       {
         type: 'Feature',
@@ -48,7 +48,7 @@ describe('pluckStyleMetaFromFeatures', () => {
     });
   });
 
-  it('Should identify when feature collection only contains lines', async () => {
+  test('Should identify when feature collection only contains lines', async () => {
     const features = [
       {
         type: 'Feature',
@@ -94,7 +94,7 @@ describe('pluckStyleMetaFromFeatures', () => {
     });
   });
 
-  it('Should not extract scaled field range when scaled field has no values', async () => {
+  test('Should not extract scaled field range when scaled field has no values', async () => {
     const features = [
       {
         type: 'Feature',
@@ -153,7 +153,7 @@ describe('pluckStyleMetaFromFeatures', () => {
     });
   });
 
-  it('Should extract scaled field range', async () => {
+  test('Should extract scaled field range', async () => {
     const features = [
       {
         type: 'Feature',
@@ -215,6 +215,99 @@ describe('pluckStyleMetaFromFeatures', () => {
         isPolygonsOnly: false,
       }
     });
+  });
+});
+
+describe('pluckCategoricalStyleMetaFromFeatures', () => {
+  test('Should pluck the categorical style-meta', async () => {
+    const field = new InlineField({
+      fieldName: 'foobar',
+      source: {} as unknown as IVectorSource,
+      origin: FIELD_ORIGIN.SOURCE,
+      dataType: 'number',
+    });
+    const dynamicColorProperty = new DynamicColorProperty(
+      {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        colorCategory: 'palette_0',
+        fieldMetaOptions: { isEnabled: true },
+      },
+      VECTOR_STYLES.LINE_COLOR,
+      field,
+      {} as unknown as IVectorLayer,
+      () => { return null }, //getFieldFormatter
+    );
+
+    const features = [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-10, 0],
+        },
+        properties: {
+          foobar: 'CN',
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-10, 0],
+        },
+        properties: {
+          foobar: 'CN',
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-10, 0],
+        },
+        properties: {
+          foobar: 'US',
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-10, 0],
+        },
+        properties: {
+          foobar: 'CN',
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-10, 0],
+        },
+        properties: {
+          foobar: 'US',
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-10, 0],
+        },
+        properties: {
+          foobar: 'IN',
+        },
+      }
+    ] as Feature[]
+
+    const categories = pluckCategoricalStyleMetaFromFeatures(dynamicColorProperty, features);
+
+    expect(categories).toEqual([
+      { key: 'CN', count: 3 },
+      { key: 'US', count: 2 },
+      { key: 'IN', count: 1 },
+    ]);
   });
 });
 

@@ -7,7 +7,7 @@
 
 import type { Feature } from 'geojson';
 import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import { DynamicStylePropertyOptions, StyleMetaDescriptor } from '../../../../../common/descriptor_types';
+import { Category, DynamicStylePropertyOptions, RangeFieldMeta, StyleMetaDescriptor } from '../../../../../common/descriptor_types';
 import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
@@ -80,11 +80,11 @@ export async function pluckStyleMetaFromFeatures(
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = { categories: [] };
       }
-      const categories = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+      const categories = pluckCategoricalStyleMetaFromFeatures(dynamicProperty, features);
       if (categories.length) {
         styleMeta.fieldMeta[name].categories = categories;
       }
-      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
+      const ordinalStyleMeta = pluckOrdinalStyleMetaFromFeatures(dynamicProperty, features);
       if (ordinalStyleMeta) {
         styleMeta.fieldMeta[name].range = ordinalStyleMeta;
       }
@@ -92,6 +92,69 @@ export async function pluckStyleMetaFromFeatures(
   );
 
   return styleMeta;
+}
+
+function pluckOrdinalStyleMetaFromFeatures(
+  property: IDynamicStyleProperty<DynamicStylePropertyOptions>, 
+  features: Feature[]
+): RangeFieldMeta | null {
+  if (!property.isOrdinal()) {
+    return null;
+  }
+
+  const name = property.getFieldName();
+  let min = Infinity;
+  let max = -Infinity;
+  for (let i = 0; i < features.length; i++) {
+    const feature = features[i];
+    const newValue = feature.properties ? parseFloat(feature.properties[name]) : NaN;
+    if (!isNaN(newValue)) {
+      min = Math.min(min, newValue);
+      max = Math.max(max, newValue);
+    }
+  }
+
+  return min === Infinity || max === -Infinity
+    ? null
+    : {
+        min,
+        max,
+        delta: max - min,
+      };
+}
+
+export function pluckCategoricalStyleMetaFromFeatures(
+  property: IDynamicStyleProperty<DynamicStylePropertyOptions>, 
+  features: Feature[]
+): Category[] {
+  const size = property.getNumberOfCategories();
+  if (!property.isCategorical() || size <= 0) {
+    return [];
+  }
+
+  const counts = new Map();
+  for (let i = 0; i < features.length; i++) {
+    const feature = features[i];
+    const term = feature.properties ? feature.properties[property.getFieldName()] : undefined;
+    // properties object may be sparse, so need to check if the field is effectively present
+    if (typeof term !== undefined) {
+      if (counts.has(term)) {
+        counts.set(term, counts.get(term) + 1);
+      } else {
+        counts.set(term, 1);
+      }
+    }
+  }
+
+  const ordered: Category[] = [];
+  for (const [key, value] of counts) {
+    ordered.push({ key, count: value });
+  }
+
+  ordered.sort((a, b) => {
+    return b.count - a.count;
+  });
+  return ordered.slice(0, size);
 }
 
 export function isOnlySingleFeatureType(

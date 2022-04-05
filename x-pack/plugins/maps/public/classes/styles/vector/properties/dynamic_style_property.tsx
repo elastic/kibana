@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Feature, FeatureCollection } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
@@ -52,11 +52,11 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
    */
   getStyleMetaHash(): string;
   isFieldMetaEnabled(): boolean;
+  isCategorical(): boolean;
   isOrdinal(): boolean;
+  getNumberOfCategories(): number;
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown | null>;
-  pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[];
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
@@ -312,63 +312,6 @@ export class DynamicStyleProperty<T>
     return 'dataMappingFunction' in this._options
       ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
       : DATA_MAPPING_FUNCTION.INTERPOLATE;
-  }
-
-  pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {
-    if (!this.isOrdinal()) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-    let min = Infinity;
-    let max = -Infinity;
-    for (let i = 0; i < features.length; i++) {
-      const feature = features[i];
-      const newValue = feature.properties ? parseFloat(feature.properties[name]) : NaN;
-      if (!isNaN(newValue)) {
-        min = Math.min(min, newValue);
-        max = Math.max(max, newValue);
-      }
-    }
-
-    return min === Infinity || max === -Infinity
-      ? null
-      : {
-          min,
-          max,
-          delta: max - min,
-        };
-  }
-
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[] {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return [];
-    }
-
-    const counts = new Map();
-    for (let i = 0; i < features.length; i++) {
-      const feature = features[i];
-      const term = feature.properties ? feature.properties[this.getFieldName()] : undefined;
-      // properties object may be sparse, so need to check if the field is effectively present
-      if (typeof term !== undefined) {
-        if (counts.has(term)) {
-          counts.set(term, counts.get(term) + 1);
-        } else {
-          counts.set(term, 1);
-        }
-      }
-    }
-
-    const ordered: Category[] = [];
-    for (const [key, value] of counts) {
-      ordered.push({ key, count: value });
-    }
-
-    ordered.sort((a, b) => {
-      return b.count - a.count;
-    });
-    return ordered.slice(0, size);
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
