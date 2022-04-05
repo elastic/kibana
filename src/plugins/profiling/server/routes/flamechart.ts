@@ -200,7 +200,7 @@ async function queryFlameGraph(
   }
 
   // profiling-stacktraces is configured with 16 shards
-  const nQueries = 8;
+  const nQueries = 1;
   const stackTraces = new Map<StackTraceID, StackTrace>();
   const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
   const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
