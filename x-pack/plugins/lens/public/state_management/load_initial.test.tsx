@@ -17,7 +17,7 @@ import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 
 const history = {
   location: {
