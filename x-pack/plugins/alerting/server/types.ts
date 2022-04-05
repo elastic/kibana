@@ -174,7 +174,7 @@ export interface RuleType<
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
   config?: RuleTypeConfig;
-  diagnostics?: Diagnostics;
+  diagnostics?: Diagnostics<Params>;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

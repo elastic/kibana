@@ -8,6 +8,9 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest as SearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { AlertsHealth } from './rule';
 
 export * from './rule';
@@ -28,8 +31,16 @@ export interface AlertingFrameworkHealth {
   alertingFrameworkHealth: AlertsHealth;
 }
 export interface DiagnosticResult {
+  type: 'warning' | 'error';
   name: string;
   message: string;
+}
+export interface DiagnoseOutput {
+  requestAndResponses: {
+    requests: Array<SearchRequest | SearchRequestWithBody>;
+    responses: SearchResponse[];
+  };
+  errorsAndWarnings: DiagnosticResult[];
 }
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';

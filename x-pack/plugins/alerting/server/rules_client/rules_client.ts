@@ -11,6 +11,7 @@ import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodas
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -21,6 +22,8 @@ import {
   SavedObjectAttributes,
   IBasePath,
   ElasticsearchServiceStart,
+  SavedObjectsServiceStart,
+  UiSettingsServiceStart,
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import { RuleDiagnostic } from '../lib/diagnostics/rule_diagnostic';
@@ -92,7 +95,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { DiagnosticResult, IExecutionLogWithErrorsResult } from '../../common';
+import { DiagnoseOutput, IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -147,6 +150,9 @@ export interface ConstructorOptions {
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
   elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
@@ -322,6 +328,9 @@ export class RulesClient {
     authorization,
     basePathService,
     elasticsearch,
+    data,
+    uiSettings,
+    savedObjects,
     taskManager,
     logger,
     spaceId,
@@ -360,6 +369,9 @@ export class RulesClient {
       spaceId,
       createAPIKey,
       elasticsearch,
+      data,
+      uiSettings,
+      savedObjects,
     });
   }
 
@@ -525,15 +537,14 @@ export class RulesClient {
   public async diagnose<Params extends RuleTypeParams = never>({
     ruleTypeId,
     params,
-  }: DiagnoseOptions<Params>): Promise<DiagnosticResult[]> {
+  }: DiagnoseOptions<Params>): Promise<DiagnoseOutput> {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleTypeId);
 
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     return await this.ruleDiagnostics.diagnose({
       params,
-      diagnostics: ruleType.diagnostics,
+      ruleType,
       username: await this.getUserName(),
-      ruleTypeId: ruleType.id,
     });
   }
 
