@@ -22,25 +22,25 @@ import {
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
-  Alert as Rule,
-  PartialAlert as PartialRule,
+  Rule,
+  PartialRule,
   RawRule,
   RuleTypeRegistry,
-  AlertAction as RuleAction,
+  RuleAction,
   IntervalSchedule,
-  SanitizedAlert as SanitizedRule,
+  SanitizedRule,
   RuleTaskState,
   AlertSummary,
-  AlertExecutionStatusValues as RuleExecutionStatusValues,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
+  RuleExecutionStatusValues,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   ResolvedSanitizedRule,
-  AlertWithLegacyId as RuleWithLegacyId,
+  RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
-  PartialAlertWithLegacyId as PartialRuleWithLegacyId,
+  PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -89,13 +89,10 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogResult } from '../../common';
+import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
-import {
-  formatExecutionErrorsResult,
-  IExecutionErrorsResult,
-} from '../lib/format_execution_log_errors';
+import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -263,7 +260,6 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
-export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;
 interface ScheduleRuleOptions {
   id: string;
   consumer: string;
@@ -406,7 +402,7 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -753,7 +749,7 @@ export class RulesClient {
             start: parsedDateStart.toISOString(),
             end: parsedDateEnd.toISOString(),
             per_page: 500,
-            filter: `(event.action:execute AND event.outcome:failure) OR (event.action:execute-timeout)`,
+            filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
             sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           },
           rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -1204,7 +1200,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({

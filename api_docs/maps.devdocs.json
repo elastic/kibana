@@ -1719,7 +1719,7 @@
             "label": "getHtmlDisplayValue",
             "description": [],
             "signature": [
-              "() => string"
+              "() => React.ReactNode"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
@@ -3009,6 +3009,20 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-public.MAPS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "MAPS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"MAPS_APP_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/maps/public/locators.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-public.RenderWizardArguments",
         "type": "Type",
         "tags": [],
@@ -3412,6 +3426,34 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ID",
+        "description": [],
+        "signature": [
+          "\"maps\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.DECIMAL_DEGREES_PRECISION",
+        "type": "number",
+        "tags": [],
+        "label": "DECIMAL_DEGREES_PRECISION",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "maps",
         "id": "def-common.EMSFileSourceDescriptor",

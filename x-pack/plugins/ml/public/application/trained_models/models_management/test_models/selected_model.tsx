@@ -13,7 +13,10 @@ import type { FormattedNerResp } from './models/ner';
 import { LangIdentOutput, LangIdentInference } from './models/lang_ident';
 import type { FormattedLangIdentResp } from './models/lang_ident';
 
-import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
+import {
+  TRAINED_MODEL_TYPE,
+  SUPPORTED_PYTORCH_TASKS,
+} from '../../../../../common/constants/trained_models';
 import { useMlApiContext } from '../../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
 
@@ -28,7 +31,10 @@ export const SelectedModel: FC<Props> = ({ model }) => {
     return null;
   }
 
-  if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
+  if (
+    model.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+    Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER
+  ) {
     const inferrer = new NerInference(trainedModels, model);
     return (
       <InferenceInputForm

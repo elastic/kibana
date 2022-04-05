@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Alert, RuleType } from '../common';
+import { Rule, RuleType } from '../common';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
-import { loadAlert, loadAlertType, loadAlertTypes } from './alert_api';
+import { loadRule, loadRuleType, loadRuleTypes } from './alert_api';
 
 const http = httpServiceMock.createStartContract();
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('loadAlertTypes', () => {
-  test('should call get alert types API', async () => {
+describe('loadRuleTypes', () => {
+  test('should call get rule types API', async () => {
     http.get.mockResolvedValueOnce([getApiRuleType()]);
 
-    const result = await loadAlertTypes({ http });
+    const result = await loadRuleTypes({ http });
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -77,22 +77,22 @@ describe('loadAlertTypes', () => {
   });
 });
 
-describe('loadAlertType', () => {
-  test('should call get alert types API', async () => {
+describe('loadRuleType', () => {
+  test('should call get rule types API', async () => {
     const ruleType = getApiRuleType();
     http.get.mockResolvedValueOnce([ruleType]);
 
-    const result = await loadAlertType({ http, id: ruleType.id });
+    const result = await loadRuleType({ http, id: ruleType.id });
     expect(result).toEqual(getRuleType());
   });
 });
 
-describe('loadAlert', () => {
+describe('loadRule', () => {
   test('should call get API with base parameters', async () => {
     const apiRule = getApiRule();
     http.get.mockResolvedValueOnce(apiRule);
 
-    const res = await loadAlert({ http, alertId: apiRule.id });
+    const res = await loadRule({ http, ruleId: apiRule.id });
     expect(res).toEqual(getRule());
 
     const fixedDate = new Date('2021-12-11T16:59:50.152Z');
@@ -292,7 +292,7 @@ function getApiRule() {
   };
 }
 
-function getRule(): Alert<{ x: number }> {
+function getRule(): Rule<{ x: number }> {
   return {
     id: '3d534c70-582b-11ec-8995-2b1578a3bc5d',
     notifyWhen: 'onActiveAlert',

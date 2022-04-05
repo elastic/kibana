@@ -7,6 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
+import { Comparator } from '../../../common/comparator_types';
 import {
   EsQueryAlertParamsSchema,
   EsQueryAlertParams,
@@ -20,7 +21,7 @@ const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   size: 100,
   timeWindowSize: 5,
   timeWindowUnit: 'm',
-  thresholdComparator: '>',
+  thresholdComparator: Comparator.GT,
   threshold: [0],
 };
 
