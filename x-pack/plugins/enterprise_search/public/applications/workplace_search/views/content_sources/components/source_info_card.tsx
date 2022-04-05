@@ -28,13 +28,18 @@ interface SourceInfoCardProps {
 }
 
 export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
-  contentSource: { createdAt, name, serviceType, isFederatedSource, mainIcon },
+  contentSource: { baseServiceType, createdAt, name, serviceType, isFederatedSource, mainIcon },
 }) => (
   <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={null}>
-          <SourceIcon serviceType={serviceType} name={name} iconAsBase64={mainIcon} size="l" />
+          <SourceIcon
+            serviceType={baseServiceType || serviceType}
+            name={name}
+            iconAsBase64={mainIcon}
+            size="l"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
