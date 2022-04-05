@@ -23,6 +23,7 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
+  const dockerContextUseLocalArtifact = config.getDockerContextUseLocalArtifact();
 
   // Create dockerfiles dir inside docker build dir
   await mkdirp(dockerFilesBuildDir);
@@ -32,7 +33,8 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
     resolve(dockerFilesBuildDir, dockerfileTemplate.name),
     dockerfileTemplate.generator({
       ...scope,
-      usePublicArtifact: true,
+      usePublicArtifact:
+        dockerContextUseLocalArtifact !== null ? !dockerContextUseLocalArtifact : true,
     })
   );
 
