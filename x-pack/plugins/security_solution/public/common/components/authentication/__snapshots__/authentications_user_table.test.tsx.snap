@@ -1,0 +1,538 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Authentication User Table Component rendering it renders the user authentication table 1`] = `
+.c2 {
+  margin-top: 8px;
+}
+
+.c2 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.c1 {
+  margin-bottom: 24px;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.c0 {
+  position: relative;
+}
+
+.c3 tbody th,
+.c3 tbody td {
+  vertical-align: top;
+}
+
+.c3 tbody .euiTableCellContent {
+  display: block;
+}
+
+.c4 {
+  margin-top: 4px;
+}
+
+@media only screen and (min-width:575px) {
+  .c2 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
+  }
+
+  .c2 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+<div
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c0"
+  data-test-subj="table-users-authentications-loading-false"
+>
+  <header
+    class="c1 siemHeaderSection"
+    data-test-subj="header-section"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Open"
+                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small"
+                  data-test-subj="query-toggle-header"
+                  title="Open"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+              <div
+                class="euiFlexItem"
+              >
+                <h4
+                  class="euiTitle euiTitle--medium"
+                  data-test-subj="header-section-title"
+                >
+                  <span
+                    class="eui-textBreakNormal"
+                  >
+                    Authentications
+                  </span>
+                </h4>
+              </div>
+            </div>
+            <div
+              class="c2 siemSubtitle"
+            >
+              <p
+                class="siemSubtitle__item siemSubtitle__item--text"
+                data-test-subj="header-panel-subtitle"
+              >
+                Showing: 0 users
+              </p>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              aria-label="Inspect"
+              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall inspectButtonComponent"
+              data-test-subj="inspect-icon-button"
+              disabled=""
+              title="Inspect"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="inspect"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div
+    class="euiBasicTable c3"
+    data-test-subj="paginated-basic-table"
+  >
+    <div>
+      <div
+        class="euiTableHeaderMobile"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </div>
+      </div>
+      <table
+        class="euiTable euiTable--responsive"
+        id="__table_generated-id"
+        tabindex="-1"
+      >
+        <caption
+          class="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_User_0"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="User"
+                >
+                  User
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Successes_1"
+              role="columnheader"
+              scope="col"
+              style="width: 8%;"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Successes"
+                >
+                  Successes
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Failures_2"
+              role="columnheader"
+              scope="col"
+              style="width: 8%;"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Failures"
+                >
+                  Failures
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last success_3"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Last success"
+                >
+                  Last success
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last successful source_4"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Last successful source"
+                >
+                  Last successful source
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last successful destination_5"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Last successful destination"
+                >
+                  Last successful destination
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last failure_6"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Last failure"
+                >
+                  Last failure
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last failed source_7"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Last failed source"
+                >
+                  Last failed source
+                </span>
+              </span>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last failed destination_8"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                  title="Last failed destination"
+                >
+                  Last failed destination
+                </span>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell euiTableRowCell--middle"
+              colspan="9"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  No items found
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c4"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+        data-test-subj="loadingMoreSizeRowPopover"
+        id="customizablePagination"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Rows per page: 10
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <nav
+        class="euiPagination"
+        data-test-subj="numberedPagination"
+      >
+        <span
+          aria-atomic="true"
+          aria-relevant="additions text"
+          class="euiScreenReaderOnly"
+          role="status"
+        >
+          Page 1 of 5
+        </span>
+        <button
+          aria-label="Previous page"
+          class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+          data-test-subj="pagination-button-previous"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowLeft"
+          />
+        </button>
+        <ul
+          class="euiPagination__list"
+        >
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-current="true"
+              aria-label="Page 1 of 5"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
+              data-test-subj="pagination-button-0"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 2 of 5"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              data-test-subj="pagination-button-1"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  2
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 3 of 5"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              data-test-subj="pagination-button-2"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  3
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 4 of 5"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              data-test-subj="pagination-button-3"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  4
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 5 of 5"
+              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              data-test-subj="pagination-button-4"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  5
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
+        <button
+          aria-label="Next page"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+          data-test-subj="pagination-button-next"
+          title="Next page"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>
+`;

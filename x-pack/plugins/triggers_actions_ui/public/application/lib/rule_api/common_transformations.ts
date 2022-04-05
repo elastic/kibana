@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertExecutionStatus } from '../../../../../alerting/common';
+import { RuleExecutionStatus } from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 import { Rule, RuleAction, ResolvedRule } from '../../../types';
 
@@ -20,7 +20,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   actionTypeId,
 });
 
-const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
+const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
   last_duration: lastDuration,
   ...rest

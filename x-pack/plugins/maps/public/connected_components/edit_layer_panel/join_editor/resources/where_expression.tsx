@@ -11,7 +11,7 @@ import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView, Query } from 'src/plugins/data/common';
 import { APP_ID } from '../../../../../common/constants';
-import { getData } from '../../../../kibana_services';
+import { getData, getSearchBar } from '../../../../kibana_services';
 
 interface Props {
   indexPattern: DataView;
@@ -46,7 +46,7 @@ export class WhereExpression extends Component<Props, State> {
   };
 
   render() {
-    const { SearchBar } = getData().ui;
+    const SearchBar = getSearchBar();
     const { whereQuery, indexPattern } = this.props;
     const expressionValue =
       whereQuery && whereQuery.query
