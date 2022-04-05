@@ -16,6 +16,7 @@ import {
   CreateExceptionListItemSchema,
   DeleteExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   composeHttpHandlerMocks,
@@ -215,12 +216,36 @@ export const exceptionsPostCreateListHttpMock =
     },
   ]);
 
+export type ExceptionsGetSummaryHttpMockInterface = ResponseProvidersInterface<{
+  exceptionsSummary: (options: HttpFetchOptionsWithPath) => ExceptionListSummarySchema;
+}>;
+/**
+ * HTTP mocks that support updating a single Exception
+ */
+export const exceptionsGetSummaryHttpMock =
+  httpHandlerMockFactory<ExceptionsGetSummaryHttpMockInterface>([
+    {
+      id: 'exceptionsSummary',
+      path: `${EXCEPTION_LIST_URL}/summary`,
+      method: 'get',
+      handler: (): ExceptionListSummarySchema => {
+        return {
+          total: 10,
+          linux: 2,
+          macos: 3,
+          windows: 5,
+        };
+      },
+    },
+  ]);
+
 export type ExceptionsListAllHttpMocksInterface = ExceptionsFindHttpMocksInterface &
   ExceptionsGetOneHttpMocksInterface &
   ExceptionsPutHttpMocksInterface &
   ExceptionsDeleteOneHttpMocksInterface &
   ExceptionsPostHttpMocksInterface &
-  ExceptionsPostCreateListHttpMockInterface;
+  ExceptionsPostCreateListHttpMockInterface &
+  ExceptionsGetSummaryHttpMockInterface;
 /** Use this HTTP mock when wanting to mock the API calls done by the Exception Http service */
 export const exceptionsListAllHttpMocks =
   composeHttpHandlerMocks<ExceptionsListAllHttpMocksInterface>([
@@ -230,4 +255,5 @@ export const exceptionsListAllHttpMocks =
     exceptionPostHttpMocks,
     exceptionsPostCreateListHttpMock,
     exceptionsDeleteOneHttpMocks,
+    exceptionsGetSummaryHttpMock,
   ]);
