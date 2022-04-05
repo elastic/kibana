@@ -37,6 +37,7 @@ import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
+import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -59,6 +60,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isLogstashOutput = inputs.typeInput.value === 'logstash';
   const isESOutput = inputs.typeInput.value === 'elasticsearch';
+
+  const showLogstashNeedEncryptedSavedObjectCallout =
+    isLogstashOutput && !form.hasEncryptedSavedObjectConfigured;
 
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
@@ -160,6 +164,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               )}
             />
           </EuiFormRow>
+          {showLogstashNeedEncryptedSavedObjectCallout && (
+            <>
+              <EuiSpacer size="m" />
+              <EncryptionKeyRequiredCallout />
+            </>
+          )}
           {isLogstashOutput && (
             <>
               <EuiSpacer size="m" />
