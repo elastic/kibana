@@ -14,7 +14,9 @@ import type {
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import { buildPhrasesFilter } from '@kbn/es-query';
 import { VectorStyle } from '../../../styles/vector/vector_style';
+import { getField } from '../../../../../common/elasticsearch_util';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
@@ -29,6 +31,7 @@ import {
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../../../sources/es_search_source';
+import { IESSource } from '../../../sources/es_source';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
 import { PropertiesMap } from '../../../../../common/elasticsearch_util';
@@ -60,6 +63,38 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   constructor(args: VectorLayerArguments) {
     super(args);
     this._source = args.source as IMvtVectorSource;
+  }
+
+  async getBounds(syncContext: DataRequestContext) {
+    // Add filter to narrow bounds to features with matching join keys
+    let joinKeyFilter;
+    if (this.getSource().isESSource()) {
+      const joins = this.getValidJoins();
+      if (joins.length) {
+        const join = joins[0];
+        const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+        if (joinDataRequest) {
+          const joinPropertiesMap = joinDataRequest?.getData() as PropertiesMap | undefined;
+          if (joinPropertiesMap) {
+            const indexPattern = await (this.getSource() as IESSource).getIndexPattern();
+            const joinField = getField(indexPattern, join.getLeftField().getName());
+            joinKeyFilter = buildPhrasesFilter(
+              joinField,
+              Array.from(joinPropertiesMap.keys()),
+              indexPattern
+            );
+          }
+        }
+      }
+    }
+
+    return super.getBounds({
+      ...syncContext,
+      dataFilters: {
+        ...syncContext.dataFilters,
+        joinKeyFilter,
+      },
+    });
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
@@ -284,11 +319,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const firstKeyFeatureState = mbMap.getFeatureState({
       source: this.getMbSourceId(),
       sourceLayer: this._source.getTileSourceLayer(),
-      id: firstKey
+      id: firstKey,
     });
     const requestMeta = joinDataRequest.getMeta();
     if (firstKeyFeatureState?.requestStopTime === requestMeta.requestStopTime) {
-      // Do not update feature state when it already contains current join results 
+      // Do not update feature state when it already contains current join results
       return;
     }
 
@@ -446,7 +481,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const joinDataRequest = this._getJoinDataRequest();
-    const joinPropertiesMap = joinDataRequest ? (joinDataRequest.getData() as PropertiesMap | undefined) : undefined;
+    const joinPropertiesMap = joinDataRequest?.getData() as PropertiesMap | undefined;
     return await pluckStyleMeta(
       this._getMetaFromTiles(),
       joinPropertiesMap,

@@ -28,6 +28,7 @@ export type DataFilters = {
   timeslice?: Timeslice;
   zoom: number;
   isReadOnly: boolean;
+  joinKeyFilter?: Filter;
 };
 
 export type VectorSourceRequestMeta = DataFilters & {
@@ -78,7 +79,7 @@ export type VectorTileLayerMeta = {
 
 // Partial because objects are justified downstream in constructors
 export type DataRequestMeta = {
-  // request stop time in milliseconds since epoch 
+  // request stop time in milliseconds since epoch
   requestStopTime?: number;
 } & Partial<
   VectorSourceRequestMeta &
