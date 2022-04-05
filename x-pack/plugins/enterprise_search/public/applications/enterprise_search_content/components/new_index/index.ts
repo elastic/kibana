@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { baseBreadcrumbs } from './search_indices';
-export { SearchIndicesRouter } from './search_indices_router';
+export { NewIndex } from './new_index';

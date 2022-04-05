@@ -20,6 +20,15 @@ import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
+export const baseBreadcrumbs = [
+  i18n.translate('xpack.enterpriseSearch.searchIndices.content.breadcrumb', {
+    defaultMessage: 'Content',
+  }),
+  i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.breadcrumb', {
+    defaultMessage: 'Search indices',
+  }),
+];
+
 export const SearchIndices: React.FC = () => {
   // TODO: Replace with a real list of indices
   const columns = [
@@ -104,14 +113,7 @@ export const SearchIndices: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.searchIndices.content.breadcrumb', {
-          defaultMessage: 'Content',
-        }),
-        i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.breadcrumb', {
-          defaultMessage: 'Search indices',
-        }),
-      ]}
+      pageChrome={baseBreadcrumbs}
       pageViewTelemetry="Search indices"
       isLoading={false}
       pageHeader={{
