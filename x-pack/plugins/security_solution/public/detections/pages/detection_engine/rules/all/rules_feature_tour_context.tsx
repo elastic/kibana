@@ -9,12 +9,15 @@ import React, { createContext, useContext, useEffect, useMemo, FC } from 'react'
 
 import { noop } from 'lodash';
 import {
-  useEuiTour,
-  EuiTourState,
-  EuiStatelessTourStep,
-  EuiSpacer,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTourState,
   EuiTourStepProps,
+  EuiStatelessTourStep,
+  useEuiTour,
 } from '@elastic/eui';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../../../../../common/constants';
@@ -37,7 +40,7 @@ const featuresTourSteps: EuiStatelessTourStep[] = [
   {
     step: 1,
     title: i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE,
-    content: <></>,
+    content: <p>{i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP}</p>,
     stepsTotal: 2,
     children: <></>,
     onFinish: noop,
@@ -71,6 +74,7 @@ const RulesFeatureTourContext = createContext<RulesFeatureTourContextType | null
  */
 export const RulesFeatureTourContextProvider: FC = ({ children }) => {
   const { storage } = useKibana().services;
+
   const initialStore = useMemo<EuiTourState>(
     () => ({
       ...tourConfig,
@@ -79,43 +83,60 @@ export const RulesFeatureTourContextProvider: FC = ({ children }) => {
     [storage]
   );
 
-  const [stepProps, actions, reducerState] = useEuiTour(featuresTourSteps, initialStore);
+  const [tourSteps, tourActions, tourState] = useEuiTour(featuresTourSteps, initialStore);
 
-  const finishTour = actions.finishTour;
-  const goToNextStep = actions.incrementStep;
+  const enhancedSteps = useMemo<EuiTourStepProps[]>(() => {
+    return tourSteps.map((item, index, array) => {
+      return {
+        ...item,
+        content: (
+          <>
+            {item.content}
+            <EuiSpacer />
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="primary"
+                  size="s"
+                  disabled={index === 0}
+                  onClick={tourActions.decrementStep}
+                >
+                  {i18n.FEATURE_TOUR_PREV_STEP_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  size="s"
+                  disabled={index === array.length - 1}
+                  onClick={tourActions.incrementStep}
+                >
+                  {i18n.FEATURE_TOUR_NEXT_STEP_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ),
+      };
+    });
+  }, [tourSteps, tourActions]);
 
-  const inMemoryTableStepProps = useMemo(
+  const providerValue = useMemo<RulesFeatureTourContextType>(
     () => ({
-      ...stepProps[0],
-      content: (
-        <>
-          <p>{i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP}</p>
-          <EuiSpacer />
-          <EuiButton color="primary" onClick={goToNextStep}>
-            {i18n.FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT}
-          </EuiButton>
-        </>
-      ),
+      steps: {
+        inMemoryTableStepProps: enhancedSteps[0],
+        bulkActionsStepProps: enhancedSteps[1],
+      },
+      finishTour: tourActions.finishTour,
+      goToNextStep: tourActions.incrementStep,
     }),
-    [stepProps, goToNextStep]
+    [enhancedSteps, tourActions]
   );
 
   useEffect(() => {
-    const { isTourActive, currentTourStep } = reducerState;
+    const { isTourActive, currentTourStep } = tourState;
     storage.set(RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
-  }, [reducerState, storage]);
-
-  const providerValue = useMemo(
-    () => ({
-      steps: {
-        inMemoryTableStepProps,
-        bulkActionsStepProps: stepProps[1],
-      },
-      finishTour,
-      goToNextStep,
-    }),
-    [finishTour, goToNextStep, inMemoryTableStepProps, stepProps]
-  );
+  }, [tourState, storage]);
 
   return (
     <RulesFeatureTourContext.Provider value={providerValue}>

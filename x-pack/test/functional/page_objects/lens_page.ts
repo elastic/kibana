@@ -254,9 +254,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForField(field: string) {
-      await retry.try(async () => {
-        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
-      });
+      await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
     async waitForMissingDataViewWarning() {
@@ -587,7 +585,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const lastIndex = (
         await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
       ).length;
-      await testSubjects.click('indexPattern-terms-add-field');
+      await retry.waitFor('check for field combobox existance', async () => {
+        await testSubjects.click('indexPattern-terms-add-field');
+        const comboboxExists = await testSubjects.exists(
+          `indexPattern-dimension-field-${lastIndex}`
+        );
+        return comboboxExists === true;
+      });
       // count the number of defined terms
       const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
       // await comboBox.openOptionsList(target);

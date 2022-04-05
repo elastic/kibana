@@ -95,6 +95,20 @@ export const FEATURE_TOUR_TITLE = i18n.translate(
   }
 );
 
+export const FEATURE_TOUR_PREV_STEP_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.prevStepButtonTitle',
+  {
+    defaultMessage: 'Go back',
+  }
+);
+
+export const FEATURE_TOUR_NEXT_STEP_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.nextStepButtonTitle',
+  {
+    defaultMessage: 'Ok, got it',
+  }
+);
+
 export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepDescription',
   {
@@ -107,13 +121,6 @@ export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepTitle',
   {
     defaultMessage: 'Step 1',
-  }
-);
-
-export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepNextButtonTitle',
-  {
-    defaultMessage: 'Ok, got it',
   }
 );
 

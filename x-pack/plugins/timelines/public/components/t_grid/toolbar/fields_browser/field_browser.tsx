@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useCallback, useRef, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -37,7 +37,9 @@ import {
   CLOSE_BUTTON_CLASS_NAME,
   FIELDS_PANE_WIDTH,
   FIELD_BROWSER_WIDTH,
+  filterBrowserFieldsByFieldName,
   focusSearchInput,
+  mergeBrowserFieldsWithDefaultCategory,
   onFieldsBrowserTabPressed,
   PANES_FLEX_GROUP_WIDTH,
   RESET_FIELDS_CLASS_NAME,
@@ -48,6 +50,8 @@ import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
 
 import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';
+import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
+import { INPUT_TIMEOUT } from '.';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;
@@ -58,42 +62,17 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
   /**
    * The current timeline column headers
    */
+  browserFields: BrowserFields;
+
   columnHeaders: ColumnHeaderOptions[];
 
   createFieldComponent?: CreateFieldComponentType;
-
-  /**
-   * A map of categoryId -> metadata about the fields in that category,
-   * filtered such that the name of every field in the category includes
-   * the filter input (as a substring).
-   */
-  filteredBrowserFields: BrowserFields;
-  /**
-   * When true, a busy spinner will be shown to indicate the field browser
-   * is searching for fields that match the specified `searchInput`
-   */
-  isSearching: boolean;
-  /** The text displayed in the search input */
-  searchInput: string;
-  /** The text actually being applied to the result set, a debounced version of searchInput */
-  appliedFilterInput: string;
-  /**
-   * The category selected on the left-hand side of the field browser
-   */
-  selectedCategoryId: string;
-  /**
-   * Invoked when the user clicks on the name of a category in the left-hand
-   * side of the field browser
-   */
-  onCategorySelected: (categoryId: string) => void;
   /**
    * Hides the field browser when invoked
    */
-  onHide: () => void;
-  /**
-   * Invoked when the user types in the search input
-   */
-  onSearchInputChange: (newSearchInput: string) => void;
+  setShow: (isShowing: boolean) => void;
+
+  show: boolean;
 
   /**
    * Focus will be restored to this button if the user presses Escape or clicks
@@ -108,27 +87,103 @@ type Props = Pick<FieldBrowserProps, 'timelineId' | 'browserFields' | 'width'> &
  * set focus to the search input, scroll to the selected category, etc
  */
 const FieldsBrowserComponent: React.FC<Props> = ({
+  browserFields,
   columnHeaders,
-  filteredBrowserFields,
   createFieldComponent: CreateField,
-  isSearching,
-  onCategorySelected,
-  onSearchInputChange,
-  onHide,
   restoreFocusTo,
-  searchInput,
-  appliedFilterInput,
-  selectedCategoryId,
+  setShow,
+  show,
   timelineId,
   width = FIELD_BROWSER_WIDTH,
 }) => {
+  /** tracks the latest timeout id from `setTimeout`*/
+  const inputTimeoutId = useRef(0);
+
   const dispatch = useDispatch();
+
   const containerElement = useRef<HTMLDivElement | null>(null);
+
+  /** all field names shown in the field browser must contain this string (when specified) */
+  const [filterInput, setFilterInput] = useState('');
+
+  const [appliedFilterInput, setAppliedFilterInput] = useState('');
+  /** all fields in this collection have field names that match the filterInput */
+  const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
+  /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
+  const [isSearching, setIsSearching] = useState(false);
+  /** this category will be displayed in the right-hand pane of the field browser */
+  const [selectedCategoryId, setSelectedCategoryId] = useState(DEFAULT_CATEGORY_NAME);
 
   const onUpdateColumns = useCallback(
     (columns) => dispatch(tGridActions.updateColumns({ id: timelineId, columns })),
     [dispatch, timelineId]
   );
+
+  const newFilteredBrowserFields = useMemo(() => {
+    return filterBrowserFieldsByFieldName({
+      browserFields: mergeBrowserFieldsWithDefaultCategory(browserFields),
+      substring: appliedFilterInput,
+    });
+  }, [appliedFilterInput, browserFields]);
+
+  const newSelectedCategoryId = useMemo(() => {
+    if (appliedFilterInput === '' || Object.keys(newFilteredBrowserFields).length === 0) {
+      return DEFAULT_CATEGORY_NAME;
+    } else {
+      return Object.keys(newFilteredBrowserFields)
+        .sort()
+        .reduce<string>((selected, category) => {
+          const filteredBrowserFieldsByCategory =
+            (newFilteredBrowserFields[category] && newFilteredBrowserFields[category].fields) || [];
+          const filteredBrowserFieldsBySelected =
+            (newFilteredBrowserFields[selected] && newFilteredBrowserFields[selected].fields) || [];
+          return newFilteredBrowserFields[category].fields != null &&
+            newFilteredBrowserFields[selected].fields != null &&
+            Object.keys(filteredBrowserFieldsByCategory).length >
+              Object.keys(filteredBrowserFieldsBySelected).length
+            ? category
+            : selected;
+        }, Object.keys(newFilteredBrowserFields)[0]);
+    }
+  }, [appliedFilterInput, newFilteredBrowserFields]);
+
+  /** Invoked when the user types in the filter input */
+  const onSearchInputChange = useCallback((newFilterInput: string) => {
+    setFilterInput(newFilterInput);
+    setIsSearching(true);
+  }, []);
+
+  useEffect(() => {
+    if (inputTimeoutId.current !== 0) {
+      clearTimeout(inputTimeoutId.current); // ⚠️ mutation: cancel any previous timers
+    }
+    // ⚠️ mutation: schedule a new timer that will apply the filter when it fires:
+    inputTimeoutId.current = window.setTimeout(() => {
+      setIsSearching(false);
+      setAppliedFilterInput(filterInput);
+    }, INPUT_TIMEOUT);
+    return () => {
+      clearTimeout(inputTimeoutId.current);
+    };
+  }, [filterInput]);
+
+  useEffect(() => {
+    setFilteredBrowserFields(newFilteredBrowserFields);
+  }, [newFilteredBrowserFields]);
+
+  useEffect(() => {
+    setSelectedCategoryId(newSelectedCategoryId);
+  }, [newSelectedCategoryId]);
+
+  /** Invoked when the field browser should be hidden */
+  const onHide = useCallback(() => {
+    setFilterInput('');
+    setAppliedFilterInput('');
+    setFilteredBrowserFields(null);
+    setIsSearching(false);
+    setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
+    setShow(false);
+  }, [setShow]);
 
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
@@ -192,6 +247,13 @@ const FieldsBrowserComponent: React.FC<Props> = ({
     [closeAndRestoreFocus, containerElement, selectedCategoryId, timelineId]
   );
 
+  // only merge in the default category if the field browser is visible
+  const browserFieldsWithDefaultCategory = useMemo(() => {
+    return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
+  }, [show, browserFields]);
+
+  const activeFilteredBrowserFields =
+    filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory;
   return (
     <EuiModal onClose={closeAndRestoreFocus} style={{ width, maxWidth: width }}>
       <div data-test-subj="fields-browser-container" onKeyDown={onKeyDown} ref={containerElement}>
@@ -206,10 +268,10 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             <EuiFlexItem>
               <Search
                 data-test-subj="header"
-                filteredBrowserFields={filteredBrowserFields}
+                filteredBrowserFields={activeFilteredBrowserFields}
                 isSearching={isSearching}
                 onSearchInputChange={onInputChange}
-                searchInput={searchInput}
+                searchInput={filterInput}
                 timelineId={timelineId}
               />
             </EuiFlexItem>
@@ -225,9 +287,9 @@ const FieldsBrowserComponent: React.FC<Props> = ({
             <EuiFlexItem grow={false}>
               <CategoriesPane
                 data-test-subj="left-categories-pane"
-                filteredBrowserFields={filteredBrowserFields}
+                filteredBrowserFields={activeFilteredBrowserFields}
                 width={CATEGORY_PANE_WIDTH}
-                onCategorySelected={onCategorySelected}
+                onCategorySelected={setSelectedCategoryId}
                 selectedCategoryId={selectedCategoryId}
                 timelineId={timelineId}
               />
@@ -237,8 +299,8 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               <FieldsPane
                 columnHeaders={columnHeaders}
                 data-test-subj="fields-pane"
-                filteredBrowserFields={filteredBrowserFields}
-                onCategorySelected={onCategorySelected}
+                filteredBrowserFields={activeFilteredBrowserFields}
+                onCategorySelected={setSelectedCategoryId}
                 onUpdateColumns={onUpdateColumns}
                 searchInput={appliedFilterInput}
                 selectedCategoryId={selectedCategoryId}
