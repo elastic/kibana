@@ -100,6 +100,7 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RulePreviewFlyout } from '../../rule_form/rule_preview_flyout';
 
 const ENTER_KEY = 13;
 
@@ -158,7 +159,9 @@ export const RulesList: React.FunctionComponent = () => {
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [previewFlyoutVisible, setPreviewFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
+  const [currentRuleToDiagnose, setCurrentRuleToDiagnose] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -214,6 +217,11 @@ export const RulesList: React.FunctionComponent = () => {
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
+  };
+
+  const onRuleDiagnose = (ruleItem: RuleTableItem) => {
+    setPreviewFlyoutVisibility(true);
+    setCurrentRuleToDiagnose(ruleItem);
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
@@ -628,6 +636,22 @@ export const RulesList: React.FunctionComponent = () => {
               ))}
             </EuiPopover>
           ) : null;
+        },
+      },
+      {
+        name: '',
+        width: '40px',
+        render: (item: RuleTableItem) => {
+          console.log(item);
+          return (
+            <EuiButtonIcon
+              color="primary"
+              title="Diagnose"
+              onClick={() => onRuleDiagnose(item)}
+              iconType="magnifyWithPlus"
+              aria-label="Diagnose"
+            />
+          );
         },
       },
       {
@@ -1353,6 +1377,9 @@ export const RulesList: React.FunctionComponent = () => {
           }
           onSave={loadRulesData}
         />
+      )}
+      {previewFlyoutVisible && currentRuleToDiagnose && (
+        <RulePreviewFlyout existingRule={currentRuleToDiagnose as Rule} />
       )}
     </section>
   );

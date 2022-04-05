@@ -12,18 +12,18 @@ import { Rule } from '../../../types';
 import { DiagnoseOutput } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { diagnoseRule } from '../../lib/rule_api';
+import { PartialRule } from '../../lib/rule_api/diagnose';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { RulePreviewWarnings } from './rule_preview_warnings';
 import { RulePreviewContent } from './rule_preview_content';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
-export type RulePreview = Pick<Rule, 'params' | 'ruleTypeId'>;
-
-interface RulePreviewProps {
-  rule: RulePreview;
+export interface RulePreviewProps {
+  potentialRule?: PartialRule;
+  existingRule?: Rule;
 }
 
-export const RulePreview = ({ rule }: RulePreviewProps) => {
+export const RulePreview = ({ potentialRule, existingRule }: RulePreviewProps) => {
   const { http } = useKibana().services;
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -31,11 +31,28 @@ export const RulePreview = ({ rule }: RulePreviewProps) => {
 
   useEffect(() => {
     (async () => {
-      setIsLoading(true);
-      setPreviewOutput(await diagnoseRule({ http, rule: pick(rule, 'ruleTypeId', 'params') }));
-      setIsLoading(false);
+      if (potentialRule) {
+        setIsLoading(true);
+        setPreviewOutput(
+          await diagnoseRule({
+            http,
+            rule: pick(potentialRule, 'ruleTypeId', 'params', 'consumer', 'schedule'),
+          })
+        );
+        setIsLoading(false);
+      }
     })();
-  }, [http, rule]);
+  }, [http, potentialRule]);
+
+  useEffect(() => {
+    (async () => {
+      if (existingRule) {
+        setIsLoading(true);
+        setPreviewOutput(await diagnoseRule({ http, rule: existingRule }));
+        setIsLoading(false);
+      }
+    })();
+  }, [http, existingRule]);
 
   const tabs = [
     {

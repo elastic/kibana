@@ -98,7 +98,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredSolutions?: string[] | undefined;
-  onShowPreview: () => void;
+  onShowPreview?: () => void;
 }
 
 export const RuleForm = ({
@@ -533,7 +533,7 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      {selectedRuleType?.hasDiagnostics && (
+      {selectedRuleType?.hasDiagnostics && onShowPreview && (
         <>
           <EuiHorizontalRule />
           <EuiFlexGroup alignItems="center" gutterSize="s">

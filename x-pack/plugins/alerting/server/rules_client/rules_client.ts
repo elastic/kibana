@@ -245,6 +245,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
 export interface DiagnoseOptions<Params extends RuleTypeParams> {
   ruleTypeId: string;
   params: Params;
+  consumer: string;
+  schedule: IntervalSchedule;
 }
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -534,15 +536,62 @@ export class RulesClient {
     );
   }
 
-  public async diagnose<Params extends RuleTypeParams = never>({
+  public async preview<Params extends RuleTypeParams = never>({
     ruleTypeId,
     params,
+    consumer,
+    schedule,
   }: DiagnoseOptions<Params>): Promise<DiagnoseOutput> {
+    await this.authorization.ensureAuthorized({
+      ruleTypeId,
+      consumer,
+      operation: WriteOperations.Create,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+
     this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleTypeId);
 
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     return await this.ruleDiagnostics.diagnose({
+      schedule,
       params,
+      ruleType,
+      username: await this.getUserName(),
+    });
+  }
+
+  public async diagnose<Params extends RuleTypeParams = never>(
+    id: string
+  ): Promise<DiagnoseOutput> {
+    let attributes: RawRule;
+    try {
+      const decryptedAlert =
+        await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
+          namespace: this.namespace,
+        });
+      attributes = decryptedAlert.attributes;
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the attributes and version using SOC
+      const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+      attributes = alert.attributes;
+    }
+
+    await this.authorization.ensureAuthorized({
+      ruleTypeId: attributes.alertTypeId,
+      consumer: attributes.consumer,
+      operation: ReadOperations.Get,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
+    return await this.ruleDiagnostics.diagnose({
+      schedule: attributes.schedule as IntervalSchedule,
+      params: attributes.params,
       ruleType,
       username: await this.getUserName(),
     });

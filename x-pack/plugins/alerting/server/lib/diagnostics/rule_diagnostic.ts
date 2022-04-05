@@ -7,7 +7,12 @@
 
 import type { Request } from '@hapi/hapi';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DiagnosticResult, DiagnoseOutput, RuleTypeParams } from '../../types';
+import type {
+  DiagnosticResult,
+  DiagnoseOutput,
+  RuleTypeParams,
+  IntervalSchedule,
+} from '../../types';
 import { addSpaceIdToPath } from '../../../../spaces/server';
 import {
   KibanaRequest,
@@ -75,6 +80,7 @@ interface ConstructorOpts {
 
 interface DiagnoseOpts<Params extends RuleTypeParams> {
   params: Params;
+  schedule: IntervalSchedule;
   ruleType: UntypedNormalizedRuleType;
   username: string | null;
 }
@@ -159,6 +165,7 @@ export class RuleDiagnostic {
   }
 
   public async diagnose<Params extends RuleTypeParams>({
+    schedule,
     params,
     ruleType,
     username,

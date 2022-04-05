@@ -45,6 +45,7 @@ import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
+import { PartialRule } from '../../lib/rule_api/diagnose';
 
 const RuleAdd = ({
   consumer,
@@ -88,7 +89,7 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
-  const [isPreviewFlyoutVisible, setIsPreviewFlyoutVisible] = useState<boolean>(false);
+  const [isPreviewFlyoutVisible, setIsPreviewFlyoutVisible] = useState<boolean>(true);
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setRule = (value: InitialRule) => {
@@ -282,7 +283,7 @@ const RuleAdd = ({
                 </EuiFlexItem>
                 {isPreviewFlyoutVisible && (
                   <EuiFlexItem>
-                    <RulePreview rule={rule as RulePreview} />
+                    <RulePreview potentialRule={rule as PartialRule} />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
