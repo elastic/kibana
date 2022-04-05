@@ -7,12 +7,8 @@
  */
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-<<<<<<< HEAD
-=======
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import agent, { Span } from 'elastic-apm-node';
 import LRUCache from 'lru-cache';
->>>>>>> 4c0efd95703 (Record request body for mget and add (de)serialization spans)
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
