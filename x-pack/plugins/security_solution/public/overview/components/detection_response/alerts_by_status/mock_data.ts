@@ -73,20 +73,6 @@ export const mockAlertsData: AlertsByStatusResponse<[], AlertsByStatusAgg> = {
             ],
           },
         },
-        // {
-        //   key: 'acknowledged',
-        //   doc_count: 2,
-        //   statusBySeverity: {
-        //     doc_count_error_upper_bound: 0,
-        //     sum_other_doc_count: 0,
-        //     buckets: [
-        //       {
-        //         key: 'high',
-        //         doc_count: 2,
-        //       },
-        //     ],
-        //   },
-        // },
       ] as StatusBucket[],
     },
   },

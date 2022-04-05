@@ -65,6 +65,15 @@ const DetectionResponseComponent = () => {
   );
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+
+  const detailsButtonOptions = useMemo(
+    () => ({
+      name: VIEW_ALERTS,
+      href: formatUrl(getDetectionEngineUrl()),
+      onClick: goToAlerts,
+    }),
+    [formatUrl, goToAlerts]
+  );
   return (
     <>
       {indicesExist ? (
@@ -96,16 +105,9 @@ const DetectionResponseComponent = () => {
                       <EuiFlexGroup>
                         <AlertsByStatus
                           title="Alerts"
-                          filterQuery={''} // Todo
-                          isInitialLoading={false} // Todo
-                          showInspectButton={true} // Todo
                           signalIndexName={signalIndexName}
                           queryId={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-                          detailsButtonOptions={{
-                            name: VIEW_ALERTS,
-                            href: formatUrl(getDetectionEngineUrl()),
-                            onClick: goToAlerts,
-                          }}
+                          detailsButtonOptions={detailsButtonOptions}
                         />
                       </EuiFlexGroup>
                     )}

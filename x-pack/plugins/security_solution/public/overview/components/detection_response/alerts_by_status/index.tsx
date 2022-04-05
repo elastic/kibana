@@ -15,7 +15,6 @@ import { APP_ID } from '../../../../../common/constants';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
 import { Panel } from '../../../../common/components/panel';
 import {
   HISTOGRAM_ACTIONS_BUTTON_CLASS,
@@ -30,21 +29,19 @@ import { DraggableLegend } from '../../../../common/components/charts/draggable_
 import { useAlertsByStatus } from './use_alerts_by_status';
 import { FormattedCount } from './formatted_count';
 import { ALERTS } from './translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
-const HistogramPanel = styled(Panel)<{ height?: number }>`
+const HistogramPanel = styled(Panel)<{ $height?: number }>`
   display: flex;
   flex-direction: column;
-  ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
+  ${({ $height }) => ($height != null ? `height: ${$height};` : '')}
 `;
 const defaultPanelHeight = 300;
 const donutHeight = 120;
 
 interface AlertsByStatusProps {
-  filterQuery: string;
   headerChildren?: React.ReactNode;
-  isInitialLoading: boolean;
   queryId: string;
-  showInspectButton: boolean;
   showSpacer?: boolean;
   signalIndexName: string | null;
   subtitle?: string;
@@ -54,7 +51,7 @@ interface AlertsByStatusProps {
 type PaddingSize = 's' | 'none' | 'm' | 'l';
 
 interface PanelSettings {
-  panelHeight: number;
+  panelHeight: string;
   paddingSize: PaddingSize;
 }
 
@@ -72,7 +69,7 @@ interface Others {
 type Props = AlertsByStatusProps & Others;
 
 const DefaultPanelSettings = {
-  panelHeight: defaultPanelHeight,
+  panelHeight: `${defaultPanelHeight}px`,
   paddingSize: 'm' as PaddingSize,
 };
 
@@ -80,28 +77,27 @@ const legendField = 'kibana.alert.severity';
 
 export const AlertsByStatus = ({
   detailsButtonOptions,
-  filterQuery,
   headerChildren,
-  isInitialLoading,
   panelSettings = DefaultPanelSettings,
-  showInspectButton,
+  queryId,
   showSpacer,
+  signalIndexName,
   subtitle,
   title,
   visualizationActionsOptions,
-  signalIndexName,
-  queryId,
 }: Props) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
   const { colors } = useContext(ThemeContext);
-  const {
-    items: donutData,
-    isLoading: loading,
-    queryId: id,
-  } = useAlertsByStatus({ signalIndexName, queryId });
+  const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
+
+  const { items: donutData, isLoading: loading } = useAlertsByStatus({
+    signalIndexName,
+    queryId,
+    skip: !toggleStatus,
+  });
   const legendItems: LegendItem[] = useMemo(
     () =>
       donutData && donutData?.length > 0 && legendField
@@ -122,16 +118,13 @@ export const AlertsByStatus = ({
   );
   return (
     <>
-      <HoverVisibilityContainer
-        show={isInitialLoading}
-        targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
-      >
+      <HoverVisibilityContainer show={true} targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
         <HistogramPanel
-          data-test-subj={`${id}Panel`}
-          height={panelSettings.panelHeight}
+          data-test-subj={`${queryId}Panel`}
+          height={toggleStatus ? 'auto' : panelSettings.panelHeight}
           paddingSize={panelSettings.paddingSize}
         >
-          {loading && !isInitialLoading && (
+          {loading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"
               size="xs"
@@ -139,14 +132,13 @@ export const AlertsByStatus = ({
               color="accent"
             />
           )}
-
           <HeaderSection
-            id={id}
+            id={queryId}
             title={title}
             subtitle={subtitle}
             inspectMultiple
-            showInspectButton={showInspectButton}
-            isInspectDisabled={filterQuery === undefined}
+            toggleStatus={toggleStatus}
+            toggleQuery={setToggleStatus}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               {visualizationActionsOptions && (
@@ -158,8 +150,8 @@ export const AlertsByStatus = ({
                         visualizationActionsOptions.className,
                         'histogram-viz-actions'
                       )}
-                      isInspectButtonDisabled={filterQuery === undefined}
-                      queryId={id}
+                      isInspectButtonDisabled={false}
+                      queryId={queryId}
                       title={title}
                     />
                   </CasesContext>
@@ -178,10 +170,7 @@ export const AlertsByStatus = ({
               <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
-
-          {isInitialLoading ? (
-            <MatrixLoader />
-          ) : (
+          {toggleStatus && (
             <>
               <EuiText className="eui-textCenter">
                 <FormattedCount count={totalAlerts} />
@@ -206,6 +195,7 @@ export const AlertsByStatus = ({
                   <DraggableLegend legendItems={legendItems} height={donutHeight} />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </>
           )}
         </HistogramPanel>

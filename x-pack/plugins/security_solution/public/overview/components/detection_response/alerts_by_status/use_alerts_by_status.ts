@@ -38,12 +38,13 @@ export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string 
 export const useAlertsByStatus = ({
   signalIndexName,
   queryId,
+  skip = false,
 }: {
   signalIndexName: string | null;
   queryId: string;
+  skip?: boolean;
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  // create a unique, but stable (across re-renders) query id
 
   const {
     loading: isLoading,
@@ -58,6 +59,7 @@ export const useAlertsByStatus = ({
       to,
     }),
     indexName: signalIndexName,
+    skip,
   });
 
   const items = useMemo(() => {
@@ -77,10 +79,10 @@ export const useAlertsByStatus = ({
   }, [setAlertsQuery, from, to]);
 
   const refetch = useCallback(() => {
-    if (refetchQuery) {
+    if (!skip && refetchQuery) {
       refetchQuery();
     }
-  }, [refetchQuery]);
+  }, [skip, refetchQuery]);
 
   useQueryInspector({
     deleteQuery,
@@ -94,5 +96,5 @@ export const useAlertsByStatus = ({
     loading: isLoading,
   });
 
-  return { items, isLoading, queryId };
+  return { items, isLoading };
 };

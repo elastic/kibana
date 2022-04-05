@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { mockCasesContract } from '../../../../../../cases/public/mocks';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { useAlertsByStatus } from './use_alerts_by_status';
 
 jest.mock('../../../../common/lib/kibana/kibana_react');
 jest.mock('../../../../common/components/charts/draggable_legend', () => {
@@ -19,16 +20,20 @@ jest.mock('../../../../common/components/charts/draggable_legend', () => {
     DraggableLegend: jest.fn((props) => <div data-test-subj="legend" {...props} />),
   };
 });
+jest.mock('./use_alerts_by_status', () => ({
+  useAlertsByStatus: jest.fn().mockReturnValue({
+    items: [],
+    isLoading: true,
+  }),
+}));
 describe('AlertsByStatus', () => {
   const mockCases = mockCasesContract();
 
   const props = {
     detailsButtonOptions: undefined,
-    donutData: parsedMockAlertsData,
     filterQuery: '',
     headerChildren: undefined,
     isInitialLoading: true,
-    loading: false,
     queryId: 'alertsByStatus',
     showInspectButton: true,
     signalIndexName: 'mock-signal-index',
@@ -46,6 +51,10 @@ describe('AlertsByStatus', () => {
         },
         theme: {},
       },
+    });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: true,
     });
   });
 
@@ -108,11 +117,15 @@ describe('AlertsByStatus', () => {
     expect(container.querySelector(`[data-test-subj="donut-chart"]`)).not.toBeInTheDocument();
   });
 
-  test('render DonutChart if isInitialLoading is false', () => {
+  test('render DonutChart if isInitialLoading is false', async () => {
     const testProps = {
       ...props,
       isInitialLoading: false,
     };
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      items: parsedMockAlertsData,
+      isLoading: false,
+    });
     const { container } = render(
       <TestProviders>
         <AlertsByStatus {...testProps} />
@@ -132,5 +145,24 @@ describe('AlertsByStatus', () => {
       </TestProviders>
     );
     expect(container.querySelector(`[data-test-subj="legend"]`)).toBeInTheDocument();
+  });
+
+  test('render toggle query button', () => {
+    const testProps = {
+      ...props,
+      isInitialLoading: false,
+    };
+
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      items: parsedMockAlertsData,
+      isLoading: false,
+    });
+
+    const { container } = render(
+      <TestProviders>
+        <AlertsByStatus {...testProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector(`[data-test-subj="query-toggle-header"]`)).toBeInTheDocument();
   });
 });
