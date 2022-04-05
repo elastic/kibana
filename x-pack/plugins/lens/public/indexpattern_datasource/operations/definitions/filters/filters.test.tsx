@@ -288,7 +288,7 @@ describe('filters', () => {
   describe('popover param editor', () => {
     // @ts-expect-error
     window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
-    jest.mock('../../../../../../../../src/plugins/data/public', () => ({
+    jest.mock('../../../../../../../../src/plugins/unified_search/public', () => ({
       QueryStringInput: () => {
         return 'QueryStringInput';
       },

@@ -13,9 +13,9 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { CreateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib';
+import { RuleTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
-import { SanitizedAlert } from '../types';
+import { SanitizedRule } from '../types';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
@@ -33,7 +33,7 @@ describe('createRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
 
-  const mockedAlert: SanitizedAlert<{ bar: boolean }> = {
+  const mockedAlert: SanitizedRule<{ bar: boolean }> = {
     alertTypeId: '1',
     consumer: 'bar',
     name: 'abc',
@@ -82,7 +82,7 @@ describe('createRuleRoute', () => {
     ],
   };
 
-  const createResult: AsApiContract<SanitizedAlert<{ bar: boolean }>> = {
+  const createResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
     ...ruleToCreate,
     mute_all: mockedAlert.muteAll,
     created_by: mockedAlert.createdBy,
@@ -471,7 +471,7 @@ describe('createRuleRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.create.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: ruleToCreate }, [
       'ok',

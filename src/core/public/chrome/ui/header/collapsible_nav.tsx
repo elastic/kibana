@@ -89,7 +89,7 @@ const overviewIDsToHide = ['kibanaOverview', 'enterpriseSearch'];
 const overviewIDs = [
   ...overviewIDsToHide,
   'observability-overview',
-  'securitySolutionUI:overview',
+  'securitySolutionUI:get_started',
   'management',
 ];
 

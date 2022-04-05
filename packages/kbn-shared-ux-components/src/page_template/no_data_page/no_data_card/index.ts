@@ -7,3 +7,4 @@
  */
 export { NoDataCard } from './no_data_card';
 export { ElasticAgentCard } from './elastic_agent_card';
+export type { NoDataCardProps, ElasticAgentCardProps } from './types';
