@@ -19,11 +19,18 @@ import {
 } from '../../common';
 import { RuleTaskInstance } from './types';
 
-export type EphemeralRuleTaskInstance<Params extends RuleTypeParams> = ConcreteTaskInstance<RuleTaskState, RuleTaskParams & { rule: SanitizedRule<Params>, apiKey: string | null }>;
-export type AlertingTaskInstance<Params extends RuleTypeParams> = RuleTaskInstance | EphemeralRuleTaskInstance<Params>;
+export type EphemeralRuleTaskInstance<Params extends RuleTypeParams> = ConcreteTaskInstance<
+  RuleTaskState,
+  RuleTaskParams & { rule: SanitizedRule<Params>; apiKey: string | null }
+>;
+export type AlertingTaskInstance<Params extends RuleTypeParams> =
+  | RuleTaskInstance
+  | EphemeralRuleTaskInstance<Params>;
 
-export function isEphemeralAlertTaskInstance<Params extends RuleTypeParams>(taskInstance: AlertingTaskInstance<RuleTypeParams>): taskInstance is EphemeralRuleTaskInstance<Params> {
-  return !!((taskInstance as EphemeralRuleTaskInstance<Params>).params.rule);
+export function isEphemeralAlertTaskInstance<Params extends RuleTypeParams>(
+  taskInstance: AlertingTaskInstance<RuleTypeParams>
+): taskInstance is EphemeralRuleTaskInstance<Params> {
+  return !!(taskInstance as EphemeralRuleTaskInstance<Params>).params.rule;
 }
 
 const enumerateErrorFields = (e: t.Errors) =>

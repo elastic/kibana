@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import uuid from 'uuid';
 import { RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
@@ -14,13 +15,8 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
 } from './lib';
-import {
-  validateNotifyWhenType,
-  BASE_ALERTING_API_PATH,
-  RuleNotifyWhenType,
-} from '../types';
+import { validateNotifyWhenType, BASE_ALERTING_API_PATH, RuleNotifyWhenType } from '../types';
 import { RouteOptions } from '.';
-import uuid from 'uuid';
 import { RuleExecutionStatus, RuleTypeParams } from '../../common/rule';
 
 export const bodySchema = schema.object({
@@ -65,7 +61,7 @@ const rewriteBodyRes: RewriteResponseCase<RuleExecutionStatus> = ({
   number_of_triggered_actions: numberOfTriggeredActions,
   number_of_scheduled_actions: numberOfScheduledActions,
   last_execution_date: lastExecutionDate,
-  last_duration: lastDuration
+  last_duration: lastDuration,
 });
 
 export const simulateRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
@@ -96,7 +92,7 @@ export const simulateRuleRoute = ({ router, licenseState, usageCounter }: RouteO
             return res.ok({
               body: {
                 result: rewriteBodyRes(simulatedRuleExecutionStatus),
-                id
+                id,
               },
             });
           } catch (e) {

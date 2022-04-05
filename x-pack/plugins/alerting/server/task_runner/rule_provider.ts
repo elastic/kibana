@@ -6,12 +6,11 @@
  */
 import apm from 'elastic-apm-node';
 import type { Request } from '@hapi/hapi';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import {
-  ErrorWithReason, ruleExecutionStatusToRaw,
-} from '../lib';
+import { ErrorWithReason, ruleExecutionStatusToRaw } from '../lib';
 import {
   RawRule,
   RuleExecutionRunResult,
@@ -21,17 +20,16 @@ import {
 } from '../types';
 import { asOk, promiseResult, Resultable } from '../lib/result_type';
 import { partiallyUpdateAlert } from '../saved_objects';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  MONITORING_HISTORY_LIMIT,
-} from '../../common';
+import { AlertInstanceContext, AlertInstanceState, MONITORING_HISTORY_LIMIT } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
+import { RuleTaskInstance } from './types';
 import {
-  RuleTaskInstance,
-} from './types';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleExecutionStatus, RuleExecutionStatusErrorReasons, RuleTypeParams, RuleTypeState, SanitizedRule } from '../../common/rule';
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../../common/rule';
 
 export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
@@ -50,7 +48,17 @@ export type RuleProvider<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> = PublicMethodsOf<ConcreteRuleProvider<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>>;
+> = PublicMethodsOf<
+  ConcreteRuleProvider<
+    Params,
+    ExtractedParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >
+>;
 
 export class ConcreteRuleProvider<
   Params extends RuleTypeParams,
@@ -74,7 +82,7 @@ export class ConcreteRuleProvider<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  
+
   constructor(
     ruleType: NormalizedRuleType<
       Params,
@@ -144,19 +152,29 @@ export class ConcreteRuleProvider<
   public async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    { executionStatus, monitoring } : { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
+    {
+      executionStatus,
+      monitoring,
+    }: { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     const client = this.context.internalSavedObjectsRepository;
 
     try {
-      await partiallyUpdateAlert(client, ruleId, {
-        ...(executionStatus ? { executionStatus: ruleExecutionStatusToRaw(executionStatus) } : {}),
-        ...(monitoring ? { monitoring } : {})
-      }, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
+      await partiallyUpdateAlert(
+        client,
+        ruleId,
+        {
+          ...(executionStatus
+            ? { executionStatus: ruleExecutionStatusToRaw(executionStatus) }
+            : {}),
+          ...(monitoring ? { monitoring } : {}),
+        },
+        {
+          ignore404: true,
+          namespace,
+          refresh: false,
+        }
+      );
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
@@ -235,5 +253,5 @@ export class ConcreteRuleProvider<
         (await rulesClient.get({ id: ruleId })).schedule
       ),
     };
-  }  
+  }
 }

@@ -40,7 +40,7 @@ import {
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
-  RawRuleAction
+  RawRuleAction,
 } from '../types';
 import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import {
@@ -605,21 +605,21 @@ export class RulesClient {
       notifyWhen,
       executionStatus: {
         status: 'pending' as RuleExecutionStatuses,
-        lastExecutionDate
+        lastExecutionDate,
       },
       monitoring: getDefaultRuleMonitoring(),
     };
 
     /* RUN simulation */
-    const taskExecutionResult: RuleExecutionStatus | undefined = await this.taskManager
-      .ephemeralRunNow( {
+    const executionResult: RuleExecutionStatus | undefined = await this.taskManager
+      .ephemeralRunNow({
         taskType: `alerting:simulation:${ruleTypeId}`,
         params: {
           alertId: id,
           spaceId: this.spaceId,
           consumer,
           rule: simulatedRule,
-          apiKey
+          apiKey,
         },
         state: {
           previousStartedAt: null,
@@ -628,41 +628,39 @@ export class RulesClient {
         },
         scope: ['alerting'],
       })
-      .then(taskExecutionResult => {
+      .then((result) => {
         const executionStatus: RuleExecutionStatus = {
-          status: Object.keys(taskExecutionResult.state?.alertInstances ?? {}).length
+          status: Object.keys(result.state?.alertInstances ?? {}).length
             ? 'active'
             : 'ok',
-          lastExecutionDate
+          lastExecutionDate,
         };
         return executionStatus;
       })
-      .catch(ex => {
+      .catch((ex) => {
         const executionStatus: RuleExecutionStatus = {
           status: 'error',
           lastExecutionDate,
           error: {
             reason: RuleExecutionStatusErrorReasons.Unknown,
-            message: `${ex}`
-          }
+            message: `${ex}`,
+          },
         };
         return executionStatus;
       })
       .finally(() => {
         // Avoid unused API key
-        markApiKeyForInvalidation(
-          { apiKey },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
+        markApiKeyForInvalidation({ apiKey }, this.logger, this.unsecuredSavedObjectsClient);
       });
 
-    /* END simulation */  
+    /* END simulation */
 
-    return taskExecutionResult ?? {
-      status: 'unknown',
-      lastExecutionDate
-    };
+    return (
+      executionResult ?? {
+        status: 'unknown',
+        lastExecutionDate,
+      }
+    );
   }
 
   public async get<Params extends RuleTypeParams = never>({
@@ -2451,22 +2449,31 @@ export class RulesClient {
     }
   }
 
-  private async denormalizeActions(alertActions: NormalizedAlertAction[]): Promise<{ actions: RawRuleAction[]; references: SavedObjectReference[] }> {
-    const actionResults = await this.fetchRuleActionTypes(alertActions)
-    const { actions, references } = await this.extractConnectorReferences(alertActions, actionResults)
-    return { 
+  private async denormalizeActions(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<{ actions: RawRuleAction[]; references: SavedObjectReference[] }> {
+    const actionResults = await this.fetchRuleActionTypes(alertActions);
+    const { actions, references } = await this.extractConnectorReferences(
+      alertActions,
+      actionResults
+    );
+    return {
       actions: actions.map(({ id, ...action }) => action),
-      references
+      references,
     };
   }
 
-  private async enrichNormalizedActionsWithConnectorId(alertActions: NormalizedAlertAction[]): Promise<RuleAction[]> {
-    const actionResults = await this.fetchRuleActionTypes(alertActions)
-    const { actions } = await this.extractConnectorReferences(alertActions, actionResults)
-    return actions.map(({ actionRef, ...action}) => action);
+  private async enrichNormalizedActionsWithConnectorId(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<RuleAction[]> {
+    const actionResults = await this.fetchRuleActionTypes(alertActions);
+    const { actions } = await this.extractConnectorReferences(alertActions, actionResults);
+    return actions.map(({ actionRef, ...action }) => action);
   }
 
-  private async fetchRuleActionTypes(alertActions: NormalizedAlertAction[]): Promise<ActionResult[]> {
+  private async fetchRuleActionTypes(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<ActionResult[]> {
     if (alertActions.length) {
       const actionsClient = await this.getActionsClient();
       const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];

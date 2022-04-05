@@ -9,9 +9,7 @@ import type { Request } from '@hapi/hapi';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import {
-  ErrorWithReason,
-} from '../lib';
+import { ErrorWithReason } from '../lib';
 import {
   RawRule,
   RuleExecutionRunResult,
@@ -56,7 +54,7 @@ export class EphemeralRuleProvider<
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private rule: SanitizedRule<Params>;
   private apiKey: string | null;
-  
+
   constructor(
     ruleType: NormalizedRuleType<
       Params,
@@ -108,11 +106,11 @@ export class EphemeralRuleProvider<
   public async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    attributes : { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
+    attributes: { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     this.rule = { ...this.rule, ...attributes };
   }
-  
+
   public async loadRuleAttributesAndRun(
     executor: (
       fakeRequest: KibanaRequest,
@@ -157,7 +155,9 @@ export class EphemeralRuleProvider<
 
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleExecutionState, Error>(executor(fakeRequest, this.apiKey, rule)),
+      state: await promiseResult<RuleExecutionState, Error>(
+        executor(fakeRequest, this.apiKey, rule)
+      ),
       schedule: asOk(rule.schedule),
     };
   }

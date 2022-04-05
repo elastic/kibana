@@ -31,11 +31,14 @@ import {
   RuleMonitoring,
   RuleMonitoringHistory,
   RuleTaskState,
-  RuleTypeRegistry
+  RuleTypeRegistry,
 } from '../types';
 import { asErr, map, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
-import { isEphemeralAlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import {
+  isEphemeralAlertTaskInstance,
+  taskInstanceToAlertTaskInstance,
+} from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
@@ -64,7 +67,14 @@ import {
 } from './types';
 import { ConcreteRuleProvider, RuleProvider } from './rule_provider';
 import { EphemeralRuleProvider } from './ephemeral_rule_provider';
-import { Rule, RuleExecutionStatus, RuleExecutionStatusErrorReasons, RuleTypeParams, RuleTypeState, SanitizedRule } from '../../common/rule';
+import {
+  Rule,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../../common/rule';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -148,19 +158,11 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
-    
+
     this.isEphemeralRule = isEphemeralAlertTaskInstance<Params>(this.taskInstance);
     this.ruleProvider = isEphemeralAlertTaskInstance<Params>(this.taskInstance)
-      ? new EphemeralRuleProvider(
-        ruleType,
-        this.taskInstance,
-        context
-      )
-      : new ConcreteRuleProvider(
-        ruleType,
-        this.taskInstance,
-        context
-      );
+      ? new EphemeralRuleProvider(ruleType, this.taskInstance, context)
+      : new ConcreteRuleProvider(ruleType, this.taskInstance, context);
   }
 
   private getExecutionHandler(
@@ -200,7 +202,7 @@ export class TaskRunner<
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
-      isEphemeralRule: this.isEphemeralRule
+      isEphemeralRule: this.isEphemeralRule,
     });
   }
 
@@ -535,7 +537,7 @@ export class TaskRunner<
     event: Event
   ): Promise<RuleExecutionState> {
     const {
-      params: { alertId: ruleId, spaceId = 'default'},
+      params: { alertId: ruleId, spaceId = 'default' },
     } = this.taskInstance;
 
     // Validate
@@ -625,9 +627,8 @@ export class TaskRunner<
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
-      this.ruleProvider.loadRuleAttributesAndRun(
-        (fakeRequest, apiKey, rule) =>
-          this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
+      this.ruleProvider.loadRuleAttributesAndRun((fakeRequest, apiKey, rule) =>
+        this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
       )
     );
 

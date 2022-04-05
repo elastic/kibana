@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { transformActionParams } from './transform_action_params';
-import { asHttpRequestExecutionSource, asSavedObjectExecutionSource, EnqueueExecutionOptions } from '../../../actions/server';
+import {
+  asHttpRequestExecutionSource,
+  asSavedObjectExecutionSource,
+  EnqueueExecutionOptions,
+} from '../../../actions/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
@@ -46,7 +50,7 @@ export function createExecutionHandler<
   ruleParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerRule,
-  isEphemeralRule
+  isEphemeralRule,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -143,20 +147,20 @@ export function createExecutionHandler<
         source: isEphemeralRule
           ? asHttpRequestExecutionSource(request)
           : asSavedObjectExecutionSource({
-            id: ruleId,
-            type: 'alert',
-          }),
+              id: ruleId,
+              type: 'alert',
+            }),
         executionId,
         relatedSavedObjects: isEphemeralRule
-        ? []
-        : [
-          {
-            id: ruleId,
-            type: 'alert',
-            namespace: namespace.namespace,
-            typeId: ruleType.id,
-          },
-        ],
+          ? []
+          : [
+              {
+                id: ruleId,
+                type: 'alert',
+                namespace: namespace.namespace,
+                typeId: ruleType.id,
+              },
+            ],
       };
 
       // TODO would be nice  to add the action name here, but it's not available

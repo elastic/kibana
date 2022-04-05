@@ -75,7 +75,8 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> =
+      taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual({
       ...taskInstance,
@@ -181,7 +182,8 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> =
+      taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual(taskInstance);
   });
