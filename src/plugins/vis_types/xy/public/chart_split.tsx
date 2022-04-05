@@ -7,28 +7,17 @@
  */
 
 import React from 'react';
-import { Accessor, AccessorFn, GroupBy, GroupBySort, SmallMultiples } from '@elastic/charts';
-import { SplitDimensionParams } from '../types';
+import { Accessor, AccessorFn, GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;
   splitRowAccessor?: Accessor | AccessorFn;
 }
 
-const CHART_SPLIT_ID = '__pie_chart_split__';
-export const SMALL_MULTIPLES_ID = '__pie_chart_sm__';
+const CHART_SPLIT_ID = '__chart_split__';
 
-export const ChartSplit = ({
-  splitColumnAccessor,
-  splitRowAccessor,
-  splitDimension,
-}: ChartSplitProps) => {
+export const ChartSplit = ({ splitColumnAccessor, splitRowAccessor }: ChartSplitProps) => {
   if (!splitColumnAccessor && !splitRowAccessor) return null;
-  let sort: GroupBySort = 'alphaDesc';
-  if (splitDimension?.meta?.params?.id === 'terms') {
-    const params = splitDimension?.meta?.sourceParams?.params as SplitDimensionParams;
-    sort = params?.order === 'asc' ? 'alphaAsc' : 'alphaDesc';
-  }
 
   return (
     <>
@@ -43,22 +32,11 @@ export const ChartSplit = ({
           }
           return spec.id;
         }}
-        sort={sort}
+        sort={Predicate.DataIndex}
       />
       <SmallMultiples
-        id={SMALL_MULTIPLES_ID}
         splitVertically={splitRowAccessor ? CHART_SPLIT_ID : undefined}
         splitHorizontally={splitColumnAccessor ? CHART_SPLIT_ID : undefined}
-        style={{
-          verticalPanelPadding: {
-            outer: 0.1,
-            inner: 0.1,
-          },
-          horizontalPanelPadding: {
-            outer: 0.1,
-            inner: 0.1,
-          },
-        }}
       />
     </>
   );
