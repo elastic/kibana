@@ -313,11 +313,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       schema: {
         config: schema.object({ apiUrl: schema.string() }),
         secrets: schema.object({ username: schema.string(), password: schema.string() }),
-        params: schema.object({ category: schema.string() }),
       },
       endpoints: {
         createIncident: {
           method: 'post',
+          params: schema.object({ category: schema.string() }),
           responseSchema: schema.object({ id: schema.string() }),
           getPath: (config) => `${config.apiUrl}/api/test`,
           getAuth: (secrets) => {

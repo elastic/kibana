@@ -20,7 +20,7 @@ export const register = <Config, Secrets, Params>({
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
   actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
-  connector: HTTPConnectorType<Config, Secrets, Params>;
+  connector: HTTPConnectorType<Config, Secrets>;
   logger: Logger;
 }) => {
   const executor = buildExecutor<Config, Secrets, Params>({

@@ -5,9 +5,23 @@
  * 2.0.
  */
 
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionType } from '../types';
 import { HTTPConnectorType } from './types';
 
-const buildValidators = (connector: HTTPConnectorType): ActionType['validate'] => {
-  return {};
+const buildSubActionParams = <Config, Secrets, Params>(
+  connector: HTTPConnectorType<Config, Secrets>
+) => {};
+
+export const buildValidators = <Config, Secrets, Params>({
+  connector,
+  configurationUtilities,
+}: {
+  configurationUtilities: ActionsConfigurationUtilities;
+  connector: HTTPConnectorType<Config, Secrets>;
+}): ActionType['validate'] => {
+  return {
+    config: connector.schema.config,
+    secrets: connector.schema.secrets,
+  };
 };

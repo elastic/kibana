@@ -23,9 +23,7 @@ export const createHTTPConnectorFramework = ({
   actionsConfigUtils: ActionsConfigurationUtilities;
 }) => {
   return {
-    registerConnector: <Config, Secrets, Params>(
-      connector: HTTPConnectorType<Config, Secrets, Params>
-    ) => {
+    registerConnector: <Config, Secrets>(connector: HTTPConnectorType<Config, Secrets>) => {
       register({ actionTypeRegistry, logger, connector, configurationUtilities });
     },
   };
