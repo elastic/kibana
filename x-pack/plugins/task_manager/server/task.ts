@@ -301,12 +301,12 @@ export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
  * A task instance that has an id and is ready for storage.
  */
 export interface ConcreteTaskInstance<
-// we allow any here as unknown will break current use in other plugins
-// this can be fixed by supporting generics in the future
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-State = Record<string, any>,
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-Params = Record<string, any>
+  // we allow any here as unknown will break current use in other plugins
+  // this can be fixed by supporting generics in the future
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  State = Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Params = Record<string, any>
 > extends TaskInstance<State, Params> {
   /**
    * The id of the Elastic document that stores this instance's data. This can

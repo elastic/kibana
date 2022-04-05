@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   getConsumerUnauthorizedErrorMessage,
@@ -14,7 +15,6 @@ import {
   ESTestIndexTool,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import uuid from 'uuid';
 import { getDefaultAlwaysFiringAlertData } from '../../../common/lib/alert_utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -61,17 +61,15 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
-          console.log(JSON.stringify(createdAction))
+          console.log(JSON.stringify(createdAction));
 
-          const reference = `rule-simulation-${uuid.v4()}:${user.username}`;            
+          const reference = `rule-simulation-${uuid.v4()}:${user.username}`;
 
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alerting/_simulate_rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(
-              getDefaultAlwaysFiringAlertData(reference, createdAction.id)
-            );
+            .send(getDefaultAlwaysFiringAlertData(reference, createdAction.id));
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -105,7 +103,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
               // wait for executor Alert Executor to be run, which means the underlying task is running
               console.log(await esTestIndexTool.waitForDocs('action:test.index-record', reference));
-              
+
               // const searchResult = await esTestIndexTool.search(
               //   'action:test.index-record',
               //   reference
