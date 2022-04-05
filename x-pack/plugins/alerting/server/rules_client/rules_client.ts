@@ -629,10 +629,9 @@ export class RulesClient {
         scope: ['alerting'],
       })
       .then((result) => {
+        const numberOfAlerts = Object.keys(result.state?.alertInstances ?? {}).length;
         const executionStatus: RuleExecutionStatus = {
-          status: Object.keys(result.state?.alertInstances ?? {}).length
-            ? 'active'
-            : 'ok',
+          status: numberOfAlerts ? 'active' : 'ok',
           lastExecutionDate,
         };
         return executionStatus;

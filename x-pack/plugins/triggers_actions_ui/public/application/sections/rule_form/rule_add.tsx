@@ -23,7 +23,7 @@ import {
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
-import { createRule, loadRuleTypes } from '../../lib/rule_api';
+import { createRule, simulateRule, loadRuleTypes } from '../../lib/rule_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmRuleSave } from './confirm_rule_save';
 import { ConfirmRuleClose } from './confirm_rule_close';
@@ -36,6 +36,7 @@ import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
+import { RuleSimulationResult } from '../../lib/rule_api/simulate';
 
 const RuleAdd = ({
   consumer,
@@ -225,6 +226,58 @@ const RuleAdd = ({
     }
   }
 
+  async function onSimulateRule(): Promise<RuleSimulationResult | undefined> {
+    try {
+      const simulationResult = await simulateRule({ http, rule: rule as RuleUpdates });
+      if (simulationResult.result.status === 'ok') {
+        toasts.addInfo(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleAdd.simulateSuccessNoAlertsNotificationText',
+            {
+              defaultMessage: 'Simulated rule "{ruleName}": no alerts detected',
+              values: {
+                ruleName: rule.name,
+              },
+            }
+          )
+        );
+      } else if (simulationResult.result.status === 'active') {
+        toasts.addSuccess(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleAdd.simulateSuccessDetectedAlertsNotificationText',
+            {
+              defaultMessage: 'Simulated rule "{ruleName}": alerts detected and actions scheduled"',
+              values: {
+                ruleName: rule.name,
+              },
+            }
+          )
+        );
+      } else {
+        toasts.addDanger(
+          simulationResult.status?.error?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleAdd.simulateErrorNotificationText',
+              {
+                defaultMessage: 'Simulating rule "{ruleName}" failed',
+                values: {
+                  ruleName: rule.name,
+                },
+              }
+            )
+        );
+      }
+      return simulationResult;
+    } catch (errorRes) {
+      toasts.addDanger(
+        errorRes.body?.message ??
+          i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.simulateErrorNotificationText', {
+            defaultMessage: 'Cannot simulate rule.',
+          })
+      );
+    }
+  }
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -286,6 +339,23 @@ const RuleAdd = ({
                   setIsConfirmRuleSaveModalOpen(true);
                 } else {
                   await saveRuleAndCloseFlyout();
+                }
+              }}
+              onSimulate={async () => {
+                setIsSaving(true);
+                if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
+                  setRule(
+                    getRuleWithInvalidatedFields(
+                      rule as Rule,
+                      ruleParamsErrors,
+                      ruleBaseErrors,
+                      ruleActionsErrors
+                    )
+                  );
+                  setIsSaving(false);
+                } else {
+                  await onSimulateRule();
+                  setIsSaving(false);
                 }
               }}
               onCancel={checkForChangesAndCloseFlyout}

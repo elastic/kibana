@@ -23,12 +23,14 @@ interface RuleAddFooterProps {
   isSaving: boolean;
   isFormLoading: boolean;
   onSave: () => void;
+  onSimulate: () => void;
   onCancel: () => void;
 }
 
 export const RuleAddFooter = ({
   isSaving,
   onSave,
+  onSimulate,
   onCancel,
   isFormLoading,
 }: RuleAddFooterProps) => {
@@ -53,21 +55,42 @@ export const RuleAddFooter = ({
           <></>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            color="success"
-            data-test-subj="saveRuleButton"
-            type="submit"
-            iconType="check"
-            isDisabled={loadingHealthCheck}
-            isLoading={isSaving}
-            onClick={onSave}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleAddFooter.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="accent"
+                data-test-subj="simulateRuleButton"
+                type="submit"
+                iconType="play"
+                isDisabled={loadingHealthCheck}
+                isLoading={isSaving}
+                onClick={onSimulate}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleAddFooter.simulateButtonLabel"
+                  defaultMessage="Simulate"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="success"
+                data-test-subj="saveRuleButton"
+                type="submit"
+                iconType="check"
+                isDisabled={loadingHealthCheck}
+                isLoading={isSaving}
+                onClick={onSave}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleAddFooter.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

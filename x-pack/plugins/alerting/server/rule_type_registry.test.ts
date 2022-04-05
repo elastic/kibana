@@ -321,17 +321,17 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "default",
-          "name": "Default",
-        },
-        Object {
-          "id": "backToAwesome",
-          "name": "Back To Awesome",
-        },
-      ]
-    `);
+              Array [
+                Object {
+                  "id": "default",
+                  "name": "Default",
+                },
+                Object {
+                  "id": "backToAwesome",
+                  "name": "Back To Awesome",
+                },
+              ]
+          `);
     });
 
     test('allows an RuleType to specify a custom rule task timeout', () => {
@@ -433,16 +433,21 @@ describe('Create Lifecycle', () => {
       registry.register(ruleType);
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "alerting:test": Object {
-            "createTaskRunner": [Function],
-            "timeout": "20m",
-            "title": "Test",
+        Array [
+          Object {
+            "alerting:simulation:test": Object {
+              "createTaskRunner": [Function],
+              "timeout": "20m",
+              "title": "Simulation:Test",
+            },
+            "alerting:test": Object {
+              "createTaskRunner": [Function],
+              "timeout": "20m",
+              "title": "Test",
+            },
           },
-        },
-      ]
-    `);
+        ]
+      `);
     });
 
     test('shallow clones the given rule type', () => {
@@ -544,42 +549,42 @@ describe('Create Lifecycle', () => {
       });
       const ruleType = registry.get('test');
       expect(ruleType).toMatchInlineSnapshot(`
-      Object {
-        "actionGroups": Array [
-          Object {
-            "id": "default",
-            "name": "Default",
-          },
-          Object {
-            "id": "recovered",
-            "name": "Recovered",
-          },
-        ],
-        "actionVariables": Object {
-          "context": Array [],
-          "params": Array [],
-          "state": Array [],
-        },
-        "config": Object {
-          "execution": Object {
-            "actions": Object {
-              "max": 1000,
-            },
-          },
-        },
-        "defaultActionGroupId": "default",
-        "executor": [MockFunction],
-        "id": "test",
-        "isExportable": true,
-        "minimumLicenseRequired": "basic",
-        "name": "Test",
-        "producer": "alerts",
-        "recoveryActionGroup": Object {
-          "id": "recovered",
-          "name": "Recovered",
-        },
-      }
-    `);
+              Object {
+                "actionGroups": Array [
+                  Object {
+                    "id": "default",
+                    "name": "Default",
+                  },
+                  Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
+                ],
+                "actionVariables": Object {
+                  "context": Array [],
+                  "params": Array [],
+                  "state": Array [],
+                },
+                "config": Object {
+                  "execution": Object {
+                    "actions": Object {
+                      "max": 1000,
+                    },
+                  },
+                },
+                "defaultActionGroupId": "default",
+                "executor": [MockFunction],
+                "id": "test",
+                "isExportable": true,
+                "minimumLicenseRequired": "basic",
+                "name": "Test",
+                "producer": "alerts",
+                "recoveryActionGroup": Object {
+                  "id": "recovered",
+                  "name": "Recovered",
+                },
+              }
+          `);
     });
 
     test(`should throw an error if type isn't registered`, () => {
@@ -623,40 +628,40 @@ describe('Create Lifecycle', () => {
       });
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
-      Set {
-        Object {
-          "actionGroups": Array [
-            Object {
-              "id": "testActionGroup",
-              "name": "Test Action Group",
-            },
-            Object {
-              "id": "recovered",
-              "name": "Recovered",
-            },
-          ],
-          "actionVariables": Object {
-            "context": Array [],
-            "params": Array [],
-            "state": Array [],
-          },
-          "defaultActionGroupId": "testActionGroup",
-          "defaultScheduleInterval": undefined,
-          "doesSetRecoveryContext": false,
-          "enabledInLicense": false,
-          "id": "test",
-          "isExportable": true,
-          "minimumLicenseRequired": "basic",
-          "name": "Test",
-          "producer": "alerts",
-          "recoveryActionGroup": Object {
-            "id": "recovered",
-            "name": "Recovered",
-          },
-          "ruleTaskTimeout": "20m",
-        },
-      }
-    `);
+              Set {
+                Object {
+                  "actionGroups": Array [
+                    Object {
+                      "id": "testActionGroup",
+                      "name": "Test Action Group",
+                    },
+                    Object {
+                      "id": "recovered",
+                      "name": "Recovered",
+                    },
+                  ],
+                  "actionVariables": Object {
+                    "context": Array [],
+                    "params": Array [],
+                    "state": Array [],
+                  },
+                  "defaultActionGroupId": "testActionGroup",
+                  "defaultScheduleInterval": undefined,
+                  "doesSetRecoveryContext": false,
+                  "enabledInLicense": false,
+                  "id": "test",
+                  "isExportable": true,
+                  "minimumLicenseRequired": "basic",
+                  "name": "Test",
+                  "producer": "alerts",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
+                  "ruleTaskTimeout": "20m",
+                },
+              }
+          `);
     });
 
     test('should return action variables state and empty context', () => {
