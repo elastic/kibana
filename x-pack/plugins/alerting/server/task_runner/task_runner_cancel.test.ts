@@ -8,9 +8,9 @@
 import sinon from 'sinon';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import {
-  AlertExecutorOptions,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
@@ -32,7 +32,7 @@ import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
-import { Alert, RecoveredActionGroup } from '../../common';
+import { Rule, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
@@ -98,7 +98,7 @@ describe('Task Runner Cancel', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-  const services = alertsMock.createAlertServices();
+  const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -138,7 +138,7 @@ describe('Task Runner Cancel', () => {
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-  const mockedRuleSavedObject: Alert<AlertTypeParams> = {
+  const mockedRuleSavedObject: Rule<RuleTypeParams> = {
     id: '1',
     consumer: 'bar',
     createdAt: mockDate,
@@ -402,9 +402,9 @@ describe('Task Runner Cancel', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -441,9 +441,9 @@ describe('Task Runner Cancel', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -476,9 +476,9 @@ describe('Task Runner Cancel', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
