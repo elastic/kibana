@@ -8,6 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PluginInitializerContext } from 'kibana/server';
 import { Plugin } from './plugin';
 

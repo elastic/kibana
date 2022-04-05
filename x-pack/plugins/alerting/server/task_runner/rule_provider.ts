@@ -13,22 +13,17 @@ import {
   ErrorWithReason, ruleExecutionStatusToRaw,
 } from '../lib';
 import {
-  AlertExecutionStatusErrorReasons,
   RawRule,
   RuleExecutionRunResult,
   RuleExecutionState,
   RuleMonitoring,
   RuleTypeRegistry,
-  SanitizedAlert,
 } from '../types';
 import { asOk, promiseResult, Resultable } from '../lib/result_type';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
-  AlertExecutionStatus,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
   MONITORING_HISTORY_LIMIT,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -36,6 +31,7 @@ import {
   RuleTaskInstance,
 } from './types';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { RuleExecutionStatus, RuleExecutionStatusErrorReasons, RuleTypeParams, RuleTypeState, SanitizedRule } from '../../common/rule';
 
 export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
@@ -47,9 +43,9 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
 });
 
 export type RuleProvider<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -57,9 +53,9 @@ export type RuleProvider<
 > = PublicMethodsOf<ConcreteRuleProvider<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>>;
 
 export class ConcreteRuleProvider<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -148,11 +144,10 @@ export class ConcreteRuleProvider<
   public async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    { executionStatus, monitoring } : { executionStatus?: AlertExecutionStatus; monitoring?: RuleMonitoring }
+    { executionStatus, monitoring } : { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     const client = this.context.internalSavedObjectsRepository;
 
-    
     try {
       await partiallyUpdateAlert(client, ruleId, {
         ...(executionStatus ? { executionStatus: ruleExecutionStatusToRaw(executionStatus) } : {}),
@@ -166,12 +161,12 @@ export class ConcreteRuleProvider<
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
   }
-  
+
   public async loadRuleAttributesAndRun(
     executor: (
       fakeRequest: KibanaRequest,
       apiKey: RawRule['apiKey'],
-      rule: SanitizedAlert<Params>
+      rule: SanitizedRule<Params>
     ) => Promise<RuleExecutionState>
   ): Promise<Resultable<RuleExecutionRunResult, Error>> {
     const {
@@ -184,12 +179,12 @@ export class ConcreteRuleProvider<
       apiKey = decryptedAttributes.apiKey;
       enabled = decryptedAttributes.enabled;
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
     }
 
     if (!enabled) {
       throw new ErrorWithReason(
-        AlertExecutionStatusErrorReasons.Disabled,
+        RuleExecutionStatusErrorReasons.Disabled,
         new Error(`Rule failed to execute because rule ran after it was disabled.`)
       );
     }
@@ -199,7 +194,7 @@ export class ConcreteRuleProvider<
     // Get rules client with space level permissions
     const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
 
-    let rule: SanitizedAlert<Params>;
+    let rule: SanitizedRule<Params>;
 
     // Ensure API key is still valid and user has access
     try {
@@ -216,13 +211,13 @@ export class ConcreteRuleProvider<
         });
       }
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, err);
     }
 
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
     }
 
     if (rule.monitoring) {
@@ -240,5 +235,5 @@ export class ConcreteRuleProvider<
         (await rulesClient.get({ id: ruleId })).schedule
       ),
     };
-  }
+  }  
 }

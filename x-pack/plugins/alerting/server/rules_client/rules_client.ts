@@ -22,27 +22,27 @@ import {
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization, ActionResult } from '../../../actions/server';
 import {
-  Alert as Rule,
-  PartialAlert as PartialRule,
+  Rule,
+  PartialRule,
   RawRule,
   RuleTypeRegistry,
-  AlertAction as RuleAction,
+  RuleAction,
   IntervalSchedule,
-  SanitizedAlert as SanitizedRule,
+  SanitizedRule,
   RuleTaskState,
   AlertSummary,
-  AlertExecutionStatusValues as RuleExecutionStatusValues,
-  AlertExecutionStatus as RuleExecutionStatus,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
+  RuleExecutionStatusValues,
+  RuleNotifyWhenType,
+  RuleExecutionStatus,
+  RuleTypeParams,
   ResolvedSanitizedRule,
-  AlertWithLegacyId as RuleWithLegacyId,
+  RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
-  PartialAlertWithLegacyId as PartialRuleWithLegacyId,
+  PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
-  RawAlertAction,
+  RawRuleAction
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -91,10 +91,11 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { AlertExecutionStatusErrorReasons, AlertExecutionStatuses, IExecutionLogWithErrorsResult, SanitizedAlert } from '../../common';
+import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
+import { RuleExecutionStatusErrorReasons, RuleExecutionStatuses } from '../../common/rule';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -425,7 +426,7 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -577,7 +578,7 @@ export class RulesClient {
     }
 
     const createTime = Date.now();
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const lastExecutionDate = new Date();
 
@@ -589,7 +590,7 @@ export class RulesClient {
     );
 
     const { apiKey, apiKeyOwner } = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const simulatedRule: SanitizedAlert<Params> = {
+    const simulatedRule: SanitizedRule<Params> = {
       id,
       ...data,
       actions: await this.enrichNormalizedActionsWithConnectorId(data.actions),
@@ -603,7 +604,7 @@ export class RulesClient {
       mutedInstanceIds: [],
       notifyWhen,
       executionStatus: {
-        status: 'pending' as AlertExecutionStatuses,
+        status: 'pending' as RuleExecutionStatuses,
         lastExecutionDate
       },
       monitoring: getDefaultRuleMonitoring(),
@@ -641,7 +642,7 @@ export class RulesClient {
           status: 'error',
           lastExecutionDate,
           error: {
-            reason: AlertExecutionStatusErrorReasons.Unknown,
+            reason: RuleExecutionStatusErrorReasons.Unknown,
             message: `${ex}`
           }
         };
@@ -1363,7 +1364,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
@@ -2450,7 +2451,7 @@ export class RulesClient {
     }
   }
 
-  private async denormalizeActions(alertActions: NormalizedAlertAction[]): Promise<{ actions: RawAlertAction[]; references: SavedObjectReference[] }> {
+  private async denormalizeActions(alertActions: NormalizedAlertAction[]): Promise<{ actions: RawRuleAction[]; references: SavedObjectReference[] }> {
     const actionResults = await this.fetchRuleActionTypes(alertActions)
     const { actions, references } = await this.extractConnectorReferences(alertActions, actionResults)
     return { 
@@ -2483,9 +2484,9 @@ export class RulesClient {
   private async extractConnectorReferences(
     alertActions: NormalizedAlertAction[],
     actionConnectors: ActionResult[]
-  ): Promise<{ actions: Array<RuleAction & RawAlertAction>; references: SavedObjectReference[] }> {
+  ): Promise<{ actions: Array<RuleAction & RawRuleAction>; references: SavedObjectReference[] }> {
     const references: SavedObjectReference[] = [];
-    const actions: Array<RuleAction & RawAlertAction> = [];
+    const actions: Array<RuleAction & RawRuleAction> = [];
     if (alertActions.length) {
       const actionsClient = await this.getActionsClient();
       alertActions.forEach(({ id, ...alertAction }, i) => {

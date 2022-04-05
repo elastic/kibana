@@ -11,7 +11,7 @@ import { validateExpression } from './validation';
 import { EsQueryAlertParams, SearchType } from './types';
 import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
-import { SanitizedAlert } from '../../../../alerting/common';
+import { SanitizedRule } from '../../../../alerting/common';
 
 const PLUGIN_ID = 'discover';
 const ES_QUERY_ALERT_TYPE = '.es-query';
@@ -47,7 +47,7 @@ function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     PLUGIN_ID,
     ES_QUERY_ALERT_TYPE,
-    (alert: SanitizedAlert<EsQueryAlertParams<SearchType.searchSource>>) => {
+    (alert: SanitizedRule<EsQueryAlertParams<SearchType.searchSource>>) => {
       return `#/viewAlert/${alert.id}`;
     }
   );

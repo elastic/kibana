@@ -8,9 +8,9 @@
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { AlertingTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
-import { AlertTypeParams, SanitizedAlert } from '../types';
+import { RuleTypeParams, SanitizedRule } from '../types';
 
-const alert: SanitizedAlert<{
+const alert: SanitizedRule<{
   bar: boolean;
 }> = {
   id: 'alert-123',
@@ -75,7 +75,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<AlertTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual({
       ...taskInstance,
@@ -181,7 +181,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<AlertTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> = taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual(taskInstance);
   });
@@ -204,7 +204,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<AlertTypeParams> = taskInstanceToAlertTaskInstance(
+    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> = taskInstanceToAlertTaskInstance(
       taskInstance,
       alert
     );

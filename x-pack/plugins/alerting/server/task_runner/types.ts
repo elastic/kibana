@@ -9,20 +9,20 @@ import { Dictionary } from 'lodash';
 import { KibanaRequest, Logger } from 'kibana/server';
 import {
   ActionGroup,
-  AlertAction,
+  RuleAction,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   IntervalSchedule,
   RuleExecutionState,
   RuleMonitoring,
   RuleTaskParams,
   RuleTaskState,
-  SanitizedAlert,
+  SanitizedRule,
 } from '../../common';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
-import { Alert as CreatedAlert } from '../alert';
+import { Alert } from '../alert';
 import { IEventLogger } from '../../../event_log/server';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
@@ -47,9 +47,9 @@ export interface TrackAlertDurationsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 > {
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
 }
 
 export interface GenerateNewAndRecoveredAlertEventsParams<
@@ -58,16 +58,16 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
 > {
   eventLogger: IEventLogger;
   executionId: string;
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
   ruleId: string;
   ruleLabel: string;
   namespace: string | undefined;
   ruleType: NormalizedRuleType<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
+    RuleTypeParams,
+    RuleTypeParams,
+    RuleTypeState,
     {
       [x: string]: unknown;
     },
@@ -77,7 +77,7 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
     string,
     string
   >;
-  rule: SanitizedAlert<AlertTypeParams>;
+  rule: SanitizedRule<RuleTypeParams>;
   spaceId: string;
 }
 
@@ -88,7 +88,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
@@ -102,8 +102,8 @@ export interface LogActiveAndRecoveredAlertsParams<
   RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  activeAlerts: Dictionary<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   ruleLabel: string;
   canSetRecoveryContext: boolean;
 }
@@ -111,9 +111,9 @@ export interface LogActiveAndRecoveredAlertsParams<
 // / ExecutionHandler
 
 export interface CreateExecutionHandlerOptions<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -125,7 +125,7 @@ export interface CreateExecutionHandlerOptions<
   executionId: string;
   tags?: string[];
   actionsPlugin: ActionsPluginStartContract;
-  actions: AlertAction[];
+  actions: RuleAction[];
   spaceId: string;
   apiKey: RawRule['apiKey'];
   kibanaBaseUrl: string | undefined;
@@ -141,7 +141,7 @@ export interface CreateExecutionHandlerOptions<
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
-  ruleParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
   isEphemeralRule: boolean;

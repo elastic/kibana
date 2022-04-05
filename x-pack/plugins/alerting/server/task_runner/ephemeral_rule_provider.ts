@@ -13,23 +13,23 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertExecutionStatusErrorReasons,
   RawRule,
   RuleExecutionRunResult,
   RuleExecutionState,
   RuleMonitoring,
   RuleTypeRegistry,
-  SanitizedAlert,
 } from '../types';
 import { asOk, promiseResult, Resultable } from '../lib/result_type';
-import { EphemeralAlertTaskInstance } from './alert_task_instance';
+import { EphemeralRuleTaskInstance } from './alert_task_instance';
 import {
-  AlertExecutionStatus,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
   MONITORING_HISTORY_LIMIT,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 
@@ -43,18 +43,18 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
 });
 
 export class EphemeralRuleProvider<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
   private context: TaskRunnerContext;
-  private taskInstance: EphemeralAlertTaskInstance<Params>;
+  private taskInstance: EphemeralRuleTaskInstance<Params>;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private rule: SanitizedAlert<Params>;
+  private rule: SanitizedRule<Params>;
   private apiKey: string | null;
   
   constructor(
@@ -67,7 +67,7 @@ export class EphemeralRuleProvider<
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    taskInstance: EphemeralAlertTaskInstance<Params>,
+    taskInstance: EphemeralRuleTaskInstance<Params>,
     context: TaskRunnerContext
   ) {
     this.context = context;
@@ -108,7 +108,7 @@ export class EphemeralRuleProvider<
   public async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    attributes : { executionStatus?: AlertExecutionStatus; monitoring?: RuleMonitoring }
+    attributes : { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     this.rule = { ...this.rule, ...attributes };
   }
@@ -117,7 +117,7 @@ export class EphemeralRuleProvider<
     executor: (
       fakeRequest: KibanaRequest,
       apiKey: RawRule['apiKey'],
-      rule: SanitizedAlert<Params>
+      rule: SanitizedRule<Params>
     ) => Promise<RuleExecutionState>
   ): Promise<Resultable<RuleExecutionRunResult, Error>> {
     const {
@@ -139,13 +139,13 @@ export class EphemeralRuleProvider<
         });
       }
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, err);
     }
 
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
     } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
     }
 
     if (rule.monitoring) {

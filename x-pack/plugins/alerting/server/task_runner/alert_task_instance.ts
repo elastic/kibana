@@ -10,28 +10,28 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import {
-  SanitizedAlert,
+  SanitizedRule,
   RuleTaskState,
   ruleParamsSchema,
   ruleStateSchema,
   RuleTaskParams,
-  AlertTypeParams
+  RuleTypeParams,
 } from '../../common';
 import { RuleTaskInstance } from './types';
 
-export type EphemeralAlertTaskInstance<Params extends AlertTypeParams> = ConcreteTaskInstance<RuleTaskState, RuleTaskParams & { rule: SanitizedAlert<Params>, apiKey: string | null }>;
-export type AlertingTaskInstance<Params extends AlertTypeParams> = RuleTaskInstance | EphemeralAlertTaskInstance<Params>;
+export type EphemeralRuleTaskInstance<Params extends RuleTypeParams> = ConcreteTaskInstance<RuleTaskState, RuleTaskParams & { rule: SanitizedRule<Params>, apiKey: string | null }>;
+export type AlertingTaskInstance<Params extends RuleTypeParams> = RuleTaskInstance | EphemeralRuleTaskInstance<Params>;
 
-export function isEphemeralAlertTaskInstance<Params extends AlertTypeParams>(taskInstance: AlertingTaskInstance<AlertTypeParams>): taskInstance is EphemeralAlertTaskInstance<Params> {
-  return !!((taskInstance as EphemeralAlertTaskInstance<Params>).params.rule);
+export function isEphemeralAlertTaskInstance<Params extends RuleTypeParams>(taskInstance: AlertingTaskInstance<RuleTypeParams>): taskInstance is EphemeralRuleTaskInstance<Params> {
+  return !!((taskInstance as EphemeralRuleTaskInstance<Params>).params.rule);
 }
 
 const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;
 
-export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
+export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
   taskInstance: ConcreteTaskInstance,
-  alert?: SanitizedAlert<Params>
+  alert?: SanitizedRule<Params>
 ): AlertingTaskInstance<Params> {
   return {
     ...taskInstance,

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, AlertTypeDisabledError } from '../lib';
+import { RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
@@ -16,13 +16,12 @@ import {
 } from './lib';
 import {
   validateNotifyWhenType,
-  AlertTypeParams,
   BASE_ALERTING_API_PATH,
-  AlertNotifyWhenType,
-  AlertExecutionStatus,
+  RuleNotifyWhenType,
 } from '../types';
 import { RouteOptions } from '.';
 import uuid from 'uuid';
+import { RuleExecutionStatus, RuleTypeParams } from '../../common/rule';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -46,7 +45,7 @@ export const bodySchema = schema.object({
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
+const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
   ...rest
@@ -55,7 +54,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']>
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<AlertExecutionStatus> = ({
+const rewriteBodyRes: RewriteResponseCase<RuleExecutionStatus> = ({
   numberOfTriggeredActions,
   numberOfScheduledActions,
   lastExecutionDate,
@@ -85,12 +84,12 @@ export const simulateRuleRoute = ({ router, licenseState, usageCounter }: RouteO
 
           try {
             const id = `simulation-${rule.rule_type_id}-${uuid.v4()}`;
-            const simulatedRuleExecutionStatus: AlertExecutionStatus =
-              await rulesClient.simulate<AlertTypeParams>({
+            const simulatedRuleExecutionStatus: RuleExecutionStatus =
+              await rulesClient.simulate<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
                   enabled: true,
-                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                  notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id },
               });
@@ -101,7 +100,7 @@ export const simulateRuleRoute = ({ router, licenseState, usageCounter }: RouteO
               },
             });
           } catch (e) {
-            if (e instanceof AlertTypeDisabledError) {
+            if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);
             }
             throw e;
