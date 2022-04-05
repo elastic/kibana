@@ -104,15 +104,17 @@ export function buildSrcUrl(svgString) {
   return domUrl.createObjectURL(svg);
 }
 
-export async function styleSvg(svgString, symbolId, fill, stroke) {
+export async function styleSvg(svgString, fill, stroke) {
   const svgXml = await parseXmlString(svgString);
-  svgXml.svg.$.id = symbolId;
+
+  // Elements nested under svg root may define style attribute
+  // Wildcard descendent selector provides more specificity to ensure root svg style attribute is applied instead of children style attributes
   svgXml.svg.style = `
-    #${symbolId} * {
-      ${fill ? `fill: ${fill}` : '#000'};
-      ${stroke ? `stroke: ${stroke}` : '#000'};
-      stroke-width: 1;
-      vector-effect: non-scaling-stroke;
+    svg * {
+      ${fill ? `fill: ${fill}` : '#000'} !important;
+      ${stroke ? `stroke: ${stroke}` : '#000'} !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
     }
   `;
   const builder = new xml2js.Builder();
