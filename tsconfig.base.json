@@ -69,7 +69,7 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
     ]
   }
 }

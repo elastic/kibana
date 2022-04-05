@@ -2,7 +2,7 @@
   "name": "@kbn/ambient-ui-types",
   "private": true,
   "version": "1.0.0",
-  "main": "./types/index.d.ts",
-  "types": "./types/index.d.ts",
+  "main": "./index.d.ts",
+  "types": "./index.d.ts",
   "license": "SSPL-1.0 OR Elastic License 2.0"
 }

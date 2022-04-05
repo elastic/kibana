@@ -5,12 +5,9 @@
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "stripInternal": false,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": []
   },
   "include": [
-    "types/**/*.d.ts"
+    "*.d.ts"
   ]
 }

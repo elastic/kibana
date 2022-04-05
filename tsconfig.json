@@ -21,5 +21,8 @@
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
     { "path": "./src/plugins/interactive_setup/tsconfig.json" },
     { "path": "./x-pack/plugins/reporting/tsconfig.json" },
+  ],
+  "types": [
+    "@kbn/ambient-ui-types",
   ]
 }

@@ -7,7 +7,7 @@ PKG_REQUIRE_NAME = "@kbn/ambient-ui-types"
 
 SRCS = glob(
   [
-    "types/**/*.d.ts",
+    "*.d.ts",
   ]
 )
 
