@@ -11,7 +11,8 @@ import { Unit } from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -37,6 +38,7 @@ import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { timelineActions } from '../../../../timelines/store/timeline';
+import { State } from '../../../../common/store';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;
@@ -94,16 +96,18 @@ export const PreviewHistogram = ({
   });
 
   const {
-    columns,
-    dataProviders,
-    deletedEventIds,
-    kqlMode,
-    itemsPerPage,
-    itemsPerPageOptions,
-    graphEventId,
-    sort,
-    defaultColumns,
-  } = alertsDefaultModel;
+    timeline: {
+      columns,
+      dataProviders,
+      defaultColumns,
+      deletedEventIds,
+      graphEventId, // If truthy, the graph viewer (Resolver) is showing
+      itemsPerPage,
+      itemsPerPageOptions,
+      kqlMode,
+      sort,
+    } = alertsDefaultModel,
+  } = useSelector((state: State) => eventsViewerSelector(state, TimelineId.rulePreview));
 
   const {
     browserFields,
