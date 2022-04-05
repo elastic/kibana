@@ -1984,7 +1984,13 @@
             "label": "axisTitlesVisibility",
             "description": [],
             "signature": [
-              "AxesSettingsConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxesSettingsConfig",
+                "text": "AxesSettingsConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
@@ -3291,6 +3297,47 @@
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              "{ getFeatures: () => Promise<",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]>; }"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.kibanaFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "kibanaFeatures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3490,7 +3537,7 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false
@@ -3516,7 +3563,13 @@
             "label": "seriesTypes",
             "description": [],
             "signature": [
-              "SeriesType",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.SeriesType",
+                "text": "SeriesType"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -3663,7 +3716,13 @@
             "label": "yConfig",
             "description": [],
             "signature": [
-              "YConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YConfig",
+                "text": "YConfig"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -3753,7 +3812,13 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "SeriesType",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.SeriesType",
+                "text": "SeriesType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
@@ -7108,6 +7173,20 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmServiceInventoryOptimizedSorting",
+        "type": "string",
+        "tags": [],
+        "label": "apmServiceInventoryOptimizedSorting",
+        "description": [],
+        "signature": [
+          "\"observability:apmServiceInventoryOptimizedSorting\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.AsDuration",

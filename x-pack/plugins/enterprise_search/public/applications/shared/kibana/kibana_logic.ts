@@ -18,11 +18,14 @@ import { SecurityPluginStart } from '../../../../../security/public';
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
 
+type RequiredFieldsOnly<T> = {
+  [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
+};
 interface KibanaLogicProps {
   config: { host?: string };
   // Kibana core
   history: History;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
+  navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;

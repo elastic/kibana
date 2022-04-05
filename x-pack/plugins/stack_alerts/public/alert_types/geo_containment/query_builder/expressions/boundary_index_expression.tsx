@@ -9,6 +9,7 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
@@ -27,6 +28,7 @@ interface Props {
   setBoundaryGeoField: (boundaryGeoField?: string) => void;
   setBoundaryNameField: (boundaryNameField?: string) => void;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 interface KibanaDeps {
@@ -42,11 +44,12 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   setBoundaryGeoField,
   setBoundaryNameField,
   data,
+  unifiedSearch,
 }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const BOUNDARY_NAME_ENTITY_TYPES = ['string', 'number', 'ip'];
   const { http } = useKibana<KibanaDeps>().services;
-  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
+  const IndexPatternSelect = (unifiedSearch.ui && unifiedSearch.ui.IndexPatternSelect) || null;
   const { boundaryGeoField } = ruleParams;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nothingSelected: DataViewField = {

@@ -48,7 +48,14 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
 
   return (
     <EuiPortal>
-      <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
+      <EuiFlyout
+        size="m"
+        ownFocus
+        onClose={onClose}
+        aria-labelledby="flyoutTitle"
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        maskProps={{ style: 'z-index: 6000' }} // For an edge case to display above the alerts flyout
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
