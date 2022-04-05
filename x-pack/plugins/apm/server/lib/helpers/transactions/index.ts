@@ -33,6 +33,7 @@ export async function getHasAggregatedTransactions({
         events: [ProcessorEvent.metric],
       },
       body: {
+        size: 1,
         query: {
           bool: {
             filter: [

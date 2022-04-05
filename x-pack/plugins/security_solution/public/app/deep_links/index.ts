@@ -32,9 +32,11 @@ import {
   TRUSTED_APPLICATIONS,
   POLICIES,
   ENDPOINTS,
+  GETTING_STARTED,
 } from '../translations';
 import {
   OVERVIEW_PATH,
+  LANDING_PATH,
   DETECTION_RESPONSE_PATH,
   ALERTS_PATH,
   RULES_PATH,
@@ -66,7 +68,14 @@ type Feature = typeof FEATURE[keyof typeof FEATURE];
 type SecuritySolutionDeepLink = AppDeepLink & {
   isPremium?: boolean;
   features?: Feature[];
+  /**
+   * Displays deep link when feature flag is enabled.
+   */
   experimentalKey?: keyof ExperimentalFeatures;
+  /**
+   * Hides deep link when feature flag is enabled.
+   */
+  hideWhenExperimentalKey?: keyof ExperimentalFeatures;
   deepLinks?: SecuritySolutionDeepLink[];
 };
 
@@ -83,6 +92,18 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       }),
     ],
     order: 9000,
+  },
+  {
+    id: SecurityPageName.landing,
+    title: GETTING_STARTED,
+    path: LANDING_PATH,
+    navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.getStarted', {
+        defaultMessage: 'Getting started',
+      }),
+    ],
   },
   {
     id: SecurityPageName.detectionAndResponse,
@@ -172,11 +193,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         order: 9002,
         deepLinks: [
           {
-            id: SecurityPageName.authentications,
+            id: SecurityPageName.hostsAuthentications,
             title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
               defaultMessage: 'Authentications',
             }),
             path: `${HOSTS_PATH}/authentications`,
+            hideWhenExperimentalKey: 'usersEnabled',
           },
           {
             id: SecurityPageName.uncommonProcesses,
@@ -186,7 +208,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/uncommonProcesses`,
           },
           {
-            id: SecurityPageName.events,
+            id: SecurityPageName.hostsEvents,
             title: i18n.translate('xpack.securitySolution.search.hosts.events', {
               defaultMessage: 'Events',
             }),
@@ -206,6 +228,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             }),
             path: `${HOSTS_PATH}/anomalies`,
             isPremium: true,
+          },
+          {
+            id: SecurityPageName.sessions,
+            title: i18n.translate('xpack.securitySolution.search.hosts.sessions', {
+              defaultMessage: 'Sessions',
+            }),
+            path: `${HOSTS_PATH}/sessions`,
           },
         ],
       },
@@ -273,6 +302,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         order: 9004,
         deepLinks: [
           {
+            id: SecurityPageName.usersAuthentications,
+            title: i18n.translate('xpack.securitySolution.search.users.authentications', {
+              defaultMessage: 'Authentications',
+            }),
+            path: `${USERS_PATH}/authentications`,
+          },
+          {
             id: SecurityPageName.usersAnomalies,
             title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
               defaultMessage: 'Anomalies',
@@ -286,7 +322,21 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Risk',
             }),
             path: `${USERS_PATH}/userRisk`,
-            isPremium: true,
+            experimentalKey: 'riskyUsersEnabled',
+          },
+          {
+            id: SecurityPageName.usersEvents,
+            title: i18n.translate('xpack.securitySolution.search.users.events', {
+              defaultMessage: 'Events',
+            }),
+            path: `${USERS_PATH}/events`,
+          },
+          {
+            id: SecurityPageName.usersExternalAlerts,
+            title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
+              defaultMessage: 'External Alerts',
+            }),
+            path: `${USERS_PATH}/externalAlerts`,
           },
         ],
       },
@@ -407,13 +457,21 @@ export function getDeepLinks(
 ): AppDeepLink[] {
   const filterDeepLinks = (securityDeepLinks: SecuritySolutionDeepLink[]): AppDeepLink[] =>
     securityDeepLinks.reduce(
-      (deepLinks: AppDeepLink[], { isPremium, features, experimentalKey, ...deepLink }) => {
+      (
+        deepLinks: AppDeepLink[],
+        { isPremium, features, experimentalKey, hideWhenExperimentalKey, ...deepLink }
+      ) => {
         if (licenseType && isPremium && !isPremiumLicense(licenseType)) {
           return deepLinks;
         }
         if (experimentalKey && !enableExperimental[experimentalKey]) {
           return deepLinks;
         }
+
+        if (hideWhenExperimentalKey && enableExperimental[hideWhenExperimentalKey]) {
+          return deepLinks;
+        }
+
         if (capabilities != null && !hasFeaturesCapability(features, capabilities)) {
           return deepLinks;
         }

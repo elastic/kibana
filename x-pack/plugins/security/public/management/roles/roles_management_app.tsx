@@ -44,7 +44,7 @@ export const rolesManagementApp = Object.freeze({
       title,
       async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
-          [startServices, { data, features, spaces }],
+          [startServices, { dataViews, features, spaces }],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -108,7 +108,7 @@ export const rolesManagementApp = Object.freeze({
                 license={license}
                 docLinks={docLinks}
                 uiCapabilities={application.capabilities}
-                dataViews={data.dataViews}
+                dataViews={dataViews}
                 history={history}
                 spacesApiUi={spacesApiUi}
               />

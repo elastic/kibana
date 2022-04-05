@@ -11,7 +11,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { rulesClientMock } from '../rules_client.mock';
-import { IExecutionLogResult } from '../lib/get_execution_log_aggregation';
+import { IExecutionLogWithErrorsResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -24,7 +24,7 @@ beforeEach(() => {
 
 describe('getRuleExecutionLogRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedExecutionLog: IExecutionLogResult = {
+  const mockedExecutionLogWithErrors: IExecutionLogWithErrorsResult = {
     total: 374,
     data: [
       {
@@ -38,6 +38,7 @@ describe('getRuleExecutionLogRoute', () => {
         num_new_alerts: 5,
         num_recovered_alerts: 0,
         num_triggered_actions: 5,
+        num_scheduled_actions: 5,
         num_succeeded_actions: 5,
         num_errored_actions: 0,
         total_search_duration_ms: 0,
@@ -56,12 +57,29 @@ describe('getRuleExecutionLogRoute', () => {
         num_new_alerts: 5,
         num_recovered_alerts: 5,
         num_triggered_actions: 5,
+        num_scheduled_actions: 5,
         num_succeeded_actions: 5,
         num_errored_actions: 0,
         total_search_duration_ms: 0,
         es_search_duration_ms: 0,
         timed_out: false,
         schedule_delay_ms: 3008,
+      },
+    ],
+    totalErrors: 2,
+    errors: [
+      {
+        id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
+        timestamp: '2022-03-23T17:37:07.086Z',
+        type: 'actions',
+        message:
+          'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
+      },
+      {
+        id: 'c1c04f04-312e-4e23-8e36-e01eb4332ed6',
+        timestamp: '2022-03-23T17:23:05.249Z',
+        type: 'alerting',
+        message: `rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule' - I am erroring in rule execution!!`,
       },
     ],
   };
@@ -76,7 +94,7 @@ describe('getRuleExecutionLogRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_execution_log"`);
 
-    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLog);
+    rulesClient.getExecutionLogForRule.mockResolvedValue(mockedExecutionLogWithErrors);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

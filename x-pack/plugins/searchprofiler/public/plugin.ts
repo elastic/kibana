@@ -14,6 +14,7 @@ import { ILicense } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';
+import { SearchProfilerLocatorDefinition } from './locator';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -23,7 +24,7 @@ const checkLicenseStatus = (license: ILicense) => {
 export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
   public setup(
     { http, getStartServices }: CoreSetup,
-    { devTools, home, licensing }: AppPublicPluginDependencies
+    { devTools, home, licensing, share }: AppPublicPluginDependencies
   ) {
     home.featureCatalogue.register({
       id: PLUGIN.id,
@@ -61,6 +62,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           I18nContext: i18nDep.Context,
           notifications: notifications.toasts,
           theme$: params.theme$,
+          location: params.location,
         });
       },
     });
@@ -72,6 +74,8 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         devTool.enable();
       }
     });
+
+    share.url.locators.create(new SearchProfilerLocatorDefinition());
   }
 
   public start() {}

@@ -52,6 +52,7 @@ describe('AddSourceList', () => {
     dataLoading: false,
     newCustomSource: {},
     isOrganization: true,
+    externalConfigured: false,
   };
 
   beforeEach(() => {
@@ -70,6 +71,7 @@ describe('AddSourceList', () => {
     wrapper.find(ConfigurationIntro).prop('advanceStep')();
 
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
+    expect(initializeAddSource).toHaveBeenCalled();
   });
 
   it('renders default state correctly when there are multiple connector options', () => {

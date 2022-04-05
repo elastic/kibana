@@ -20,7 +20,7 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../alerting/common';
 
 export type AnomalyDetectionAlertContext = {
@@ -53,7 +53,7 @@ export function registerAnomalyDetectionAlertType({
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
     never, // Only use if defining useSavedObjectReferences hook
-    AlertTypeState,
+    RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
     AnomalyScoreMatchGroupId

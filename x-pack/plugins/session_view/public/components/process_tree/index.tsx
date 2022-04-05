@@ -145,14 +145,16 @@ export const ProcessTree = ({
       if (processEl) {
         processEl.prepend(selectionAreaEl);
 
-        const cTop = scrollerRef.current.scrollTop;
-        const cBottom = cTop + scrollerRef.current.clientHeight;
+        const { height: elHeight, y: elTop } = processEl.getBoundingClientRect();
+        const { y: viewPortElTop, height: viewPortElHeight } =
+          scrollerRef.current.getBoundingClientRect();
 
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
+        const viewPortElBottom = viewPortElTop + viewPortElHeight;
+        const elBottom = elTop + elHeight;
+        const isVisible = elBottom >= viewPortElTop && elTop <= viewPortElBottom;
 
-        if (!isVisible) {
+        // jest will die when calling scrollIntoView (perhaps not part of the DOM it executes under)
+        if (!isVisible && processEl.scrollIntoView) {
           processEl.scrollIntoView({ block: 'center' });
         }
       }
@@ -170,11 +172,13 @@ export const ProcessTree = ({
     // after 2 pages are loaded (due to bi-directional jump to), auto select the process
     // for the jumpToEvent
     if (!selectedProcess && jumpToEvent) {
-      const process = processMap[jumpToEvent.process.entity_id];
+      const process = processMap[jumpToEvent.process?.entity_id ?? ''];
 
-      if (process) {
+      if (process && jumpToEvent.process?.entity_id) {
         onProcessSelected(process);
-        selectProcess(process);
+      } else {
+        // auto selects the session leader process if jumpToEvent is not found in processMap
+        onProcessSelected(sessionLeader);
       }
     } else if (!selectedProcess) {
       // auto selects the session leader process if no selection is made yet
@@ -199,14 +203,15 @@ export const ProcessTree = ({
             isSessionLeader
             process={sessionLeader}
             onProcessSelected={onProcessSelected}
-            jumpToEventID={jumpToEvent?.process.entity_id}
-            jumpToAlertID={jumpToEvent?.kibana?.alert.uuid}
+            jumpToEventID={jumpToEvent?.process?.entity_id}
+            jumpToAlertID={jumpToEvent?.kibana?.alert?.uuid}
             selectedProcessId={selectedProcess?.id}
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
             onShowAlertDetails={onShowAlertDetails}
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
+            searchResults={searchResults}
           />
         )}
         <div

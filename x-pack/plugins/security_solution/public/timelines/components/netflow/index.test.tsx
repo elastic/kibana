@@ -204,7 +204,7 @@ describe('Netflow', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
       )
-    ).toEqual('10.1.2.3:80');
+    ).toContain('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -340,7 +340,7 @@ describe('Netflow', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
-    ).toEqual('192.168.1.2:9987');
+    ).toContain('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {
@@ -374,7 +374,7 @@ describe('Netflow', () => {
           .first()
           .text()
       )
-    ).toEqual('tls.client_certificate.fingerprint.sha1-value');
+    ).toContain('tls.client_certificate.fingerprint.sha1-value');
   });
 
   test('it hyperlinks tls.fingerprints.ja3.hash site to compare the fingerprint against a known set of signatures', () => {
@@ -390,7 +390,7 @@ describe('Netflow', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
-    ).toEqual('tls.fingerprints.ja3.hash-value');
+    ).toContain('tls.fingerprints.ja3.hash-value');
   });
 
   test('it hyperlinks tls.server_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
@@ -418,7 +418,7 @@ describe('Netflow', () => {
           .first()
           .text()
       )
-    ).toEqual('tls.server_certificate.fingerprint.sha1-value');
+    ).toContain('tls.server_certificate.fingerprint.sha1-value');
   });
 
   test('it renders network.transport', () => {

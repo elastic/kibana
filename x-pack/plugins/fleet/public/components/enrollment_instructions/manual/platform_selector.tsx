@@ -36,6 +36,8 @@ const CommandCode = styled.pre({
   overflow: 'auto',
 });
 
+const K8S_COMMAND = `kubectl apply -f elastic-agent-managed-kubernetes.yaml`;
+
 export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxCommand,
   macCommand,
@@ -74,9 +76,10 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         )}
       </EuiText>
       <EuiSpacer size="l" />
+
       {isK8s ? (
         <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{linuxCommand}</CommandCode>
+          <CommandCode>{K8S_COMMAND}</CommandCode>
         </EuiCodeBlock>
       ) : (
         <>

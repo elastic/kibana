@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EventKind,
   AlertStatusEventEntityIdMap,
   Process,
   ProcessEvent,
@@ -31,7 +32,7 @@ export const updateAlertEventStatus = (
         alert: {
           ...event.kibana.alert,
           workflow_status:
-            updatedAlertsStatus[event.kibana.alert?.uuid]?.status ??
+            updatedAlertsStatus[event.kibana.alert?.uuid ?? '']?.status ??
             event.kibana.alert?.workflow_status,
         },
       },
@@ -42,7 +43,11 @@ export const updateAlertEventStatus = (
 // create a new process if none are created and return the mutated processMap
 export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[]) => {
   events.forEach((event) => {
-    const { entity_id: id } = event.process;
+    const { entity_id: id } = event.process ?? {};
+    if (!id) {
+      return;
+    }
+
     let process = processMap[id];
 
     if (!process) {
@@ -50,7 +55,11 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
       processMap[id] = process;
     }
 
-    process.addEvent(event);
+    if (event.event?.kind === EventKind.signal) {
+      process.addAlert(event);
+    } else if (event.event?.kind === EventKind.event) {
+      process.addEvent(event);
+    }
   });
 
   return processMap;
@@ -75,11 +84,12 @@ export const buildProcessTree = (
   }
 
   events.forEach((event) => {
-    const process = processMap[event.process.entity_id];
-    const parentProcess = processMap[event.process.parent?.entity_id];
-
+    const { entity_id: id, parent } = event.process ?? {};
+    const process = processMap[id ?? ''];
+    const parentProcess = processMap[parent?.entity_id ?? ''];
+    // if either entity_id or parent does not exist, return
     // if session leader, or process already has a parent, return
-    if (process.id === sessionEntityId || process.parent) {
+    if (!id || !parent || process.id === sessionEntityId || process.parent) {
       return;
     }
 
@@ -105,12 +115,14 @@ export const buildProcessTree = (
 
   // with this new page of events processed, lets try re-parent any orphans
   orphans?.forEach((process) => {
-    const parentProcess = processMap[process.getDetails().process.parent.entity_id];
+    const parentProcessId = process.getDetails().process?.parent?.entity_id;
 
-    if (parentProcess) {
+    if (parentProcessId) {
+      const parentProcess = processMap[parentProcessId];
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
-
-      parentProcess.children.push(process);
+      if (parentProcess !== undefined) {
+        parentProcess.children.push(process);
+      }
     } else {
       newOrphans.push(process);
     }
@@ -133,12 +145,12 @@ export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | 
 
     if (searchQuery) {
       const event = process.getDetails();
-      const { working_directory: workingDirectory, args } = event.process;
+      const { working_directory: workingDirectory, args } = event.process || {};
 
       // TODO: the text we search is the same as what we render.
       // in future we may support KQL searches to match against any property
       // for now plain text search is limited to searching process.working_directory + process.args
-      const text = `${workingDirectory} ${args?.join(' ')}`;
+      const text = `${workingDirectory ?? ''} ${args?.join(' ')}`;
 
       process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
 
