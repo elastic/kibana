@@ -156,7 +156,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
-          threshold={threshold}
           index={index}
         />
       )}

@@ -16,7 +16,10 @@ import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { columns } from '../../configurations/security_solution_detections/columns';
+import {
+  columns,
+  rulePreviewColumns,
+} from '../../configurations/security_solution_detections/columns';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => {
   const combinedQuery =
@@ -154,6 +157,12 @@ export const alertsDefaultModel: SubsetTimelineModel = {
   columns,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
+};
+
+export const alertsPreviewDefaultModel: SubsetTimelineModel = {
+  ...alertsDefaultModel,
+  columns: rulePreviewColumns,
+  defaultColumns: rulePreviewColumns,
 };
 
 export const requiredFieldsForActions = [

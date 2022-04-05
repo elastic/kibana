@@ -16,18 +16,9 @@ import {
 
 import * as i18n from '../../components/alerts_table/translations';
 
-/**
- * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
- * plus additional TGrid column properties
- */
-export const columns: Array<
+const baseColumns: Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
 > = [
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: '@timestamp',
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
-  },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RULE,
@@ -77,4 +68,30 @@ export const columns: Array<
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
   },
+];
+
+/**
+ * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
+ * plus additional TGrid column properties
+ */
+export const columns: Array<
+  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
+> = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: '@timestamp',
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
+  },
+  ...baseColumns,
+];
+
+export const rulePreviewColumns: Array<
+  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
+> = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'kibana.original_event.time',
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
+  },
+  ...baseColumns,
 ];
