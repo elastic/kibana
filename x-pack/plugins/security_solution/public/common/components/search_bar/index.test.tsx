@@ -26,6 +26,8 @@ jest.mock('../../lib/kibana', () => {
             ...original.useKibana().services.data.query,
             filterManager: mockFilterManager,
           },
+        },
+        unifiedSearch: {
           ui: {
             SearchBar: jest.fn().mockImplementation((props) => (
               <button
