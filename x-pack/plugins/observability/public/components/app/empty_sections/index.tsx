@@ -13,20 +13,40 @@ import { ObservabilityAppServices } from '../../../application/types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
 import { getEmptySections } from '../../../pages/overview/empty_section';
+import type { ObservabilityFetchDataPlugins } from '../../../typings';
 import { EmptySection } from './empty_section';
 
+const APP_ID_TO_CAPABILITIES: Record<ObservabilityFetchDataPlugins | 'alert', string> = {
+  alert: 'alert',
+  apm: 'apm',
+  ux: 'apm',
+  infra_logs: 'logs',
+  infra_metrics: 'infrastructure',
+  synthetics: 'uptime',
+};
+
 export function EmptySections() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    http,
+    application: { capabilities },
+  } = useKibana<ObservabilityAppServices>().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
   const appEmptySections = getEmptySections({ http }).filter(({ id }) => {
+    const isVisible = capabilities[APP_ID_TO_CAPABILITIES[id]]?.show;
+    if (!isVisible) {
+      return false;
+    }
+
     const app = hasDataMap[id];
     if (app) {
       return app.status === FETCH_STATUS.FAILURE || !app.hasData;
     }
+
     return false;
   });
+
   return (
     <EuiFlexItem>
       <EuiSpacer size="s" />

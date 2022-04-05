@@ -14,6 +14,8 @@ import { UptimeSection } from '../../components/app/section/uptime';
 import { UXSection } from '../../components/app/section/ux';
 import { HasDataMap } from '../../context/has_data_context';
 import { BucketSize } from '.';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import type { ObservabilityAppServices } from '../../application/types';
 
 interface Props {
   bucketSize: BucketSize;
@@ -21,24 +23,41 @@ interface Props {
 }
 
 export function DataSections({ bucketSize }: Props) {
+  const { capabilities } = useKibana<ObservabilityAppServices>().services.application!;
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <LogsSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MetricsSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <APMSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UptimeSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UXSection bucketSize={bucketSize} />
-        </EuiFlexItem>
+        {capabilities.logs.show ? (
+          <EuiFlexItem grow={false}>
+            <LogsSection bucketSize={bucketSize} />
+          </EuiFlexItem>
+        ) : null}
+
+        {capabilities.infrastructure.show ? (
+          <EuiFlexItem grow={false}>
+            <MetricsSection bucketSize={bucketSize} />
+          </EuiFlexItem>
+        ) : null}
+
+        {capabilities.apm.show ? (
+          <EuiFlexItem grow={false}>
+            <APMSection bucketSize={bucketSize} />
+          </EuiFlexItem>
+        ) : null}
+
+        {capabilities.uptime.show ? (
+          <EuiFlexItem grow={false}>
+            <UptimeSection bucketSize={bucketSize} />
+          </EuiFlexItem>
+        ) : null}
+
+        {/* UX is grouped with APM */}
+        {capabilities.apm.show ? (
+          <EuiFlexItem grow={false}>
+            <UXSection bucketSize={bucketSize} />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>
   );
