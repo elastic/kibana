@@ -13,7 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "ephemeral_tasks": Object {
-          "enabled": false,
+          "enabled": true,
           "request_capacity": 10,
         },
         "event_loop_delay": Object {
@@ -63,7 +63,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "ephemeral_tasks": Object {
-          "enabled": false,
+          "enabled": true,
           "request_capacity": 10,
         },
         "event_loop_delay": Object {
@@ -111,7 +111,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "ephemeral_tasks": Object {
-          "enabled": false,
+          "enabled": true,
           "request_capacity": 10,
         },
         "event_loop_delay": Object {

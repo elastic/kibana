@@ -271,9 +271,12 @@ const RuleAdd = ({
     } catch (errorRes) {
       toasts.addDanger(
         errorRes.body?.message ??
-          i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.simulateErrorNotificationText', {
-            defaultMessage: 'Cannot simulate rule.',
-          })
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleAdd.simulateFailureNotificationText',
+            {
+              defaultMessage: 'Cannot simulate rule.',
+            }
+          )
       );
     }
   }
