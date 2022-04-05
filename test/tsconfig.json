@@ -42,6 +42,7 @@
     { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../src/plugins/navigation/tsconfig.json" },
+    { "path": "../src/plugins/unified_search/tsconfig.json" },
     { "path": "../src/plugins/newsfeed/tsconfig.json" },
     { "path": "../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../src/plugins/saved_objects_management/tsconfig.json" },

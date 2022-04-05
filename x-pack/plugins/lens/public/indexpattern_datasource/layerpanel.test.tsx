@@ -11,7 +11,7 @@ import { IndexPatternLayerPanelProps, LayerPanel } from './layerpanel';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
-import { DataViewsList } from '../../../../../src/plugins/data/public';
+import { DataViewsList } from '../../../../../src/plugins/unified_search/public';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';

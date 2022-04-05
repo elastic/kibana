@@ -112,6 +112,7 @@ export function modelsProvider(client: IScopedClusterClient, mlClient: MlClient)
      */
     async getNodesOverview(): Promise<NodesOverviewResponse> {
       // TODO set node_id to ml:true when elasticsearch client is updated.
+      // @ts-expect-error typo in type definition: MlGetMemoryStatsResponse.cluser_name
       const response = (await mlClient.getMemoryStats()) as MemoryStatsResponse;
 
       const { trained_model_stats: trainedModelStats } = await mlClient.getTrainedModelsStats({
