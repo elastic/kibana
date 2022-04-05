@@ -26,10 +26,8 @@ export const EncryptionKeyRequiredCallout: React.FunctionComponent = () => {
     >
       <FormattedMessage
         id="xpack.fleet.encryptionKeyRequired.calloutDescription"
-        defaultMessage="To configure this output, you must set {key} in the Kibana configuration. {link}"
+        defaultMessage="You must configure an encryption key before configuring this output. {link}"
         values={{
-          key: <EuiCode>xpack.encryptedSavedObjects.encryptionKey</EuiCode>,
-          file: <EuiCode>kibana.yml</EuiCode>,
           link: (
             <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank" external>
               <FormattedMessage
