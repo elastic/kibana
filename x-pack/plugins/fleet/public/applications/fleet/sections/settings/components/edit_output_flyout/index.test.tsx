@@ -84,6 +84,6 @@ describe('EditOutputFlyout', () => {
     });
 
     // Show logstash SSL inputs
-    expect(utils.getByText('Set an encryption key to enable logstash output')).not.toBeNull();
+    expect(utils.getByText('Set an encryption key to configure this output')).not.toBeNull();
   });
 });
