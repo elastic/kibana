@@ -32,6 +32,7 @@ import { ESSearchSource } from '../../../sources/es_search_source';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
 import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { pluckStyleMeta } from './pluck_style_meta';
 
 export const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
@@ -254,11 +255,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this.getMbSourceId() === mbSourceId;
   }
 
-  _getMbTooManyFeaturesLayerId() {
-    return this.makeMbLayerId('toomanyfeatures');
-  }
-
-  _syncFeatureState(mbMap: MbMap) {
+  _getJoinPropertiesMap(): PropertiesMap | undefined {
     const joins = this.getValidJoins();
     if (!joins.length) {
       return;
@@ -266,8 +263,18 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
     const join = joins[0];
     const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-    const joinData = joinDataRequest?.getData() as PropertiesMap | undefined;
-    if (!joinData) {
+    return joinDataRequest 
+      ? joinDataRequest.getData() as PropertiesMap | undefined
+      : undefined;
+  }
+
+  _getMbTooManyFeaturesLayerId() {
+    return this.makeMbLayerId('toomanyfeatures');
+  }
+
+  _syncFeatureState(mbMap: MbMap) {
+    const joinPropertiesMap = this._getJoinPropertiesMap();
+    if (!joinPropertiesMap) {
       return;
     }
 
@@ -276,7 +283,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       sourceLayer: this._source.getTileSourceLayer(),
       id: undefined,
     };
-    joinData.forEach((value: object, key: string) => {
+    joinPropertiesMap.forEach((value: object, key: string) => {
       featureIdentifier.id = key;
       mbMap.setFeatureState(featureIdentifier, value);
     });
@@ -412,6 +419,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
-    return await this.getCurrentStyle().pluckStyleMetaFromTileMeta(this._getMetaFromTiles());
+    return await pluckStyleMeta(
+      this._getMetaFromTiles(),
+      this._getJoinPropertiesMap(),
+      await this.getSource().getSupportedShapeTypes(),
+      this.getCurrentStyle().getDynamicPropertiesArray(),
+    );
   }
 }

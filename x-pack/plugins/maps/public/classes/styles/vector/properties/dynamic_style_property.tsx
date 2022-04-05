@@ -32,7 +32,6 @@ import {
   PercentilesFieldMeta,
   RangeFieldMeta,
   StyleMetaData,
-  TileMetaFeature,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';
@@ -58,8 +57,6 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): Category[];
-  pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): Category[];
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
@@ -315,36 +312,6 @@ export class DynamicStyleProperty<T>
     return 'dataMappingFunction' in this._options
       ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
       : DATA_MAPPING_FUNCTION.INTERPOLATE;
-  }
-
-  pluckOrdinalStyleMetaFromTileMetaFeatures(
-    metaFeatures: TileMetaFeature[]
-  ): RangeFieldMeta | null {
-    if (!this._field || !this.isOrdinal()) {
-      return null;
-    }
-
-    let min = Infinity;
-    let max = -Infinity;
-    for (let i = 0; i < metaFeatures.length; i++) {
-      const range = this._field.pluckRangeFromTileMetaFeature(metaFeatures[i]);
-      if (range) {
-        min = Math.min(range.min, min);
-        max = Math.max(range.max, max);
-      }
-    }
-
-    return min === Infinity || max === -Infinity
-      ? null
-      : {
-          min,
-          max,
-          delta: max - min,
-        };
-  }
-
-  pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): Category[] {
-    return [];
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {

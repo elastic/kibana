@@ -23,7 +23,6 @@ import {
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
-  VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
@@ -67,10 +66,8 @@ import {
   SizeStaticOptions,
   SizeStylePropertyDescriptor,
   StyleDescriptor,
-  StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
-  TileMetaFeature,
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
@@ -501,49 +498,6 @@ export class VectorStyle implements IVectorStyle {
       />
     );
   }
-
-  async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
-    const supportedShapeTypes = await this._source.getSupportedShapeTypes();
-    const styleMeta: StyleMetaDescriptor = {
-      geometryTypes: {
-        isPointsOnly:
-          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POINT),
-        isLinesOnly:
-          supportedShapeTypes.length === 1 && supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE),
-        isPolygonsOnly:
-          supportedShapeTypes.length === 1 &&
-          supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON),
-      },
-      fieldMeta: {},
-    };
-
-    const dynamicProperties = this.getDynamicPropertiesArray();
-    if (dynamicProperties.length === 0 || !metaFeatures) {
-      // no additional meta data to pull from source data request.
-      return styleMeta;
-    }
-
-    dynamicProperties.forEach((dynamicProperty) => {
-      const name = dynamicProperty.getFieldName();
-      if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = { categories: [] };
-      }
-      const categories =
-        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
-      if (categories.length) {
-        styleMeta.fieldMeta[name].categories = categories;
-      }
-      const ordinalStyleMeta =
-        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
-      if (ordinalStyleMeta) {
-        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
-      }
-    });
-
-    return styleMeta;
-  }
-
-  
 
   getSourceFieldNames() {
     const fieldNames: string[] = [];

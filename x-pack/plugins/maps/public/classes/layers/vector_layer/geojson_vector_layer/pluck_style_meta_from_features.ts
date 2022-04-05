@@ -16,7 +16,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export async function pluckStyleMetaFromFeatures(
   features: Feature[],
-  supportedFeatures: VECTOR_SHAPE_TYPE[],
+  supportedShapeTypes: VECTOR_SHAPE_TYPE[],
   dynamicProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>,
 ): Promise<StyleMetaDescriptor> {
   const hasFeatureType = {
@@ -24,7 +24,7 @@ export async function pluckStyleMetaFromFeatures(
     [VECTOR_SHAPE_TYPE.LINE]: false,
     [VECTOR_SHAPE_TYPE.POLYGON]: false,
   };
-  if (supportedFeatures.length > 1) {
+  if (supportedShapeTypes.length > 1) {
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
 
@@ -52,17 +52,17 @@ export async function pluckStyleMetaFromFeatures(
     geometryTypes: {
       isPointsOnly: isOnlySingleFeatureType(
         VECTOR_SHAPE_TYPE.POINT,
-        supportedFeatures,
+        supportedShapeTypes,
         hasFeatureType
       ),
       isLinesOnly: isOnlySingleFeatureType(
         VECTOR_SHAPE_TYPE.LINE,
-        supportedFeatures,
+        supportedShapeTypes,
         hasFeatureType
       ),
       isPolygonsOnly: isOnlySingleFeatureType(
         VECTOR_SHAPE_TYPE.POLYGON,
-        supportedFeatures,
+        supportedShapeTypes,
         hasFeatureType
       ),
     },
@@ -96,11 +96,11 @@ export async function pluckStyleMetaFromFeatures(
 
 export function isOnlySingleFeatureType(
   featureType: VECTOR_SHAPE_TYPE,
-  supportedFeatures: VECTOR_SHAPE_TYPE[],
+  supportedShapeTypes: VECTOR_SHAPE_TYPE[],
   hasFeatureType: { [key in keyof typeof VECTOR_SHAPE_TYPE]: boolean }
 ): boolean {
-  if (supportedFeatures.length === 1) {
-    return supportedFeatures[0] === featureType;
+  if (supportedShapeTypes.length === 1) {
+    return supportedShapeTypes[0] === featureType;
   }
 
   const featureTypes = Object.keys(hasFeatureType);
