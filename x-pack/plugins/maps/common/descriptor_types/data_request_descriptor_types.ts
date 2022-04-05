@@ -77,7 +77,10 @@ export type VectorTileLayerMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataRequestMeta = Partial<
+export type DataRequestMeta = {
+  // request stop time in milliseconds since epoch 
+  requestStopTime?: number;
+} & Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &

@@ -255,15 +255,14 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this.getMbSourceId() === mbSourceId;
   }
 
-  _getJoinPropertiesMap(): PropertiesMap | undefined {
+  _getJoinDataRequest() {
     const joins = this.getValidJoins();
     if (!joins.length) {
       return;
     }
 
     const join = joins[0];
-    const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-    return joinDataRequest ? (joinDataRequest.getData() as PropertiesMap | undefined) : undefined;
+    return this.getDataRequest(join.getSourceDataRequestId());
   }
 
   _getMbTooManyFeaturesLayerId() {
@@ -271,11 +270,37 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   _syncFeatureState(mbMap: MbMap) {
-    const joinPropertiesMap = this._getJoinPropertiesMap();
+    const joinDataRequest = this._getJoinDataRequest();
+    if (!joinDataRequest) {
+      return;
+    }
+
+    const joinPropertiesMap = joinDataRequest.getData() as PropertiesMap | undefined;
     if (!joinPropertiesMap) {
       return;
     }
 
+    const [firstKey] = joinPropertiesMap.keys();
+    const firstKeyFeatureState = mbMap.getFeatureState({
+      source: this.getMbSourceId(),
+      sourceLayer: this._source.getTileSourceLayer(),
+      id: firstKey
+    });
+    const requestMeta = joinDataRequest.getMeta();
+    if (firstKeyFeatureState?.requestStopTime === requestMeta.requestStopTime) {
+      // Do not update feature state when it already contains current join results 
+      return;
+    }
+
+    // Clear existing feature state
+    mbMap.removeFeatureState({
+      source: this.getMbSourceId(),
+      sourceLayer: this._source.getTileSourceLayer(),
+      // by omitting 'id' argument, all feature state is cleared for source
+    });
+
+    // Set feature state for join results
+    // reusing featureIdentifier to avoid creating new object in tight loops
     const featureIdentifier: FeatureIdentifier = {
       source: this.getMbSourceId(),
       sourceLayer: this._source.getTileSourceLayer(),
@@ -283,7 +308,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     };
     joinPropertiesMap.forEach((value: object, key: string) => {
       featureIdentifier.id = key;
-      mbMap.setFeatureState(featureIdentifier, value);
+      mbMap.setFeatureState(featureIdentifier, {
+        ...value,
+        requestStopTime: requestMeta.requestStopTime,
+      });
     });
   }
 
@@ -417,9 +445,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    const joinDataRequest = this._getJoinDataRequest();
+    const joinPropertiesMap = joinDataRequest ? (joinDataRequest.getData() as PropertiesMap | undefined) : undefined;
     return await pluckStyleMeta(
       this._getMetaFromTiles(),
-      this._getJoinPropertiesMap(),
+      joinPropertiesMap,
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()
     );
