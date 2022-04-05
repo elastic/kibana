@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../src/core/server';
 import {
@@ -38,7 +39,7 @@ export const registerAlertStatusRoute = (
 };
 
 export const searchAlertByUuid = async (client: AlertsClient, alertUuid: string) => {
-  const indices = (await client.getAuthorizedAlertsIndices(['siem']))?.filter(
+  const indices = (await client.getAuthorizedAlertsIndices([AlertConsumers.SIEM]))?.filter(
     (index) => index !== PREVIEW_ALERTS_INDEX
   );
 
@@ -55,6 +56,7 @@ export const searchAlertByUuid = async (client: AlertsClient, alertUuid: string)
     track_total_hits: false,
     size: 1,
     index: indices.join(','),
+    featureIds: [AlertConsumers.SIEM],
   });
 
   const events = result.hits.hits.map((hit: any) => {

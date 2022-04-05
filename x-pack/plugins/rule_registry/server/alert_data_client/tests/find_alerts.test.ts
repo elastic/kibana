@@ -10,6 +10,7 @@ import {
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
   ALERT_WORKFLOW_STATUS,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -367,6 +368,52 @@ describe('find()', () => {
       const result = await alertsClient.find({
         query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
         index: '.alerts-observability.apm.alerts',
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "_shards": Object {
+            "failed": 0,
+            "skipped": 0,
+            "successful": 1,
+            "total": 1,
+          },
+          "hits": Object {
+            "hits": Array [
+              Object {
+                "_id": "NoxgpHkBqbdrfX07MqXV",
+                "_index": ".alerts-observability.apm.alerts",
+                "_primary_term": 2,
+                "_seq_no": 362,
+                "_source": Object {
+                  "kibana.alert.rule.consumer": "apm",
+                  "kibana.alert.rule.rule_type_id": "apm.error_rate",
+                  "kibana.alert.workflow_status": "open",
+                  "kibana.space_ids": Array [
+                    "test_default_space_id",
+                  ],
+                  "message": "hello world 1",
+                },
+                "_type": "alert",
+                "_version": 1,
+                "found": true,
+              },
+            ],
+            "max_score": 999,
+            "total": 1,
+          },
+          "timed_out": false,
+          "took": 5,
+        }
+      `);
+    });
+
+    test('returns alert without going through authz featureIds is security_solution', async () => {
+      const alertsClient = new AlertsClient(alertsClientParams);
+      const result = await alertsClient.find({
+        query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+        index: '.alerts-observability.apm.alerts',
+        featureIds: [AlertConsumers.SIEM],
       });
 
       expect(result).toMatchInlineSnapshot(`

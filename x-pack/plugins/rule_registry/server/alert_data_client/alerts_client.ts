@@ -6,6 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -98,6 +99,7 @@ interface SingleSearchAfterAndAudit {
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   lastSortIds?: Array<string | number> | undefined;
+  featureIds?: string[] | undefined;
 }
 
 /**
@@ -225,6 +227,7 @@ export class AlertsClient {
     index,
     operation,
     lastSortIds = [],
+    featureIds = [],
   }: SingleSearchAfterAndAudit) {
     try {
       const alertSpaceId = this.spaceId;
@@ -238,7 +241,14 @@ export class AlertsClient {
 
       let queryBody = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
-        query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        query: await this.buildEsQueryWithAuthz(
+          query,
+          id,
+          alertSpaceId,
+          operation,
+          config,
+          featureIds
+        ),
         aggs,
         _source,
         track_total_hits: trackTotalHits,
@@ -367,11 +377,21 @@ export class AlertsClient {
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
-    config: EsQueryConfig
+    config: EsQueryConfig,
+    featureIds: string[]
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(this.authorization, operation)) as Filter;
-      const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
+      const isSecurityRequest = featureIds.length === 1 && featureIds[0] === AlertConsumers.SIEM;
+      const authzFilter = isSecurityRequest
+        ? null
+        : ((await getAuthzFilter(this.authorization, operation)) as Filter);
+      const spacesFilter = isSecurityRequest
+        ? null
+        : (getSpacesFilter(alertSpaceId) as unknown as Filter);
+      const filters = [];
+      if (!isSecurityRequest && authzFilter && spacesFilter) {
+        filters.push(authzFilter, spacesFilter);
+      }
       let esQuery;
       if (id != null) {
         esQuery = { query: `_id:${id}`, language: 'kuery' };
@@ -383,7 +403,7 @@ export class AlertsClient {
       const builtQuery = buildEsQuery(
         undefined,
         esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
-        [authzFilter, spacesFilter],
+        filters,
         config
       );
       if (query != null && typeof query === 'object') {
@@ -433,7 +453,8 @@ export class AlertsClient {
       null,
       alertSpaceId,
       operation,
-      config
+      config,
+      []
     );
 
     while (hasSortIds) {
@@ -605,6 +626,7 @@ export class AlertsClient {
     track_total_hits: trackTotalHits,
     size,
     index,
+    featureIds,
   }: {
     query?: object | undefined;
     aggs?: object | undefined;
@@ -612,6 +634,7 @@ export class AlertsClient {
     track_total_hits?: boolean | undefined;
     _source?: string[] | undefined;
     size?: number | undefined;
+    featureIds?: string[];
   }) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
@@ -623,6 +646,7 @@ export class AlertsClient {
         size,
         index,
         operation: ReadOperations.Find,
+        featureIds,
       });
 
       if (alertsSearchResponse == null) {
@@ -640,6 +664,10 @@ export class AlertsClient {
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
+      if (featureIds.length === 1 && featureIds[0] === AlertConsumers.SIEM) {
+        const indices = this.ruleDataService.findIndicesByFeature(featureIds[0], Dataset.alerts);
+        return indices.map((i) => `${i.baseName}-${this.spaceId}`);
+      }
       // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
       // return all of the features that you can access and does not care about your featureIds
       const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
