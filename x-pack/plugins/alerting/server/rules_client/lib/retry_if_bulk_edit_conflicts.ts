@@ -19,7 +19,7 @@ import {
 } from '../../../../../../src/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkEditError } from '../rules_client';
-import { AlertTypeParams, RawRule } from '../../types';
+import { RawRule } from '../../types';
 
 // number of times to retry when conflicts occur
 export const RetryForConflictsAttempts = 2;
@@ -37,7 +37,7 @@ type BulkEditObjects = (filter: KueryNode) => Promise<{
   errors: BulkEditError[];
 }>;
 
-export const retryIfBulkEditConflicts = async <P extends AlertTypeParams>(
+export const retryIfBulkEditConflicts = async (
   logger: Logger,
   name: string,
   bulkEditObjects: BulkEditObjects,
