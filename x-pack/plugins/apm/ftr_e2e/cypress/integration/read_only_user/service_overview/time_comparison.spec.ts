@@ -50,8 +50,7 @@ const apisToIntercept = [
   },
 ];
 
-// Skipping tests since it's flaky.
-describe.skip('Service overview: Time Comparison', () => {
+describe('Service overview: Time Comparison', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -127,18 +126,18 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.visit(serviceOverviewPath);
     cy.contains('opbeans-java');
     // opens the page with "Day before" selected
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
     // selects another comparison type
-    cy.get('[data-test-subj="comparisonSelect"]').select('week');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'week');
+    cy.get('[data-test-subj="comparisonSelect"]').select('1w');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
   });
 
   it('changes comparison type when a new time range is selected', () => {
     cy.visit(serviceOverviewPath);
     cy.contains('opbeans-java');
     // Time comparison default value
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
 
@@ -147,12 +146,12 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 24 hours');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 7 days');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'week');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
     cy.get('[data-test-subj="comparisonSelect"]').should(
       'contain.text',
       'Week before'
