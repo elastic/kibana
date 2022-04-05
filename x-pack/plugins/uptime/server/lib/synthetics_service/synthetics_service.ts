@@ -240,7 +240,7 @@ export class SyntheticsService {
     this.logger.debug(`1 monitor will be pushed to synthetics service.`);
 
     try {
-      return await this.apiClient.post(data);
+      this.syncErrors = await this.apiClient.post(data);
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -268,7 +268,8 @@ export class SyntheticsService {
     this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
     try {
-      return await this.apiClient.put(data);
+      this.syncErrors = await this.apiClient.put(data);
+      return this.syncErrors;
     } catch (e) {
       this.logger.error(e);
       throw e;

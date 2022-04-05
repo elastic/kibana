@@ -41,7 +41,7 @@ export const MonitorAsyncError = () => {
               <li key={e.locationId}>
                 {`${
                   locations.find((location) => location.id === e.locationId)?.label
-                } - ${STATUS_LABEL}: ${e.error.status}; ${REASON_LABEL}: ${e.error.reason}.`}
+                } - ${STATUS_LABEL}: ${e.error.status}; ${REASON_LABEL}: ${e.error.reason}`}
               </li>
             );
           })}
