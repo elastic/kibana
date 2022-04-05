@@ -7,6 +7,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../..';
