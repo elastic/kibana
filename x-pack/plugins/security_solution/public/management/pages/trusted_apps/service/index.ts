@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './trusted_apps_http_service';
 export { TrustedAppsApiClient } from './api_client';

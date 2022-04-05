@@ -33,7 +33,7 @@ import { PolicyArtifactsPageLabels, policyArtifactsPageLabels } from '../transla
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
 import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import type { ArtifactListPageLocation } from '../../../../../types';
 
 interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -44,7 +44,7 @@ interface PolicyArtifactsLayoutProps {
   getArtifactPath: (
     location?:
       | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
+      | Partial<ArtifactListPageLocation>
       | Partial<HostIsolationExceptionsPageLocation>
   ) => string;
   getPolicyArtifactsPath: (policyId: string) => string;

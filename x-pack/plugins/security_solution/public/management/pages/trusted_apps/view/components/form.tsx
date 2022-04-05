@@ -40,7 +40,7 @@ import {
   isMacosLinuxTrustedAppCondition,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
-import { defaultConditionEntry } from '../../store/builders';
+
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
@@ -236,6 +236,13 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   validation.isValid = isValid;
   return validation;
 };
+
+const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.HASH> => ({
+  field: ConditionEntryField.HASH,
+  operator: 'included',
+  type: 'match',
+  value: '',
+});
 
 export interface TrustedAppFormState {
   isValid: boolean;

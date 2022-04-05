@@ -14,7 +14,7 @@ import { ArtifactFormComponentProps } from './types';
 import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { trustedAppsAllHttpMocks } from '../../pages/mocks';
-import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/trusted_apps_api_client';
+import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_client';
 import { artifactListPageLabels } from './translations';
 
 export const getFormComponentMock = (): {

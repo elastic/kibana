@@ -42,7 +42,7 @@ import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translatio
 import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
 import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
 import { POLICY_ARTIFACT_BLOCKLISTS_LABELS } from './blocklists_translations';
-import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
 import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
 import { BlocklistsApiClient } from '../../../blocklist/services/blocklists_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';

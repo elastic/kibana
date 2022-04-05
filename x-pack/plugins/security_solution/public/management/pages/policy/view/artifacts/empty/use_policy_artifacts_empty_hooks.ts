@@ -11,7 +11,7 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import type { ArtifactListPageLocation } from '../../../../../types';
 import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 
 export const useGetLinkTo = (
@@ -21,7 +21,7 @@ export const useGetLinkTo = (
   getArtifactPath: (
     location?:
       | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
+      | Partial<ArtifactListPageLocation>
       | Partial<HostIsolationExceptionsPageLocation>
   ) => string,
   location?: Partial<{ show: 'create' }>

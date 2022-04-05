@@ -18,7 +18,7 @@ import {
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
-import { TrustedAppsApiClient } from '../../../../trusted_apps/service/trusted_apps_api_client';
+import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';

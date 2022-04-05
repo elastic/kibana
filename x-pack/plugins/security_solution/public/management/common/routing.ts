@@ -16,8 +16,7 @@ import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { EventFiltersPageLocation } from '../pages/event_filters/types';
 import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
 import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
-import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
-import { AdministrationSubTab } from '../types';
+import { ArtifactListPageLocation, AdministrationSubTab } from '../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -153,9 +152,10 @@ const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
   return value === undefined || value === defaultValue;
 };
 
-const normalizeTrustedAppsPageLocation = (
-  location?: Partial<TrustedAppsListPageLocation>
-): Partial<TrustedAppsListPageLocation> => {
+// TODO: use this instead of named artifact methods below
+const normalizeArtifactsPageLocation = (
+  location?: Partial<ArtifactListPageLocation>
+): Partial<ArtifactListPageLocation> => {
   if (location) {
     return {
       ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
@@ -164,7 +164,6 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
         ? { page_size: location.page_size }
         : {}),
-      ...(!isDefaultOrMissing(location.view_type, 'grid') ? { view_type: location.view_type } : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
@@ -317,29 +316,23 @@ export const extractArtifactsListPaginationParams = (query: querystring.ParsedUr
 
 export const extractTrustedAppsListPageLocation = (
   query: querystring.ParsedUrlQuery
-): TrustedAppsListPageLocation => {
-  const showParamValue = extractFirstParamValue(
-    query,
-    'show'
-  ) as TrustedAppsListPageLocation['show'];
+): ArtifactListPageLocation => {
+  const showParamValue = extractFirstParamValue(query, 'show') as ArtifactListPageLocation['show'];
 
   return {
     ...extractTrustedAppsListPaginationParams(query),
-    view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
   };
 };
 
-export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLocation>): string => {
+export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageLocation>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });
 
-  return `${path}${appendSearch(
-    querystring.stringify(normalizeTrustedAppsPageLocation(location))
-  )}`;
+  return `${path}${appendSearch(querystring.stringify(normalizeArtifactsPageLocation(location)))}`;
 };
 
 export const extractPolicyDetailsArtifactsListPageLocation = (

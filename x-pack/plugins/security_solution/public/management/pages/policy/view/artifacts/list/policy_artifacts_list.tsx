@@ -29,7 +29,7 @@ import { ExceptionsListApiClient } from '../../../../../services/exceptions_list
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import type { ArtifactListPageLocation } from '../../../../../types';
 import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 
 interface PolicyArtifactsListProps {
@@ -39,7 +39,7 @@ interface PolicyArtifactsListProps {
   getArtifactPath: (
     location?:
       | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
+      | Partial<ArtifactListPageLocation>
       | Partial<HostIsolationExceptionsPageLocation>
   ) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
