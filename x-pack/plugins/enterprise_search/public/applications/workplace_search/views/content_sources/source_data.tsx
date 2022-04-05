@@ -260,6 +260,7 @@ export const staticSourceData: SourceDataItem[] = [
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
     },
     accountContextOnly: true,
+    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,

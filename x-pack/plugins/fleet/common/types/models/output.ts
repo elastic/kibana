@@ -29,6 +29,7 @@ export interface NewOutput {
 
 export type OutputSOAttributes = NewOutput & {
   output_id?: string;
+  ssl?: string; // encrypted ssl field
 };
 
 export type Output = NewOutput & {

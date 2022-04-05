@@ -547,7 +547,7 @@ describe('alert actions', () => {
         });
       });
 
-      test('Exceptions are included', async () => {
+      test('Exceptions and filters are included', async () => {
         mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
         await sendAlertToTimelineAction({
           createTimeline,
@@ -584,6 +584,21 @@ describe('alert actions', () => {
             },
             description: '_id: 1',
             filters: [
+              {
+                meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: '"{"query":"placeholder"}"',
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'host.name': 'placeholder' } },
+              },
+              {
+                // https://github.com/elastic/kibana/issues/126574 - if the provided filter has no `meta` field
+                // we expect an empty object to be inserted before calling `createTimeline`
+                meta: {},
+                query: { match_all: {} },
+              },
               {
                 meta: {
                   alias: 'Exceptions',
@@ -701,6 +716,21 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            filters: [
+              {
+                meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: '"{"query":"placeholder"}"',
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'host.name': 'placeholder' } },
+              },
+              {
+                meta: {},
+                query: { match_all: {} },
+              },
+            ],
             dataProviders: [
               {
                 and: [],

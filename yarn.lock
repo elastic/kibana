@@ -1407,6 +1407,10 @@
   dependencies:
     tslib "^2.0.0"
 
+"@elastic/analytics@link:bazel-bin/packages/elastic-analytics":
+  version "0.0.0"
+  uid ""
+
 "@elastic/apm-rum-core@^5.14.1":
   version "5.14.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.14.1.tgz#8f65060967c8d68498f2c520e4169ec07eb3b5bb"
@@ -5532,6 +5536,10 @@
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
+
+"@types/elastic__analytics@link:bazel-bin/packages/elastic-analytics/npm_module_types":
+  version "0.0.0"
+  uid ""
 
 "@types/elastic__apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types":
   version "0.0.0"

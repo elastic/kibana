@@ -42,11 +42,11 @@ import * as useValuesListHook from '../../../hooks/use_values_list';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
+import { setIndexPatterns } from '../../../../../../../src/plugins/unified_search/public/services';
 import type {
   DataView,
   DataViewsContract,
-} from '../../../../../../../src/plugins/data_views/common';
+} from '../../../../../../../src/plugins/data_views/public';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
@@ -150,7 +150,6 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
   const dataView = mockDataView;
-
   setIndexPatterns({
     ...[dataView],
     get: async () => dataView,
