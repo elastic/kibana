@@ -143,13 +143,11 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
-const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean; $display: string }>(
-  ({ $isVisible, $display }) => ({
-    style: {
-      display: $isVisible ? $display ?? 'flex' : 'none',
-    },
-  })
-)<{ $isVisible: boolean; $display: string }>``;
+const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
+  style: {
+    display: $isVisible ? 'flex' : 'none',
+  },
+}))<{ $isVisible: boolean }>``;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -162,16 +160,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setForm,
 }) => {
   const { pathname } = useLocation();
+  const sourcererPathName = getScopeFromPath(pathname);
 
   const {
     // browserFields,
     // docValueFields,
-    indexPattern,
+    indexPattern: dataViewIndexPattern,
     runtimeMappings,
     // selectedPatterns,
     dataViewId,
-    loading: isLoadingIndexPattern,
-  } = useSourcererDataView(getScopeFromPath(pathname));
+    loading: isLoadingDataViewIndexPattern,
+  } = useSourcererDataView(sourcererPathName);
   // // console.log('SELECTED PATTERNS', selectedPatterns);
   // console.log('INDEX PATTERN', indexPattern);
   // console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
@@ -186,25 +185,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       selectedPatterns,
       missingPatterns: sourcererMissingPatterns,
     },
-  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, getScopeFromPath(pathname)));
+  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, sourcererPathName));
 
   // console.log('ALL OPTIONS', kibanaDataViews);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
-  const [radioIdSelected, setRadioIdSelected] = useState('dataViewId');
+  const [radioIdSelected, setRadioIdSelected] = useState('dataView');
 
-  const onChangeRadioButton = (optionId) => {
-    setRadioIdSelected(optionId);
-  };
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const initialState = defaultValues ?? {
     ...stepDefineDefaultValue,
     index: indicesConfig,
     threatIndex: threatIndicesConfig,
-    dataViewId: selectedDataViewId ?? 'security-solution-default',
+    dataViewId: selectedDataViewId,
   };
   // console.error('initial state', JSON.stringify(initialState, null, 2));
   const { form } = useForm<DefineStepRule>({
@@ -252,7 +248,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
-  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  // TODO: update the logic for browserField stuff.
+  // if 'index' is selected, use these browser fields
+  // otherwise use the dataview browserfields
+  const [indexPatternsLoading, { browserFields, indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(index);
+
+  const [indexPattern, setIndexPattern] = useState(dataViewIndexPattern);
+
+  const onChangeRadioButton = (optionId: string) => {
+    setRadioIdSelected(optionId);
+  };
+
+  useEffect(() => {
+    if (radioIdSelected === 'dataView') {
+      setIndexPattern(dataViewIndexPattern);
+    } else {
+      // elasticsearch index patterns
+      // ts-expect-error Type 'DataViewFieldBase' is missing the following properties from type 'FieldSpec': searchable, aggregatablets(2345)
+      setIndexPattern(indexIndexPatterns);
+    }
+  }, [indexIndexPatterns, dataViewIndexPattern, radioIdSelected]);
   const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
 
   const [
@@ -417,7 +433,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} $display={'flex-wrap'} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
@@ -495,7 +511,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
-                    isLoading: isLoadingIndexPattern,
+                    isLoading: isLoadingDataViewIndexPattern,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
                   }}
                   config={{
@@ -527,7 +543,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleQueryBar',
                     indexPattern,
                     isDisabled: isLoading,
-                    isLoading: isLoadingIndexPattern,
+                    isLoading: isLoadingDataViewIndexPattern,
                     dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
                     openTimelineSearch,
                     onValidityChange: setIsQueryBarValid,

@@ -124,12 +124,16 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
+/**
+ * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
+ * Maybe something with io-ts?
+ */
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
-  dataViewId: string;
+  dataViewId: string | null;
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;

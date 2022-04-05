@@ -59,9 +59,9 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const skipValidation = isMlRule(formData.ruleType) || formData.dataViewId != null;
 
-          if (!needsValidation) {
+          if (skipValidation) {
             return;
           }
 
@@ -84,7 +84,29 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'Data Views',
       }
     ),
-    validations: [],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const skipValidation = isMlRule(formData.ruleType) || formData.index != null;
+
+          if (skipValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
+              {
+                defaultMessage: 'A minimum of one index pattern is required.',
+              }
+            )
+          )(...args);
+        },
+      },
+    ],
   },
   queryBar: {
     validations: [
