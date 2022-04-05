@@ -5,31 +5,40 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const config = getService('config');
+  const log = getService('log');
+  let esNode: EsArchiver;
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+    if (config.get('esTestCluster.ccs')) {
+      esNode = getService('remoteEsArchiver' as 'esArchiver');
+    } else {
+      esNode = esArchiver;
+    }
+    await log.debug(esNode);
+    await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esNode.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+    await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   async function unloadLogstash() {
-    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   describe('dashboard app', function () {
@@ -71,6 +80,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));
+    });
+    if (config.get('esTestCluster.ccs')) {
+      before(loadCurrentData);
+      after(unloadCurrentData);
+      describe('using current data using ccs', function () {
+        loadTestFile(require.resolve('./dashboard_filtering'));
+      });
+    }
+    describe('continue using current data tests', function () {
       loadTestFile(require.resolve('./dashboard_filtering'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));

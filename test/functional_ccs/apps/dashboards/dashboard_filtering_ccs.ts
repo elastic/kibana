@@ -26,6 +26,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const runningConfig = getService('config');
+  let kibanaDirectories: {
+    kibana: string;
+    unload: string;
+  };
+  const localKibanaObjects = {
+    kibana: 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana',
+    unload: 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload',
+  };
+  const remoteKibanaObjects = {
+    kibana: 'test/functional/fixtures/kbn_archiver/dashboard/current/ccs/kibana',
+    unload: 'test/functional/fixtures/kbn_archiver/dashboard/current/ccs/kibana_unload',
+  };
 
   describe('dashboard filtering using ccs', function () {
     const populateDashboard = async () => {
@@ -51,15 +64,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_ccs'
-      );
+      if (runningConfig.get('esTestCluster.ccs')) {
+        kibanaDirectories = remoteKibanaObjects;
+      } else {
+        kibanaDirectories = localKibanaObjects;
+      }
+      await kibanaServer.importExport.load(kibanaDirectories.kibana);
       // The kbn_archiver above was created from an es_archiver which intentionally had
       // 2 missing index patterns.  But that would fail to load with kbn_archiver.
       // So we unload those 2 index patterns here.
-      await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload_ccs'
-      );
+      await kibanaServer.importExport.unload(kibanaDirectories.unload);
 
       await security.testUser.setRoles([
         'kibana_admin',

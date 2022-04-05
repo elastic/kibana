@@ -1,24 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { RemoteEsArchiverProvider } from '../../../test/functional/services/remote_es/remote_es_archiver';
-import { RemoteEsProvider } from '../../../test/functional/services/remote_es/remote_es';
+import { RemoteEsProvider } from './services/remote_es/remote_es';
+import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
 
+// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('./config'));
 
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/lens')],
+    testFiles: [require.resolve('./apps/discover'), require.resolve('./apps/dashboard')],
+
+    services: {
+      ...functionalConfig.get('services'),
+      remoteEs: RemoteEsProvider,
+      remoteEsArchiver: RemoteEsArchiverProvider,
+    },
 
     junit: {
-      reportName: 'X-Pack CCS Tests',
+      reportName: 'Kibana OSS CCS Tests',
     },
 
     security: {
@@ -41,14 +49,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ccs: {
         remoteClusterUrl:
           process.env.REMOTE_CLUSTER_URL ??
-          'http://elastic:changeme@localhost:' +
-            `${functionalConfig.get('servers.elasticsearch.port') + 1}`,
+          // eslint-disable-next-line prettier/prettier
+          `http://elastic:changeme@localhost:${functionalConfig.get('servers.elasticsearch.port') + 1
+          }`,
       },
-    },
-    services: {
-      ...functionalConfig.get('services'),
-      remoteEs: RemoteEsProvider,
-      remoteEsArchiver: RemoteEsArchiverProvider,
     },
   };
 }
