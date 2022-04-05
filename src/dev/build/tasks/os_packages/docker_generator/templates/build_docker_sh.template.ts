@@ -18,6 +18,7 @@ function generator({
   baseOSImage,
   architecture,
 }: TemplateContext) {
+  const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -54,7 +55,7 @@ function generator({
   retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;
+  docker buildx build --platform ${dockerArchitecture} -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;
 
   docker save ${imageTag}${imageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
 

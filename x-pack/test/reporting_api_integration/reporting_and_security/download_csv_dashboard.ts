@@ -257,6 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { language: 'kuery', query: '' },
               sort: [{ '@timestamp': 'desc' }],
             },
+            columns: ['@timestamp', 'clientip', 'extension'],
           })
         )) as supertest.Response;
         const { status: resStatus, text: resText, type: resType } = res;
@@ -295,6 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { language: 'kuery', query: '' },
               sort: [{ '@timestamp': 'desc' }],
             },
+            columns: ['@timestamp', 'clientip', 'extension'],
           })
         )) as supertest.Response;
         const { status: resStatus, text: resText, type: resType } = res;
@@ -317,6 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
               fields: ['date', 'message'],
               filter: [],
             },
+            columns: ['date', 'message'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;
@@ -342,6 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
               fields: ['date', 'message'],
               filter: [],
             },
+            columns: ['date', 'message'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;
@@ -401,6 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
+            columns: ['name', 'power'],
           })
         )) as supertest.Response;
 

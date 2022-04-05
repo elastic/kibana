@@ -73,6 +73,7 @@ export async function runDockerGenerator(
       : []),
   ];
 
+  const dockerCrossCompile = config.getDockerCrossCompile();
   const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
   const scope: TemplateContext = {
     artifactPrefix,
@@ -104,7 +105,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 

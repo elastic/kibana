@@ -9,6 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
+import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
 import { nestedProcessorsErrorFixture } from './fixtures';
@@ -35,16 +36,12 @@ jest.mock('@elastic/eui', () => {
 describe('<PipelinesCreate />', () => {
   let testBed: PipelinesCreateTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('on component mount', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -106,7 +103,7 @@ describe('<PipelinesCreate />', () => {
     describe('form submission', () => {
       beforeEach(async () => {
         await act(async () => {
-          testBed = await setup();
+          testBed = await setup(httpSetup);
         });
 
         testBed.component.update();
@@ -129,27 +126,28 @@ describe('<PipelinesCreate />', () => {
 
         await actions.clickSubmitButton();
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        const expected = {
-          name: 'my_pipeline',
-          description: 'pipeline description',
-          processors: [],
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          API_BASE_PATH,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: 'my_pipeline',
+              description: 'pipeline description',
+              processors: [],
+            }),
+          })
+        );
       });
 
       test('should surface API errors from the request', async () => {
         const { actions, find, exists } = testBed;
 
         const error = {
-          status: 409,
+          statusCode: 409,
           error: 'Conflict',
           message: `There is already a pipeline with name 'my_pipeline'.`,
         };
 
-        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, error);
 
         await actions.clickSubmitButton();
 
@@ -160,7 +158,9 @@ describe('<PipelinesCreate />', () => {
       test('displays nested pipeline errors as a flat list', async () => {
         const { actions, find, exists, component } = testBed;
         httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
-          body: nestedProcessorsErrorFixture,
+          statusCode: 409,
+          message: 'Error',
+          ...nestedProcessorsErrorFixture,
         });
 
         await actions.clickSubmitButton();
