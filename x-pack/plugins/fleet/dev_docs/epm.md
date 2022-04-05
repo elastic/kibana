@@ -1,3 +1,5 @@
+TODO: consolidate with docs issue that is open now
+
 This document is part of the original drafts for ingest management documentation in `docs/ingest_manager` and may be outdated.
 Overall documentation of Ingest Management is now maintained in the `elastic/stack-docs` repository.
 
