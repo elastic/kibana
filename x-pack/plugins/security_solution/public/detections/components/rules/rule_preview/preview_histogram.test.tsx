@@ -15,9 +15,10 @@ import { usePreviewHistogram } from './use_preview_histogram';
 
 import { PreviewHistogram } from './preview_histogram';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/components/url_state/normalize_time_range.ts');
 
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
