@@ -490,3 +490,76 @@ describe('#extends', () => {
     expect(extended.validate(undefined)).toEqual({ initial: 'bar', added: 42 });
   });
 });
+
+test('returns schema structure', () => {
+  // This test covers different schema types that may or may not be nested
+  const objSchema = schema.object({
+    any: schema.any(),
+    array: schema.arrayOf(schema.string()),
+    boolean: schema.boolean(),
+    buffer: schema.buffer(),
+    byteSize: schema.byteSize(),
+    conditional: schema.conditional(
+      schema.contextRef('context_value_1'),
+      schema.contextRef('context_value_2'),
+      schema.string(),
+      schema.string()
+    ),
+    duration: schema.duration(),
+    ip: schema.ip(),
+    literal: schema.literal('foo'),
+    map: schema.mapOf(schema.string(), schema.string()),
+    maybe: schema.maybe(schema.string()),
+    never: schema.never(),
+    nullable: schema.nullable(schema.string()),
+    number: schema.number(),
+    record: schema.recordOf(schema.string(), schema.string()),
+    stream: schema.stream(),
+    string: schema.string(),
+    union: schema.oneOf([schema.string()]),
+    uri: schema.uri(),
+  });
+  const type = objSchema.extends({
+    nested: objSchema,
+  });
+  expect(type.getSchemaStructure()).toEqual([
+    { path: ['any'], type: 'any' },
+    { path: ['array'], type: 'array' },
+    { path: ['boolean'], type: 'boolean' },
+    { path: ['buffer'], type: 'binary' },
+    { path: ['byteSize'], type: 'bytes' },
+    { path: ['conditional'], type: 'any' },
+    { path: ['duration'], type: 'duration' },
+    { path: ['ip'], type: 'string' },
+    { path: ['literal'], type: 'any' },
+    { path: ['map'], type: 'map' },
+    { path: ['maybe'], type: 'any' },
+    { path: ['never'], type: 'any' },
+    { path: ['nullable'], type: 'alternatives' },
+    { path: ['number'], type: 'number' },
+    { path: ['record'], type: 'record' },
+    { path: ['stream'], type: 'stream' },
+    { path: ['string'], type: 'any' },
+    { path: ['union'], type: 'alternatives' },
+    { path: ['uri'], type: 'string' },
+    { path: ['nested', 'any'], type: 'any' },
+    { path: ['nested', 'array'], type: 'array' },
+    { path: ['nested', 'boolean'], type: 'boolean' },
+    { path: ['nested', 'buffer'], type: 'binary' },
+    { path: ['nested', 'byteSize'], type: 'bytes' },
+    { path: ['nested', 'conditional'], type: 'any' },
+    { path: ['nested', 'duration'], type: 'duration' },
+    { path: ['nested', 'ip'], type: 'string' },
+    { path: ['nested', 'literal'], type: 'any' },
+    { path: ['nested', 'map'], type: 'map' },
+    { path: ['nested', 'maybe'], type: 'any' },
+    { path: ['nested', 'never'], type: 'any' },
+    { path: ['nested', 'nullable'], type: 'alternatives' },
+    { path: ['nested', 'number'], type: 'number' },
+    { path: ['nested', 'record'], type: 'record' },
+    { path: ['nested', 'stream'], type: 'stream' },
+    { path: ['nested', 'string'], type: 'any' },
+    { path: ['nested', 'union'], type: 'alternatives' },
+    { path: ['nested', 'uri'], type: 'string' },
+  ]);
+});

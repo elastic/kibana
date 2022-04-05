@@ -132,11 +132,15 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          [...uiPlugins.public].map(async ([id, plugin]) => ({
-            id,
-            plugin,
-            config: await getUiConfig(uiPlugins, id),
-          }))
+          [...uiPlugins.public].map(async ([id, plugin]) => {
+            const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
+            return {
+              id,
+              plugin,
+              config: browserConfig,
+              exposedConfigKeys, // TODO: only include this for integration tests (what's the best way to do this?)
+            };
+          })
         ),
         legacyMetadata: {
           uiSettings: settings,
@@ -152,5 +156,8 @@ export class RenderingService {
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
-  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {
+    browserConfig: {},
+    exposedConfigKeys: {},
+  }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
 };

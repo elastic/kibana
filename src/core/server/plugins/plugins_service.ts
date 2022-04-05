@@ -214,7 +214,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private generateUiPluginsConfigs(
     uiPlugins: Map<string, DiscoveredPlugin>
-  ): Map<PluginName, Observable<unknown>> {
+  ): Map<PluginName, Observable<ReturnType<typeof createBrowserConfig>>> {
     return new Map(
       [...uiPlugins]
         .filter(([pluginId, _]) => {
@@ -231,9 +231,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             pluginId,
             this.configService
               .atPath(plugin.configPath)
-              .pipe(
-                map((config: any) => createBrowserConfig(config, configDescriptor.exposeToBrowser!))
-              ),
+              .pipe(map((config: any) => createBrowserConfig(config, configDescriptor))),
           ];
         })
     );
