@@ -15,7 +15,7 @@ import { RuleExecutionSummary } from '../../../../../common/detection_engine/sch
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
+import { PartialRule, FindResult } from '../../../../../../alerting/server';
 import { ActionsClient, FindActionResult } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType } from '../../rules/types';
@@ -121,7 +121,7 @@ export const transformFindAlerts = (
 };
 
 export const transform = (
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
