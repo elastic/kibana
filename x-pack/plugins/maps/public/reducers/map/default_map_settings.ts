@@ -7,7 +7,7 @@
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import { MapSettings } from '../../../common/descriptor_types';
+import { MapSettings } from './types';
 
 export function getDefaultMapSettings(): MapSettings {
   return {

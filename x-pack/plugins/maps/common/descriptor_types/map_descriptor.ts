@@ -10,8 +10,7 @@
 import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
-import { DRAW_SHAPE, ES_SPATIAL_RELATIONS, INITIAL_LOCATION } from '../constants';
-import { CustomIcon } from './style_property_descriptor_types';
+import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {
   minLon: number;
@@ -27,34 +26,6 @@ export type MapCenter = {
 
 export type MapCenterAndZoom = MapCenter & {
   zoom: number;
-};
-
-export type MapSettings = {
-  autoFitToDataBounds: boolean;
-  backgroundColor: string;
-  customIcons: CustomIcon[];
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  initialLocation: INITIAL_LOCATION;
-  fixedLocation: {
-    lat: number;
-    lon: number;
-    zoom: number;
-  };
-  browserLocation: {
-    zoom: number;
-  };
-  maxZoom: number;
-  minZoom: number;
-  showScaleControl: boolean;
-  showSpatialFilters: boolean;
-  showTimesliderToggleButton: boolean;
-  spatialFiltersAlpa: number;
-  spatialFiltersFillColor: string;
-  spatialFiltersLineColor: string;
 };
 
 export type Goto = {

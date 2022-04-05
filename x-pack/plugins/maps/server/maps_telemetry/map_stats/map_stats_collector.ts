@@ -19,7 +19,6 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
-  MapSettings,
   VectorLayerDescriptor,
 } from '../../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
@@ -37,6 +36,7 @@ import {
   RESOLUTION_KEYS,
   SCALING_KEYS,
 } from './types';
+import { MapSettings } from '../../../public/reducers/map';
 
 /*
  * Use MapStatsCollector instance to track map saved object stats.
@@ -63,7 +63,7 @@ export class MapStatsCollector {
       return;
     }
 
-    let mapSettings: Partial<MapSettings>;
+    let mapSettings: MapSettings;
     try {
       const mapState = JSON.parse(attributes.mapStateJSON);
       mapSettings = mapState.settings;

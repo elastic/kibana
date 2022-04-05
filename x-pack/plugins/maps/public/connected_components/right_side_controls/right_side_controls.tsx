@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LayerControl } from './layer_control';
 import { MouseCoordinatesControl } from './mouse_coordinates_control';
 import { AttributionControl } from './attribution_control';
-import { MapSettings } from '../../../common/descriptor_types';
+import { MapSettings } from '../../reducers/map';
 
 export interface Props {
   settings: MapSettings;

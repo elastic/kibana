@@ -24,7 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as usng from 'usng.js';
 import { isNaN, isNull } from 'lodash';
-import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import { MapCenter } from '../../../../common/descriptor_types';
+import { MapSettings } from '../../../reducers/map';
 
 export const COORDINATE_SYSTEM_DEGREES_DECIMAL = 'dd';
 export const COORDINATE_SYSTEM_MGRS = 'mgrs';
