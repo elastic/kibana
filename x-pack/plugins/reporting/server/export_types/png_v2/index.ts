@@ -9,6 +9,7 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE_V2 as jobType,
 } from '../../../common/constants';
@@ -30,6 +31,7 @@ export const getExportType = (): ExportTypeDefinition<
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_STANDARD,
     LICENSE_TYPE_GOLD,
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
