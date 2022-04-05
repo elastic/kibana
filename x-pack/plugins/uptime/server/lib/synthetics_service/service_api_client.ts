@@ -28,7 +28,6 @@ export interface ServiceData {
     api_key: string;
   };
   runOnce?: boolean;
-  isNew?: boolean;
 }
 
 export class ServiceAPIClient {
@@ -123,7 +122,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce, isNew }: ServiceData
+    { monitors: allMonitors, output, runOnce }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
