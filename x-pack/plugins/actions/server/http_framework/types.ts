@@ -18,6 +18,7 @@ interface EndPointConfig<
   FetchResponse extends Record<string, any> = Record<string, any>
 > {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
+  params: Type<Params>;
   responseSchema: Type<FetchResponse>;
   getPath: (config: Config) => string;
   getAuth: (secrets: Secrets) => AxiosBasicCredentials;
@@ -29,16 +30,13 @@ interface EndPointConfig<
   postFetch?: (res: FetchResponse) => void;
 }
 
-type EndPointFunc = () => void;
+export type EndPointFunc = () => Promise<{}>;
 
-export type EndPoint<Config, Secrets, Params> =
-  | EndPointConfig<Config, Secrets, Params>
-  | EndPointFunc;
+export type EndPoint<Config, Secrets> = EndPointConfig<Config, Secrets> | EndPointFunc;
 
 export interface HTTPConnectorType<
   Config extends Record<string, any> = Record<string, any>,
-  Secrets extends Record<string, any> = Record<string, any>,
-  Params extends Record<string, any> = Record<string, any>
+  Secrets extends Record<string, any> = Record<string, any>
 > {
   id: string;
   name: string;
@@ -46,9 +44,9 @@ export interface HTTPConnectorType<
   schema: {
     config: Type<Config>;
     secrets: Type<Secrets>;
-    params: Type<Params>;
   };
-  endpoints: Record<string, EndPoint<Config, Secrets, Params>>;
+  endpoints: Record<string, EndPoint<Config, Secrets>>;
 }
 
 export type HandlerReturnType = Record<string, unknown> | Array<Record<string, unknown>>;
+export type HandlerFunc = () => Promise<HandlerReturnType>;
