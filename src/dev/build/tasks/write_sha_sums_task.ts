@@ -21,7 +21,7 @@ export const WriteShaSums: GlobalTask = {
     });
 
     for (const artifact of artifacts) {
-      await write(`${artifact}.sha1.txt`, await getFileHash(artifact, 'sha1'));
+      await write(`${artifact}.sha512.txt`, `${await getFileHash(artifact, 'sha512')} ${artifact}`);
     }
   },
 };
