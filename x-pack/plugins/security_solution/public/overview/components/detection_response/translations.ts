@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.ruleAlertsSectionTitle',
   {
-    defaultMessage: 'Open alerts by Rule',
+    defaultMessage: 'Open alerts by rule',
   }
 );
 export const NO_ALERTS_FOUND = i18n.translate(
