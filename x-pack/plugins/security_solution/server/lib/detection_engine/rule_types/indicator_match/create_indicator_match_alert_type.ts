@@ -70,7 +70,8 @@ export const createIndicatorMatchAlertType = (
         spaceId,
       } = execOptions;
 
-      const isPercolatorEnabled = completeRule.ruleParams.percolate;
+      // const isPercolatorEnabled = completeRule.ruleParams.percolate;
+      const isPercolatorEnabled = true;
       const indicatorMatchExecutor = isPercolatorEnabled ? percolateExecutor : threatMatchExecutor;
 
       const result = await indicatorMatchExecutor({
