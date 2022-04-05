@@ -15,8 +15,8 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import {
-  AlertExecutionStatuses,
-  AlertExecutionStatusValues,
+  RuleExecutionStatuses,
+  RuleExecutionStatusValues,
 } from '../../../../../../alerting/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
 
@@ -59,13 +59,13 @@ export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = 
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel"
-              defaultMessage="Status"
+              defaultMessage="Last response"
             />
           </EuiFilterButton>
         }
       >
         <div className="euiFilterSelect__items">
-          {[...AlertExecutionStatusValues].sort().map((item: AlertExecutionStatuses) => {
+          {[...RuleExecutionStatusValues].sort().map((item: RuleExecutionStatuses) => {
             const healthColor = getHealthColor(item);
             return (
               <EuiFilterSelectItem
@@ -92,7 +92,7 @@ export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = 
   );
 };
 
-export function getHealthColor(status: AlertExecutionStatuses) {
+export function getHealthColor(status: RuleExecutionStatuses) {
   switch (status) {
     case 'active':
       return 'success';

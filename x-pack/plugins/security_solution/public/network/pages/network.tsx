@@ -36,7 +36,6 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
-import { OverviewEmpty } from '../../overview/components/overview_empty';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
 import { NetworkRouteType } from './navigation/types';
@@ -52,6 +51,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { filterNetworkExternalAlertData } from '../../common/components/visualization_actions/utils';
+import { LandingPageComponent } from '../../common/components/landing_page';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -234,9 +234,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <SecuritySolutionPageWrapper>
-            <OverviewEmpty />
-          </SecuritySolutionPageWrapper>
+          <LandingPageComponent />
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />

@@ -12,11 +12,12 @@ import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
 import { DetailPanelHostTab } from '../detail_panel_host_tab';
+import { useStyles } from './styles';
 import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  selectedProcess: Process;
+  selectedProcess: Process | undefined;
   alerts?: ProcessEvent[];
   investigatedAlert?: ProcessEvent;
   onProcessSelected: (process: Process) => void;
@@ -60,7 +61,7 @@ export const SessionViewDetailPanel = ({
         name: i18n.translate('xpack.sessionView.detailsPanel.host', {
           defaultMessage: 'Host',
         }),
-        content: <DetailPanelHostTab processHost={selectedProcess.events[0].host} />,
+        content: <DetailPanelHostTab processHost={selectedProcess?.events[0]?.host} />,
       },
       {
         id: 'alerts',
@@ -86,7 +87,7 @@ export const SessionViewDetailPanel = ({
     alerts,
     alertsCount,
     processDetail,
-    selectedProcess.events,
+    selectedProcess?.events,
     onProcessSelected,
     onShowAlertDetails,
     investigatedAlert,
@@ -101,8 +102,10 @@ export const SessionViewDetailPanel = ({
     [tabs, selectedTabId]
   );
 
+  const styles = useStyles();
+
   return (
-    <>
+    <div css={styles.detailsPanelLeftBorder}>
       <EuiTabs size="l" expand>
         {tabs.map((tab, index) => (
           <EuiTab
@@ -118,6 +121,6 @@ export const SessionViewDetailPanel = ({
         ))}
       </EuiTabs>
       {tabContent}
-    </>
+    </div>
   );
 };

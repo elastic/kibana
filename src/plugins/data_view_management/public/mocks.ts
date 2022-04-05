@@ -11,6 +11,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
+import { unifiedSearchPluginMock } from '../../unified_search/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../data_view_field_editor/public/mocks';
 import { indexPatternEditorPluginMock } from '../../data_view_editor/public/mocks';
 import { dataViewPluginMocks } from '../../data_views/public/mocks';
@@ -55,13 +56,15 @@ const docLinks = {
 const createIndexPatternManagmentContext = (): {
   [key in keyof IndexPatternManagmentContext]: any;
 } => {
-  const { chrome, uiSettings, notifications, overlays } = coreMock.createStart();
+  const { application, chrome, uiSettings, notifications, overlays } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
   const dataViewFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
   const dataViews = dataViewPluginMocks.createStartContract();
+  const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
   return {
+    application,
     chrome,
     uiSettings,
     notifications,
@@ -70,6 +73,7 @@ const createIndexPatternManagmentContext = (): {
     docLinks,
     data,
     dataViews,
+    unifiedSearch,
     dataViewFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},

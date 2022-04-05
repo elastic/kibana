@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
+export type { ControlWidth } from './types';
 export type { ControlPanelState, ControlsPanels, ControlGroupInput } from './control_group/types';
 export type { OptionsListEmbeddableInput } from './control_types/options_list/types';
-export type { ControlWidth } from './types';
+export type { RangeSliderEmbeddableInput } from './control_types/range_slider/types';
 
-export { OPTIONS_LIST_CONTROL } from './control_types/options_list/types';
 export { CONTROL_GROUP_TYPE } from './control_group/types';
+export { OPTIONS_LIST_CONTROL } from './control_types/options_list/types';
+export { RANGE_SLIDER_CONTROL } from './control_types/range_slider/types';
+
+export { getDefaultControlGroupInput } from './control_group/control_group_constants';
+
+export { TIME_SLIDER_CONTROL } from './control_types/time_slider/types';

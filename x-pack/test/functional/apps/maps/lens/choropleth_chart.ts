@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.dragFieldToWorkspace('geo.dest');
+      await PageObjects.lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
 
       // add filter to force data fetch to set activeData
       await filterBar.addFilter('bytes', 'is between', '200', '10000');

@@ -16,7 +16,7 @@ import {
   SortingOptions,
 } from '../../../../../containers/detection_engine/rules/types';
 import { useFindRules } from './use_find_rules';
-import { getRulesComparator, getRulesPredicate } from './utils';
+import { getRulesComparator } from './utils';
 
 export interface RulesTableState {
   /**
@@ -114,7 +114,7 @@ export interface LoadingRules {
 
 export interface RulesTableActions {
   reFetchRules: ReturnType<typeof useFindRules>['refetch'];
-  setFilterOptions: React.Dispatch<React.SetStateAction<FilterOptions>>;
+  setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsInMemorySorting: (value: boolean) => void;
   setIsRefreshOn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -186,6 +186,13 @@ export const RulesTableContextProvider = ({
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
+  const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
+    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+    setPage(1);
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
+
   // Fetch rules
   const {
     data: { rules, total } = { rules: [], total: 0 },
@@ -210,15 +217,10 @@ export const RulesTableContextProvider = ({
     }
   }, [isFetched, isRefetching, refetchPrePackagedRulesStatus]);
 
-  // Filter rules
-  const filteredRules = isInMemorySorting ? rules.filter(getRulesPredicate(filterOptions)) : rules;
-
   // Paginate and sort rules
   const rulesToDisplay = isInMemorySorting
-    ? filteredRules
-        .sort(getRulesComparator(sortingOptions))
-        .slice((page - 1) * perPage, page * perPage)
-    : filteredRules;
+    ? rules.sort(getRulesComparator(sortingOptions)).slice((page - 1) * perPage, page * perPage)
+    : rules;
 
   const providerValue = useMemo(
     () => ({
@@ -227,7 +229,7 @@ export const RulesTableContextProvider = ({
         pagination: {
           page,
           perPage,
-          total: isInMemorySorting ? filteredRules.length : total,
+          total: isInMemorySorting ? rules.length : total,
         },
         filterOptions,
         isActionInProgress,
@@ -246,7 +248,7 @@ export const RulesTableContextProvider = ({
       },
       actions: {
         reFetchRules: refetch,
-        setFilterOptions,
+        setFilterOptions: handleFilterOptionsChange,
         setIsAllSelected,
         setIsInMemorySorting: toggleInMemorySorting,
         setIsRefreshOn,
@@ -260,7 +262,7 @@ export const RulesTableContextProvider = ({
     [
       dataUpdatedAt,
       filterOptions,
-      filteredRules.length,
+      handleFilterOptionsChange,
       isActionInProgress,
       isAllSelected,
       isFetched,
@@ -274,6 +276,7 @@ export const RulesTableContextProvider = ({
       page,
       perPage,
       refetch,
+      rules.length,
       rulesToDisplay,
       selectedRuleIds,
       sortingOptions,
