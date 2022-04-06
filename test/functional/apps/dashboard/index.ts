@@ -81,13 +81,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));
     });
-    if (config.get('esTestCluster.ccs')) {
-      before(loadCurrentData);
-      after(unloadCurrentData);
-      describe('using current data using ccs', function () {
+
+    describe('using current data using ccs', function () {
+      if (config.get('esTestCluster.ccs')) {
+        before(loadCurrentData);
+        after(unloadCurrentData);
         loadTestFile(require.resolve('./dashboard_filtering'));
-      });
-    }
+      } else {
+        log.debug('Skipping CCS tests because CCS is not enabled.');
+      }
+    });
+
     describe('continue using current data tests', function () {
       loadTestFile(require.resolve('./dashboard_filtering'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
