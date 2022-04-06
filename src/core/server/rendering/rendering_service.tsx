@@ -79,7 +79,7 @@ export class RenderingService {
     { http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { includeUserSettings = true, vars }: IRenderOptions = {}
+    { isAnonymousPage = false, vars }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -90,7 +90,7 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
-      user: includeUserSettings ? await uiSettings.getUserProvided() : {},
+      user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
@@ -108,7 +108,7 @@ export class RenderingService {
       // This is intentional, it does not automatically include any required plugins/bundles.
       // If additional required plugin dependencies are added in the future that need to be enabled on anonymous pages, that should be
       // explicitly defined in the affected plugin manifest(s).
-      ([, plugin]) => includeUserSettings || plugin.enabledOnAnonymousPages
+      ([, plugin]) => !isAnonymousPage || plugin.enabledOnAnonymousPages
     );
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,

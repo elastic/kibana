@@ -1308,7 +1308,7 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    includeUserSettings?: boolean;
+    isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
 }
