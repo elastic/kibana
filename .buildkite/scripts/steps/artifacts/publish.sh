@@ -45,28 +45,28 @@ download "dependencies-$VERSION.csv"
 
 cd - 
 
-echo "--- Pull latest release manager CLI"
+echo "--- Pull latest release manager"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 docker pull docker.elastic.co/infra/release-manager:latest
 
-# echo "--- Publish artifacts"
-# VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-# VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-# VAULT_ADDR="https://secrets.elastic.co:8200"
-# QUALIFIER=""
-# docker run --rm \
-#   --name release-manager \
-#   -e VAULT_ADDR \
-#   -e VAULT_ROLE_ID \
-#   -e VAULT_SECRET_ID \
-#   --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts \
-#   docker.elastic.co/infra/release-manager:latest \
-#     cli collect \
-#       --project kibana \
-#       --branch "$KIBANA_BASE_BRANCH" \
-#       --commit "$GIT_COMMIT" \
-#       --workflow "$WORKFLOW" \
-#       --version "$VERSION"
-#       --qualifier "$QUALIFIER"
-#       --artifact-set main
+echo "--- Publish artifacts"
+VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
+VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
+VAULT_ADDR="https://secrets.elastic.co:8200"
+QUALIFIER=""
+docker run --rm \
+  --name release-manager \
+  -e VAULT_ADDR \
+  -e VAULT_ROLE_ID \
+  -e VAULT_SECRET_ID \
+  --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts \
+  docker.elastic.co/infra/release-manager:latest \
+    cli collect \
+      --project kibana \
+      --branch "$KIBANA_BASE_BRANCH" \
+      --commit "$GIT_COMMIT" \
+      --workflow "$WORKFLOW" \
+      --version "$VERSION"
+      --qualifier "$QUALIFIER"
+      --artifact-set main
