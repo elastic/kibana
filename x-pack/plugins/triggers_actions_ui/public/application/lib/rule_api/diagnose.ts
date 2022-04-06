@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { DiagnoseOutput, DiagnosticResult } from '../../../../../alerting/common';
+import { DiagnoseOutput } from '../../../../../alerting/common';
 import { RewriteResponseCase } from '../../../../../actions/common';
 import { Rule } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';

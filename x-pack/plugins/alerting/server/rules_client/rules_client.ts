@@ -594,8 +594,7 @@ export class RulesClient {
         ruleType,
         ruleSavedObject.attributes,
         ruleSavedObject.references,
-        false,
-        true
+        false
       ) as Rule,
       apiKey: ruleSavedObject.attributes.apiKey,
       schedule: ruleSavedObject.attributes.schedule as IntervalSchedule,

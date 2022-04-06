@@ -98,7 +98,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredSolutions?: string[] | undefined;
-  onShowPreview?: () => void;
+  onTogglePreview?: (show: boolean) => void;
 }
 
 export const RuleForm = ({
@@ -114,7 +114,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredSolutions,
-  onShowPreview,
+  onTogglePreview,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -468,6 +468,9 @@ export const RuleForm = ({
                 setRuleProperty('ruleTypeId', null);
                 setRuleTypeModel(null);
                 setRuleProperty('params', {});
+                if (onTogglePreview) {
+                  onTogglePreview(false);
+                }
               }}
             />
           </EuiFlexItem>
@@ -533,7 +536,7 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      {onShowPreview && (
+      {onTogglePreview && (
         <>
           <EuiHorizontalRule />
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -558,7 +561,7 @@ export const RuleForm = ({
               size="s"
             />
           ) : (
-            <EuiButton onClick={() => onShowPreview()}>Preview</EuiButton>
+            <EuiButton onClick={() => onTogglePreview(true)}>Preview</EuiButton>
           )}
           <EuiHorizontalRule />
         </>

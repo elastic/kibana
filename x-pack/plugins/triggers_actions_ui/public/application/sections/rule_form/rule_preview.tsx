@@ -31,7 +31,7 @@ export const RulePreview = ({ potentialRule, existingRule }: RulePreviewProps) =
 
   useEffect(() => {
     (async () => {
-      if (potentialRule) {
+      if (potentialRule && potentialRule?.ruleTypeId) {
         setIsLoading(true);
         setPreviewOutput(
           await diagnoseRule({

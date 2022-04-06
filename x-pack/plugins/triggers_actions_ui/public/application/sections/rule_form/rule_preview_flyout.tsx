@@ -9,11 +9,19 @@ import React from 'react';
 import { EuiPortal, EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { RulePreview, RulePreviewProps } from './rule_preview';
 
-export const RulePreviewFlyout = ({ potentialRule, existingRule }: RulePreviewProps) => {
+type RulePreviewFlyoutProps = RulePreviewProps & {
+  onClose: () => void;
+};
+
+export const RulePreviewFlyout = ({
+  potentialRule,
+  existingRule,
+  onClose,
+}: RulePreviewFlyoutProps) => {
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={() => {}}
+        onClose={() => onClose()}
         aria-labelledby="flyoutRulePreviewTitle"
         size="m"
         maxWidth={620}

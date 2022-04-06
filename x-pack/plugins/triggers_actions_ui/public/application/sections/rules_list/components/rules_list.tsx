@@ -642,7 +642,6 @@ export const RulesList: React.FunctionComponent = () => {
         name: '',
         width: '40px',
         render: (item: RuleTableItem) => {
-          console.log(item);
           return (
             <EuiButtonIcon
               color="primary"
@@ -1379,7 +1378,12 @@ export const RulesList: React.FunctionComponent = () => {
         />
       )}
       {previewFlyoutVisible && currentRuleToDiagnose && (
-        <RulePreviewFlyout existingRule={currentRuleToDiagnose as Rule} />
+        <RulePreviewFlyout
+          existingRule={currentRuleToDiagnose as Rule}
+          onClose={() => {
+            setPreviewFlyoutVisibility(false);
+          }}
+        />
       )}
     </section>
   );

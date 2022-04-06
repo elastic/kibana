@@ -276,8 +276,8 @@ const RuleAdd = ({
                     ruleTypeRegistry={ruleTypeRegistry}
                     metadata={metadata}
                     filteredSolutions={filteredSolutions}
-                    onShowPreview={() => {
-                      setIsPreviewFlyoutVisible(true);
+                    onTogglePreview={(show: boolean) => {
+                      setIsPreviewFlyoutVisible(show);
                     }}
                   />
                 </EuiFlexItem>

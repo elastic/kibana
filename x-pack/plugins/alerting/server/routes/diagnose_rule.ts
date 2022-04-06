@@ -28,7 +28,7 @@ const rewriteBodyReq: RewriteRequestCase<DiagnoseOptions<RuleTypeParams>> = ({
   ruleTypeId,
 });
 
-export const diagnoseRuleRoute = ({ router, licenseState }: RouteOptions) => {
+export const previewRuleRoute = ({ router, licenseState }: RouteOptions) => {
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/_preview`,
@@ -51,12 +51,11 @@ export const diagnoseRuleRoute = ({ router, licenseState }: RouteOptions) => {
   );
 };
 
-export const previewRuleRoute = ({ router, licenseState }: RouteOptions) => {
+export const diagnoseRuleRoute = ({ router, licenseState }: RouteOptions) => {
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_diagnose`,
       validate: {
-        body: bodySchema,
         params: schema.object({
           id: schema.string(),
         }),

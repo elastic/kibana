@@ -6,6 +6,7 @@
  */
 
 import type { Request } from '@hapi/hapi';
+import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   DiagnosticResult,
@@ -33,6 +34,7 @@ import { validateRuleTypeParams } from '../validate_rule_type_params';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import { PluginStart as DataPluginStart } from '../../../../../../src/plugins/data/server';
 import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
+import { RuleMonitoring } from '../../../common';
 
 export type CustomDiagnostic<Params extends RuleTypeParams> = (
   params: Params
@@ -82,13 +84,6 @@ interface DiagnoseOpts<Params extends RuleTypeParams> {
   schedule: IntervalSchedule;
   ruleType: UntypedNormalizedRuleType;
   username: string | null;
-}
-
-interface DiagnoseExecutorOpts<Params extends RuleTypeParams> {
-  ruleType: UntypedNormalizedRuleType;
-  scopedClusterClient: IScopedClusterClient;
-  request: KibanaRequest;
-  params: Params;
 }
 
 function getIndexAccessError(index: string, username: string | null, err: Error): DiagnosticResult {
@@ -191,6 +186,7 @@ export class RuleDiagnostic {
       schedule,
       ruleType,
       ruleId: rule?.id,
+      ruleMonitoring: rule?.monitoring,
     });
     errorsAndWarnings.push(...frameworkDiagnosticResults);
 
@@ -205,6 +201,7 @@ export class RuleDiagnostic {
 
     // Sample executor results
     const executorResults = await this.runExecutor({
+      rule,
       ruleType,
       params,
       apiKey,
@@ -225,11 +222,13 @@ export class RuleDiagnostic {
     schedule,
     ruleType,
     ruleId,
+    ruleMonitoring,
   }: {
     params: Params;
     schedule: IntervalSchedule;
     ruleType: UntypedNormalizedRuleType;
     ruleId?: string;
+    ruleMonitoring?: RuleMonitoring;
   }) {
     const results: DiagnosticResult[] = [];
 
@@ -257,12 +256,29 @@ export class RuleDiagnostic {
 
     // If we're given a schedule, check that it is not too frequent
     if (schedule && schedule.interval) {
-      if (parseDuration(schedule.interval) < ONE_MINUTE_IN_MILLISSECONDS) {
+      const scheduleDurationMs = parseDuration(schedule.interval);
+      if (scheduleDurationMs < ONE_MINUTE_IN_MILLISSECONDS) {
         results.push({
           type: 'warning',
           name: 'Check interval too small',
           message: 'Running rules at this check interval may affect alerting performance.',
         });
+      }
+
+      // If we're given rule monitoring history, compare avg execution duration with check interval
+      const p50Execution: number | null = get(
+        ruleMonitoring,
+        'execution.calculated_metrics.p50',
+        null
+      ) as number | null;
+      if (p50Execution) {
+        if (scheduleDurationMs < p50Execution) {
+          results.push({
+            type: 'warning',
+            name: 'Execution duration exceeds check interval',
+            message: 'The average execution duration for this rule exceeds the check interval.',
+          });
+        }
       }
     }
 
@@ -332,10 +348,12 @@ export class RuleDiagnostic {
   }
 
   public async runExecutor<Params extends RuleTypeParams>({
+    rule,
     ruleType,
     params,
     apiKey,
   }: {
+    rule?: Rule;
     params: Params;
     apiKey?: string | null;
     ruleType: UntypedNormalizedRuleType;
@@ -411,6 +429,7 @@ export class RuleDiagnostic {
       try {
         const exists = await esClient.indices.exists({
           index,
+          allow_no_indices: false,
         });
         if (!exists) {
           results.push(getIndexExistsError(index));
@@ -527,11 +546,18 @@ export class RuleDiagnostic {
   }
 
   private async diagnoseExecution<Params extends RuleTypeParams>({
+    rule,
     ruleType,
     params,
     scopedClusterClient,
     request,
-  }: DiagnoseExecutorOpts<Params>) {
+  }: {
+    rule?: Rule;
+    ruleType: UntypedNormalizedRuleType;
+    scopedClusterClient: IScopedClusterClient;
+    request: KibanaRequest;
+    params: Params;
+  }) {
     const results: DiagnosticResult[] = [];
     const savedObjectsClient = this.savedObjects.getScopedClient(request, {
       includedHiddenTypes: ['alert', 'action'],
@@ -540,8 +566,8 @@ export class RuleDiagnostic {
     const uiSettingsClient = this.uiSettings.asScopedToClient(savedObjectsClient);
 
     try {
-      await ruleType.executor({
-        alertId: 'preview',
+      const executionPromise = ruleType.executor({
+        alertId: rule?.id ?? 'preview',
         executionId: 'preview',
         startedAt: new Date(),
         previousStartedAt: null,
@@ -560,30 +586,44 @@ export class RuleDiagnostic {
         params,
         state: {},
         rule: {
-          name: 'preview',
-          tags: [],
-          consumer: '',
+          name: rule?.name ?? 'preview',
+          tags: rule?.tags ?? [],
+          consumer: rule?.consumer ?? '',
           producer: '',
-          ruleTypeId: ruleType.id,
+          ruleTypeId: rule?.alertTypeId ?? ruleType.id,
           ruleTypeName: ruleType.name,
-          enabled: true,
-          schedule: {
-            interval: '1h',
+          enabled: rule?.enabled ?? true,
+          schedule: rule?.schedule ?? {
+            interval: '5m',
           },
           actions: [],
-          createdBy: null,
-          updatedBy: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          throttle: null,
-          notifyWhen: 'onActionGroupChange',
+          createdBy: rule?.createdBy ?? null,
+          updatedBy: rule?.updatedBy ?? null,
+          createdAt: rule?.createdAt ?? new Date(),
+          updatedAt: rule?.updatedAt ?? new Date(),
+          throttle: rule?.throttle ?? null,
+          notifyWhen: rule?.notifyWhen ?? 'onActionGroupChange',
         },
         spaceId: this.spaceId,
-        name: 'preview',
-        tags: [],
-        createdBy: null,
-        updatedBy: null,
+        name: rule?.name ?? 'preview',
+        tags: rule?.tags ?? [],
+        createdBy: rule?.createdBy ?? null,
+        updatedBy: rule?.updatedBy ?? null,
       });
+      await Promise.race([
+        executionPromise,
+        new Promise((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  'Preview execution timed out. Actual rule execution may take an unexpectedly long time.'
+                )
+              ),
+            20000
+          )
+        ),
+      ]);
     } catch (err) {
       results.push({
         type: 'error',

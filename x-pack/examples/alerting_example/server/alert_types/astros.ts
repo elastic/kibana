@@ -61,6 +61,9 @@ export const alertType: RuleType<
   async executor({ services, params }) {
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 
+    // add artificial timeout
+    await new Promise((r) => setTimeout(r, 240000));
+
     const response = await axios.get<PeopleInSpace>('http://api.open-notify.org/astros.json');
     const {
       data: { number: peopleInSpace, people = [] },
