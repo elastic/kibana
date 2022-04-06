@@ -260,34 +260,36 @@ function DefaultEditorAgg({
       extraAction={renderAggButtons()}
       onToggle={onToggle}
     >
-      <>
-        <EuiSpacer size="m" />
-        {SchemaComponent && (
-          <SchemaComponent
+      {isEditorOpen && (
+        <>
+          <EuiSpacer size="m" />
+          {SchemaComponent && (
+            <SchemaComponent
+              agg={agg}
+              editorStateParams={state.params}
+              setAggParamValue={setAggParamValue}
+              setStateParamValue={setStateParamValue}
+            />
+          )}
+          <DefaultEditorAggParams
             agg={agg}
-            editorStateParams={state.params}
+            aggError={aggError}
+            aggIndex={aggIndex}
+            aggIsTooLow={aggIsTooLow}
+            disabledParams={disabledParams}
+            formIsTouched={formIsTouched}
+            groupName={groupName}
+            indexPattern={agg.getIndexPattern()}
+            metricAggs={metricAggs}
+            state={state}
             setAggParamValue={setAggParamValue}
-            setStateParamValue={setStateParamValue}
+            onAggTypeChange={onAggTypeChange}
+            setTouched={setTouched}
+            setValidity={setValidity}
+            schemas={schemas}
           />
-        )}
-        <DefaultEditorAggParams
-          agg={agg}
-          aggError={aggError}
-          aggIndex={aggIndex}
-          aggIsTooLow={aggIsTooLow}
-          disabledParams={disabledParams}
-          formIsTouched={formIsTouched}
-          groupName={groupName}
-          indexPattern={agg.getIndexPattern()}
-          metricAggs={metricAggs}
-          state={state}
-          setAggParamValue={setAggParamValue}
-          onAggTypeChange={onAggTypeChange}
-          setTouched={setTouched}
-          setValidity={setValidity}
-          schemas={schemas}
-        />
-      </>
+        </>
+      )}
     </EuiAccordion>
   );
 }
