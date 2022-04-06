@@ -26,4 +26,13 @@ export class Entity<TFields extends Fields> {
 
     return this;
   }
+
+  setFields(fields: TFields) {
+    Object.keys(fields).map((key) => {
+      const fieldName = key as keyof TFields;
+      this.fields[fieldName] = fields[fieldName];
+    });
+
+    return this;
+  }
 }

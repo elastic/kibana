@@ -41,14 +41,14 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
             .children(
               instance
                 .span('GET /products', 'sql', 'mysql')
-                .dbStatement('SELECT * FROM PRODUCTS')
+                .setFields({ 'span.db.statement': 'SELECT * FROM PRODUCTS' })
                 .duration(1000)
                 .success()
                 .destination('elasticsearch')
                 .timestamp(timestamp),
               instance
                 .span('GET apm-*/_search', 'db', 'elasticsearch')
-                .dbStatement(JSON.stringify(mockDbStatement))
+                .setFields({ 'span.db.statement': JSON.stringify(mockDbStatement) })
                 .duration(1000)
                 .success()
                 .destination('elasticsearch')

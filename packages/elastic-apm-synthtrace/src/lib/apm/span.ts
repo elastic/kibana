@@ -38,9 +38,4 @@ export class Span extends BaseSpan {
 
     return this;
   }
-
-  dbStatement(value: string) {
-    this.fields['span.db.statement'] = value;
-    return this;
-  }
 }
