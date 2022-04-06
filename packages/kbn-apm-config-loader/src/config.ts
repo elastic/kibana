@@ -246,18 +246,6 @@ export class ApmConfiguration {
    * Reads APM configuration from different sources and merges them together.
    */
   private getConfigFromAllSources(): AgentConfigOptions {
-    const config = merge({}, this.getConfigFromKibanaConfig(), this.getConfigFromEnv());
-
-    if (config.active === false && config.contextPropagationOnly !== false) {
-      throw new Error(
-        'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
-      );
-    }
-
-    if (config.active === true) {
-      config.contextPropagationOnly = config.contextPropagationOnly ?? false;
-    }
-
-    return config;
+    return merge({}, this.getConfigFromKibanaConfig(), this.getConfigFromEnv());
   }
 }
