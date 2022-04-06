@@ -204,7 +204,8 @@ export const packAssetType: SavedObjectsType = {
   name: packAssetSavedObjectType,
   hidden: false,
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
+    visibleInManagement: false,
   },
   namespaceType: 'agnostic',
   mappings: packAssetSavedObjectMappings,
