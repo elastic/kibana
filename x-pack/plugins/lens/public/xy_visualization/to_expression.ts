@@ -432,7 +432,7 @@ const axesToExpression = (axes: AxisConfig[]): Ast[] => {
         function: 'axisConfig',
         arguments: {
           id: [axis.id],
-          position: [axis.position],
+          position: axis.position ? [axis.position] : [],
         },
       },
     ],
