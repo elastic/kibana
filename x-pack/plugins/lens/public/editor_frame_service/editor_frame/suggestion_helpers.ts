@@ -289,5 +289,9 @@ export function getTopSuggestionForField(
     field,
     mainPalette,
   });
-  return suggestions.find((s) => s.visualizationId === visualization.activeId) || suggestions[0];
+  return (
+    suggestions.find((s) => s.visualizationId === visualization.activeId) ||
+    suggestions.filter((suggestion) => !suggestion.hide)[0] ||
+    suggestions[0]
+  );
 }

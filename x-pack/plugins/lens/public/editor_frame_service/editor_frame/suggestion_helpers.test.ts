@@ -733,6 +733,28 @@ describe('suggestion helpers', () => {
       );
     });
 
+    it('should get the top non-hidden suggestion if there is no active visualization', () => {
+      defaultParams[1].activeId = null;
+      mockVisualization2.getSuggestions.mockReturnValue([]);
+      mockVisualization1.getSuggestions.mockReturnValue([
+        {
+          score: 0.3,
+          title: 'second suggestion',
+          state: { second: true },
+          previewIcon: 'empty',
+        },
+        {
+          score: 0.5,
+          title: 'mop suggestion',
+          state: { first: true },
+          previewIcon: 'empty',
+          hide: true,
+        },
+      ]);
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result!.title).toEqual('second suggestion');
+    });
+
     it('should return nothing if visualization does not produce suggestions', () => {
       mockVisualization1.getSuggestions.mockReturnValue([]);
       const result = getTopSuggestionForField(...defaultParams);
