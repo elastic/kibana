@@ -10,7 +10,11 @@ import { getInstallCommandForPlatform } from './install_command_utils';
 describe('getInstallCommandForPlatform', () => {
   describe('without policy id', () => {
     it('should return the correct command if the the policyId is not set for linux', () => {
-      const res = getInstallCommandForPlatform('http://elasticsearch:9200', 'service-token-1');
+      const res = getInstallCommandForPlatform(
+        'linux',
+        'http://elasticsearch:9200',
+        'service-token-1'
+      );
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.zip \\\\
@@ -24,7 +28,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for mac', () => {
-      const res = getInstallCommandForPlatform('http://elasticsearch:9200', 'service-token-1');
+      const res = getInstallCommandForPlatform(
+        'mac',
+        'http://elasticsearch:9200',
+        'service-token-1'
+      );
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-x86_64.tar.gz \\\\
@@ -38,7 +46,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for windows', () => {
-      const res = getInstallCommandForPlatform('http://elasticsearch:9200', 'service-token-1');
+      const res = getInstallCommandForPlatform(
+        'windows',
+        'http://elasticsearch:9200',
+        'service-token-1'
+      );
 
       expect(res).toMatchInlineSnapshot(`
         "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.tar.gz -OutFile elastic-agent--windows-x86_64.tar.gz \`
@@ -52,7 +64,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for rpm', () => {
-      const res = getInstallCommandForPlatform('http://elasticsearch:9200', 'service-token-1');
+      const res = getInstallCommandForPlatform(
+        'rpm',
+        'http://elasticsearch:9200',
+        'service-token-1'
+      );
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm \\\\
@@ -66,7 +82,11 @@ describe('getInstallCommandForPlatform', () => {
     });
 
     it('should return the correct command if the the policyId is not set for deb', () => {
-      const res = getInstallCommandForPlatform('http://elasticsearch:9200', 'service-token-1');
+      const res = getInstallCommandForPlatform(
+        'deb',
+        'http://elasticsearch:9200',
+        'service-token-1'
+      );
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb \\\\
@@ -81,6 +101,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command sslCATrustedFingerprint option is passed', () => {
       const res = getInstallCommandForPlatform(
+        'linux',
         'http://elasticsearch:9200',
         'service-token-1',
         undefined,
@@ -105,6 +126,7 @@ describe('getInstallCommandForPlatform', () => {
   describe('with policy id', () => {
     it('should return the correct command if the the policyId is set for linux', () => {
       const res = getInstallCommandForPlatform(
+        'linux',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1'
@@ -124,6 +146,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for mac', () => {
       const res = getInstallCommandForPlatform(
+        'mac',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1'
@@ -143,6 +166,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for windows', () => {
       const res = getInstallCommandForPlatform(
+        'windows',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1'
@@ -162,6 +186,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for rpm', () => {
       const res = getInstallCommandForPlatform(
+        'rpm',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1'
@@ -181,6 +206,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for deb', () => {
       const res = getInstallCommandForPlatform(
+        'deb',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1'
@@ -202,6 +228,7 @@ describe('getInstallCommandForPlatform', () => {
   describe('with policy id and fleet server host and production deployment', () => {
     it('should return the correct command if the the policyId is set for linux', () => {
       const res = getInstallCommandForPlatform(
+        'linux',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1',
@@ -226,6 +253,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for mac', () => {
       const res = getInstallCommandForPlatform(
+        'mac',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1',
@@ -250,6 +278,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for windows', () => {
       const res = getInstallCommandForPlatform(
+        'windows',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1',
@@ -274,6 +303,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for rpm', () => {
       const res = getInstallCommandForPlatform(
+        'rpm',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1',
@@ -298,6 +328,7 @@ describe('getInstallCommandForPlatform', () => {
 
     it('should return the correct command if the the policyId is set for deb', () => {
       const res = getInstallCommandForPlatform(
+        'deb',
         'http://elasticsearch:9200',
         'service-token-1',
         'policy-1',
