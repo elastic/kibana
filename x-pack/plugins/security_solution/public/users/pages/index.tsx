@@ -31,7 +31,12 @@ export const UsersContainer = React.memo(() => {
           match: {
             params: { detailName },
           },
-        }) => <UsersDetails usersDetailsPagePath={usersDetailsPagePath} detailName={detailName} />}
+        }) => (
+          <UsersDetails
+            usersDetailsPagePath={usersDetailsPagePath}
+            detailName={decodeURIComponent(detailName)}
+          />
+        )}
       />
       <Route
         path={usersDetailsPagePath}
