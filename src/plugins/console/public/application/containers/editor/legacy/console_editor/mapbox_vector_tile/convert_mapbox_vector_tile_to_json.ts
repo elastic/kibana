@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { VectorTile, VectorTileFeature } from '@mapbox/vector-tile';
+import { VectorTile, VectorTileLayer, VectorTileFeature } from '@mapbox/vector-tile';
 
 interface MapboxVectorTileJson {
   [key: string]: {};
@@ -17,7 +17,7 @@ export function convertMapboxVectorTileToJson(response: VectorTile) {
 
   for (const property in data) {
     if (data.hasOwnProperty(property)) {
-      const propertyObject = data[property];
+      const propertyObject: VectorTileLayer = data[property];
       const featuresArray = [];
 
       for (let index = 0; index < propertyObject.length; index++) {
@@ -55,7 +55,7 @@ export function convertMapboxVectorTileToJson(response: VectorTile) {
         });
       }
 
-      output[property] = [...featuresArray];
+      output[property] = featuresArray;
     }
   }
 

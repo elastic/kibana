@@ -48,7 +48,7 @@ function modeForContentType(contentType?: string) {
   if (!contentType) {
     return 'ace/mode/text';
   }
-  if (isJSONContentType(contentType)) {
+  if (isJSONContentType(contentType) || isMapboxVectorTile) {
     // Using hjson will allow us to use comments in editor output and solves the problem with error markers
     return 'ace/mode/hjson';
   } else if (contentType.indexOf('application/yaml') >= 0) {
@@ -96,8 +96,10 @@ function EditorOutputUI() {
 
             if (isMapboxVectorTile(contentType)) {
               const vectorTile = new VectorTile(new Protobuf(value as ArrayBuffer));
-              editorOutput = convertMapboxVectorTileToJson(vectorTile);
+              const vectorTileJson = convertMapboxVectorTileToJson(vectorTile);
+              editorOutput = safeExpandLiteralStrings(vectorTileJson as string);
             }
+
             return editorOutput;
           })
           .join('\n'),
