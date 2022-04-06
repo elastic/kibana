@@ -44,6 +44,9 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
+        ELASTIC_APM_CAPTURE_BODY: 'all',
+        ELASTIC_APM_CAPTURE_HEADERS: true,
+        ELASTIC_APM_LONG_FIELD_MAX_LENGTH: 300_000,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance/tests/config.playwright`,
           performancePhase: process.env.TEST_PERFORMANCE_PHASE,
