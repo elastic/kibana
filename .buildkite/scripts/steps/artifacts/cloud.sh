@@ -23,7 +23,7 @@ TAG="$VERSION-$GIT_COMMIT"
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana/kibana-cloud:$VERSION"
 KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
 
-docker tag "$KIBANA_BASE_IMAGE" "KIBANA_TEST_IMAGE"
+docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
