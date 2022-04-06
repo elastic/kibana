@@ -173,7 +173,16 @@ Uptime::
 
 For detailed information about the 7.10.0 release, review the following sections.
 
-<<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>> | <<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>>
+<<known-issue-v7.10.0,Known issue>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>> | <<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>>
+
+[float]
+[[known-issue-v7.10.0]]
+=== Known issue
+
+Dashboard:: 
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
++
+To resolve the known issue, upgrade to {kib} 7.17.3 or later.       
 
 [float]
 [[deprecation-v7.10.0]]
