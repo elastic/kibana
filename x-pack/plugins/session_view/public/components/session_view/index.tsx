@@ -30,6 +30,7 @@ import {
   useFetchSessionViewProcessEvents,
   useFetchSessionViewAlerts,
 } from './hooks';
+import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 
 /**
  * The main wrapper component for the session view.
@@ -45,7 +46,7 @@ export const SessionView = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
   const [displayOptions, setDisplayOptions] = useLocalStorage<DisplayOptionsState>(
-    'displayOptions',
+    LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
     {
       timestamp: true,
       verboseMode: true,
