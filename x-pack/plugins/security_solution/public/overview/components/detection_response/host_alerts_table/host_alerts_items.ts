@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { GenericBuckets } from '../../../../../common/search_strategy';
-import { AlertSearchResponse } from '../../../../detections/containers/detection_engine/alerts/types';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-const ID = 'vulnerableHostsBySeverityQuery';
 const HOSTS_BY_SEVERITY_AGG = 'hostsBySeverity';
 
 interface TimeRange {
@@ -20,6 +20,10 @@ interface TimeRange {
   to: string;
 }
 
+interface UseHostsAlertsItemsProps {
+  skip: boolean;
+  queryId: string;
+}
 export interface AlertSeverityCounts {
   hostName: string;
   totalAlerts: number;
@@ -45,55 +49,61 @@ interface AlertCountersBySeverityAndSeverityAggregation {
   };
 }
 
-interface AlertsCounterResult {
-  counters: AlertSeverityCounts[];
-  id: string;
-  inspect: { dsl: string; response: string };
-  isInspected: boolean;
-}
-
 interface UseVulnerableHostsCountersReturnType {
   isLoading: boolean;
-  data: AlertsCounterResult;
-  refetch: (() => Promise<void>) | null;
+  data: AlertSeverityCounts[];
 }
 
 export const useHostAlertsItems = ({
-  from,
-  to,
-}: TimeRange): UseVulnerableHostsCountersReturnType => {
+  skip,
+  queryId,
+}: UseHostsAlertsItemsProps): UseVulnerableHostsCountersReturnType => {
+  const { to, from, setQuery: globalSetQuery, deleteQuery } = useGlobalTime();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-
   const {
+    data,
+    request,
+    response,
     setQuery,
     loading: isLoadingData,
-    refetch,
-    ...result
+    refetch: refetchQuery,
   } = useQueryAlerts<{}, AlertCountersBySeverityAndSeverityAggregation>({
     query: buildVulnerableHostAggregationQuery({ from, to }),
     indexName: signalIndexName,
+    skip,
   });
+
+  const isLoading = isLoadingData && isSignalIndexLoading;
 
   useEffect(() => {
     setQuery(buildVulnerableHostAggregationQuery({ from, to }));
   }, [setQuery, from, to]);
 
-  const transformedResponse = useMemo(
-    () => ({
-      id: ID,
-      counters: pickOffCounters(result.data),
-      inspect: {
-        dsl: result.request,
-        response: result.response,
-      },
-      isInspected: false,
-    }),
-    [result]
-  );
+  const transformedResponse: AlertSeverityCounts[] = useMemo(() => {
+    if (data && !!data.aggregations) {
+      return pickOffCounters(data.aggregations);
+    }
+    return [];
+  }, [data]);
 
-  const isLoading = isLoadingData && isSignalIndexLoading;
+  const refetch = useCallback(() => {
+    if (!skip && refetchQuery) {
+      refetchQuery();
+    }
+  }, [skip, refetchQuery]);
 
-  return { isLoading, data: transformedResponse, refetch };
+  useQueryInspector({
+    deleteQuery,
+    inspect: {
+      dsl: [request],
+      response: [response],
+    },
+    refetch,
+    setQuery: globalSetQuery,
+    queryId,
+    loading: isLoading,
+  });
+  return { isLoading, data: transformedResponse };
 };
 
 export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => ({
@@ -172,9 +182,9 @@ export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => 
 });
 
 function pickOffCounters(
-  rawAlertResponse: AlertSearchResponse<{}, AlertCountersBySeverityAndSeverityAggregation> | null
+  rawAggregation: AlertCountersBySeverityAndSeverityAggregation
 ): AlertSeverityCounts[] {
-  const buckets = rawAlertResponse?.aggregations?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
+  const buckets = rawAggregation?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
 
   return buckets.reduce<AlertSeverityCounts[]>((accumalatedAlertsByHost, currentHost) => {
     return [

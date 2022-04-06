@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */ // we need both to allow a user to right click and open in new a tab or click and navigate within the app without forcing a reload of the application
+
+import React, { useMemo } from 'react';
+
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -16,41 +20,121 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import React from 'react';
-
+import { SecurityPageName } from '../../../../app/types';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { SEVERITY_COLOR } from '../util';
 import { AlertSeverityCounts, useUserAlertsItems } from './user_alerts_items';
 
-const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
+type GetTableColumns = (params: {
+  getAppUrl: GetAppUrl;
+  navigateTo: NavigateTo;
+}) => Array<EuiBasicTableColumn<AlertSeverityCounts>>;
+
+const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
+
+export const UserAlertsTable = React.memo(() => {
+  const { getAppUrl, navigateTo } = useNavigation();
+  const { toggleStatus, setToggleStatus } = useQueryToggle(
+    DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID
+  );
+  const { data, isLoading } = useUserAlertsItems({
+    skip: !toggleStatus,
+    queryId: DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID,
+  });
+
+  const columns = useMemo(
+    () => getTableColumns({ getAppUrl, navigateTo }),
+    [getAppUrl, navigateTo]
+  );
+
+  return (
+    <EuiPanel hasBorder data-test-subj="userSeverityAlertsPanel">
+      <HeaderSection
+        id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
+        title={i18n.USER_ALERTS_SECTION_TITLE}
+        titleSize="s"
+        subtitle="TO DO"
+        toggleStatus={toggleStatus}
+        toggleQuery={setToggleStatus}
+      />
+
+      {toggleStatus && (isLoading || data.length > 0) ? (
+        <>
+          <EuiBasicTable
+            data-test-subj="userAlertsTable"
+            columns={columns}
+            items={data}
+            loading={isLoading}
+            noItemsMessage={<>{'No alerts found'}</> /** TODO */}
+          />
+          <EuiSpacer size="m" />
+          <EuiButton
+            onClick={() => {
+              console.log('Where to link to');
+            }}
+          >
+            {i18n.VIEW_ALL_USER_ALERTS}
+          </EuiButton>
+        </>
+      ) : (
+        <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+      )}
+    </EuiPanel>
+  );
+});
+
+UserAlertsTable.displayName = 'UserAlertsTable';
+
+const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
   {
     field: 'userName',
     name: i18n.USER_ALERTS_USERNAME_COLUMN,
     truncateText: true,
     textOnly: true,
 
-    render: (hostName: string) => (
-      <EuiLink
-        data-test-subj="userSeverityAlertsTable-hostName"
-        href={`/app/security/rules/id/${hostName}`}
-      >
-        {hostName}
-      </EuiLink>
-    ),
+    render: (userName: string) => {
+      const url = getAppUrl({ deepLinkId: SecurityPageName.users, path: userName });
+
+      return (
+        <EuiLink
+          data-test-subj="userSeverityAlertsTable-userName"
+          href={`/app/security/users/${userName}`}
+          onClick={(ev?: React.MouseEvent) => {
+            if (ev) {
+              ev.preventDefault();
+            }
+            navigateTo({ url });
+          }}
+        >
+          {userName}
+        </EuiLink>
+      );
+    },
   },
   {
     field: 'totalAlerts',
     name: i18n.ALERTS_COLUMN,
-    render: (totalAlerts: number, { userName }) => (
-      <EuiLink
-        data-test-subj="userSeverityAlertsTable-totalAlerts"
-        href={`/app/security/rules/id/${userName}`}
-      >
-        {totalAlerts}
-      </EuiLink>
-    ),
+    render: (totalAlerts: number, { userName }) => {
+      const url = getAppUrl({ deepLinkId: SecurityPageName.users, path: userName });
+
+      return (
+        <EuiLink
+          data-test-subj="userSeverityAlertsTable-totalAlerts"
+          href={`/app/security/users/id/${userName}`}
+          onClick={(ev?: React.MouseEvent) => {
+            if (ev) {
+              ev.preventDefault();
+            }
+            navigateTo({ url });
+          }}
+        >
+          {totalAlerts}
+        </EuiLink>
+      );
+    },
   },
   {
     field: 'critical',
@@ -89,41 +173,3 @@ const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
     ),
   },
 ];
-
-export const UserAlertsTable = React.memo(() => {
-  const { to, from } = useGlobalTime();
-  const { data, isLoading } = useUserAlertsItems({ to, from });
-
-  return (
-    <EuiPanel hasBorder data-test-subj="userSeverityAlertsPanel">
-      <HeaderSection
-        id={data.id}
-        title={'Vulnerable users by severity'}
-        titleSize="s"
-        hideSubtitle
-      />
-      {isLoading || data.counters.length > 0 ? (
-        <>
-          <EuiBasicTable
-            data-test-subj="userAlertsTable"
-            columns={tableColumns}
-            items={data.counters}
-            loading={isLoading}
-            noItemsMessage={<>{'No alerts found'}</> /** TODO */}
-          />
-          <EuiSpacer size="m" />
-          <EuiButton
-            onClick={() => {
-              console.log('redirect');
-            }}
-          >
-            {i18n.VIEW_ALL_USER_ALERTS}
-          </EuiButton>
-        </>
-      ) : (
-        <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-      )}
-    </EuiPanel>
-  );
-});
-UserAlertsTable.displayName = 'UserAlertsTable';

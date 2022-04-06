@@ -6,9 +6,19 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+
+import { useHostAlertsItems } from './host_alerts_items';
 import { mockVulnerableHostsBySeverityResult } from './mock_data';
 
-import { buildVulnerableHostAggregationQuery, useHostAlertsItems } from './host_alerts_items';
+jest.mock('../../../../common/containers/use_global_time', () => ({
+  useGlobalTime: () => ({
+    from: '2020-07-07T08:20:18.966Z',
+    isInitializing: false,
+    to: '2020-07-08T08:20:18.966Z',
+    setQuery: jest.fn(),
+    deleteQuery: jest.fn(),
+  }),
+}));
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: () => mockVulnerableHostsBySeverityResult,
@@ -21,9 +31,6 @@ jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_
   }),
 }));
 
-const from = '2022-03-02T10:13:37.853Z';
-const to = '2022-03-29T10:13:37.853Z';
-
 describe('useVulnerableHostsCounters', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -32,21 +39,15 @@ describe('useVulnerableHostsCounters', () => {
   it('initializes', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useHostAlertsItems({ from: 'initial_date', to: 'end_date' })
+        useHostAlertsItems({
+          queryId: 'someQueryid',
+          skip: false,
+        })
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        data: {
-          counters: [],
-          id: 'vulnerableHostsBySeverityQuery',
-          inspect: {
-            dsl: '',
-            response: '',
-          },
-          isInspected: false,
-        },
+        data: [],
         isLoading: false,
-        refetch: null,
       });
     });
   });
@@ -54,61 +55,48 @@ describe('useVulnerableHostsCounters', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
         useHostAlertsItems({
-          from,
-          to,
+          queryId: 'someQueryid',
+          skip: false,
         })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        data: {
-          counters: [
-            {
-              hostName: 'Host-342m5gl1g2',
-              count: 100,
-              critical: 5,
-              high: 50,
-              low: 40,
-              medium: 5,
-            },
-            {
-              hostName: 'Host-vns3hyykhu',
-              count: 104,
-              critical: 4,
-              high: 100,
-              low: 0,
-              medium: 0,
-            },
-            {
-              hostName: 'Host-awafztonav',
-              count: 108,
-              critical: 4,
-              high: 50,
-              low: 50,
-              medium: 4,
-            },
-            {
-              hostName: 'Host-56k7zf5kne',
-              count: 128,
-              critical: 1,
-              high: 6,
-              low: 59,
-              medium: 62,
-            },
-          ],
-          id: 'vulnerableHostsBySeverityQuery',
-          inspect: {
-            dsl: JSON.stringify(
-              { index: ['detections'], body: buildVulnerableHostAggregationQuery({ from, to }) },
-              null,
-              2
-            ),
-            response: JSON.stringify(mockVulnerableHostsBySeverityResult, null, 2),
+        data: [
+          {
+            hostName: 'Host-342m5gl1g2',
+            totalAlerts: 100,
+            critical: 5,
+            high: 50,
+            low: 40,
+            medium: 5,
           },
-          isInspected: false,
-        },
+          {
+            hostName: 'Host-vns3hyykhu',
+            totalAlerts: 104,
+            critical: 4,
+            high: 100,
+            low: 0,
+            medium: 0,
+          },
+          {
+            hostName: 'Host-awafztonav',
+            totalAlerts: 108,
+            critical: 4,
+            high: 50,
+            low: 50,
+            medium: 4,
+          },
+          {
+            hostName: 'Host-56k7zf5kne',
+            totalAlerts: 128,
+            critical: 1,
+            high: 6,
+            low: 59,
+            medium: 62,
+          },
+        ],
         isLoading: false,
-        refetch: result.current.refetch,
       });
     });
   });

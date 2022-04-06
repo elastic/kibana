@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */ // we need both to allow a user to right click and open in new a tab or click and navigate within the app without forcing a reload of the application
+
+import React, { useMemo } from 'react';
+
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -16,41 +20,114 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import React from 'react';
-
-import { useNavigation } from '../../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../app/types';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { SEVERITY_COLOR } from '../util';
 import { AlertSeverityCounts, useHostAlertsItems } from './host_alerts_items';
 
-const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
+type GetTableColumns = (params: {
+  getAppUrl: GetAppUrl;
+  navigateTo: NavigateTo;
+}) => Array<EuiBasicTableColumn<AlertSeverityCounts>>;
+
+const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
+
+export const HostAlertsTable = React.memo(() => {
+  const { getAppUrl, navigateTo } = useNavigation();
+  const { toggleStatus, setToggleStatus } = useQueryToggle(
+    DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID
+  );
+
+  const { data, isLoading } = useHostAlertsItems({
+    skip: !toggleStatus,
+    queryId: DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID,
+  });
+
+  const columns = useMemo(
+    () => getTableColumns({ getAppUrl, navigateTo }),
+    [getAppUrl, navigateTo]
+  );
+
+  return (
+    <EuiPanel hasBorder data-test-subj="hostSeverityAlertsPanel">
+      <HeaderSection
+        id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
+        title={i18n.HOST_ALERTS_SECTION_TITLE}
+        titleSize="s"
+        toggleStatus={toggleStatus}
+        toggleQuery={setToggleStatus}
+      />
+      {toggleStatus && (isLoading || data.length > 0) ? (
+        <>
+          <EuiBasicTable
+            data-test-subj="hostAlertsTable"
+            columns={columns}
+            items={data}
+            loading={isLoading}
+          />
+          <EuiSpacer size="m" />
+          <EuiButton onClick={() => console.log('TO DO Where to link ')}>
+            {i18n.VIEW_ALL_HOST_ALERTS}
+          </EuiButton>
+        </>
+      ) : (
+        <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+      )}
+    </EuiPanel>
+  );
+});
+
+HostAlertsTable.displayName = 'HostAlertsTable';
+
+const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
   {
     field: 'hostName',
     name: i18n.HOST_ALERTS_HOSTNAME_COLUMN,
     truncateText: true,
     textOnly: true,
-    render: (hostName: string) => (
-      <EuiLink
-        data-test-subj="hostSeverityAlertsTable-hostName"
-        href={`/app/security/rules/id/${hostName}`}
-      >
-        {hostName}
-      </EuiLink>
-    ),
+    render: (hostName: string) => {
+      const url = getAppUrl({ deepLinkId: SecurityPageName.hosts, path: hostName });
+
+      return (
+        <EuiLink
+          data-test-subj="userSeverityAlertsTable-hostName"
+          href={`/app/security/hosts/${hostName}`}
+          onClick={(ev?: React.MouseEvent) => {
+            if (ev) {
+              ev.preventDefault();
+            }
+            navigateTo({ url });
+          }}
+        >
+          {hostName}
+        </EuiLink>
+      );
+    },
   },
   {
     field: 'totalAlerts',
     name: i18n.ALERTS_COLUMN,
-    render: (totalAlerts: number, { hostName }) => (
-      <EuiLink
-        data-test-subj="hostSeverityAlertsTable-totalAlerts"
-        href={`/app/security/rules/id/${hostName}`}
-      >
-        {totalAlerts}
-      </EuiLink>
-    ),
+    render: (totalAlerts: number, { hostName }) => {
+      const url = getAppUrl({ deepLinkId: SecurityPageName.hosts, path: hostName });
+
+      return (
+        <EuiLink
+          data-test-subj="hostSeverityAlertsTable-totalAlerts"
+          href={`/app/security/hosts/${hostName}`}
+          onClick={(ev?: React.MouseEvent) => {
+            if (ev) {
+              ev.preventDefault();
+            }
+            navigateTo({ url });
+          }}
+        >
+          {totalAlerts}
+        </EuiLink>
+      );
+    },
   },
   {
     field: 'critical',
@@ -89,37 +166,3 @@ const tableColumns: Array<EuiBasicTableColumn<AlertSeverityCounts>> = [
     ),
   },
 ];
-
-export const HostAlertsTable = React.memo(() => {
-  const { to, from } = useGlobalTime();
-  const { navigateTo } = useNavigation();
-  const { data, isLoading } = useHostAlertsItems({ to, from });
-
-  return (
-    <EuiPanel hasBorder data-test-subj="hostSeverityAlertsPanel">
-      <HeaderSection
-        id={data.id}
-        title={i18n.HOST_ALERTS_SECTION_TITLE}
-        titleSize="s"
-        hideSubtitle
-      />
-      {isLoading || data.counters.length > 0 ? (
-        <>
-          <EuiBasicTable
-            data-test-subj="hostAlertsTable"
-            columns={tableColumns}
-            items={data.counters}
-            loading={isLoading}
-          />
-          <EuiSpacer size="m" />
-          <EuiButton onClick={() => navigateTo({ url: 'how to form this' })}>
-            {i18n.VIEW_ALL_HOST_ALERTS}
-          </EuiButton>
-        </>
-      ) : (
-        <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-      )}
-    </EuiPanel>
-  );
-});
-HostAlertsTable.displayName = 'HostAlertsTable';
