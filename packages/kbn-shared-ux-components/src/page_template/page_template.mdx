@@ -32,6 +32,9 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
   }}
 />
 ```
+
+![Screenshot of demo empty state code. Shows the Kibana navigation bars and a centered empty state with the dashboard app icon, a level 1 heading "Dashboards", body text "You don't have any dashboards yet.", and a button that says "Create new dashboard".](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_default_empty_state.png)
+
 <DocCallOut color="warning" title="Missing page header content can lead to an anemic empty state">
   Because all properties of the page header are optional, the empty state has the potential to
   render blank. Make sure your empty state doesn't leave the user confused.
@@ -56,6 +59,8 @@ You can also provide a custom empty prompt to replace the pre-built one. You'll 
 </KibanaPageTemplate>
 ```
 
+![Screenshot of demo custom empty state code. Shows the Kibana navigation bars and a centered empty state with the a level 1 heading "No data", body text "You have no data. Would you like some of ours?", and a button that says "Get sample data".](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_custom_empty_state.png)
+
 ### Empty states with a page header
 
 When passing both a `pageHeader` configuration and `isEmptyState`, the component will render the proper template (`centeredContent`). Be sure to reduce the heading level within your child empty prompt to `<h2>`.
@@ -78,6 +83,8 @@ When passing both a `pageHeader` configuration and `isEmptyState`, the component
   />
 </KibanaPageTemplate>
 ```
+
+![Screenshot of demo custom empty state code with a page header. Shows the Kibana navigation bars, a level 1 heading "Dashboards", and a centered empty state with the a level 2 heading "No data", body text "You have no data. Would you like some of ours?", and a button that says "Get sample data".](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_header_and_empty_state.png)
 
 ## `solutionNav`
 
@@ -107,19 +114,23 @@ When using `EuiSideNav`, root level items should not be linked but provide secti
 </KibanaPageTemplate>
 ```
 
+![Screenshot of Stack Management empty state with a provided solution navigation shown on the left, outlined in pink.](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_template_solution_nav.png)
+
+![Screenshots of Stack Management page in mobile view. Menu closed on the left, menu open on the right.](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_template_solution_nav_mobile.png)
+
 ## `noDataConfig`
 
 Increases the consistency in messaging across all the solutions during the getting started process when no data exists. Each solution/template instance decides when is the most appropriate time to show this configuration, but is messaged specifically towards having no indices or index patterns at all or that match the particular solution.
 
 This is a built-in configuration that displays a very specific UI and requires very specific keys. It will also ignore all other configurations of the template including `pageHeader` and `children`, with the exception of continuing to show `solutionNav`.
 
-The `noDataConfig` is of type [`NoDataPagProps`](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx):
+The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kibana/blob/main/packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts#L14):
 
 1. `solution: string`: Single name for the current solution, used to auto-generate the title, logo, and description *(required)*
 2. `docsLink: string`: Required to set the docs link for the whole solution *(required)*
 3. `logo?: string`: Optionally replace the auto-generated logo
 4. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
-5. `action: NoDataPageActionsProps`: An object of `NoDataPageActions` configurations with a unique primary key *(required)*
+5. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key *(required)*
 
 ### `NoDataPageActions`
 
@@ -153,3 +164,5 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
   {/* Children will be ignored */}
 </KibanaPageTemplate>
 ```
+
+![Screenshot of and example in Observability using the no data configuration and using the corresponding list numbers to point out the UI elements that they adjust.](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_template_no_data_config.png)
