@@ -70,6 +70,7 @@
       "jest-styled-components",
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
     ]
   }
 }
