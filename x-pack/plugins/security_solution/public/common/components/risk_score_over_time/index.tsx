@@ -20,28 +20,26 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import { chartDefaultSettings, useTheme } from '../../../common/components/charts/common';
-import { useTimeZone } from '../../../common/lib/kibana';
-import { histogramDateTimeFormatter } from '../../../common/components/utils';
-import { HeaderSection } from '../../../common/components/header_section';
-import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
+import { chartDefaultSettings, useTheme } from '../charts/common';
+import { useTimeZone } from '../../lib/kibana';
+import { histogramDateTimeFormatter } from '../utils';
+import { HeaderSection } from '../header_section';
+import { InspectButton, InspectButtonContainer } from '../inspect';
 import * as i18n from './translations';
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { HostsComponentsQueryProps } from '../../pages/navigation/types';
-import { buildHostNamesFilter } from '../../../../common/search_strategy/security_solution/risk_score';
-import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
+import { PreferenceFormattedDate } from '../formatted_date';
+import { RiskScore } from '../../../../common/search_strategy';
 
-export interface HostRiskScoreOverTimeProps
-  extends Pick<HostsComponentsQueryProps, 'setQuery' | 'deleteQuery'> {
-  hostName: string;
+export interface RiskScoreOverTimeProps {
   from: string;
   to: string;
+  loading: boolean;
+  riskScore?: RiskScore[];
+  queryId: string;
+  title: string;
 }
 
 const RISKY_THRESHOLD = 70;
 const DEFAULT_CHART_HEIGHT = 250;
-const QUERY_ID = HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME;
 
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
@@ -54,12 +52,13 @@ const LoadingChart = styled(EuiLoadingChart)`
   text-align: center;
 `;
 
-const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
-  hostName,
+const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   from,
   to,
-  setQuery,
-  deleteQuery,
+  riskScore,
+  loading,
+  queryId,
+  title,
 }) => {
   const timeZone = useTimeZone();
 
@@ -70,51 +69,29 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
     []
   );
 
-  const timerange = useMemo(
-    () => ({
-      from,
-      to,
-    }),
-    [from, to]
-  );
   const theme = useTheme();
-
-  const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
-    onlyLatest: false,
-    timerange,
-  });
 
   const graphData = useMemo(
     () =>
-      data
-        ?.map((hostRisk) => ({
-          x: hostRisk['@timestamp'],
-          y: hostRisk.risk_stats.risk_score,
+      riskScore
+        ?.map((data) => ({
+          x: data['@timestamp'],
+          y: data.risk_stats.risk_score,
         }))
         .reverse() ?? [],
-    [data]
+    [riskScore]
   );
-
-  useQueryInspector({
-    queryId: QUERY_ID,
-    loading,
-    refetch,
-    setQuery,
-    deleteQuery,
-    inspect,
-  });
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder data-test-subj="hostRiskScoreOverTime">
+      <EuiPanel hasBorder data-test-subj="RiskScoreOverTime">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
-            <HeaderSection title={i18n.HOST_RISK_SCORE_OVER_TIME} hideSubtitle />
+            <HeaderSection title={title} hideSubtitle />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <InspectButton queryId={QUERY_ID} title={i18n.HOST_RISK_SCORE_OVER_TIME} />
+            <InspectButton queryId={queryId} title={title} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -122,7 +99,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
           <EuiFlexItem grow={1}>
             <div style={{ height: DEFAULT_CHART_HEIGHT }}>
               {loading ? (
-                <LoadingChart size="l" data-test-subj="HostRiskScoreOverTime-loading" />
+                <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
               ) : (
                 <Chart>
                   <Settings
@@ -161,7 +138,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                     }}
                   />
                   <LineSeries
-                    id={'HostRiskOverTime'}
+                    id={'RiskOverTime'}
                     name={i18n.RISK_SCORE}
                     xScaleType={ScaleType.Time}
                     yScaleType={ScaleType.Linear}
@@ -172,13 +149,13 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                     tickFormat={scoreFormatter}
                   />
                   <LineAnnotation
-                    id="HostRiskOverTime_annotation"
+                    id="RiskOverTime_annotation"
                     domainType={AnnotationDomainType.YDomain}
                     dataValues={[
                       {
                         dataValue: RISKY_THRESHOLD,
                         details: `${RISKY_THRESHOLD}`,
-                        header: i18n.HOST_RISK_THRESHOLD,
+                        header: i18n.RISK_THRESHOLD,
                       },
                     ]}
                     markerPosition="left"
@@ -205,6 +182,6 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   );
 };
 
-HostRiskScoreOverTimeComponent.displayName = 'HostRiskScoreOverTimeComponent';
-export const HostRiskScoreOverTime = React.memo(HostRiskScoreOverTimeComponent);
-HostRiskScoreOverTime.displayName = 'HostRiskScoreOverTime';
+RiskScoreOverTimeComponent.displayName = 'RiskScoreOverTimeComponent';
+export const RiskScoreOverTime = React.memo(RiskScoreOverTimeComponent);
+RiskScoreOverTime.displayName = 'RiskScoreOverTime';
