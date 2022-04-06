@@ -6,37 +6,36 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import classnames from 'classnames';
 import uuid from 'uuid';
 import { Datum } from '@elastic/charts';
-import { DonutChart, NO_LEGEND_DATA } from '../../../../common/components/charts/donutchart';
-import { APP_ID, APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
-import {
-  useGetUserCasesPermissions,
-  useKibana,
-  useNavigation,
-} from '../../../../common/lib/kibana';
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { DonutChart } from '../../../../common/components/charts/donutchart';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { Panel } from '../../../../common/components/panel';
-import {
-  HISTOGRAM_ACTIONS_BUTTON_CLASS,
-  VisualizationActions,
-} from '../../../../common/components/visualization_actions';
-import { VisualizationActionsProps } from '../../../../common/components/visualization_actions/types';
+import { HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../../../../common/components/visualization_actions';
 import { ViewDetailsButton } from './view_details_button';
 import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
-import { ThemeContext } from '../../../../common/components/charts/donut_theme_context';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
 import { useAlertsByStatus } from './use_alerts_by_status';
-import { FormattedCount } from './formatted_count';
-import { ALERTS } from './translations';
+import {
+  ALERTS,
+  ALERTS_TITLE,
+  STATUS_ACKNOWLEDGED,
+  STATUS_CLOSED,
+  STATUS_OPEN,
+} from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { VIEW_ALERTS } from '../../../pages/translations';
+import { SEVERITY_COLOR } from '../utils';
+import { FormattedCount } from '../../../../common/components/formatted_number';
+import { ChartLabel } from './chart_label';
 
 const HistogramPanel = styled(Panel)<{ $height?: number }>`
   display: flex;
@@ -47,56 +46,22 @@ const defaultPanelHeight = 300;
 const donutHeight = 120;
 
 interface AlertsByStatusProps {
-  headerChildren?: React.ReactNode;
-  queryId: string;
-  showSpacer?: boolean;
   signalIndexName: string | null;
-  subtitle?: string;
-  title: string;
 }
 
 type PaddingSize = 's' | 'none' | 'm' | 'l';
 
-interface PanelSettings {
-  panelHeight: string;
-  paddingSize: PaddingSize;
-}
-
-type VisualizationActionsOptions = Omit<
-  VisualizationActionsProps,
-  'queryId' | 'title' | 'isInspectButtonDisabled'
->;
-
-interface Others {
-  panelSettings?: PanelSettings;
-  visualizationActionsOptions?: VisualizationActionsOptions;
-}
-
-type Props = AlertsByStatusProps & Others;
-
-const DefaultPanelSettings = {
+const panelSettings = {
   panelHeight: `${defaultPanelHeight}px`,
   paddingSize: 'm' as PaddingSize,
 };
-
 const legendField = 'kibana.alert.severity';
+const colors = SEVERITY_COLOR;
+const legends: Severity[] = ['critical', 'high', 'medium', 'low'];
+const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
-export const AlertsByStatus = ({
-  headerChildren,
-  panelSettings = DefaultPanelSettings,
-  queryId,
-  showSpacer,
-  signalIndexName,
-  subtitle,
-  title,
-  visualizationActionsOptions,
-}: Props) => {
-  const { cases } = useKibana().services;
-  const CasesContext = cases.ui.getCasesContext();
-  const userPermissions = useGetUserCasesPermissions();
-  const userCanCrud = userPermissions?.crud ?? false;
-  const { colors } = useContext(ThemeContext);
-  const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
+export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
+  const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
   const { navigateTo } = useNavigation();
   const goToAlerts = useCallback(
@@ -122,50 +87,47 @@ export const AlertsByStatus = ({
 
   const { items: donutData, isLoading: loading } = useAlertsByStatus({
     signalIndexName,
-    queryId,
+    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     skip: !toggleStatus,
   });
   const legendItems: LegendItem[] = useMemo(
     () =>
-      !loading && donutData?.length > 0 && legendField
-        ? (donutData[0] && donutData[0].buckets).map((d) => ({
-            color: colors[d.key],
-            dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
-            timelineId: undefined,
-            field: legendField,
-            value: d.key,
-          }))
-        : NO_LEGEND_DATA,
-    [colors, donutData, loading]
+      legends.map((d) => ({
+        color: colors[d],
+        dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d}`),
+        timelineId: undefined,
+        field: legendField,
+        value: d,
+      })),
+    []
   );
 
-  const totalAlerts = useMemo(
-    () => donutData.reduce((acc, curr) => acc + curr.doc_count, 0),
-    [donutData]
-  );
+  const totalAlerts =
+    loading || !donutData
+      ? null
+      : (donutData?.open?.total ?? 0) +
+        (donutData?.acknowledged?.total ?? 0) +
+        (donutData?.closed?.total ?? 0);
 
-  const fillColor = useCallback(
-    (d: Datum) => {
-      switch (d.dataName) {
-        case 'low':
-          return colors.low;
-        case 'medium':
-          return colors.medium;
-        case 'high':
-          return colors.high;
-        case 'critical':
-          return colors.critical;
-        default:
-          return colors.low;
-      }
-    },
-    [colors.critical, colors.high, colors.low, colors.medium]
-  );
+  const fillColor = useCallback((d: Datum) => {
+    switch (d.dataName) {
+      case 'low':
+        return colors.low;
+      case 'medium':
+        return colors.medium;
+      case 'high':
+        return colors.high;
+      case 'critical':
+        return colors.critical;
+      default:
+        return colors.low;
+    }
+  }, []);
   return (
     <>
       <HoverVisibilityContainer show={true} targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
         <HistogramPanel
-          data-test-subj={`${queryId}Panel`}
+          data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}
           height={toggleStatus ? 'auto' : panelSettings.panelHeight}
           paddingSize={panelSettings.paddingSize}
         >
@@ -178,31 +140,13 @@ export const AlertsByStatus = ({
             />
           )}
           <HeaderSection
-            id={queryId}
-            title={title}
-            subtitle={subtitle}
+            id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
+            title={ALERTS_TITLE}
             inspectMultiple
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {visualizationActionsOptions && (
-                <EuiFlexItem grow={false}>
-                  <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
-                    <VisualizationActions
-                      {...visualizationActionsOptions}
-                      className={classnames(
-                        visualizationActionsOptions.className,
-                        'histogram-viz-actions'
-                      )}
-                      isInspectButtonDisabled={false}
-                      queryId={queryId}
-                      title={title}
-                    />
-                  </CasesContext>
-                </EuiFlexItem>
-              )}
-
               <EuiFlexItem grow={false}>
                 <ViewDetailsButton
                   onClick={detailsButtonOptions.onClick}
@@ -210,32 +154,59 @@ export const AlertsByStatus = ({
                   name={detailsButtonOptions.name}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
           {toggleStatus && (
             <>
-              <EuiText className="eui-textCenter">
-                <FormattedCount count={totalAlerts} />
-                <> </>
-                <small>{ALERTS(totalAlerts)}</small>
-              </EuiText>
+              {!loading && totalAlerts != null && (
+                <EuiText className="eui-textCenter">
+                  <b>
+                    <FormattedCount count={totalAlerts} />
+                  </b>
+                  <> </>
+                  <small>{ALERTS(totalAlerts)}</small>
+                </EuiText>
+              )}
               <EuiFlexGroup>
-                {!loading &&
-                  donutData?.map((data) => (
-                    <EuiFlexItem key={`alerts-status-${data.key}`}>
-                      <DonutChart
-                        data={data.buckets}
-                        height={donutHeight}
-                        link={data.link}
-                        label={data.label}
-                        showLegend={false}
-                        isEmptyChart={data.doc_count === 0}
-                        sum={<FormattedCount count={data.doc_count} />}
-                        fillColor={fillColor}
-                      />
-                    </EuiFlexItem>
-                  ))}
+                {!loading && (
+                  <EuiFlexItem key={`alerts-status-open`}>
+                    <DonutChart
+                      colors={SEVERITY_COLOR}
+                      data={donutData?.open?.severities}
+                      fillColor={fillColor}
+                      height={donutHeight}
+                      label={STATUS_OPEN}
+                      showLegend={false}
+                      title={<ChartLabel count={donutData?.open?.total} />}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem key={`alerts-status-acknowledged`}>
+                  {!loading && (
+                    <DonutChart
+                      colors={SEVERITY_COLOR}
+                      data={donutData?.acknowledged?.severities}
+                      fillColor={fillColor}
+                      height={donutHeight}
+                      label={STATUS_ACKNOWLEDGED}
+                      showLegend={false}
+                      title={<ChartLabel count={donutData?.acknowledged?.total} />}
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem key={`alerts-status-closed`}>
+                  {!loading && (
+                    <DonutChart
+                      colors={SEVERITY_COLOR}
+                      data={donutData?.closed?.severities}
+                      fillColor={fillColor}
+                      height={donutHeight}
+                      label={STATUS_CLOSED}
+                      showLegend={false}
+                      title={<ChartLabel count={donutData?.closed?.total} />}
+                    />
+                  )}
+                </EuiFlexItem>
                 <EuiFlexItem>
                   {legendItems.length > 0 && (
                     <DraggableLegend legendItems={legendItems} height={donutHeight} />
@@ -247,7 +218,6 @@ export const AlertsByStatus = ({
           )}
         </HistogramPanel>
       </HoverVisibilityContainer>
-      {showSpacer && <EuiSpacer data-test-subj="spacer" size="l" />}
     </>
   );
 };

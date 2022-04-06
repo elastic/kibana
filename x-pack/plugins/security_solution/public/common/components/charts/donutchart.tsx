@@ -17,22 +17,24 @@ import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DonutChartEmpty } from './donutchart_empty';
-import { ParsedSeverityBucket } from '../../../overview/components/detection_response/alerts_by_status/types';
 
 export const NO_LEGEND_DATA: LegendItem[] = [];
 
-type DonutChartData = ParsedSeverityBucket;
+interface DonutChartData {
+  key: string;
+  value: number;
+}
 
 export interface DonutChartProps {
-  data: DonutChartData[];
+  colors: Record<string, string>;
+  data: DonutChartData[] | null | undefined;
   fillColor: (d: Datum) => string;
   height?: number;
-  isEmptyChart: boolean;
   label: string;
   legendField?: string;
   link?: string | null;
   showLegend?: boolean;
-  sum: React.ReactElement | string | number | null;
+  title: React.ReactElement | string | number | null;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -49,19 +51,19 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const DonutChart = ({
+  colors,
   data,
+  fillColor,
   height = 90,
-  isEmptyChart,
   label,
   legendField,
   link,
   showLegend = true,
-  sum,
-  fillColor,
+  title,
 }: DonutChartProps) => {
   const theme = useTheme();
 
-  const { colors, chartTheme } = useContext(ThemeContext);
+  const { chartTheme } = useContext(ThemeContext);
 
   const legendItems: LegendItem[] = useMemo(
     () =>
@@ -78,7 +80,6 @@ export const DonutChart = ({
         : NO_LEGEND_DATA,
     [colors, data, legendField]
   );
-
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -88,32 +89,31 @@ export const DonutChart = ({
       data-test-subj="donut-chart"
     >
       <StyledEuiFlexItem grow={false}>
-        {data && data.length > 0 && (
-          <StyledEuiFlexGroup
-            direction="column"
-            gutterSize="none"
-            alignItems="center"
-            justifyContent="center"
-          >
-            {sum && <EuiFlexItem>{sum}</EuiFlexItem>}
-            <EuiFlexItem className="eui-textTruncate">
-              {isEmptyChart && (
-                <EuiTextColor color="#ABB4C4" className="eui-textTruncate">
-                  {label}
-                </EuiTextColor>
-              )}
-              {!isEmptyChart && !link && (
-                <EuiText className="eui-textTruncate" size="s">
-                  {label}
-                </EuiText>
-              )}
+        <StyledEuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <EuiFlexItem>{title}</EuiFlexItem>
+          <EuiFlexItem className="eui-textTruncate">
+            {!data && (
+              <EuiTextColor color="#ABB4C4" className="eui-textTruncate">
+                {label}
+              </EuiTextColor>
+            )}
+            {data && !link && (
+              <EuiText className="eui-textTruncate" size="s">
+                {label}
+              </EuiText>
+            )}
 
-              {!isEmptyChart && link && <EuiLink className="eui-textTruncate">{label}</EuiLink>}
-            </EuiFlexItem>
-          </StyledEuiFlexGroup>
-        )}
-        {isEmptyChart && <DonutChartEmpty size={height} />}
-        {!isEmptyChart && (
+            {data && link && <EuiLink className="eui-textTruncate">{label}</EuiLink>}
+          </EuiFlexItem>
+        </StyledEuiFlexGroup>
+        {data == null ? (
+          <DonutChartEmpty size={height} />
+        ) : (
           <Chart size={height}>
             <Settings theme={chartTheme.theme} baseTheme={theme} />
             <Partition
@@ -123,13 +123,13 @@ export const DonutChart = ({
               valueAccessor={(d: Datum) => d.value as number}
               layers={[
                 {
-                  groupByRollup: (d: Datum) => d.status,
+                  groupByRollup: (d: Datum) => d.group,
                   shape: {
                     fillColor: () => '#fff',
                   },
                 },
                 {
-                  groupByRollup: (d: Datum) => d.status,
+                  groupByRollup: (d: Datum) => d.group,
                   shape: {
                     fillColor: () => '#fff',
                   },
@@ -138,7 +138,9 @@ export const DonutChart = ({
                to make the one above thinner.
                */
                 {
-                  groupByRollup: (d: Datum) => d.key,
+                  groupByRollup: (d: Datum) => {
+                    return d.key;
+                  },
                   nodeLabel: (d: Datum) => d,
                   shape: {
                     fillColor,

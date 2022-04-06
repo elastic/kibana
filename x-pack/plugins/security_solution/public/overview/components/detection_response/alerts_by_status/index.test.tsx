@@ -30,15 +30,8 @@ describe('AlertsByStatus', () => {
   const mockCases = mockCasesContract();
 
   const props = {
-    detailsButtonOptions: undefined,
-    filterQuery: '',
-    headerChildren: undefined,
-    isInitialLoading: true,
-    queryId: 'alertsByStatus',
     showInspectButton: true,
     signalIndexName: 'mock-signal-index',
-    title: 'Alerts',
-    visualizationActionsOptions: undefined,
   };
 
   beforeEach(() => {
@@ -75,7 +68,9 @@ describe('AlertsByStatus', () => {
         <AlertsByStatus {...props} />
       </TestProviders>
     );
-    expect(container.querySelector(`[data-test-subj="alertsByStatusPanel"]`)).toBeInTheDocument();
+    expect(
+      container.querySelector(`[data-test-subj="detection-response-alerts-by-status-panel"]`)
+    ).toBeInTheDocument();
   });
 
   test('render HeaderSection', () => {

@@ -8,35 +8,21 @@
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-export interface StatusBySeverity {
+interface StatusBySeverity {
   doc_count_error_upper_bound: number;
   sum_other_doc_count: number;
   buckets: SeverityBucket[];
 }
 
-export interface StatusBucket {
+interface StatusBucket {
   key: Status;
   doc_count: number;
   statusBySeverity?: StatusBySeverity;
 }
 
-export interface ParsedStatusBucket extends StatusBucket {
-  buckets: ParsedSeverityBucket[];
-  link?: string | null;
-  label: string;
-}
-
-export interface SeverityBucket {
+interface SeverityBucket {
   key: Severity;
   doc_count: number;
-}
-
-export interface ParsedSeverityBucket {
-  value: number;
-  status: string;
-  label: string;
-  group: Status;
-  key: Severity;
 }
 
 export interface AlertsByStatusAgg {
@@ -64,3 +50,11 @@ export interface AlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined>
     hits: Hit[];
   };
 }
+
+export interface SeverityBuckets {
+  key: Severity;
+  value: number;
+}
+export type ParsedAlertsData = Partial<
+  Record<Status, { total: number; severities: SeverityBuckets[] }>
+>;

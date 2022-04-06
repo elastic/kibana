@@ -9,8 +9,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { parseAlertsData } from './utils';
-import { AlertsByStatusAgg } from './types';
+import { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 
 export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string }) => ({
   size: 0,
@@ -34,6 +33,27 @@ export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string 
     },
   },
 });
+
+export const parseAlertsData = (
+  response: AlertsByStatusResponse<{}, AlertsByStatusAgg>
+): ParsedAlertsData => {
+  const statusBuckets = response?.aggregations?.alertsByStatus?.buckets ?? [];
+
+  return statusBuckets.reduce<ParsedAlertsData>((parsedAlertsData, statusBucket) => {
+    const severityBuckets = statusBucket.statusBySeverity?.buckets ?? [];
+
+    return {
+      ...parsedAlertsData,
+      [statusBucket.key]: {
+        total: statusBucket.doc_count,
+        severities: severityBuckets.map((severityBucket) => ({
+          key: severityBucket.key,
+          value: severityBucket.doc_count,
+        })),
+      },
+    };
+  }, {});
+};
 
 export const useAlertsByStatus = ({
   signalIndexName,
@@ -64,7 +84,7 @@ export const useAlertsByStatus = ({
 
   const items = useMemo(() => {
     if (data == null) {
-      return [];
+      return null;
     }
     return parseAlertsData(data);
   }, [data]);

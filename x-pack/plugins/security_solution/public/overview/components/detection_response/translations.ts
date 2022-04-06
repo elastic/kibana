@@ -68,3 +68,10 @@ export const ALERTS = (totalAlerts: number) =>
     values: { totalAlerts },
     defaultMessage: 'total {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
+
+export const ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolution.responseOps.alertsByStatus.title',
+  {
+    defaultMessage: 'Alerts',
+  }
+);

@@ -22,7 +22,6 @@ import { inputsSelectors } from '../../common/store/selectors';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { useUserInfo } from '../../detections/components/user_info';
 import { LandingPageComponent } from '../../common/components/landing_page';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../components/detection_response/alerts_by_status/utils';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -76,11 +75,7 @@ const DetectionResponseComponent = () => {
                   <EuiFlexItem>
                     {hasIndexRead && hasKibanaREAD && (
                       <EuiFlexGroup>
-                        <AlertsByStatus
-                          title="Alerts"
-                          signalIndexName={signalIndexName}
-                          queryId={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-                        />
+                        <AlertsByStatus signalIndexName={signalIndexName} />
                       </EuiFlexGroup>
                     )}
                   </EuiFlexItem>
