@@ -20,7 +20,7 @@ buildkite-agent artifact download "kibana-cloud-$VERSION-docker-image.tar.gz" . 
 docker load --input kibana-cloud-$VERSION-docker-image.tar.gz
 
 TAG="$VERSION-$GIT_COMMIT"
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana/kibana-cloud:$VERSION"
+KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION"
 KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
 
 docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
