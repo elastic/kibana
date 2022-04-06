@@ -87,6 +87,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
         setPolicies(
           newPolicies.map((p) => {
             const name = agentPolicyById[p.id]?.name ?? p.name;
+
             return {
               ...p,
               name,

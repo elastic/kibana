@@ -32,6 +32,7 @@ export async function getPolicyLevelUsage(
   if (!packagePolicyService) {
     return {};
   }
+
   const packagePolicies = await packagePolicyService.list(soClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
     perPage: 10_000,
@@ -74,6 +75,7 @@ export async function getPolicyLevelUsage(
       enrolled: policied.doc_count,
     };
   }
+
   return result;
 }
 
@@ -82,6 +84,7 @@ export function getPackageVersions(packagePolicies: ListResult<PackagePolicy>) {
     if (item.package) {
       acc[item.package.version] = (acc[item.package.version] ?? 0) + 1;
     }
+
     return acc;
   }, {} as { [version: string]: number });
 }
@@ -101,6 +104,7 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
       if (policyAgents === 0) {
         ++acc.queryGroups.empty;
       }
+
       return acc;
     },
     {
@@ -202,6 +206,7 @@ export function extractBeatUsageMetrics(
       }
     }
   }
+
   return result;
 }
 

@@ -69,6 +69,7 @@ export const usePackQueryErrors = ({
       });
 
       searchSource.setField('index', logsDataView);
+
       return searchSource.fetch$().toPromise();
     },
     {

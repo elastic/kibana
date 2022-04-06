@@ -33,6 +33,7 @@ const ManageIntegrationLinkComponent = () => {
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
+
         return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
           path: pagePathGetters.integration_details_policies({
             pkgkey: OSQUERY_INTEGRATION_NAME,

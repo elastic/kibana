@@ -43,6 +43,7 @@ export function createTelemetrySavedQueriesTaskConfig() {
 
       if (!savedQueriesResponse?.total) {
         logger.debug('no saved queries found');
+
         return 0;
       }
 
