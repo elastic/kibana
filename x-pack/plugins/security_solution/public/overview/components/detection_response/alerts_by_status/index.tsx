@@ -12,8 +12,12 @@ import classnames from 'classnames';
 import uuid from 'uuid';
 import { Datum } from '@elastic/charts';
 import { DonutChart, NO_LEGEND_DATA } from '../../../../common/components/charts/donutchart';
-import { APP_ID } from '../../../../../common/constants';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { APP_ID, APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import {
+  useGetUserCasesPermissions,
+  useKibana,
+  useNavigation,
+} from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { Panel } from '../../../../common/components/panel';
@@ -22,7 +26,7 @@ import {
   VisualizationActions,
 } from '../../../../common/components/visualization_actions';
 import { VisualizationActionsProps } from '../../../../common/components/visualization_actions/types';
-import { ViewDetailsButton, ViewDetailsButtonProps } from './view_details_button';
+import { ViewDetailsButton } from './view_details_button';
 import { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { ThemeContext } from '../../../../common/components/charts/donut_theme_context';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -31,6 +35,8 @@ import { useAlertsByStatus } from './use_alerts_by_status';
 import { FormattedCount } from './formatted_count';
 import { ALERTS } from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
+import { VIEW_ALERTS } from '../../../pages/translations';
 
 const HistogramPanel = styled(Panel)<{ $height?: number }>`
   display: flex;
@@ -64,7 +70,6 @@ type VisualizationActionsOptions = Omit<
 interface Others {
   panelSettings?: PanelSettings;
   visualizationActionsOptions?: VisualizationActionsOptions;
-  detailsButtonOptions?: ViewDetailsButtonProps;
 }
 
 type Props = AlertsByStatusProps & Others;
@@ -77,7 +82,6 @@ const DefaultPanelSettings = {
 const legendField = 'kibana.alert.severity';
 
 export const AlertsByStatus = ({
-  detailsButtonOptions,
   headerChildren,
   panelSettings = DefaultPanelSettings,
   queryId,
@@ -93,6 +97,28 @@ export const AlertsByStatus = ({
   const userCanCrud = userPermissions?.crud ?? false;
   const { colors } = useContext(ThemeContext);
   const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
+  const { navigateTo } = useNavigation();
+  const goToAlerts = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateTo({
+        appId: APP_UI_ID,
+        deepLinkId: SecurityPageName.alerts,
+        path: getDetectionEngineUrl(urlSearch),
+      });
+    },
+    [navigateTo, urlSearch]
+  );
+
+  const detailsButtonOptions = useMemo(
+    () => ({
+      name: VIEW_ALERTS,
+      href: formatUrl(getDetectionEngineUrl()),
+      onClick: goToAlerts,
+    }),
+    [formatUrl, goToAlerts]
+  );
 
   const { items: donutData, isLoading: loading } = useAlertsByStatus({
     signalIndexName,
@@ -101,8 +127,8 @@ export const AlertsByStatus = ({
   });
   const legendItems: LegendItem[] = useMemo(
     () =>
-      donutData && donutData?.length > 0 && legendField
-        ? (donutData[0] && donutData[0].buckets).map((d, i) => ({
+      !loading && donutData?.length > 0 && legendField
+        ? (donutData[0] && donutData[0].buckets).map((d) => ({
             color: colors[d.key],
             dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
             timelineId: undefined,
@@ -110,7 +136,7 @@ export const AlertsByStatus = ({
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [colors, donutData]
+    [colors, donutData, loading]
   );
 
   const totalAlerts = useMemo(
@@ -176,16 +202,14 @@ export const AlertsByStatus = ({
                   </CasesContext>
                 </EuiFlexItem>
               )}
-              {detailsButtonOptions?.name &&
-                (detailsButtonOptions?.onClick || detailsButtonOptions?.href) && (
-                  <EuiFlexItem grow={false}>
-                    <ViewDetailsButton
-                      onClick={detailsButtonOptions.onClick}
-                      href={detailsButtonOptions.href}
-                      name={detailsButtonOptions.name}
-                    />
-                  </EuiFlexItem>
-                )}
+
+              <EuiFlexItem grow={false}>
+                <ViewDetailsButton
+                  onClick={detailsButtonOptions.onClick}
+                  href={detailsButtonOptions.href}
+                  name={detailsButtonOptions.name}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
@@ -197,22 +221,25 @@ export const AlertsByStatus = ({
                 <small>{ALERTS(totalAlerts)}</small>
               </EuiText>
               <EuiFlexGroup>
-                {donutData?.map((data) => (
-                  <EuiFlexItem key={`alerts-status-${data.key}`}>
-                    <DonutChart
-                      data={data.buckets}
-                      height={donutHeight}
-                      link={data.link}
-                      label={data.label}
-                      showLegend={false}
-                      isEmptyChart={data.doc_count === 0}
-                      sum={<FormattedCount count={data.doc_count} />}
-                      fillColor={fillColor}
-                    />
-                  </EuiFlexItem>
-                ))}
+                {!loading &&
+                  donutData?.map((data) => (
+                    <EuiFlexItem key={`alerts-status-${data.key}`}>
+                      <DonutChart
+                        data={data.buckets}
+                        height={donutHeight}
+                        link={data.link}
+                        label={data.label}
+                        showLegend={false}
+                        isEmptyChart={data.doc_count === 0}
+                        sum={<FormattedCount count={data.doc_count} />}
+                        fillColor={fillColor}
+                      />
+                    </EuiFlexItem>
+                  ))}
                 <EuiFlexItem>
-                  <DraggableLegend legendItems={legendItems} height={donutHeight} />
+                  {legendItems.length > 0 && (
+                    <DraggableLegend legendItems={legendItems} height={donutHeight} />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />

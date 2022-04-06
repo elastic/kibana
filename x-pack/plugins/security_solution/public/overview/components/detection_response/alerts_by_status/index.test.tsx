@@ -48,6 +48,7 @@ describe('AlertsByStatus', () => {
         cases: mockCases,
         application: {
           capabilities: { [CASES_FEATURE_ID]: { crud_cases: true, read_cases: true } },
+          getUrlForApp: jest.fn(),
         },
         theme: {},
       },
@@ -97,17 +98,6 @@ describe('AlertsByStatus', () => {
     ).not.toBeInTheDocument();
   });
 
-  test('does Not render ViewDetailsButton if detailsButtonOptions are not provided', () => {
-    const { container } = render(
-      <TestProviders>
-        <AlertsByStatus {...props} />
-      </TestProviders>
-    );
-    expect(
-      container.querySelector(`[data-test-subj="view-details-button"]`)
-    ).not.toBeInTheDocument();
-  });
-
   test('does Not render DonutChart if isInitialLoading is true', () => {
     const { container } = render(
       <TestProviders>
@@ -139,6 +129,11 @@ describe('AlertsByStatus', () => {
       ...props,
       isInitialLoading: false,
     };
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      items: parsedMockAlertsData,
+      isLoading: false,
+    });
+
     const { container } = render(
       <TestProviders>
         <AlertsByStatus {...testProps} />
