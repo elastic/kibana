@@ -37,7 +37,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     }
 
     const body: GetFleetStatusResponse = {
-      isReady: missingRequirements.length > 0,
+      isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
       missing_optionnal_features: missingOptionnalFeatures,
     };
