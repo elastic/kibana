@@ -73,9 +73,7 @@ export const UserAlertsTable = React.memo(() => {
             />
             <EuiSpacer size="m" />
             <EuiButton
-              onClick={() => {
-                console.log('Where to link to');
-              }}
+              onClick={() => navigateTo({ url: getAppUrl({ deepLinkId: SecurityPageName.users }) })}
             >
               {i18n.VIEW_ALL_USER_ALERTS}
             </EuiButton>

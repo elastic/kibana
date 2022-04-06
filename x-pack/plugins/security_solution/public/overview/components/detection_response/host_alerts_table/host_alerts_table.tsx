@@ -71,7 +71,9 @@ export const HostAlertsTable = React.memo(() => {
               loading={isLoading}
             />
             <EuiSpacer size="m" />
-            <EuiButton onClick={() => console.log('TO DO Where to link ')}>
+            <EuiButton
+              onClick={() => navigateTo({ url: getAppUrl({ deepLinkId: SecurityPageName.hosts }) })}
+            >
               {i18n.VIEW_ALL_HOST_ALERTS}
             </EuiButton>
           </>
