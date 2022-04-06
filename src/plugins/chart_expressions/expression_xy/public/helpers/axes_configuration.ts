@@ -8,6 +8,10 @@
 
 import { FormatFactory } from '../types';
 import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
+import {
   AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
@@ -59,11 +63,18 @@ export function groupAxesByType(
   layers.forEach((layer, index) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
-      let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
-        ?.meta?.params || { id: 'number' };
+        layer.yConfig?.find(
+          (yAxisConfig) =>
+            getAccessorByDimension(yAxisConfig.forAccessor, table?.columns || []) === yAccessor
+        )?.axisMode || 'auto';
+      let formatter: SerializedFieldFormat = getFormatByAccessor(
+        accessor,
+        table?.columns || []
+      ) || {
+        id: 'number',
+      };
       if (
         isDataLayer(layer) &&
         layer.seriesType.includes('percentage') &&
@@ -78,7 +89,7 @@ export function groupAxesByType(
       }
       series[mode].push({
         layer: index,
-        accessor,
+        accessor: yAccessor,
         fieldFormat: formatter,
       });
     });

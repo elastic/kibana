@@ -8,6 +8,10 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
 import type { FilterEvent } from '../types';
 import type { CommonXYDataLayerConfigResult } from '../../common';
 import type { FormatFactory } from '../types';
@@ -22,7 +26,11 @@ export const getLegendAction = (
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
     const layer = filteredLayers.find((l) =>
-      series.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+      series.seriesKeys.some((key: string | number) =>
+        l.accessors.some(
+          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+        )
+      )
     );
 
     if (!layer || !layer.splitAccessor) {
@@ -30,11 +38,10 @@ export const getLegendAction = (
     }
 
     const splitLabel = series.seriesKeys[0] as string;
-    const accessor = layer.splitAccessor;
 
     const { table } = layer;
-    const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-    const formatter = formatFactory(splitColumn && splitColumn.meta?.params);
+    const accessor = getAccessorByDimension(layer.splitAccessor, table.columns);
+    const formatter = formatFactory(getFormatByAccessor(layer.splitAccessor, table.columns));
 
     const rowIndex = table.rows.findIndex((row) => {
       if (layersAlreadyFormatted[accessor]) {

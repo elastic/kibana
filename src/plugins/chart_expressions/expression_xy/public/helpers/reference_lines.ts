@@ -7,6 +7,7 @@
  */
 
 import { partition } from 'lodash';
+import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import type { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
 import { isStackedChart } from './state';
 import { isAnnotationsLayer, isDataLayer } from './visualization';
@@ -27,9 +28,10 @@ export function computeOverallDataDomain(
   for (const layer of unstacked) {
     if (!isAnnotationsLayer(layer) && layer.table) {
       for (const accessor of layer.accessors) {
-        if (accessorMap.has(accessor)) {
+        const yColumnId = getAccessorByDimension(accessor, layer.table.columns);
+        if (accessorMap.has(yColumnId)) {
           for (const row of layer.table.rows) {
-            const value = row[accessor];
+            const value = row[yColumnId];
             if (typeof value === 'number') {
               // when not stacked, do not keep the 0
               max = max != null ? Math.max(value, max) : value;
@@ -44,15 +46,17 @@ export function computeOverallDataDomain(
   const stackedResults: Record<string, number> = {};
   for (const { accessors, xAccessor, table } of stacked as CommonXYDataLayerConfigResult[]) {
     if (table) {
+      const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
       for (const accessor of accessors) {
-        if (accessorMap.has(accessor)) {
+        const yColumnId = getAccessorByDimension(accessor, table.columns);
+        if (accessorMap.has(yColumnId)) {
           for (const row of table.rows) {
-            const value = row[accessor];
+            const value = row[yColumnId];
             // start with a shared bucket
             let bucket = 'shared';
-            // but if there's an xAccessor use it as new bucket system
-            if (xAccessor) {
-              bucket = row[xAccessor];
+            // but if there's an xColumnId use it as new bucket system
+            if (xColumnId) {
+              bucket = row[xColumnId];
             }
             if (typeof value === 'number') {
               stackedResults[bucket] = stackedResults[bucket] ?? 0;

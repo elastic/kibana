@@ -40,7 +40,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       }),
     },
     xAccessor: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionXY.dataLayer.xAccessor.help', {
         defaultMessage: 'X-axis',
       }),
@@ -78,13 +78,13 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       strict: true,
     },
     splitAccessor: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
         defaultMessage: 'The column to split by',
       }),
     },
     accessors: {
-      types: ['string'],
+      types: ['string', 'vis_dimension'],
       help: i18n.translate('expressionXY.dataLayer.accessors.help', {
         defaultMessage: 'The columns to display on the y axis.',
       }),

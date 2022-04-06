@@ -9,6 +9,7 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import { Datatable } from '../../../../expressions';
+import type { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { PaletteOutput } from '../../../../charts/common';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import {
@@ -85,11 +86,11 @@ export interface YConfig {
 }
 
 export interface DataLayerArgs {
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   seriesType: SeriesType;
-  xAccessor?: string;
+  xAccessor?: string | ExpressionValueVisDimension;
   hide?: boolean;
-  splitAccessor?: string;
+  splitAccessor?: string | ExpressionValueVisDimension;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
@@ -268,7 +269,7 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
 };
 
 export interface ReferenceLineLayerArgs {
-  accessors: string[];
+  accessors: Array<ExpressionValueVisDimension | string>;
   columnToLabel?: string;
   yConfig?: YConfigResult[];
 }

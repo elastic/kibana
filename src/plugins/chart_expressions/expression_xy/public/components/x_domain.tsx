@@ -9,6 +9,10 @@
 import { uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
+import {
+  getColumnByAccessor,
+  getAccessorByDimension,
+} from '../../../../../plugins/visualizations/common/utils';
 import { Endzones } from '../../../../../plugins/charts/public';
 import type { CommonXYDataLayerConfigResult } from '../../common';
 import { search } from '../../../../../plugins/data/public';
@@ -22,7 +26,7 @@ export interface XDomain {
 export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => {
   return layers
     .map(({ xAccessor, table }) => {
-      const xColumn = table.columns.find((col) => col.id === xAccessor);
+      const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
       const timeRange =
         xColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.timeRange;
       if (timeRange) {
@@ -57,9 +61,10 @@ export const getXDomain = (
   if (isHistogram && isFullyQualified(baseDomain)) {
     const xValues = uniq(
       layers
-        .flatMap(({ table, xAccessor }) =>
-          table.rows.map((row) => row[xAccessor!].valueOf() as number)
-        )
+        .flatMap<number>(({ table, xAccessor }) => {
+          const accessor = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+          return table.rows.map((row) => row[accessor!].valueOf());
+        })
         .sort()
     );
 

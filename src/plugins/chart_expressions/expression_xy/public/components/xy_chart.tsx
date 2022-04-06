@@ -38,6 +38,11 @@ import {
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  getColumnByAccessor,
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
 import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
 import { RenderMode } from '../../../../expressions/common';
 import { FieldFormat } from '../../../../field_formats/common';
@@ -268,7 +273,9 @@ export function XYChart({
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
-  const xColumnId = firstTable.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
+  const xColumnId = dataLayers[0]?.xAccessor
+    ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
+    : null;
 
   const groupedAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
@@ -361,7 +368,7 @@ export function XYChart({
           for (const { axisMode, forAccessor } of yConfig || []) {
             if (axis.groupId === axisMode) {
               for (const row of table.rows) {
-                const value = row[forAccessor];
+                const value = row[getAccessorByDimension(forAccessor, table.columns)];
                 // keep the 0 in view
                 max = Math.max(value, max || 0, 0);
                 min = Math.min(value, min || 0, 0);
@@ -396,7 +403,11 @@ export function XYChart({
     const xyGeometry = geometry as GeometryValue;
 
     const layer = dataLayers.find((l) =>
-      xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
+      xySeries.seriesKeys.some((key: string | number) =>
+        l.accessors.some((accessor) =>
+          getAccessorByDimension(accessor, l.table.columns).includes(key.toString())
+        )
+      )
     );
     if (!layer) {
       return;
@@ -404,46 +415,51 @@ export function XYChart({
 
     const { table } = layer;
 
-    const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
+    const xColumn = layer.xAccessor && getColumnByAccessor(layer.xAccessor, table.columns);
+    const xAccessor = layer.xAccessor ? getAccessorByDimension(layer.xAccessor, table.columns) : '';
     const currentXFormatter =
-      layer.xAccessor && layersAlreadyFormatted[layer.xAccessor] && xColumn
-        ? formatFactory(xColumn.meta.params)
+      xAccessor && layersAlreadyFormatted[xAccessor] && xColumn
+        ? formatFactory(getFormatByAccessor(layer.xAccessor!, table.columns))
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
       if (layer.xAccessor) {
-        if (layersAlreadyFormatted[layer.xAccessor]) {
+        if (layersAlreadyFormatted[xAccessor]) {
           // stringify the value to compare with the chart value
-          return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
+          return currentXFormatter.convert(row[xAccessor]) === xyGeometry.x;
         }
-        return row[layer.xAccessor] === xyGeometry.x;
+        return row[xAccessor] === xyGeometry.x;
       }
     });
 
     const points = [
       {
         row: rowIndex,
-        column: table.columns.findIndex((col) => col.id === layer.xAccessor),
-        value: layer.xAccessor ? table.rows[rowIndex][layer.xAccessor] : xyGeometry.x,
+        column: table.columns.findIndex((col) => col.id === xAccessor),
+        value: xAccessor ? table.rows[rowIndex][xAccessor] : xyGeometry.x,
       },
     ];
 
     if (xySeries.seriesKeys.length > 1) {
       const pointValue = xySeries.seriesKeys[0];
+      const splitAccessor = layer.splitAccessor
+        ? getAccessorByDimension(layer.splitAccessor, table.columns)
+        : '';
 
-      const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+      const splitFormatter = formatFactory(
+        layer.splitAccessor ? getFormatByAccessor(layer.splitAccessor, table.columns) : undefined
+      );
 
       points.push({
         row: table.rows.findIndex((row) => {
-          if (layer.splitAccessor) {
-            if (layersAlreadyFormatted[layer.splitAccessor]) {
-              return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
+          if (splitAccessor) {
+            if (layersAlreadyFormatted[splitAccessor]) {
+              return splitFormatter.convert(row[splitAccessor]) === pointValue;
             }
-            return row[layer.splitAccessor] === pointValue;
+            return row[splitAccessor] === pointValue;
           }
         }),
-        column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
+        column: table.columns.findIndex((col) => col.id === splitAccessor),
         value: pointValue,
       });
     }
@@ -468,8 +484,9 @@ export function XYChart({
     }
 
     const { table } = dataLayers[0];
-
-    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === dataLayers[0].xAccessor);
+    const xAccessor =
+      dataLayers[0].xAccessor && getAccessorByDimension(dataLayers[0].xAccessor, table.columns);
+    const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
 
     const context: BrushEvent['data'] = {
       range: [min, max],
@@ -656,9 +673,21 @@ export function XYChart({
             ? JSON.parse(columnToLabel)
             : {};
 
+          const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+          const splitColumnId =
+            splitAccessor && getAccessorByDimension(splitAccessor, table.columns);
+          const yColumnId = accessor && getAccessorByDimension(accessor, table.columns);
+
           const formatterPerColumn = new Map<DatatableColumn, FieldFormat>();
           for (const column of table.columns) {
-            formatterPerColumn.set(column, formatFactory(column.meta.params));
+            formatterPerColumn.set(
+              column,
+              formatFactory(
+                xColumnId && column.id === xColumnId
+                  ? getFormatByAccessor(xAccessor, table.columns)
+                  : column.meta.params
+              )
+            );
           }
 
           // what if row values are not primitive? That is the case of, for instance, Ranges
@@ -673,7 +702,7 @@ export function XYChart({
                 if (
                   record != null &&
                   // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-                  (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
+                  (!isPrimitive(record) || (column.id === xColumnId && xScaleType === 'ordinal'))
                 ) {
                   newRow[column.id] = formatterPerColumn.get(column)!.convert(record);
                 }
@@ -701,22 +730,22 @@ export function XYChart({
           const isBarChart = seriesType.includes('bar');
           const enableHistogramMode =
             isHistogram &&
-            (isStacked || !splitAccessor) &&
+            (isStacked || !splitColumnId) &&
             (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
 
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = tableConverted.rows.filter(
             (row) =>
-              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
+              !(xColumnId && typeof row[xColumnId] === 'undefined') &&
               !(
-                splitAccessor &&
-                typeof row[splitAccessor] === 'undefined' &&
-                typeof row[accessor] === 'undefined'
+                splitColumnId &&
+                typeof row[splitColumnId] === 'undefined' &&
+                typeof row[yColumnId] === 'undefined'
               )
           );
 
-          if (!xAccessor) {
+          if (!xColumnId) {
             rows.forEach((row) => {
               row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
                 defaultMessage: '(empty)',
@@ -725,33 +754,35 @@ export function XYChart({
           }
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
 
-          const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
-          const splitHint = table.columns.find((col) => col.id === splitAccessor)?.meta?.params;
+          const formatter = yColumnId ? getFormatByAccessor(yColumnId, table.columns) : undefined;
+          const splitHint = splitAccessor
+            ? getFormatByAccessor(splitAccessor, table.columns)
+            : undefined;
           const splitFormatter = formatFactory(splitHint);
           const seriesProps: SeriesSpec = {
-            splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: isStacked ? [xAccessor as string] : [],
-            id: `${splitAccessor}-${accessor}`,
-            xAccessor: xAccessor || 'unifiedX',
-            yAccessors: [accessor],
+            splitSeriesAccessors: splitColumnId ? [splitColumnId] : [],
+            stackAccessors: isStacked ? [xColumnId as string] : [],
+            id: splitColumnId ? `${splitColumnId}-${yColumnId}` : yColumnId,
+            xAccessor: xColumnId || 'unifiedX',
+            yAccessors: [yColumnId],
             data: rows,
-            xScaleType: xAccessor ? xScaleType : 'ordinal',
+            xScaleType: xColumnId ? xScaleType : 'ordinal',
             yScaleType:
               formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
                 ? ScaleType.LinearBinary
                 : yScaleType,
             color: ({ yAccessor, seriesKeys }) => {
-              const overwriteColor = getSeriesColor(layer, accessor);
+              const overwriteColor = getSeriesColor(layer, yColumnId);
               if (overwriteColor !== null) {
                 return overwriteColor;
               }
               const colorAssignment = colorAssignments[palette.name];
               const seriesLayers: SeriesLayer[] = [
                 {
-                  name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+                  name: splitColumnId ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
                   totalSeriesAtDepth: colorAssignment.totalSeriesCount,
                   rankAtDepth: colorAssignment.getRank(
                     layer,
@@ -778,8 +809,8 @@ export function XYChart({
             timeZone,
             areaSeriesStyle: {
               point: {
-                visible: !xAccessor,
-                radius: xAccessor && !emphasizeFitting ? 5 : 0,
+                visible: !xColumnId,
+                radius: xColumnId && !emphasizeFitting ? 5 : 0,
               },
               ...(args.fillOpacity && { area: { opacity: args.fillOpacity } }),
               ...(emphasizeFitting && {
@@ -798,8 +829,8 @@ export function XYChart({
             },
             lineSeriesStyle: {
               point: {
-                visible: !xAccessor,
-                radius: xAccessor && !emphasizeFitting ? 5 : 0,
+                visible: !xColumnId,
+                radius: xColumnId && !emphasizeFitting ? 5 : 0,
               },
               ...(emphasizeFitting && {
                 fit: {
@@ -822,12 +853,12 @@ export function XYChart({
                     if (
                       i === 0 &&
                       splitHint &&
-                      splitAccessor &&
-                      !layersAlreadyFormatted[splitAccessor]
+                      splitColumnId &&
+                      !layersAlreadyFormatted[splitColumnId]
                     ) {
                       return splitFormatter.convert(key);
                     }
-                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? null;
+                    return splitColumnId && i === 0 ? key : columnToLabelMap[key] ?? null;
                   })
                   .join(' - ');
                 return result;
@@ -836,7 +867,7 @@ export function XYChart({
               // For formatted split series, format the key
               // This handles splitting by dates, for example
               if (splitHint) {
-                if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
+                if (splitColumnId && layersAlreadyFormatted[splitColumnId]) {
                   return d.seriesKeys[0];
                 }
                 return splitFormatter.convert(d.seriesKeys[0]);
@@ -844,7 +875,7 @@ export function XYChart({
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
               // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? null;
+              return splitColumnId ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? null;
             },
           };
 

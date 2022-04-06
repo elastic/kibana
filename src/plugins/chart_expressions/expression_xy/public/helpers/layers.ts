@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
+import type { ExpressionValueVisDimension } from '../../../../../plugins/visualizations/common';
 import {
   CommonXYDataLayerConfigResult,
   CommonXYLayerConfigResult,
@@ -17,13 +19,17 @@ export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
   return layers.filter<CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult>(
     (layer): layer is CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult => {
       const { table } = layer;
-      let accessors: string[] = [];
+      let accessors: Array<ExpressionValueVisDimension | string> = [];
       let xAccessor: undefined | string | number;
       let splitAccessor: undefined | string | number;
 
       if (isDataLayer(layer)) {
-        xAccessor = layer.xAccessor;
-        splitAccessor = layer.splitAccessor;
+        xAccessor =
+          layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
+        splitAccessor =
+          layer.splitAccessor &&
+          table &&
+          getAccessorByDimension(layer.splitAccessor, table.columns);
       }
 
       if (isDataLayer(layer) || isReferenceLayer(layer)) {

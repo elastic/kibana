@@ -8,6 +8,10 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../../plugins/visualizations/common/utils';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
@@ -58,9 +62,10 @@ export function getColorAssignments(
       if (!layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
-      const splitAccessor = layer.splitAccessor;
+      const splitAccessor = getAccessorByDimension(layer.splitAccessor, layer.table.columns);
       const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(column.meta.params);
+      const columnFormatter =
+        column && formatFactory(getFormatByAccessor(layer.splitAccessor, layer.table.columns));
       const splits =
         !column || !layer.table
           ? []
@@ -101,7 +106,9 @@ export function getColorAssignments(
           (sortedLayer.splitAccessor && splitRank !== -1
             ? splitRank * sortedLayer.accessors.length
             : 0) +
-          sortedLayer.accessors.indexOf(yAccessor)
+          sortedLayer.accessors.findIndex(
+            (accessor) => getAccessorByDimension(accessor, sortedLayer.table.columns) === yAccessor
+          )
         );
       },
     };
