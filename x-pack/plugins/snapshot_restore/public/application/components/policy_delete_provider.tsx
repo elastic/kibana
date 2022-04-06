@@ -28,6 +28,9 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
 
+  const policiesToDelete = [...policyNames];
+  const { mutate: deletePoliciesMutation } = deletePolicies(policiesToDelete);
+
   const deletePolicyPrompt: DeletePolicy = (names, onSuccess = () => undefined) => {
     if (!names || !names.length) {
       throw new Error('No policy names specified for deletion');
@@ -43,48 +46,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
   };
 
   const deletePolicy = () => {
-    const policiesToDelete = [...policyNames];
-    deletePolicies(policiesToDelete).then(({ data, error }) => {
-      const { itemsDeleted, errors } = data || { itemsDeleted: undefined, errors: undefined };
-
-      // Surface success notifications
-      if (itemsDeleted && itemsDeleted.length) {
-        const hasMultipleSuccesses = itemsDeleted.length > 1;
-        const successMessage = hasMultipleSuccesses
-          ? i18n.translate('xpack.snapshotRestore.deletePolicy.successMultipleNotificationTitle', {
-              defaultMessage: 'Deleted {count} policies',
-              values: { count: itemsDeleted.length },
-            })
-          : i18n.translate('xpack.snapshotRestore.deletePolicy.successSingleNotificationTitle', {
-              defaultMessage: "Deleted policy '{name}'",
-              values: { name: itemsDeleted[0] },
-            });
-        toastNotifications.addSuccess(successMessage);
-        if (onSuccessCallback.current) {
-          onSuccessCallback.current([...itemsDeleted]);
-        }
-      }
-
-      // Surface error notifications
-      // `error` is generic server error
-      // `data.errors` are specific errors with removing particular policy(ies)
-      if (error || (errors && errors.length)) {
-        const hasMultipleErrors =
-          (errors && errors.length > 1) || (error && policiesToDelete.length > 1);
-        const errorMessage = hasMultipleErrors
-          ? i18n.translate('xpack.snapshotRestore.deletePolicy.errorMultipleNotificationTitle', {
-              defaultMessage: 'Error deleting {count} policies',
-              values: {
-                count: (errors && errors.length) || policiesToDelete.length,
-              },
-            })
-          : i18n.translate('xpack.snapshotRestore.deletePolicy.errorSingleNotificationTitle', {
-              defaultMessage: "Error deleting policy '{name}'",
-              values: { name: (errors && errors[0].name) || policiesToDelete[0] },
-            });
-        toastNotifications.addDanger(errorMessage);
-      }
-    });
+    deletePoliciesMutation(policiesToDelete);
     closeModal();
   };
 

@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
+import { QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 
 import { API_BASE_PATH } from '../../common';
 import { AuthorizationProvider, KibanaThemeProvider } from '../shared_imports';
 import { AppContextProvider, AppDependencies } from './app_context';
+import { queryClient } from './query_client';
 
 interface Props {
   appDependencies: AppDependencies;
@@ -27,7 +30,12 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
     <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
+          <AppContextProvider value={appDependencies}>
+            <QueryClientProvider client={queryClient}>
+              {children}
+              <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
+          </AppContextProvider>
         </KibanaThemeProvider>
       </I18nContext>
     </AuthorizationProvider>

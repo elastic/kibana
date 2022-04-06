@@ -47,7 +47,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     data: { policies } = {
       policies: undefined,
     },
-    resendRequest: reload,
   } = useLoadPolicies();
 
   const { uiMetricService } = useServices();
@@ -73,13 +72,11 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     if (policyName && policiesDeleted.includes(policyName)) {
       closePolicyDetails();
     }
-    if (policiesDeleted.length) {
-      reload();
-    }
   };
 
   const onPolicyExecuted = () => {
-    reload();
+    // reload();
+    // should reload policies when executed..
   };
 
   // Track component loaded
@@ -199,7 +196,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
         <PolicyTable
           policies={policies || []}
-          reload={reload}
+          reload={() => { /* should reload*/ }}
           openPolicyDetailsUrl={openPolicyDetailsUrl}
           onPolicyDeleted={onPolicyDeleted}
           onPolicyExecuted={onPolicyExecuted}
