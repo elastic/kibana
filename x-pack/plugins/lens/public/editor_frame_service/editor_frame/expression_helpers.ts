@@ -6,13 +6,16 @@
  */
 
 import { Ast, AstFunction, fromExpression } from '@kbn/interpreter';
+import { ExpressionAstExpression } from 'src/plugins/expressions/public';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
   datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates
+  datasourceStates: DatasourceStates,
+  visualizationState: unknown,
+  visualization: Visualization<unknown>
 ): Ast | null {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -21,7 +24,53 @@ export function prependDatasourceExpression(
     const layers = datasource.getLayers(datasourceStates[datasourceId].state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId);
+      const groups = visualization.getConfiguration({
+        layerId,
+        state: visualizationState,
+        frame: {
+          datasourceLayers: {
+            [layerId]: datasource.getPublicAPI({
+              state,
+              layerId,
+            }),
+          },
+        },
+      }).groups;
+      const result = datasource.toExpression(state, layerId) as ExpressionAstExpression | null;
+      const layerAPI = datasource.getPublicAPI({
+        state,
+        layerId,
+      });
+      const columns = layerAPI.getTableSpec();
+      const collapseColumns = columns
+        .filter((c) => !groups.some((g) => g.accessors.some((a) => a.columnId === c.columnId)))
+        .map((c) => c.columnId);
+      if (collapseColumns.length > 0 && result) {
+        result.chain = [
+          ...result.chain,
+          {
+            type: 'function',
+            function: 'lens_collapse',
+            arguments: {
+              by: columns
+                .filter(
+                  (c) =>
+                    !collapseColumns.includes(c.columnId) &&
+                    layerAPI.getOperationForColumnId(c.columnId)?.isBucketed
+                )
+                .map((c) => c.columnId),
+              metric: columns
+                .filter(
+                  (c) =>
+                    !collapseColumns.includes(c.columnId) &&
+                    !layerAPI.getOperationForColumnId(c.columnId)?.isBucketed
+                )
+                .map((c) => c.columnId),
+              fn: ['sum'],
+            },
+          },
+        ];
+      }
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }
@@ -87,7 +136,9 @@ export function buildExpression({
   const completeExpression = prependDatasourceExpression(
     visualizationExpression,
     datasourceMap,
-    datasourceStates
+    datasourceStates,
+    visualizationState,
+    visualization
   );
 
   return completeExpression;

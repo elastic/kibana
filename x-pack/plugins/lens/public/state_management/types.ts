@@ -23,9 +23,16 @@ import {
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
+  layerCollapseFunction?: Record<string, 'avg' | 'sum' | 'min' | 'max'>;
 }
 
-export type DatasourceStates = Record<string, { state: unknown; isLoading: boolean }>;
+export type DatasourceStates = Record<
+  string,
+  {
+    state: unknown;
+    isLoading: boolean;
+  }
+>;
 export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;

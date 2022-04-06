@@ -6,6 +6,7 @@
  */
 
 export * from './counter_rate';
+export * from './collapse';
 export * from './format_column';
 export * from './rename_columns';
 export * from './merge_tables';

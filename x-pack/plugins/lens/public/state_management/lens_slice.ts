@@ -162,6 +162,11 @@ export const setLayerDefaultDimension = createAction<{
   groupId: string;
 }>('lens/setLayerDefaultDimension');
 
+export const setLayerCollapseFn = createAction<{
+  layerId: string;
+  collapseFn: string;
+}>('lens/setLayerCollapseFn');
+
 export const lensActions = {
   setState,
   onActiveDataChange,
@@ -187,6 +192,7 @@ export const lensActions = {
   removeOrClearLayer,
   addLayer,
   setLayerDefaultDimension,
+  setLayerCollapseFn,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -661,6 +667,26 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
       state.stagedPreview = undefined;
+    },
+    [setLayerCollapseFn.type]: (
+      state,
+      {
+        payload: { layerId, collapseFn },
+      }: {
+        payload: {
+          layerId: string;
+          collapseFn: string;
+        };
+      }
+    ) => {
+      if (!state.visualization.layerCollapseFunction) {
+        state.visualization.layerCollapseFunction = {};
+      }
+      state.visualization.layerCollapseFunction[layerId] = collapseFn as
+        | 'avg'
+        | 'sum'
+        | 'min'
+        | 'max';
     },
     [setLayerDefaultDimension.type]: (
       state,

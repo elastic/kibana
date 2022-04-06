@@ -16,10 +16,18 @@ import {
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
+import {
+  StateSetter,
+  Visualization,
+  DraggedOperation,
+  DropType,
+  VisualizationDimensionGroupConfig,
+  OperationMetadata,
+} from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -44,9 +52,11 @@ const initialActiveDimensionState = {
 export function LayerPanel(
   props: Exclude<LayerPanelProps, 'state' | 'setState'> & {
     activeVisualization: Visualization;
+    collapseFn?: string;
     layerId: string;
     layerIndex: number;
     isOnlyLayer: boolean;
+    updateCollapseFn: (newFn: string) => void;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
     updateDatasourceAsync: (datasourceId: string, newState: unknown) => void;
@@ -80,6 +90,8 @@ export function LayerPanel(
     updateAll,
     updateDatasourceAsync,
     visualizationState,
+    collapseFn,
+    updateCollapseFn,
   } = props;
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -181,7 +193,10 @@ export function LayerPanel(
 
       if (layerDatasource) {
         const group = groups.find(({ groupId: gId }) => gId === groupId);
-        const filterOperations = group?.filterOperations || (() => false);
+        const filterOperations =
+          groupId === 'collapse'
+            ? (o: OperationMetadata) => o.isBucketed
+            : group?.filterOperations || (() => false);
         const dropResult = layerDatasourceOnDrop({
           ...layerDatasourceDropProps,
           droppedItem,
@@ -192,6 +207,7 @@ export function LayerPanel(
           groupId,
           dropType,
         });
+        if (groupId === 'collapse') return;
         if (dropResult) {
           let previousColumn =
             typeof droppedItem.column === 'string' ? droppedItem.column : undefined;
@@ -288,25 +304,29 @@ export function LayerPanel(
           updateAll(
             datasourceId,
             newState,
-            activeVisualization.removeDimension({
-              layerId,
-              columnId: activeId,
-              prevState: visualizationState,
-              frame: framePublicAPI,
-            })
+            activeGroup.groupId !== 'collapse'
+              ? activeVisualization.removeDimension({
+                  layerId,
+                  columnId: activeId,
+                  prevState: visualizationState,
+                  frame: framePublicAPI,
+                })
+              : visualizationState
           );
         }
       } else if (isDimensionComplete) {
         updateAll(
           datasourceId,
           newState,
-          activeVisualization.setDimension({
-            layerId,
-            groupId: activeGroup.groupId,
-            columnId: activeId,
-            prevState: visualizationState,
-            frame: framePublicAPI,
-          })
+          activeGroup.groupId !== 'collapse'
+            ? activeVisualization.setDimension({
+                layerId,
+                groupId: activeGroup.groupId,
+                columnId: activeId,
+                prevState: visualizationState,
+                frame: framePublicAPI,
+              })
+            : visualizationState
         );
         setActiveDimension({ ...activeDimension, isNew: false });
       } else {
@@ -398,7 +418,25 @@ export function LayerPanel(
             )}
           </header>
 
-          {groups.map((group, groupIndex) => {
+          {[
+            ...groups,
+            {
+              groupLabel: 'collapse',
+              groupId: 'collapse',
+              accessors: layerDatasource
+                .getPublicAPI({
+                  state: layerDatasourceState,
+                  layerId,
+                })
+                .getTableSpec()
+                .filter(
+                  (c) => !groups.some((g) => g.accessors.some((a) => a.columnId === c.columnId))
+                )
+                .map((c) => ({ columnId: c.columnId })),
+              supportsMoreColumns: true,
+              filterOperations: (o) => o.isBucketed,
+            } as VisualizationDimensionGroupConfig,
+          ].map((group, groupIndex) => {
             let isMissing = false;
 
             if (!isEmptyLayer) {
@@ -502,12 +540,14 @@ export function LayerPanel(
                                         columnId: id,
                                         prevState: layerDatasourceState,
                                       }),
-                                      activeVisualization.removeDimension({
-                                        layerId,
-                                        columnId: id,
-                                        prevState: props.visualizationState,
-                                        frame: framePublicAPI,
-                                      })
+                                      group.groupId !== 'collapse'
+                                        ? activeVisualization.removeDimension({
+                                            layerId,
+                                            columnId: id,
+                                            prevState: props.visualizationState,
+                                            frame: framePublicAPI,
+                                          })
+                                        : props.visualizationState
                                     );
                                   } else {
                                     props.updateVisualization(
@@ -622,6 +662,24 @@ export function LayerPanel(
         }}
         panel={
           <div>
+            {activeGroup && activeId && layerDatasource && activeGroup.groupId === 'collapse' && (
+              <EuiFormRow label={<>Collapse by </>} display="rowCompressed" fullWidth>
+                <EuiSelect
+                  compressed
+                  data-test-subj="indexPattern-terms-orderBy"
+                  options={[
+                    { text: 'sum', value: 'sum' },
+                    { text: 'min', value: 'min' },
+                    { text: 'max', value: 'max' },
+                    { text: 'avg', value: 'avg' },
+                  ]}
+                  value={collapseFn || 'sum'}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    updateCollapseFn(e.target.value);
+                  }}
+                />
+              </EuiFormRow>
+            )}
             {activeGroup && activeId && layerDatasource && (
               <NativeRenderer
                 render={layerDatasource.renderDimensionEditor}
@@ -648,6 +706,7 @@ export function LayerPanel(
               !isFullscreen &&
               !activeDimension.isNew &&
               activeVisualization.renderDimensionEditor &&
+              activeGroup.groupId !== 'collapse' &&
               activeGroup?.enableDimensionEditor && (
                 <div className="lnsLayerPanel__styleEditor">
                   <NativeRenderer

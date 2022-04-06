@@ -554,7 +554,9 @@ function preparePreviewExpression(
             state: suggestionDatasourceState,
           },
         }
-      : datasourceStates
+      : datasourceStates,
+    visualizableState.visualizationState,
+    visualization
   );
 
   return expressionWithDatasource;

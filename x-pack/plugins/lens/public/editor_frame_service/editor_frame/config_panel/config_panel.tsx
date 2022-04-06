@@ -27,6 +27,7 @@ import {
 } from '../../../state_management';
 import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
+import { setLayerCollapseFn } from '../../../state_management/lens_slice';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -141,6 +142,10 @@ export function LayerPanels(
         <LayerPanel
           {...props}
           activeVisualization={activeVisualization}
+          collapseFn={visualization.layerCollapseFunction?.[layerId]}
+          updateCollapseFn={(newFn: string) => {
+            dispatchLens(setLayerCollapseFn({ layerId, collapseFn: newFn }));
+          }}
           registerNewLayerRef={registerNewLayerRef}
           key={layerId}
           layerId={layerId}
