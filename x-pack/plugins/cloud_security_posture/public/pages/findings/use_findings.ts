@@ -9,13 +9,12 @@ import { type UseQueryResult, useQuery } from 'react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
+import { extractErrorMessage } from '../../../common/utils/helpers';
 import type {
   DataView,
   EsQuerySortValue,
   IKibanaSearchResponse,
   SerializedSearchSourceFields,
-  TimeRange,
 } from '../../../../../../src/plugins/data/common';
 import type { CspClientPluginStartDeps } from '../../types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -31,7 +30,6 @@ interface CspFindings {
 export interface CspFindingsRequest
   extends Required<Pick<SerializedSearchSourceFields, 'sort' | 'size' | 'from' | 'query'>> {
   filters: Filter[];
-  dateRange: TimeRange;
 }
 
 type ResponseProps = 'data' | 'error' | 'status';
@@ -87,18 +85,13 @@ const extractFindings = ({
 const createFindingsSearchSource = (
   {
     query,
-    dateRange,
     dataView,
     filters,
     ...rest
-  }: Omit<CspFindingsRequest, 'queryKey'> & {
-    dataView: DataView;
-  },
+  }: Omit<CspFindingsRequest, 'queryKey'> & { dataView: DataView },
   queryService: CspClientPluginStartDeps['data']['query']
 ): SerializedSearchSourceFields => {
   if (query) queryService.queryString.setQuery(query);
-  const timeFilter = queryService.timefilter.timefilter.createFilter(dataView, dateRange);
-  queryService.filterManager.setFilters([...filters, timeFilter].filter(isNonNullable));
 
   return {
     ...rest,
