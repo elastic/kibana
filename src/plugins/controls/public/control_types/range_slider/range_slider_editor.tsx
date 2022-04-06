@@ -83,7 +83,7 @@ export const RangeSliderEditor = ({
             setLastUsedDataViewId?.(dataViewId);
             onChange({ dataViewId });
             get(dataViewId).then((newDataView) =>
-              setState((s) => ({ ...s, dataView: newDataView }))
+              setState((s) => ({ ...s, dataView: newDataView, fieldName: undefined }))
             );
           }}
           trigger={{
