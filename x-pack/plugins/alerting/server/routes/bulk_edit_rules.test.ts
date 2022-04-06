@@ -12,7 +12,7 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 
-import { SanitizedAlert } from '../types';
+import { SanitizedRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -23,7 +23,7 @@ beforeEach(() => {
 });
 
 describe('bulkEditInternalRulesRoute', () => {
-  const mockedAlert: SanitizedAlert<{}> = {
+  const mockedAlert: SanitizedRule<{}> = {
     id: '1',
     alertTypeId: '1',
     schedule: { interval: '10s' },
@@ -59,7 +59,7 @@ describe('bulkEditInternalRulesRoute', () => {
     },
   };
 
-  const mockedAlerts: Array<SanitizedAlert<{}>> = [mockedAlert];
+  const mockedAlerts: Array<SanitizedRule<{}>> = [mockedAlert];
   const bulkEditRequest = {
     filter: '',
     operations: [

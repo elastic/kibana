@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
 import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { SanitizedRule } from '../../../../../plugins/alerting/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -19,16 +20,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    it('should edit alert with tags edit action', async () => {
-      const { body: createdAlert } = await supertest
+    it('should bulk edit rule with tags operation', async () => {
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ tags: ['default'] }));
 
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
       const payload = {
-        ids: [createdAlert.id],
+        ids: [createdRule.id],
         operations: [
           {
             operation: 'add',
@@ -48,7 +49,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkEditResponse.body.rules[0].tags).to.eql(['default', 'tag-1']);
 
       const { body: updatedAlert } = await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo');
 
       expect(updatedAlert.tags).to.eql(['default', 'tag-1']);
@@ -58,25 +59,29 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         supertest,
         spaceId: Spaces.space1.id,
         type: 'alert',
-        id: createdAlert.id,
+        id: createdRule.id,
       });
     });
 
-    it('should edit multiple alerts with tags edit action', async () => {
-      const { body: createdAlert1 } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ tags: ['foo', 'bar'] }));
-      const { body: createdAlert2 } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ tags: ['bar'] }));
+    it('should bulk edit multiple rules with tags operation', async () => {
+      const rules: SanitizedRule[] = (
+        await Promise.all(
+          Array.from({ length: 10 }).map(() =>
+            supertest
+              .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getTestRuleData({ tags: [`multiple-rules-edit`] }))
+              .expect(200)
+          )
+        )
+      ).map((res) => res.body);
 
-      objectRemover.add(Spaces.space1.id, createdAlert1.id, 'rule', 'alerting');
-      objectRemover.add(Spaces.space1.id, createdAlert2.id, 'rule', 'alerting');
+      rules.forEach((rule) => {
+        objectRemover.add(Spaces.space1.id, rule.id, 'rule', 'alerting');
+      });
 
       const payload = {
-        ids: [createdAlert1.id, createdAlert2.id],
+        filter: `alert.attributes.tags: "multiple-rules-edit"`,
         operations: [
           {
             operation: 'set',
@@ -91,35 +96,38 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(payload);
 
-      expect(bulkEditResponse.body.total).to.be(2);
+      expect(bulkEditResponse.body.total).to.be(10);
       expect(bulkEditResponse.body.errors).to.have.length(0);
-      expect(bulkEditResponse.body.rules).to.have.length(2);
-      expect(bulkEditResponse.body.rules[0].tags).to.eql(['rewritten']);
-      expect(bulkEditResponse.body.rules[1].tags).to.eql(['rewritten']);
+      expect(bulkEditResponse.body.rules).to.have.length(10);
+      bulkEditResponse.body.rules.every((rule: { tags: string[] }) =>
+        expect(rule.tags).to.eql([`rewritten`])
+      );
 
-      const updatedAlerts = await Promise.all([
-        supertest
-          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert1.id}`)
-          .set('kbn-xsrf', 'foo'),
-        supertest
-          .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert2.id}`)
-          .set('kbn-xsrf', 'foo'),
-      ]);
+      const updatedRules: SanitizedRule[] = (
+        await Promise.all(
+          rules.map((rule) =>
+            supertest
+              .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${rule.id}`)
+              .set('kbn-xsrf', 'foo')
+          )
+        )
+      ).map((res) => res.body);
 
-      expect(updatedAlerts[0].body.tags).to.eql(['rewritten']);
-      expect(updatedAlerts[1].body.tags).to.eql(['rewritten']);
+      updatedRules.forEach((rule) => {
+        expect(rule.tags).to.eql([`rewritten`]);
+      });
     });
 
-    it(`shouldn't edit alert from another space`, async () => {
-      const { body: createdAlert } = await supertest
+    it(`shouldn't bulk edit rule from another space`, async () => {
+      const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData({ tags: ['default'] }));
 
-      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
       const payload = {
-        ids: [createdAlert.id],
+        ids: [createdRule.id],
         operations: [
           {
             operation: 'add',

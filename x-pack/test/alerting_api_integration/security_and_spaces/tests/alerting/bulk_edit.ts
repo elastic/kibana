@@ -16,6 +16,7 @@ import {
   getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { SanitizedRule } from '../../../../../plugins/alerting/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -184,7 +185,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              response.body.rules.every((rule: { tags: string[] }) =>
+              response.body.rules.forEach((rule: SanitizedRule) =>
                 expect(rule.tags).to.eql([`multiple-rules-edit-${scenario.id}`, 'tag-A'])
               );
               expect(response.body.rules).to.have.length(10);
