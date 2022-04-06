@@ -34,12 +34,13 @@ const operationsSchema = schema.arrayOf(
       field: schema.literal('actions'),
       value: schema.arrayOf(ruleActionSchema),
     }),
-  ])
+  ]),
+  { minSize: 1 }
 );
 
 const bodySchema = schema.object({
   filter: schema.maybe(schema.string()),
-  ids: schema.maybe(schema.arrayOf(schema.string())),
+  ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
   operations: operationsSchema,
 });
 
