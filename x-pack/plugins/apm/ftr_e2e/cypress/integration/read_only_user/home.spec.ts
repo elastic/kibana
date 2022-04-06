@@ -14,19 +14,14 @@ const end = '2021-10-10T00:15:00.000Z';
 
 const serviceInventoryHref = url.format({
   pathname: '/app/apm/services',
-  query: { rangeFrom: start, rangeTo: end },
+  query: {
+    comparisonEnabled: 'true',
+    environment: 'ENVIRONMENT_ALL',
+    rangeFrom: start,
+    rangeTo: end,
+    offset: '1d',
+  },
 });
-
-const apisToIntercept = [
-  {
-    endpoint: '/internal/apm/service?*',
-    name: 'servicesMainStatistics',
-  },
-  {
-    endpoint: '/internal/apm/services/detailed_statistics?*',
-    name: 'servicesDetailedStatistics',
-  },
-];
 
 describe('Home page', () => {
   before(async () => {
@@ -65,14 +60,9 @@ describe('Home page', () => {
 
   describe('navigations', () => {
     it('navigates to service overview page with transaction type', () => {
-      apisToIntercept.map(({ endpoint, name }) => {
-        cy.intercept('GET', endpoint).as(name);
-      });
-
       cy.visit(serviceInventoryHref);
 
       cy.contains('Services');
-
       cy.contains('opbeans-rum').click({ force: true });
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
