@@ -163,6 +163,13 @@ export const alertsPreviewDefaultModel: SubsetTimelineModel = {
   ...alertsDefaultModel,
   columns: rulePreviewColumns,
   defaultColumns: rulePreviewColumns,
+  sort: [
+    {
+      columnId: 'kibana.alert.original_time',
+      columnType: 'number',
+      sortDirection: 'desc',
+    },
+  ],
 };
 
 export const requiredFieldsForActions = [
