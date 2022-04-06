@@ -83,19 +83,21 @@ function runTests() {
 
 if (argv.times) {
   const runCounter = { succeeded: 0, failed: 0, remaining: argv.times };
+  let exitStatus = 0;
   times(argv.times, () => {
     try {
       runTests();
       runCounter.succeeded++;
     } catch (e) {
+      exitStatus = 1;
       runCounter.failed++;
     }
     runCounter.remaining--;
-
     if (argv.times > 1) {
       console.log(runCounter);
     }
   });
+  process.exit(exitStatus);
 } else {
   runTests();
 }

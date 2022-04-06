@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const start = '2021-01-01T00:00:00.000Z';
       const end = '2021-01-08T00:15:00.000Z';
 
-      const spikeStart = new Date('2021-01-07T20:00:00.000Z').getTime();
+      const spikeStart = new Date('2021-01-07T23:15:00.000Z').getTime();
       const spikeEnd = new Date('2021-01-08T00:15:00.000Z').getTime();
 
       const NORMAL_DURATION = 100;
