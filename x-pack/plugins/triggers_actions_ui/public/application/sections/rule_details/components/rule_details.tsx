@@ -16,15 +16,13 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiPageContentBody,
-  EuiSwitch,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
-  EuiLoadingSpinner,
   EuiIconTip,
-  EuiEmptyPrompt,
-  EuiPageTemplate,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -38,6 +36,7 @@ import {
   ActionType,
   ActionConnector,
   TriggersActionsUiConfig,
+  RuleTableItem,
 } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -55,6 +54,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ruleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RuleStatusDropdown } from '../../rules_list/components/rule_status_dropdown';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -62,7 +62,7 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'unmuteRule' | 'muteRule'>;
+} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
 
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
@@ -70,8 +70,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   actionTypes,
   disableRule,
   enableRule,
-  unmuteRule,
-  muteRule,
+  snoozeRule,
+  unsnoozeRule,
   requestRefresh,
   refreshToken,
 }) => {
@@ -150,13 +150,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const ruleActions = rule.actions;
   const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
-  const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
-  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
-  const [isMutedUpdating, setIsMutedUpdating] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(rule.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [dismissRuleErrors, setDismissRuleErrors] = useState<boolean>(false);
-  const [dismissRuleWarning, setDismissRuleWarning] = useState<boolean>(false);
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -269,6 +263,95 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             values={{ ruleName: rule.name }}
           />
         }
+        description={
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.triggerActionsTitle"
+                        defaultMessage="Trigger actions"
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <RuleStatusDropdown
+                    disableRule={async () => await disableRule(rule)}
+                    enableRule={async () => await enableRule(rule)}
+                    snoozeRule={async (snoozeEndTime: string | -1) =>
+                      await snoozeRule(rule, snoozeEndTime)
+                    }
+                    unsnoozeRule={async () => await unsnoozeRule(rule)}
+                    item={rule as RuleTableItem}
+                    onRuleChanged={requestRefresh}
+                    direction="row"
+                    isEditable={hasEditButton}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
+                        defaultMessage="Type"
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {uniqueActions && uniqueActions.length ? (
+                <EuiFlexGroup responsive={false} gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
+                        defaultMessage="Actions"
+                      />{' '}
+                      {hasActionsWithBrokenConnector && (
+                        <EuiIconTip
+                          data-test-subj="actionWithBrokenConnector"
+                          type="alert"
+                          color="danger"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
+                            {
+                              defaultMessage:
+                                'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
+                            }
+                          )}
+                          position="right"
+                        />
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="xs">
+                      {uniqueActions.map((action, index) => (
+                        <EuiFlexItem key={index} grow={false}>
+                          <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
+                            {actionTypesByTypeId[action].name ?? action}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         rightSideItems={[
           <ViewInApp rule={rule} />,
           <EuiButtonEmpty
@@ -288,227 +371,49 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       />
       <EuiSpacer size="l" />
       <EuiPageContentBody>
-        <EuiFlexGroup wrap responsive={false} gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle"
-                  defaultMessage="Type"
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiBadge data-test-subj="ruleTypeLabel">{ruleType.name}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            {uniqueActions && uniqueActions.length ? (
-              <>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsTex"
-                    defaultMessage="Actions"
-                  />{' '}
-                  {hasActionsWithBrokenConnector && (
-                    <EuiIconTip
-                      data-test-subj="actionWithBrokenConnector"
-                      type="rule"
-                      color="danger"
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.actionsWarningTooltip',
-                        {
-                          defaultMessage:
-                            'Unable to load one of the connectors associated with this rule. Edit the rule to select a new connector.',
-                        }
-                      )}
-                      position="right"
-                    />
-                  )}
-                </EuiText>
-
-                <EuiSpacer size="xs" />
-                <EuiFlexGroup wrap gutterSize="s">
-                  {uniqueActions.map((action, index) => (
-                    <EuiFlexItem key={index} grow={false}>
-                      <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                        {actionTypesByTypeId[action].name ?? action}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </>
-            ) : null}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer />
-            <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
-              <EuiFlexItem grow={false}>
-                {isEnabledUpdating ? (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.enableLoadingTitle"
-                          defaultMessage="Enable"
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <EuiSwitch
-                    name="enable"
-                    disabled={!canSaveRule || !ruleType.enabledInLicense}
-                    checked={isEnabled}
-                    data-test-subj="enableSwitch"
-                    onChange={async () => {
-                      setIsEnabledUpdating(true);
-                      if (isEnabled) {
-                        setIsEnabled(false);
-                        await disableRule(rule);
-                        // Reset dismiss if previously clicked
-                        setDismissRuleErrors(false);
-                      } else {
-                        setIsEnabled(true);
-                        await enableRule(rule);
-                      }
-                      requestRefresh();
-                      setIsEnabledUpdating(false);
-                    }}
-                    label={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.enableTitle"
-                        defaultMessage="Enable"
-                      />
-                    }
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {isMutedUpdating ? (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiLoadingSpinner size="m" />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.muteLoadingTitle"
-                          defaultMessage="Mute"
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <EuiSwitch
-                    name="mute"
-                    checked={isMuted}
-                    disabled={!canSaveRule || !isEnabled || !ruleType.enabledInLicense}
-                    data-test-subj="muteSwitch"
-                    onChange={async () => {
-                      setIsMutedUpdating(true);
-                      if (isMuted) {
-                        setIsMuted(false);
-                        await unmuteRule(rule);
-                      } else {
-                        setIsMuted(true);
-                        await muteRule(rule);
-                      }
-                      requestRefresh();
-                      setIsMutedUpdating(false);
-                    }}
-                    label={
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.collapsedItemActons.muteTitle"
-                        defaultMessage="Mute"
-                      />
-                    }
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {rule.enabled && !dismissRuleErrors && rule.executionStatus.status === 'error' ? (
+        {rule.enabled &&
+        rule.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCallOut
-                color="danger"
-                data-test-subj="ruleErrorBanner"
-                size="s"
-                title={getRuleStatusErrorReasonText()}
-                iconType="rule"
-              >
-                <EuiText size="s" color="danger" data-test-subj="ruleErrorMessageText">
+              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
+                <p>
+                  <EuiIcon color="danger" type="alert" />
+                  &nbsp;
+                  <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
                   {rule.executionStatus.error?.message}
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" wrap={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="dismiss-execution-error"
-                      color="danger"
-                      onClick={() => setDismissRuleErrors(true)}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.dismissButtonTitle"
-                        defaultMessage="Dismiss"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  {rule.executionStatus.error?.reason ===
-                    AlertExecutionStatusErrorReasons.License && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        href={`${http.basePath.get()}/app/management/stack/license_management`}
-                        color="danger"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                          defaultMessage="Manage license"
-                        />
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                  &nbsp;
+                  <EuiLink
+                    href={`${http.basePath.get()}/app/management/stack/license_management`}
+                    color="primary"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+                      defaultMessage="Manage license"
+                    />
+                  </EuiLink>
+                </p>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
 
-        {rule.enabled && !dismissRuleWarning && rule.executionStatus.status === 'warning' ? (
+        {rule.enabled && rule.executionStatus.status === 'warning' ? (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
                 color="warning"
                 data-test-subj="ruleWarningBanner"
                 size="s"
-                title={getRuleStatusWarningReasonText()}
                 iconType="alert"
               >
-                <EuiText size="s" color="warning" data-test-subj="ruleWarningMessageText">
+                <p>
+                  <EuiIcon color="warning" type="alert" />
+                  &nbsp;
+                  {getRuleStatusWarningReasonText()}
+                  &nbsp;
                   {rule.executionStatus.warning?.message}
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" wrap={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="dismiss-execution-warning"
-                      color="warning"
-                      onClick={() => setDismissRuleWarning(true)}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.dismissButtonTitle"
-                        defaultMessage="Dismiss"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                </p>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -521,89 +426,41 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 color="warning"
                 data-test-subj="actionWithBrokenConnectorWarningBanner"
                 size="s"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle',
-                  {
-                    defaultMessage:
-                      'There is an issue with one of the connectors associated with this rule.',
-                  }
-                )}
               >
-                {hasEditButton && (
-                  <EuiFlexGroup gutterSize="s" wrap={true}>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
-                        color="warning"
-                        onClick={() => setEditFlyoutVisibility(true)}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"
-                          defaultMessage="Edit rule"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
+                <p>
+                  <EuiIcon color="warning" type="alert" />
+                  &nbsp;
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
+                    defaultMessage="There is an issue with one of the connectors associated with this rule."
+                  />
+                  &nbsp;
+                  {hasEditButton && (
+                    <EuiLink
+                      data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
+                      color="primary"
+                      onClick={() => setEditFlyoutVisibility(true)}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"
+                        defaultMessage="Edit rule"
+                      />
+                    </EuiLink>
+                  )}
+                </p>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
         <EuiFlexGroup>
           <EuiFlexItem>
-            {rule.enabled ? (
-              <RuleRouteWithApi
-                requestRefresh={requestRefresh}
-                refreshToken={refreshToken}
-                rule={rule}
-                ruleType={ruleType}
-                readOnly={!canSaveRule}
-              />
-            ) : (
-              <>
-                <EuiSpacer />
-                <EuiPageTemplate template="empty">
-                  <EuiEmptyPrompt
-                    data-test-subj="disabledEmptyPrompt"
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRuleTitle"
-                          defaultMessage="Disabled Rule"
-                        />
-                      </h2>
-                    }
-                    body={
-                      <>
-                        <p>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.ruleDetails.alertInstances.disabledRule"
-                            defaultMessage="This rule is disabled and cannot be displayed."
-                          />
-                        </p>
-                      </>
-                    }
-                    actions={[
-                      <EuiButton
-                        data-test-subj="disabledEmptyPromptAction"
-                        color="primary"
-                        fill
-                        disabled={isEnabledUpdating}
-                        onClick={async () => {
-                          setIsEnabledUpdating(true);
-                          setIsEnabled(true);
-                          await enableRule(rule);
-                          requestRefresh();
-                          setIsEnabledUpdating(false);
-                        }}
-                      >
-                        Enable
-                      </EuiButton>,
-                    ]}
-                  />
-                </EuiPageTemplate>
-              </>
-            )}
+            <RuleRouteWithApi
+              requestRefresh={requestRefresh}
+              refreshToken={refreshToken}
+              rule={rule}
+              ruleType={ruleType}
+              readOnly={!canSaveRule}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContentBody>

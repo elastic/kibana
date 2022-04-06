@@ -7,6 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -415,6 +416,8 @@ export class FleetPlugin
           level: ServiceStatusLevels.available,
           summary: 'Fleet is setting up',
         });
+
+        await plugins.licensing.license$.pipe(take(1)).toPromise();
 
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),

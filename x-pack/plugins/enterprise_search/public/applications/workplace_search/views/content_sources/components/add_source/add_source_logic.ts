@@ -89,7 +89,10 @@ export interface AddSourceActions {
     params: OauthParams,
     isOrganization: boolean
   ): { search: Search; params: OauthParams; isOrganization: boolean };
-  getSourceConfigData(serviceType: string): { serviceType: string };
+  getSourceConfigData(
+    serviceType: string,
+    addSourceProps?: AddSourceProps
+  ): { serviceType: string; addSourceProps: AddSourceProps | undefined };
   getSourceConnectData(
     serviceType: string,
     successCallback: (oauthUrl: string) => void
@@ -97,6 +100,7 @@ export interface AddSourceActions {
   getSourceReConnectData(sourceId: string): { sourceId: string };
   getPreContentSourceConfigData(): void;
   setButtonNotLoading(): void;
+  setFirstStep(addSourceProps: AddSourceProps): { addSourceProps: AddSourceProps };
 }
 
 export interface SourceConfigData {
@@ -107,9 +111,9 @@ export interface SourceConfigData {
   needsPermissions?: boolean;
   privateSourcesEnabled: boolean;
   configuredFields: {
-    publicKey: string;
-    privateKey: string;
-    consumerKey: string;
+    publicKey?: string;
+    privateKey?: string;
+    consumerKey?: string;
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
@@ -177,7 +181,10 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
     setPreContentSourceId: (preContentSourceId: string) => preContentSourceId,
     setSelectedGithubOrganizations: (option: string) => option,
-    getSourceConfigData: (serviceType: string) => ({ serviceType }),
+    getSourceConfigData: (serviceType: string, addSourceProps?: AddSourceProps) => ({
+      serviceType,
+      addSourceProps,
+    }),
     getSourceConnectData: (serviceType: string, successCallback: (oauthUrl: string) => string) => ({
       serviceType,
       successCallback,
@@ -200,6 +207,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     ) => ({ serviceType, successCallback, errorCallback }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
+    setFirstStep: (addSourceProps) => ({ addSourceProps }),
   },
   reducers: {
     addSourceProps: [
@@ -232,6 +240,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
+        getSourceConfigData: () => true,
       },
     ],
     buttonLoading: [
@@ -354,15 +363,17 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     initializeAddSource: ({ addSourceProps }) => {
       const { serviceType } = addSourceProps.sourceData;
       actions.setAddSourceProps({ addSourceProps });
-      actions.setAddSourceStep(getFirstStep(addSourceProps));
-      actions.getSourceConfigData(serviceType);
+      actions.getSourceConfigData(serviceType, addSourceProps);
     },
-    getSourceConfigData: async ({ serviceType }) => {
+    getSourceConfigData: async ({ serviceType, addSourceProps }) => {
       const route = `/internal/workplace_search/org/settings/connectors/${serviceType}`;
 
       try {
         const response = await HttpLogic.values.http.get<SourceConfigData>(route);
         actions.setSourceConfigData(response);
+        if (addSourceProps) {
+          actions.setFirstStep(addSourceProps);
+        }
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -461,8 +472,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         private_key: sourceConfigData.configuredFields?.privateKey,
         public_key: sourceConfigData.configuredFields?.publicKey,
         consumer_key: sourceConfigData.configuredFields?.consumerKey,
-        external_connector_url: externalConnectorUrl || undefined,
-        external_connector_api_key: externalConnectorApiKey || undefined,
+        external_connector_url: (serviceType === 'external' && externalConnectorUrl) || undefined,
+        external_connector_api_key:
+          (serviceType === 'external' && externalConnectorApiKey) || undefined,
       };
 
       try {
@@ -536,6 +548,14 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         flashAPIErrors(e);
       }
     },
+    setFirstStep: ({ addSourceProps }) => {
+      const firstStep = getFirstStep(
+        addSourceProps,
+        values.sourceConfigData,
+        SourcesLogic.values.externalConfigured
+      );
+      actions.setAddSourceStep(firstStep);
+    },
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
       clearFlashMessages();
       const { isOrganization } = AppLogic.values;
@@ -578,18 +598,34 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   }),
 });
 
-const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
+const getFirstStep = (
+  props: AddSourceProps,
+  sourceConfigData: SourceConfigData,
+  externalConfigured: boolean
+): AddSourceSteps => {
   const {
     connect,
     configure,
     reAuthenticate,
-    sourceData: { serviceType },
+    sourceData: { serviceType, externalConnectorAvailable },
   } = props;
+  // We can land on this page from a choice page for multiple types of connectors
+  // If that's the case we want to skip the intro and configuration, if the external & internal connector have already been configured
+  const { configuredFields, configured } = sourceConfigData;
+  if (externalConnectorAvailable && configured && externalConfigured)
+    return AddSourceSteps.ConnectInstanceStep;
+  if (externalConnectorAvailable && !configured && externalConfigured)
+    return AddSourceSteps.SaveConfigStep;
+  if (serviceType === 'external') {
+    // external connectors can be partially configured, so we need to check which fields are filled
+    if (configuredFields?.clientId && configuredFields?.clientSecret) {
+      return AddSourceSteps.ConnectInstanceStep;
+    }
+    // Unconfigured external connectors have already shown the intro step before the choice page, so we don't want to show it again
+    return AddSourceSteps.SaveConfigStep;
+  }
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
-  // TODO: Re-do this once we have more than one external connector type
-  // External connectors have already shown the intro step before the choice page, so we don't want to show it again
-  if (serviceType === 'external') return AddSourceSteps.SaveConfigStep;
   return AddSourceSteps.ConfigIntroStep;
 };
