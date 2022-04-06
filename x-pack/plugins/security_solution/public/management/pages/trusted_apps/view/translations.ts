@@ -121,4 +121,43 @@ export const POLICY_SELECT_DESCRIPTION = i18n.translate(
       'Assign this trusted application globally across all policies, or assign it to specific policies.',
   }
 );
-//
+
+export const INPUT_ERRORS = {
+  name: i18n.translate('xpack.securitySolution.trustedapps.create.nameRequiredMsg', {
+    defaultMessage: 'Name is required',
+  }),
+  os: i18n.translate('xpack.securitySolution.trustedapps.create.osRequiredMsg', {
+    defaultMessage: 'Operating System is required',
+  }),
+  field: i18n.translate('xpack.securitySolution.trustedapps.create.conditionRequiredMsg', {
+    defaultMessage: 'At least one Field definition is required',
+  }),
+  noDuplicateField: (field: ConditionEntryField) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldDuplicatedMsg', {
+      defaultMessage: '{field} cannot be added more than once',
+      values: { field: CONDITION_FIELD_TITLE[field] },
+    }),
+  mustHaveValue: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldValueRequiredMsg', {
+      defaultMessage: '[{row}] Field entry must have a value',
+      values: { row: index + 1 },
+    }),
+  invalidHash: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidHashMsg', {
+      defaultMessage: '[{row}] Invalid hash value',
+      values: { row: index + 1 },
+    }),
+  pathWarning: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidPathMsg', {
+      defaultMessage: '[{row}] Path may be formed incorrectly; verify value',
+      values: { row: index + 1 },
+    }),
+  wildcardPathWarning: (index: number) =>
+    i18n.translate(
+      'xpack.securitySolution.trustedapps.create.conditionFieldDegradedPerformanceMsg',
+      {
+        defaultMessage: `[{row}] A wildcard in the filename will affect the endpoint's performance`,
+        values: { row: index + 1 },
+      }
+    ),
+};

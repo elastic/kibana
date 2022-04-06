@@ -18,7 +18,6 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   hasSimpleExecutableName,
   isPathValid,
@@ -44,10 +43,10 @@ import {
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
-  CONDITION_FIELD_TITLE,
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
   DESCRIPTION_LABEL,
+  INPUT_ERRORS,
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
@@ -114,52 +113,28 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   // Name field
   if (!values.name.trim()) {
     isValid = false;
-    addResultToValidation(
-      validation,
-      'name',
-      'errors',
-      i18n.translate('xpack.securitySolution.trustedapps.create.nameRequiredMsg', {
-        defaultMessage: 'Name is required',
-      })
-    );
+    addResultToValidation(validation, 'name', 'errors', INPUT_ERRORS.name);
   }
 
   if (!values.os_types) {
     isValid = false;
-    addResultToValidation(
-      validation,
-      'os',
-      'errors',
-      i18n.translate('xpack.securitySolution.trustedapps.create.osRequiredMsg', {
-        defaultMessage: 'Operating System is required',
-      })
-    );
+    addResultToValidation(validation, 'os', 'errors', INPUT_ERRORS.os);
   }
 
   const os = ((values.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
   if (!values.entries.length) {
     isValid = false;
-    addResultToValidation(
-      validation,
-      'entries',
-      'errors',
-      i18n.translate('xpack.securitySolution.trustedapps.create.conditionRequiredMsg', {
-        defaultMessage: 'At least one Field definition is required',
-      })
-    );
+    addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.field);
   } else {
     const duplicated = getDuplicateFields(values.entries as TrustedAppConditionEntry[]);
     if (duplicated.length) {
       isValid = false;
-      duplicated.forEach((field) => {
+      duplicated.forEach((field: ConditionEntryField) => {
         addResultToValidation(
           validation,
           'entries',
           'errors',
-          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldDuplicatedMsg', {
-            defaultMessage: '{field} cannot be added more than once',
-            values: { field: CONDITION_FIELD_TITLE[field] },
-          })
+          INPUT_ERRORS.noDuplicateField(field)
         );
       });
     }
@@ -173,42 +148,15 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
         isValid = false;
-        addResultToValidation(
-          validation,
-          'entries',
-          'errors',
-          i18n.translate(
-            'xpack.securitySolution.trustedapps.create.conditionFieldValueRequiredMsg',
-            {
-              defaultMessage: '[{row}] Field entry must have a value',
-              values: { row: index + 1 },
-            }
-          )
-        );
+        addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.mustHaveValue(index));
       } else if (
         entry.field === ConditionEntryField.HASH &&
         !isValidHash((entry as TrustedAppConditionEntry).value)
       ) {
         isValid = false;
-        addResultToValidation(
-          validation,
-          'entries',
-          'errors',
-          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidHashMsg', {
-            defaultMessage: '[{row}] Invalid hash value',
-            values: { row: index + 1 },
-          })
-        );
+        addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.invalidHash(index));
       } else if (!isValidPathEntry) {
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidPathMsg', {
-            defaultMessage: '[{row}] Path may be formed incorrectly; verify value',
-            values: { row: index + 1 },
-          })
-        );
+        addResultToValidation(validation, 'entries', 'warnings', INPUT_ERRORS.pathWarning(index));
       } else if (
         isValidPathEntry &&
         !hasSimpleExecutableName({
@@ -221,13 +169,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           validation,
           'entries',
           'warnings',
-          i18n.translate(
-            'xpack.securitySolution.trustedapps.create.conditionFieldDegradedPerformanceMsg',
-            {
-              defaultMessage: `[{row}] A wildcard in the filename will affect the endpoint's performance`,
-              values: { row: index + 1 },
-            }
-          )
+          INPUT_ERRORS.wildcardPathWarning(index)
         );
       }
     });
@@ -243,11 +185,6 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
   type: 'match',
   value: '',
 });
-
-export interface TrustedAppFormState {
-  isValid: boolean;
-  item: NewTrustedApp;
-}
 
 export const Form = memo<ArtifactFormComponentProps>(
   ({ item, policies, policiesIsLoading, onChange, mode }) => {
@@ -455,7 +392,7 @@ export const Form = memo<ArtifactFormComponentProps>(
       return item.os_types[0] as OperatingSystem;
     }, [item?.os_types]);
 
-    const trustedApp = useMemo(() => {
+    const trustedApp = useMemo<ArtifactFormComponentProps['item']>(() => {
       const ta = item;
 
       ta.entries = item.entries.length
@@ -466,7 +403,7 @@ export const Form = memo<ArtifactFormComponentProps>(
     }, [item]);
 
     return (
-      <EuiForm component="div">
+      <EuiForm component="div" data-test-subj={getTestId('')}>
         <EuiTitle size="xs">
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>
