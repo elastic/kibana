@@ -197,7 +197,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         await act(async () => {
           testBed = await setup({
             onClose: jest.fn(),
-            viewDataStep: { title: 'View Data', children: <div /> },
           });
           testBed.component.update();
         });
@@ -216,7 +215,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         await act(async () => {
           testBed = await setup({
             onClose: jest.fn(),
-            viewDataStep: undefined,
           });
           testBed.component.update();
         });
