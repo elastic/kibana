@@ -4405,7 +4405,6 @@
     "timelion.timelionDescription": "Affichez des données temporelles sur un graphe.",
     "timelion.uiSettings.defaultIndexDescription": "Index Elasticsearch par défaut dans lequel rechercher avec {esParam}",
     "timelion.uiSettings.defaultIndexLabel": "Index par défaut",
-    "timelion.uiSettings.experimentalLabel": "expérimental",
     "timelion.uiSettings.legacyChartsLibraryDeprication": "Ce paramètre est déclassé et ne sera plus pris en charge à partir de la version 8.0.",
     "timelion.uiSettings.legacyChartsLibraryDescription": "Active la bibliothèque de graphiques héritée pour les graphiques Timelion dans Visualize.",
     "timelion.uiSettings.legacyChartsLibraryLabel": "Bibliothèque de graphiques Timelion héritée",

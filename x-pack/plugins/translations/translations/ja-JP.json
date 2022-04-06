@@ -5147,7 +5147,6 @@
     "timelion.timelionDescription": "グラフに時系列データを表示します。",
     "timelion.uiSettings.defaultIndexDescription": "{esParam} で検索するデフォルトの Elasticsearch インデックスです",
     "timelion.uiSettings.defaultIndexLabel": "デフォルトのインデックス",
-    "timelion.uiSettings.experimentalLabel": "テクニカルプレビュー",
     "timelion.uiSettings.legacyChartsLibraryDeprication": "この設定はサポートが終了し、将来のバージョンではサポートされません。",
     "timelion.uiSettings.legacyChartsLibraryDescription": "VisualizeでTimelionグラフのレガシーグラフライブラリを有効にします",
     "timelion.uiSettings.legacyChartsLibraryLabel": "Timelionレガシーグラフライブラリ",

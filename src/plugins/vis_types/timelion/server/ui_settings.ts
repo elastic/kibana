@@ -13,10 +13,6 @@ import type { UiSettingsParams } from 'kibana/server';
 import { UI_SETTINGS } from '../common/constants';
 import { configSchema } from '../config';
 
-const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
-  defaultMessage: 'technical preview',
-});
-
 export function getUiSettings(
   config: TypeOf<typeof configSchema>
 ): Record<string, UiSettingsParams<unknown>> {

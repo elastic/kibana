@@ -5155,7 +5155,6 @@
     "timelion.timelionDescription": "在图表上显示时间序列数据。",
     "timelion.uiSettings.defaultIndexDescription": "要使用 {esParam} 搜索的默认 Elasticsearch 索引",
     "timelion.uiSettings.defaultIndexLabel": "默认索引",
-    "timelion.uiSettings.experimentalLabel": "技术预览",
     "timelion.uiSettings.legacyChartsLibraryDeprication": "此设置已过时，在未来版本中将不受支持。",
     "timelion.uiSettings.legacyChartsLibraryDescription": "在 Visualize 中启用 timelion 图表的旧版图表库",
     "timelion.uiSettings.legacyChartsLibraryLabel": "Timelion 旧版图表库",
