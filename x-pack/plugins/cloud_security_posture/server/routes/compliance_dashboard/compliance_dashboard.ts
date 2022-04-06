@@ -78,9 +78,9 @@ const getLatestCyclesIds = async (esClient: ElasticsearchClient): Promise<string
 const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: Trends) =>
   clustersWithoutTrends.map((cluster) => ({
     ...cluster,
-    trend: trends.map(({ timestamp, clusters: clustersStats }) => ({
+    trend: trends.map(({ timestamp, clusters: clustersTrendData }) => ({
       timestamp,
-      ...clustersStats[cluster.meta.clusterId],
+      ...clustersTrendData[cluster.meta.clusterId],
     })),
   }));
 
