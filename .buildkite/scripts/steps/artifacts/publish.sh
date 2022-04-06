@@ -67,6 +67,6 @@ docker run --rm \
       --branch "$KIBANA_BASE_BRANCH" \
       --commit "$GIT_COMMIT" \
       --workflow "$WORKFLOW" \
-      --version "$VERSION"
-      --qualifier "$QUALIFIER"
+      --version "$VERSION" \
+      --qualifier "$QUALIFIER" \
       --artifact-set main
