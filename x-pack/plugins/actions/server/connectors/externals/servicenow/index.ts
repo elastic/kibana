@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import { AxiosBasicCredentials, AxiosResponse } from 'axios';
+import { AxiosBasicCredentials } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
@@ -26,6 +27,58 @@ import {
   prepareIncident,
 } from '../../../builtin_action_types/servicenow/utils';
 import { CaseConnector } from '../../case';
+
+const incidentSchema = schema.object({
+  result: schema.object({
+    sys_id: schema.string(),
+    number: schema.string(),
+    sys_created_on: schema.string(),
+    sys_updated_on: schema.string(),
+  }),
+});
+
+const applicationInformationSchema = schema.object({
+  result: schema.object({
+    name: schema.string(),
+    scope: schema.string(),
+    version: schema.string(),
+  }),
+});
+
+const importSetTableSuccessResponse = schema.object({
+  import_set: schema.string(),
+  staging_table: schema.string(),
+  result: schema.arrayOf(
+    schema.object({
+      display_name: schema.string(),
+      display_value: schema.string(),
+      record_link: schema.string(),
+      status: schema.string(),
+      sys_id: schema.string(),
+      table: schema.string(),
+      transform_map: schema.string(),
+    })
+  ),
+});
+
+const importSetTableErrorResponse = schema.object({
+  import_set: schema.string(),
+  staging_table: schema.string(),
+  result: schema.arrayOf(
+    schema.object({
+      error_message: schema.string(),
+      status_message: schema.string(),
+      status: schema.string(),
+      transform_map: schema.string(),
+    })
+  ),
+});
+
+const importSetTableResponse = schema.oneOf([
+  importSetTableSuccessResponse,
+  importSetTableErrorResponse,
+  incidentSchema,
+]);
 
 export class ServiceNow extends CaseConnector<ServiceNowIncident> {
   private secrets: ServiceNowSecretConfigurationType;
@@ -94,9 +147,8 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
       const res = await this.request({
         url: `${this.urls.tableApiIncidentUrl}/${id}`,
         method: 'get',
+        responseSchema: incidentSchema,
       });
-
-      this.checkInstance(res);
 
       return { ...res.data.result };
     } catch (error) {
@@ -112,9 +164,8 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
         url: this.useTableApi ? this.urls.tableApiIncidentUrl : this.urls.importSetTableUrl,
         method: 'post',
         data: prepareIncident(this.useTableApi, incident),
+        responseSchema: importSetTableResponse,
       });
-
-      this.checkInstance(res);
 
       if (!this.useTableApi) {
         this.throwIfImportSetApiResponseIsAnError(res.data);
@@ -149,23 +200,12 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
       const res = await this.request({
         url: versionUrl,
         method: 'get',
+        responseSchema: applicationInformationSchema,
       });
-
-      this.checkInstance(res);
 
       return { ...res.data.result };
     } catch (error) {
       throw createServiceError(error, 'Unable to get application version');
-    }
-  }
-
-  private checkInstance(res: AxiosResponse) {
-    if (res.status >= 200 && res.status < 400 && res.data.result == null) {
-      throw new Error(
-        `There is an issue with your Service Now Instance. Please check ${
-          res.request?.connection?.servername ?? ''
-        }.`
-      );
     }
   }
 

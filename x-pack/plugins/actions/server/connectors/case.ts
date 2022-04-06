@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, { AxiosBasicCredentials, AxiosInstance, Method } from 'axios';
+import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { Incident } from '../builtin_action_types/servicenow/types';
@@ -73,16 +74,17 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     }
   }
 
-  public async request<R = unknown>({
+  public async request<D = unknown, R = unknown>({
     url,
     data,
     method = 'get',
-    ...rest
+    responseSchema,
   }: {
     url: string;
-    data?: R;
+    data?: D;
     method?: Method;
-  }) {
+    responseSchema: Type<R>;
+  }): Promise<AxiosResponse<R>> {
     if (!this.axiosInstance) {
       this.axiosInstance = axios.create({
         auth: this.getBasicAuth(),
@@ -102,8 +104,7 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     // TODO: Add name of service/connector
     this.logger.debug(`Request to external service. Method: ${method}. URL: ${normalizedURL}`);
 
-    return await this.axiosInstance(normalizedURL, {
-      ...rest,
+    const res = await this.axiosInstance(normalizedURL, {
       method,
       data: this.normalizeData(data),
       // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
@@ -113,5 +114,10 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
       maxContentLength,
       timeout,
     });
+
+    // TODO: use namespace configuration
+    responseSchema.validate(res);
+
+    return res;
   }
 }
