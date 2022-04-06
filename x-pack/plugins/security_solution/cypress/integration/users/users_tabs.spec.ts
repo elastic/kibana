@@ -37,22 +37,18 @@ describe('Users stats and tables', () => {
 
   it(`renders all users`, () => {
     const totalUsers = 1;
-    const usersPerPage = 1;
 
     cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} user`);
-    cy.get(USER_NAME_CELL).should('have.length', usersPerPage);
   });
 
   it(`renders all authentications`, () => {
     const totalUsers = 1;
-    const usersPerPage = 1;
 
     cy.get(AUTHENTICATIONS_TAB).click();
 
     cy.get(AUTHENTICATIONS_TABLE)
       .find(HEADER_SUBTITLE)
       .should('have.text', `Showing: ${totalUsers} user`);
-    cy.get(USER_NAME_CELL).should('have.length', usersPerPage);
   });
 
   it(`renders anomalies tab`, () => {

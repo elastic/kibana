@@ -7,7 +7,7 @@
 
 export const IPS_TABLE_LOADED = '[data-test-subj="table-topNFlowSource-loading-false"]';
 
-export const EXPAND_OVERFLOW_ITEMS = '[data-test-subj="render-content-destination.domain"]';
+export const EXPAND_OVERFLOW_ITEMS = '[data-test-subj="overflow-button"]';
 
 export const FILTER_IN = '[data-test-subj="hover-actions-filter-for"]';
 

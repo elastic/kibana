@@ -36,7 +36,7 @@ export const clickOnAddToTimeline = () => {
 };
 
 export const clickOnShowTopN = () => {
-  cy.get(SHOW_TOP_FIELD).click();
+  cy.get(SHOW_TOP_FIELD).first().click();
 };
 
 export const clickOnCopyValue = () => {

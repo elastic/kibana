@@ -408,8 +408,7 @@ Below you will a set of best practices that should be followed when writing Cypr
 Consider to extract all the elements you need to interact with to the `screens` folder. In this way in case the locator changes, we just need to update the value in one place.
 
 ### Write easy to read tests
-Consider to extract all the tasks a user should perfom into the `tasks` folder. In this way is going to be easier to undertsand what are we trying to mimic from the user perspective. Also in case there is change on the way the user has to perform the action, we 
-just need to update the value in one place.
+Consider to extract all the tasks a user should perfom into the `tasks` folder. In this way is going to be easier to undertsand what are we trying to mimic from the user perspective. Also in case there is change on the way the user has to perform the action, we just need to update the value in one place.
 
 ### Make sure your test fails
 Before open a PR with a new test, please first make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
