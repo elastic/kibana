@@ -6,12 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { AlertTypeParams, AlertTypeParamsValidator } from '../types';
+import { RuleTypeParams, RuleTypeParamsValidator } from '../types';
 
-export function validateMutatedRuleTypeParams<Params extends AlertTypeParams>(
+export function validateMutatedRuleTypeParams<Params extends RuleTypeParams>(
   mutatedParams: Params,
   origParams?: Params,
-  validator?: AlertTypeParamsValidator<Params>
+  validator?: RuleTypeParamsValidator<Params>
 ): Params {
   if (!validator) {
     return mutatedParams;

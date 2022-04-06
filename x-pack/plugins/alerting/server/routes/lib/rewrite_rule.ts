@@ -6,7 +6,7 @@
  */
 import { omit } from 'lodash';
 
-import { AlertTypeParams, SanitizedAlert } from '../../types';
+import { RuleTypeParams, SanitizedRule } from '../../types';
 
 export const rewriteRule = ({
   alertTypeId,
@@ -23,7 +23,7 @@ export const rewriteRule = ({
   scheduledTaskId,
   snoozeEndTime,
   ...rest
-}: SanitizedAlert<AlertTypeParams>) => ({
+}: SanitizedRule<RuleTypeParams>) => ({
   ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,

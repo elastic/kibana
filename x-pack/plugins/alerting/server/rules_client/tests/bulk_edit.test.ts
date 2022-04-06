@@ -11,7 +11,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { RecoveredActionGroup, AlertTypeParams } from '../../../common';
+import { RecoveredActionGroup, RuleTypeParams } from '../../../common';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
@@ -689,7 +689,7 @@ describe('bulkEdit()', () => {
         recoveryActionGroup: RecoveredActionGroup,
         validate: {
           params: {
-            validate: (rule) => rule as AlertTypeParams,
+            validate: (rule) => rule as RuleTypeParams,
             validateMutatedParams: (rule: unknown) => {
               throw Error('Mutated error for rule');
             },
