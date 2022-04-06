@@ -35,7 +35,7 @@ import {
   getQueryableUniqueIndexPatternIds,
 } from './map_selectors';
 
-import { CustomIcon, LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
+import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
@@ -255,12 +255,10 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     ];
     const waitingForMapReadyLayerList: VectorLayerDescriptor[] =
       [] as unknown as VectorLayerDescriptor[];
-    const customIcons: CustomIcon[] = [];
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(
         layerList,
-        waitingForMapReadyLayerList,
-        customIcons
+        waitingForMapReadyLayerList
       )
     ).toEqual(['foo', 'bar']);
   });
@@ -279,12 +277,10 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       createWaitLayerDescriptorMock({ indexPatternId: 'fbr' }),
       createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
     ] as unknown as VectorLayerDescriptor[];
-    const customIcons: CustomIcon[] = [];
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(
         layerList,
-        waitingForMapReadyLayerList,
-        customIcons
+        waitingForMapReadyLayerList
       )
     ).toEqual(['foo', 'fbr']);
   });
