@@ -107,7 +107,9 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  */
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
-   * The unique identifier of the application
+   * The unique identifier of the application.
+   *
+   * Can only be composed of alphanumeric characters, `-` and `_`
    */
   id: string;
 
@@ -824,6 +826,7 @@ export interface ApplicationStart {
    * @param options - navigation options
    */
   navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
+
   /**
    * Returns the absolute path (or URL) to a given app, including the global base path.
    *

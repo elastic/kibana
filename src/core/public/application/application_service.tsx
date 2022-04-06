@@ -173,7 +173,7 @@ export class ApplicationService {
     };
 
     return {
-      register: (plugin, app: App<unknown>) => {
+      register: (plugin, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
         validateApp(app);
