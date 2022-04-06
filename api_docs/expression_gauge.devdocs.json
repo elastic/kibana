@@ -102,7 +102,15 @@
             "section": "def-common.Accessors",
             "text": "Accessors"
           },
-          " | undefined) => number"
+          " | undefined, paletteParams?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
@@ -148,6 +156,41 @@
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMaxValue.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "paletteParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMaxValue.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRespectRanges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -177,7 +220,15 @@
             "section": "def-common.Accessors",
             "text": "Accessors"
           },
-          " | undefined) => any"
+          " | undefined, paletteParams?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          " | undefined, isRespectRanges?: boolean | undefined) => any"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
@@ -219,6 +270,41 @@
                 "text": "Accessors"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMinValue.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "paletteParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMinValue.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRespectRanges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
@@ -981,6 +1067,19 @@
                 "path": "src/plugins/vis_types/gauge/public/to_ast.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.respectRanges",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "respectRanges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "expressionGauge",

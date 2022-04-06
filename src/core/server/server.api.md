@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
+import { AnalyticsClient } from '@elastic/analytics';
 import apm from 'elastic-apm-node';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -20,6 +21,7 @@ import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
+import { ContextProviderOpts } from '@elastic/analytics';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
@@ -32,7 +34,12 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Event as Event_2 } from '@elastic/analytics';
+import { EventContext } from '@elastic/analytics';
+import { EventType } from '@elastic/analytics';
+import { EventTypeOpts } from '@elastic/analytics';
 import { IncomingHttpHeaders } from 'http';
+import { IShipper } from '@elastic/analytics';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
@@ -41,6 +48,7 @@ import { LogRecord } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@elastic/analytics';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
@@ -53,13 +61,33 @@ import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ShipperClassConstructor } from '@elastic/analytics';
 import { Stream } from 'stream';
+import { TelemetryCounter } from '@elastic/analytics';
+import { TelemetryCounterType } from '@elastic/analytics';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { URL as URL_2 } from 'url';
 
 export { AddConfigDeprecation }
+
+export { AnalyticsClient }
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServicePreboot = AnalyticsClient;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceSetup = AnalyticsClient;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 // @public
 export const APP_WRAPPER_CLASS = "kbnAppWrapper";
@@ -294,6 +322,8 @@ export { ConfigService }
 // @internal
 export type ConfigUsageData = Record<string, any | any[]>;
 
+export { ContextProviderOpts }
+
 // @public
 export interface ContextSetup {
     createContextContainer(): IContextContainer;
@@ -408,6 +438,8 @@ export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => 
 // @public
 export interface CorePreboot {
     // (undocumented)
+    analytics: AnalyticsServicePreboot;
+    // (undocumented)
     elasticsearch: ElasticsearchServicePreboot;
     // (undocumented)
     http: HttpServicePreboot;
@@ -438,6 +470,8 @@ export interface CoreServicesUsageData {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // (undocumented)
+    analytics: AnalyticsServiceSetup;
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
@@ -474,6 +508,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    analytics: AnalyticsServiceStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
@@ -981,6 +1017,10 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+export { Event_2 as Event }
+
+export { EventContext }
+
 // Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -990,6 +1030,10 @@ export class EventLoopDelaysMonitor {
     reset(): void;
     stop(): void;
 }
+
+export { EventType }
+
+export { EventTypeOpts }
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
@@ -1309,6 +1353,8 @@ export interface IScopedClusterClient {
     readonly asCurrentUser: ElasticsearchClient;
     readonly asInternalUser: ElasticsearchClient;
 }
+
+export { IShipper }
 
 // @public
 export interface IUiSettingsClient {
@@ -1635,6 +1681,8 @@ export interface OpsServerMetrics {
         max_in_millis: number;
     };
 }
+
+export { OptInConfig }
 
 export { PackageInfo }
 
@@ -3055,6 +3103,8 @@ export type SharedGlobalConfig = RecursiveReadonly<{
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
+export { ShipperClassConstructor }
+
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
@@ -3071,6 +3121,10 @@ export interface StatusServiceSetup {
     overall$: Observable<ServiceStatus>;
     set(status$: Observable<ServiceStatus>): void;
 }
+
+export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public
 export interface UiSettingsParams<T = unknown> {

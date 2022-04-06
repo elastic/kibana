@@ -16,7 +16,8 @@
     "discover",
     "dashboard",
     "dashboardEnhanced",
-    "developerExamples"
+    "developerExamples",
+    "unifiedSearch"
   ],
   "optionalPlugins": [],
   "requiredBundles": ["dashboardEnhanced", "embeddable", "kibanaUtils", "kibanaReact"]
