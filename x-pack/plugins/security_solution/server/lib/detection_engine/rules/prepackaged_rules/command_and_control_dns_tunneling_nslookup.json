@@ -12,6 +12,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential DNS Tunneling via NsLookup",
+  "note": "## Triage and analysis\n\n### Investigating Potential DNS Tunneling via NsLookup\n\nAttackers can abuse existing network rules that allow DNS communication with external resources to use the protocol as\ntheir command and control and/or exfiltration channel.\n\nDNS queries can be used to infiltrate data such as commands to be run, malicious files, etc., and also for exfiltration,\nsince queries can be used to send data to the attacker-controlled DNS server. This process is commonly known as DNS tunneling.\n\nMore information on how tunneling works and how it can be abused can be found on\n[Palo Alto Unit42 Research](https://unit42.paloaltonetworks.com/dns-tunneling-how-dns-can-be-abused-by-malicious-actors).\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Inspect the DNS query and identify the information sent.\n- Extract this communication's indicators of compromise (IoCs) and use traffic logs to search for other potentially compromised hosts.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. If the parent process is trusted and the data sent is not sensitive nor\ncommand and control related, this alert can be closed.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Immediately block the IoCs identified on the triage.\n- Implement any temporary network rules, procedures, and segmentation required to contain the attack.\n- Capture forensic images to preserve evidence.\n- Reset the password for the user account and other potentially compromised accounts (email, services, CRMs, etc.).\n- Update firewall rules to be more restrictive.\n- Reimage affected systems.\n",
   "query": "event.category:process and event.type:start and process.name:nslookup.exe and process.args:(-querytype=* or -qt=* or -q=* or -type=*)\n",
   "references": [
     "https://unit42.paloaltonetworks.com/dns-tunneling-in-the-wild-overview-of-oilrigs-dns-tunneling/"
@@ -57,5 +58,5 @@
     "value": 15
   },
   "type": "threshold",
-  "version": 3
+  "version": 4
 }

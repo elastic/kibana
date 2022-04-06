@@ -83,6 +83,11 @@ export type {
 };
 
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from './analytics';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
@@ -443,6 +448,23 @@ export type {
 
 export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
 
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServicePreboot,
+  AnalyticsServiceStart,
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ContextProviderOpts,
+  OptInConfig,
+  ShipperClassConstructor,
+  TelemetryCounter,
+} from './analytics';
+export { TelemetryCounterType } from './analytics';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -484,6 +506,8 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CorePreboot {
+  /** {@link AnalyticsServicePreboot} */
+  analytics: AnalyticsServicePreboot;
   /** {@link ElasticsearchServicePreboot} */
   elasticsearch: ElasticsearchServicePreboot;
   /** {@link HttpServicePreboot} */
@@ -502,6 +526,8 @@ export interface CorePreboot {
  * @public
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -556,6 +582,8 @@ export type StartServicesAccessor<
  * @public
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
   /** {@link DocLinksServiceStart} */

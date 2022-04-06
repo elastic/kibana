@@ -105,7 +105,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
-      sessionViewId,
+      sessionViewConfig,
       showCheckboxes,
       sort,
     } = defaultModel,
@@ -164,11 +164,11 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
       <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
     ) : null;
-  }, [graphEventId, id, sessionViewId, SessionView, Navigation]);
+  }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
