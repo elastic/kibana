@@ -31,6 +31,7 @@
     { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

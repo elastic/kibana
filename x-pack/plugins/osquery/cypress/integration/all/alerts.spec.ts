@@ -18,6 +18,7 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { ROLES } from '../../test';
 
 describe('Alert Event Details', () => {
   before(() => {
@@ -25,7 +26,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
   });
 
   after(() => {
