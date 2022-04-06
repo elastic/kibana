@@ -5,145 +5,358 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
 import {
   map,
   distinctUntilChanged,
-  switchMap,
+  filter,
   debounceTime,
   timeoutWith,
   startWith,
 } from 'rxjs/operators';
+import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 
-import { PluginName } from '../plugins';
-import { ServiceStatus, CoreStatus, ServiceStatusLevels } from './types';
+import type { PluginName } from '../plugins';
+import type { ServiceStatus, CoreStatus } from './types';
+import { ServiceStatusLevels } from './types';
 import { getSummaryStatus } from './get_summary_status';
 
 const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 
-interface Deps {
+const defaultStatus: ServiceStatus = {
+  level: ServiceStatusLevels.unavailable,
+  summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
+};
+
+export interface Deps {
   core$: Observable<CoreStatus>;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
 }
 
-export class PluginsStatusService {
-  private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
-  private readonly update$ = new BehaviorSubject(true);
-  private readonly defaultInheritedStatus$: Observable<ServiceStatus>;
-  private newRegistrationsAllowed = true;
+interface PluginData {
+  [name: string]: {
+    name: PluginName;
+    depth: number; // depth of this plugin in the dependency tree (root plugins will have depth = 1)
+    dependencies: PluginName[];
+    reverseDependencies: PluginName[];
+    reportedStatus?: ServiceStatus;
+    derivedStatus: ServiceStatus;
+  };
+}
+interface PluginStatus {
+  [name: string]: ServiceStatus;
+}
 
-  constructor(private readonly deps: Deps) {
-    this.defaultInheritedStatus$ = this.deps.core$.pipe(
-      map((coreStatus) => {
-        return getSummaryStatus(Object.entries(coreStatus), {
-          allAvailableSummary: `All dependencies are available`,
-        });
-      })
-    );
+interface ReportedStatusSubscriptions {
+  [name: string]: Subscription;
+}
+
+export class PluginsStatusService {
+  private coreStatus: CoreStatus = { elasticsearch: defaultStatus, savedObjects: defaultStatus };
+  private pluginData: PluginData;
+  private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies
+  private orderedPluginNames: PluginName[];
+  private pluginData$ = new ReplaySubject<PluginData>(1);
+  private pluginStatus: PluginStatus = {};
+  private pluginStatus$ = new BehaviorSubject<PluginStatus>(this.pluginStatus);
+  private reportedStatusSubscriptions: ReportedStatusSubscriptions = {};
+  private isReportingStatus: Record<PluginName, boolean> = {};
+  private newRegistrationsAllowed = true;
+  private coreSubscription: Subscription;
+
+  constructor(deps: Deps, private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS) {
+    this.pluginData = this.initPluginData(deps.pluginDependencies);
+    this.rootPlugins = this.getRootPlugins();
+    this.orderedPluginNames = this.getOrderedPluginNames();
+
+    this.coreSubscription = deps.core$
+      .pipe(debounceTime(10))
+      .subscribe((coreStatus: CoreStatus) => {
+        this.coreStatus = coreStatus;
+        this.updateRootPluginsStatuses();
+        this.updateDependantStatuses(this.rootPlugins);
+        this.emitCurrentStatus();
+      });
   }
 
+  /**
+   * Register a status Observable for a specific plugin
+   * @param {PluginName} plugin The name of the plugin
+   * @param {Observable<ServiceStatus>} status$ An external Observable that must be trusted as the source of truth for the status of the plugin
+   * @throws An error if the status registrations are not allowed
+   */
   public set(plugin: PluginName, status$: Observable<ServiceStatus>) {
     if (!this.newRegistrationsAllowed) {
       throw new Error(
         `Custom statuses cannot be registered after setup, plugin [${plugin}] attempted`
       );
     }
-    this.pluginStatuses.set(plugin, status$);
-    this.update$.next(true); // trigger all existing Observables to update from the new source Observable
+
+    this.isReportingStatus[plugin] = true;
+    // unsubscribe from any previous subscriptions. Ideally plugins should register a status Observable only once
+    this.reportedStatusSubscriptions[plugin]?.unsubscribe();
+
+    // delete any derived statuses calculated before the custom status Observable was registered
+    delete this.pluginStatus[plugin];
+
+    this.reportedStatusSubscriptions[plugin] = status$
+      // Set a timeout for externally-defined status Observables
+      .pipe(
+        timeoutWith(this.statusTimeoutMs, status$.pipe(startWith(defaultStatus))),
+        distinctUntilChanged()
+      )
+      .subscribe((status) => {
+        const levelChanged = this.updatePluginReportedStatus(plugin, status);
+
+        if (levelChanged) {
+          this.updateDependantStatuses([plugin]);
+        }
+
+        this.emitCurrentStatus();
+      });
   }
 
+  /**
+   * Prevent plugins from registering status Observables
+   */
   public blockNewRegistrations() {
     this.newRegistrationsAllowed = false;
   }
 
+  /**
+   * Obtain an Observable of the status of all the plugins
+   * @returns {Observable<Record<PluginName, ServiceStatus>>} An Observable that will yield the current status of all plugins
+   */
   public getAll$(): Observable<Record<PluginName, ServiceStatus>> {
-    return this.getPluginStatuses$([...this.deps.pluginDependencies.keys()]);
-  }
-
-  public getDependenciesStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
-    const dependencies = this.deps.pluginDependencies.get(plugin);
-    if (!dependencies) {
-      throw new Error(`Unknown plugin: ${plugin}`);
-    }
-
-    return this.getPluginStatuses$(dependencies).pipe(
-      // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(25)
-    );
-  }
-
-  public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
-    return this.update$.pipe(
-      debounceTime(25), // Avoid calling the plugin's custom status logic for every plugin that depends on it.
-      switchMap(() => {
-        // Only go up the dependency tree if any of this plugin's dependencies have a custom status
-        // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.
-        if (this.anyCustomStatuses(plugin)) {
-          return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
-            map(([coreStatus, pluginStatuses]) => {
-              return getSummaryStatus(
-                [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
-                {
-                  allAvailableSummary: `All dependencies are available`,
-                }
-              );
-            })
-          );
-        } else {
-          return this.defaultInheritedStatus$;
-        }
-      })
-    );
-  }
-
-  private getPluginStatuses$(plugins: PluginName[]): Observable<Record<PluginName, ServiceStatus>> {
-    if (plugins.length === 0) {
-      return of({});
-    }
-
-    return this.update$.pipe(
-      switchMap(() => {
-        const pluginStatuses = plugins
-          .map((depName) => {
-            const pluginStatus = this.pluginStatuses.get(depName)
-              ? this.pluginStatuses.get(depName)!.pipe(
-                  timeoutWith(
-                    STATUS_TIMEOUT_MS,
-                    this.pluginStatuses.get(depName)!.pipe(
-                      startWith({
-                        level: ServiceStatusLevels.unavailable,
-                        summary: `Status check timed out after ${STATUS_TIMEOUT_MS / 1000}s`,
-                      })
-                    )
-                  )
-                )
-              : this.getDerivedStatus$(depName);
-            return [depName, pluginStatus] as [PluginName, Observable<ServiceStatus>];
-          })
-          .map(([pName, status$]) =>
-            status$.pipe(map((status) => [pName, status] as [PluginName, ServiceStatus]))
-          );
-
-        return combineLatest(pluginStatuses).pipe(
-          map((statuses) => Object.fromEntries(statuses)),
-          distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
-        );
-      })
+    return this.pluginStatus$.asObservable().pipe(
+      // do not emit until we have a status for all plugins
+      filter((all) => Object.keys(all).length === this.orderedPluginNames.length),
+      distinctUntilChanged<Record<PluginName, ServiceStatus>>(isDeepStrictEqual)
     );
   }
 
   /**
-   * Determines whether or not this plugin or any plugin in it's dependency tree have a custom status registered.
+   * Obtain an Observable of the status of the dependencies of the given plugin
+   * @param {PluginName} plugin the name of the plugin whose dependencies' status must be retreived
+   * @returns {Observable<Record<PluginName, ServiceStatus>>} An Observable that will yield the current status of the plugin's dependencies
    */
-  private anyCustomStatuses(plugin: PluginName): boolean {
-    if (this.pluginStatuses.get(plugin)) {
-      return true;
+  public getDependenciesStatus$(plugin: PluginName): Observable<Record<PluginName, ServiceStatus>> {
+    const directDependencies = this.pluginData[plugin].dependencies;
+
+    return this.getAll$().pipe(
+      map((allStatus) => {
+        const dependenciesStatus: Record<PluginName, ServiceStatus> = {};
+        directDependencies.forEach((dep) => (dependenciesStatus[dep] = allStatus[dep]));
+        return dependenciesStatus;
+      }),
+      debounceTime(10)
+    );
+  }
+
+  /**
+   * Obtain an Observable of the derived status of the given plugin
+   * @param {PluginName} plugin the name of the plugin whose derived status must be retrieved
+   * @returns {Observable<ServiceStatus>} An Observable that will yield the derived status of the plugin
+   */
+  public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
+    return this.pluginData$.asObservable().pipe(
+      map((pluginData) => pluginData[plugin]?.derivedStatus),
+      filter((status: ServiceStatus | undefined): status is ServiceStatus => !!status),
+      distinctUntilChanged<ServiceStatus>(isDeepStrictEqual)
+    );
+  }
+
+  /**
+   * Hook to be called at the stop lifecycle event
+   */
+  public stop() {
+    // Cancel all active subscriptions
+    this.coreSubscription.unsubscribe();
+    Object.values(this.reportedStatusSubscriptions).forEach((subscription) => {
+      subscription.unsubscribe();
+    });
+  }
+
+  /**
+   * Initialize a convenience data structure
+   * that maintain up-to-date information about the plugins and their statuses
+   * @param {ReadonlyMap<PluginName, PluginName[]>} pluginDependencies Information about the different plugins and their dependencies
+   * @returns {PluginData}
+   */
+  private initPluginData(pluginDependencies: ReadonlyMap<PluginName, PluginName[]>): PluginData {
+    const pluginData: PluginData = {};
+
+    if (pluginDependencies) {
+      pluginDependencies.forEach((dependencies, name) => {
+        pluginData[name] = {
+          name,
+          depth: 0,
+          dependencies,
+          reverseDependencies: [],
+          derivedStatus: defaultStatus,
+        };
+      });
+
+      pluginDependencies.forEach((dependencies, name) => {
+        dependencies.forEach((dependency) => {
+          pluginData[dependency].reverseDependencies.push(name);
+        });
+      });
     }
 
-    return this.deps.pluginDependencies
-      .get(plugin)!
-      .reduce((acc, depName) => acc || this.anyCustomStatuses(depName), false as boolean);
+    return pluginData;
+  }
+
+  /**
+   * Create a list with all the root plugins.
+   * Root plugins are all those plugins that do not have any dependency.
+   * @returns {PluginName[]} a list with all the root plugins present in the provided deps
+   */
+  private getRootPlugins(): PluginName[] {
+    return Object.keys(this.pluginData).filter(
+      (plugin) => this.pluginData[plugin].dependencies.length === 0
+    );
+  }
+
+  /**
+   * Obtain a list of plugins names, ordered by depth.
+   * @see {calculateDepthRecursive}
+   * @returns {PluginName[]} a list of plugins, ordered by depth + name
+   */
+  private getOrderedPluginNames(): PluginName[] {
+    this.rootPlugins.forEach((plugin) => {
+      this.calculateDepthRecursive(plugin, 1);
+    });
+
+    return sortBy(Object.values(this.pluginData), ['depth', 'name']).map(({ name }) => name);
+  }
+
+  /**
+   * Calculate the depth of the given plugin, knowing that it's has at least the specified depth
+   * The depth of a plugin is determined by how many levels of dependencies the plugin has above it.
+   * We define root plugins as depth = 1, plugins that only depend on root plugins will have depth = 2
+   * and so on so forth
+   * @param {PluginName} plugin the name of the plugin whose depth must be calculated
+   * @param {number} depth the minimum depth that we know for sure this plugin has
+   */
+  private calculateDepthRecursive(plugin: PluginName, depth: number): void {
+    const pluginData = this.pluginData[plugin];
+    pluginData.depth = Math.max(pluginData.depth, depth);
+    const newDepth = depth + 1;
+    pluginData.reverseDependencies.forEach((revDep) =>
+      this.calculateDepthRecursive(revDep, newDepth)
+    );
+  }
+
+  /**
+   * Updates the root plugins statuses according to the current core services status
+   */
+  private updateRootPluginsStatuses(): void {
+    const derivedStatus = getSummaryStatus(Object.entries(this.coreStatus), {
+      allAvailableSummary: `All dependencies are available`,
+    });
+
+    // note that the derived status is the same for all root plugins
+    this.rootPlugins.forEach((plugin) => {
+      this.pluginData[plugin].derivedStatus = derivedStatus;
+      if (!this.isReportingStatus[plugin]) {
+        // this root plugin has NOT registered any status Observable. Thus, its status is derived from core
+        this.pluginStatus[plugin] = derivedStatus;
+      }
+    });
+  }
+
+  /**
+   * Update the derived statuses of the specified plugins' dependant plugins,
+   * If impacted plugins have not registered a custom status Observable, update their "current" status as well.
+   * @param {PluginName[]} plugins The names of the plugins whose dependant plugins must be updated
+   */
+  private updateDependantStatuses(plugins: PluginName[]): void {
+    const toCheck = new Set<PluginName>();
+    plugins.forEach((plugin) =>
+      this.pluginData[plugin].reverseDependencies.forEach((revDep) => toCheck.add(revDep))
+    );
+
+    // Note that we are updating the plugins in an ordered fashion.
+    // This way, when updating plugin X (at depth = N),
+    // all of its dependencies (at depth < N) have already been updated
+    for (let i = 0; i < this.orderedPluginNames.length; ++i) {
+      const current = this.orderedPluginNames[i];
+      if (toCheck.has(current)) {
+        // update the current plugin status
+        this.updatePluginStatus(current);
+        // flag all its reverse dependencies to be checked
+        // TODO flag them only IF the status of this plugin has changed, seems to break some tests
+        this.pluginData[current].reverseDependencies.forEach((revDep) => toCheck.add(revDep));
+      }
+    }
+  }
+
+  /**
+   * Determine the derived status of the specified plugin and update it on the pluginData structure
+   * Optionally, if the plugin has not registered a custom status Observable, update its "current" status as well
+   * @param {PluginName} plugin The name of the plugin to be updated
+   */
+  private updatePluginStatus(plugin: PluginName): void {
+    const newStatus = this.determinePluginStatus(plugin);
+    this.pluginData[plugin].derivedStatus = newStatus;
+
+    if (!this.isReportingStatus[plugin]) {
+      // this plugin has NOT registered any status Observable.
+      // Thus, its status is derived from its dependencies + core
+      this.pluginStatus[plugin] = newStatus;
+    }
+  }
+
+  /**
+   * Deterime the current plugin status, taking into account its reported status, its derived status
+   * and the status of the core services
+   * @param {PluginName} plugin the name of the plugin whose status must be determined
+   * @returns {ServiceStatus} The status of the plugin
+   */
+  private determinePluginStatus(plugin: PluginName): ServiceStatus {
+    const coreStatus: Array<[PluginName, ServiceStatus]> = Object.entries(this.coreStatus);
+    const newLocal = this.pluginData[plugin];
+
+    let depsStatus: Array<[PluginName, ServiceStatus]> = [];
+
+    if (Object.keys(this.isReportingStatus).length) {
+      // if at least one plugin has registered a status Observable... take into account plugin dependencies
+      depsStatus = newLocal.dependencies.map((dependency) => [
+        dependency,
+        this.pluginData[dependency].reportedStatus || this.pluginData[dependency].derivedStatus,
+      ]);
+    }
+
+    const newStatus = getSummaryStatus([...coreStatus, ...depsStatus], {
+      allAvailableSummary: `All dependencies are available`,
+    });
+
+    return newStatus;
+  }
+
+  /**
+   * Updates the reported status for the given plugin, along with the status of its dependencies tree.
+   * @param {PluginName} plugin The name of the plugin whose reported status must be updated
+   * @param {ServiceStatus} reportedStatus The newly reported status for that plugin
+   * @return {boolean} true if the level of the reported status changed
+   */
+  private updatePluginReportedStatus(plugin: PluginName, reportedStatus: ServiceStatus): boolean {
+    const previousReportedStatus = this.pluginData[plugin].reportedStatus;
+
+    this.pluginData[plugin].reportedStatus = reportedStatus;
+    this.pluginStatus[plugin] = reportedStatus;
+
+    return previousReportedStatus?.level !== reportedStatus.level;
+  }
+
+  /**
+   * Emit the current status to internal Subjects, effectively propagating it to observers.
+   */
+  private emitCurrentStatus(): void {
+    this.pluginData$.next(this.pluginData);
+    // we must clone the plugin status to prevent future modifications from updating current emission
+    this.pluginStatus$.next({ ...this.pluginStatus });
   }
 }
