@@ -8,6 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectReference } from 'kibana/server';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData } from './types';

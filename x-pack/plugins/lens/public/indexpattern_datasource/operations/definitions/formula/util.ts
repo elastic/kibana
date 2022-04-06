@@ -12,7 +12,7 @@ import type {
   TinymathFunction,
   TinymathNamedArgument,
   TinymathVariable,
-} from 'packages/kbn-tinymath';
+} from '@kbn/tinymath';
 import type { Query } from 'src/plugins/data/public';
 import type {
   OperationDefinition,

@@ -37,6 +37,7 @@ import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
+import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -45,7 +46,7 @@ export interface EditOutputFlyoutProps {
 
 const OUTPUT_TYPE_OPTIONS = [
   { value: 'elasticsearch', text: 'Elasticsearch' },
-  { value: 'logstash', text: 'Logstash' },
+  { value: 'logstash', text: 'Logstash (BETA)' },
 ];
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
@@ -59,6 +60,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isLogstashOutput = inputs.typeInput.value === 'logstash';
   const isESOutput = inputs.typeInput.value === 'elasticsearch';
+
+  const showLogstashNeedEncryptedSavedObjectCallout =
+    isLogstashOutput && !form.hasEncryptedSavedObjectConfigured;
 
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
@@ -130,6 +134,23 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 defaultMessage="Type"
               />
             }
+            helpText={
+              isLogstashOutput && (
+                <FormattedMessage
+                  id="xpack.fleet.editOutputFlyout.logstashTypeOutputBetaHelpText"
+                  defaultMessage="Logstash output is in BETA, Please help by reporting any bugs. {learnMoreLink}."
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink href={docLinks.links.fleet.guide} external>
+                        {i18n.translate('xpack.fleet.editOutputFlyout.learnMoreLink', {
+                          defaultMessage: 'Learn more',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              )
+            }
           >
             <EuiSelect
               fullWidth
@@ -143,6 +164,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               )}
             />
           </EuiFormRow>
+          {showLogstashNeedEncryptedSavedObjectCallout && (
+            <>
+              <EuiSpacer size="m" />
+              <EncryptionKeyRequiredCallout />
+            </>
+          )}
           {isLogstashOutput && (
             <>
               <EuiSpacer size="m" />

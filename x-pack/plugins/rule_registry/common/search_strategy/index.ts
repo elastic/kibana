@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ValidFeatureId } from '@kbn/rule-data-utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Ecs } from 'kibana/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchRequest, IEsSearchResponse } from 'src/plugins/data/common';

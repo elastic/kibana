@@ -17,7 +17,6 @@ import {
 } from '../../common/constants';
 import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
-import { uptimeOverviewNavigatorParams } from './locators/overview';
 
 export function renderApp(
   core: CoreStart,
@@ -40,8 +39,6 @@ export function renderApp(
   );
 
   const canSave = (capabilities.uptime.save ?? false) as boolean;
-
-  plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
   const props: UptimeAppProps = {
     isDev,

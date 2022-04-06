@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Clearing Windows Console History",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.action == \"start\" and\n  (process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or process.pe.original_file_name == \"PowerShell.EXE\") and\n     (process.args : \"*Clear-History*\" or\n     (process.args : (\"*Remove-Item*\", \"rm\") and process.args : (\"*ConsoleHost_history.txt*\", \"*(Get-PSReadlineOption).HistorySavePath*\")) or\n     (process.args : \"*Set-PSReadlineOption*\" and process.args : \"*SaveNothing*\"))\n",
   "references": [
     "https://stefanos.cloud/blog/kb/how-to-clear-the-powershell-command-history/",
@@ -54,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }
