@@ -199,6 +199,7 @@ export function OverviewPage({ routeParams }: Props) {
                     rangeFrom={relativeStart}
                     rangeTo={relativeEnd}
                     indexNames={indexNames}
+                    itemsPerPage={10}
                     stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
                     storage={new Storage(window.localStorage)}
                   />
