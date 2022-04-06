@@ -110,6 +110,11 @@ describe('alerts_route.ts', () => {
         return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
       }
     );
+
+    // @ts-expect-error
+    alertsClientParams.ruleDataService.findIndicesByFeature.mockImplementation(() => [
+      'alerts-security.alerts',
+    ]);
   });
 
   describe('doSearch(client, sessionEntityId)', () => {
