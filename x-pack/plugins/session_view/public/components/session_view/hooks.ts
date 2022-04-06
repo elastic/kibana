@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useInfiniteQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
@@ -25,12 +25,14 @@ import {
 
 export const useFetchSessionViewProcessEvents = (
   sessionEntityId: string,
-  jumpToEvent: ProcessEvent | undefined
+  jumpToCursor?: string
 ) => {
   const { http } = useKibana<CoreStart>().services;
-  const [isJumpToFirstPage, setIsJumpToFirstPage] = useState<boolean>(false);
-  const jumpToCursor = jumpToEvent && jumpToEvent.process?.start;
-  const cachingKeys = [QUERY_KEY_PROCESS_EVENTS, sessionEntityId];
+  const [currentJumpToCursor, setCurrentJumpToCursor] = useState<string>('');
+  const cachingKeys = useMemo(
+    () => [QUERY_KEY_PROCESS_EVENTS, sessionEntityId, jumpToCursor],
+    [sessionEntityId, jumpToCursor]
+  );
 
   const query = useInfiniteQuery(
     cachingKeys,
@@ -58,15 +60,21 @@ export const useFetchSessionViewProcessEvents = (
       getNextPageParam: (lastPage) => {
         if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
           return {
-            cursor: lastPage.events[lastPage.events.length - 1].process?.start,
+            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
             forward: true,
           };
         }
       },
-      getPreviousPageParam: (firstPage) => {
-        if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
+      getPreviousPageParam: (firstPage, pages) => {
+        const atBeginning = pages.length > 1 && firstPage.events.length < PROCESS_EVENTS_PER_PAGE;
+
+        if (jumpToCursor && !atBeginning) {
+          // it's possible the first page returned no events
+          // fallback to using jumpToCursor if there are no "forward" events.
+          const cursor = firstPage.events?.[0]?.['@timestamp'] || jumpToCursor;
+
           return {
-            cursor: firstPage.events[0].process?.start,
+            cursor,
             forward: false,
           };
         }
@@ -78,11 +86,11 @@ export const useFetchSessionViewProcessEvents = (
   );
 
   useEffect(() => {
-    if (jumpToEvent && query.data?.pages.length === 1 && !isJumpToFirstPage) {
+    if (jumpToCursor && query.data?.pages.length === 1 && jumpToCursor !== currentJumpToCursor) {
       query.fetchPreviousPage({ cancelRefetch: true });
-      setIsJumpToFirstPage(true);
+      setCurrentJumpToCursor(jumpToCursor);
     }
-  }, [jumpToEvent, query, isJumpToFirstPage]);
+  }, [jumpToCursor, query, currentJumpToCursor]);
 
   return query;
 };
