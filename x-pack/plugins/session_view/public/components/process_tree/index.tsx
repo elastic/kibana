@@ -242,6 +242,7 @@ export const ProcessTree = ({
                   onClick={fetchPreviousPage}
                   isFetching={isFetching}
                   eventsRemaining={eventsRemaining}
+                  forward={false}
                 />
               ) : null
             }
@@ -252,6 +253,7 @@ export const ProcessTree = ({
                   onClick={fetchNextPage}
                   isFetching={isFetching}
                   eventsRemaining={eventsRemaining}
+                  forward={true}
                 />
               ) : null
             }

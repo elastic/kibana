@@ -15,6 +15,7 @@ export interface ProcessTreeLoadMoreButtonDeps {
   text: string;
   isFetching: boolean;
   eventsRemaining: number;
+  forward: boolean;
 }
 
 export const ProcessTreeLoadMoreButton = ({
@@ -22,12 +23,18 @@ export const ProcessTreeLoadMoreButton = ({
   text,
   isFetching,
   eventsRemaining,
+  forward,
 }: ProcessTreeLoadMoreButtonDeps) => {
   const styles = useStyles();
 
   return (
     <div css={styles.wrapper}>
-      <EuiButtonEmpty size="xs" iconType="arrowDown" onClick={onClick} isLoading={isFetching}>
+      <EuiButtonEmpty
+        size="xs"
+        iconType={forward ? 'arrowDown' : 'arrowUp'}
+        onClick={onClick}
+        isLoading={isFetching}
+      >
         {text}
         {eventsRemaining !== 0 && (
           <FormattedMessage
