@@ -26,6 +26,9 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
      */
     async goToFirstListedCase() {
       await testSubjects.existOrFail('cases-table');
+      await testSubjects.existOrFail('case-details-link', {
+        timeout: config.get('timeouts.waitFor'),
+      });
       await testSubjects.click('case-details-link');
       await testSubjects.existOrFail('case-view-title', {
         timeout: config.get('timeouts.waitFor'),
