@@ -34,23 +34,30 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
 
 // const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
 
-describe('RulesPage', () => {
+describe('empty RulesPage', () => {
   async function setup() {
     const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
-    console.log(useFetchRules, '!!useFetchRules');
     const rulesState: RuleState = {
-      isLoading: true,
+      isLoading: false,
       data: [],
       error: null,
       totalItemCount: 0,
     };
-    useFetchRules.mockReturnValue({ rulesState });
+    useFetchRules.mockReturnValue({ rulesState, noData: true });
   }
   it('renders empty screen', async () => {
     await setup();
 
     const wrapper = shallow(<RulesPage />);
 
-    expect(wrapper.find(RulesTable)).toHaveLength(1);
+    expect(wrapper.find(RulesTable)).toHaveLength(0);
   });
 });
+
+describe('empty RulesPage with show only capability', () => {});
+
+describe('rulesPage with items', () => {});
+
+describe('rulesPage with items and show only capability', () => {});
+
+describe('rulesPage with disabled items', () => {});
