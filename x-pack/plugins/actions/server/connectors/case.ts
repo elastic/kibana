@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { AxiosInstance, Method } from 'axios';
+import axios, { AxiosBasicCredentials, AxiosInstance, Method } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { Incident } from '../builtin_action_types/servicenow/types';
@@ -21,16 +21,18 @@ interface CaseConnectorInterface<T extends unknown> {
 }
 
 export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
+  private axiosInstance: AxiosInstance | undefined;
   constructor(
-    public axiosInstance: AxiosInstance,
     public configurationUtilities: ActionsConfigurationUtilities,
     public logger: Logger
   ) {}
+
   // abstract addIncidentComment: (comment: any) => Promise<any>;
   // abstract deleteIncident: (incident: any) => Promise<any>;
   // abstract getFields: () => Promise<any>;
   abstract createIncident(incident: Partial<Incident>): Promise<T>;
   // abstract getIncident: (incidentId: string) => Promise<any>;
+  abstract getBasicAuth(): AxiosBasicCredentials;
 
   public async request<R = unknown>({
     url,
@@ -42,6 +44,12 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     data?: R;
     method?: Method;
   }) {
+    if (!this.axiosInstance) {
+      this.axiosInstance = axios.create({
+        auth: this.getBasicAuth(),
+      });
+    }
+
     const { httpAgent, httpsAgent } = getCustomAgents(
       this.configurationUtilities,
       this.logger,

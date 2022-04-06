@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import { AxiosBasicCredentials } from 'axios';
 import { Logger } from '@kbn/logging';
 import {
   ExecutorParams,
@@ -16,6 +16,8 @@ import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { CaseConnector } from '../../case';
 
 export class Jira extends CaseConnector<unknown> {
+  private secrets: JiraSecretConfigurationType;
+
   constructor({
     config,
     configurationUtilities,
@@ -36,10 +38,12 @@ export class Jira extends CaseConnector<unknown> {
       throw Error(`[Action]i18n.NAME: Wrong configuration.`);
     }
 
-    const axiosInstance = axios.create({
-      auth: { username: email, password: apiToken },
-    });
-    super(axiosInstance, configurationUtilities, logger);
+    super(configurationUtilities, logger);
+    this.secrets = secrets;
+  }
+
+  getBasicAuth(): AxiosBasicCredentials {
+    return { username: this.secrets.email, password: this.secrets.apiToken };
   }
 
   createIncident(incident: Partial<unknown>): Promise<unknown> {}

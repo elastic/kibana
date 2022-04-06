@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import axios, { AxiosResponse } from 'axios';
+import { AxiosBasicCredentials, AxiosResponse } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
@@ -28,6 +28,7 @@ import {
 import { CaseConnector } from '../../case';
 
 export class ServiceNow extends CaseConnector<ServiceNowIncident> {
+  private secrets: ServiceNowSecretConfigurationType;
   private urls: {
     basic: string;
     importSetTableUrl: string;
@@ -60,11 +61,9 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     if (!apiUrl || !username || !password) {
       throw Error(`[Action]i18n.SERVICENOW: Wrong configuration.`);
     }
-    const axiosInstance = axios.create({
-      auth: { username, password },
-    });
 
-    super(axiosInstance, configurationUtilities, logger);
+    super(configurationUtilities, logger);
+    this.secrets = secrets;
 
     const url = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
     this.urls = {
@@ -84,6 +83,10 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     };
     this.useTableApi = !internalConfig.useImportAPI || usesTableApiConfigValue;
     this.appScope = internalConfig.appScope;
+  }
+
+  getBasicAuth(): AxiosBasicCredentials {
+    return { username: this.secrets.username, password: this.secrets.password };
   }
 
   async getIncident(id: string): Promise<ServiceNowIncident> {
