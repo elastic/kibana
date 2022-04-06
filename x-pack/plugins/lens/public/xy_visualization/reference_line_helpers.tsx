@@ -12,7 +12,13 @@ import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
-import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig, YConfig, YAxisMode } from './types';
+import type {
+  XYState,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  YConfig,
+  YAxisMode,
+} from './types';
 import {
   checkScaleOperation,
   getAxisName,
