@@ -35,7 +35,7 @@ export interface Deps {
 }
 
 interface PluginData {
-  [name: PluginName]: {
+  [name: string]: {
     name: PluginName;
     depth: number; // depth of this plugin in the dependency tree (root plugins will have depth = 1)
     dependencies: PluginName[];
@@ -45,11 +45,11 @@ interface PluginData {
   };
 }
 interface PluginStatus {
-  [name: PluginName]: ServiceStatus;
+  [name: string]: ServiceStatus;
 }
 
 interface ReportedStatusSubscriptions {
-  [name: PluginName]: Subscription;
+  [name: string]: Subscription;
 }
 
 export class PluginsStatusService {
