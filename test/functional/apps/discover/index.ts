@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const config = getService('config');
 
   describe('discover app', function () {
     this.tags('ciGroup6');
@@ -55,6 +55,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_chart_hidden'));
     loadTestFile(require.resolve('./_context_encoded_url_param'));
     loadTestFile(require.resolve('./_data_view_editor'));
+    if (config.get('esTestCluster.ccs')) {
+      loadTestFile(require.resolve('./_data_view_editor'));
+    }
     loadTestFile(require.resolve('./_empty_state'));
   });
 }

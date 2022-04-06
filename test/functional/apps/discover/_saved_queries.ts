@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EsArchiver } from '@kbn/es-archiver';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -21,8 +22,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
+  const localArchiveDirectories = {
+    nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
+    discover: 'test/functional/fixtures/kbn_archiver/discover.json',
+  };
+  const remoteArchiveDirectories = {
+    nested: 'test/functional/fixtures/kbn_archiver/ccs/date_nested.json',
+    discover: 'test/functional/fixtures/kbn_archiver/ccs/discover.json',
+  };
+  const defaultIndexPatternString = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  const dateNestedIndexPattern = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:date-nested'
+    : 'date-nested';
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultIndex: defaultIndexPatternString,
+  };
+  let esNode: EsArchiver;
+  let kbnArchives: {
+    nested: string;
+    discover: string;
   };
 
   const setUpQueriesWithFilters = async () => {
@@ -37,17 +58,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/124990
-  describe.skip('saved queries saved objects', function describeIndexTests() {
+  describe.only('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
+      if (config.get('esTestCluster.ccs')) {
+        esNode = getService('remoteEsArchiver' as 'esArchiver');
+        kbnArchives = remoteArchiveDirectories;
+      } else {
+        esNode = esArchiver;
+        kbnArchives = localArchiveDirectories;
+      }
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/date_nested.json'
-      );
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(kbnArchives.discover);
+      await kibanaServer.importExport.load(kbnArchives.nested);
+      await esNode.load('test/functional/fixtures/es_archiver/date_nested');
+      await esNode.load('test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
@@ -56,10 +82,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload(kbnArchives.discover);
+      await kibanaServer.importExport.unload(kbnArchives.nested);
+      await esNode.unload('test/functional/fixtures/es_archiver/date_nested');
+      await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.common.unsetTime();
     });
 
@@ -84,12 +110,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('date-nested');
+        await PageObjects.discover.selectIndexPattern(dateNestedIndexPattern);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.discover.selectIndexPattern(defaultIndexPatternString);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
@@ -100,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/124986
-    describe.skip('saved query management component functionality', function () {
+    describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
       it('should show the saved query management component when there are no saved queries', async () => {
