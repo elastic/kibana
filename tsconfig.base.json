@@ -71,6 +71,7 @@
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
     ]
   }
 }

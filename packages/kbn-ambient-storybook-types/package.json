@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/ambient-ui-types",
+  "name": "@kbn/ambient-storybook-types",
   "private": true,
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0"

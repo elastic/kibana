@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-ambient-ui-types"
-PKG_REQUIRE_NAME = "@kbn/ambient-ui-types"
+PKG_DIRNAME = "kbn-ambient-storybook-types"
+PKG_REQUIRE_NAME = "@kbn/ambient-storybook-types"
 
 SRCS = glob(
   [

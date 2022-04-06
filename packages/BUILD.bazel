@@ -16,6 +16,7 @@ filegroup(
     "//packages/elastic-safer-lodash-set:build",
     "//packages/kbn-ace:build",
     "//packages/kbn-alerts:build",
+    "//packages/kbn-ambient-storybook-types:build",
     "//packages/kbn-ambient-ui-types:build",
     "//packages/kbn-analytics:build",
     "//packages/kbn-apm-config-loader:build",

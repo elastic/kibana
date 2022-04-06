@@ -2924,6 +2924,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ambient-storybook-types@link:bazel-bin/packages/kbn-ambient-storybook-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ambient-ui-types@link:bazel-bin/packages/kbn-ambient-ui-types":
   version "0.0.0"
   uid ""

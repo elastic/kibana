@@ -20,28 +20,3 @@ declare module 'react-syntax-highlighter/dist/cjs/prism-light';
 declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
 declare module 'monaco-editor/esm/vs/basic-languages/css/css';
 declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
-
-// TODO: clintandrewhall - We need to move this to @kbn/storybook - https://github.com/elastic/kibana/issues/129634
-// Storybook uses this module and its types are defined in the source but not in the type output
-declare module 'file-system-cache' {
-  interface Options {
-    basePath?: string;
-    ns?: string | string[];
-    extension?: string;
-  }
-
-  class FileSystemCache {
-    constructor(options: Options);
-    path(key: string): string;
-    fileExists(key: string): Promise<boolean>;
-    ensureBasePath(): Promise<void>;
-    get(key: string, defaultValue?: any): Promise<any | typeof defaultValue>;
-    getSync(key: string, defaultValue?: any): any | typeof defaultValue;
-    set(key: string, value: any): Promise<{ path: string }>;
-    setSync(key: string, value: any): this;
-    remove(key: string): Promise<void>;
-    clear(): Promise<void>;
-    save(): Promise<{ paths: string[] }>;
-    load(): Promise<{ files: Array<{ path: string; value: any }> }>;
-  }
-}

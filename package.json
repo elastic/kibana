@@ -131,6 +131,7 @@
     "@hapi/wreck": "^17.1.0",
     "@kbn/ace": "link:bazel-bin/packages/kbn-ace",
     "@kbn/alerts": "link:bazel-bin/packages/kbn-alerts",
+    "@kbn/ambient-storybook-types": "link:bazel-bin/packages/kbn-ambient-storybook-types",
     "@kbn/ambient-ui-types": "link:bazel-bin/packages/kbn-ambient-ui-types",
     "@kbn/analytics": "link:bazel-bin/packages/kbn-analytics",
     "@kbn/apm-config-loader": "link:bazel-bin/packages/kbn-apm-config-loader",
