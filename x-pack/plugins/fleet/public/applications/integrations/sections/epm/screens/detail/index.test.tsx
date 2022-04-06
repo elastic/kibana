@@ -527,7 +527,11 @@ The logs were tested with version 1.10.
 On Windows, the module was tested with Nginx installed from the Chocolatey repository.
 `;
 
-  const agentsSetupResponse: GetFleetStatusResponse = { isReady: true, missing_requirements: [] };
+  const agentsSetupResponse: GetFleetStatusResponse = {
+    isReady: true,
+    missing_requirements: [],
+    missing_optionnal_features: [],
+  };
 
   const packagePoliciesResponse: GetPackagePoliciesResponse = {
     items: [
