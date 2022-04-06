@@ -30,7 +30,8 @@ export const createGridColumns = (
   rows: DatatableRow[],
   formattedColumns: FormattedColumns,
   columnsWidth: TableVisUiState['colWidth'],
-  fireEvent: IInterpreterRenderHandlers['event']
+  fireEvent: IInterpreterRenderHandlers['event'],
+  closeCellPopover?: Function
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     fireEvent({
@@ -55,7 +56,7 @@ export const createGridColumns = (
     const formattedColumn = formattedColumns[col.id];
     const cellActions = formattedColumn.filterable
       ? [
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
             const contentsIsDefined = rowValue !== null && rowValue !== undefined;
             const cellContent = formattedColumn.formatter.convert(rowValue);
@@ -83,7 +84,7 @@ export const createGridColumns = (
                   data-test-subj="tbvChartCell__filterForCellValue"
                   onClick={() => {
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                    closePopover?.();
+                    closeCellPopover?.();
                   }}
                   iconType="plusInCircle"
                 >
@@ -92,7 +93,7 @@ export const createGridColumns = (
               )
             );
           },
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
             const contentsIsDefined = rowValue !== null && rowValue !== undefined;
             const cellContent = formattedColumn.formatter.convert(rowValue);
@@ -119,7 +120,7 @@ export const createGridColumns = (
                   aria-label={filterOutAriaLabel}
                   onClick={() => {
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                    closePopover?.();
+                    closeCellPopover?.();
                   }}
                   iconType="minusInCircle"
                 >
