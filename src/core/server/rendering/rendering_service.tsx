@@ -104,7 +104,7 @@ export class RenderingService {
     });
 
     const publicPlugins = [...uiPlugins.public].filter(
-      ([, plugin]) => includeUserSettings || plugin.enableForAnonymousPages
+      ([, plugin]) => includeUserSettings || plugin.enabledOnAnonymousPages
     );
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,

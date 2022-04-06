@@ -895,7 +895,7 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 // @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
-    enableForAnonymousPages?: boolean;
+    enabledOnAnonymousPages?: boolean;
     readonly id: PluginName;
     readonly optionalPlugins: readonly PluginName[];
     readonly requiredBundles: readonly PluginName[];
@@ -1741,7 +1741,7 @@ export interface PluginManifest {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     readonly configPath: ConfigPath;
     readonly description?: string;
-    enableForAnonymousPages?: boolean;
+    enabledOnAnonymousPages?: boolean;
     // @deprecated
     readonly extraPublicDirs?: string[];
     readonly id: PluginName;

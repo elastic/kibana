@@ -264,7 +264,7 @@ export interface PluginManifest {
    * Specifies whether this plugin will be enabled for anonymous pages (login page, status page when configured, etc.)
    * Default is false.
    */
-  enableForAnonymousPages?: boolean;
+  enabledOnAnonymousPages?: boolean;
 }
 
 /**
@@ -317,7 +317,7 @@ export interface DiscoveredPlugin {
    * Specifies whether this plugin will be enabled for anonymous pages (login page, status page when configured, etc.)
    * Default is false.
    */
-  enableForAnonymousPages?: boolean;
+  enabledOnAnonymousPages?: boolean;
 }
 
 /**

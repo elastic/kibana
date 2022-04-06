@@ -12,7 +12,7 @@
   "optionalPlugins": ["home", "management", "usageCollection", "spaces", "share"],
   "server": true,
   "ui": true,
-  "enableForAnonymousPages": true,
+  "enabledOnAnonymousPages": true,
   "requiredBundles": [
     "home",
     "kibanaReact",
