@@ -610,8 +610,6 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
-  // const currentIndexPattern = indexPatterns[0];
-
   const setDatasourceState: StateSetter<unknown> = useMemo(() => {
     return (updater) => {
       dispatch(
