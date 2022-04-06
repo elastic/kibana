@@ -65,6 +65,11 @@ export function send(
         jqXHR.responseText =
           "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
       }
+      if (jqXHR.status === 400) {
+        jqXHR.responseText =
+          '400 - Bad request.\nPlease check the query format, spell errors, etc.';
+      }
+
       wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
     }) as any
   );
