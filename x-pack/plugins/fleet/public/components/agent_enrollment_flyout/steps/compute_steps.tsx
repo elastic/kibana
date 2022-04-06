@@ -200,6 +200,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   selectionType,
   onClickViewAgents,
   isK8s,
+  installedPackagePolicy,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -262,6 +263,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           agentsIds: enrolledAgentIds,
           agentDataConfirmed,
           setAgentDataConfirmed,
+          installedPolicy: installedPackagePolicy,
         })
       );
     }
@@ -285,6 +287,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     link,
     enrolledAgentIds,
     agentDataConfirmed,
+    installedPackagePolicy,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;

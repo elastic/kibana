@@ -24,58 +24,52 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   agentDataConfirmed,
   setAgentDataConfirmed,
 }) => {
-  const { enrolledAgents, numAgentsWithData, isLoading, linkButton } = useGetAgentIncomingData(
-    agentsIds,
-    installedPolicy
-  );
+  const { enrolledAgents, numAgentsWithData, isLoading, linkButton, message } =
+    useGetAgentIncomingData(agentsIds, installedPolicy);
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
+  }
+  if (!agentDataConfirmed) {
+    return (
+      <EuiText size="s">
+        {i18n.translate('xpack.fleet.confirmIncomingData.loading', {
+          defaultMessage:
+            'It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our troubleshooting guide. You may close this dialog and check later by viewing our integration assets.',
+        })}
+      </EuiText>
+    );
   }
 
   return (
     <>
-      {!agentDataConfirmed ? (
-        <EuiText size="s">
-          {i18n.translate('xpack.fleet.confirmIncomingData.loading', {
-            defaultMessage:
-              'It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our troubleshooting guide. You may close this dialog and check later by viewing our integration assets.',
-          })}
-        </EuiText>
-      ) : (
-        <>
-          <EuiCallOut
-            data-test-subj="IncomingDataConfirmedCallOut"
-            title={i18n.translate('xpack.fleet.confirmIncomingData.title', {
-              defaultMessage:
-                'Incoming data received from {numAgentsWithData} of {enrolledAgents} recently enrolled { enrolledAgents, plural, one {agent} other {agents}}.',
-              values: {
-                numAgentsWithData,
-                enrolledAgents,
-              },
-            })}
-            color="success"
-            iconType="check"
-          />
-          <EuiSpacer size="m" />
-          <EuiText size="s">
-            {i18n.translate('xpack.fleet.confirmIncomingData.subtitle', {
-              defaultMessage: 'Your agent is enrolled successfully and your data is received.',
-            })}
-          </EuiText>
-        </>
-      )}
-
-      <EuiSpacer size="m" />
+      <EuiCallOut
+        data-test-subj="IncomingDataConfirmedCallOut"
+        title={i18n.translate('xpack.fleet.confirmIncomingData.title', {
+          defaultMessage:
+            'Incoming data received from {numAgentsWithData} of {enrolledAgents} recently enrolled { enrolledAgents, plural, one {agent} other {agents}}.',
+          values: {
+            numAgentsWithData,
+            enrolledAgents,
+          },
+        })}
+        color="success"
+        iconType="check"
+      />
       {installedPolicy && (
-        <EuiButton
-          href={linkButton.href}
-          isDisabled={isLoading}
-          color="primary"
-          fill
-          data-test-subj="IncomingDataConfirmedButton"
-        >
-          {linkButton.text}
-        </EuiButton>
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s">{message}</EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            href={linkButton.href}
+            isDisabled={isLoading}
+            color="primary"
+            fill
+            data-test-subj="IncomingDataConfirmedButton"
+          >
+            {linkButton.text}
+          </EuiButton>
+        </>
       )}
     </>
   );

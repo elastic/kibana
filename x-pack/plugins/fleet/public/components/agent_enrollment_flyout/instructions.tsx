@@ -77,8 +77,7 @@ export const Instructions = (props: InstructionProps) => {
     setSelectionType('tabs');
   }
 
-  if (!fleetStatus.isReady || isLoadingAgents || isLoadingAgentPolicies)
-    return <Loading size="l" />;
+  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;

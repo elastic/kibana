@@ -42,18 +42,19 @@ export * from './steps';
 export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
   agentPolicy,
-  viewDataStep,
   defaultMode = 'managed',
   isIntegrationFlow,
+  installedPackagePolicy,
 }) => {
-  const settings = useGetSettings();
-  const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-
-  const fleetStatus = useFleetStatus();
   const findPolicyById = (policies: AgentPolicy[], id: string | undefined) => {
     if (!id) return undefined;
     return policies.find((p) => p.id === id);
   };
+
+  const settings = useGetSettings();
+  const fleetStatus = useFleetStatus();
+  const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
   const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
@@ -66,18 +67,19 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     isLoadingAgentPolicies,
     refreshAgentPolicies,
   } = useAgentEnrollmentFlyoutData();
+
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+
+  const selectedPolicy = agentPolicyWithPackagePolicies
+    ? agentPolicyWithPackagePolicies
+    : findPolicyById(agentPolicies, selectedPolicyId);
+
   const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
 
-  const selectedPolicy =
-    selectedPolicyId === agentPolicy?.id
-      ? agentPolicy
-      : findPolicyById(agentPolicies, selectedPolicyId);
-
   useEffect(() => {
-    if (agentPolicyWithPackagePolicies) {
+    if (selectedPolicy) {
       if (
-        (agentPolicyWithPackagePolicies.package_policies as PackagePolicy[]).some(
+        (selectedPolicy.package_policies as PackagePolicy[]).some(
           (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
         )
       ) {
@@ -86,11 +88,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
         setIsFleetServerPolicySelected(false);
       }
     }
-  }, [agentPolicyWithPackagePolicies, isFleetServerPolicySelected]);
+  }, [selectedPolicy, isFleetServerPolicySelected]);
 
-  const { isK8s } = useIsK8sPolicy(
-    agentPolicyWithPackagePolicies ? agentPolicyWithPackagePolicies : undefined
-  );
+  const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
 
   const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
 
@@ -147,8 +147,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           ) : undefined
         }
       >
-        {isLoadingInitialAgentPolicies || isLoadingInitialRequest ? (
-          <Loading />
+        {isLoadingInitialAgentPolicies ? (
+          <Loading size="l" />
         ) : (
           <Instructions
             settings={settings.data?.item}
@@ -156,7 +156,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}
-            viewDataStep={viewDataStep}
             isFleetServerPolicySelected={isFleetServerPolicySelected}
             isK8s={isK8s}
             refreshAgentPolicies={refreshAgentPolicies}
@@ -169,6 +168,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             selectedApiKeyId={selectedApiKeyId}
             setSelectedAPIKeyId={setSelectedAPIKeyId}
             onClickViewAgents={onClose}
+            installedPackagePolicy={installedPackagePolicy}
           />
         )}
       </EuiFlyoutBody>

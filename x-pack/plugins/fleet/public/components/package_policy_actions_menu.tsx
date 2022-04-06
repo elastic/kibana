@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
-import type { EuiStepProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
@@ -22,14 +21,12 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: InMemoryPackagePolicy;
-  viewDataStep?: EuiStepProps;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref: string;
 }> = ({
   agentPolicy,
   packagePolicy,
-  viewDataStep,
   showAddAgent,
   upgradePackagePolicyHref,
   defaultIsOpen = false,
@@ -43,7 +40,6 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
   }, []);
-
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -142,9 +138,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicy}
-            viewDataStep={viewDataStep}
             onClose={onEnrollmentFlyoutClose}
             isIntegrationFlow={true}
+            installedPackagePolicy={{
+              name: packagePolicy?.package?.name || '',
+              version: packagePolicy?.package?.version || '',
+            }}
           />
         </EuiPortal>
       )}

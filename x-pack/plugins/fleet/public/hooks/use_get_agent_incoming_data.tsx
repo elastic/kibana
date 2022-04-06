@@ -49,9 +49,12 @@ export const useGetAgentIncomingData = (
 
   let href;
   let text;
+  let message;
+
   if (!installedPolicy) {
     href = '';
     text = '';
+    message = '';
   }
 
   if (installedPolicy?.name === 'apm') {
@@ -59,12 +62,20 @@ export const useGetAgentIncomingData = (
     text = i18n.translate('xpack.fleet.confirmIncomingData.installApmAgentButtonText', {
       defaultMessage: 'Install APM Agent',
     });
+    message = i18n.translate('xpack.fleet.confirmIncomingData.subtitle', {
+      defaultMessage:
+        'Next, install APM agents on your hosts to collect data from your applications and services.',
+    });
   } else {
     href = getHref('integration_details_assets', {
       pkgkey: `${installedPolicy?.name}-${installedPolicy?.version}`,
     });
     text = i18n.translate('xpack.fleet.confirmIncomingData.viewDataAssetsButtonText', {
       defaultMessage: 'View assets',
+    });
+    message = i18n.translate('xpack.fleet.confirmIncomingData.subtitle', {
+      defaultMessage:
+        'Next, analyze your data using our integration assets such as curated views, dashboards and more.',
     });
   }
   const linkButton = { href, text };
@@ -74,5 +85,6 @@ export const useGetAgentIncomingData = (
     numAgentsWithData,
     isLoading,
     linkButton,
+    message,
   };
 };
