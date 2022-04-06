@@ -734,9 +734,22 @@ describe('suggestion helpers', () => {
     });
 
     it('should get the top non-hidden suggestion if there is no active visualization', () => {
-      defaultParams[1].activeId = null;
-      mockVisualization2.getSuggestions.mockReturnValue([]);
-      mockVisualization1.getSuggestions.mockReturnValue([
+      defaultParams[0] = {
+        '1': {
+          getTableSpec: () => [],
+          datasourceId: '',
+          getOperationForColumnId: jest.fn(),
+          getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
+        },
+      };
+      defaultParams[3] = {
+        testVis: mockVisualization1,
+        vis2: mockVisualization2,
+      };
+      mockVisualization1.getSuggestions.mockReturnValue([]);
+      mockVisualization2.getSuggestions.mockReturnValue([
         {
           score: 0.3,
           title: 'second suggestion',
