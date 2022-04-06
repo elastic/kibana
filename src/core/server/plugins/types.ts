@@ -259,6 +259,12 @@ export interface PluginManifest {
    * A brief description of what this plugin does and any capabilities it provides.
    */
   readonly description?: string;
+
+  /**
+   * Specifies whether this plugin will be enabled for anonymous pages (login page, status page when configured, etc.)
+   * Default is false.
+   */
+  enableForAnonymousPages?: boolean;
 }
 
 /**
@@ -306,6 +312,12 @@ export interface DiscoveredPlugin {
    * duplicated here.
    */
   readonly requiredBundles: readonly PluginName[];
+
+  /**
+   * Specifies whether this plugin will be enabled for anonymous pages (login page, status page when configured, etc.)
+   * Default is false.
+   */
+  enableForAnonymousPages?: boolean;
 }
 
 /**

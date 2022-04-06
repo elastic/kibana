@@ -262,6 +262,7 @@ export class PluginsSystem<T extends PluginType> {
               uiPluginNames.includes(p)
             ),
             requiredBundles: plugin.manifest.requiredBundles,
+            enableForAnonymousPages: plugin.manifest.enableForAnonymousPages,
           },
         ];
       })

@@ -9,5 +9,6 @@
   "configPath": ["xpack", "licensing"],
   "server": true,
   "ui": true,
+  "enableForAnonymousPages": true,
   "requiredBundles": ["kibanaReact"]
 }

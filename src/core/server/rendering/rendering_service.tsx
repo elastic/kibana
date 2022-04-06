@@ -103,6 +103,9 @@ export class RenderingService {
       buildNum,
     });
 
+    const publicPlugins = [...uiPlugins.public].filter(
+      ([, plugin]) => includeUserSettings || plugin.enableForAnonymousPages
+    );
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${basePath}/ui`,
@@ -132,7 +135,7 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          [...uiPlugins.public].map(async ([id, plugin]) => ({
+          publicPlugins.map(async ([id, plugin]) => ({
             id,
             plugin,
             config: await getUiConfig(uiPlugins, id),

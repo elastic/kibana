@@ -51,6 +51,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     serviceFolders: true,
     owner: true,
     description: true,
+    enableForAnonymousPages: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -212,6 +213,7 @@ export async function parseManifest(
     extraPublicDirs: manifest.extraPublicDirs,
     owner: manifest.owner!,
     description: manifest.description,
+    enableForAnonymousPages: manifest.enableForAnonymousPages,
   };
 }
 
