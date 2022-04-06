@@ -27,6 +27,7 @@
     "timelines",
     "triggersActionsUi",
     "uiActions",
+    "unifiedSearch",
     "sessionView"
   ],
   "optionalPlugins": [

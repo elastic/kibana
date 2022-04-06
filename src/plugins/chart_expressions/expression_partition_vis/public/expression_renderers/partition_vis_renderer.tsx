@@ -9,6 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ExpressionRenderDefinition } from '../../../../expressions/public';
 import type { PersistedState } from '../../../../visualizations/public';
@@ -32,6 +33,12 @@ export const strings = {
 const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
 const PartitionVisComponent = withSuspense(LazyPartitionVisComponent);
 
+const partitionVisRenderer = css({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+});
+
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
 ) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
@@ -50,7 +57,7 @@ export const getPartitionVisRenderer: (
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
-          <div css={{ height: '100%' }}>
+          <div css={partitionVisRenderer}>
             <PartitionVisComponent
               chartsThemeService={theme}
               palettesRegistry={palettesRegistry}

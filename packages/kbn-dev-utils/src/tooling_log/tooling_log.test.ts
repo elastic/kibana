@@ -95,6 +95,24 @@ describe('#indent()', () => {
       ]
     `);
   });
+
+  it('resets the indent synchrounsly if the block does not return a promise', () => {
+    const log = new ToolingLog();
+    const writer = new ToolingLogCollectingWriter();
+    log.setWriters([writer]);
+
+    log.info('foo');
+    log.indent(4, () => log.error('bar'));
+    log.info('baz');
+
+    expect(writer.messages).toMatchInlineSnapshot(`
+      Array [
+        " info foo",
+        "   │ERROR bar",
+        " info baz",
+      ]
+    `);
+  });
 });
 
 (['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'] as const).forEach(
