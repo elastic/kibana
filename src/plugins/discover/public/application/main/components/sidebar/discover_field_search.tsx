@@ -72,8 +72,6 @@ interface FieldTypeTableItem {
   description: string;
 }
 
-const FIELD_TYPES_PER_PAGE = 6;
-
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
@@ -109,10 +107,6 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
 
   const { docLinks } = useDiscoverServices();
 
-  const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex } = usePager({
-    initialPageSize: FIELD_TYPES_PER_PAGE,
-    totalItems: presentFieldTypes.length,
-  });
   const items: FieldTypeTableItem[] = useMemo(() => {
     return presentFieldTypes
       .sort((one, another) => one.localeCompare(another))
@@ -120,9 +114,8 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
         id: index,
         dataType: element,
         description: getFieldTypeDescription(element),
-      }))
-      .slice(startIndex, pageSize + startIndex);
-  }, [pageSize, presentFieldTypes, startIndex]);
+      }));
+  }, [presentFieldTypes]);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
