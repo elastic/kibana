@@ -15,7 +15,6 @@ import {
 import { getUiActions } from '../../../../../kibana_services';
 import type { DataViewField } from '../../../../../../../data_views/public';
 import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
-import { APP_ID } from '../../../../../../common';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -46,8 +45,7 @@ async function getCompatibleActions(
 export function triggerVisualizeActions(
   field: DataViewField,
   indexPatternId: string | undefined,
-  contextualFields: string[],
-  shouldPassOriginatingApp: boolean = true
+  contextualFields: string[]
 ) {
   if (!indexPatternId) return;
   const trigger = getTriggerConstant(field.type);
@@ -55,11 +53,6 @@ export function triggerVisualizeActions(
     indexPatternId,
     fieldName: field.name,
     contextualFields,
-    ...(shouldPassOriginatingApp
-      ? {
-          originatingApp: APP_ID,
-        }
-      : {}),
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
