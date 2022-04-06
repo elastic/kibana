@@ -43,7 +43,9 @@ export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
-    agents: true,
+    agents: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
