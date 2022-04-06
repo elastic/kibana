@@ -6,6 +6,7 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { PolicyAdd } from '../../../public/application/sections/policy_add';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 import { WithAppDependencies } from './setup_environment';
@@ -18,9 +19,11 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<PolicyFormTestSubjects>(
-  WithAppDependencies(PolicyAdd),
-  testBedConfig
-);
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<PolicyFormTestSubjects>(
+    WithAppDependencies(PolicyAdd, httpSetup),
+    testBedConfig
+  );
 
-export const setup = formSetup.bind(null, initTestBed);
+  return formSetup(initTestBed);
+};

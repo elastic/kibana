@@ -10,7 +10,6 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
@@ -104,7 +103,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 };
 
 export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+  const testBed = testBedSetup(props);
   return {
     ...testBed,
     actions: createActions(testBed),
@@ -119,10 +118,9 @@ export const setupEnvironment = () => {
   // @ts-ignore
   apiService.setup(mockHttpClient, uiMetricService);
 
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+  const { httpRequestsMockHelpers } = initHttpRequests();
 
   return {
-    server,
     httpRequestsMockHelpers,
   };
 };

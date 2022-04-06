@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { getExperimentalAllowedValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from './experimental_features_service';
 import { getIsExperimentalFeatureEnabled } from './get_experimental_features';
+
+const allowedExperimentalValueKeys = getExperimentalAllowedValues();
 
 describe('getIsExperimentalFeatureEnabled', () => {
   it('getIsExperimentalFeatureEnabled returns the flag enablement', async () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
+        internalAlertsTable: true,
         rulesDetailLogs: true,
       },
     });
@@ -25,8 +29,14 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
+    result = getIsExperimentalFeatureEnabled('internalAlertsTable');
+
+    expect(result).toEqual(true);
+
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
-      'Invalid enable value doesNotExist. Allowed values are: rulesListDatagrid, rulesDetailLogs'
+      `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(
+        ', '
+      )}`
     );
   });
 });

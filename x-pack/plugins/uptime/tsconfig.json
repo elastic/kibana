@@ -30,6 +30,9 @@
     },
     {
       "path": "../fleet/tsconfig.json"
+    },
+    {
+      "path": "../../../src/plugins/unified_search/tsconfig.json"
     }
   ]
 }

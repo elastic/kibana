@@ -48,18 +48,23 @@ describe('<MonitorManagementList />', () => {
         page: 1,
         total: 6,
         monitors,
+        syncErrors: null,
       },
       locations: [],
+      enablement: null,
       error: {
         serviceLocations: null,
         monitorList: null,
+        enablement: null,
       },
       loading: {
         monitorList: true,
         serviceLocations: false,
+        enablement: false,
       },
       syntheticsService: {
         loading: false,
+        signupUrl: null,
       },
     } as MonitorManagementListState,
   };

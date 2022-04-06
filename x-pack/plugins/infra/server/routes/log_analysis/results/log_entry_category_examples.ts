@@ -14,11 +14,13 @@ import {
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
-import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initGetLogEntryCategoryExamplesRoute = ({
+  framework,
+  getStartServices,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -37,14 +39,8 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: Inf
         },
       } = request.body;
 
-      const sourceConfiguration = await sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
-      const resolvedSourceConfiguration = await resolveLogSourceConfiguration(
-        sourceConfiguration.configuration,
-        await framework.getIndexPatternsServiceWithRequestContext(requestContext)
-      );
+      const [, , { logViews }] = await getStartServices();
+      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(sourceId);
 
       try {
         assertHasInfraMlPlugins(requestContext);
@@ -56,7 +52,7 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: Inf
           endTime,
           categoryId,
           exampleCount,
-          resolvedSourceConfiguration
+          resolvedLogView
         );
 
         return response.ok({

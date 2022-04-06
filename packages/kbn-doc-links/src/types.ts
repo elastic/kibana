@@ -213,6 +213,7 @@ export interface DocLinks {
   readonly kibana: {
     readonly guide: string;
     readonly autocompleteSuggestions: string;
+    readonly secureSavedObject: string;
     readonly xpackSecurity: string;
   };
   readonly upgradeAssistant: {
@@ -345,6 +346,7 @@ export interface DocLinks {
     troubleshooting: string;
     elasticAgent: string;
     datastreams: string;
+    datastreamsILM: string;
     datastreamsNamingScheme: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
