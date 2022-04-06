@@ -290,6 +290,10 @@ export const EditRolePage: FunctionComponent<Props> = ({
   spacesApiUi,
 }) => {
   if (!dataViews) {
+    // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
+    // as the login page). That said, it _is_ required for this page to function correctly, so we throw an error here if it's not available.
+    // We don't ever expect Kibana to work correctly if the dataViews plugin is not available (and we don't expect this to happen at all),
+    // so this error edge case is an acceptable tradeoff.
     throw new Error('The dataViews plugin is required for this page, but it is not available');
   }
   const backToRoleList = useCallback(() => history.push('/'), [history]);
