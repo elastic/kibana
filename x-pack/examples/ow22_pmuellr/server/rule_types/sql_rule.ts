@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Logger } from 'kibana/server';
 
 import {
   RuleType,
@@ -26,35 +27,38 @@ interface ActionContext extends AlertInstanceContext {
   message: string;
 }
 
-export const ruleTypeSql: RuleType<
+type ExecutorOptions = AlertExecutorOptions<
   Params,
-  never,
   {},
   {},
   ActionContext,
   typeof SqlRuleActionGroupId
-> = {
-  id: SqlRuleId,
-  name: SqlRuleName,
-  actionGroups: [{ id: SqlRuleActionGroupId, name: SqlRuleActionGroupId }],
-  executor,
-  defaultActionGroupId: SqlRuleActionGroupId,
-  validate: {
-    params: ParamsSchema,
-  },
-  actionVariables: {
-    context: [{ name: 'message', description: 'A pre-constructed message for the alert.' }],
-    params: [{ name: 'query', description: 'SQL query to run.' }],
-  },
-  minimumLicenseRequired: 'basic',
-  isExportable: true,
-  producer: RuleProducer,
-  doesSetRecoveryContext: true,
-};
+>;
 
-async function executor(
-  options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof SqlRuleActionGroupId>
-) {
+type SqlRuleType = RuleType<Params, never, {}, {}, ActionContext, typeof SqlRuleActionGroupId>;
+
+export function getRuleTypeSql(logger: Logger): SqlRuleType {
+  return {
+    id: SqlRuleId,
+    name: SqlRuleName,
+    actionGroups: [{ id: SqlRuleActionGroupId, name: SqlRuleActionGroupId }],
+    executor: (options: ExecutorOptions) => executor(logger, options),
+    defaultActionGroupId: SqlRuleActionGroupId,
+    validate: {
+      params: ParamsSchema,
+    },
+    actionVariables: {
+      context: [{ name: 'message', description: 'A pre-constructed message for the alert.' }],
+      params: [{ name: 'query', description: 'SQL query to run.' }],
+    },
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    producer: RuleProducer,
+    doesSetRecoveryContext: true,
+  };
+}
+
+async function executor(logger: Logger, options: ExecutorOptions) {
   const { services, params } = options;
   const { alertFactory, scopedClusterClient } = services;
 

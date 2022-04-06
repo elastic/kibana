@@ -23,3 +23,19 @@ export const WebhookRuleId = 'ow22-webhook';
 export const WebhookRuleActionGroupId = 'found';
 export const WebhookRuleName = 'Webhook';
 export const WebhookRuleDescription = 'Alerting rule that runs the rule via a webhook.';
+
+export interface WebhookRuleRequest {
+  ruleId: string;
+  executionId: string;
+  params: Record<string, unknown>;
+  state: Record<string, unknown>;
+}
+
+export type WebhookAlertInstanceId = string;
+export type WebhookActionGroup = string;
+export type WebhookAlertContext = unknown;
+export type WebhookAlertInstance = Record<WebhookActionGroup, WebhookAlertContext>;
+export interface WebhookRuleResponse {
+  state: Record<string, unknown>;
+  instances: Record<WebhookAlertInstanceId, WebhookAlertInstance>;
+}

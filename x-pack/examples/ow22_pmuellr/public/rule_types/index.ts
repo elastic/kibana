@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { getRuleType as getRuleTypeSql } from './sql_rule';
-export { getRuleType as getRuleTypeWebhook } from './webhook_rule';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../../plugins/triggers_actions_ui/public';
+
+import { getRuleType as getRuleTypeSql } from './sql_rule';
+import { getRuleType as getRuleTypeWebhook } from './webhook_rule';
+
+export function registerRuleTypes(taaSetup: TriggersAndActionsUIPublicPluginSetup) {
+  taaSetup.ruleTypeRegistry.register(getRuleTypeSql());
+  taaSetup.ruleTypeRegistry.register(getRuleTypeWebhook());
+}

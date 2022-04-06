@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,15 +15,21 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { AlertTypeParams } from '../../../../plugins/alerting/common';
-import {
-  RuleTypeModel,
-  RuleTypeParamsExpressionProps,
-  ValidationResult,
-} from '../../../../plugins/triggers_actions_ui/public';
+import { RuleTypeModel, ValidationResult } from '../../../../plugins/triggers_actions_ui/public';
 import { WebhookRuleId, WebhookRuleDescription } from '../../common';
 
 interface Params extends AlertTypeParams {
   url?: string;
+}
+
+interface ErrorsProp {
+  [key: string]: string[];
+}
+
+interface ParamsProps {
+  ruleParams: { url?: string };
+  setRuleParams: (property: string, value: any) => void;
+  errors: ErrorsProp;
 }
 
 export function getRuleType(): RuleTypeModel {
@@ -39,7 +45,7 @@ export function getRuleType(): RuleTypeModel {
 }
 
 function validateParams(params: Params): ValidationResult {
-  const result = { errors: { url: [] as string[] } };
+  const result: ValidationResult = { errors: { url: [] as string[] } };
 
   if (!params.url) {
     result.errors.url.push('URL required');
@@ -51,33 +57,15 @@ const DefaultRoute = '/_dev/webhook_rule_example';
 const DefaultHost = 'https://elastic:changeme@localhost:5601';
 const DefaultWebhook = `${DefaultHost}${DefaultRoute}`;
 
-export const WebhookRuleExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<Params>
-> = ({ ruleParams, setRuleParams }) => {
-  const url = ruleParams.url || DefaultWebhook;
-  const [errorMessage, setErrorMessage] = useState<string>('');
-
-  function onChangeUrl(event: React.ChangeEvent<HTMLInputElement>) {
-    let value = event.target.value.trim();
-    if (!value) {
-      value = '';
-      setErrorMessage('url must be set');
-    } else {
-      setErrorMessage('');
-    }
-    setRuleParams('url', value);
-  }
-
-  function errorMessageIfNeeded() {
-    return (
-      <Fragment>
-        {errorMessage ? (
-          <EuiFormRow>
-            <EuiCallOut color="danger" size="s" title={errorMessage} />
-          </EuiFormRow>
-        ) : null}
-      </Fragment>
-    );
+export const WebhookRuleExpression: React.FunctionComponent<ParamsProps> = ({
+  ruleParams,
+  setRuleParams,
+  errors,
+}) => {
+  let url = ruleParams.url;
+  if (url == null) {
+    url = DefaultWebhook;
+    setRuleParams('url', url);
   }
 
   return (
@@ -87,10 +75,27 @@ export const WebhookRuleExpression: React.FunctionComponent<
           <EuiFormRow label="URL" helpText="URL of the webhook to invoke">
             <EuiFieldText value={url} onChange={onChangeUrl} />
           </EuiFormRow>
-          {errorMessageIfNeeded()}
+          {errorMessagesIfNeeded(errors)}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
     </Fragment>
   );
+
+  function onChangeUrl(event: React.ChangeEvent<HTMLInputElement>) {
+    setRuleParams('url', event.target.value.trim());
+  }
 };
+
+function errorMessagesIfNeeded(errors: ErrorsProp) {
+  const allErrors = errors.url.join('; ');
+  return (
+    <Fragment>
+      {allErrors ? (
+        <EuiFormRow>
+          <EuiCallOut color="danger" size="s" title={allErrors} />
+        </EuiFormRow>
+      ) : null}
+    </Fragment>
+  );
+}

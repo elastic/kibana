@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { ruleTypeSql } from './sql_rule';
-import { ruleTypeWebhook } from './webhook_rule';
-
-// export { ruleTypeSql } from './sql_rule';
-// export { ruleTypeWebhook } from './webhook_rule';
+import { Logger } from 'kibana/server';
+import { getRuleTypeSql } from './sql_rule';
+import { getRuleTypeWebhook } from './webhook_rule';
 
 import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerting/server';
 
-export function registerRuleTypes(alerting: AlertingSetup) {
-  alerting.registerType(ruleTypeSql);
-  alerting.registerType(ruleTypeWebhook);
+export function registerRuleTypes(logger: Logger, alerting: AlertingSetup) {
+  alerting.registerType(getRuleTypeSql(logger));
+  alerting.registerType(getRuleTypeWebhook(logger));
 }

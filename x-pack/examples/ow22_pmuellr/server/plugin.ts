@@ -24,7 +24,7 @@ export class Ow22pmuellrPlugin implements Plugin<void, void, Ow22pmuellrDeps> {
   }
 
   public setup(core: CoreSetup, { alerting }: Ow22pmuellrDeps) {
-    registerRuleTypes(alerting);
+    registerRuleTypes(this.logger, alerting);
 
     const router = core.http.createRouter();
     registerRoutes(this.logger, router);
