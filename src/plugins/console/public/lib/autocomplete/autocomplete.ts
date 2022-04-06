@@ -141,6 +141,7 @@ export function getCurrentMethodAndTokenPaths(
       case 'punctuation.end_triple_quote':
         // reset the search for key
         state = STATES.looking_for_scope_start;
+        if (t.value === '"""' || !t.value.trim().length) break;
         for (t = tokenIter.stepBackward(); t; t = tokenIter.stepBackward()) {
           if (t.type === 'punctuation.start_triple_quote') {
             t = tokenIter.stepBackward();
