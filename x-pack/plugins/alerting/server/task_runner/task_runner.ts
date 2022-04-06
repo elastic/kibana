@@ -120,7 +120,6 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
-  private isEphemeralRule: boolean;
 
   private ruleProvider: RuleProvider<
     Params,
@@ -158,8 +157,6 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
-
-    this.isEphemeralRule = isEphemeralAlertTaskInstance<Params>(this.taskInstance);
     this.ruleProvider = isEphemeralAlertTaskInstance<Params>(this.taskInstance)
       ? new EphemeralRuleProvider(ruleType, this.taskInstance, context)
       : new ConcreteRuleProvider(ruleType, this.taskInstance, context);
@@ -202,7 +199,7 @@ export class TaskRunner<
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
-      isEphemeralRule: this.isEphemeralRule,
+      isEphemeralRule: this.ruleProvider.isEphemeralRule(),
     });
   }
 
