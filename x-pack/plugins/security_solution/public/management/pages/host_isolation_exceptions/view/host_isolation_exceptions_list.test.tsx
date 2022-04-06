@@ -14,7 +14,7 @@ import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 

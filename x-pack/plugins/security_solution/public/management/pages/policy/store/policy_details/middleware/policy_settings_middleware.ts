@@ -22,7 +22,7 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../../services/ingest';
+} from '../../../../../services/policies/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 

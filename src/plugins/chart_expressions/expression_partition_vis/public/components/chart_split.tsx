@@ -7,14 +7,11 @@
  */
 
 import React from 'react';
-import { Accessor, AccessorFn, GroupBy, SmallMultiples } from '@elastic/charts';
-import { Predicate } from '@elastic/charts/dist/common/predicate';
-import { DatatableColumn } from '../../../../expressions/public';
+import { Accessor, AccessorFn, GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;
   splitRowAccessor?: Accessor | AccessorFn;
-  splitDimension?: DatatableColumn;
 }
 
 const CHART_SPLIT_ID = '__pie_chart_split__';

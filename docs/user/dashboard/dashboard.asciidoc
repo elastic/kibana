@@ -87,7 +87,7 @@ To create panels from the dashboard toolbar, use one of the following options:
 
 * *Create visualization* &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
 
-* *All types* &mdash; Opens the menu for all of the editors and panel types. 
+* *Select type* &mdash; Opens the menu for all of the editors and panel types. 
 
 To create panels from the *Visualize Library*:
 

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "RDP Enabled via Registry",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Terminal Server\\\\fDenyTSConnections\" and\n  registry.data.strings : (\"0\", \"0x00000000\") and not (process.name : \"svchost.exe\" and user.domain == \"NT AUTHORITY\") and\n  not process.executable : \"C:\\\\Windows\\\\System32\\\\SystemPropertiesRemote.exe\"\n",
   "risk_score": 47,
   "rule_id": "58aa72ca-d968-4f34-b9f7-bea51d75eb50",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }
