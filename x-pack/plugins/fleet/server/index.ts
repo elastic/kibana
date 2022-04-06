@@ -41,7 +41,9 @@ export { AgentNotFoundError } from './errors';
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
-    agents: true,
+    agents: {
+      enabled: true,
+    },
   },
   deprecations: ({ deprecate, renameFromRoot, unused, unusedFromRoot }) => [
     deprecate('enabled', '8.0.0'),
