@@ -22,7 +22,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
 import { RuleExecutionMetrics } from '../types';
-import { Alert as Rule } from '../types';
+import { Rule } from '../types';
 
 type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
 interface WrapScopedClusterClientFactoryOpts {

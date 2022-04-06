@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
-import { CSP_EVALUATION_BADGE_FAILED, CSP_EVALUATION_BADGE_PASSED } from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   type: 'passed' | 'failed';
@@ -21,6 +21,10 @@ const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
 
 export const CspEvaluationBadge = ({ type }: Props) => (
   <EuiBadge color={getColor(type)}>
-    {type === 'failed' ? CSP_EVALUATION_BADGE_FAILED : CSP_EVALUATION_BADGE_PASSED}
+    {type === 'failed' ? (
+      <FormattedMessage id="xpack.csp.cspEvaluationBadge.failedLabel" defaultMessage="FAILED" />
+    ) : (
+      <FormattedMessage id="xpack.csp.cspEvaluationBadge.passedLabel" defaultMessage="PASSED" />
+    )}
   </EuiBadge>
 );

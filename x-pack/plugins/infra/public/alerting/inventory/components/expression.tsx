@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce, omit } from 'lodash';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   ForLastExpression,
@@ -87,7 +86,7 @@ type Props = Omit<
     },
     AlertContextMeta
   >,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 export const defaultExpression = {

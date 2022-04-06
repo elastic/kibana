@@ -16,7 +16,6 @@ import {
   loggingSystemMock,
   statusServiceMock,
 } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';

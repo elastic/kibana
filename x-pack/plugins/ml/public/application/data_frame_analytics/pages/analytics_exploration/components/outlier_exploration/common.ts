@@ -14,15 +14,10 @@ export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>
   `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;
 
 export const getFeatureCount = (resultsField: string, tableItems: DataGridItem[] = []) => {
-  if (tableItems.length === 0) {
-    return 0;
-  }
-
-  const fullItem = tableItems[0];
-
-  if (Array.isArray(fullItem[`${resultsField}.${FEATURE_INFLUENCE}`])) {
-    return fullItem[`${resultsField}.${FEATURE_INFLUENCE}`].length;
-  }
-
-  return 0;
+  return tableItems.reduce((featureCount, fullItem) => {
+    if (Array.isArray(fullItem[`${resultsField}.${FEATURE_INFLUENCE}`])) {
+      return Math.max(featureCount, fullItem[`${resultsField}.${FEATURE_INFLUENCE}`].length);
+    }
+    return featureCount;
+  }, 0);
 };

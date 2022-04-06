@@ -12833,6 +12833,29 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.GetFullAgentManifestResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetFullAgentManifestResponse",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetFullAgentManifestResponse.item",
+            "type": "string",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/agent_policy.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.GetFullAgentPolicyRequest",
         "type": "Interface",
         "tags": [],
@@ -19859,6 +19882,17 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.K8S_API_ROOT",
+        "type": "string",
+        "tags": [],
+        "label": "K8S_API_ROOT",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.KEEP_POLICIES_UP_TO_DATE_PACKAGES",
         "type": "Array",
         "tags": [],
@@ -20739,7 +20773,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; name: string; version: string; path: string; internal?: boolean | undefined; data_streams?: ",
+          " | undefined)[] | undefined; name: string; version: string; internal?: boolean | undefined; path: string; data_streams?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -21585,6 +21619,36 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentPolicyRouteService.getK8sInfoPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getK8sInfoPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentPolicyRouteService.getK8sFullDownloadPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getK8sFullDownloadPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -22868,6 +22932,39 @@
         ],
         "path": "x-pack/plugins/fleet/common/constants/epm.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.K8S_API_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "K8S_API_ROUTES",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "K8S_DOWNLOAD_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.K8S_API_ROUTES.K8S_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "K8S_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
