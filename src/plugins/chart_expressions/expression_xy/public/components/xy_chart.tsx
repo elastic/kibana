@@ -273,14 +273,14 @@ export function XYChart({
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
-  const xColumnId = dataLayers[0]?.xAccessor
+  const columnId = dataLayers[0]?.xAccessor
     ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
     : null;
 
   const groupedAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
-    xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
+    columnId ? firstTable.rows[0]?.[columnId] : undefined,
     xAxisFormatter
   );
   const visualConfigs = [
