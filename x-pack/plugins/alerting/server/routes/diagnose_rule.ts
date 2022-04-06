@@ -75,3 +75,28 @@ export const diagnoseRuleRoute = ({ router, licenseState }: RouteOptions) => {
     )
   );
 };
+
+export const bulkDiagnoseRuleRoute = ({ router, licenseState }: RouteOptions) => {
+  router.post(
+    {
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/_bulk_diagnose`,
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        }),
+      },
+    },
+    handleDisabledApiKeysError(
+      router.handleLegacyErrors(
+        verifyAccessAndContext(licenseState, async function (context, req, res) {
+          const rulesClient = context.alerting.getRulesClient();
+          const { ids } = req.body;
+
+          return res.ok({
+            body: await rulesClient.bulkDiagnose(ids),
+          });
+        })
+      )
+    )
+  );
+};

@@ -31,3 +31,15 @@ export async function diagnoseRule({
     });
   }
 }
+
+export async function bulkDiagnoseRules({
+  http,
+  ids,
+}: {
+  http: HttpSetup;
+  ids: string[];
+}): Promise<DiagnoseOutput[]> {
+  return await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/_bulk_diagnose`, {
+    body: JSON.stringify({ ids }),
+  });
+}

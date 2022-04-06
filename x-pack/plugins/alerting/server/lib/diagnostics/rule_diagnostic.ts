@@ -84,6 +84,7 @@ interface DiagnoseOpts<Params extends RuleTypeParams> {
   schedule: IntervalSchedule;
   ruleType: UntypedNormalizedRuleType;
   username: string | null;
+  execute: boolean;
 }
 
 function getIndexAccessError(index: string, username: string | null, err: Error): DiagnosticResult {
@@ -177,6 +178,7 @@ export class RuleDiagnostic {
     params,
     ruleType,
     username,
+    execute = true,
   }: DiagnoseOpts<Params>): Promise<DiagnoseOutput> {
     const errorsAndWarnings: DiagnosticResult[] = [];
 
@@ -199,18 +201,23 @@ export class RuleDiagnostic {
     });
     errorsAndWarnings.push(...customDiagnosticResults);
 
-    // Sample executor results
-    const executorResults = await this.runExecutor({
-      rule,
-      ruleType,
-      params,
-      apiKey,
-    });
-    errorsAndWarnings.push(...executorResults.errorsAndWarnings);
+    if (execute) {
+      // Sample executor results
+      const executorResults = await this.runExecutor({
+        rule,
+        ruleType,
+        params,
+        apiKey,
+      });
+      errorsAndWarnings.push(...executorResults.errorsAndWarnings);
+      return {
+        errorsAndWarnings,
+        requestAndResponses: executorResults.requestAndResponses,
+        ...(rule?.id ? { id: rule.id } : {}),
+      };
+    }
 
-    // Preview results
-
-    return { errorsAndWarnings, requestAndResponses: executorResults.requestAndResponses };
+    return { errorsAndWarnings, ...(rule?.id ? { id: rule.id } : {}) };
   }
 
   /**

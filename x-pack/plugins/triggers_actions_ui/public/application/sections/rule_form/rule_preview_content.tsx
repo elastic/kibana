@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
 interface RulePreviewContentProps {
-  content: any[];
+  content?: any[];
   description: string;
 }
 

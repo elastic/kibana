@@ -559,12 +559,11 @@ export class RulesClient {
       params,
       ruleType,
       username: await this.getUserName(),
+      execute: true,
     });
   }
 
-  public async diagnose<Params extends RuleTypeParams = never>(
-    id: string
-  ): Promise<DiagnoseOutput> {
+  public async diagnose(id: string): Promise<DiagnoseOutput> {
     let ruleSavedObject: SavedObject<RawRule>;
     try {
       ruleSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
@@ -601,7 +600,66 @@ export class RulesClient {
       params: ruleSavedObject.attributes.params,
       ruleType,
       username: await this.getUserName(),
+      execute: true,
     });
+  }
+
+  public async bulkDiagnose(ids: string[]): Promise<DiagnoseOutput[]> {
+    const ruleSavedObjects: Array<SavedObject<RawRule>> = await Promise.all(
+      ids.map(async (id: string) => {
+        let ruleSavedObject: SavedObject<RawRule>;
+        try {
+          ruleSavedObject =
+            await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+              'alert',
+              id,
+              {
+                namespace: this.namespace,
+              }
+            );
+        } catch (e) {
+          // Still attempt to load the attributes and version using SOC
+          ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+        }
+
+        await this.authorization.ensureAuthorized({
+          ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+          consumer: ruleSavedObject.attributes.consumer,
+          operation: ReadOperations.Get,
+          entity: AlertingAuthorizationEntity.Rule,
+        });
+
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleSavedObject.attributes.alertTypeId);
+
+        return ruleSavedObject;
+      })
+    );
+
+    return await Promise.all(
+      ruleSavedObjects.map(async (ruleSavedObject: SavedObject<RawRule>) => {
+        try {
+          const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
+          const result = this.ruleDiagnostics.diagnose({
+            rule: this.getPartialRuleFromRaw(
+              ruleSavedObject.id,
+              ruleType,
+              ruleSavedObject.attributes,
+              ruleSavedObject.references,
+              false
+            ) as Rule,
+            apiKey: ruleSavedObject.attributes.apiKey,
+            schedule: ruleSavedObject.attributes.schedule as IntervalSchedule,
+            params: ruleSavedObject.attributes.params,
+            ruleType,
+            username: await this.getUserName(),
+            execute: false,
+          });
+          return result;
+        } catch (err) {
+          return { errorsAndWarnings: [], id: ruleSavedObject.id };
+        }
+      })
+    );
   }
 
   public async get<Params extends RuleTypeParams = never>({

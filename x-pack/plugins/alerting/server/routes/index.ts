@@ -12,7 +12,7 @@ import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { createRuleRoute } from './create_rule';
-import { diagnoseRuleRoute, previewRuleRoute } from './diagnose_rule';
+import { diagnoseRuleRoute, previewRuleRoute, bulkDiagnoseRuleRoute } from './diagnose_rule';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
@@ -48,6 +48,7 @@ export function defineRoutes(opts: RouteOptions) {
   createRuleRoute(opts);
   diagnoseRuleRoute(opts);
   previewRuleRoute(opts);
+  bulkDiagnoseRuleRoute(opts);
   getRuleRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);

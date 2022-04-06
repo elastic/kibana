@@ -36,7 +36,8 @@ export interface DiagnosticResult {
   message: string;
 }
 export interface DiagnoseOutput {
-  requestAndResponses: {
+  id?: string;
+  requestAndResponses?: {
     requests: Array<SearchRequest | SearchRequestWithBody>;
     responses: SearchResponse[];
   };
