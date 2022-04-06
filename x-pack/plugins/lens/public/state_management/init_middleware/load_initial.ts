@@ -186,7 +186,7 @@ export function loadInitial(
                 setState({
                   isSaveable: true,
                   sharingSavedObjectProps,
-                  filters,
+                  filters: data.query.filterManager.getFilters(),
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
