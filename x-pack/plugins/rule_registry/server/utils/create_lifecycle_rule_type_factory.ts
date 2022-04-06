@@ -9,8 +9,8 @@ import { IRuleDataClient } from '../rule_data_client';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/common';
 import { AlertTypeWithExecutor } from '../types';
 import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
@@ -18,7 +18,7 @@ import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecyc
 export const createLifecycleRuleTypeFactory =
   ({ logger, ruleDataClient }: { logger: Logger; ruleDataClient: IRuleDataClient }) =>
   <
-    TParams extends AlertTypeParams,
+    TParams extends RuleTypeParams,
     TAlertInstanceContext extends AlertInstanceContext,
     TServices extends {
       alertWithLifecycle: LifecycleAlertService<Record<string, any>, TAlertInstanceContext, string>;
@@ -29,7 +29,7 @@ export const createLifecycleRuleTypeFactory =
     const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
     const executor = createBoundLifecycleExecutor<
       TParams,
-      AlertTypeState,
+      RuleTypeState,
       AlertInstanceState,
       TAlertInstanceContext,
       string

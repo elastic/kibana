@@ -10,11 +10,8 @@ import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import {
-  FilterManager,
-  UI_SETTINGS,
-  FilterLabel,
-} from '../../../../../../../../src/plugins/data/public';
+import { FilterManager, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import { FilterLabel } from '../../../../../../../../src/plugins/unified_search/public';
 import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
 
