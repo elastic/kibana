@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
+import { getTypeForFieldIcon } from '../../../../application/main/components/sidebar/discover_field';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { Storage } from '../../../../../../kibana_utils/public';
 import { usePager } from '../../../../utils/use_pager';
@@ -153,11 +154,19 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
+  // const getTypeForFieldIcon = (field: DataViewField) =>
+  //   field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
+
   const fieldToItem = useCallback(
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
+      // const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
+      const fieldType = isNestedFieldParent(field, dataView)
+        ? 'nested'
+        : fieldMapping
+        ? getTypeForFieldIcon(fieldMapping)
+        : undefined;
 
       const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
 
