@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-// This module provides a helper to perform retries on a function if the
-// function ends up throwing a SavedObject 409 conflict.  This can happen
-// when alert SO's are updated in the background, and will avoid having to
-// have the caller make explicit conflict checks, where the conflict was
-// caused by a background update.
+// This module provides a helper to perform retries on a bulk edit operation
+// if it returns in response saved_objects list a SavedObject 409 conflict error.
 
 import { KueryNode } from '@kbn/es-query';
 import {
