@@ -82,7 +82,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                 ...prevState,
                 [app]: {
                   hasData,
-                  show: capabilities[APP_ID_TO_CAPABILITIES[app]].show || false,
+                  show: capabilities[APP_ID_TO_CAPABILITIES[app]]?.show || true,
                   ...(serviceName ? { serviceName } : {}),
                   ...(indices ? { indices } : {}),
                   status: FETCH_STATUS.SUCCESS,
