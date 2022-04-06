@@ -138,6 +138,11 @@ export const packType: SavedObjectsType = {
       produce(objects, (draft) => {
         draft.forEach((packSO) => {
           packSO.references = [];
+          // Only prebuilt packs should have a version
+          if (packSO.attributes.version) {
+            packSO.attributes.name += '_copy';
+            delete packSO.attributes.version;
+          }
         });
 
         return draft;
