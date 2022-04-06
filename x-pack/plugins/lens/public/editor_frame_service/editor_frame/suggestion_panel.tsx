@@ -230,16 +230,28 @@ export function SuggestionPanel({
               visualizationId,
               visualizationState: suggestionVisualizationState,
               datasourceState: suggestionDatasourceState,
-              datasourceId: suggetionDatasourceId,
+              datasourceId: suggestionDatasourceId,
             }) => {
               return (
                 !hide &&
                 validateDatasourceAndVisualization(
-                  suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                  suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  { datasourceLayers: getDatasourceLayers(currentDatasourceStates, datasourceMap) }
+                  {
+                    datasourceLayers: getDatasourceLayers(
+                      suggestionDatasourceId
+                        ? {
+                            [suggestionDatasourceId]: {
+                              isLoading: true,
+                              state: suggestionDatasourceState,
+                            },
+                          }
+                        : {},
+                      datasourceMap
+                    ),
+                  }
                 ) == null
               );
             }
