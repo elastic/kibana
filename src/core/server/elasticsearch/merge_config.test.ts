@@ -8,6 +8,7 @@
 
 import { mergeConfig } from './merge_config';
 import type { ElasticsearchClientConfig } from './client';
+import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 
 const partialToConfig = (parts: Partial<ElasticsearchClientConfig>): ElasticsearchClientConfig => {
   return parts as ElasticsearchClientConfig;
@@ -112,5 +113,24 @@ describe('mergeConfig', () => {
       hosts: ['localhost'],
       maxSockets: 42,
     });
+  });
+
+  it('works with a real instance of ElasticsearchConfig', () => {
+    const rawConfig = configSchema.validate({
+      username: 'foo',
+      password: 'bar',
+    });
+
+    const baseConfig = new ElasticsearchConfig(rawConfig);
+
+    const overrides: Partial<ElasticsearchClientConfig> = {
+      serviceAccountToken: 'token',
+    };
+
+    const output = mergeConfig(baseConfig, overrides);
+
+    expect(output.serviceAccountToken).toEqual('token');
+    expect(output.username).toBeUndefined();
+    expect(output.password).toBeUndefined();
   });
 });
