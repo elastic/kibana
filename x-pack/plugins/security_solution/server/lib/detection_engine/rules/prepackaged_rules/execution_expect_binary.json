@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary expect abuse to break out from restricted environments by spawning an interactive system shell. The expect utility allows us to automate control of interactive applications such as telnet,ftp,ssh and others and the activity of spawning shell is not a standard use of this binary for a user or system administrator and could potentially indicate malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via the expect command",
+  "query": "process where event.type == \"start\" and process.name in (\"bash\", \"sh\", \"dash\") and\n  process.parent.name == \"expect\" and process.parent.args == \"-c\" and\n  process.parent.args in (\"spawn /bin/sh;interact\", \"spawn /bin/bash;interact\", \"spawn /bin/dash;interact\", \"spawn sh;interact\", \"spawn bash;interact\", \"spawn dash;interact\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/expect/"
+  ],
+  "risk_score": 47,
+  "rule_id": "fd3fc25e-7c7c-4613-8209-97942ac609f6",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}
