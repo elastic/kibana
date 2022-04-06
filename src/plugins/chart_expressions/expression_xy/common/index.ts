@@ -34,7 +34,6 @@ export type {
   EndValue,
   XYRender,
   LayerType,
-  YAxisMode,
   LineStyle,
   FillStyle,
   SeriesType,

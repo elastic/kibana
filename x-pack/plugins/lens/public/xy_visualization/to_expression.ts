@@ -423,7 +423,7 @@ const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpressio
   chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
 });
 
-const axesToExpression = (axes: AxisConfig[]): Ast => {
+const axesToExpression = (axes: AxisConfig[]): Ast[] => {
   return axes.map((axis) => ({
     type: 'expression',
     chain: [
@@ -574,6 +574,7 @@ const dataLayerToExpression = (
 };
 
 const yConfigToExpression = (yConfig: YConfig, axes: AxisConfig[], defaultColor?: string): Ast => {
+  const axisId = axes.find((axis) => axis.position === yConfig.axisMode)?.id;
   return {
     type: 'expression',
     chain: [
@@ -581,7 +582,7 @@ const yConfigToExpression = (yConfig: YConfig, axes: AxisConfig[], defaultColor?
         type: 'function',
         function: 'yConfig',
         arguments: {
-          axisId: [axes.find((axis) => axis.position === yConfig.axisMode)?.id],
+          axisId: axisId ? [axisId] : [],
           forAccessor: [yConfig.forAccessor],
           color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
           lineStyle: [yConfig.lineStyle || 'solid'],

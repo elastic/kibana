@@ -18,6 +18,7 @@ export type {
   ValidLayer,
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
+  YAxisMode,
 } from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
@@ -74,7 +75,6 @@ export type {
   YConfig,
   XYRender,
   LayerType,
-  YAxisMode,
   LineStyle,
   FillStyle,
   SeriesType,

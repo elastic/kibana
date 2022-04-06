@@ -8,15 +8,11 @@
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../common';
-import type {
-  YAxisMode,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
-import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
+import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig, YConfig, YAxisMode } from './types';
 import {
   checkScaleOperation,
   getAxisName,

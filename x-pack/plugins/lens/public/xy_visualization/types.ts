@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
@@ -33,11 +34,18 @@ import type {
   LineStyle,
   IconPosition,
   FillStyle,
-  YAxisMode,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
 
+export const YAxisModes = {
+  AUTO: 'auto',
+  LEFT: 'left',
+  RIGHT: 'right',
+  BOTTOM: 'bottom',
+} as const;
+
+export type YAxisMode = $Values<typeof YAxisModes>;
 export interface YConfig {
   forAccessor: string;
   color?: string;

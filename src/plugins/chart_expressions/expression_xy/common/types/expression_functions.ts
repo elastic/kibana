@@ -23,7 +23,6 @@ import {
   ValueLabelModes,
   XScaleTypes,
   XYCurveTypes,
-  YAxisModes,
   YScaleTypes,
   REFERENCE_LINE_LAYER,
   Y_CONFIG,
@@ -44,7 +43,6 @@ import {
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
-export type YAxisMode = $Values<typeof YAxisModes>;
 export type LineStyle = $Values<typeof LineStyles>;
 export type FillStyle = $Values<typeof FillStyles>;
 export type SeriesType = $Values<typeof SeriesTypes>;
