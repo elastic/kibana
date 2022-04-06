@@ -5,7 +5,9 @@
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "stripInternal": false,
-    "types": []
+    "types": [
+      "@types/react",
+    ]
   },
   "include": [
     "*.d.ts"

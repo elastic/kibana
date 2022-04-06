@@ -5,7 +5,11 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node", "@emotion/react/types/css-prop"]
+    "types": [
+      "node", 
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+    ]
   },
   "include": [
     "**/*",
