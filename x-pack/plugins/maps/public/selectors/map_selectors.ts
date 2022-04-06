@@ -396,7 +396,7 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor, []);  // custom icons not needed, layer instance only used to get index pattern ids
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
         if (layer.isVisible()) {
           indexPatternIds.push(...layer.getQueryableIndexPatternIds());
         }
