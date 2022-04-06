@@ -630,9 +630,8 @@ export class TaskRunner<
       this.ruleProvider.loadRuleAttributesAndRun((fakeRequest, apiKey, rule) => {
         this.ruleName = rule.name;
         this.ruleConsumer = rule.consumer;
-        return this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
-      }
-      )
+        return this.validateAndExecuteRule(fakeRequest, apiKey, rule, event);
+      })
     );
 
     const ruleMonitoring =
