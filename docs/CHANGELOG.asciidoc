@@ -104,6 +104,16 @@ Upgrade to {kib} 7.15.2.
 ====
 
 [float]
+[[known-issues-v7.15.2]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.15.12. 
+
+For the known issues in the previous releases, refer to the <<known-issue-7.15.0, known issues in 7.15.0>.
+
+[float]
 [[breaking-changes-v7.15.2]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.15.2, review the <<breaking-changes-7.15.0,7.15.0 breaking changes>>.
@@ -145,6 +155,16 @@ Osquery Manager::
 == {kib} 7.15.1
 
 Review the following information about the 7.15.1 release.
+
+[float]
+[[known-issues-v7.15.1]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.15.1. 
+
+For the known issues in the previous releases, refer to the <<known-issue-7.15.0, known issues in 7.15.0>.
 
 [float]
 [[breaking-changes-v7.15.1]]
@@ -216,7 +236,7 @@ For information about the {kib} 7.15.0 release, review the following information
 
 [float]
 [[known-issue-7.15.0]]
-=== Known issue
+=== Known issues
 
 .{kib} is unable to restore *Discover* search sessions with a relative time range
 [%collapsible]
@@ -243,6 +263,15 @@ In some cases, users who have enabled APM aggregated transactions (metrics-power
 
 *Impact* +
 Disable metrics powered transactions with `xpack.apm.searchAggregatedTransactions: 'never'` until 7.15.1. See {kibana-pull}112240[#112240] for more information.
+====
+
+.Hidden dashboard titles now appear
+[%collapsible]
+====
+*Details*  +
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
+*Impact* +
+Upgrade to {kib} 7.17.3 or later.
 ====
 
 [float]
