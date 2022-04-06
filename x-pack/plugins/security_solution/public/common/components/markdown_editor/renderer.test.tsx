@@ -20,7 +20,7 @@ describe('Markdown', () => {
 
       expect(
         removeExternalLinkText(wrapper.find('[data-test-subj="markdown-link"]').first().text())
-      ).toEqual('External Site');
+      ).toContain('External Site');
     });
 
     test('it renders the expected href', () => {

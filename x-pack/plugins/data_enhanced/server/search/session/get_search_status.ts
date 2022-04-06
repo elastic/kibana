@@ -17,6 +17,7 @@ export async function getSearchStatus(
   asyncId: string
 ): Promise<Pick<SearchSessionRequestInfo, 'status' | 'error'>> {
   // TODO: Handle strategies other than the default one
+  // https://github.com/elastic/kibana/issues/127880
   try {
     // @ts-expect-error start_time_in_millis: EpochMillis is string | number
     const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status(

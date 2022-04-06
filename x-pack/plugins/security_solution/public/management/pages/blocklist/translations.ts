@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 
 export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.blocklists.details.header', {
   defaultMessage: 'Details',
@@ -15,7 +15,8 @@ export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.blocklists.
 export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.blocklists.details.header.description',
   {
-    defaultMessage: 'Add a blocklist to prevent selected applications from running on your hosts.',
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
   }
 );
 
@@ -61,29 +62,34 @@ export const VALUE_LABEL = i18n.translate('xpack.securitySolution.blocklists.val
   defaultMessage: 'Value',
 });
 
-export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
-  [ConditionEntryField.HASH]: i18n.translate('xpack.securitySolution.blocklists.entry.field.hash', {
+export const VALUE_LABEL_HELPER = i18n.translate(
+  'xpack.securitySolution.blocklists.value.label.helper',
+  {
+    defaultMessage: 'Type or copy & paste one or multiple comma delimited values',
+  }
+);
+
+export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: string } = {
+  'file.hash.*': i18n.translate('xpack.securitySolution.blocklists.entry.field.hash', {
     defaultMessage: 'Hash',
   }),
-  [ConditionEntryField.PATH]: i18n.translate('xpack.securitySolution.blocklists.entry.field.path', {
+  'file.path': i18n.translate('xpack.securitySolution.blocklists.entry.field.path', {
     defaultMessage: 'Path',
   }),
-  [ConditionEntryField.SIGNER]: i18n.translate(
+  'file.Ext.code_signature': i18n.translate(
     'xpack.securitySolution.blocklists.entry.field.signature',
     { defaultMessage: 'Signature' }
   ),
 };
 
-export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string } = {
-  [ConditionEntryField.HASH]: i18n.translate(
-    'xpack.securitySolution.blocklists.entry.field.description.hash',
-    { defaultMessage: 'md5, sha1, or sha256' }
-  ),
-  [ConditionEntryField.PATH]: i18n.translate(
-    'xpack.securitySolution.blocklists.entry.field.description.path',
-    { defaultMessage: 'The full path of the application' }
-  ),
-  [ConditionEntryField.SIGNER]: i18n.translate(
+export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]: string } = {
+  'file.hash.*': i18n.translate('xpack.securitySolution.blocklists.entry.field.description.hash', {
+    defaultMessage: 'md5, sha1, or sha256',
+  }),
+  'file.path': i18n.translate('xpack.securitySolution.blocklists.entry.field.description.path', {
+    defaultMessage: 'The full path of the application',
+  }),
+  'file.Ext.code_signature': i18n.translate(
     'xpack.securitySolution.blocklists.entry.field.description.signature',
     { defaultMessage: 'The signer of the application' }
   ),
@@ -107,13 +113,25 @@ export const ERRORS = {
   INVALID_HASH: i18n.translate('xpack.securitySolution.blocklists.errors.values.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
-  INVALID_PATH: i18n.translate('xpack.securitySolution.blocklists.errors.values.invalidPath', {
+  INVALID_PATH: i18n.translate('xpack.securitySolution.blocklists.warnings.values.invalidPath', {
     defaultMessage: 'Path may be formed incorrectly; verify value',
   }),
   WILDCARD_PRESENT: i18n.translate(
-    'xpack.securitySolution.blocklists.errors.values.wildcardPresent',
+    'xpack.securitySolution.blocklists.warnings.values.wildcardPresent',
     {
       defaultMessage: "A wildcard in the filename will affect the endpoint's performance",
+    }
+  ),
+  DUPLICATE_VALUE: i18n.translate(
+    'xpack.securitySolution.blocklists.warnings.values.duplicateValue',
+    {
+      defaultMessage: 'This value already exists',
+    }
+  ),
+  DUPLICATE_VALUES: i18n.translate(
+    'xpack.securitySolution.blocklists.warnings.values.duplicateValues',
+    {
+      defaultMessage: 'One or more duplicate values removed',
     }
   ),
 };

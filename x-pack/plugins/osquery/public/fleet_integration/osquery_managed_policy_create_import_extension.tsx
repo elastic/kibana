@@ -46,6 +46,7 @@ import {
   fieldValidators,
   ValidationFunc,
 } from '../shared_imports';
+import { useFetchStatus } from './use_fetch_status';
 
 // https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57
 const RESTRICTED_CONFIG_OPTIONS = [
@@ -340,6 +341,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const { permissionDenied } = useFetchStatus();
+
   return (
     <>
       {!editMode ? <DisabledCallout /> : null}
@@ -366,23 +369,27 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         </>
       ) : null}
 
-      <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
-      <EuiSpacer size="xxl" />
-      <StyledEuiAccordion
-        id="advanced"
-        buttonContent={i18n.translate(
-          'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
-          {
-            defaultMessage: 'Advanced',
-          }
-        )}
-      >
-        <EuiSpacer size="xs" />
-        <Form form={configForm}>
-          <CommonUseField path="config" />
-          <ConfigUploader onChange={handleConfigUpload} />
-        </Form>
-      </StyledEuiAccordion>
+      {!permissionDenied && (
+        <>
+          <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
+          <EuiSpacer size="xxl" />
+          <StyledEuiAccordion
+            id="advanced"
+            buttonContent={i18n.translate(
+              'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
+              {
+                defaultMessage: 'Advanced',
+              }
+            )}
+          >
+            <EuiSpacer size="xs" />
+            <Form form={configForm}>
+              <CommonUseField path="config" />
+              <ConfigUploader onChange={handleConfigUpload} />
+            </Form>
+          </StyledEuiAccordion>
+        </>
+      )}
     </>
   );
 });

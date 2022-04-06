@@ -37,7 +37,9 @@ export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
-export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
+export const getIndexPatternSelectComponent = () =>
+  pluginsStart.unifiedSearch.ui.IndexPatternSelect;
+export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
 export const getHttp = () => coreStart.http;
 export const getExecutionContext = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;

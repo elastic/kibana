@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find_cases', () => {
     describe('basic tests', () => {
@@ -478,6 +479,53 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('range queries', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('returns all cases without a range filter', async () => {
+        const EXPECTED_CASES = 3;
+        const cases = await findCases({ supertest });
+
+        expect(cases.total).to.be(EXPECTED_CASES);
+        expect(cases.count_open_cases).to.be(EXPECTED_CASES);
+        expect(cases.cases.length).to.be(EXPECTED_CASES);
+      });
+
+      it('respects the range parameters', async () => {
+        const queries = [
+          { expectedCases: 2, query: { from: '2022-03-16' } },
+          { expectedCases: 2, query: { to: '2022-03-21' } },
+          { expectedCases: 2, query: { from: '2022-03-15', to: '2022-03-21' } },
+        ];
+
+        for (const query of queries) {
+          const cases = await findCases({
+            supertest,
+            query: query.query,
+          });
+
+          expect(cases.total).to.be(query.expectedCases);
+          expect(cases.count_open_cases).to.be(query.expectedCases);
+          expect(cases.cases.length).to.be(query.expectedCases);
+        }
+      });
+
+      it('returns a bad request on malformed parameter', async () => {
+        await findCases({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
+      });
+    });
+
     describe('rbac', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
@@ -716,6 +764,40 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Only security solution cases are being returned
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+      });
+
+      describe('range queries', () => {
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+          await deleteAllCaseItems(es);
+        });
+
+        it('should respect the owner filter when using range queries', async () => {
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              from: '2022-03-15',
+              to: '2022-03-21',
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+        });
       });
     });
   });

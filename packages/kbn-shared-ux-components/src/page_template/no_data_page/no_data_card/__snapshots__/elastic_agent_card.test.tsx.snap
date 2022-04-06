@@ -3,6 +3,7 @@
 exports[`ElasticAgentCard renders 1`] = `
 .emotion-0 {
   max-width: 400px;
+  margin-inline: auto;
 }
 
 <SharedUxServicesProvider
@@ -170,13 +171,9 @@ exports[`ElasticAgentCard renders 1`] = `
             title="Add Elastic Agent"
           >
             <EuiCard
-              betaBadgeProps={
-                Object {
-                  "label": undefined,
-                }
-              }
               css={
                 Object {
+                  "marginInline": "auto",
                   "maxWidth": 400,
                 }
               }

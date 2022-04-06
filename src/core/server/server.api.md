@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
+import { AnalyticsClient } from '@elastic/analytics';
 import apm from 'elastic-apm-node';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -20,6 +21,7 @@ import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
+import { ContextProviderOpts } from '@elastic/analytics';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
@@ -32,7 +34,12 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Event as Event_2 } from '@elastic/analytics';
+import { EventContext } from '@elastic/analytics';
+import { EventType } from '@elastic/analytics';
+import { EventTypeOpts } from '@elastic/analytics';
 import { IncomingHttpHeaders } from 'http';
+import { IShipper } from '@elastic/analytics';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
@@ -41,6 +48,7 @@ import { LogRecord } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@elastic/analytics';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
@@ -53,13 +61,33 @@ import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ShipperClassConstructor } from '@elastic/analytics';
 import { Stream } from 'stream';
+import { TelemetryCounter } from '@elastic/analytics';
+import { TelemetryCounterType } from '@elastic/analytics';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { URL as URL_2 } from 'url';
 
 export { AddConfigDeprecation }
+
+export { AnalyticsClient }
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServicePreboot = AnalyticsClient;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceSetup = AnalyticsClient;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 // @public
 export const APP_WRAPPER_CLASS = "kbnAppWrapper";
@@ -294,6 +322,8 @@ export { ConfigService }
 // @internal
 export type ConfigUsageData = Record<string, any | any[]>;
 
+export { ContextProviderOpts }
+
 // @public
 export interface ContextSetup {
     createContextContainer(): IContextContainer;
@@ -408,6 +438,8 @@ export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => 
 // @public
 export interface CorePreboot {
     // (undocumented)
+    analytics: AnalyticsServicePreboot;
+    // (undocumented)
     elasticsearch: ElasticsearchServicePreboot;
     // (undocumented)
     http: HttpServicePreboot;
@@ -438,6 +470,8 @@ export interface CoreServicesUsageData {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // (undocumented)
+    analytics: AnalyticsServiceSetup;
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
@@ -474,6 +508,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    analytics: AnalyticsServiceStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
@@ -981,6 +1017,10 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+export { Event_2 as Event }
+
+export { EventContext }
+
 // Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -991,6 +1031,10 @@ export class EventLoopDelaysMonitor {
     stop(): void;
 }
 
+export { EventType }
+
+export { EventTypeOpts }
+
 // @public (undocumented)
 export interface ExecutionContextSetup {
     // (undocumented)
@@ -1000,6 +1044,14 @@ export interface ExecutionContextSetup {
 
 // @public (undocumented)
 export type ExecutionContextStart = ExecutionContextSetup;
+
+// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type ExposedToBrowserDescriptor<T> = {
+    [Key in keyof T]?: T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? // can be nested for objects
+    ExposedToBrowserDescriptor<T[Key]> | boolean : boolean;
+};
 
 // @public
 export interface FakeRequest {
@@ -1302,6 +1354,8 @@ export interface IScopedClusterClient {
     readonly asInternalUser: ElasticsearchClient;
 }
 
+export { IShipper }
+
 // @public
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
@@ -1454,8 +1508,6 @@ export { LogMeta }
 
 export { LogRecord }
 
-// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
-//
 // @public
 export type MakeUsageFromSchema<T> = {
     [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
@@ -1630,6 +1682,8 @@ export interface OpsServerMetrics {
     };
 }
 
+export { OptInConfig }
+
 export { PackageInfo }
 
 // @public
@@ -1647,9 +1701,7 @@ export { Plugin_2 as Plugin }
 export interface PluginConfigDescriptor<T = any> {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     deprecations?: ConfigDeprecationProvider;
-    exposeToBrowser?: {
-        [P in keyof T]?: boolean;
-    };
+    exposeToBrowser?: ExposedToBrowserDescriptor<T>;
     exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
@@ -2362,6 +2414,7 @@ export interface SavedObjectsExportTransformContext {
 // @public
 export type SavedObjectsFieldMapping = estypes.MappingProperty & {
     dynamic?: false | 'strict';
+    properties?: Record<estypes.PropertyName, estypes.MappingProperty>;
 };
 
 // @public (undocumented)
@@ -3050,6 +3103,8 @@ export type SharedGlobalConfig = RecursiveReadonly<{
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
+export { ShipperClassConstructor }
+
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
@@ -3066,6 +3121,10 @@ export interface StatusServiceSetup {
     overall$: Observable<ServiceStatus>;
     set(status$: Observable<ServiceStatus>): void;
 }
+
+export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public
 export interface UiSettingsParams<T = unknown> {
@@ -3161,8 +3220,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:376:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:378:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:485:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:393:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:395:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:502:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

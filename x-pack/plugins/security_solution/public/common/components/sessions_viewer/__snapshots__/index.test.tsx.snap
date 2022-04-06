@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SessionsView renders correctly against snapshot 1`] = `
+<DocumentFragment>
+  .c1 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c1 > * {
+  max-width: 100%;
+}
+
+.c1 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c1:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c0 {
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+}
+
+<div
+    data-test-subj="security_solution:sessions_viewer:sessions_view"
+  >
+    <div
+      class="c0"
+    >
+      <div
+        class="c1"
+        data-test-subj="hoverVisibilityContainer"
+      >
+        <div>
+          <div
+            data-test-subj="security_solution:sessions_viewer:sessions_view:entityType"
+          >
+            sessions
+          </div>
+          <div
+            data-test-subj="security_solution:sessions_viewer:sessions_view:startDate"
+          >
+            2022-03-22T22:10:56.794Z
+          </div>
+          <div
+            data-test-subj="security_solution:sessions_viewer:sessions_view:endDate"
+          >
+            2022-03-21T22:10:56.791Z
+          </div>
+          <div
+            data-test-subj="security_solution:sessions_viewer:sessions_view:timelineId"
+          >
+            hosts-page-sessions
+          </div>
+          <div>
+            process.start
+          </div>
+          <div>
+            process.end
+          </div>
+          <div>
+            process.executable
+          </div>
+          <div>
+            user.name
+          </div>
+          <div>
+            process.interactive
+          </div>
+          <div>
+            process.pid
+          </div>
+          <div>
+            host.hostname
+          </div>
+          <div>
+            process.entry_leader.entry_meta.type
+          </div>
+          <div>
+            process.entry_leader.entry_meta.source.ip
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

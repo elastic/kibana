@@ -8,6 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PluginInitializerContext } from 'kibana/server';
 import { Plugin } from './plugin';
 
@@ -55,6 +56,7 @@ export { deleteRules } from './application/lib/rule_api/delete';
 export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';
 export { muteRule } from './application/lib/rule_api/mute';
+export { unmuteRule } from './application/lib/rule_api/unmute';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 

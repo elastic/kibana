@@ -253,6 +253,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AnalyticsServicePreboot](./kibana-plugin-core-server.analyticsservicepreboot.md) | Exposes the public APIs of the AnalyticsClient during the preboot phase  |
+|  [AnalyticsServiceSetup](./kibana-plugin-core-server.analyticsservicesetup.md) | Exposes the public APIs of the AnalyticsClient during the setup phase.  |
+|  [AnalyticsServiceStart](./kibana-plugin-core-server.analyticsservicestart.md) | Exposes the public APIs of the AnalyticsClient during the start phase  |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
@@ -265,6 +268,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
 |  [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |  |
+|  [ExposedToBrowserDescriptor](./kibana-plugin-core-server.exposedtobrowserdescriptor.md) | Type defining the list of configuration properties that will be exposed on the client-side Object properties can either be fully exposed |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |

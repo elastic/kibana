@@ -11,6 +11,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { Filter } from '@kbn/es-query';
 import { isTab } from '../../../../timelines/public';
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -29,7 +30,6 @@ import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
-import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { UsersTabs } from './users_tabs';
 import { navTabsUsers } from './nav_tabs';
 import * as i18n from './translations';
@@ -49,6 +49,8 @@ import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { LandingPageComponent } from '../../common/components/landing_page';
+import { userNameExistsFilter } from './details/helpers';
 
 const ID = 'UsersQueryId';
 
@@ -86,7 +88,11 @@ const UsersComponent = () => {
   const { uiSettings } = useKibana().services;
 
   const { tabName } = useParams<{ tabName: string }>();
-  const tabsFilters = React.useMemo(() => {
+  const tabsFilters: Filter[] = React.useMemo(() => {
+    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+      return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
+    }
+
     if (tabName === UsersTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
@@ -162,6 +168,10 @@ const UsersComponent = () => {
 
   const capabilities = useMlCapabilities();
   const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const navTabs = useMemo(
+    () => navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled),
+    [capabilities, riskyUsersFeatureEnabled]
+  );
 
   return (
     <>
@@ -197,9 +207,7 @@ const UsersComponent = () => {
 
             <EuiSpacer />
 
-            <SecuritySolutionTabNavigation
-              navTabs={navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled)}
-            />
+            <SecuritySolutionTabNavigation navTabs={navTabs} />
 
             <EuiSpacer />
 
@@ -214,15 +222,12 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}
+              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <SecuritySolutionPageWrapper>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />
