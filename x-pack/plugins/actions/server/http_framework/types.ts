@@ -12,7 +12,7 @@ import type { LicenseType } from '../../../licensing/common/types';
 import { CaseConnector } from '../connectors/case';
 
 // TODO: Fix types
-type IService = new (...args: any[]) => CaseConnector<unknown>;
+export type IService = new (...args: any[]) => CaseConnector<unknown>;
 
 export interface HTTPConnectorType<
   Config extends Record<string, any> = Record<string, any>,

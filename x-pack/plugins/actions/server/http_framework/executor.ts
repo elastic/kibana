@@ -19,7 +19,20 @@ export const buildExecutor = <Config, Secrets>({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): ExecutorType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, {}> => {
-  return async ({ actionId }) => {
-    return { status: 'ok', data: {}, actionId };
+  return async ({ actionId, params, config, secrets }) => {
+    const subAction = params.subAction;
+    const subActionParams = params.subActionParams;
+
+    const service = new connector.Service({
+      config,
+      configurationUtilities,
+      logger,
+      params,
+      secrets,
+    });
+
+    const data = service[subAction](subActionParams);
+
+    return { status: 'ok', data, actionId };
   };
 };
