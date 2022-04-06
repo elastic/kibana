@@ -283,8 +283,8 @@ The following component menus are available:
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
-[[open-lens-data-in-discover]]
-=== Open the data in Discover
+[[explore-lens-data-in-discover]]
+=== Explore the data in Discover
 
 When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
 
