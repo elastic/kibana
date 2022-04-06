@@ -62,6 +62,18 @@ Review important information about the {kib} 7.13.x releases.
 
 For information about the {kib} 7.13.4 release, review the following information.
 
+[discrete]
+[[known-issue-7.13.4]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.13.4. 
+
+For the known issues in previous releases, refer to the following:
+
+<<known-issue-7.13.1,7.13.1>> | <<known-issue-7.13.0, 7.13.0>>
+
 [float]
 [[breaking-changes-7.13.4]]
 === Breaking changes
@@ -92,6 +104,18 @@ Operations::
 == {kib} 7.13.3
 
 For information about the {kib} 7.13.3 release, review the following information.
+
+[discrete]
+[[known-issue-7.13.3]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.13.3. 
+
+For the known issues in previous releases, refer to the following:
+
+<<known-issue-7.13.1,7.13.1>> | <<known-issue-7.13.0, 7.13.0>>
 
 [float]
 [[breaking-changes-7.13.3]]
@@ -138,6 +162,19 @@ Uptime::
 
 For information about the {kib} 7.13.2 release, review the following information.
 
+[discrete]
+[[known-issue-7.13.2]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.13.2. 
+
+For the known issues in previous releases, refer to the following:
+
+<<known-issue-7.13.1,7.13.1>> | <<known-issue-7.13.0, 7.13.0>>
+
+
 [float]
 [[breaking-changes-7.13.2]]
 === Breaking changes
@@ -183,7 +220,9 @@ For information about the {kib} 7.13.1 release, review the following information
 
 [discrete]
 [[known-issue-7.13.1]]
-=== Known issue
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. For known issues in the previous release, refer to the <<known-issue-7.13.0,known issues in 7.13.0>>.
 
 Kibana instances with dashboard panels that are `by value` and have drilldowns may fail to start after upgrade.  
 We recommend that users who have been using drilldowns in Kibana wait for 7.13.2 to upgrade.
@@ -281,6 +320,16 @@ connecting to a {fleet-server} started with a service token.
 *Impact* +
 You must do a force unenroll to remove the {agent} and invalidate the API keys,
 or unenrollment hangs indefinitely. https://github.com/elastic/fleet-server/issues/380[#380]
+====
+
+.Hidden dashboard titles now appear
+[%collapsible]
+====
+*Details*  +
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
+
+*Impact* +
+Upgrade to {kib} 7.17.3 or later.
 ====
 
 [float]
