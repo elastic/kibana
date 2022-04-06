@@ -28,7 +28,6 @@ import {
   EuiFilterButton,
   EuiSpacer,
   EuiIcon,
-  EuiPagination,
   EuiBasicTableColumn,
   EuiLink,
   EuiText,
@@ -324,9 +323,17 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
       onClick={onHelpClick}
       data-test-subj="fieldTypesHelpButton"
       className="dscFieldTypesHelp__button"
-      aria-label="Filter type help"
+      aria-label={i18n.translate('discover.fieldTypesPopover.buttonAriaLabel', {
+        defaultMessage: 'Filter type help',
+      })}
     >
-      <EuiIcon type="iInCircle" color="primary" title="Filter type help" />
+      <EuiIcon
+        type="iInCircle"
+        color="primary"
+        title={i18n.translate('discover.fieldTypesPopover.iconTitle', {
+          defaultMessage: 'Filter type help',
+        })}
+      />
     </EuiFilterButton>
   );
 
@@ -401,29 +408,17 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
                 responsive={false}
               />
             </EuiPanel>
-            {/* <EuiSpacer size="s" />
-            {presentFieldTypes.length > FIELD_TYPES_PER_PAGE && (
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiPagination
-                    aria-label={i18n.translate('discover.fieldChooser.paginationAriaLabel', {
-                      defaultMessage: 'Field types navigation',
-                    })}
-                    activePage={curPageIndex}
-                    pageCount={totalPages}
-                    onPageClick={changePageIndex}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )} */}
             <EuiPanel color="transparent" paddingSize="s">
               <EuiText color="subdued" size="xs">
                 <p>
-                  Learn more about&nbsp;
+                  {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
+                    defaultMessage: 'Learn more about',
+                  })}
+                  &nbsp;
                   <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
                     <FormattedMessage
-                      id="discover.fieldTypesPopover.learnMore"
-                      defaultMessage="field types"
+                      id="discover.fieldTypesPopover.learnMoreLink"
+                      defaultMessage="field types."
                     />
                   </EuiLink>
                 </p>

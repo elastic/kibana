@@ -22,6 +22,10 @@ export function getFieldTypeDescription(type: string) {
       return i18n.translate('discover.fieldNameDescription.dateField', {
         defaultMessage: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
       });
+    case 'date_range':
+      return i18n.translate('discover.fieldNameDescription.dateField', {
+        defaultMessage: 'Range of date values.',
+      });
     case 'geo_point':
       return i18n.translate('discover.fieldNameDescription.geoPointField', {
         defaultMessage: 'Latitude and longitude points.',
@@ -33,6 +37,10 @@ export function getFieldTypeDescription(type: string) {
     case 'ip':
       return i18n.translate('discover.fieldNameDescription.ipAddressField', {
         defaultMessage: 'IPv4 and IPv6 addresses.',
+      });
+    case 'ip_range':
+      return i18n.translate('discover.fieldNameDescription.ipAddressField', {
+        defaultMessage: 'Range of ip values supporting either IPv4 or IPv6 (or mixed) addresses.',
       });
     case 'murmur3':
       return i18n.translate('discover.fieldNameDescription.murmur3Field', {
