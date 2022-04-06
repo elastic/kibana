@@ -8,10 +8,11 @@
 
 import { Observable } from 'rxjs';
 
-import { type PluginName } from '../plugins';
-import { type ServiceStatus } from './types';
+import type { PluginName } from '../plugins';
+import type { ServiceStatus } from './types';
 
-import { type Deps, PluginsStatusService as BasePluginsStatusService } from './plugins_status';
+import type { Deps } from './plugins_status';
+import { PluginsStatusService as BasePluginsStatusService } from './plugins_status';
 
 export class PluginsStatusService extends BasePluginsStatusService {
   private all$?: Observable<Record<PluginName, ServiceStatus>>;

@@ -17,8 +17,9 @@ import {
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
 
-import { type PluginName } from '../plugins';
-import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from './types';
+import type { PluginName } from '../plugins';
+import type { ServiceStatus, CoreStatus } from './types';
+import { ServiceStatusLevels } from './types';
 import { getSummaryStatus } from './get_summary_status';
 
 const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
