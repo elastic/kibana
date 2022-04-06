@@ -22,8 +22,8 @@ import {
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../tasks/common';
-import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { selectCustomTemplates } from '../../tasks/templates';
 import {
@@ -41,12 +41,30 @@ import {
 } from '../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
-import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
+
+describe('Create a timeline from a template', () => {
+  before(() => {
+    deleteTimelines();
+    createTimelineTemplate(getTimeline());
+    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+  });
+  it('Should have the same query and open the timeline modal', () => {
+    selectCustomTemplates();
+    expandEventAction();
+    clickingOnCreateTimelineFormTemplateBtn();
+
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    closeTimeline();
+  });
+});
 
 describe('Timelines', (): void => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(OVERVIEW_URL);
+    login();
+    visit(OVERVIEW_URL);
   });
 
   describe('Toggle create timeline from plus icon', () => {
@@ -100,7 +118,7 @@ describe('Timelines', (): void => {
 
     it('should update timeline after adding eql', () => {
       cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-      const eql = 'any where process.name == "which"';
+      const eql = 'any where process.name == "zsh"';
       addEqlToTimeline(eql);
 
       cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
@@ -110,27 +128,5 @@ describe('Timelines', (): void => {
         .then(parseInt)
         .should('be.gt', 0);
     });
-  });
-});
-
-describe('Create a timeline from a template', () => {
-  before(() => {
-    cy.intercept('/api/timeline*').as('timeline');
-    cleanKibana();
-    createTimelineTemplate(getTimeline());
-    loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
-    waitForTimelinesPanelToBeLoaded();
-  });
-  it('Should have the same query and open the timeline modal', () => {
-    selectCustomTemplates();
-    cy.wait('@timeline', { timeout: 100000 });
-    expandEventAction();
-    clickingOnCreateTimelineFormTemplateBtn();
-    cy.wait('@timeline', { timeout: 100000 });
-
-    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
-    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
-    closeTimeline();
   });
 });
