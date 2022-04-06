@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Creating Rule', () => {
+    describe.skip('Create rule button', () => {
       it('Show Create Rule flyout when Create Rule button is clicked', async () => {
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Showing Rules', () => {
+    describe('Rules table', () => {
       before(async () => {
         const uptimeRule = {
           params: {
@@ -111,19 +111,19 @@ export default ({ getService }: FtrProviderContext) => {
       it('shows the Create Rule button when user has permissions', async () => {
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
-          'Create Rule button is visible',
+          'Create rule button',
           async () => await testSubjects.exists('createRuleButton')
         );
       });
 
-      it(`shows the No permission prompt when the user has no permissions`, async () => {
+      it(`shows the no permission prompt when the user has no permissions`, async () => {
         await observability.users.setTestUserRole({
           elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [{ spaces: ['*'], base: [], feature: { discover: ['all'] } }],
         });
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
-          'No Permissions Prompt',
+          'No permissions prompt',
           async () => await testSubjects.exists('noPermissionPrompt')
         );
       });
