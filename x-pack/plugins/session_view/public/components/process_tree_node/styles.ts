@@ -73,6 +73,8 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       '&:hover:before': {
         backgroundColor: hoverColor,
         transform: `translateY(-${size.xs})`,
+        marginLeft: '-50%',
+        width: '150%',
       },
       '&:before': {
         position: 'absolute',
