@@ -17,7 +17,7 @@ interface ResultTabsProps {
   agentIds?: string[];
   startDate?: string;
   endDate?: string;
-  addToTimeline?: (actionId: string) => void;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({

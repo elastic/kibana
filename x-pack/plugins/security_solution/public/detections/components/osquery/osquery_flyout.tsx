@@ -42,26 +42,27 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
   const { getAddToTimelineButton } = timelines.getHoverActions();
 
   const handleAddToTimeline = useCallback(
-    (actionId: string) => {
+    (payload: { query: [string, string]; isIcon?: true }) => {
+      const [field, value] = payload.query;
       const providerA: DataProvider = {
         and: [],
         enabled: true,
         excluded: false,
-        id: actionId,
+        id: value,
         kqlQuery: '',
-        name: actionId,
+        name: value,
         queryMatch: {
-          field: 'action_id',
-          value: actionId,
+          field,
+          value,
           operator: ':',
         },
       };
 
       return getAddToTimelineButton({
         dataProvider: providerA,
-        field: actionId,
+        field: value,
         ownFocus: false,
-        Component: TimelineComponent,
+        ...(payload.isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
       });
     },
     [getAddToTimelineButton]

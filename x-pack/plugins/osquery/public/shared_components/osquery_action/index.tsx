@@ -20,7 +20,7 @@ import { useIsOsqueryAvailable } from './use_is_osquery_available';
 interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
-  addToTimeline: (actionId: string) => void;
+  addToTimeline: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
