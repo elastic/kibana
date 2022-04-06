@@ -9,7 +9,6 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-// import { useGlobalTime } from '../../common/containers/use_global_time';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -21,22 +20,24 @@ import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING, VIEW_ALERTS } from './tran
 import { inputsSelectors } from '../../common/store/selectors';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { useUserInfo } from '../../detections/components/user_info';
+import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../components/detection_response/alerts_by_status/utils';
 import { getDetectionEngineUrl, useFormatUrl } from '../../common/components/link_to';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { APP_UI_ID } from '../../../common/constants';
 
+const getGlobalQuery = inputsSelectors.globalQuery(); // create state-only selector from factory
+
 const DetectionResponseComponent = () => {
-  const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  // TODO: link queries with global time queries
-  // const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
 
-  const queriesLoading: boolean = useShallowEqualSelector(
-    (state) => !!getGlobalQuery(state).find((query) => query.loading)
+  const globalQueries = useShallowEqualSelector(getGlobalQuery);
+  const queriesLoading: boolean = useMemo(
+    () => !!globalQueries.find((query) => query.loading),
+    [globalQueries]
   );
   const kibana = useKibana();
   const { navigateToApp } = kibana.services.application;
@@ -90,7 +91,7 @@ const DetectionResponseComponent = () => {
                   <>{UPDATED} </>
                   <FormattedRelative
                     data-test-subj="last-updated-at-date"
-                    key={`formatedRelative-${Date.now()}`}
+                    key={`formattedRelative-${Date.now()}`}
                     value={new Date(updatedAt)}
                   />
                 </EuiFlexItem>
@@ -114,8 +115,12 @@ const DetectionResponseComponent = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem>{'[cases chart]'}</EuiFlexItem>
-              <EuiFlexItem>{'[rules table]'}</EuiFlexItem>
+
+              <EuiFlexItem>
+                {hasIndexRead && hasKibanaREAD && (
+                  <RuleAlertsTable signalIndexName={signalIndexName} />
+                )}
+              </EuiFlexItem>
               <EuiFlexItem>{'[cases table]'}</EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
