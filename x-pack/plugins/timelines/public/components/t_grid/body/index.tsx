@@ -7,6 +7,7 @@
 
 import {
   EuiDataGrid,
+  EuiDataGridRefProps,
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
@@ -28,6 +29,7 @@ import React, {
   useMemo,
   useState,
   useContext,
+  useRef,
 } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
@@ -337,6 +339,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
@@ -687,6 +691,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
               timelineId: id,
+              closeCellPopover: dataGridRef.current?.closeCellPopover,
             });
           return {
             ...header,
@@ -837,6 +842,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   onChangeItemsPerPage,
                   onChangePage,
                 }}
+                ref={dataGridRef}
               />
             </EuiDataGridContainer>
           )}
