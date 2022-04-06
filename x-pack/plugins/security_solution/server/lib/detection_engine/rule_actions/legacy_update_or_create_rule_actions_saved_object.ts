@@ -6,8 +6,8 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertAction } from '../../../../../alerting/common';
-import { AlertServices } from '../../../../../alerting/server';
+import { RuleAction } from '../../../../../alerting/common';
+import { RuleExecutorServices } from '../../../../../alerting/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';
@@ -21,8 +21,8 @@ import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions
  */
 interface LegacyUpdateOrCreateRuleActionsSavedObject {
   ruleAlertId: string;
-  savedObjectsClient: AlertServices['savedObjectsClient'];
-  actions: AlertAction[] | undefined;
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
+  actions: RuleAction[] | undefined;
   throttle: string | null | undefined;
   logger: Logger;
 }

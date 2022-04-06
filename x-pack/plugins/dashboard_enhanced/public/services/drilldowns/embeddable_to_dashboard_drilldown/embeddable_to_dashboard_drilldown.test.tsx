@@ -10,7 +10,7 @@ import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilld
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
 import { FilterStateStore, Query, TimeRange } from '../../../../../../../src/plugins/data/common';
-import { ApplyGlobalFilterActionContext } from '../../../../../../../src/plugins/data/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../../../src/plugins/unified_search/public';
 import {
   DashboardAppLocatorDefinition,
   DashboardAppLocatorParams,

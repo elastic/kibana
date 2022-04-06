@@ -13,12 +13,13 @@ import { MountPoint } from 'kibana/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
+import type { UnifiedSearchPublicPluginStart } from '../../../unified_search/public';
 
-const dataShim = {
+const unifiedSearch = {
   ui: {
     SearchBar: () => <div className="searchBar" />,
   },
-};
+} as unknown as UnifiedSearchPublicPluginStart;
 
 describe('TopNavMenu', () => {
   const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
@@ -72,7 +73,7 @@ describe('TopNavMenu', () => {
 
   it('Should render search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu appName={'test'} showSearchBar={true} data={dataShim as any} />
+      <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearch} />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
@@ -81,7 +82,12 @@ describe('TopNavMenu', () => {
 
   it('Should render menu items and search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu appName={'test'} config={menuItems} showSearchBar={true} data={dataShim as any} />
+      <TopNavMenu
+        appName={'test'}
+        config={menuItems}
+        showSearchBar={true}
+        unifiedSearch={unifiedSearch}
+      />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
@@ -94,7 +100,7 @@ describe('TopNavMenu', () => {
         appName={'test'}
         config={menuItems}
         showSearchBar={true}
-        data={dataShim as any}
+        unifiedSearch={unifiedSearch}
         className={'myCoolClass'}
       />
     );
@@ -142,7 +148,7 @@ describe('TopNavMenu', () => {
           appName={'test'}
           config={menuItems}
           showSearchBar={true}
-          data={dataShim as any}
+          unifiedSearch={unifiedSearch}
           setMenuMountPoint={setMountPoint}
         />
       );

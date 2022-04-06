@@ -99,5 +99,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.deleteAllControls();
       });
     });
+
+    describe('control group settings flyout closes', async () => {
+      it('on save', async () => {
+        await dashboardControls.openControlGroupSettingsFlyout();
+        await dashboard.saveDashboard('Test Control Group Settings', {
+          saveAsNew: false,
+          exitFromEditMode: false,
+        });
+        await testSubjects.missingOrFail('control-group-settings-flyout');
+      });
+
+      it('on view mode change', async () => {
+        await dashboardControls.openControlGroupSettingsFlyout();
+        await dashboard.clickCancelOutOfEditMode();
+        await testSubjects.missingOrFail('control-group-settings-flyout');
+      });
+
+      it('when navigating away from dashboard', async () => {
+        await dashboard.switchToEditMode();
+        await dashboardControls.openControlGroupSettingsFlyout();
+        await dashboard.gotoDashboardLandingPage();
+        await testSubjects.missingOrFail('control-group-settings-flyout');
+      });
+
+      after(async () => {
+        await dashboard.loadSavedDashboard('Test Control Group Settings');
+      });
+    });
   });
 }
