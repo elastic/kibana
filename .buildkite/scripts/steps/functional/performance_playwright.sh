@@ -23,7 +23,7 @@ cd "$XPACK_DIR"
 jobId=$(npx uuid)
 export TEST_JOB_ID="$jobId"
 
-journeys=("ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
+journeys=("login")
 
 for i in "${journeys[@]}"; do
     echo "JOURNEY[${i}] is running"
