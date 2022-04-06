@@ -94,6 +94,10 @@ describe('migrations v2 model', () => {
     },
     knownTypes: ['dashboard', 'config'],
     excludeFromUpgradeFilterHooks: {},
+    migrationDocLinks: {
+      resolveMigrationFailures:
+        'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html',
+    },
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -299,7 +303,7 @@ describe('migrations v2 model', () => {
 
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}"`
+          `"The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}. Refer to https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html for more information"`
         );
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {

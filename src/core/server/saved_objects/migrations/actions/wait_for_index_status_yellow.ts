@@ -20,6 +20,7 @@ export interface WaitForIndexStatusYellowParams {
   client: ElasticsearchClient;
   index: string;
   timeout?: string;
+  migrationDocLinks: Record<string, string>;
 }
 /**
  * A yellow index status means the index's primary shard is allocated and the
@@ -37,6 +38,7 @@ export const waitForIndexStatusYellow =
     client,
     index,
     timeout = DEFAULT_TIMEOUT,
+    migrationDocLinks,
   }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
   () => {
     return client.cluster
@@ -54,7 +56,7 @@ export const waitForIndexStatusYellow =
         if (res.timed_out === true) {
           return Either.left({
             type: 'retryable_es_client_error' as const,
-            message: `Timeout waiting for the status of the [${index}] index to become 'yellow'`,
+            message: `Timeout waiting for the status of the [${index}] index to become 'yellow'. Refer to ${migrationDocLinks.resolveMigrationFailures} for more information.`,
           });
         }
         return Either.right({});

@@ -61,7 +61,11 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
-      Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
+      Actions.waitForIndexStatusYellow({
+        client,
+        index: state.sourceIndex.value,
+        migrationDocLinks: state.migrationDocLinks,
+      }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -81,12 +85,14 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         client,
         indexName: state.targetIndex,
         mappings: state.targetIndexMappings,
+        migrationDocLinks: state.migrationDocLinks,
       }),
     CREATE_REINDEX_TEMP: (state: CreateReindexTempState) =>
       Actions.createIndex({
         client,
         indexName: state.tempIndex,
         mappings: state.tempIndexMappings,
+        migrationDocLinks: state.migrationDocLinks,
       }),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),
@@ -123,7 +129,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock({ client, index: state.tempIndex }),
     CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
-      Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
+      Actions.cloneIndex({
+        client,
+        source: state.tempIndex,
+        target: state.targetIndex,
+        migrationDocLinks: state.migrationDocLinks,
+      }),
     REFRESH_TARGET: (state: RefreshTarget) =>
       Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
     UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
@@ -179,6 +190,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         client,
         indexName: state.sourceIndex.value,
         mappings: state.legacyReindexTargetMappings,
+        migrationDocLinks: state.migrationDocLinks,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({

@@ -38,6 +38,7 @@ export interface CreateIndexParams {
   indexName: string;
   mappings: IndexMapping;
   aliases?: string[];
+  migrationDocLinks: Record<string, string>;
 }
 /**
  * Creates an index with the given mappings
@@ -54,6 +55,7 @@ export const createIndex = ({
   indexName,
   mappings,
   aliases = [],
+  migrationDocLinks,
 }: CreateIndexParams): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
   const createIndexTask: TaskEither.TaskEither<
     RetryableEsClientError,
@@ -133,7 +135,12 @@ export const createIndex = ({
       } else {
         // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
-          waitForIndexStatusYellow({ client, index: indexName, timeout: DEFAULT_TIMEOUT }),
+          waitForIndexStatusYellow({
+            client,
+            index: indexName,
+            timeout: DEFAULT_TIMEOUT,
+            migrationDocLinks,
+          }),
           TaskEither.map(() => {
             /** When the index status is 'yellow' we know that all shards were started */
             return 'create_index_succeeded';
