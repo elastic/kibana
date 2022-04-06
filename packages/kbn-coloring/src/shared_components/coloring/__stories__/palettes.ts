@@ -8,28 +8,23 @@
 
 import type { PaletteDefinition, SeriesLayer } from '../../../palettes/types';
 
-export const getPaletteRegistry = () => {
-  const colors = [
-    '#54B399',
-    '#6092C0',
-    '#D36086',
-    '#9170B8',
-    '#CA8EAE',
-    '#D6BF57',
-    '#B9A888',
-    '#DA8B45',
-    '#AA6556',
-    '#E7664C',
-  ];
+const getMockedPalette = (
+  id: string,
+  title: string,
+  colors: string[],
+  canDynamicColoring: boolean = true
+): PaletteDefinition => {
   let counter = 0;
-  const mockPalette: PaletteDefinition = {
-    id: 'custom',
-    title: 'My Palette',
+  return {
+    id,
+    title,
     getCategoricalColor: (_: SeriesLayer[]) => {
       counter++;
       if (counter > colors.length - 1) counter = 0;
       return colors[counter];
     },
+    canDynamicColoring,
+    internal: true,
     getCategoricalColors: (num: number) => colors,
     toExpression: () => ({
       type: 'expression',
@@ -44,10 +39,52 @@ export const getPaletteRegistry = () => {
       ],
     }),
   };
+};
+
+export const getPaletteRegistry = () => {
+  const getMockedPalettes = (): Record<string, PaletteDefinition> => ({
+    default: getMockedPalette('default', 'Default Palette', [
+      '#54B399',
+      '#6092C0',
+      '#D36086',
+      '#9170B8',
+      '#CA8EAE',
+      '#D6BF57',
+      '#B9A888',
+      '#DA8B45',
+      '#AA6556',
+      '#E7664C',
+    ]),
+    positive: getMockedPalette('positive', 'Grey Palette', [
+      '#222',
+      '#333',
+      '#444',
+      '#555',
+      '#666',
+      '#777',
+      '#888',
+      '#999',
+      '#AAA',
+      '#BBB',
+    ]),
+    foo: getMockedPalette('foo', 'Foo Palette', [
+      '#7E7',
+      '#7D7',
+      '#7A7',
+      '#797',
+      '#787',
+      '#777',
+      '#767',
+      '#757',
+      '#747',
+      '#737',
+    ]),
+    custom: getMockedPalette('custom', 'Custom Palette', [], false),
+  });
 
   return {
-    get: (name: string) => mockPalette,
-    getAll: () => [mockPalette],
+    get: (name: string) => getMockedPalettes()[name],
+    getAll: () => Object.values(getMockedPalettes()),
   };
 };
 

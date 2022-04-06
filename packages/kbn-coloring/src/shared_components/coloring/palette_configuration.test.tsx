@@ -43,7 +43,7 @@ jest.mock('./color_ranges/color_ranges_validation', () => {
   };
 });
 
-describe.skip('palette panel', () => {
+describe('palette panel', () => {
   const paletteRegistry = getPaletteRegistry();
   let props: {
     palettes: PaletteRegistry;

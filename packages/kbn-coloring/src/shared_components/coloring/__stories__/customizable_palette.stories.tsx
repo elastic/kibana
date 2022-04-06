@@ -28,7 +28,7 @@ Default.args = {
   palettes: getPaletteRegistry(),
   activePalette: {
     type: 'palette',
-    name: 'custom',
+    name: 'default',
     params: {
       steps: 1,
       maxSteps: 10,
