@@ -20727,7 +20727,6 @@
     "xpack.securitySolution.detectionEngine.panelSubtitleShowing": "Affichant",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel": "Compte",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer": "Remarque : cet aperçu exclut les effets d'exceptions aux règles et les remplacements d'horodatages.",
-    "xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql": "Remarque : cet aperçu exclut les effets d'exceptions aux règles et les remplacements d'horodatages, et est limité à 100 résultats.",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphHitsTitle": "Résultats",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError": "Erreur de récupération de l'aperçu",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewInspectTitle": "aperçu de la recherche",

@@ -23614,7 +23614,6 @@
     "xpack.securitySolution.detectionEngine.panelSubtitleShowing": "正在显示",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel": "计数",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer": "注意：此预览不包括规则例外和时间戳覆盖的影响。",
-    "xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql": "注意：此预览不包括规则例外和时间戳覆盖的影响，且仅显示 100 个结果。",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphHitsTitle": "命中数",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError": "提取预览时出错",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewInspectTitle": "查询预览",
