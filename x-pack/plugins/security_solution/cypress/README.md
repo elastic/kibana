@@ -425,7 +425,7 @@ taken into consideration until another solution is implemented:
 - Group the tests that are similar in different contexts.
 - For every context login only once, clean the state between tests if needed without re-loading the page.
 - All tests in a spec file must be order-independent.
-- Clean up the state and data just when needed using `cleanKibana` function.  The execution of it is expensive of time, so consider if you really need to clean the data before the execution. I.e: If you are just checking that a modal can be opened, you may not need to clean the data.
+- Clean up the state and data just when needed using `cleanKibana` function.  Executing this function takes a lot of time, so consider if you really need to clean the data before the execution. I.e: If you are just checking that a modal can be opened, you may not need to clean the data.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
