@@ -2277,7 +2277,7 @@ components:
               - api_keys
               - fleet_admin_user
               - fleet_server
-        missing_optionnal_features:
+        missing_optional_features:
           type: array
           items:
             type: string
@@ -2286,7 +2286,7 @@ components:
       required:
         - isReady
         - missing_requirements
-        - missing_optionnal_features
+        - missing_optional_features
     agent_type:
       type: string
       title: Agent type

@@ -73,7 +73,7 @@ describe('EditOutputFlyout', () => {
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUsedFleetStatus.mockReturnValue({
-      missingOptionnalFeatures: ['encrypted_saved_object_encryption_key_required'],
+      missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
     } as any);
     const { utils } = renderFlyout({
       type: 'logstash',

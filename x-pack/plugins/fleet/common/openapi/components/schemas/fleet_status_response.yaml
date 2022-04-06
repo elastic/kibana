@@ -12,7 +12,7 @@ properties:
         - 'api_keys'
         - 'fleet_admin_user'
         - 'fleet_server'
-  missing_optionnal_features: 
+  missing_optional_features: 
     type: array
     items:
       type: string
@@ -21,4 +21,4 @@ properties:
 required:
   - isReady
   - missing_requirements
-  - missing_optionnal_features
+  - missing_optional_features

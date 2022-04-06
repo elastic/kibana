@@ -530,7 +530,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
   const agentsSetupResponse: GetFleetStatusResponse = {
     isReady: true,
     missing_requirements: [],
-    missing_optionnal_features: [],
+    missing_optional_features: [],
   };
 
   const packagePoliciesResponse: GetPackagePoliciesResponse = {

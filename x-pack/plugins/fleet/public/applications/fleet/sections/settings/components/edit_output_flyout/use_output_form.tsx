@@ -35,7 +35,7 @@ import { confirmUpdate } from './confirm_update';
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const fleetStatus = useFleetStatus();
 
-  const hasEncryptedSavedObjectConfigured = !fleetStatus.missingOptionnalFeatures?.includes(
+  const hasEncryptedSavedObjectConfigured = !fleetStatus.missingOptionalFeatures?.includes(
     'encrypted_saved_object_encryption_key_required'
   );
 

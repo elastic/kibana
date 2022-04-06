@@ -22,7 +22,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
-    const missingOptionnalFeatures: GetFleetStatusResponse['missing_optionnal_features'] = [];
+    const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
 
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
@@ -33,13 +33,13 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     }
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-      missingOptionnalFeatures.push('encrypted_saved_object_encryption_key_required');
+      missingOptionalFeatures.push('encrypted_saved_object_encryption_key_required');
     }
 
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
-      missing_optionnal_features: missingOptionnalFeatures,
+      missing_optional_features: missingOptionalFeatures,
     };
 
     return response.ok({
