@@ -39,7 +39,7 @@ export const ProcessTreeLoadMoreButton = ({
         {eventsRemaining !== 0 && (
           <FormattedMessage
             id="xpack.sessionView.processTreeLoadMoreButton"
-            defaultMessage="({count} left)"
+            defaultMessage=" ({count} left)"
             values={{ count: eventsRemaining }}
           />
         )}
