@@ -223,9 +223,9 @@ describe('axes_configuration', () => {
   const axes: AxisConfig[] = [
     {
       id: '1',
-      position: 'right'
-    }
-  ]
+      position: 'right',
+    },
+  ];
 
   const sampleLayer: DataLayerConfigResult = {
     type: 'dataLayer',
@@ -310,7 +310,6 @@ describe('axes_configuration', () => {
       axes,
       formatFactory
     );
-    console.log(groups)
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('right');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');

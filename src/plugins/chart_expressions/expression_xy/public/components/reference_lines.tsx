@@ -144,7 +144,7 @@ export const ReferenceLineAnnotations = ({
           const axisMap = {
             left: yAxesConfiguration.some((axes) => axes.position === 'left'),
             right: yAxesConfiguration.some((axes) => axes.position === 'right'),
-          }
+          };
 
           // get the position for vertical chart
           const markerPositionVertical = getBaseIconPlacement(

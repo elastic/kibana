@@ -258,7 +258,7 @@ export function XYChart({
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
 
-  const getYAxesTitles = (axisSeries: Series[], groupId: 'right' | 'left') => {
+  const getYAxesTitles = (axisSeries: Series[], groupId: string) => {
     const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
     return (
       yTitle ||
@@ -286,7 +286,10 @@ export function XYChart({
   const visualConfigs = [
     ...referenceLineLayers
       .flatMap(({ yConfig }) => yConfig)
-      .map((config) => ({ ...config, position: getAxisConfig(yAxesConfiguration, config)?.position })),
+      .map((config) => ({
+        ...config,
+        position: getAxisConfig(yAxesConfiguration, config)?.position,
+      })),
     ...groupedAnnotations,
   ].filter(Boolean);
 

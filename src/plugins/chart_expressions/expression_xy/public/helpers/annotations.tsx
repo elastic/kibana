@@ -32,7 +32,7 @@ export const getLinesCausedPaddings = (
       return;
     }
     const { position, icon, iconPosition, textVisibility } = config;
-    if (position && hasIcon(icon) || textVisibility) {
+    if ((position && hasIcon(icon)) || textVisibility) {
       const placement = getBaseIconPlacement(iconPosition, axesMap, position);
       paddings[placement] = Math.max(
         paddings[placement] || 0,

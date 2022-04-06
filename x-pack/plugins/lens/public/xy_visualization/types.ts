@@ -33,7 +33,7 @@ import type {
   LineStyle,
   IconPosition,
   FillStyle,
-  YAxisMode
+  YAxisMode,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';

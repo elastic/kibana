@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { FormatFactory } from '../types';
 import {
   AxisConfig,
@@ -19,7 +20,6 @@ import type {
   SerializedFieldFormat,
 } from '../../../../../plugins/field_formats/common';
 import { isDataLayer } from './visualization';
-import { Position } from '@elastic/charts';
 
 export interface Series {
   layer: number;
@@ -36,7 +36,7 @@ interface AxesSeries {
 }
 
 export type GroupsConfiguration = Array<{
-  groupId: 'left' | 'right';
+  groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
@@ -89,7 +89,6 @@ export function groupAxesByType(
         accessor,
         fieldFormat: formatter,
         axisId: yConfigByAccessor?.axisId,
-        ...(axisConfigById || {}),
       });
     });
   });
@@ -99,7 +98,7 @@ export function groupAxesByType(
   series.auto.forEach((currentSeries) => {
     let key = Object.keys(series).find(
       (seriesKey) =>
-        seriesKey !== 'auto' &&
+        seriesKey.includes('axis') &&
         series[seriesKey].length > 0 &&
         series[seriesKey].every((axisSeries) =>
           isFormatterCompatible(axisSeries.fieldFormat, currentSeries.fieldFormat)
@@ -147,7 +146,7 @@ export function getAxesConfiguration(
   axes?.forEach((axis) => {
     if (series[axis.id] && series[axis.id].length > 0) {
       axisGroups.push({
-        groupId: axis.id,
+        groupId: `axis-${axis.id}`,
         position: axis.position || Position.Left,
         formatter: formatFactory?.(series[axis.id][0].fieldFormat),
         series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),

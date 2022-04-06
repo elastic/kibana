@@ -5,6 +5,7 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "axes": Array [],
         "axisTitlesVisibilitySettings": Array [
           Object {
             "chain": Array [
@@ -29,9 +30,6 @@ Object {
         ],
         "curveType": Array [
           "LINEAR",
-        ],
-        "description": Array [
-          "",
         ],
         "emphasizeFitting": Array [
           true,
@@ -212,9 +210,6 @@ Object {
             ],
             "type": "expression",
           },
-        ],
-        "title": Array [
-          "",
         ],
         "valueLabels": Array [
           "hide",
