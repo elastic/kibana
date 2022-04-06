@@ -7,12 +7,13 @@
 
 import expect from '@kbn/expect';
 import beatDetailFixture from './fixtures/detail';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('instance detail mb', () => {
+    const { setup, tearDown } = getLifecycleMethods(getService);
     const archive =
       'x-pack/test/functional/es_archives/monitoring/beats_with_restarted_instance_mb';
     const timeRange = {
@@ -21,11 +22,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize beat with metrics', async () => {

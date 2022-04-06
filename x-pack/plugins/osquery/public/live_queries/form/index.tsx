@@ -62,6 +62,7 @@ interface LiveQueryFormProps {
   ecsMappingField?: boolean;
   formType?: FormType;
   enabled?: boolean;
+  hideFullscreen?: true;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -72,6 +73,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
+  hideFullscreen,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -146,7 +148,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     onSubmit: async (formData, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
 
-      if (isValid) {
+      if (isValid && !!ecsFieldValue) {
         try {
           await mutateAsync(
             pickBy(
@@ -268,9 +270,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const ecsFieldProps = useMemo(
     () => ({
-      isDisabled: !permissions.writeSavedQueries,
+      isDisabled: !permissions.writeLiveQueries,
     }),
-    [permissions.writeSavedQueries]
+    [permissions.writeLiveQueries]
+  );
+
+  const isSavedQueryDisabled = useMemo(
+    () =>
+      queryComponentProps.disabled || !permissions.runSavedQueries || !permissions.readSavedQueries,
+    [permissions.readSavedQueries, permissions.runSavedQueries, queryComponentProps.disabled]
   );
 
   const queryFieldStepContent = useMemo(
@@ -278,11 +286,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <>
         {queryField ? (
           <>
-            <SavedQueriesDropdown
-              disabled={queryComponentProps.disabled || !permissions.runSavedQueries}
-              onChange={handleSavedQueryChange}
-            />
-            <EuiSpacer />
+            {!isSavedQueryDisabled && (
+              <>
+                <SavedQueriesDropdown
+                  disabled={isSavedQueryDisabled}
+                  onChange={handleSavedQueryChange}
+                />
+                <EuiSpacer />
+              </>
+            )}
             <UseField
               path="query"
               component={LiveQueryQueryField}
@@ -356,7 +368,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     [
       queryField,
       queryComponentProps,
-      permissions.runSavedQueries,
       permissions.writeSavedQueries,
       handleSavedQueryChange,
       ecsMappingField,
@@ -372,15 +383,21 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       enabled,
       isSubmitting,
       submit,
+      isSavedQueryDisabled,
     ]
   );
 
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
-        <ResultTabs actionId={actionId} endDate={data?.actions[0].expiration} agentIds={agentIds} />
+        <ResultTabs
+          actionId={actionId}
+          endDate={data?.actions[0].expiration}
+          agentIds={agentIds}
+          hideFullscreen={hideFullscreen}
+        />
       ) : null,
-    [actionId, agentIds, data?.actions]
+    [actionId, agentIds, data?.actions, hideFullscreen]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(

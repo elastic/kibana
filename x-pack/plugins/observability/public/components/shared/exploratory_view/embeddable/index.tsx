@@ -11,7 +11,7 @@ import { CoreStart } from 'kibana/public';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import type { IndexPatternState } from '../hooks/use_app_index_pattern';
+import type { DataViewState } from '../hooks/use_app_data_view';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import type { AppDataType } from '../types';
 
@@ -30,7 +30,7 @@ export function getExploratoryViewEmbeddable(
   plugins: ObservabilityPublicPluginsStart
 ) {
   return (props: ExploratoryEmbeddableProps) => {
-    const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
+    const [indexPatterns, setIndexPatterns] = useState<DataViewState>({} as DataViewState);
     const [loading, setLoading] = useState(false);
 
     const series = props.attributes && props.attributes[0];

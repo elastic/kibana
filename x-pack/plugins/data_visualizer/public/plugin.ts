@@ -17,6 +17,7 @@ import { setStartServices } from './kibana_services';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { LensPublicStart } from '../../lens/public';
@@ -37,6 +38,7 @@ export interface DataVisualizerSetupDependencies {
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   fileUpload: FileUploadPluginStart;
   maps: MapsStartApi;
   embeddable: EmbeddableStart;

@@ -19,18 +19,28 @@ export const mockEvents: ProcessEvent[] = [
   {
     '@timestamp': '2021-11-23T15:25:04.210Z',
     user: {
-      name: '',
+      name: 'vagrant',
       id: '1000',
+    },
+    group: {
+      id: '1000',
+      name: 'vagrant',
     },
     process: {
       pid: 3535,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
       executable: '/usr/bin/bash',
       command_line: 'bash',
       interactive: false,
       entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
       tty: {
-        descriptor: 0,
-        type: 'char_device',
         char_device: {
           major: 8,
           minor: 1,
@@ -39,8 +49,12 @@ export const mockEvents: ProcessEvent[] = [
       parent: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -52,8 +66,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -63,8 +75,12 @@ export const mockEvents: ProcessEvent[] = [
       session_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -76,8 +92,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -87,8 +101,12 @@ export const mockEvents: ProcessEvent[] = [
       entry_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -100,8 +118,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -111,8 +127,12 @@ export const mockEvents: ProcessEvent[] = [
       group_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -124,8 +144,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -163,18 +181,28 @@ export const mockEvents: ProcessEvent[] = [
   {
     '@timestamp': '2021-11-23T15:25:04.218Z',
     user: {
-      name: '',
+      name: 'vagrant',
       id: '1000',
+    },
+    group: {
+      id: '1000',
+      name: 'vagrant',
     },
     process: {
       pid: 3535,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
       executable: '/usr/bin/vi',
       command_line: 'bash',
       interactive: true,
-      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727',
+      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
       tty: {
-        descriptor: 0,
-        type: 'char_device',
         char_device: {
           major: 8,
           minor: 1,
@@ -183,8 +211,12 @@ export const mockEvents: ProcessEvent[] = [
       parent: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -196,8 +228,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.218Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -207,8 +237,12 @@ export const mockEvents: ProcessEvent[] = [
       session_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -220,8 +254,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.218Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -231,8 +263,12 @@ export const mockEvents: ProcessEvent[] = [
       entry_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -244,8 +280,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.218Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -254,13 +288,19 @@ export const mockEvents: ProcessEvent[] = [
       },
       group_leader: {
         pid: 3535,
+        user: {
+          name: 'vagrant',
+          id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         executable: '/usr/bin/vi',
         command_line: 'bash',
         interactive: true,
-        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727',
+        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -282,19 +322,187 @@ export const mockEvents: ProcessEvent[] = [
   {
     '@timestamp': '2021-11-23T15:25:05.202Z',
     user: {
-      name: '',
+      name: 'vagrant',
       id: '1000',
+    },
+    group: {
+      id: '1000',
+      name: 'vagrant',
     },
     process: {
       pid: 3535,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
       exit_code: 137,
       executable: '/usr/bin/vi',
       command_line: 'bash',
       interactive: true,
       entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3728',
       tty: {
-        descriptor: 0,
-        type: 'char_device',
+        char_device: {
+          major: 8,
+          minor: 1,
+        },
+      },
+      parent: {
+        pid: 2442,
+        user: {
+          name: 'vagrant',
+          id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        executable: '/usr/bin/bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: '2021-11-23T15:25:05.202Z',
+        tty: {
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      session_leader: {
+        pid: 2442,
+        user: {
+          name: 'vagrant',
+          id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: '2021-11-23T15:25:05.202Z',
+        tty: {
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      entry_leader: {
+        pid: 2442,
+        user: {
+          name: 'vagrant',
+          id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        executable: '/usr/bin/bash',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: '2021-11-23T15:25:05.202Z',
+        tty: {
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      group_leader: {
+        pid: 3535,
+        user: {
+          name: 'vagrant',
+          id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        exit_code: 137,
+        executable: '/usr/bin/vi',
+        command_line: 'bash',
+        interactive: true,
+        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3728',
+        tty: {
+          char_device: {
+            major: 8,
+            minor: 1,
+          },
+        },
+      },
+      start: '2021-11-23T15:25:05.202Z',
+      name: '',
+      args_count: 2,
+      args: ['vi', 'cmd/config.ini'],
+      working_directory: '/home/vagrant',
+    },
+    event: {
+      action: EventAction.end,
+      category: 'process',
+      kind: EventKind.event,
+    },
+    host: {
+      architecture: 'x86_64',
+      hostname: 'james-fleet-714-2',
+      id: '48c1b3f1ac5da4e0057fc9f60f4d1d5d',
+      ip: '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809',
+      mac: '42:01:0a:84:00:32',
+      name: 'james-fleet-714-2',
+      os: {
+        family: 'centos',
+        full: 'CentOS 7.9.2009',
+        kernel: '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 UTC 2021',
+        name: 'Linux',
+        platform: 'centos',
+        version: '7.9.2009',
+      },
+    },
+  },
+  {
+    '@timestamp': '2021-11-23T15:25:05.202Z',
+    user: {
+      name: '',
+      id: '1000',
+    },
+    group: {
+      id: '1000',
+      name: 'vagrant',
+    },
+    process: {
+      pid: 3536,
+      user: {
+        name: '',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
+      exit_code: 137,
+      executable: '/usr/bin/cat',
+      command_line: 'bash',
+      interactive: true,
+      entity_id: '7e4daeb2-4a4e-56c4-980e-f0dcfdbc3728',
+      tty: {
         char_device: {
           major: 8,
           minor: 1,
@@ -306,6 +514,10 @@ export const mockEvents: ProcessEvent[] = [
           name: '',
           id: '1000',
         },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         executable: '/usr/bin/bash',
         interactive: true,
         entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
@@ -315,8 +527,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:05.202Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -329,6 +539,10 @@ export const mockEvents: ProcessEvent[] = [
           name: '',
           id: '1000',
         },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         executable: '/usr/bin/bash',
         command_line: 'bash',
         interactive: true,
@@ -339,8 +553,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:05.202Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -353,6 +565,10 @@ export const mockEvents: ProcessEvent[] = [
           name: '',
           id: '1000',
         },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         executable: '/usr/bin/bash',
         command_line: 'bash',
         interactive: true,
@@ -363,8 +579,6 @@ export const mockEvents: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:05.202Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -372,15 +586,25 @@ export const mockEvents: ProcessEvent[] = [
         },
       },
       group_leader: {
-        pid: 3535,
-        exit_code: 137,
-        executable: '/usr/bin/vi',
+        pid: 2442,
+        user: {
+          name: '',
+          id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        executable: '/usr/bin/bash',
         command_line: 'bash',
         interactive: true,
-        entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3728',
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        name: '',
+        args: [],
+        args_count: 0,
+        working_directory: '/home/vagrant',
+        start: '2021-11-23T15:25:05.202Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -390,7 +614,7 @@ export const mockEvents: ProcessEvent[] = [
       start: '2021-11-23T15:25:05.202Z',
       name: '',
       args_count: 2,
-      args: ['vi', 'cmd/config.ini'],
+      args: ['cat'],
       working_directory: '/home/vagrant',
     },
     event: {
@@ -435,7 +659,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:04.218Z'),
+        original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
           action: 'exec',
         },
@@ -447,8 +671,20 @@ export const mockAlerts: ProcessEvent[] = [
       name: 'vagrant',
       id: '1000',
     },
+    group: {
+      id: '1000',
+      name: 'vagrant',
+    },
     process: {
       pid: 3535,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
       executable: '/usr/bin/vi',
       command_line: 'bash',
       interactive: true,
@@ -456,8 +692,12 @@ export const mockAlerts: ProcessEvent[] = [
       parent: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -469,8 +709,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.859Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -480,8 +718,12 @@ export const mockAlerts: ProcessEvent[] = [
       session_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -493,8 +735,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.859Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -504,8 +744,12 @@ export const mockAlerts: ProcessEvent[] = [
       entry_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -517,8 +761,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.859Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -528,8 +770,12 @@ export const mockAlerts: ProcessEvent[] = [
       group_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -541,8 +787,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.859Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -555,8 +799,6 @@ export const mockAlerts: ProcessEvent[] = [
       working_directory: '/home/vagrant',
       start: '2021-11-23T15:26:34.859Z',
       tty: {
-        descriptor: 0,
-        type: 'char_device',
         char_device: {
           major: 8,
           minor: 1,
@@ -602,7 +844,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:05.202Z'),
+        original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
           action: 'exit',
         },
@@ -614,8 +856,20 @@ export const mockAlerts: ProcessEvent[] = [
       name: 'vagrant',
       id: '1000',
     },
+    group: {
+      id: '1000',
+      name: 'vagrant',
+    },
     process: {
       pid: 3535,
+      user: {
+        name: 'vagrant',
+        id: '1000',
+      },
+      group: {
+        id: '1000',
+        name: 'vagrant',
+      },
       exit_code: 137,
       executable: '/usr/bin/vi',
       command_line: 'bash',
@@ -624,8 +878,12 @@ export const mockAlerts: ProcessEvent[] = [
       parent: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -637,8 +895,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.860Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -648,8 +904,12 @@ export const mockAlerts: ProcessEvent[] = [
       session_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -661,8 +921,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.860Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -672,8 +930,12 @@ export const mockAlerts: ProcessEvent[] = [
       entry_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -685,8 +947,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.860Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -696,8 +956,12 @@ export const mockAlerts: ProcessEvent[] = [
       group_leader: {
         pid: 2442,
         user: {
-          name: '',
+          name: 'vagrant',
           id: '1000',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
         },
         executable: '/usr/bin/bash',
         command_line: 'bash',
@@ -709,8 +973,6 @@ export const mockAlerts: ProcessEvent[] = [
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:26:34.860Z',
         tty: {
-          descriptor: 0,
-          type: 'char_device',
           char_device: {
             major: 8,
             minor: 1,
@@ -723,8 +985,6 @@ export const mockAlerts: ProcessEvent[] = [
       working_directory: '/home/vagrant',
       start: '2021-11-23T15:26:34.860Z',
       tty: {
-        descriptor: 0,
-        type: 'char_device',
         char_device: {
           major: 8,
           minor: 1,
@@ -762,20 +1022,247 @@ export const mockData: ProcessEventsPage[] = [
   },
 ];
 
+export const nullMockEvents: ProcessEvent[] = [
+  {
+    '@timestamp': null!,
+    user: {
+      name: null!,
+      id: null!,
+    },
+    group: {
+      id: null!,
+      name: null!,
+    },
+    process: {
+      pid: null!,
+      user: null!,
+      group: null!,
+      executable: null!,
+      command_line: null!,
+      interactive: null!,
+      entity_id: null!,
+      tty: null!,
+      parent: null!,
+      session_leader: null!,
+      entry_leader: null!,
+      group_leader: null!,
+      name: null!,
+      args_count: null!,
+      args: null!,
+      working_directory: null!,
+      start: null!,
+    },
+    event: {
+      action: null!,
+      category: null!,
+      kind: null!,
+    },
+    host: {
+      architecture: null!,
+      hostname: null!,
+      id: null!,
+      ip: null!,
+      mac: null!,
+      name: null!,
+      os: null!,
+    },
+  },
+];
+
+export const nullMockData: ProcessEventsPage[] = [
+  {
+    events: nullMockEvents,
+    cursor: undefined,
+  },
+];
+
+export const deepNullMockEvents: ProcessEvent[] = [
+  {
+    '@timestamp': null!,
+    event: {
+      action: null!,
+      category: null!,
+      kind: null!,
+    },
+    group: {
+      id: null!,
+      name: null!,
+    },
+    host: {
+      architecture: null!,
+      hostname: null!,
+      id: null!,
+      ip: null!,
+      mac: null!,
+      name: null!,
+      os: {
+        family: null!,
+        full: null!,
+        kernel: null!,
+        name: null!,
+        platform: null!,
+        version: null!,
+      },
+    },
+    process: {
+      args: [null!, null!],
+      args_count: null!,
+      command_line: null!,
+      entity_id: null!,
+      entry_leader: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        entry_meta: {
+          source: {
+            ip: null!,
+          },
+          type: null!,
+        },
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      executable: null!,
+      group_leader: {
+        args: [null!, null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      interactive: null!,
+      name: null!,
+      parent: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      pid: null!,
+      session_leader: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      start: null!,
+      tty: {
+        char_device: {
+          major: null!,
+          minor: null!,
+        },
+      },
+      working_directory: null!,
+    },
+    user: {
+      id: null!,
+      name: null!,
+    },
+  },
+];
+
+export const deepNullMockData: ProcessEventsPage[] = [
+  {
+    events: deepNullMockEvents,
+    cursor: undefined,
+  },
+];
+
 export const childProcessMock: Process = {
   id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bd',
   events: [],
+  alerts: [],
   children: [],
   autoExpand: false,
   searchMatched: null,
   parent: undefined,
   orphans: [],
   addEvent: (_) => undefined,
+  addAlert: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
   hasAlerts: () => false,
   getAlerts: () => [],
+  updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
   getOutput: () => '',
   getDetails: () =>
@@ -843,17 +1330,20 @@ export const childProcessMock: Process = {
 export const processMock: Process = {
   id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
   events: [],
+  alerts: [],
   children: [],
   autoExpand: false,
   searchMatched: null,
   parent: undefined,
   orphans: [],
   addEvent: (_) => undefined,
+  addAlert: (_) => undefined,
   clearSearch: () => undefined,
   getChildren: () => [],
   hasOutput: () => false,
   hasAlerts: () => false,
   getAlerts: () => [],
+  updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
   getOutput: () => '',
   getDetails: () =>
@@ -881,7 +1371,11 @@ export const processMock: Process = {
         },
       },
       user: {
-        id: '1',
+        id: '1000',
+        name: 'vagrant',
+      },
+      group: {
+        id: '1000',
         name: 'vagrant',
       },
       process: {
@@ -895,10 +1389,110 @@ export const processMock: Process = {
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         pid: 1,
-        parent: {} as ProcessFields,
-        session_leader: {} as ProcessFields,
-        entry_leader: {} as ProcessFields,
-        group_leader: {} as ProcessFields,
+        parent: {
+          pid: 2442,
+          user: {
+            name: 'vagrant',
+            id: '1000',
+          },
+          group: {
+            id: '1000',
+            name: 'vagrant',
+          },
+          executable: '/usr/bin/bash',
+          command_line: 'bash',
+          interactive: true,
+          entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+          name: '',
+          args: [],
+          args_count: 0,
+          working_directory: '/home/vagrant',
+          start: '2021-11-23T15:26:34.859Z',
+          tty: {
+            char_device: {
+              major: 8,
+              minor: 1,
+            },
+          },
+        } as ProcessFields,
+        session_leader: {
+          pid: 2442,
+          user: {
+            name: 'vagrant',
+            id: '1000',
+          },
+          group: {
+            id: '1000',
+            name: 'vagrant',
+          },
+          executable: '/usr/bin/bash',
+          command_line: 'bash',
+          interactive: true,
+          entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+          name: '',
+          args: [],
+          args_count: 0,
+          working_directory: '/home/vagrant',
+          start: '2021-11-23T15:26:34.859Z',
+          tty: {
+            char_device: {
+              major: 8,
+              minor: 1,
+            },
+          },
+        } as ProcessFields,
+        entry_leader: {
+          pid: 2442,
+          user: {
+            name: 'vagrant',
+            id: '1000',
+          },
+          group: {
+            id: '1000',
+            name: 'vagrant',
+          },
+          executable: '/usr/bin/bash',
+          command_line: 'bash',
+          interactive: true,
+          entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+          name: '',
+          args: [],
+          args_count: 0,
+          working_directory: '/home/vagrant',
+          start: '2021-11-23T15:26:34.859Z',
+          tty: {
+            char_device: {
+              major: 8,
+              minor: 1,
+            },
+          },
+        } as ProcessFields,
+        group_leader: {
+          pid: 2442,
+          user: {
+            name: 'vagrant',
+            id: '1000',
+          },
+          group: {
+            id: '1000',
+            name: 'vagrant',
+          },
+          executable: '/usr/bin/bash',
+          command_line: 'bash',
+          interactive: true,
+          entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+          name: '',
+          args: [],
+          args_count: 0,
+          working_directory: '/home/vagrant',
+          start: '2021-11-23T15:26:34.859Z',
+          tty: {
+            char_device: {
+              major: 8,
+              minor: 1,
+            },
+          },
+        } as ProcessFields,
       },
     } as ProcessEvent),
   isUserEntered: () => false,
@@ -914,29 +1508,33 @@ export const sessionViewBasicProcessMock: Process = {
 
 export const sessionViewAlertProcessMock: Process = {
   ...processMock,
-  events: [...mockEvents, ...mockAlerts],
+  events: mockEvents,
+  alerts: mockAlerts,
   hasAlerts: () => true,
-  getAlerts: () => mockEvents,
+  getAlerts: () => mockAlerts,
   hasExec: () => true,
   isUserEntered: () => true,
 };
 
 export const mockProcessMap = mockEvents.reduce(
   (processMap, event) => {
-    processMap[event.process.entity_id] = {
-      id: event.process.entity_id,
+    processMap[event.process!.entity_id!] = {
+      id: event.process!.entity_id!,
       events: [event],
+      alerts: [],
       children: [],
       parent: undefined,
       autoExpand: false,
       searchMatched: null,
       orphans: [],
       addEvent: (_) => undefined,
+      addAlert: (_) => undefined,
       clearSearch: () => undefined,
       getChildren: () => [],
       hasOutput: () => false,
       hasAlerts: () => false,
       getAlerts: () => [],
+      updateAlertsStatus: (_) => undefined,
       hasExec: () => false,
       getOutput: () => '',
       getDetails: () => event,

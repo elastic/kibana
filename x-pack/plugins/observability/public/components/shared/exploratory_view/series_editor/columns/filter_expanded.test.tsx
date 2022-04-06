@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
-import { mockUxSeries, mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUxSeries, mockAppDataView, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
@@ -18,7 +18,7 @@ describe('FilterExpanded', function () {
 
   it('render', async () => {
     const initSeries = { filters };
-    mockAppIndexPattern();
+    mockAppDataView();
 
     render(
       <FilterExpanded

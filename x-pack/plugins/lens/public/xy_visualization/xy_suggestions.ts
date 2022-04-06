@@ -16,10 +16,11 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, XYState, visualizationTypes } from './types';
-import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
+import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
+import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 const columnSortOrder = {
   document: 0,
@@ -44,6 +45,7 @@ export function getSuggestions({
   keptLayerIds,
   subVisualizationId,
   mainPalette,
+  isFromContext,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -71,7 +73,7 @@ export function getSuggestions({
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
-    table.columns.some((col) => col.operation.isStaticValue) ||
+    table.columns.some((col) => col.operation.isStaticValue && !isFromContext) ||
     // do not use suggestions with non-numeric metrics
     table.columns.some((col) => !col.operation.isBucketed && col.operation.dataType !== 'number')
   ) {
@@ -158,7 +160,8 @@ function flipSeriesType(seriesType: SeriesType) {
 
 function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentLayer =
-    currentState && currentState.layers.find(({ layerId }) => layerId === table.layerId);
+    currentState &&
+    getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
 
   const buckets = table.columns.filter((col) => col.operation.isBucketed);
   // reverse the buckets before prioritization to always use the most inner
@@ -416,7 +419,7 @@ function getSeriesType(
   const defaultType = 'bar_stacked';
 
   const oldLayer = getExistingLayer(currentState, layerId);
-  const oldLayerSeriesType = oldLayer ? oldLayer.seriesType : false;
+  const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
 
   const closestSeriesType =
     oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultType;
@@ -496,28 +499,35 @@ function buildSuggestion({
     splitBy = xValue;
     xValue = undefined;
   }
-  const existingLayer: XYLayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const existingLayer = getExistingLayer(currentState, layerId) || null;
   const accessors = yValues.map((col) => col.columnId);
-  const newLayer = {
-    ...existingLayer,
-    palette: mainPalette || ('palette' in existingLayer ? existingLayer.palette : undefined),
+  const newLayer: XYDataLayerConfig = {
+    ...(existingLayer || {}),
+    palette:
+      mainPalette ||
+      (existingLayer && 'palette' in existingLayer
+        ? (existingLayer as XYDataLayerConfig).palette
+        : undefined),
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
     splitAccessor: splitBy?.columnId,
     accessors,
     yConfig:
-      'yConfig' in existingLayer && existingLayer.yConfig
+      existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: layerTypes.DATA,
   };
 
   // Maintain consistent order for any layers that were saved
-  const keptLayers = currentState
+  const keptLayers: XYLayerConfig[] = currentState
     ? currentState.layers
         // Remove layers that aren't being suggested
-        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        .filter(
+          (layer) =>
+            keptLayerIds.includes(layer.layerId) || layer.layerType === layerTypes.ANNOTATIONS
+        )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))
         // Replace the seriesType on all previous layers
@@ -561,7 +571,8 @@ function buildSuggestion({
       yRight: true,
     },
     preferredSeriesType: seriesType,
-    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
+    layers:
+      existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {

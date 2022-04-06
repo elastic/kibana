@@ -18,7 +18,7 @@ import {
 } from '../../../detections/components/alerts_table/translations';
 import { ALERT_THRESHOLD_RESULT } from '../../../../common/field_maps/field_names';
 import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { getEnrichedFieldInfo, SummaryRow } from './helpers';
+import { getEnrichedFieldInfo, AlertSummaryRow } from './helpers';
 import { EventSummaryField, EnrichedFieldInfo } from './types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
@@ -37,6 +37,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
+  { id: 'kibana.alert.original_event.id', label: i18n.SOURCE_EVENT_ID },
 ];
 
 /**
@@ -226,12 +227,14 @@ export const getSummaryRows = ({
   timelineId,
   eventId,
   isDraggable = false,
+  isReadOnly = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
   isDraggable?: boolean;
+  isReadOnly?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -253,7 +256,7 @@ export const getSummaryRows = ({
   });
 
   return data != null
-    ? tableFields.reduce<SummaryRow[]>((acc, field) => {
+    ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
         const item = data.find(
           (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
         );
@@ -279,6 +282,7 @@ export const getSummaryRows = ({
             field,
           }),
           isDraggable,
+          isReadOnly,
         };
 
         if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {

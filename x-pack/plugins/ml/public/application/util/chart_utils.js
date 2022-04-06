@@ -13,56 +13,11 @@ import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/locator';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
-export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 export const ANNOTATION_SYMBOL_HEIGHT = 10;
+export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 
 const MAX_LABEL_WIDTH = 100;
-
-export function chartLimits(data = []) {
-  const domain = d3.extent(data, (d) => {
-    let metricValue = d.value;
-    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
-      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
-      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
-    }
-    return metricValue;
-  });
-  const limits = { max: domain[1], min: domain[0] };
-
-  if (limits.max === limits.min) {
-    limits.max = d3.max(data, (d) => {
-      if (d.typical) {
-        return Math.max(d.value, d.typical);
-      } else {
-        // If analysis with by and over field, and more than one cause,
-        // there will be no actual and typical value.
-        // TODO - produce a better visual for population analyses.
-        return d.value;
-      }
-    });
-    limits.min = d3.min(data, (d) => {
-      if (d.typical) {
-        return Math.min(d.value, d.typical);
-      } else {
-        // If analysis with by and over field, and more than one cause,
-        // there will be no actual and typical value.
-        // TODO - produce a better visual for population analyses.
-        return d.value;
-      }
-    });
-  }
-
-  // add padding of 5% of the difference between max and min
-  // if we ended up with the same value for both of them
-  if (limits.max === limits.min) {
-    const padding = limits.max * 0.05;
-    limits.max += padding;
-    limits.min -= padding;
-  }
-
-  return limits;
-}
 
 export function chartExtendedLimits(data = [], functionDescription) {
   let _min = Infinity;

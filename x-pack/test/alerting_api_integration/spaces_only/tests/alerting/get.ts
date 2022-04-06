@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const getTestUtils = (
@@ -22,7 +22,7 @@ const getTestUtils = (
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -54,7 +54,9 @@ const getTestUtils = (
         created_at: response.body.created_at,
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
-        ...(describeType === 'internal' ? { monitoring: response.body.monitoring } : {}),
+        ...(describeType === 'internal'
+          ? { monitoring: response.body.monitoring, snooze_end_time: response.body.snooze_end_time }
+          : {}),
       });
       expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -64,7 +66,7 @@ const getTestUtils = (
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -113,7 +115,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 

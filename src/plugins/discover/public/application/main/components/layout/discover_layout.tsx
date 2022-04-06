@@ -25,7 +25,7 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { generateFilters } from '../../../../../../data/public';
-import { DataViewField } from '../../../../../../data/common';
+import { DataViewField } from '../../../../../../data_views/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -48,7 +48,7 @@ import {
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DataViewType, DataView } from '../../../../../../data_views/common';
+import { DataViewType, DataView } from '../../../../../../data_views/public';
 
 /**
  * Local storage key for sidebar persistence state

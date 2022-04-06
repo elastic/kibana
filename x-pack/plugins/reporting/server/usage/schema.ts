@@ -12,6 +12,8 @@ import {
   ByAppCounts,
   JobTypes,
   LayoutCounts,
+  MetricsPercentiles,
+  MetricsStats,
   RangeStats,
   ReportingUsageType,
   SizePercentiles,
@@ -49,22 +51,88 @@ const sizesSchema: MakeSchemaFrom<SizePercentiles> = {
   '99.0': { type: 'long' },
 };
 
+const metricsPercentilesSchema: MakeSchemaFrom<MetricsPercentiles> = {
+  '50.0': { type: 'long' },
+  '75.0': { type: 'long' },
+  '95.0': { type: 'long' },
+  '99.0': { type: 'long' },
+};
+
+const metricsSchemaCsv: MakeSchemaFrom<Pick<MetricsStats, 'csv_rows'>> = {
+  csv_rows: metricsPercentilesSchema,
+};
+
+const metricsSchemaPng: MakeSchemaFrom<Pick<MetricsStats, 'png_cpu' | 'png_memory'>> = {
+  png_cpu: metricsPercentilesSchema,
+  png_memory: metricsPercentilesSchema,
+};
+
+const metricsSchemaPdf: MakeSchemaFrom<Pick<MetricsStats, 'pdf_cpu' | 'pdf_memory' | 'pdf_pages'>> =
+  {
+    pdf_cpu: metricsPercentilesSchema,
+    pdf_memory: metricsPercentilesSchema,
+    pdf_pages: metricsPercentilesSchema,
+  };
+
+const errorCodesSchemaCsv: MakeSchemaFrom<JobTypes['csv_searchsource']['error_codes']> = {
+  authentication_expired_error: { type: 'long' },
+  queue_timeout_error: { type: 'long' },
+  unknown_error: { type: 'long' },
+  kibana_shutting_down_error: { type: 'long' },
+};
+const errorCodesSchemaPng: MakeSchemaFrom<JobTypes['PNGV2']['error_codes']> = {
+  authentication_expired_error: { type: 'long' },
+  queue_timeout_error: { type: 'long' },
+  unknown_error: { type: 'long' },
+  kibana_shutting_down_error: { type: 'long' },
+  browser_could_not_launch_error: { type: 'long' },
+  browser_unexpectedly_closed_error: { type: 'long' },
+  browser_screenshot_error: { type: 'long' },
+};
+const errorCodesSchemaPdf: MakeSchemaFrom<JobTypes['printable_pdf_v2']['error_codes']> = {
+  pdf_worker_out_of_memory_error: { type: 'long' },
+  authentication_expired_error: { type: 'long' },
+  queue_timeout_error: { type: 'long' },
+  unknown_error: { type: 'long' },
+  kibana_shutting_down_error: { type: 'long' },
+  browser_could_not_launch_error: { type: 'long' },
+  browser_unexpectedly_closed_error: { type: 'long' },
+  browser_screenshot_error: { type: 'long' },
+};
+
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
-  sizes: sizesSchema,
+  output_size: sizesSchema,
   app: appCountsSchema,
-  layout: layoutCountsSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
-  csv_searchsource: availableTotalSchema,
-  csv_searchsource_immediate: availableTotalSchema,
-  PNG: availableTotalSchema,
-  PNGV2: availableTotalSchema,
-  printable_pdf: availableTotalSchema,
-  printable_pdf_v2: availableTotalSchema,
+  csv_searchsource: {
+    ...availableTotalSchema,
+    metrics: metricsSchemaCsv,
+    error_codes: errorCodesSchemaCsv,
+  },
+  csv_searchsource_immediate: {
+    ...availableTotalSchema,
+    metrics: metricsSchemaCsv,
+    error_codes: errorCodesSchemaCsv,
+  },
+  PNG: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
+  PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
+  printable_pdf: {
+    ...availableTotalSchema,
+    layout: layoutCountsSchema,
+    metrics: metricsSchemaPdf,
+    error_codes: errorCodesSchemaPdf,
+  },
+  printable_pdf_v2: {
+    ...availableTotalSchema,
+    layout: layoutCountsSchema,
+    metrics: metricsSchemaPdf,
+    error_codes: errorCodesSchemaPdf,
+  },
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {

@@ -11,18 +11,18 @@ import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
-  SanitizedAlert,
+  SanitizedRule,
 } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   alertTypeId,
   createdBy,
   updatedBy,
@@ -35,6 +35,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   executionStatus,
   actions,
   scheduledTaskId,
+  snoozeEndTime,
   ...rest
 }) => ({
   ...rest,
@@ -47,6 +48,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
+  // Remove this object spread boolean check after snoozeEndTime is added to the public API
+  ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),

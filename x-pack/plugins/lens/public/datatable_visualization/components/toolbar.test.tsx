@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
@@ -13,6 +13,19 @@ import { FramePublicAPI, VisualizationToolbarProps } from '../../types';
 import { ToolbarButton } from 'src/plugins/kibana_react/public';
 import { ReactWrapper } from 'enzyme';
 import { PagingState } from '../../../common/expressions';
+import { EuiButtonGroup, EuiRange } from '@elastic/eui';
+
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      return () => '';
+    },
+  };
+});
 
 class Harness {
   wrapper: ReactWrapper;
@@ -25,12 +38,33 @@ class Harness {
     this.wrapper.find(ToolbarButton).simulate('click');
   }
 
-  public get fitRowToContentSwitch() {
-    return this.wrapper.find('EuiSwitch[data-test-subj="lens-legend-auto-height-switch"]');
+  public get rowHeight() {
+    return this.wrapper.find('[data-test-subj="lnsRowHeightSettings"]').find(EuiButtonGroup);
   }
 
-  toggleFitRowToContent() {
-    this.fitRowToContentSwitch.prop('onChange')!({} as FormEvent);
+  public get headerRowHeight() {
+    return this.wrapper.find('[data-test-subj="lnsHeaderHeightSettings"]').find(EuiButtonGroup);
+  }
+
+  changeRowHeight(newMode: 'single' | 'auto' | 'custom') {
+    this.rowHeight.prop('onChange')!(newMode);
+  }
+
+  changeHeaderRowHeight(newMode: 'single' | 'auto' | 'custom') {
+    this.headerRowHeight.prop('onChange')!(newMode);
+  }
+
+  public get rowHeightLines() {
+    return this.wrapper.find(EuiRange);
+  }
+
+  changeRowHeightLines(lineCount: number) {
+    this.rowHeightLines.prop('onChange')!(
+      {
+        currentTarget: { value: lineCount },
+      } as unknown as ChangeEvent<HTMLInputElement>,
+      true
+    );
   }
 
   public get paginationSwitch() {
@@ -56,7 +90,8 @@ describe('datatable toolbar', () => {
       setState: jest.fn(),
       frame: {} as FramePublicAPI,
       state: {
-        fitRowToContent: false,
+        rowHeight: 'single',
+        headerRowHeight: 'single',
       } as DatatableVisualizationState,
     };
 
@@ -66,36 +101,66 @@ describe('datatable toolbar', () => {
   it('should reflect state in the UI', async () => {
     harness.togglePopover();
 
-    expect(harness.fitRowToContentSwitch.prop('checked')).toBe(false);
+    expect(harness.rowHeight.prop('idSelected')).toBe('single');
+    expect(harness.headerRowHeight.prop('idSelected')).toBe('single');
     expect(harness.paginationSwitch.prop('checked')).toBe(false);
 
     harness.wrapper.setProps({
       state: {
-        fitRowToContent: true,
+        rowHeight: 'auto',
         paging: defaultPagingState,
       },
     });
 
-    expect(harness.fitRowToContentSwitch.prop('checked')).toBe(true);
+    expect(harness.rowHeight.prop('idSelected')).toBe('auto');
     expect(harness.paginationSwitch.prop('checked')).toBe(true);
   });
 
-  it('should toggle fit-row-to-content', async () => {
+  it('should change row height to "Auto" mode', async () => {
     harness.togglePopover();
 
-    harness.toggleFitRowToContent();
+    harness.changeRowHeight('auto');
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
-      fitRowToContent: true,
+      headerRowHeight: 'single',
+      rowHeight: 'auto',
+      rowHeightLines: undefined,
     });
 
-    harness.wrapper.setProps({ state: { fitRowToContent: true } }); // update state manually
-    harness.toggleFitRowToContent(); // turn it off
+    harness.changeRowHeight('single'); // turn it off
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(2);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(2, {
-      fitRowToContent: false,
+      rowHeight: 'single',
+      headerRowHeight: 'single',
+      rowHeightLines: 1,
+    });
+  });
+
+  it('should change row height to "Custom" mode', async () => {
+    harness.togglePopover();
+
+    harness.changeRowHeight('custom');
+
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
+      rowHeight: 'custom',
+      headerRowHeight: 'single',
+      rowHeightLines: 2,
+    });
+  });
+
+  it('should change header height to "Custom" mode', async () => {
+    harness.togglePopover();
+
+    harness.changeHeaderRowHeight('custom');
+
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
+      rowHeight: 'single',
+      headerRowHeight: 'custom',
+      headerRowHeightLines: 2,
     });
   });
 
@@ -107,18 +172,20 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(1, {
       paging: defaultPagingState,
-      fitRowToContent: false,
+      rowHeight: 'single',
+      headerRowHeight: 'single',
     });
 
     // update state manually
     harness.wrapper.setProps({
-      state: { fitRowToContent: false, paging: defaultPagingState },
+      state: { rowHeight: 'single', headerRowHeight: 'single', paging: defaultPagingState },
     });
     harness.togglePagination(); // turn it off. this should disable pagination but preserve the default page size
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(2);
     expect(defaultProps.setState).toHaveBeenNthCalledWith(2, {
-      fitRowToContent: false,
+      rowHeight: 'single',
+      headerRowHeight: 'single',
       paging: { ...defaultPagingState, enabled: false },
     });
   });

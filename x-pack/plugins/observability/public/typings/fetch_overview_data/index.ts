@@ -60,6 +60,11 @@ export interface InfraMetricsHasDataResponse {
   indices: string;
 }
 
+export interface InfraLogsHasDataResponse {
+  hasData: boolean;
+  indices: string;
+}
+
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
@@ -155,7 +160,7 @@ export interface ObservabilityFetchDataResponse {
 export interface ObservabilityHasDataResponse {
   apm: APMHasDataResponse;
   infra_metrics: InfraMetricsHasDataResponse;
-  infra_logs: boolean;
+  infra_logs: InfraLogsHasDataResponse;
   synthetics: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }

@@ -1,8 +1,8 @@
 [[sharing-saved-objects]]
-== Sharing Saved Objects
+== Sharing saved objects
 
-This guide describes the Sharing Saved Objects effort, and the breaking changes that plugin developers need to be aware of for the planned
-8.0 release of {kib}.
+This guide describes the "Sharing saved objects" effort, and the breaking changes that plugin developers need to be aware of for the planned
+8.0 release of {kib}. It also describes how developers can take advantage of this feature.
 
 [[sharing-saved-objects-overview]]
 === Overview
@@ -28,6 +28,12 @@ Ideally, most types of objects in {kib} will eventually be _shareable_; however,
 <<sharing-saved-objects-faq-share-capable-vs-shareable,_share-capable_ objects>> as a stepping stone for plugin developers to fully support
 this feature.
 
+Implementing a shareable saved object type is done in two phases:
+
+- **Phase 1**: Convert an existing isolated object type into a share-capable one. Keep reading!
+- **Phase 2**: Switch an existing share-capable object type into a shareable one, _or_ create a new shareable object type. Jump to the
+  <<sharing-saved-objects-phase-2>>!
+
 [[sharing-saved-objects-breaking-changes]]
 === Breaking changes
 
@@ -49,21 +55,21 @@ change the IDs of any existing objects that are not in the Default space. Changi
 TIP: External plugins can also convert their objects, but <<sharing-saved-objects-faq-external-plugins,they don't have to do so before the
 8.0 release>>.
 
-[[sharing-saved-objects-dev-flowchart]]
-=== Developer Flowchart
+[[sharing-saved-objects-phase-1]]
+=== Phase 1 developer flowchart
 
 If you're still reading this page, you're probably developing a {kib} plugin that registers an object type, and you want to know what steps
 you need to take to prepare for the 8.0 release and mitigate any breaking changes! Depending on how you are using saved objects, you may
 need to take up to 5 steps, which are detailed in separate sections below. Refer to this flowchart:
 
-image::images/sharing-saved-objects-dev-flowchart.png["Sharing Saved Objects developer flowchart"]
+image::images/sharing-saved-objects-phase-1-dev-flowchart.png["Sharing Saved Objects phase 1 - developer flowchart"]
 
 TIP: There is a proof-of-concept (POC) pull request to demonstrate these changes. It first adds a simple test plugin that allows users to
 create and view notes. Then, it goes through the steps of the flowchart to convert the isolated "note" objects to become share-capable. As
 you read this guide, you can https://github.com/elastic/kibana/pull/107256[follow along in the POC] to see exactly how to take these steps.
 
 [[sharing-saved-objects-q1]]
-=== Question 1
+==== Question 1
 
 > *Do these objects contain links to other objects?*
 
@@ -71,7 +77,7 @@ If your objects store _any_ links to other objects (with an object type/ID), you
 continue functioning after the 8.0 upgrade.
 
 [[sharing-saved-objects-step-1]]
-=== Step 1
+==== Step 1
 
 ⚠️ This step *must* be completed no later than the 7.16 release. ⚠️
 
@@ -117,7 +123,7 @@ migrations: {
 NOTE: Reminder, don't forget to add unit tests and integration tests!
 
 [[sharing-saved-objects-q2]]
-=== Question 2
+==== Question 2
 
 > *Are there any "deep links" to these objects?*
 
@@ -130,7 +136,7 @@ Note that some URLs may contain <<sharing-saved-objects-faq-multiple-deep-link-o
 Dashboard _and_ a filter for an Index Pattern.
 
 [[sharing-saved-objects-step-2]]
-=== Step 2
+==== Step 2
 
 ⚠️ This step will preferably be completed in the 7.16 release; it *must* be completed no later than the 8.0 release. ⚠️
 
@@ -158,12 +164,13 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 
 The
 https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
-interface] has three fields, summarized below:
+interface] has four fields, summarized below:
 
 * `saved_object` - The saved object that was found.
 * `outcome` - One of the following values: `'exactMatch' | 'aliasMatch' | 'conflict'`
 * `alias_target_id` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It means that a legacy URL alias with this ID points
   to an object with a _different_ ID.
+* `alias_purpose` - This is defined if the outcome is `'aliasMatch'` or `'conflict'`. It describes why the legacy URL alis was created.
 
 The SavedObjectsClient is available both on the server-side and the client-side. You may be fetching the object on the server-side via a
 custom HTTP route, or you may be fetching it on the client-side directly. Either way, the `outcome` and `alias_target_id` fields need to be
@@ -173,7 +180,7 @@ NOTE: You don't need to use `resolve()` everywhere, <<sharing-saved-objects-faq-
 links>>!
 
 [[sharing-saved-objects-step-3]]
-=== Step 3
+==== Step 3
 
 ⚠️ This step will preferably be completed in the 7.16 release; it *must* be completed no later than the 8.0 release. ⚠️
 
@@ -205,7 +212,7 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 ]
 ```
 
-3. Update your Plugin class implementation to depend on the Core HTTP service and Spaces plugin API:
+3. Update your Plugin class implementation to depend on the Spaces plugin API:
 +
 ```ts
 interface PluginStartDeps {
@@ -217,11 +224,10 @@ export class MyPlugin implements Plugin<{}, {}, {}, PluginStartDeps> {
     core.application.register({
       ...
       async mount(appMountParams: AppMountParameters) {
-        const [coreStart, pluginStartDeps] = await core.getStartServices();
-        const { http } = coreStart;
+        const [, pluginStartDeps] = await core.getStartServices();
         const { spaces: spacesApi } = pluginStartDeps;
         ...
-        // pass `http` and `spacesApi` to your app when you render it
+        // pass `spacesApi` to your app when you render it
       },
     });
     ...
@@ -236,12 +242,18 @@ if (spacesApi && resolveResult.outcome === 'aliasMatch') {
   // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
   const newObjectId = resolveResult.alias_target_id!; // This is always defined if outcome === 'aliasMatch'
   const newPath = `/this/page/${newObjectId}${window.location.hash}`; // Use the *local* path within this app (do not include the "/app/appId" prefix)
-  await spacesApi.ui.redirectLegacyUrl(newPath, OBJECT_NOUN);
+  await spacesApi.ui.redirectLegacyUrl({
+    path: newPath,
+    aliasPurpose: resolveResult.alias_purpose, <1>
+    objectNoun: OBJECT_NOUN <2>
+  });
   return;
 }
 ```
-_Note that `OBJECT_NOUN` is optional, it just changes "object" in the toast to whatever you specify -- you may want the toast to say
-"dashboard" or "index pattern" instead!_
+<1> The `aliasPurpose` field is required as of 8.2, because the API response now includes the reason the alias was created to inform the
+    client whether a toast should be shown or not.
+<2> The `objectNoun` field is optional. It just changes "object" in the toast to whatever you specify -- you may want the toast to say
+    "dashboard" or "data view" instead.
 
 5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
 +
@@ -286,7 +298,7 @@ different outcomes.]
 NOTE: Reminder, don't forget to add unit tests and functional tests!
 
 [[sharing-saved-objects-step-4]]
-=== Step 4
+==== Step 4
 
 ⚠️ This step *must* be completed in the 8.0 release (no earlier and no later). ⚠️
 
@@ -308,7 +320,7 @@ TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#use
 NOTE: Reminder, don't forget to add integration tests!
 
 [[sharing-saved-objects-q3]]
-=== Question 3
+==== Question 3
 
 > *Are these objects encrypted?*
 
@@ -316,7 +328,7 @@ Saved objects can optionally be <<xpack-security-secure-saved-objects,encrypted>
 object types are encrypted, so most plugin developers will not be affected.
 
 [[sharing-saved-objects-step-5]]
-=== Step 5
+==== Step 5
 
 ⚠️ This step *must* be completed in the 8.0 release (no earlier and no later). ⚠️
 
@@ -334,12 +346,145 @@ image::images/sharing-saved-objects-step-5.png["Sharing Saved Objects ESO migrat
 
 NOTE: Reminder, don't forget to add unit tests and integration tests!
 
+[[sharing-saved-objects-phase-2]]
+=== Phase 2 developer flowchart
+
+This section covers switching a share-capable object type into a shareable one _or_ creating a new shareable saved object type. Refer to
+this flowchart:
+
+image::images/sharing-saved-objects-phase-2-dev-flowchart.png["Sharing Saved Objects phase 2 - developer flowchart"]
+
 [[sharing-saved-objects-step-6]]
-=== Step 6
+==== Step 6
 
-> *Update your code to make your objects shareable*
+> *Update your _server-side code_ to mark these objects as "shareable"*
 
-_This is not required for the 8.0 release; this additional information will be added in the near future!_
+When you register your object, you need to set the proper `namespaceType`. If you have an existing object type that is "share-capable", you
+can simply change it:
+
+image::images/sharing-saved-objects-step-6.png["Sharing Saved Objects registration (shareable)"]
+
+[[sharing-saved-objects-step-7]]
+==== Step 7
+
+> *Update saved object delete API usage to handle multiple spaces*
+
+If an object is shared to multiple spaces, it cannot be deleted without using the
+https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsdeleteoptions.md[`force`
+delete option]. You should always be aware when a saved object exists in multiple spaces, and you should warn users in that case.
+
+If your UI allows users to delete your objects, you can define a warning message like this:
+
+```tsx
+const { namespaces, id } = savedObject;
+const warningMessage =
+  namespaces.length > 1 || namespaces.includes('*') ? (
+    <FormattedMessage
+      id="myPlugin.deleteObjectWarning"
+      defaultMessage="When you delete this object, you remove it from every space it is shared in. You can't undo this action."
+    />
+  ) : null;
+```
+
+The <<data-views,Data Views page>> in <<management>> uses a
+https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx[similar
+approach] to show a warning in its delete confirmation modal:
+
+image::images/sharing-saved-objects-step-7.png["Sharing Saved Objects deletion warning"]
+
+[[sharing-saved-objects-step-8]]
+==== Step 8
+
+> *Allow users to view and change assigned spaces for your objects*
+
+Users will need a way to view what spaces your objects are currently assigned to and share them to additional spaces. You can accomplish
+this in two ways, and many consumers will want to implement both:
+
+1. (Highly recommended) Add reusable components to your application, making it "space-aware". The space-related components are exported by
+   the spaces plugin, and you can use them in your own application.
++
+First, make sure your page contents are wrapped in a
+https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/spaces_context/types.ts[spaces context provider]:
++
+```tsx
+const ContextWrapper = useMemo(
+  () =>
+    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+  [spacesApi]
+);
+
+...
+
+return (
+  <ContextWrapper feature='my-feature-id'>
+    <!-- your page contents here -->
+  </ContextWrapper>
+);
+```
++
+Second, display a https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/space_list/types.ts[list of spaces] for an
+object, and third, show a
+https://github.com/elastic/kibana/blob/{branch}/x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts[flyout] for the user to
+edit the object's assigned spaces. You may want to follow the example of the <<data-views,Data Views page>> and
+https://github.com/elastic/kibana/blob/{branch}/src/plugins/data_view_management/public/components/index_pattern_table/spaces_list.tsx[combine
+these into a single component] so that the space list can be clicked to show the flyout:
++
+```tsx
+const [showFlyout, setShowFlyout] = useState(false);
+const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [spacesApi]);
+
+const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
+  savedObjectTarget: {
+    type: myObject.type,
+    namespaces: myObject.namespaces,
+    id: myObject.id,
+    icon: 'beaker', <1>
+    title: myObject.attributes.title, <2>
+    noun: OBJECT_NOUN, <3>
+  },
+  onUpdate: () => { /* callback when the object is updated */ },
+  onClose: () => setShowFlyout(false),
+};
+
+const canAssignSpaces = !capabilities || !!capabilities.savedObjectsManagement.shareIntoSpace;
+const clickProperties = canAssignSpaces
+  ? { cursorStyle: 'pointer', listOnClick: () => setShowFlyout(true) }
+  : { cursorStyle: 'not-allowed' };
+return (
+  <>
+    <LazySpaceList
+      namespaces={spaceIds}
+      displayLimit={8}
+      behaviorContext="outside-space" <4>
+      {...clickProperties}
+    />
+    {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
+  </>
+);
+```
+<1> The `icon` field is optional. It specifies an https://elastic.github.io/eui/#/display/icons[EUI icon] type that will be displayed in the
+    flyout header.
+<2> The `title` field is optional. It specifies a human-readable identifier for your object that will be displayed in the flyout header.
+<3> The `noun` field is optional. It just changes "object" in the flyout to whatever you specify -- you may want the flyout to say
+    "dashboard" or "data view" instead.
+<4> The `behaviorContext` field is optional. It controls how the space list is displayed. When using an `"outside-space"` behavior context,
+    the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a
+    `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
+
+2. Allow users to access your objects in the <<managing-saved-objects,Saved Objects Management page>> in <<management>>. You can do this by
+   ensuring that your objects are marked as
+   https://github.com/elastic/kibana/blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectstypemanagementdefinition.md[importable and exportable] in your <<saved-objects-type-registration,saved object type registration>>:
++
+```ts
+name: 'my-object-type',
+management: {
+  isImportableAndExportable: true,
+},
+...
+```
+If you do this, then your objects will be visible in the <<managing-saved-objects,Saved Objects Management page>>, where users can assign
+them to multiple spaces.
 
 [[sharing-saved-objects-faq]]
 === Frequently asked questions (FAQ)

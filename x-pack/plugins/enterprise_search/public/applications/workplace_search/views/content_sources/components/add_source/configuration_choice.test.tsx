@@ -9,14 +9,10 @@ import { mockKibanaValues, setMockValues } from '../../../../../__mocks__/kea_lo
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { EuiText, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
-import {
-  PersonalDashboardLayout,
-  WorkplaceSearchPageTemplate,
-} from '../../../../components/layout';
 import { staticSourceData } from '../../source_data';
 
 import { ConfigurationChoice } from './configuration_choice';
@@ -28,6 +24,9 @@ describe('ConfigurationChoice', () => {
   };
   const mockValues = {
     isOrganization: true,
+    sourceConfigData: {
+      categories: [],
+    },
   };
 
   beforeEach(() => {
@@ -35,38 +34,29 @@ describe('ConfigurationChoice', () => {
     jest.clearAllMocks();
   });
 
-  describe('layout', () => {
-    it('renders the default workplace search layout when on an organization view', () => {
-      setMockValues({ ...mockValues, isOrganization: true });
-      const wrapper = shallow(<ConfigurationChoice sourceData={staticSourceData[1]} />);
-
-      expect(wrapper.type()).toEqual(WorkplaceSearchPageTemplate);
-    });
-
-    it('renders the personal dashboard layout when not in an organization', () => {
-      setMockValues({ ...mockValues, isOrganization: false });
-      const wrapper = shallow(<ConfigurationChoice sourceData={staticSourceData[1]} />);
-
-      expect(wrapper.type()).toEqual(PersonalDashboardLayout);
-    });
-  });
-
   it('renders internal connector if available', () => {
-    const wrapper = shallow(<ConfigurationChoice {...{ ...props }} />);
+    const wrapper = mount(<ConfigurationChoice {...{ ...props }} />);
 
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find('EuiCard')).toHaveLength(1);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
   it('should navigate to internal connector on internal connector click', () => {
-    const wrapper = shallow(<ConfigurationChoice {...props} />);
+    const wrapper = mount(<ConfigurationChoice {...props} />);
     const button = wrapper.find(EuiButton);
     button.simulate('click');
     expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/box/internal/');
   });
+  it('should call prop function when provided on internal connector click', () => {
+    const advanceSpy = jest.fn();
+    const wrapper = mount(<ConfigurationChoice {...{ ...props, goToInternalStep: advanceSpy }} />);
+    const button = wrapper.find(EuiButton);
+    button.simulate('click');
+    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(advanceSpy).toHaveBeenCalled();
+  });
 
   it('renders external connector if available', () => {
-    const wrapper = shallow(
+    const wrapper = mount(
       <ConfigurationChoice
         {...{
           ...props,
@@ -79,12 +69,11 @@ describe('ConfigurationChoice', () => {
       />
     );
 
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find('EuiCard')).toHaveLength(1);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
   it('should navigate to external connector on external connector click', () => {
-    const wrapper = shallow(
+    const wrapper = mount(
       <ConfigurationChoice
         {...{
           ...props,
@@ -102,7 +91,7 @@ describe('ConfigurationChoice', () => {
   });
 
   it('renders custom connector if available', () => {
-    const wrapper = shallow(
+    const wrapper = mount(
       <ConfigurationChoice
         {...{
           ...props,
@@ -116,12 +105,11 @@ describe('ConfigurationChoice', () => {
       />
     );
 
-    expect(wrapper.find('EuiPanel')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find('EuiCard')).toHaveLength(1);
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
-  it('should navigate to custom connector on internal connector click', () => {
-    const wrapper = shallow(
+  it('should navigate to custom connector on custom connector click', () => {
+    const wrapper = mount(
       <ConfigurationChoice
         {...{
           ...props,

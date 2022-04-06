@@ -13,7 +13,7 @@ import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { createStartContractMock } from '../__mocks__/start_contract';
 import { savedSearchMock } from '../__mocks__/saved_search';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data_views/public';
 import { createFilterManagerMock } from 'src/plugins/data/public/query/filter_manager/filter_manager.mock';
 import { ViewMode } from 'src/plugins/embeddable/public';
 

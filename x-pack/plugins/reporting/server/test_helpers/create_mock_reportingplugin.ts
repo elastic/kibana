@@ -16,7 +16,6 @@ import {
   loggingSystemMock,
   statusServiceMock,
 } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
@@ -118,6 +117,16 @@ export const createMockConfigSchema = (
     roles: {
       enabled: false,
       ...overrides.roles,
+    },
+    capture: {
+      maxAttempts: 1,
+      loadDelay: 1,
+      timeouts: {
+        openUrl: 100,
+        renderComplete: 100,
+        waitForElements: 100,
+      },
+      zoom: 1,
     },
   } as ReportingConfigType;
 };

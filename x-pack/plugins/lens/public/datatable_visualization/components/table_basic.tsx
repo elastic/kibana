@@ -255,6 +255,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [firstTable, isNumericMap, columnConfig]);
 
+  const headerRowHeight = props.args.headerRowHeight ?? 'single';
+  const headerRowLines = props.args.headerRowHeightLines ?? 1;
+
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
@@ -268,7 +271,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         formatFactory,
         onColumnResize,
         onColumnHide,
-        alignments
+        alignments,
+        headerRowHeight,
+        headerRowLines
       ),
     [
       bucketColumns,
@@ -282,6 +287,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       onColumnResize,
       onColumnHide,
       alignments,
+      headerRowHeight,
+      headerRowLines,
     ]
   );
 
@@ -334,9 +341,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         DataContext,
         props.uiSettings,
-        props.args.fitRowToContent
+        props.args.fitRowToContent,
+        props.args.rowHeightLines
       ),
-    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
+    [
+      formatters,
+      columnConfig,
+      props.uiSettings,
+      props.args.fitRowToContent,
+      props.args.rowHeightLines,
+    ]
   );
 
   const columnVisibility = useMemo(
@@ -414,13 +428,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
-          rowHeightsOptions={
-            props.args.fitRowToContent
+          rowHeightsOptions={{
+            defaultHeight: props.args.fitRowToContent
+              ? 'auto'
+              : props.args.rowHeightLines
               ? {
-                  defaultHeight: 'auto',
+                  lineCount: props.args.rowHeightLines,
                 }
-              : undefined
-          }
+              : undefined,
+          }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}

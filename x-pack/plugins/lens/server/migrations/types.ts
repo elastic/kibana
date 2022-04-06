@@ -7,6 +7,7 @@
 
 import type { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import type { CustomPaletteParams, LayerType, PersistableFilter } from '../../common';
@@ -246,3 +247,14 @@ export type VisState716 =
   | {
       palette?: PaletteOutput<CustomPaletteParams>;
     };
+
+// Datatable only
+export interface VisState810 {
+  fitRowToContent?: boolean;
+}
+
+// Datatable only
+export interface VisState820 {
+  rowHeight: 'auto' | 'single' | 'custom';
+  rowHeightLines: number;
+}

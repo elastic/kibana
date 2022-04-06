@@ -15,7 +15,8 @@ export const getServiceLocationsRoute: UMRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ server }): Promise<any> => {
     if (server.syntheticsService.locations.length > 0) {
-      return { locations: server.syntheticsService.locations };
+      const { throttling, locations } = server.syntheticsService;
+      return { throttling, locations };
     }
 
     return getServiceLocations(server);

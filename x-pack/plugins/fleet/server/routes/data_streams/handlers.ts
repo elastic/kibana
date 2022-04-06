@@ -37,13 +37,6 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-interface ESDataStreamStats {
-  data_stream: string;
-  backing_indices: number;
-  store_size_bytes: number;
-  maximum_timestamp: number;
-}
-
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -60,12 +53,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
       getPackageSavedObjects(context.core.savedObjects.client),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
+    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -127,6 +120,9 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
+        // `store_size` should be available from ES due to ?human=true flag
+        // but fallback to bytes just in case
+        size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
       };
 

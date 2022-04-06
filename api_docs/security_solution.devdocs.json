@@ -62,7 +62,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly usersEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly securityRulesCancelEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; }"
+              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly usersEnabled: boolean; readonly detectionResponseEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly securityRulesCancelEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false
@@ -302,7 +302,7 @@
           "PinnedEvent",
           ">; resolveTimelineConfig?: ",
           "ResolveTimelineConfig",
-          " | undefined; showSaveModal?: boolean | undefined; savedQueryId?: string | null | undefined; show: boolean; status: ",
+          " | undefined; showSaveModal?: boolean | undefined; savedQueryId?: string | null | undefined; sessionViewId: string | null; show: boolean; status: ",
           "TimelineStatus",
           "; updated?: number | undefined; updatedBy?: string | null | undefined; isSaving: boolean; version: string | null; initialized?: boolean | undefined; }"
         ],
@@ -887,7 +887,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ metricsEntitiesEnabled: boolean; ruleRegistryEnabled: boolean; tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; usersEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; securityRulesCancelEnabled: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; previewTelemetryUrlEnabled: boolean; }>; }"
+          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ metricsEntitiesEnabled: boolean; ruleRegistryEnabled: boolean; tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; usersEnabled: boolean; detectionResponseEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; riskyUsersEnabled: boolean; securityRulesCancelEnabled: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,

@@ -128,10 +128,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionNameProductId = 'GET /api/product/:id';
 
         await synthtraceEsClient.index([
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductList)
                 .timestamp(timestamp)
@@ -139,10 +139,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_ERROR_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductList)
                 .duration(1000)
@@ -150,10 +150,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .failure()
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductId)
                 .timestamp(timestamp)
@@ -161,10 +161,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .success()
                 .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_ID_ERROR_RATE)
-            .flatMap((timestamp) =>
+            .spans((timestamp) =>
               serviceGoProdInstance
                 .transaction(transactionNameProductId)
                 .duration(1000)

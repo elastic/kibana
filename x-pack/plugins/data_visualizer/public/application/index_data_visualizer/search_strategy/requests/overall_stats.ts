@@ -21,7 +21,7 @@ import { AggregatableField, NonAggregatableField } from '../../types/overall_sta
 import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 
 export const checkAggregatableFieldsExistRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   aggregatableFields: string[],
   samplerShardSize: number,
@@ -31,7 +31,7 @@ export const checkAggregatableFieldsExistRequest = (
   datafeedConfig?: estypes.MlDatafeed,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
   const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
@@ -90,6 +90,13 @@ export const checkAggregatableFieldsExistRequest = (
 export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
   aggregatableFields: string[];
 }
+
+export function isAggregatableFieldOverallStats(
+  arg: unknown
+): arg is AggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],
@@ -168,7 +175,7 @@ export const processAggregatableFieldsExistResponse = (
 };
 
 export const checkNonAggregatableFieldExistsRequest = (
-  indexPatternTitle: string,
+  dataViewTitle: string,
   query: Query['query'],
   field: string,
   timeFieldName: string | undefined,
@@ -176,7 +183,7 @@ export const checkNonAggregatableFieldExistsRequest = (
   latestMs: number | undefined,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.SearchRequest => {
-  const index = indexPatternTitle;
+  const index = dataViewTitle;
   const size = 0;
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
 

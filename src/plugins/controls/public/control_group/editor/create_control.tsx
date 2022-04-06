@@ -6,56 +6,52 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiButtonIconColor,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-} from '@elastic/eui';
-import React, { useState, ReactElement } from 'react';
+import { EuiButton, EuiContextMenuItem } from '@elastic/eui';
+import React from 'react';
 
-import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { OverlayRef } from '../../../../../core/public';
-import { forwardAllContext } from './forward_all_context';
-import { DEFAULT_CONTROL_WIDTH } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
-import { ControlWidth, IEditableControlFactory, ControlInput } from '../../types';
+import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
+import { toMountPoint } from '../../../../kibana_react/public';
+import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
+import { setFlyoutRef } from '../embeddable/control_group_container';
 
-export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean }) => {
+export type CreateControlButtonTypes = 'toolbar' | 'callout';
+export interface CreateControlButtonProps {
+  defaultControlWidth?: ControlWidth;
+  updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
+  addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
+  setLastUsedDataViewId?: (newDataViewId: string) => void;
+  getRelevantDataViewId?: () => string | undefined;
+  buttonType: CreateControlButtonTypes;
+  closePopover?: () => void;
+}
+
+interface CreateControlResult {
+  type: string;
+  controlInput: Omit<ControlInput, 'id'>;
+}
+
+export const CreateControlButton = ({
+  defaultControlWidth,
+  updateDefaultWidth,
+  addNewEmbeddable,
+  buttonType,
+  closePopover,
+  setLastUsedDataViewId,
+  getRelevantDataViewId,
+}: CreateControlButtonProps) => {
   // Controls Services Context
-  const { overlays, controls } = pluginServices.getHooks();
-  const { getControlTypes, getControlFactory } = controls.useService();
-  const { openFlyout, openConfirm } = overlays.useService();
+  const { overlays, controls } = pluginServices.getServices();
+  const { getControlTypes, getControlFactory } = controls;
+  const { openFlyout, openConfirm } = overlays;
 
-  // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<
-    ControlGroupInput,
-    typeof controlGroupReducers
-  >();
-  const {
-    containerActions: { addNewEmbeddable },
-    actions: { setDefaultControlWidth },
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
-  } = reduxContainerContext;
-  const dispatch = useEmbeddableDispatch();
+  const createNewControl = async () => {
+    const PresentationUtilProvider = pluginServices.getContextProvider();
 
-  // current state
-  const { defaultControlWidth } = useEmbeddableSelector((state) => state);
-  const [isControlTypePopoverOpen, setIsControlTypePopoverOpen] = useState(false);
-
-  const createNewControl = async (type: string) => {
-    const factory = getControlFactory(type);
-    if (!factory) throw new EmbeddableFactoryNotFoundError(type);
-
-    const initialInputPromise = new Promise<Omit<ControlInput, 'id'>>((resolve, reject) => {
+    const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
       let inputToReturn: Partial<ControlInput> = {};
 
       const onCancel = (ref: OverlayRef) => {
@@ -77,39 +73,45 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
         });
       };
 
-      const editableFactory = factory as IEditableControlFactory;
-
       const flyoutInstance = openFlyout(
-        forwardAllContext(
-          <ControlEditor
-            isCreate={true}
-            factory={editableFactory}
-            width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-            updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-            updateWidth={(newWidth) => dispatch(setDefaultControlWidth(newWidth as ControlWidth))}
-            onTypeEditorChange={(partialInput) =>
-              (inputToReturn = { ...inputToReturn, ...partialInput })
-            }
-            onSave={() => {
-              if (editableFactory.presaveTransformFunction) {
-                inputToReturn = editableFactory.presaveTransformFunction(inputToReturn);
+        toMountPoint(
+          <PresentationUtilProvider>
+            <ControlEditor
+              setLastUsedDataViewId={setLastUsedDataViewId}
+              getRelevantDataViewId={getRelevantDataViewId}
+              isCreate={true}
+              width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+              updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+              updateWidth={updateDefaultWidth}
+              onSave={(type: string) => {
+                const factory = getControlFactory(type) as IEditableControlFactory;
+                if (factory.presaveTransformFunction) {
+                  inputToReturn = factory.presaveTransformFunction(inputToReturn);
+                }
+                resolve({ type, controlInput: inputToReturn });
+                flyoutInstance.close();
+              }}
+              onCancel={() => onCancel(flyoutInstance)}
+              onTypeEditorChange={(partialInput) =>
+                (inputToReturn = { ...inputToReturn, ...partialInput })
               }
-              resolve(inputToReturn);
-              flyoutInstance.close();
-            }}
-            onCancel={() => onCancel(flyoutInstance)}
-          />,
-          reduxContainerContext
+            />
+          </PresentationUtilProvider>
         ),
         {
-          onClose: (flyout) => onCancel(flyout),
+          outsideClickCloses: false,
+          onClose: (flyout) => {
+            onCancel(flyout);
+            setFlyoutRef(undefined);
+          },
         }
       );
+      setFlyoutRef(flyoutInstance);
     });
 
     initialInputPromise.then(
-      async (explicitInput) => {
-        await addNewEmbeddable(type, explicitInput);
+      async (promise) => {
+        await addNewEmbeddable(promise.type, promise.controlInput);
       },
       () => {} // swallow promise rejection because it can be part of normal flow
     );
@@ -117,60 +119,25 @@ export const CreateControlButton = ({ isIconButton }: { isIconButton: boolean })
 
   if (getControlTypes().length === 0) return null;
 
-  const onCreateButtonClick = () => {
-    if (getControlTypes().length > 1) {
-      setIsControlTypePopoverOpen(!isControlTypePopoverOpen);
-      return;
-    }
-    createNewControl(getControlTypes()[0]);
-  };
-
   const commonButtonProps = {
-    onClick: onCreateButtonClick,
-    color: 'primary' as EuiButtonIconColor,
+    key: 'addControl',
+    onClick: () => {
+      createNewControl();
+      if (closePopover) {
+        closePopover();
+      }
+    },
     'data-test-subj': 'controls-create-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),
   };
 
-  const createControlButton = isIconButton ? (
-    <EuiButtonIcon {...commonButtonProps} iconType={'plusInCircle'} />
-  ) : (
-    <EuiButton {...commonButtonProps} size="s">
+  return buttonType === 'callout' ? (
+    <EuiButton {...commonButtonProps} color="primary" size="s">
       {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
     </EuiButton>
+  ) : (
+    <EuiContextMenuItem {...commonButtonProps} icon="plusInCircle">
+      {ControlGroupStrings.emptyState.getAddControlButtonTitle()}
+    </EuiContextMenuItem>
   );
-
-  if (getControlTypes().length > 1) {
-    const items: ReactElement[] = [];
-    getControlTypes().forEach((type) => {
-      const factory = getControlFactory(type);
-      items.push(
-        <EuiContextMenuItem
-          key={type}
-          icon={factory.getIconType?.()}
-          data-test-subj={`create-${type}-control`}
-          onClick={() => {
-            setIsControlTypePopoverOpen(false);
-            createNewControl(type);
-          }}
-        >
-          {factory.getDisplayName()}
-        </EuiContextMenuItem>
-      );
-    });
-
-    return (
-      <EuiPopover
-        button={createControlButton}
-        isOpen={isControlTypePopoverOpen}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        data-test-subj="control-type-picker"
-        closePopover={() => setIsControlTypePopoverOpen(false)}
-      >
-        <EuiContextMenuPanel size="s" items={items} />
-      </EuiPopover>
-    );
-  }
-  return createControlButton;
 };

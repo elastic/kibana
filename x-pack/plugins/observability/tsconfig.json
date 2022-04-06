@@ -28,6 +28,7 @@
     { "path": "../rule_registry/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../timelines/tsconfig.json"},
-    { "path": "../translations/tsconfig.json" }
+    { "path": "../translations/tsconfig.json" },
+    { "path":  "../../../src/plugins/unified_search/tsconfig.json"}
   ]
 }

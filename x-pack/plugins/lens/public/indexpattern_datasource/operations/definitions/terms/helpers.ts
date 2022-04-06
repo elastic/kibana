@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import type { CoreStart } from 'kibana/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
-import { operationDefinitionMap } from '../index';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '../index';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
@@ -18,9 +18,11 @@ import type { FieldStatsResponse } from '../../../../../common';
 import type { FrameDatasourceAPI } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '../index';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternLayer, IndexPattern } from '../../../types';
+import { LastValueIndexPatternColumn } from '../last_value';
 
-export const MULTI_KEY_VISUAL_SEPARATOR = '›';
+import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
+import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
+import { isColumnOfType } from '../helpers';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
 
@@ -203,13 +205,81 @@ export function getDisallowedTermsMessage(
   };
 }
 
+function checkLastValue(column: GenericIndexPatternColumn) {
+  return (
+    column.operationType !== 'last_value' ||
+    (['number', 'date'].includes(column.dataType) &&
+      !(column as LastValueIndexPatternColumn).params.showArrayValues)
+  );
+}
+
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
   const column = layer.columns[columnId];
   return (
     column &&
     !column.isBucketed &&
-    column.operationType !== 'last_value' &&
+    checkLastValue(column) &&
     !('references' in column) &&
     !isReferenced(layer, columnId)
   );
+}
+
+export function isScriptedField(field: IndexPatternField): boolean;
+export function isScriptedField(fieldName: string, indexPattern: IndexPattern): boolean;
+export function isScriptedField(
+  fieldName: string | IndexPatternField,
+  indexPattern?: IndexPattern
+) {
+  if (typeof fieldName === 'string') {
+    const field = indexPattern?.getFieldByName(fieldName);
+    return field && field.scripted;
+  }
+  return fieldName.scripted;
+}
+
+export function getFieldsByValidationState(
+  newIndexPattern: IndexPattern,
+  column?: GenericIndexPatternColumn,
+  field?: string | IndexPatternField
+): {
+  allFields: Array<IndexPatternField | undefined>;
+  validFields: string[];
+  invalidFields: string[];
+} {
+  const newFieldNames: string[] = [];
+  if (column && 'sourceField' in column) {
+    if (column.sourceField) {
+      newFieldNames.push(column.sourceField);
+    }
+    if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+      newFieldNames.push(...(column.params?.secondaryFields ?? []));
+    }
+  }
+  if (field) {
+    newFieldNames.push(typeof field === 'string' ? field : field.name || field.displayName);
+  }
+  const newFields = newFieldNames.map((fieldName) => newIndexPattern.getFieldByName(fieldName));
+  // lodash groupby does not provide the index arg, so had to write it manually :(
+  const validFields: string[] = [];
+  const invalidFields: string[] = [];
+  // mind to check whether a column was passed, in such case single term with scripted field is ok
+  const canAcceptScripted = Boolean(column && newFields.length === 1);
+  newFieldNames.forEach((fieldName, i) => {
+    const newField = newFields[i];
+    const isValid =
+      newField &&
+      supportedTypes.has(newField.type) &&
+      newField.aggregatable &&
+      (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
+      (canAcceptScripted || !isScriptedField(newField));
+
+    const arrayToPush = isValid ? validFields : invalidFields;
+    arrayToPush.push(fieldName);
+  });
+
+  return {
+    allFields: newFields,
+    validFields,
+    invalidFields,
+  };
 }

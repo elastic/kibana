@@ -76,6 +76,16 @@ describe('Reporting server createConfig$', () => {
 
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "capture": Object {
+          "loadDelay": 1,
+          "maxAttempts": 1,
+          "timeouts": Object {
+            "openUrl": 100,
+            "renderComplete": 100,
+            "waitForElements": 100,
+          },
+          "zoom": 1,
+        },
         "csv": Object {},
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "index": ".reporting",

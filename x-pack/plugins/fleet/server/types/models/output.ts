@@ -35,8 +35,12 @@ const OutputBaseSchema = {
   hosts: schema.conditional(
     schema.siblingRef('type'),
     schema.literal(outputType.Elasticsearch),
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] })),
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }))
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+      minSize: 1,
+    }),
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
+      minSize: 1,
+    })
   ),
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),

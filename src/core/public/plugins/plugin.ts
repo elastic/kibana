@@ -8,7 +8,6 @@
 
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { isPromise } from '@kbn/std';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
@@ -31,23 +30,6 @@ export interface Plugin<
 }
 
 /**
- * A plugin with asynchronous lifecycle methods.
- *
- * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
- * @public
- */
-export interface AsyncPlugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> {
-  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-  stop?(): void;
-}
-
-/**
  * The `plugin` export at the root of a plugin's `public` directory should conform
  * to this interface.
  *
@@ -58,11 +40,7 @@ export type PluginInitializer<
   TStart,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> = (
-  core: PluginInitializerContext
-) =>
-  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -80,9 +58,7 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private instance?:
-    | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
@@ -105,10 +81,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public setup(
-    setupContext: CoreSetup<TPluginsStart, TStart>,
-    plugins: TPluginsSetup
-  ): TSetup | Promise<TSetup> {
+  public setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup {
     this.instance = this.createPluginInstance();
     return this.instance.setup(setupContext, plugins);
   }
@@ -126,15 +99,8 @@ export class PluginWrapper<
     }
 
     const startContract = this.instance.start(startContext, plugins);
-    if (isPromise(startContract)) {
-      return startContract.then((resolvedContract) => {
-        this.startDependencies$.next([startContext, plugins, resolvedContract]);
-        return resolvedContract;
-      });
-    } else {
-      this.startDependencies$.next([startContext, plugins, startContract]);
-      return startContract;
-    }
+    this.startDependencies$.next([startContext, plugins, startContract]);
+    return startContract;
   }
 
   /**

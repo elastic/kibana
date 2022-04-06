@@ -63,7 +63,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe.skip('Detection rules, EQL', () => {
+describe('Detection rules, EQL', () => {
   const expectedUrls = getEqlRule().referenceUrls.join('');
   const expectedFalsePositives = getEqlRule().falsePositivesExamples.join('');
   const expectedTags = getEqlRule().tags.join('');
@@ -159,7 +159,7 @@ describe.skip('Detection rules, EQL', () => {
   });
 });
 
-describe.skip('Detection rules, sequence EQL', () => {
+describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = '1 alert';
 

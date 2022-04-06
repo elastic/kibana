@@ -702,10 +702,12 @@ describe('suggestion helpers', () => {
       defaultParams = [
         {
           '1': {
-            getTableSpec: () => [{ columnId: 'col1' }],
+            getTableSpec: () => [{ columnId: 'col1', fields: [] }],
             datasourceId: '',
             getOperationForColumnId: jest.fn(),
             getVisualDefaults: jest.fn(),
+            getSourceId: jest.fn(),
+            getFilters: jest.fn(),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -764,6 +766,8 @@ describe('suggestion helpers', () => {
           datasourceId: '',
           getOperationForColumnId: jest.fn(),
           getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

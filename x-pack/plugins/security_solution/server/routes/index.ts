@@ -103,7 +103,8 @@ export const initRoutes = (
     security,
     ruleOptions,
     securityRuleTypeOptions,
-    previewRuleDataClient
+    previewRuleDataClient,
+    getStartServices
   );
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.

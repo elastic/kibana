@@ -114,7 +114,7 @@ export function AddToCaseAction({
       )}
       {isCasesOpen &&
         lensAttributes &&
-        cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+        cases.ui.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 }

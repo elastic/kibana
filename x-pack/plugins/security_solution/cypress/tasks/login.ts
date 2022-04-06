@@ -290,7 +290,7 @@ export const getEnvAuth = (): User => {
  * It prevents tour to appear during tests and cover UI elements
  * @param window - browser's window object
  */
-const disableRulesFeatureTour = (window: Window) => {
+const disableFeatureTourForRuleManagementPage = (window: Window) => {
   const tourConfig = {
     isTourActive: false,
   };
@@ -317,7 +317,7 @@ export const loginAndWaitForPage = (
         if (onBeforeLoadCallback) {
           onBeforeLoadCallback(win);
         }
-        disableRulesFeatureTour(win);
+        disableFeatureTourForRuleManagementPage(win);
       },
     }
   );
@@ -333,7 +333,7 @@ export const waitForPage = (url: string) => {
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableRulesFeatureTour,
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
@@ -341,7 +341,7 @@ export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) =
 export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
   loginWithUser(user);
   cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableRulesFeatureTour,
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
@@ -351,7 +351,7 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
 
   login(role);
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableRulesFeatureTour,
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
   });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
@@ -359,6 +359,8 @@ export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
 
 export const loginAndWaitForHostDetailsPage = (hostName = 'suricata-iowa') => {
   loginAndWaitForPage(hostDetailsUrl(hostName));
+
+  cy.get('[data-test-subj="hostDetailsPage"]', { timeout: 12000 }).should('exist');
   cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
 };
 

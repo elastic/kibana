@@ -18,11 +18,11 @@ import {
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
-import { QueryFilter } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { ESBoolQuery } from '../../../../common/typed_json';
 
 interface GetFilterArgs {
   type: Type;
@@ -30,7 +30,7 @@ interface GetFilterArgs {
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
 }
@@ -53,7 +53,7 @@ export const getFilter = async ({
   type,
   query,
   lists,
-}: GetFilterArgs): Promise<QueryFilter> => {
+}: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter(query, language, filters || [], index, lists);

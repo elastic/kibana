@@ -134,6 +134,7 @@ export const applicationUsageSchema = {
   apm: commonSchema,
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
+  enterpriseSearchContent: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   graph: commonSchema,
@@ -160,6 +161,7 @@ export const applicationUsageSchema = {
   securitySolutionUI: commonSchema,
   /**
    * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
+   * @removeBy 9.0.0
    */
   siem: commonSchema,
   space_selector: commonSchema,

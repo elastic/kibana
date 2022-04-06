@@ -29,16 +29,16 @@ const DefaultQueryParams: TimeSeriesQuery = {
 };
 
 describe('timeSeriesQuery', () => {
-  const abortableEsClient = alertsMock.createAlertServices().search.asCurrentUser;
+  const esClient = alertsMock.createRuleExecutorServices().scopedClusterClient.asCurrentUser;
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const params = {
     logger,
-    abortableEsClient,
+    esClient,
     query: DefaultQueryParams,
   };
 
   it('fails as expected when the callCluster call fails', async () => {
-    abortableEsClient.search = jest.fn().mockRejectedValue(new Error('woopsie'));
+    esClient.search.mockRejectedValue(new Error('woopsie'));
     await timeSeriesQuery(params);
     expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

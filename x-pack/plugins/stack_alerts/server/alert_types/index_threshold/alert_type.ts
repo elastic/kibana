@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { RuleType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -132,10 +132,10 @@ export function getAlertType(
   };
 
   async function executor(
-    options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
     const { alertId: ruleId, name, services, params } = options;
-    const { alertFactory, search } = services;
+    const { alertFactory, scopedClusterClient } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -149,7 +149,7 @@ export function getAlertType(
       );
     }
 
-    const abortableEsClient = search.asCurrentUser;
+    const esClient = scopedClusterClient.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -171,7 +171,7 @@ export function getAlertType(
       await data
     ).timeSeriesQuery({
       logger,
-      abortableEsClient,
+      esClient,
       query: queryParams,
     });
     logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);

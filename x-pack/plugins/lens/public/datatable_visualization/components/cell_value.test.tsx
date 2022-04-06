@@ -86,7 +86,7 @@ describe('datatable cell renderer', () => {
         />
       </DataContext.Provider>
     );
-    expect(cell.find('.lnsTableCell').prop('className')).toContain('--right');
+    expect(cell.find('.lnsTableCell--right').exists()).toBeTruthy();
   });
 
   describe('dynamic coloring', () => {
@@ -127,6 +127,7 @@ describe('datatable cell renderer', () => {
         ],
         sortingColumnId: '',
         sortingDirection: 'none',
+        rowHeightLines: 1,
       };
     }
 

@@ -22,8 +22,12 @@ import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
+import {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  useDebouncedValue,
+  PalettePicker,
+} from '../shared_components';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 
@@ -120,6 +124,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
 
   const onLegendMaxLinesChange = useCallback(
     (val) => onStateChange({ legendMaxLines: val }),
+    [onStateChange]
+  );
+
+  const onLegendSizeChange = useCallback(
+    (val) => onStateChange({ legendSize: val }),
     [onStateChange]
   );
 
@@ -251,6 +260,8 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
         onMaxLinesChange={onLegendMaxLinesChange}
+        legendSize={layer.legendSize}
+        onLegendSizeChange={onLegendSizeChange}
       />
     </EuiFlexGroup>
   );
@@ -291,14 +302,12 @@ export function DimensionEditor(
   }
 ) {
   return (
-    <>
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={props.state.palette}
-        setPalette={(newPalette) => {
-          props.setState({ ...props.state, palette: newPalette });
-        }}
-      />
-    </>
+    <PalettePicker
+      palettes={props.paletteService}
+      activePalette={props.state.palette}
+      setPalette={(newPalette) => {
+        props.setState({ ...props.state, palette: newPalette });
+      }}
+    />
   );
 }

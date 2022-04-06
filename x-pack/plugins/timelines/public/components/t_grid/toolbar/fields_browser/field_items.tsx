@@ -149,7 +149,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
       <EuiBadge data-test-subj={`field-${name}-category`}>{category}</EuiBadge>
     ),
     sortable: true,
-    width: '100px',
+    width: '130px',
   },
 ];
 
@@ -161,10 +161,12 @@ export const getFieldColumns = ({
   onToggleColumn,
   highlight = '',
   getFieldTableColumns,
+  onHide,
 }: {
   onToggleColumn: (id: string) => void;
   highlight?: string;
   getFieldTableColumns?: GetFieldTableColumns;
+  onHide: () => void;
 }): FieldTableColumns => [
   {
     field: 'selected',
@@ -185,7 +187,7 @@ export const getFieldColumns = ({
     width: '25px',
   },
   ...(getFieldTableColumns
-    ? getFieldTableColumns(highlight)
+    ? getFieldTableColumns({ highlight, onHide })
     : getDefaultFieldTableColumns(highlight)),
 ];
 

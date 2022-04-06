@@ -32,6 +32,7 @@ snapshots.js
 # package overrides
 /packages/elastic-eslint-config-kibana
 /packages/kbn-plugin-generator/template
+/packages/kbn-generate/templates
 /packages/kbn-pm/dist
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
 /packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/

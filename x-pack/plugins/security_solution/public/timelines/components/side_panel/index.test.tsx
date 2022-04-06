@@ -125,7 +125,7 @@ describe('Details Panel Component', () => {
             navigateToApp: jest.fn(),
           },
           cases: {
-            getCasesContext: () => mockCasesContext,
+            ui: { getCasesContext: () => mockCasesContext },
           },
         },
       });

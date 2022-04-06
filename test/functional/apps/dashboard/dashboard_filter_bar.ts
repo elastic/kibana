@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const security = getService('security');
@@ -32,7 +31,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard filter bar', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
+      // The kbn_archiver above was created from an es_archiver which intentionally had
+      // 2 missing index patterns.  But that would fail to load with kbn_archiver.
+      // So we unload those 2 index patterns here.
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
+      );
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -42,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Add a filter bar', function () {
@@ -193,10 +202,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         } else {
           const documentCell = await dataGrid.getCellElement(1, 3);
           await documentCell.click();
-          const expandCellContentButton = await documentCell.findByTestSubject(
-            'euiDataGridCellExpandButton'
-          );
-          await expandCellContentButton.click();
           await testSubjects.click('filterForButton');
         }
         const filterCount = await filterBar.getFilterCount();
