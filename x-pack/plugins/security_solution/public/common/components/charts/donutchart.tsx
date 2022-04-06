@@ -149,7 +149,7 @@ export const DonutChart = ({
           </Chart>
         )}
       </StyledEuiFlexItem>
-      {showLegend && legendItems && (
+      {showLegend && legendItems.length > 0 && (
         <EuiFlexItem>
           <DraggableLegend legendItems={legendItems} height={height} />
         </EuiFlexItem>

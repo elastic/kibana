@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -17,40 +17,21 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
-import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING, VIEW_ALERTS } from './translations';
+import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { useUserInfo } from '../../detections/components/user_info';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../components/detection_response/alerts_by_status/utils';
-import { getDetectionEngineUrl, useFormatUrl } from '../../common/components/link_to';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { APP_UI_ID } from '../../../common/constants';
 
 const DetectionResponseComponent = () => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuery(), []);
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
   const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  // TODO: link queries with global time queries
-  // const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
 
   const queriesLoading: boolean = useShallowEqualSelector(
     (state) => !!getGlobalQuery(state).find((query) => query.loading)
-  );
-  const kibana = useKibana();
-  const { navigateToApp } = kibana.services.application;
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
-
-  const goToAlerts = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.alerts,
-        path: getDetectionEngineUrl(urlSearch),
-      });
-    },
-    [navigateToApp, urlSearch]
   );
 
   useEffect(() => {
@@ -66,14 +47,6 @@ const DetectionResponseComponent = () => {
 
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
 
-  const detailsButtonOptions = useMemo(
-    () => ({
-      name: VIEW_ALERTS,
-      href: formatUrl(getDetectionEngineUrl()),
-      onClick: goToAlerts,
-    }),
-    [formatUrl, goToAlerts]
-  );
   return (
     <>
       {indicesExist ? (
@@ -107,7 +80,6 @@ const DetectionResponseComponent = () => {
                           title="Alerts"
                           signalIndexName={signalIndexName}
                           queryId={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-                          detailsButtonOptions={detailsButtonOptions}
                         />
                       </EuiFlexGroup>
                     )}
