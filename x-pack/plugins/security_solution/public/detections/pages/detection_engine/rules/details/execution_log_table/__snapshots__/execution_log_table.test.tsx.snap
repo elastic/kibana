@@ -14,13 +14,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
         onlyShowFilters={true}
       />
     </EuiFlexItem>
-    <EuiFlexItem
-      style={
-        Object {
-          "maxWidth": "582px",
-        }
-      }
-    >
+    <Styled(EuiFlexItem)>
       <EuiSuperDatePicker
         end="now"
         isPaused={true}
@@ -32,7 +26,7 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
         start="now-24h"
         width="full"
       />
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
   <EuiSpacer
     size="s"
@@ -105,23 +99,6 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
           "sortable": false,
           "truncateText": false,
           "width": "35%",
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "data-test-subj": "action-filter-by-execution-id",
-              "description": "Filter alerts by rule execution ID.",
-              "field": "",
-              "icon": "filter",
-              "isPrimary": true,
-              "name": "Edit",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "kibana.alert.rule.execution.uuid",
-          "name": "Actions",
-          "width": "5%",
         },
       ]
     }

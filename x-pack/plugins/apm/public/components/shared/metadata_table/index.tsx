@@ -73,7 +73,10 @@ export function MetadataTable({ sections, isLoading }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink href={docLinks.links.apm.metaData} target="_blank">
-            <EuiIcon type="help" /> How to add labels and other data
+            <EuiIcon type="help" />
+            {i18n.translate('xpack.apm.metadata.help', {
+              defaultMessage: 'How to add labels and other data',
+            })}
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>

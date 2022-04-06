@@ -213,6 +213,7 @@ export interface DocLinks {
   readonly kibana: {
     readonly guide: string;
     readonly autocompleteSuggestions: string;
+    readonly secureSavedObject: string;
     readonly xpackSecurity: string;
   };
   readonly upgradeAssistant: {
