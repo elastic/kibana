@@ -931,7 +931,7 @@
             "label": "indent",
             "description": [],
             "signature": [
-              "{ (delta: number): undefined; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
+              "{ (delta: number): void; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
             "deprecated": false,
