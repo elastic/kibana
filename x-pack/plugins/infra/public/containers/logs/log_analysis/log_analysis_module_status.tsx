@@ -226,6 +226,7 @@ const getJobStatus =
           return 'stopped';
         } else if (
           (jobSummary.jobState === 'opening' && jobSummary.awaitingNodeAssignment === false) ||
+          jobSummary.jobState === 'resetting' ||
           jobSummary.jobState === 'reverting'
         ) {
           return 'initializing';
