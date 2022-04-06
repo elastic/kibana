@@ -136,7 +136,7 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         position="left"
         showGridLines
         domain={{ min: 0, max: 100 }}
-        tickFormat={(v) => getPostureScorePercentage(v)}
+        tickFormat={(rawScore) => getPostureScorePercentage(rawScore)}
       />
     </Chart>
   );
