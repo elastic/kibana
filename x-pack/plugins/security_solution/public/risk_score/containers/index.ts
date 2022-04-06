@@ -16,8 +16,7 @@ export const enum UserRiskScoreQueryId {
 
 export const enum HostRiskScoreQueryId {
   DEFAULT = 'HostRiskScore',
-  HOST_RISK_SCORE_OVER_TIME = 'HostRiskScoreOverTimeQuery',
-  TOP_HOST_SCORE_CONTRIBUTORS = 'TopHostScoreContributorsQuery',
+  HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
   OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
   HOSTS_BY_RISK = 'HostsByRisk',
 }

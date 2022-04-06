@@ -36,6 +36,8 @@ export interface RiskScoreOverTimeProps {
   riskScore?: RiskScore[];
   queryId: string;
   title: string;
+  toggleStatus: boolean;
+  toggleQuery?: (status: boolean) => void;
 }
 
 const RISKY_THRESHOLD = 70;
@@ -59,6 +61,8 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   loading,
   queryId,
   title,
+  toggleStatus,
+  toggleQuery,
 }) => {
   const timeZone = useTimeZone();
 
@@ -87,96 +91,104 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
       <EuiPanel hasBorder data-test-subj="RiskScoreOverTime">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
-            <HeaderSection title={title} hideSubtitle />
+            <HeaderSection
+              title={title}
+              hideSubtitle
+              toggleQuery={toggleQuery}
+              toggleStatus={toggleStatus}
+            />
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <InspectButton queryId={queryId} title={title} />
-          </EuiFlexItem>
+          {toggleStatus && (
+            <EuiFlexItem grow={false}>
+              <InspectButton queryId={queryId} title={title} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
-        <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem grow={1}>
-            <div style={{ height: DEFAULT_CHART_HEIGHT }}>
-              {loading ? (
-                <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
-              ) : (
-                <Chart>
-                  <Settings
-                    {...chartDefaultSettings}
-                    theme={theme}
-                    tooltip={{
-                      headerFormatter,
-                    }}
-                  />
-                  <Axis
-                    id="bottom"
-                    position={Position.Bottom}
-                    tickFormat={dataTimeFormatter}
-                    showGridLines
-                    gridLine={{
-                      strokeWidth: 1,
-                      opacity: 1,
-                      dash: [3, 5],
-                    }}
-                  />
-                  <Axis
-                    domain={{
-                      min: 0,
-                      max: 100,
-                    }}
-                    id="left"
-                    position={Position.Left}
-                    ticks={3}
-                    style={{
-                      tickLine: {
-                        visible: false,
-                      },
-                      tickLabel: {
-                        padding: 10,
-                      },
-                    }}
-                  />
-                  <LineSeries
-                    id={'RiskOverTime'}
-                    name={i18n.RISK_SCORE}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="x"
-                    yAccessors={['y']}
-                    timeZone={timeZone}
-                    data={graphData}
-                    tickFormat={scoreFormatter}
-                  />
-                  <LineAnnotation
-                    id="RiskOverTime_annotation"
-                    domainType={AnnotationDomainType.YDomain}
-                    dataValues={[
-                      {
-                        dataValue: RISKY_THRESHOLD,
-                        details: `${RISKY_THRESHOLD}`,
-                        header: i18n.RISK_THRESHOLD,
-                      },
-                    ]}
-                    markerPosition="left"
-                    style={{
-                      line: {
+        {toggleStatus && (
+          <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexItem grow={1}>
+              <div style={{ height: DEFAULT_CHART_HEIGHT }}>
+                {loading ? (
+                  <LoadingChart size="l" data-test-subj="RiskScoreOverTime-loading" />
+                ) : (
+                  <Chart>
+                    <Settings
+                      {...chartDefaultSettings}
+                      theme={theme}
+                      tooltip={{
+                        headerFormatter,
+                      }}
+                    />
+                    <Axis
+                      id="bottom"
+                      position={Position.Bottom}
+                      tickFormat={dataTimeFormatter}
+                      showGridLines
+                      gridLine={{
                         strokeWidth: 1,
-                        stroke: euiThemeVars.euiColorDanger,
                         opacity: 1,
-                      },
-                    }}
-                    marker={
-                      <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>
-                        {i18n.RISKY}
-                      </StyledEuiText>
-                    }
-                  />
-                </Chart>
-              )}
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                        dash: [3, 5],
+                      }}
+                    />
+                    <Axis
+                      domain={{
+                        min: 0,
+                        max: 100,
+                      }}
+                      id="left"
+                      position={Position.Left}
+                      ticks={3}
+                      style={{
+                        tickLine: {
+                          visible: false,
+                        },
+                        tickLabel: {
+                          padding: 10,
+                        },
+                      }}
+                    />
+                    <LineSeries
+                      id={'RiskOverTime'}
+                      name={i18n.RISK_SCORE}
+                      xScaleType={ScaleType.Time}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor="x"
+                      yAccessors={['y']}
+                      timeZone={timeZone}
+                      data={graphData}
+                      tickFormat={scoreFormatter}
+                    />
+                    <LineAnnotation
+                      id="RiskOverTime_annotation"
+                      domainType={AnnotationDomainType.YDomain}
+                      dataValues={[
+                        {
+                          dataValue: RISKY_THRESHOLD,
+                          details: `${RISKY_THRESHOLD}`,
+                          header: i18n.RISK_THRESHOLD,
+                        },
+                      ]}
+                      markerPosition="left"
+                      style={{
+                        line: {
+                          strokeWidth: 1,
+                          stroke: euiThemeVars.euiColorDanger,
+                          opacity: 1,
+                        },
+                      }}
+                      marker={
+                        <StyledEuiText color={euiThemeVars.euiColorDarkestShade}>
+                          {i18n.RISKY}
+                        </StyledEuiText>
+                      }
+                    />
+                  </Chart>
+                )}
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
     </InspectButtonContainer>
   );
