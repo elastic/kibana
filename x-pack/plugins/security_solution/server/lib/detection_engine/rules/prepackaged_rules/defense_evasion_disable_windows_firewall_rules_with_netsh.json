@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Disable Windows Firewall Rules via Netsh",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"netsh.exe\" and\n  (process.args : \"disable\" and process.args : \"firewall\" and process.args : \"set\") or\n  (process.args : \"advfirewall\" and process.args : \"off\" and process.args : \"state\")\n",
   "risk_score": 47,
   "rule_id": "4b438734-3793-4fda-bd42-ceeada0be8f9",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 10
+  "version": 11
 }
