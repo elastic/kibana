@@ -95,7 +95,7 @@ For detailed information about the n.n.n release, review the following sections.
 [[release-notes-7.11.2]]
 == {kib} 7.11.2
 
-The 7.11.2 release includes the following security update, known issue, and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+The 7.11.2 release includes the following security update, known issue, and bug fixes. Before you upgrade, refer to the <<breaking-changes-7.11,Breaking changes in 7.11.0>> and <<known-issue-v7.11.0,Known issue in 7.11.0>>.
 
 [float]
 [[security-update-v7.11.2]]
@@ -166,7 +166,7 @@ Security::
 [[release-notes-7.11.1]]
 == {kib} 7.11.1
 
-The 7.11.1 release includes the following enhancements and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+The 7.11.1 release includes the following enhancements and bug fixes. Before you upgrade, refer to the <<breaking-changes-7.11,Breaking changes in 7.11.0>> and <<known-issue-v7.11.0,Known issue in 7.11.0>>.
 
 [float]
 [[enhancement-v7.11.1]]
@@ -202,8 +202,18 @@ Monitoring::
 [[release-notes-7.11.0]]
 == {kib} 7.11.0
 
-For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
+For detailed information about the 7.11.0 release, review the <<known-issue-v7.11.0,Known issue>>, <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
+
 For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+
+[float]
+[[known-issue-v7.11.0]]
+=== Known issue
+
+Dashboard:: 
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
++
+To resolve the known issue, upgrade to {kib} 7.17.3 or later. 
 
 [float]
 [[deprecation-v7.11.0]]
