@@ -21,10 +21,10 @@ import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const baseBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.searchIndices.content.breadcrumb', {
+  i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
     defaultMessage: 'Content',
   }),
-  i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.breadcrumb', {
+  i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.breadcrumb', {
     defaultMessage: 'Search indices',
   }),
 ];
@@ -34,7 +34,7 @@ export const SearchIndices: React.FC = () => {
   const columns = [
     {
       field: 'name',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.name.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
         defaultMessage: 'Search index name',
       }),
       sortable: true,
@@ -50,7 +50,7 @@ export const SearchIndices: React.FC = () => {
     },
     {
       field: 'source_type',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.sourceType.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.sourceType.columnTitle', {
         defaultMessage: 'Source type',
       }),
       sortable: true,
@@ -59,7 +59,7 @@ export const SearchIndices: React.FC = () => {
     {
       field: 'elasticsearch_index_name',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchIndices.elasticsearchIndexName.columnTitle',
+        'xpack.enterpriseSearch.content.searchIndices.elasticsearchIndexName.columnTitle',
         {
           defaultMessage: 'Elasticsearch index name',
         }
@@ -69,14 +69,17 @@ export const SearchIndices: React.FC = () => {
     },
     {
       field: 'search_engines',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.searchEngines.columnTitle', {
-        defaultMessage: 'Attached search engines',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.searchEngines.columnTitle',
+        {
+          defaultMessage: 'Attached search engines',
+        }
+      ),
       truncateText: true,
     },
     {
       field: 'document_count',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.docsCount.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
         defaultMessage: 'Documents',
       }),
       sortable: true,
@@ -84,7 +87,7 @@ export const SearchIndices: React.FC = () => {
       align: 'right' as HorizontalAlignment,
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.actions.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
@@ -104,7 +107,7 @@ export const SearchIndices: React.FC = () => {
   const createNewIndexButton = (
     <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
       <EuiButton iconType="plusInCircle" color="primary" fill>
-        {i18n.translate('xpack.enterpriseSearch.searchIndices.create.buttonTitle', {
+        {i18n.translate('xpack.enterpriseSearch.content.searchIndices.create.buttonTitle', {
           defaultMessage: 'Create new index',
         })}
       </EuiButton>
@@ -117,9 +120,12 @@ export const SearchIndices: React.FC = () => {
       pageViewTelemetry="Search indices"
       isLoading={false}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.pageTitle', {
-          defaultMessage: 'Search indices',
-        }),
+        pageTitle: i18n.translate(
+          'xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle',
+          {
+            defaultMessage: 'Search indices',
+          }
+        ),
         rightSideItems: [createNewIndexButton],
       }}
     >

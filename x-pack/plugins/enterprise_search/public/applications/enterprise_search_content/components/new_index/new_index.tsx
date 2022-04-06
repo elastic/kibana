@@ -226,14 +226,14 @@ export const NewIndex: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
         ...baseBreadcrumbs,
-        i18n.translate('xpack.enterpriseSearch.searchIndices.newIndex.breadcrumb', {
+        i18n.translate('xpack.enterpriseSearch.content.newIndex.breadcrumb', {
           defaultMessage: 'New search index',
         }),
       ]}
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.pageTitle', {
+        pageTitle: i18n.translate('xpack.enterpriseSearch.content.newIndex.pageTitle', {
           defaultMessage: 'New search index',
         }),
       }}
