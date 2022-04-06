@@ -54,6 +54,7 @@ const jobStateRT = rt.keyof({
   failed: null,
   opened: null,
   opening: null,
+  reverting: null,
 });
 
 const jobAnalysisConfigRT = rt.partial({
