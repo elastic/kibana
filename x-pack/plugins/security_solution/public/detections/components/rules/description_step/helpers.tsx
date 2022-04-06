@@ -29,11 +29,8 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  getDisplayValueFromFilter,
-  FilterLabel,
-} from '../../../../../../../../src/plugins/data/public';
-
+import { getDisplayValueFromFilter } from '../../../../../../../../src/plugins/data/public';
+import { FilterLabel } from '../../../../../../../../src/plugins/unified_search/public';
 import {
   subtechniquesOptions,
   tacticsOptions,

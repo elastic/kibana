@@ -71,6 +71,7 @@ export function ActionBar({
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === SurrDocType.SUCCESSORS;
   const [newDocCount, setNewDocCount] = useState(docCount);
+  const canLoadMore = defaultStepSize > 0 || newDocCount !== docCount;
   const isValid = (value: number) => value >= MIN_CONTEXT_SIZE && value <= MAX_CONTEXT_SIZE;
   const onSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
@@ -92,7 +93,7 @@ export function ActionBar({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj={`${type}LoadMoreButton`}
-            isDisabled={isDisabled}
+            isDisabled={isDisabled || !canLoadMore}
             isLoading={isLoading}
             onClick={() => {
               const value = newDocCount + defaultStepSize;
