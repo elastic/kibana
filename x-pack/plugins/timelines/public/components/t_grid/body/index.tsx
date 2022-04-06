@@ -92,6 +92,7 @@ interface OwnProps {
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
   defaultCellActions?: TGridCellAction[];
+  visibleCellActions?: number;
   disabledCellActions: string[];
   fieldBrowserOptions?: FieldBrowserOptions;
   filters?: Filter[];
@@ -307,6 +308,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     columnHeaders,
     data,
     defaultCellActions,
+    visibleCellActions,
     disabledCellActions,
     fieldBrowserOptions,
     filterQuery,
@@ -716,6 +718,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   cellActions:
                     header.tGridCellActions?.map(buildAction) ??
                     defaultCellActions?.map(buildAction),
+                  visibleCellActions,
                 }
               : {}),
           };
@@ -725,6 +728,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         columnHeaders,
         data,
         defaultCellActions,
+        visibleCellActions,
         disabledCellActions,
         dispatch,
         id,
