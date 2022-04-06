@@ -69,7 +69,7 @@ import { RoleValidator } from './validate_role';
 interface Props {
   action: 'edit' | 'clone';
   roleName?: string;
-  dataViews: DataViewsContract;
+  dataViews?: DataViewsContract;
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -289,6 +289,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
   history,
   spacesApiUi,
 }) => {
+  if (!dataViews) {
+    throw new Error('The dataViews plugin is required for this page, but it is not available');
+  }
   const backToRoleList = useCallback(() => history.push('/'), [history]);
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
