@@ -12,7 +12,7 @@ import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-import { UiPlugins } from '../plugins';
+import type { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
@@ -103,13 +103,7 @@ export class RenderingService {
       buildNum,
     });
 
-    const publicPlugins = [...uiPlugins.public].filter(
-      // If this is an anonymous page, it filters out ALL plugins that do not have "enabledOnAnonymousPages" set in their manifest.
-      // This is intentional, it does not automatically include any required plugins/bundles.
-      // If additional required plugin dependencies are added in the future that need to be enabled on anonymous pages, that should be
-      // explicitly defined in the affected plugin manifest(s).
-      ([, plugin]) => !isAnonymousPage || plugin.enabledOnAnonymousPages
-    );
+    const filteredPlugins = filterUiPlugins(uiPlugins, isAnonymousPage);
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${basePath}/ui`,
@@ -139,7 +133,7 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          publicPlugins.map(async ([id, plugin]) => ({
+          filteredPlugins.map(async ([id, plugin]) => ({
             id,
             plugin,
             config: await getUiConfig(uiPlugins, id),
@@ -161,3 +155,38 @@ const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
   return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
 };
+
+/**
+ * Gets the array of plugins that should be enabled on the page.
+ *  * If this _is not_ an anonymous page, all plugins will be enabled.
+ *  * If this _is_ an anonymous page, only plugins that have "enabledOnAnonymousPages" set in their manifest *and* the graph of their
+ *    requiredPlugins will be enabled.
+ */
+function filterUiPlugins(uiPlugins: UiPlugins, isAnonymousPage: boolean) {
+  if (!isAnonymousPage) {
+    return [...uiPlugins.public];
+  }
+  const pluginsToProcess = [...uiPlugins.public].reduce<string[]>((acc, [id, plugin]) => {
+    if (plugin.enabledOnAnonymousPages) {
+      acc.push(id);
+    }
+    return acc;
+  }, []);
+
+  const pluginsToInclude = new Set<string>();
+  while (pluginsToProcess.length > 0) {
+    const pluginId = pluginsToProcess.pop() as string;
+    const plugin = uiPlugins.public.get(pluginId);
+    if (!plugin) {
+      continue;
+    }
+    pluginsToInclude.add(pluginId);
+    for (const requiredPluginId of plugin.requiredPlugins) {
+      if (!pluginsToInclude.has(requiredPluginId)) {
+        pluginsToProcess.push(requiredPluginId);
+      }
+    }
+  }
+  // Filter the plugins, maintaining the order (that is important)
+  return [...uiPlugins.public].filter(([id]) => pluginsToInclude.has(id));
+}
