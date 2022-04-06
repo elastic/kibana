@@ -13,11 +13,7 @@ import { groupBy } from 'lodash';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '../../../../field_formats/common';
-import type {
-  CommonXYReferenceLineLayerConfigResult,
-  IconPosition,
-  YAxisMode,
-} from '../../common/types';
+import type { CommonXYReferenceLineLayerConfigResult, IconPosition } from '../../common/types';
 import {
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,

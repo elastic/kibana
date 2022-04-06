@@ -1438,10 +1438,12 @@ describe('XYChart component', () => {
         ],
         axes: [
           {
+            type: 'axisConfig',
             id: '1',
             position: 'left',
           },
           {
+            type: 'axisConfig',
             id: '2',
             position: 'right',
           },
@@ -1498,6 +1500,7 @@ describe('XYChart component', () => {
         ],
         axes: [
           {
+            type: 'axisConfig',
             id: '1',
             position: 'left',
           },
@@ -1642,8 +1645,8 @@ describe('XYChart component', () => {
       const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
 
       // In this case, the ID is used as the name. This shouldn't happen in practice
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual(null);
+      expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
     test('simplest xy chart with empty name', () => {
