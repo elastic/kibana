@@ -49,7 +49,7 @@ This section summarizes the changes in each release.
 [[release-notes-7.10.2]]
 == {kib} 7.10.2
 
-For detailed information about the 7.10.2 release, review the following bug fixes. For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+For detailed information about the 7.10.2 release, review the following bug fixes. Before you upgrade, review the <<breaking-changes-7.10,breaking changes in 7.10>> and <<known-issue-v7.10.0,known issue in 7.10.0>>.
 
 [float]
 [[security-update-v7.10.2]]
@@ -100,7 +100,7 @@ Security::
 
 For detailed information about the 7.10.1 release, review the following enhancements and bug fixes.
 
-For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+Before you upgrade, review the <<breaking-changes-7.10,breaking changes in 7.10>> and <<known-issue-v7.10.0,known issue in 7.10.0>>.
 
 [float]
 [[enhancement-v7.10.1]]
