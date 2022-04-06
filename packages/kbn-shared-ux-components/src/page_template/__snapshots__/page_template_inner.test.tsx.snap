@@ -18,6 +18,11 @@ exports[`KibanaPageTemplateInner custom template 1`] = `
     }
     iconColor=""
     iconType="test"
+    title={
+      <h1>
+        test
+      </h1>
+    }
   />
 </EuiPageTemplate>
 `;
@@ -36,10 +41,10 @@ exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
     Object {
       "description": "test",
       "iconType": "test",
+      "pageTitle": "test",
       "rightSideItems": Array [
         "test",
       ],
-      "title": "test",
     }
   }
   template="centeredContent"
@@ -70,6 +75,11 @@ exports[`KibanaPageTemplateInner isEmpty pageHeader & no children 1`] = `
     }
     iconColor=""
     iconType="test"
+    title={
+      <h1>
+        test
+      </h1>
+    }
   />
 </EuiPageTemplate>
 `;

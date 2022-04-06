@@ -9,6 +9,7 @@ SOURCE_FILES = glob(
   [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "assets/**/*.png",
   ],
   exclude = [
     "**/*.test.*",

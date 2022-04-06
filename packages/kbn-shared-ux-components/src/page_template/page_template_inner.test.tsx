@@ -14,7 +14,7 @@ import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 describe('KibanaPageTemplateInner', () => {
   const pageHeader = {
     iconType: 'test',
-    title: 'test',
+    pageTitle: 'test',
     description: 'test',
     rightSideItems: ['test'],
   };

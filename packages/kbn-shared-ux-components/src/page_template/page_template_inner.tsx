@@ -53,7 +53,6 @@ export const KibanaPageTemplateInner: FunctionComponent<Props> = ({
   }
 
   const classes = getClasses(template, className);
-
   return (
     <EuiPageTemplate template={template} className={classes} pageHeader={header} {...rest}>
       {children}

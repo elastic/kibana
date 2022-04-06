@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from './page_template';
 import mdx from './page_template.mdx';
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
@@ -24,7 +24,7 @@ export default {
   },
 };
 
-type Params = Pick<KibanaPageTemplateProps, 'isEmptyState'>;
+type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader'>;
 
 const noDataConfig = {
   solution: 'Kibana',
@@ -88,6 +88,13 @@ const content = (
   </EuiText>
 );
 
+const header = {
+  iconType: 'logoKibana',
+  pageTitle: 'Kibana',
+  description: 'Welcome to Kibana!',
+  rightSideItems: [<EuiButton fill>Add something</EuiButton>, <EuiButton>Do something</EuiButton>],
+};
+
 export const WithNoDataConfig = () => {
   return <KibanaPageTemplate noDataConfig={noDataConfig} />;
 };
@@ -101,13 +108,21 @@ export const WithSolutionNav = () => {
 };
 
 export const PureComponent = (params: Params) => {
-  return <KibanaPageTemplate {...params}>{content}</KibanaPageTemplate>;
+  return (
+    <KibanaPageTemplate {...params} pageHeader={params.pageHeader ? header : undefined}>
+      {content}
+    </KibanaPageTemplate>
+  );
 };
 
 PureComponent.argTypes = {
   isEmptyState: {
     control: 'boolean',
     defaultValue: false,
+  },
+  pageHeader: {
+    control: 'boolean',
+    defaultValue: true,
   },
 };
 
