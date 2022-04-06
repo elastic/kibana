@@ -11,6 +11,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { Filter } from '@kbn/es-query';
 import { isTab } from '../../../../timelines/public';
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -49,6 +50,7 @@ import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_us
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { userNameExistsFilter } from './details/helpers';
 
 const ID = 'UsersQueryId';
 
@@ -86,7 +88,11 @@ const UsersComponent = () => {
   const { uiSettings } = useKibana().services;
 
   const { tabName } = useParams<{ tabName: string }>();
-  const tabsFilters = React.useMemo(() => {
+  const tabsFilters: Filter[] = React.useMemo(() => {
+    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+      return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
+    }
+
     if (tabName === UsersTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
@@ -216,6 +222,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}
+              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

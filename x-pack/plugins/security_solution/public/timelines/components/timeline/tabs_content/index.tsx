@@ -27,6 +27,7 @@ import {
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
+import { SessionViewConfig } from '../session_tab_content/use_session_view';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -60,7 +61,7 @@ interface BasicTimelineTab {
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
-  sessionViewId?: string | null;
+  sessionViewConfig?: SessionViewConfig | null;
   timelineDescription: string;
 }
 
@@ -235,7 +236,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineFullScreen,
   timelineType,
   graphEventId,
-  sessionViewId,
+  sessionViewConfig,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -351,7 +352,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.session}`}
             onClick={setSessionAsActiveTab}
             isSelected={activeTab === TimelineTabs.session}
-            disabled={sessionViewId === null}
+            disabled={sessionViewConfig === null}
             key={TimelineTabs.session}
           >
             {i18n.SESSION_TAB}

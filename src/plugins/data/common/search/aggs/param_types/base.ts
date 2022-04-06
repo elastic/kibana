@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { IAggConfigs } from '../agg_configs';
