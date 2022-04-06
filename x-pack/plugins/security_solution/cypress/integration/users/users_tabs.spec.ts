@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HEADER_SUBTITLE, USER_NAME_CELL } from '../../screens/users/all_users';
+import { HEADER_SUBTITLE } from '../../screens/users/all_users';
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../screens/users/user_anomalies';
 import {
   AUTHENTICATIONS_TAB,
