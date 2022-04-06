@@ -26,20 +26,24 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
 };
 
 export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
-  private axiosInstance: AxiosInstance | undefined;
+  private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http', 'https'];
 
   constructor(
     public configurationUtilities: ActionsConfigurationUtilities,
-    public logger: Logger
-  ) {}
+    public logger: Logger,
+    auth: AxiosBasicCredentials
+  ) {
+    this.axiosInstance = axios.create({
+      auth,
+    });
+  }
 
   // abstract addIncidentComment: (comment: any) => Promise<any>;
   // abstract deleteIncident: (incident: any) => Promise<any>;
   // abstract getFields: () => Promise<any>;
   abstract createIncident(incident: Partial<Incident>): Promise<T>;
   // abstract getIncident: (incidentId: string) => Promise<any>;
-  abstract getBasicAuth(): AxiosBasicCredentials;
 
   private normalizeURL(url: string) {
     const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
@@ -93,12 +97,6 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     method?: Method;
     responseSchema: Type<R>;
   }): Promise<AxiosResponse<R>> {
-    if (!this.axiosInstance) {
-      this.axiosInstance = axios.create({
-        auth: this.getBasicAuth(),
-      });
-    }
-
     this.assertURL(url);
     this.ensureUriAllowed(url);
     const normalizedURL = this.normalizeURL(url);

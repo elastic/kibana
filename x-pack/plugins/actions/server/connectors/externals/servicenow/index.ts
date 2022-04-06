@@ -115,8 +115,10 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
       throw Error(`[Action]i18n.SERVICENOW: Wrong configuration.`);
     }
 
-    super(configurationUtilities, logger);
-    this.secrets = secrets;
+    super(configurationUtilities, logger, {
+      username: secrets.username,
+      password: secrets.password,
+    });
 
     this.urls = {
       basic: url,
@@ -136,10 +138,6 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
 
     this.useTableApi = !internalConfig.useImportAPI || usesTableApiConfigValue;
     this.appScope = internalConfig.appScope;
-  }
-
-  getBasicAuth(): AxiosBasicCredentials {
-    return { username: this.secrets.username, password: this.secrets.password };
   }
 
   async getIncident(id: string): Promise<ServiceNowIncident> {
