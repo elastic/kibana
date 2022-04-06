@@ -9,14 +9,14 @@ import React from 'react';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const Settings: React.FC = () => {
+export const ConnectorSettings: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[]}
-      pageViewTelemetry="Settings"
+      pageViewTelemetry="Connector Settings"
       isLoading={false}
     >
-      <>Settings</>
+      <>Connector Settings</>
     </EnterpriseSearchContentPageTemplate>
   );
 };
