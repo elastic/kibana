@@ -55,17 +55,16 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     params: ExecutorParams;
     secrets: ServiceNowSecretConfigurationType;
   }) {
-    const { apiUrl, usesTableApi: usesTableApiConfigValue } = config;
+    const { apiUrl: url, usesTableApi: usesTableApiConfigValue } = config;
     const { username, password } = secrets;
 
-    if (!apiUrl || !username || !password) {
+    if (!url || !username || !password) {
       throw Error(`[Action]i18n.SERVICENOW: Wrong configuration.`);
     }
 
     super(configurationUtilities, logger);
     this.secrets = secrets;
 
-    const url = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
     this.urls = {
       basic: url,
       importSetTableUrl: `${url}/api/now/import/${internalConfig.importSetTable}`,

@@ -22,6 +22,8 @@ interface CaseConnectorInterface<T extends unknown> {
 
 export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
   private axiosInstance: AxiosInstance | undefined;
+  private validProtocols: string[] = ['http', 'https'];
+
   constructor(
     public configurationUtilities: ActionsConfigurationUtilities,
     public logger: Logger
@@ -33,6 +35,23 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
   abstract createIncident(incident: Partial<Incident>): Promise<T>;
   // abstract getIncident: (incidentId: string) => Promise<any>;
   abstract getBasicAuth(): AxiosBasicCredentials;
+
+  private normalizeURL(url: string) {
+    const replaceDoubleSlashRegex = new RegExp('([^:]/)/+', 'g');
+    return url.replace(replaceDoubleSlashRegex, '$1');
+  }
+
+  private assertURL(url: string) {
+    try {
+      const validURL = new URL(url);
+
+      if (!this.validProtocols.includes(validURL.protocol)) {
+        throw new Error('Invalid protocol');
+      }
+    } catch (error) {
+      throw new Error(`URL Error: ${error.message}`);
+    }
+  }
 
   public async request<R = unknown>({
     url,
@@ -50,6 +69,9 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
       });
     }
 
+    this.assertURL(url);
+    const normalizedURL = this.normalizeURL(url);
+
     const { httpAgent, httpsAgent } = getCustomAgents(
       this.configurationUtilities,
       this.logger,
@@ -57,7 +79,7 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     );
     const { maxContentLength, timeout } = this.configurationUtilities.getResponseSettings();
 
-    return await this.axiosInstance(url, {
+    return await this.axiosInstance(normalizedURL, {
       ...rest,
       method,
       data: data ?? {},
