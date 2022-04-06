@@ -33,7 +33,7 @@ export function annotationLayerConfigFunction(): ExpressionFunctionDefinition<
         help: 'Show details',
       },
       annotations: {
-        types: ['manual_event_annotation'],
+        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
         help: '',
         multi: true,
       },

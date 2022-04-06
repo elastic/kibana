@@ -29,6 +29,13 @@ export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.default
   defaultMessage: 'Event',
 });
 
+export const defaultRangeAnnotationLabel = i18n.translate(
+  'xpack.lens.xyChart.defaultRangeAnnotationLabel',
+  {
+    defaultMessage: 'Event range',
+  }
+);
+
 export function getStaticDate(
   dataLayers: XYDataLayerConfig[],
   activeData: FramePublicAPI['activeData']

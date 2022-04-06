@@ -2568,7 +2568,7 @@ describe('XYChart component', () => {
       time: '2022-03-18T08:25:00.000Z',
       label: 'Event 1',
       icon: 'triangle',
-      type: 'manual_event_annotation',
+      type: 'manual_point_event_annotation',
       color: 'red',
       lineStyle: 'dashed',
       lineWidth: 3,
@@ -2582,7 +2582,7 @@ describe('XYChart component', () => {
           {
             time: '2022-03-18T08:25:17.140Z',
             label: 'Annotation',
-            type: 'manual_event_annotation',
+            type: 'manual_point_event_annotation',
           },
         ],
       },

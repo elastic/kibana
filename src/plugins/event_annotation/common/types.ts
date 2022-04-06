@@ -7,10 +7,11 @@
  */
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
+export type Fill = 'inside' | 'outside' | 'none';
 export type AnnotationType = 'manual';
-export type KeyType = 'point_in_time';
+export type KeyType = 'point_in_time' | 'range';
 
-export interface StyleProps {
+export interface PointStyleProps {
   label: string;
   color?: string;
   icon?: string;
@@ -20,10 +21,31 @@ export interface StyleProps {
   isHidden?: boolean;
 }
 
-export type EventAnnotationConfig = {
+export type PointInTimeEventAnnotationConfig = {
   id: string;
   key: {
-    type: KeyType;
+    type: 'point_in_time';
     timestamp: string;
   };
-} & StyleProps;
+} & PointStyleProps;
+
+export interface RangeStyleProps {
+  label: string;
+  color?: string;
+  outside?: boolean;
+  textVisibility?: boolean;
+  isHidden?: boolean;
+}
+
+export type RangeEventAnnotationConfig = {
+  id: string;
+  key: {
+    type: 'range';
+    timestamp: string;
+    endTimestamp: string;
+  };
+} & RangeStyleProps;
+
+export type StyleProps = PointStyleProps & RangeStyleProps;
+
+export type EventAnnotationConfig = PointInTimeEventAnnotationConfig | RangeEventAnnotationConfig;

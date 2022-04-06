@@ -16,10 +16,14 @@ import {
   AnnotationTooltipFormatter,
   LineAnnotation,
   Position,
+  RectAnnotation,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { EventAnnotationArgs } from '../../../../event_annotation/common';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  ManualPointEventAnnotationArgs,
+  ManualRangeEventAnnotationOutput,
+} from 'src/plugins/event_annotation/common/manual_event_annotation/types';
 import type { FieldFormat } from '../../../../field_formats/common';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
@@ -34,7 +38,8 @@ const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInte
 };
 
 export interface AnnotationsProps {
-  groupedAnnotations: CollectiveConfig[];
+  groupedLineAnnotations: CollectiveConfig[];
+  rangeAnnotations: ManualRangeEventAnnotationOutput[];
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
@@ -43,7 +48,7 @@ export interface AnnotationsProps {
   isBarChart?: boolean;
 }
 
-interface CollectiveConfig extends EventAnnotationArgs {
+interface CollectiveConfig extends ManualPointEventAnnotationArgs {
   roundedTimestamp: number;
   axisMode: 'bottom';
   customTooltipDetails?: AnnotationTooltipFormatter | undefined;
@@ -55,9 +60,11 @@ const groupVisibleConfigsByInterval = (
   firstTimestamp?: number
 ) => {
   return layers
-    .flatMap(({ annotations }) => annotations.filter((a) => !a.isHidden))
+    .flatMap(({ annotations }) =>
+      annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
+    )
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
-    .reduce<Record<string, EventAnnotationArgs[]>>((acc, current) => {
+    .reduce<Record<string, ManualPointEventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(
         moment(current.time).valueOf(),
         firstTimestamp,
@@ -72,7 +79,7 @@ const groupVisibleConfigsByInterval = (
 
 const createCustomTooltipDetails =
   (
-    config: EventAnnotationArgs[],
+    config: ManualPointEventAnnotationArgs[],
     formatter?: FieldFormat
   ): AnnotationTooltipFormatter | undefined =>
   () => {
@@ -95,8 +102,8 @@ const createCustomTooltipDetails =
     );
   };
 
-function getCommonProperty<T, K extends keyof EventAnnotationArgs>(
-  configArr: EventAnnotationArgs[],
+function getCommonProperty<T, K extends keyof ManualPointEventAnnotationArgs>(
+  configArr: ManualPointEventAnnotationArgs[],
   propertyName: K,
   fallbackValue: T
 ) {
@@ -107,9 +114,9 @@ function getCommonProperty<T, K extends keyof EventAnnotationArgs>(
   return fallbackValue;
 }
 
-const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
+const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
   return {
-    color: getCommonProperty<EventAnnotationArgs['color'], 'color'>(
+    color: getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
       configArr,
       'color',
       defaultAnnotationColor
@@ -118,6 +125,17 @@ const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
     lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
     textVisibility: getCommonProperty(configArr, 'textVisibility', false),
   };
+};
+
+export const getRangeAnnotations = (layers: AnnotationLayerConfigResult[]) => {
+  return layers
+    .flatMap(({ annotations }) =>
+      annotations.filter(
+        (a): a is ManualRangeEventAnnotationOutput =>
+          a.type === 'manual_range_event_annotation' && !a.isHidden
+      )
+    )
+    .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf());
 };
 
 export const getAnnotationsGroupedByInterval = (
@@ -148,7 +166,8 @@ export const getAnnotationsGroupedByInterval = (
 };
 
 export const Annotations = ({
-  groupedAnnotations,
+  groupedLineAnnotations,
+  rangeAnnotations,
   formatter,
   isHorizontal,
   paddingMap,
@@ -158,7 +177,7 @@ export const Annotations = ({
 }: AnnotationsProps) => {
   return (
     <>
-      {groupedAnnotations.map((annotation) => {
+      {groupedLineAnnotations.map((annotation) => {
         const markerPositionVertical = Position.Top;
         const markerPosition = isHorizontal
           ? mapVerticalToHorizontalPlacement(markerPositionVertical)
@@ -170,7 +189,7 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = annotation.lineWidth || 1;
+        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
         return (
           <LineAnnotation
             id={id}
@@ -223,6 +242,39 @@ export const Annotations = ({
                 opacity: 1,
               },
             }}
+          />
+        );
+      })}
+      {rangeAnnotations.map(({ label, time, color, endTime, outside }) => {
+        const id = snakeCase(label);
+        return (
+          <RectAnnotation
+            id={id}
+            key={id}
+            customTooltipDetails={() => (
+              <>
+                <EuiText size="xs">
+                  <h4>
+                    {formatter
+                      ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
+                      : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
+                  </h4>
+                </EuiText>
+                <EuiText size="xs">{label}</EuiText>
+              </>
+            )}
+            dataValues={[
+              {
+                coordinates: {
+                  x0: moment(time).valueOf(),
+                  x1: moment(endTime).valueOf(),
+                },
+                details: label,
+              },
+            ]}
+            style={{ fill: color || defaultAnnotationColor }}
+            outside={Boolean(outside)}
+            outsideDimension={hide ? 2 : 10}
           />
         );
       })}

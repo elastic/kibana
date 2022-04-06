@@ -6,10 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { StyleProps } from '../types';
+import { PointStyleProps, RangeStyleProps } from '../types';
 
-export type EventAnnotationArgs = {
+export type ManualPointEventAnnotationArgs = {
   time: string;
-} & StyleProps;
+} & PointStyleProps;
 
-export type EventAnnotationOutput = EventAnnotationArgs & { type: 'manual_event_annotation' };
+export type ManualPointEventAnnotationOutput = ManualPointEventAnnotationArgs & {
+  type: 'manual_point_event_annotation';
+};
+
+export type ManualRangeEventAnnotationArgs = {
+  time: string;
+  endTime: string;
+} & RangeStyleProps;
+
+export type ManualRangeEventAnnotationOutput = ManualRangeEventAnnotationArgs & {
+  type: 'manual_range_event_annotation';
+};
+
+export type EventAnnotationArgs = ManualPointEventAnnotationArgs | ManualRangeEventAnnotationArgs;
+export type EventAnnotationOutput =
+  | ManualPointEventAnnotationOutput
+  | ManualRangeEventAnnotationOutput;

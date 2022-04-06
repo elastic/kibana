@@ -7,7 +7,11 @@
  */
 
 import { CoreSetup, Plugin } from 'kibana/server';
-import { manualEventAnnotation, eventAnnotationGroup } from '../common';
+import {
+  manualPointEventAnnotation,
+  eventAnnotationGroup,
+  manualRangeEventAnnotation,
+} from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
 
 interface SetupDependencies {
@@ -16,7 +20,8 @@ interface SetupDependencies {
 
 export class EventAnnotationServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup, dependencies: SetupDependencies) {
-    dependencies.expressions.registerFunction(manualEventAnnotation);
+    dependencies.expressions.registerFunction(manualPointEventAnnotation);
+    dependencies.expressions.registerFunction(manualRangeEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
 
     return {};

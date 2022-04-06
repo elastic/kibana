@@ -7,8 +7,8 @@
  */
 
 import { ExpressionAstExpression } from '../../../expressions/common/ast';
-import { EventAnnotationArgs } from '../../common';
+import { EventAnnotationConfig } from '../../common';
 
 export interface EventAnnotationServiceType {
-  toExpression: (props: EventAnnotationArgs) => ExpressionAstExpression;
+  toExpression: (props: EventAnnotationConfig) => ExpressionAstExpression;
 }

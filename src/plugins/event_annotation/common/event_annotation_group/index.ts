@@ -35,7 +35,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     }),
     args: {
       annotations: {
-        types: ['manual_event_annotation'],
+        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',
         }),
