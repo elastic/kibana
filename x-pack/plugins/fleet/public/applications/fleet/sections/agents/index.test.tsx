@@ -7,15 +7,12 @@
 
 import React from 'react';
 
-// import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../mock';
 import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 import { useGetSettings } from '../../../../hooks/use_request/settings';
 import { useAuthz } from '../../../../hooks/use_authz';
 
 import { AgentsApp } from '.';
-
-// jest.mock('');
 
 jest.mock('../../../../hooks/use_fleet_status', () => ({
   FleetStatusProvider: (props: any) => {
