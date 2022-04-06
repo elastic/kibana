@@ -17,7 +17,6 @@ import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { FeaturesPluginStart } from '../../features/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
@@ -126,7 +125,7 @@ export class SecurityPlugin
         icon: 'securityApp',
         path: '/app/management/security/roles',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         order: 600,
       });
     }

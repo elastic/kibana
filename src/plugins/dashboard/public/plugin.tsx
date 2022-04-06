@@ -31,7 +31,7 @@ import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
+import type { HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { DataPublicPluginSetup, DataPublicPluginStart } from './services/data';
 import { SharePluginSetup, SharePluginStart } from './services/share';
@@ -321,7 +321,7 @@ export class DashboardPlugin
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         solutionId: 'kibana',
         order: 100,
       });

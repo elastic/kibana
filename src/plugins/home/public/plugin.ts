@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
-  FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   TutorialService,
@@ -124,7 +123,7 @@ export class HomePublicPlugin
       icon: 'indexOpen',
       showOnHomePage: true,
       path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
-      category: 'data' as FeatureCatalogueCategory.DATA,
+      category: 'data',
       order: 500,
     });
 

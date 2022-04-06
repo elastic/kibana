@@ -16,10 +16,7 @@ import {
 } from '../../../../src/core/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { CloudSetup, CloudStart } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
@@ -37,6 +34,7 @@ import { docLinks } from './applications/shared/doc_links';
 export interface ClientConfigType {
   host?: string;
 }
+
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
   errorConnectingMessage?: string;
@@ -47,6 +45,7 @@ interface PluginsSetup {
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
 }
+
 export interface PluginsStart {
   cloud?: CloudSetup & CloudStart;
   licensing: LicensingPluginStart;
@@ -174,7 +173,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         showOnHomePage: false,
       });
 
@@ -184,7 +183,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'workplaceSearchApp',
         description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
         path: WORKPLACE_SEARCH_PLUGIN.URL,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         showOnHomePage: false,
       });
     }

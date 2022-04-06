@@ -11,5 +11,5 @@
   "requiredPlugins": ["management", "charts", "data", "kibanaReact", "kibanaUtils", "savedObjects", "unifiedSearch"],
   "configPath": ["xpack", "trigger_actions_ui"],
   "extraPublicDirs": ["public/common", "public/common/constants"],
-  "requiredBundles": ["home", "alerting", "esUiShared", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils"]
 }

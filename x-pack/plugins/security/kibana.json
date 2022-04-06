@@ -13,7 +13,6 @@
   "server": true,
   "ui": true,
   "requiredBundles": [
-    "home",
     "kibanaReact",
     "spaces",
     "esUiShared"

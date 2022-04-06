@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { FeatureCatalogueCategory } from '../../home/public';
 import {
   AppSetupUIPluginDependencies,
   ClientConfigType,
@@ -41,7 +40,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           icon: 'consoleApp',
           path: '/app/dev_tools#/console',
           showOnHomePage: false,
-          category: FeatureCatalogueCategory.ADMIN,
+          category: 'admin',
         });
       }
 

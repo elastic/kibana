@@ -58,7 +58,6 @@ import {
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { showNewVisModal } from './wizard';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { FeatureCatalogueCategory } from '../../home/public';
 import { visualizeEditorTrigger } from './triggers';
 
 import type { VisualizeServices } from './visualize_app/types';
@@ -324,7 +323,7 @@ export class VisualizationsPlugin
         icon: 'visualizeApp',
         path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
       });
     }
 

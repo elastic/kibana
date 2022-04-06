@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'kibana/public';
-import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
@@ -55,7 +54,7 @@ export class AdvancedSettingsPlugin
         icon: 'gear',
         path: '/app/management/kibana/settings',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

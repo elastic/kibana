@@ -11,7 +11,6 @@ import { KibanaServices } from './common/lib/kibana';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -51,7 +50,7 @@ export class CasesUiPlugin
         icon: 'watchesApp',
         path: APP_PATH,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

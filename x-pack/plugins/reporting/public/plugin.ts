@@ -21,8 +21,7 @@ import {
 } from 'src/core/public';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import {
-  FeatureCatalogueCategory,
+import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
@@ -170,7 +169,7 @@ export class ReportingPublicPlugin
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     management.sections.section.insightsAndAlerting.registerApp({

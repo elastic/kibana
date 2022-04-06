@@ -78,7 +78,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
               icon: 'pipelineApp',
               path: '/app/management/ingest/pipelines',
               showOnHomePage: false,
-              category: FeatureCatalogueCategory.ADMIN,
+              category: 'admin',
             });
           });
         }

@@ -38,7 +38,6 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginStart } from '../../licensing/public';
@@ -238,7 +237,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         icon: 'indexManagementApp',
         showOnHomePage: true,
         path: INTEGRATIONS_BASE_PATH,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         order: 510,
       });
     }

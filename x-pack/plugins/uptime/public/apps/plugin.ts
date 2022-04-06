@@ -19,10 +19,7 @@ import { SharePluginSetup, SharePluginStart } from '../../../../../src/plugins/s
 import { DiscoverStart } from '../../../../../src/plugins/discover/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -97,7 +94,7 @@ export class UptimePlugin
         icon: 'uptimeApp',
         path: '/app/uptime',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
       });
     }
     const getUptimeDataHelper = async () => {

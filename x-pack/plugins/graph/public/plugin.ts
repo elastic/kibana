@@ -25,8 +25,7 @@ import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
-import {
-  FeatureCatalogueCategory,
+import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
@@ -67,7 +66,7 @@ export class GraphPlugin
         icon: 'graphApp',
         path: '/app/graph',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         solutionId: 'kibana',
         order: 600,
       });

@@ -9,7 +9,6 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { ILicense } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common';
@@ -37,7 +36,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       icon: 'searchProfilerApp',
       path: '/app/dev_tools#/searchprofiler',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     const devTool = devTools.register({

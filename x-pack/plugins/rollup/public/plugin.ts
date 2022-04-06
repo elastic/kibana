@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 import { UIM_APP_NAME } from '../common';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 // @ts-ignore
@@ -60,7 +57,7 @@ export class RollupPlugin implements Plugin {
         icon: 'indexRollupApp',
         path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

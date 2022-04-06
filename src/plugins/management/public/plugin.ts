@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
 import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { HomePublicPluginSetup } from '../../home/public';
 import {
   CoreSetup,
   CoreStart,
@@ -89,7 +89,7 @@ export class ManagementPlugin
         icon: 'managementApp',
         path: '/app/management',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         visible: () => this.hasAnyEnabledApps,
       });
     }

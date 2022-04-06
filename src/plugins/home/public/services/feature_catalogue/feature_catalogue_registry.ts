@@ -10,11 +10,7 @@ import { Capabilities } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 
 /** @public */
-export enum FeatureCatalogueCategory {
-  ADMIN = 'admin',
-  DATA = 'data',
-  OTHER = 'other',
-}
+export type FeatureCatalogueCategory = 'admin' | 'data' | 'other';
 
 /** @public */
 export interface FeatureCatalogueEntry {

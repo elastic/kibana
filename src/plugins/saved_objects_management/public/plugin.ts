@@ -12,7 +12,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DataViewsPublicPluginStart } from '../../data_views/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
+import { HomePublicPluginSetup } from '../../home/public';
 import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import {
   SavedObjectsManagementActionService,
@@ -76,7 +76,7 @@ export class SavedObjectsManagementPlugin
         icon: 'savedObjectsApp',
         path: '/app/management/kibana/objects',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

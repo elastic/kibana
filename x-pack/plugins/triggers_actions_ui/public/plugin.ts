@@ -18,10 +18,7 @@ import {
   ManagementAppMountParams,
   ManagementSetup,
 } from '../../../../src/plugins/management/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -135,7 +132,7 @@ export class Plugin
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
