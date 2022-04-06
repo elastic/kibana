@@ -9,7 +9,7 @@
 import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-//import { NoDataViewsComponent } from '@kbn/shared-ux-components';
+// import { NoDataViewsComponent } from '@kbn/shared-ux-components';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { useKibana } from '../../shared_imports';
 
