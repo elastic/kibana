@@ -407,7 +407,7 @@ test('return all set optional fields as they are in manifest', async () => {
           optionalPlugins: ['some-optional-plugin'],
           ui: true,
           owner: { name: 'foo' },
-          enableForAnonymousPages: true,
+          enabledOnAnonymousPages: true,
         })
       )
     );
@@ -425,7 +425,7 @@ test('return all set optional fields as they are in manifest', async () => {
     server: false,
     ui: true,
     owner: { name: 'foo' },
-    enableForAnonymousPages: true,
+    enabledOnAnonymousPages: true,
   });
 });
 
