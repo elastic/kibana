@@ -11,7 +11,6 @@ import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
   ExecutorParams,
-  ExternalServiceParamsCreate,
   GetApplicationInfoResponse,
   ImportSetApiResponse,
   ImportSetApiResponseError,
@@ -66,6 +65,7 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     });
 
     super(axiosInstance, configurationUtilities, logger);
+
     const url = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
     this.urls = {
       basic: url,
