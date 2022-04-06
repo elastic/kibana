@@ -80,6 +80,10 @@ export class EphemeralRuleProvider<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
+  public isEphemeralRule() {
+    return true;
+  }
+
   private getFakeKibanaRequest(spaceId: string | undefined, apiKey: RawRule['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 

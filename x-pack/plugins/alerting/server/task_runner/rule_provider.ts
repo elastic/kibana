@@ -108,6 +108,10 @@ export class ConcreteRuleProvider<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
+  public isEphemeralRule() {
+    return false;
+  }
+
   private getFakeKibanaRequest(spaceId: string | undefined, apiKey: RawRule['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 
