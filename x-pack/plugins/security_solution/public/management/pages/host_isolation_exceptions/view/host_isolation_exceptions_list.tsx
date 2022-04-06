@@ -13,6 +13,7 @@ import type { ArtifactListPageProps } from '../../../components/artifact_list_pa
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { HostIsolationExceptionsForm } from './components/form';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object.freeze({
   pageTitle: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageTitle', {
@@ -111,6 +112,10 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
 export const HostIsolationExceptionsList = memo(() => {
   const http = useHttp();
   const apiClient = HostIsolationExceptionsApiClient.getInstance(http);
+  // There is a flow when the Host Isolation Exceptions page is accessible to the user, even
+  // though they might not have authz to isolate hosts - in a downgrade scenario when entries
+  // still exist. The only thing the user can do is view and delete entries.
+  const canIsolate = useUserPrivileges().endpointPrivileges.canIsolateHost;
 
   return (
     <ArtifactListPage
@@ -119,6 +124,8 @@ export const HostIsolationExceptionsList = memo(() => {
       labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
       data-test-subj="hostIsolationExceptionsListPage"
       searchableFields={SEARCHABLE_FIELDS}
+      allowCardCreateAction={canIsolate}
+      allowCardEditAction={canIsolate}
     />
   );
 });
