@@ -43,6 +43,7 @@ export const yAxisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.yConfig.lineStyle.help', {
         defaultMessage: 'The style of the reference line',
       }),
+      strict: true,
     },
     lineWidth: {
       types: ['number'],
@@ -62,6 +63,7 @@ export const yAxisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.yConfig.iconPosition.help', {
         defaultMessage: 'The placement of the icon for the reference line',
       }),
+      strict: true,
     },
     textVisibility: {
       types: ['boolean'],
@@ -75,6 +77,7 @@ export const yAxisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.yConfig.fill.help', {
         defaultMessage: 'Fill',
       }),
+      strict: true,
     },
     axisId: {
       types: ['string'],

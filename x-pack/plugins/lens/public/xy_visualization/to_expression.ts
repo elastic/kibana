@@ -77,7 +77,6 @@ export const toExpression = (
     metadata,
     datasourceLayers,
     paletteService,
-    attributes,
     datasourceExpressionsByLayers,
     eventAnnotationService
   );
@@ -164,7 +163,6 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
@@ -231,8 +229,6 @@ export const buildExpression = (
         type: 'function',
         function: 'layeredXyVis',
         arguments: {
-          title: [attributes?.title || ''],
-          description: [attributes?.description || ''],
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
           yRightTitle: [state.yRightTitle || ''],

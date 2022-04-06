@@ -177,8 +177,6 @@ export interface LabelsOrientationConfig {
 
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -205,8 +203,6 @@ export interface XYArgs {
 }
 
 export interface LayeredXYArgs {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -216,7 +212,7 @@ export interface LayeredXYArgs {
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  layers: XYExtendedLayerConfigResult[];
+  layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -231,8 +227,6 @@ export interface LayeredXYArgs {
 }
 
 export interface XYProps {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;

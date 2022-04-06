@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
@@ -16,7 +16,7 @@ import {
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect } from 'react';
+import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -37,7 +37,10 @@ export interface FilterItemProps {
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: PanelOptions[];
   timeRangeForSuggestionsOverride?: boolean;
+  readonly?: boolean;
 }
+
+type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
 
 interface LabelOptions {
   title: string;
@@ -349,32 +352,44 @@ export function FilterItem(props: FilterItemProps) {
     return null;
   }
 
-  const badge = (
-    <FilterView
-      filter={filter}
-      valueLabel={valueLabelConfig.title}
-      filterLabelStatus={valueLabelConfig.status}
-      errorMessage={valueLabelConfig.message}
-      className={getClasses(filter.meta.negate ?? false, valueLabelConfig)}
-      iconOnClick={() => props.onRemove()}
-      onClick={handleBadgeClick}
-      data-test-subj={getDataTestSubj(valueLabelConfig)}
-    />
-  );
+  const filterViewProps = {
+    filter,
+    valueLabel: valueLabelConfig.title,
+    filterLabelStatus: valueLabelConfig.status,
+    errorMessage: valueLabelConfig.message,
+    className: getClasses(!!filter.meta.negate, valueLabelConfig),
+    iconOnClick: props.onRemove,
+    onClick: handleBadgeClick,
+    'data-test-subj': getDataTestSubj(valueLabelConfig),
+    readonly: props.readonly,
+  };
+
+  const popoverProps: FilterPopoverProps = {
+    id: `popoverFor_filter${id}`,
+    className: `globalFilterItem__popover`,
+    anchorClassName: `globalFilterItem__popoverAnchor`,
+    isOpen: isPopoverOpen,
+    closePopover: () => {
+      setIsPopoverOpen(false);
+    },
+    button: <FilterView {...filterViewProps} />,
+    panelPaddingSize: 'none',
+  };
+
+  if (props.readonly) {
+    return (
+      <EuiPopover
+        panelClassName="globalFilterItem__readonlyPanel"
+        anchorPosition="upCenter"
+        {...popoverProps}
+      >
+        <FilterView {...filterViewProps} hideAlias />
+      </EuiPopover>
+    );
+  }
 
   return (
-    <EuiPopover
-      id={`popoverFor_filter${id}`}
-      className={`globalFilterItem__popover`}
-      anchorClassName={`globalFilterItem__popoverAnchor`}
-      isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
-      button={badge}
-      anchorPosition="downLeft"
-      panelPaddingSize="none"
-    >
+    <EuiPopover anchorPosition="downLeft" {...popoverProps}>
       <EuiContextMenu initialPanelId={0} panels={getPanels()} />
     </EuiPopover>
   );

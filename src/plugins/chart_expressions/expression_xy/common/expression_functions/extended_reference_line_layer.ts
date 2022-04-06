@@ -20,34 +20,34 @@ export const extendedReferenceLineLayerFunction: ExpressionFunctionDefinition<
   name: EXTENDED_REFERENCE_LINE_LAYER,
   aliases: [],
   type: EXTENDED_REFERENCE_LINE_LAYER,
-  help: i18n.translate('expressionXY.referenceLineLayer.help', {
+  help: i18n.translate('expressionXY.extendedReferenceLineLayer.help', {
     defaultMessage: `Configure a reference line in the xy chart`,
   }),
   inputTypes: ['datatable'],
   args: {
     accessors: {
       types: ['string'],
-      help: i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
+      help: i18n.translate('expressionXY.extendedReferenceLineLayer.accessors.help', {
         defaultMessage: 'The columns to display on the y axis.',
       }),
       multi: true,
     },
     yConfig: {
       types: [Y_CONFIG],
-      help: i18n.translate('expressionXY.referenceLineLayer.yConfig.help', {
+      help: i18n.translate('expressionXY.extendedReferenceLineLayer.yConfig.help', {
         defaultMessage: 'Additional configuration for y axes',
       }),
       multi: true,
     },
     columnToLabel: {
       types: ['string'],
-      help: i18n.translate('expressionXY.referenceLineLayer.columnToLabel.help', {
+      help: i18n.translate('expressionXY.extendedReferenceLineLayer.columnToLabel.help', {
         defaultMessage: 'JSON key-value pairs of column ID to label',
       }),
     },
     table: {
       types: ['datatable'],
-      help: i18n.translate('expressionXY.dataLayer.table.help', {
+      help: i18n.translate('expressionXY.extendedReferenceLineLayer.table.help', {
         defaultMessage: 'Table',
       }),
     },
@@ -56,6 +56,7 @@ export const extendedReferenceLineLayerFunction: ExpressionFunctionDefinition<
     return {
       type: EXTENDED_REFERENCE_LINE_LAYER,
       ...args,
+      accessors: args.accessors ?? [],
       layerType: LayerTypes.REFERENCELINE,
       table: args.table ?? input,
     };

@@ -27,7 +27,7 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   name: EXTENDED_DATA_LAYER,
   aliases: [],
   type: EXTENDED_DATA_LAYER,
-  help: i18n.translate('expressionXY.dataLayer.help', {
+  help: i18n.translate('expressionXY.extendedDataLayer.help', {
     defaultMessage: `Configure a layer in the xy chart`,
   }),
   inputTypes: ['datatable'],
@@ -35,80 +35,84 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
     hide: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionXY.dataLayer.hide.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.hide.help', {
         defaultMessage: 'Show / hide axis',
       }),
     },
     xAccessor: {
       types: ['string'],
-      help: i18n.translate('expressionXY.dataLayer.xAccessor.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.xAccessor.help', {
         defaultMessage: 'X-axis',
       }),
     },
     seriesType: {
       types: ['string'],
       options: [...Object.values(SeriesTypes)],
-      help: i18n.translate('expressionXY.dataLayer.seriesType.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.seriesType.help', {
         defaultMessage: 'The type of chart to display.',
       }),
+      required: true,
+      strict: true,
     },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],
-      help: i18n.translate('expressionXY.dataLayer.xScaleType.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.xScaleType.help', {
         defaultMessage: 'The scale type of the x axis',
       }),
       default: XScaleTypes.ORDINAL,
+      strict: true,
     },
     isHistogram: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.isHistogram.help', {
         defaultMessage: 'Whether to layout the chart as a histogram',
       }),
     },
     yScaleType: {
       options: [...Object.values(YScaleTypes)],
-      help: i18n.translate('expressionXY.dataLayer.yScaleType.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.yScaleType.help', {
         defaultMessage: 'The scale type of the y axes',
       }),
       default: YScaleTypes.LINEAR,
+      strict: true,
     },
     splitAccessor: {
       types: ['string'],
-      help: i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.splitAccessor.help', {
         defaultMessage: 'The column to split by',
       }),
     },
     accessors: {
       types: ['string'],
-      help: i18n.translate('expressionXY.dataLayer.accessors.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.accessors.help', {
         defaultMessage: 'The columns to display on the y axis.',
       }),
       multi: true,
     },
     yConfig: {
       types: [Y_CONFIG],
-      help: i18n.translate('expressionXY.dataLayer.yConfig.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.yConfig.help', {
         defaultMessage: 'Additional configuration for y axes',
       }),
       multi: true,
     },
     columnToLabel: {
       types: ['string'],
-      help: i18n.translate('expressionXY.dataLayer.columnToLabel.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.columnToLabel.help', {
         defaultMessage: 'JSON key-value pairs of column ID to label',
       }),
     },
     palette: {
       default: `{theme "palette" default={system_palette name="default"} }`,
-      help: i18n.translate('expressionXY.dataLayer.palette.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.palette.help', {
         defaultMessage: 'Palette',
       }),
       types: ['palette'],
     },
     table: {
       types: ['datatable'],
-      help: i18n.translate('expressionXY.dataLayer.table.help', {
+      help: i18n.translate('expressionXY.extendedDataLayer.table.help', {
         defaultMessage: 'Table',
       }),
     },
@@ -117,6 +121,7 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
+      accessors: args.accessors ?? [],
       layerType: LayerTypes.DATA,
       table: args.table ?? input,
     };

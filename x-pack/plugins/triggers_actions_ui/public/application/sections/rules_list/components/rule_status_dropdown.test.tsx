@@ -22,6 +22,7 @@ describe('RuleStatusDropdown', () => {
     enableRule,
     snoozeRule,
     unsnoozeRule,
+    isEditable: true,
     previousSnoozeInterval: null,
     item: {
       id: '1',
@@ -113,6 +114,21 @@ describe('RuleStatusDropdown', () => {
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
       'Disabled'
+    );
+  });
+
+  test('renders read-only status control when isEditable is false', () => {
+    const wrapper = mountWithIntl(
+      <RuleStatusDropdown
+        {...{
+          ...props,
+          item: { ...props.item, snoozeEndTime: SNOOZE_END_TIME },
+        }}
+        isEditable={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
+      'Enabled'
     );
   });
 });

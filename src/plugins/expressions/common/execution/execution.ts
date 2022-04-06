@@ -489,7 +489,7 @@ export class Execution<
           continue;
         }
 
-        if (!aliases?.length) {
+        if (!aliases?.length && name === '_') {
           throw new Error(`${fnDef.name} requires an argument`);
         }
 
