@@ -67,18 +67,18 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   graphEventId,
   activeTab,
 }) => {
-  const title = useMemo(() => {
+  const title = () => {
     if (timelineId === TimelineId.active) {
       return activeTab === TimelineTabs.graph ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
     } else {
       return graphEventId ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
     }
-  }, [activeTab, graphEventId, timelineId]);
+  };
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
-          {title}
+          {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>
       {timelineId !== TimelineId.active && (
