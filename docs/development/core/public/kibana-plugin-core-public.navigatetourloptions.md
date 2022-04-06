@@ -16,6 +16,6 @@ export interface NavigateToUrlOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [forceRedirect?](./kibana-plugin-core-public.navigatetourloptions.forceredirect.md) | boolean | <i>(Optional)</i> if true, will redirect directly to the url |
+|  [forceRedirect?](./kibana-plugin-core-public.navigatetourloptions.forceredirect.md) | boolean | <i>(Optional)</i> if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using <code>window.location.assign</code> instead of <code>push</code>) |
 |  [skipAppLeave?](./kibana-plugin-core-public.navigatetourloptions.skipappleave.md) | boolean | <i>(Optional)</i> if true, will bypass the default onAppLeave behavior |
 
