@@ -244,6 +244,7 @@ async function queryFlameGraph(
             return client.mget({
               index: 'profiling-stacktraces',
               ids,
+              realtime: false,
               _source_includes: ['FrameID', 'Type'],
             });
           }
@@ -336,6 +337,7 @@ async function queryFlameGraph(
       return await client.mget({
         index: 'profiling-stackframes',
         ids: [...stackFrameDocIDs],
+        realtime: false,
       });
     }
   );
