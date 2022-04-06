@@ -34,21 +34,21 @@ export const LogstashInstructions = () => {
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"
-          defaultMessage="Configure Logstash for Elastic Agent"
+          defaultMessage="You must configure Logstash for Elastic Agent"
         />
       }
     >
       <>
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.description"
-          defaultMessage="You must add a pipeline for Elastic Agent to Logstash. For more information, visit our
+          defaultMessage="You must add an Elastic Agent pipeline configuration to Logstash.
           {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink external={true} href={docLinks.links.fleet.guide}>
+              <EuiLink external={true} href={docLinks.links.logstash.inputElasticAgent}>
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.documentationLink"
-                  defaultMessage="documentation"
+                  defaultMessage="Learn more"
                 />
               </EuiLink>
             ),
@@ -71,14 +71,14 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
         <EuiButton onClick={() => setIsOpen(false)}>
           <FormattedMessage
             id="xpack.fleet.settings.logstashInstructions.collapseInstructionsButtonLabel"
-            defaultMessage="Collapse instructions"
+            defaultMessage="Collapse steps"
           />
         </EuiButton>
       ) : (
         <EuiButton onClick={() => setIsOpen(true)} fill={true}>
           <FormattedMessage
             id="xpack.fleet.settings.logstashInstructions.viewInstructionButtonLabel"
-            defaultMessage="View instructions"
+            defaultMessage="View steps"
           />
         </EuiButton>
       )}

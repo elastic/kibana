@@ -11,7 +11,7 @@ import { outputType } from '../../../common/constants';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
-    return 'Invalid logstash host should not start with http(s)';
+    return 'Host URL must begin with a domain name or IP address';
   }
 
   try {
@@ -21,7 +21,7 @@ export function validateLogstashHost(val: string) {
       return 'Invalid host';
     }
   } catch (err) {
-    return 'Invalid logstash host';
+    return 'Invalid Logstash host';
   }
 }
 

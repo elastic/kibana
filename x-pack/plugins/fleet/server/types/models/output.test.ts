@@ -19,7 +19,7 @@ describe('Output model', () => {
 
     it('should return an error for an invalid host with http scheme', () => {
       expect(validateLogstashHost('https://test.fr:5044')).toMatchInlineSnapshot(
-        `"Invalid logstash host should not start with http(s)"`
+        `"Host URL must begin with a domain name or IP address"`
       );
     });
   });
