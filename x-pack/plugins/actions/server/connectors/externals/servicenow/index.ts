@@ -80,6 +80,7 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
         return `${url}/api/now/table/sys_choice?sysparm_query=name=task^ORname=${internalConfig.table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element`;
       },
     };
+
     this.useTableApi = !internalConfig.useImportAPI || usesTableApiConfigValue;
     this.appScope = internalConfig.appScope;
   }
