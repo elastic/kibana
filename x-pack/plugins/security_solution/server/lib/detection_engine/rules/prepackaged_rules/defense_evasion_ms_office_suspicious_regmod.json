@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Microsoft Office Products offers options for users and developers to control the security settings for running and using Macros. Adversaries may abuse these security settings to modify the default behavior of the Office Application to trust future macros and/or disable security warnings, which could increase their chances of establishing persistence.",
+  "description": "Microsoft Office Products offer options for users and developers to control the security settings for running and using Macros. Adversaries may abuse these security settings to modify the default behavior of the Office Application to trust future macros and/or disable security warnings, which could increase their chances of establishing persistence.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "MS Office Macro Security Registry Modifications",
+  "note": "## Triage and analysis\n\n### Investigating MS Office Macro Security Registry Modifications\n\nMacros are small programs that are used to automate repetitive tasks in Microsoft Office applications.\nHistorically, macros have been used for a variety of reasons -- from automating part of a job, to\nbuilding entire processes and data flows. Macros are written in Visual Basic for Applications (VBA) and are saved as\npart of Microsoft Office files.\n\nMacros are often created for legitimate reasons, but they can also be written by attackers to gain access, harm a\nsystem, or bypass other security controls such as application allow listing. In fact, exploitation from malicious macros\nis one of the top ways that organizations are compromised today. These attacks are often conducted through phishing or\nspear phishing campaigns.\n\nAttackers can convince victims to modify Microsoft Office security settings, so their macros are trusted by default and\nno warnings are displayed when they are executed. These settings include:\n\n* *Trust access to the VBA project object model* - When enabled, Microsoft Office will trust all macros and run any code\nwithout showing a security warning or requiring user permission.\n* *VbaWarnings* - When set to 1, Microsoft Office will trust all macros and run any code without showing a security\nwarning or requiring user permission.\n\nThis rule looks for registry changes affecting the conditions above.\n\n#### Possible investigation steps\n\n- Identify the user that performed the operation.\n- Verify whether malicious macros were executed after the registry change.\n- Contact the user and check if the change was done manually.\n- Investigate other alerts associated with the user during the past 48 hours.\n\n### False positive analysis\n\n- This activity should not happen legitimately. The security team should address any potential benign true\npositives (B-TPs), as this configuration can put the user and the domain at risk.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Reset the registry key value.\n- Isolate the host if malicious code was executed and reset the involved account's passwords.\n- Explore using GPOs to manage security settings for Microsoft Office macros.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "registry where event.type == \"change\" and\n    registry.path : (\n        \"HKU\\\\S-1-5-21-*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Security\\\\AccessVBOM\",\n        \"HKU\\\\S-1-5-21-*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Security\\\\VbaWarnings\"\n        ) and \n    registry.data.strings == \"0x00000001\" and\n    process.name : (\"cscript.exe\", \"wscript.exe\", \"mshta.exe\", \"mshta.exe\", \"winword.exe\", \"excel.exe\")\n",
   "risk_score": 47,
   "rule_id": "feeed87c-5e95-4339-aef1-47fd79bcfbe3",
@@ -63,5 +64,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }
