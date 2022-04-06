@@ -15,12 +15,17 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { RESULTS_TABLE_CELL_WRRAPER } from '../../screens/live_query';
+import {
+  RESULTS_TABLE,
+  RESULTS_TABLE_BUTTON,
+  RESULTS_TABLE_CELL_WRRAPER,
+} from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
+import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
     navigateTo('/app/osquery');
   });
 
@@ -48,6 +53,9 @@ describe('ALL - Live Query', () => {
     submitQuery();
 
     checkResults();
+    cy.getBySel(RESULTS_TABLE).within(() => {
+      cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
+    });
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'message', index: 1 },
     });

@@ -40,18 +40,23 @@ describe('useExpViewTimeRange', function () {
           page: 1,
           total: 0,
           monitors: [],
+          syncErrors: null,
         },
         locations: [],
+        enablement: null,
         error: {
           serviceLocations: error,
           monitorList: null,
+          enablement: null,
         },
         loading: {
           monitorList: false,
           serviceLocations: loading,
+          enablement: false,
         },
         syntheticsService: {
           loading: false,
+          signupUrl: null,
         },
       },
     };

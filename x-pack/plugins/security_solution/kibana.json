@@ -22,10 +22,12 @@
     "licensing",
     "maps",
     "ruleRegistry",
+    "sessionView",
     "taskManager",
     "timelines",
     "triggersActionsUi",
     "uiActions",
+    "unifiedSearch",
     "sessionView"
   ],
   "optionalPlugins": [

@@ -45,6 +45,7 @@ export interface PostComment {
   caseId: string;
   data: CommentRequest;
   updateCase?: (newCase: Case) => void;
+  throwOnError?: boolean;
 }
 export interface UsePostComment extends NewCommentState {
   postComment: (args: PostComment) => Promise<void>;
@@ -60,7 +61,7 @@ export const usePostComment = (): UsePostComment => {
   const abortCtrlRef = useRef(new AbortController());
 
   const postMyComment = useCallback(
-    async ({ caseId, data, updateCase }: PostComment) => {
+    async ({ caseId, data, updateCase, throwOnError }: PostComment) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -84,6 +85,9 @@ export const usePostComment = (): UsePostComment => {
             );
           }
           dispatch({ type: 'FETCH_FAILURE' });
+          if (throwOnError) {
+            throw error;
+          }
         }
       }
     },

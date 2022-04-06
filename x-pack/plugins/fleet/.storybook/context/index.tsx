@@ -52,6 +52,14 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   const startServices: FleetStartServices = useMemo(
     () => ({
       ...stubbedStartServices,
+      analytics: {
+        registerContextProvider: () => {},
+        registerEventType: () => {},
+        registerShipper: () => {},
+        reportEvent: () => {},
+        optIn: () => {},
+        telemetryCounter$: EMPTY,
+      },
       application: getApplication(),
       executionContext: getExecutionContext(),
       chrome: getChrome(),

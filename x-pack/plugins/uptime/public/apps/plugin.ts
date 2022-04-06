@@ -49,6 +49,8 @@ import {
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
 import { CasesUiStart } from '../../../cases/public';
+import { uptimeOverviewNavigatorParams } from './locators/overview';
+import { CloudSetup } from '../../../cloud/public';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -56,6 +58,7 @@ export interface ClientPluginsSetup {
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ClientPluginsStart {
@@ -103,6 +106,8 @@ export class UptimePlugin
 
       return UptimeDataHelper(coreStart);
     };
+
+    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
     plugins.observability.dashboard.register({
       appName: 'synthetics',

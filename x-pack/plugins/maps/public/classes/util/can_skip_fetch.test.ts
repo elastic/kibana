@@ -7,7 +7,7 @@
 
 import { canSkipSourceUpdate, updateDueToExtent } from './can_skip_fetch';
 import { DataRequest } from './data_request';
-import { Filter } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
 import { ISource } from '../sources/source';
 
 describe('updateDueToExtent', () => {

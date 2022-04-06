@@ -14,6 +14,7 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
+  executionContextServiceMock,
 } from '../../../../../../src/core/public/mocks';
 import { GlobalFlyout } from '../../../../../../src/plugins/es_ui_shared/public';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
@@ -48,7 +49,10 @@ setUiMetricService(services.uiMetricService);
 
 const appDependencies = {
   services,
-  core: { getUrlForApp: () => {} },
+  core: {
+    getUrlForApp: () => {},
+    executionContext: executionContextServiceMock.createStartContract(),
+  },
   plugins: {},
 } as any;
 

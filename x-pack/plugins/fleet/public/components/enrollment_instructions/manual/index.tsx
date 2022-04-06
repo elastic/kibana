@@ -15,6 +15,8 @@ import { PlatformSelector } from '../../../components';
 interface Props {
   fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
+  policyId: string | undefined;
+  isK8s: string | undefined;
 }
 
 function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
@@ -24,6 +26,8 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   fleetServerHosts,
+  policyId,
+  isK8s,
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
   const kibanaVersion = useKibanaVersion();
@@ -39,7 +43,8 @@ cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+cd elastic-agent-${kibanaVersion}-windows-x86_64
 .\\elastic-agent.exe install ${enrollArgs}`;
 
   const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb

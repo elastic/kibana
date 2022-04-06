@@ -20,6 +20,7 @@ export { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 export { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 export { AddAgentHelpPopover } from './add_agent_help_popover';
+export { EuiButtonWithTooltip } from './eui_button_with_tooltip';
 export * from './link_and_revision';
 export * from './agent_enrollment_flyout';
 export * from './platform_selector';

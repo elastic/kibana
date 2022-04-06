@@ -99,7 +99,6 @@ pageLoadAssetSize:
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  data: 491273
   dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
@@ -124,5 +123,7 @@ pageLoadAssetSize:
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
-  expressionXY: 41392
+  unifiedSearch: 49195
+  data: 454087
+  expressionXY: 26500
   eventAnnotation: 19334

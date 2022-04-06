@@ -57,7 +57,7 @@ NOTE: GeoJSON feature coordinates must be in EPSG:4326 coordinate reference syst
 . Use the file chooser to select a GeoJSON file with the extension `.json` or `.geojson`.
 . Click *Import file*.
 
-discrete]
+[discrete]
 === Upload a shapefile
 
 *Upload file* indexes shapefile features in {es}, creating a document for each feature.

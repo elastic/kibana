@@ -57,14 +57,14 @@ const PolicyEmptyState = React.memo<{
         </EuiFlexGroup>
       ) : (
         <EuiFlexGroup data-test-subj="policyOnboardingInstructions" alignItems="center">
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <EuiText>
-              <h3>
+              <h1>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
                   defaultMessage="Get started with Endpoint Security"
                 />
-              </h3>
+              </h1>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
@@ -118,7 +118,7 @@ const PolicyEmptyState = React.memo<{
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={2}>
             <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
           </EuiFlexItem>
         </EuiFlexGroup>

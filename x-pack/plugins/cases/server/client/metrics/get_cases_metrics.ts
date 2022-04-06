@@ -41,6 +41,8 @@ export async function getStatusTotalsByType(
 
     const options = constructQueryOptions({
       owner: queryParams.owner,
+      from: queryParams.from,
+      to: queryParams.to,
       authorizationFilter,
     });
 

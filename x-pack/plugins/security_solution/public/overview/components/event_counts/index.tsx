@@ -19,7 +19,7 @@ import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {
-  filterHostExternalAlertData,
+  hostNameExistsFilter,
   filterNetworkExternalAlertData,
 } from '../../../common/components/visualization_actions/utils';
 
@@ -51,7 +51,7 @@ const EventCountsComponent: React.FC<Props> = ({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters: [...filters, ...filterHostExternalAlertData],
+        filters: [...filters, ...hostNameExistsFilter],
       }),
     [filters, indexPattern, query, uiSettings]
   );

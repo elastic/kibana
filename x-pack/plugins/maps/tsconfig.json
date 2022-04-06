@@ -39,6 +39,7 @@
     { "path": "../file_upload/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" }
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Creation or Modification of Root Certificate",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path :\n    (\n      \"HKLM\\\\Software\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Microsoft\\\\SystemCertificates\\\\AuthRoot\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\SystemCertificates\\\\AuthRoot\\\\Certificates\\\\*\\\\Blob\"\n    )\n",
   "references": [
     "https://posts.specterops.io/code-signing-certificate-cloning-attacks-and-defenses-6f98657fc6ec",
@@ -56,5 +57,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

@@ -7,7 +7,6 @@
 
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import { get } from 'lodash';
 import styled from 'styled-components';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -48,6 +47,10 @@ const UtilitySwitch = styled(EuiSwitch)`
   margin-left: 17px;
 `;
 
+const DatePickerEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 582px;
+`;
+
 interface ExecutionLogTableProps {
   ruleId: string;
   selectAlertsTab: () => void;
@@ -74,19 +77,19 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Searchbar/Filter/Settings state
   const [queryText, setQueryText] = useState('');
-  const [statusFilters, setStatusFilters] = useState('');
+  const [statusFilters, setStatusFilters] = useState<string | undefined>(undefined);
   const [showMetricColumns, setShowMetricColumns] = useState<boolean>(
     storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY) ?? false
   );
 
   // Pagination state
-  const [pageIndex, setPageIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState<keyof AggregateRuleExecutionEvent>('timestamp');
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // Index for `add filter` action and toasts for errors
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-  const { addError } = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   // Table data state
   const {
@@ -109,12 +112,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const items = events?.events ?? [];
   const maxEvents = events?.total ?? 0;
 
+  // Cache UUID field from data view as it can be expensive to iterate all data view fields
+  const uuidDataViewField = useMemo(() => {
+    return indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
+  }, [indexPattern]);
+
   // Callbacks
   const onTableChangeCallback = useCallback(({ page = {}, sort = {} }) => {
     const { index, size } = page;
     const { field, direction } = sort;
 
-    setPageIndex(index);
+    setPageIndex(index + 1);
     setPageSize(size);
     setSortField(field);
     setSortDirection(direction);
@@ -138,7 +146,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onRefreshChangeCallback = useCallback((props: OnRefreshChangeProps) => {
     setIsPaused(props.isPaused);
-    setRefreshInterval(props.refreshInterval);
+    // Only support auto-refresh >= 1minute -- no current ability to limit within component
+    setRefreshInterval(props.refreshInterval > 60000 ? props.refreshInterval : 60000);
   }, []);
 
   const onRefreshCallback = useCallback(
@@ -153,31 +162,37 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   }, []);
 
   const onStatusFilterChangeCallback = useCallback((updatedStatusFilters: string[]) => {
-    setStatusFilters(updatedStatusFilters.sort().join(','));
+    setStatusFilters(
+      updatedStatusFilters.length ? updatedStatusFilters.sort().join(',') : undefined
+    );
   }, []);
 
   const onFilterByExecutionIdCallback = useCallback(
-    (executionId: string) => {
-      const field = indexPattern.fields.find((f) => f.name === EXECUTION_UUID_FIELD_NAME);
-      if (field != null) {
+    (executionId: string, executionStart: string) => {
+      if (uuidDataViewField != null) {
         const filter = buildFilter(
           indexPattern,
-          field,
+          uuidDataViewField,
           FILTERS.PHRASE,
           false,
           false,
           executionId,
           null
         );
+        filterManager.removeAll();
         filterManager.addFilters(filter);
         selectAlertsTab();
+        addSuccess({
+          title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
+          text: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION,
+        });
       } else {
         addError(i18n.ACTIONS_FIELD_NOT_FOUND_ERROR, {
           title: i18n.ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE,
         });
       }
     },
-    [addError, filterManager, indexPattern, selectAlertsTab]
+    [addError, addSuccess, filterManager, indexPattern, selectAlertsTab, uuidDataViewField]
   );
 
   const onShowMetricColumnsCallback = useCallback(
@@ -191,7 +206,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   // Memoized state
   const pagination = useMemo(() => {
     return {
-      pageIndex,
+      pageIndex: pageIndex - 1,
       pageSize,
       totalItemCount:
         maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED ? MAX_EXECUTION_EVENTS_DISPLAYED : maxEvents,
@@ -208,6 +223,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     };
   }, [sortDirection, sortField]);
 
+  // TODO: Re-add actions once alert count is displayed in table and UX is finalized
+  // @ts-expect-error unused constant
   const actions = useMemo(
     () => [
       {
@@ -222,10 +239,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             description: i18n.COLUMN_ACTIONS_TOOLTIP,
             icon: 'filter',
             type: 'icon',
-            onClick: (value: object) => {
-              const executionId = get(value, EXECUTION_UUID_FIELD_NAME);
-              if (executionId) {
-                onFilterByExecutionIdCallback(executionId);
+            onClick: (executionEvent: AggregateRuleExecutionEvent) => {
+              if (executionEvent?.execution_uuid) {
+                onFilterByExecutionIdCallback(
+                  executionEvent.execution_uuid,
+                  executionEvent.timestamp
+                );
               }
             },
             'data-test-subj': 'action-filter-by-execution-id',
@@ -239,9 +258,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const executionLogColumns = useMemo(
     () =>
       showMetricColumns
-        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks), ...actions]
-        : [...EXECUTION_LOG_COLUMNS, ...actions],
-    [actions, docLinks, showMetricColumns]
+        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks)]
+        : [...EXECUTION_LOG_COLUMNS],
+    [docLinks, showMetricColumns]
   );
 
   return (
@@ -254,7 +273,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             onlyShowFilters={true}
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ maxWidth: '582px' }}>
+        <DatePickerEuiFlexItem>
           <EuiSuperDatePicker
             start={start}
             end={end}
@@ -267,7 +286,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             recentlyUsedRanges={recentlyUsedRanges}
             width="full"
           />
-        </EuiFlexItem>
+        </DatePickerEuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <UtilityBar>
@@ -282,8 +301,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             </UtilityBarText>
           </UtilityBarGroup>
           {maxEvents > MAX_EXECUTION_EVENTS_DISPLAYED && (
-            <UtilityBarGroup>
-              <UtilityBarText dataTestSubj="exceptionsShowing">
+            <UtilityBarGroup grow={true}>
+              <UtilityBarText dataTestSubj="exceptionsShowing" shouldWrap={true}>
                 <EuiTextColor color="danger">
                   {i18n.RULE_EXECUTION_LOG_SEARCH_LIMIT_EXCEEDED(
                     maxEvents,
