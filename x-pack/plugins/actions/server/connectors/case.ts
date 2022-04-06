@@ -20,6 +20,10 @@ interface CaseConnectorInterface<T extends unknown> {
   // getFields: () => Promise<any>;
 }
 
+const isObject = (v: unknown): v is Record<string, unknown> => {
+  return typeof v === 'object' && v !== null;
+};
+
 export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
   private axiosInstance: AxiosInstance | undefined;
   private validProtocols: string[] = ['http', 'https'];
@@ -39,6 +43,22 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
   private normalizeURL(url: string) {
     const replaceDoubleSlashRegex = new RegExp('([^:]/)/+', 'g');
     return url.replace(replaceDoubleSlashRegex, '$1');
+  }
+
+  private removeNullOrUndefinedFields(data: unknown | undefined) {
+    if (isObject(data)) {
+      return Object.fromEntries(Object.entries(data).filter(([_, value]) => value != null));
+    }
+
+    return data;
+  }
+
+  private normalizeData(data: unknown | undefined) {
+    if (data == null) {
+      return {};
+    }
+
+    return this.removeNullOrUndefinedFields(data);
   }
 
   private assertURL(url: string) {
@@ -82,7 +102,7 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     return await this.axiosInstance(normalizedURL, {
       ...rest,
       method,
-      data: data ?? {},
+      data: this.normalizeData(data),
       // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
       httpAgent,
       httpsAgent,
