@@ -62,7 +62,7 @@ setGlobalDate();
 describe('bulkEdit()', () => {
   let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
-  const existingAlert = {
+  const existingRule = {
     id: '1',
     type: 'alert',
     attributes: {
@@ -76,21 +76,21 @@ describe('bulkEdit()', () => {
       throttle: null,
       notifyWhen: null,
       actions: [],
-      name: 'my alert name',
+      name: 'my rule name',
     },
     references: [],
     version: '123',
   };
-  const existingDecryptedAlert = {
-    ...existingAlert,
+  const existingDecryptedRule = {
+    ...existingRule,
     attributes: {
-      ...existingAlert.attributes,
+      ...existingRule.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
   };
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [existingDecryptedAlert] }
+    response = { saved_objects: [existingDecryptedRule] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
       close: jest.fn(),
@@ -122,7 +122,7 @@ describe('bulkEdit()', () => {
     mockCreatePointInTimeFinderAsInternalUser();
 
     unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
-      saved_objects: [existingAlert],
+      saved_objects: [existingRule],
     });
 
     ruleTypeRegistry.get.mockReturnValue({
@@ -581,8 +581,8 @@ describe('bulkEdit()', () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
           {
-            ...existingAlert,
-            attributes: { ...existingAlert.attributes, apiKey: undefined as unknown as string },
+            ...existingRule,
+            attributes: { ...existingRule.attributes, apiKey: undefined as unknown as string },
           },
         ],
       });
@@ -618,8 +618,8 @@ describe('bulkEdit()', () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
           {
-            ...existingDecryptedAlert,
-            attributes: { ...existingDecryptedAlert.attributes, enabled: true },
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
           },
         ],
       });
@@ -634,7 +634,7 @@ describe('bulkEdit()', () => {
           },
         ],
       });
-      expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+      expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
     });
   });
 
@@ -675,7 +675,7 @@ describe('bulkEdit()', () => {
         'params invalid: [param1]: expected value of type [string] but got [undefined]'
       );
       expect(result.errors[0]).toHaveProperty('rule.id', '1');
-      expect(result.errors[0]).toHaveProperty('rule.name', 'my alert name');
+      expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
     });
 
     test('should validate mutatedParams for rules', async () => {
@@ -717,7 +717,7 @@ describe('bulkEdit()', () => {
         'Mutated params invalid: Mutated error for rule'
       );
       expect(result.errors[0]).toHaveProperty('rule.id', '1');
-      expect(result.errors[0]).toHaveProperty('rule.name', 'my alert name');
+      expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
     });
   });
 

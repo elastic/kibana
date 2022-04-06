@@ -48,11 +48,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkEditResponse.body.rules).to.have.length(1);
       expect(bulkEditResponse.body.rules[0].tags).to.eql(['default', 'tag-1']);
 
-      const { body: updatedAlert } = await supertest
+      const { body: updatedRule } = await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo');
 
-      expect(updatedAlert.tags).to.eql(['default', 'tag-1']);
+      expect(updatedRule.tags).to.eql(['default', 'tag-1']);
 
       // Ensure AAD isn't broken
       await checkAAD({
