@@ -64,7 +64,6 @@ export function AddLayerButton({
         position="bottom"
       >
         <EuiButton
-          className="lnsConfigPanel__addLayerBtn"
           fullWidth
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -88,7 +87,6 @@ export function AddLayerButton({
       data-test-subj="lnsConfigPanel__addLayerPopover"
       button={
         <EuiButton
-          className="lnsConfigPanel__addLayerBtn"
           fullWidth
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -110,6 +108,7 @@ export function AddLayerButton({
     >
       <EuiContextMenu
         initialPanelId={0}
+        className="lnsConfigPanel__addLayerMenu"
         panels={[
           {
             id: 0,
@@ -143,7 +142,6 @@ export function AddLayerButton({
                     <span className="lnsLayerAddButtonLabel">{label}</span>
                   ),
                 className: 'lnsLayerAddButton',
-                width: 300,
                 icon: icon && <EuiIcon size="m" type={icon} />,
                 ['data-test-subj']: `lnsLayerAddButton-${type}`,
                 onClick: () => {
