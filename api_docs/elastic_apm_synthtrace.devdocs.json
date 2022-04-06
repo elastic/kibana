@@ -150,7 +150,7 @@
               "[], options?: ",
               "StreamToBulkOptions",
               " | undefined) => Promise<",
-              "IndicesRefreshResponse",
+              "ShardsOperationResponseBase",
               ">"
             ],
             "path": "packages/elastic-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",

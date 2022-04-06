@@ -6,40 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const CRITICAL = i18n.translate('xpack.csp.critical', {
-  defaultMessage: 'Critical',
-});
-
-export const WARNING = i18n.translate('xpack.csp.warning', {
-  defaultMessage: 'Warning',
-});
-
-export const HEALTHY = i18n.translate('xpack.csp.healthy', {
-  defaultMessage: 'Healthy',
-});
-
-export const PAGE_NOT_FOUND = i18n.translate('xpack.csp.page_not_found', {
-  defaultMessage: 'Page not found',
-});
-
-export const LOADING = i18n.translate('xpack.csp.loading', {
-  defaultMessage: 'Loading...',
-});
-
-export const CSP_EVALUATION_BADGE_FAILED = i18n.translate(
-  'xpack.csp.cspEvaluationBadge.failedLabelText',
-  {
-    defaultMessage: 'FAILED',
-  }
-);
-
-export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
-  'xpack.csp.cspEvaluationBadge.passedLabelText',
-  {
-    defaultMessage: 'PASSED',
-  }
-);
-
 export const PACKAGE_NOT_INSTALLED_TEXT = {
   PAGE_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.pageTitle', {
     defaultMessage: 'Install Integration to get started',
@@ -64,3 +30,7 @@ export const DEFAULT_NO_DATA_TEXT = {
     defaultMessage: 'Cloud Security Posture',
   }),
 };
+
+export const CLOUD_SECURITY_POSTURE = i18n.translate('xpack.csp.cspPageTemplate.navigationTitle', {
+  defaultMessage: 'Cloud Security Posture',
+});
