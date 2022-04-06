@@ -57,25 +57,27 @@ export const HostAlertsTable = React.memo(() => {
         id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
         title={i18n.HOST_ALERTS_SECTION_TITLE}
         titleSize="s"
+        hideSubtitle
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
       />
-      {toggleStatus && (isLoading || data.length > 0) ? (
-        <>
-          <EuiBasicTable
-            data-test-subj="hostAlertsTable"
-            columns={columns}
-            items={data}
-            loading={isLoading}
-          />
-          <EuiSpacer size="m" />
-          <EuiButton onClick={() => console.log('TO DO Where to link ')}>
-            {i18n.VIEW_ALL_HOST_ALERTS}
-          </EuiButton>
-        </>
-      ) : (
-        <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-      )}
+      {toggleStatus &&
+        (isLoading || data.length > 0 ? (
+          <>
+            <EuiBasicTable
+              data-test-subj="hostAlertsTable"
+              columns={columns}
+              items={data}
+              loading={isLoading}
+            />
+            <EuiSpacer size="m" />
+            <EuiButton onClick={() => console.log('TO DO Where to link ')}>
+              {i18n.VIEW_ALL_HOST_ALERTS}
+            </EuiButton>
+          </>
+        ) : (
+          <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+        ))}
     </EuiPanel>
   );
 });
