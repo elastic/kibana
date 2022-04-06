@@ -8,17 +8,17 @@
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
+import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { Incident } from '../builtin_action_types/servicenow/types';
 
 export interface CaseConnectorInterface<T extends unknown> {
-  // TO DO need to implement a better type
+  // TODO: need to implement a better type
   // addIncidentComment: (comment: any) => Promise<any>;
   createIncident: (incident: Partial<Incident>) => Promise<T>;
   // deleteIncident: (incident: any) => Promise<any>;
   // getIncident: (incidentId: string) => Promise<any>;
-  // getFields: () => Promise<any>;
 }
 
 const isObject = (v: unknown): v is Record<string, unknown> => {
@@ -42,8 +42,8 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
   abstract getBasicAuth(): AxiosBasicCredentials;
 
   private normalizeURL(url: string) {
-    const replaceDoubleSlashRegex = new RegExp('([^:]/)/+', 'g');
-    return url.replace(replaceDoubleSlashRegex, '$1');
+    const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
+    return url.replace(replaceDoubleSlashesRegex, '$1');
   }
 
   private removeNullOrUndefinedFields(data: unknown | undefined) {
@@ -74,6 +74,14 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     }
   }
 
+  private ensureUriAllowed(url: string) {
+    try {
+      this.configurationUtilities.ensureUriAllowed(url);
+    } catch (allowedListError) {
+      return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+    }
+  }
+
   public async request<D = unknown, R = unknown>({
     url,
     data,
@@ -92,6 +100,7 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     }
 
     this.assertURL(url);
+    this.ensureUriAllowed(url);
     const normalizedURL = this.normalizeURL(url);
 
     const { httpAgent, httpsAgent } = getCustomAgents(
