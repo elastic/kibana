@@ -9,6 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { RulesPage } from './index';
 import { RulesTable } from './components/rules_table';
+import { RuleState } from './types';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
@@ -27,8 +28,24 @@ jest.mock('./config', () => ({
   convertRulesToTableItems: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_fetch_rules', () => ({
+  useFetchRules: jest.fn(),
+}));
+
+// const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
+
 describe('RulesPage', () => {
-  async function setup() {}
+  async function setup() {
+    const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
+    console.log(useFetchRules, '!!useFetchRules');
+    const rulesState: RuleState = {
+      isLoading: true,
+      data: [],
+      error: null,
+      totalItemCount: 0,
+    };
+    useFetchRules.mockReturnValue({ rulesState });
+  }
   it('renders empty screen', async () => {
     await setup();
 
