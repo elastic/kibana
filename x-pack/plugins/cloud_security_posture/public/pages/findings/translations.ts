@@ -38,10 +38,6 @@ export const OS = i18n.translate('xpack.csp.findings.osLabel', {
   defaultMessage: 'OS',
 });
 
-export const FINDINGS = i18n.translate('xpack.csp.findings.findingsLabel', {
-  defaultMessage: 'Findings',
-});
-
 export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
   defaultMessage: 'Resource',
 });
@@ -190,3 +186,8 @@ export const PLATFORM = i18n.translate('xpack.csp.findings.platformLabel', {
 export const NO_FINDINGS = i18n.translate('xpack.csp.findings.nonFindingsLabel', {
   defaultMessage: 'There are no Findings',
 });
+
+export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.csp.findings.searchBar.searchPlaceholder',
+  { defaultMessage: 'Search findings (eg. resource.section : "API Server")' }
+);

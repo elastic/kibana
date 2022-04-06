@@ -32,11 +32,12 @@ import {
 import { AgentPolicy } from '../../../../../../fleet/common';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
+import { CreatePackagePolicyRouteState, pagePathGetters } from '../../../../../../fleet/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -122,9 +123,9 @@ export const PolicyList = memo(() => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `/integrations/${
-        endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : ''
-      }/add-integration`,
+      path: pagePathGetters.add_integration_to_policy({
+        pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
+      })[1],
       state: {
         onCancelNavigateTo: [
           APP_UI_ID,
@@ -316,11 +317,13 @@ export const PolicyList = memo(() => {
           />
         </>
       ) : (
-        <PolicyEmptyState
-          loading={packageIsFetching}
-          onActionClick={handleCreatePolicyClick}
-          policyEntryPoint
-        />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState
+            loading={packageIsFetching}
+            onActionClick={handleCreatePolicyClick}
+            policyEntryPoint
+          />
+        </ManagementEmptyStateWrapper>
       )}
     </AdministrationListPage>
   );

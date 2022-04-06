@@ -44,7 +44,7 @@ image::images/dashboard-controls.png[]
 
 To create *Controls* panels:
 
-. On the dashboard, click *All types*, then select *Controls*.
+. On the dashboard, click *Select type*, then select *Controls*.
 
 . Select the control panel type from the dropdown, then click *Add*.
 
