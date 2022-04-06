@@ -17,9 +17,15 @@ import {
   EuiMarkdownFormat,
 } from '@elastic/eui';
 
-import { content } from './example_page_content.md';
-
 export function examplePage(title: string): JSX.Element {
+  const content =
+    `Hoping I could have "shared" \`.md\` files that would be easily viewable / linkable up on GH, but also work as content in this Kibana page, but ... didn't see any easy way to do that.
+  
+So here's the link to GH, describing this example:
+
+[x-pack/examples/ow22_pmuellr/docs/README.md](https://github.com/pmuellr/kibana/blob/onweek/2022/x-pack/examples/ow22_pmuellr/docs/README.md)
+  `.trim();
+
   return (
     <EuiPage>
       <EuiPageBody>
