@@ -16,7 +16,7 @@ export const storybookAliases = {
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   dashboard: 'src/plugins/dashboard/.storybook',
-  data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
+  data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',

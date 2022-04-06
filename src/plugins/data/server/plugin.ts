@@ -11,8 +11,8 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
+import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
-import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -23,10 +23,11 @@ import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
 import { AutocompleteSetup } from './autocomplete/autocomplete_service';
-
-interface DataEnhancements {
-  search: SearchEnhancements;
-}
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../x-pack/plugins/task_manager/server';
+import type { SecurityPluginSetup } from '../../../../x-pack/plugins/security/server';
 
 export interface DataPluginSetup {
   autocomplete: AutocompleteSetup;
@@ -36,10 +37,6 @@ export interface DataPluginSetup {
    * @deprecated - use "fieldFormats" plugin directly instead
    */
   fieldFormats: FieldFormatsSetup;
-  /**
-   * @internal
-   */
-  __enhance: (enhancements: DataEnhancements) => void;
 }
 
 export interface DataPluginStart {
@@ -61,12 +58,15 @@ export interface DataPluginSetupDependencies {
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  taskManager?: TaskManagerSetupContract;
+  security?: SecurityPluginSetup;
 }
 
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
   dataViews: DataViewsServerPluginStart;
+  taskManager?: TaskManagerStartContract;
 }
 
 export class DataServerPlugin
@@ -95,7 +95,14 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
+    {
+      bfetch,
+      expressions,
+      usageCollection,
+      fieldFormats,
+      taskManager,
+      security,
+    }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
@@ -107,21 +114,27 @@ export class DataServerPlugin
       bfetch,
       expressions,
       usageCollection,
+      security,
+      taskManager,
     });
 
     return {
       autocomplete: this.autocompleteService.setup(core),
-      __enhance: (enhancements: DataEnhancements) => {
-        searchSetup.__enhance(enhancements.search);
-      },
       search: searchSetup,
       query: querySetup,
       fieldFormats,
     };
   }
 
-  public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
+  public start(
+    core: CoreStart,
+    { fieldFormats, dataViews, taskManager }: DataPluginStartDependencies
+  ) {
+    const search = this.searchService.start(core, {
+      fieldFormats,
+      indexPatterns: dataViews,
+      taskManager,
+    });
     const datatableUtilities = new DatatableUtilitiesService(
       search.aggs,
       dataViews,

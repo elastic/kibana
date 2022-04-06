@@ -22,6 +22,9 @@ import { DataViewsContract } from './data_views';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
+import { ScreenshotModePluginStart } from '../../screenshot_mode/public';
+import { SharePluginStart } from '../../share/public';
+import { ManagementSetup } from '../../management/public';
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -30,12 +33,15 @@ export interface DataSetupDependencies {
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
+  management: ManagementSetup;
 }
 
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
+  screenshotMode: ScreenshotModePluginStart;
+  share: SharePluginStart;
 }
 
 /**

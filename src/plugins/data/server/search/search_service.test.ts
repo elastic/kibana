@@ -22,7 +22,6 @@ import type {
   IEsSearchResponse,
   IScopedSearchClient,
   IScopedSearchSessionsClient,
-  ISearchSessionService,
   ISearchStart,
   ISearchStrategy,
 } from '.';
@@ -31,6 +30,16 @@ import { NoSearchIdInSessionError } from '.';
 import { expressionsPluginMock } from '../../../expressions/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
+
+let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
+jest.mock('./session', () => {
+  class SearchSessionService {
+    asScopedProvider = () => (request: any) => mockSessionClient;
+  }
+  return {
+    SearchSessionService,
+  };
+});
 
 describe('Search service', () => {
   let plugin: SearchService;
@@ -88,8 +97,7 @@ describe('Search service', () => {
     let searchPluginStart: ISearchStart<IEsSearchRequest, IEsSearchResponse<any>>;
     let mockStrategy: any;
     let mockStrategyNoCancel: jest.Mocked<ISearchStrategy>;
-    let mockSessionService: ISearchSessionService<any>;
-    let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
+
     const sessionId = '1234';
 
     beforeEach(() => {
@@ -104,9 +112,6 @@ describe('Search service', () => {
       };
 
       mockSessionClient = createSearchSessionsClientMock();
-      mockSessionService = {
-        asScopedProvider: () => (request: any) => mockSessionClient,
-      };
 
       const pluginSetup = plugin.setup(mockCoreSetup, {
         bfetch: bfetchPluginMock.createSetupContract(),
@@ -114,9 +119,6 @@ describe('Search service', () => {
       });
       pluginSetup.registerSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY, mockStrategy);
       pluginSetup.registerSearchStrategy('nocancel', mockStrategyNoCancel);
-      pluginSetup.__enhance({
-        sessionService: mockSessionService,
-      });
 
       searchPluginStart = plugin.start(mockCoreStart, {
         fieldFormats: createFieldFormatsStartMock(),

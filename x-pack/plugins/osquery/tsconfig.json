@@ -24,7 +24,6 @@
     // requiredPlugins from ./kibana.json
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../data_enhanced/tsconfig.json" },
     { "path": "../fleet/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json

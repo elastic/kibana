@@ -141,6 +141,19 @@
         }
       }
     },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
     "sample-data": {
       "properties": {
         "installed": {

@@ -19,4 +19,7 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
   renameFromRoot('kibana.autocompleteTimeout', 'data.autocomplete.valueSuggestions.timeout', {
     level: 'warning',
   }),
+  renameFromRoot('xpack.data_enhanced.search.sessions', 'data.search.sessions', {
+    level: 'warning',
+  }),
 ];

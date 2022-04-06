@@ -12,6 +12,8 @@ import { CoreSetup, CoreStart } from '../../../../core/public';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/public/mocks';
+import { managementPluginMock } from '../../../management/public/mocks';
+import { screenshotModePluginMock } from '../../../screenshot_mode/public/mocks';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -19,7 +21,7 @@ describe('Search service', () => {
   let mockCoreStart: MockedKeys<CoreStart>;
   const initializerContext = coreMock.createPluginInitializerContext();
   initializerContext.config.get = jest.fn().mockReturnValue({
-    search: { aggs: { shardDelay: { enabled: false } } },
+    search: { aggs: { shardDelay: { enabled: false } }, sessions: { enabled: true } },
   });
 
   beforeEach(() => {
@@ -35,6 +37,7 @@ describe('Search service', () => {
         packageInfo: { version: '8' },
         bfetch,
         expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+        management: managementPluginMock.createSetupContract(),
       } as unknown as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
@@ -45,9 +48,18 @@ describe('Search service', () => {
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
+      const bfetch = bfetchPluginMock.createSetupContract();
+      searchService.setup(mockCoreSetup, {
+        packageInfo: { version: '8' },
+        bfetch,
+        expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
+        management: managementPluginMock.createSetupContract(),
+      } as unknown as SearchServiceSetupDependencies);
+
       const start = searchService.start(mockCoreStart, {
         fieldFormats: {},
         indexPatterns: {},
+        screenshotMode: screenshotModePluginMock.createStartContract(),
       } as any);
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');

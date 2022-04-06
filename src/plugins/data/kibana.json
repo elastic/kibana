@@ -3,7 +3,17 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["bfetch", "expressions", "uiActions", "share", "inspector", "fieldFormats", "dataViews"],
+  "requiredPlugins": [
+    "bfetch",
+    "expressions",
+    "uiActions",
+    "share",
+    "inspector",
+    "fieldFormats",
+    "dataViews",
+    "screenshotMode",
+    "management"
+  ],
   "serviceFolders": ["search", "query", "autocomplete", "ui"],
   "optionalPlugins": ["usageCollection", "taskManager", "security"],
   "extraPublicDirs": ["common"],

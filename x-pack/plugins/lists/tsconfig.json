@@ -18,5 +18,6 @@
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../security/tsconfig.json"},
+    { "path": "../../../src/plugins/data/tsconfig.json"}
   ]
 }

@@ -34,7 +34,7 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from 'src/core/public';
-import type { DataViewsContract } from 'src/plugins/data/public';
+import type { DataViewsContract } from 'src/plugins/data_views/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeature } from '../../../../../features/common';

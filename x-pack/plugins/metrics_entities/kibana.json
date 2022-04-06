@@ -9,6 +9,6 @@
   "configPath": ["xpack", "metricsEntities"],
   "server": true,
   "ui": false,
-  "requiredPlugins": ["data", "dataEnhanced"],
+  "requiredPlugins": ["data"],
   "optionalPlugins": []
 }

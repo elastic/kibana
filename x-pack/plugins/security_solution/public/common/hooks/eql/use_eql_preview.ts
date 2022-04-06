@@ -19,6 +19,7 @@ import {
   isPartialResponse,
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
+  EQL_SEARCH_STRATEGY,
 } from '../../../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { formatInspect, getEqlAggsData } from './helpers';
@@ -26,7 +27,6 @@ import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { inputsModel } from '../../../common/store';
-import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
 import { useAppToasts } from '../use_app_toasts';
 
 export const useEqlPreview = (): [

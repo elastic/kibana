@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import {
   CoreStart,
   KibanaRequest,
@@ -13,9 +14,18 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
 } from 'kibana/server';
+import { KueryNode, SearchSessionSavedObjectAttributes } from '../../../common';
 import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
-import { SearchSessionsConfigSchema } from '../../../config';
+import { SearchSessionsConfigSchema, ConfigSchema } from '../../../config';
+
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../../../x-pack/plugins/task_manager/server';
 
 export interface IScopedSearchSessionsClient<T = unknown> {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
@@ -38,3 +48,44 @@ export interface IScopedSearchSessionsClient<T = unknown> {
 export interface ISearchSessionService<T = unknown> {
   asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient<T>;
 }
+
+export enum SearchStatus {
+  IN_PROGRESS = 'in_progress',
+  ERROR = 'error',
+  COMPLETE = 'complete',
+}
+
+export interface CheckSearchSessionsDeps {
+  savedObjectsClient: SavedObjectsClientContract;
+  client: ElasticsearchClient;
+  logger: Logger;
+}
+
+export interface SearchSessionTaskSetupDeps {
+  taskManager: TaskManagerSetupContract;
+  logger: Logger;
+  config: ConfigSchema;
+}
+
+export interface SearchSessionTaskStartDeps {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  config: ConfigSchema;
+}
+
+export type SearchSessionTaskFn = (
+  deps: CheckSearchSessionsDeps,
+  config: SearchSessionsConfigSchema
+) => Observable<void>;
+
+export type SearchSessionsResponse = SavedObjectsFindResponse<
+  SearchSessionSavedObjectAttributes,
+  unknown
+>;
+
+export type CheckSearchSessionsFn = (
+  deps: CheckSearchSessionsDeps,
+  config: SearchSessionsConfigSchema,
+  filter: KueryNode,
+  page: number
+) => Observable<SearchSessionsResponse>;
