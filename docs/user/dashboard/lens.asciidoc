@@ -288,7 +288,7 @@ The following component menus are available:
 
 When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
 
-To get started, click *Open in Discover* in the toolbar.
+To get started, click *Explore data in Discover* in the toolbar.
 
 For more information about exploring your data with *Discover*, check out <<discover,Discover>>.
 
