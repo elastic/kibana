@@ -10,7 +10,7 @@ import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
 
-export interface TrendsESQueryResult {
+export interface ScoreTrendDoc {
   '@timestamp': string;
   total_findings: number;
   passed_findings: number;
@@ -43,20 +43,9 @@ export type Trends = Array<{
 
 type CorrectSearchResponse<TDocument> = Record<'body', SearchResponse<TDocument>>;
 
-export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
-  const trendsQueryResult = (await esClient.search<TrendsESQueryResult>(
-    // @ts-ignore the sorting function used does not match ES search type
-    getTrendsAggsQuery(),
-    { meta: true }
-  )) as unknown as CorrectSearchResponse<TrendsESQueryResult>;
-
-  if (!trendsQueryResult.body.hits.hits) throw new Error('missing trend results from score index');
-
-  const trends = trendsQueryResult.body.hits.hits.map((hit) => {
-    if (!hit._source) throw new Error('missing data for one or more of the trend results');
-    const data = hit._source;
-
-    return {
+export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trends =>
+  scoreTrendDocs
+    .map((data) => ({
       timestamp: data['@timestamp'],
       summary: {
         totalFindings: data.total_findings,
@@ -75,8 +64,22 @@ export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> 
           },
         ])
       ),
-    };
+    }))
+    .sort((a, b) => new Date(a.timestamp).getDate() - new Date(b.timestamp).getDate());
+
+export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
+  const trendsQueryResult = (await esClient.search<ScoreTrendDoc>(
+    // @ts-ignore the sorting function used does not match ES search type
+    getTrendsAggsQuery(),
+    { meta: true }
+  )) as unknown as CorrectSearchResponse<ScoreTrendDoc>;
+
+  if (!trendsQueryResult.body.hits.hits) throw new Error('missing trend results from score index');
+
+  const scoreTrendDocs = trendsQueryResult.body.hits.hits.map((hit) => {
+    if (!hit._source) throw new Error('missing _source data for one or more of trend results');
+    return hit._source;
   });
 
-  return trends;
+  return getTrendsFromQueryResult(scoreTrendDocs);
 };
