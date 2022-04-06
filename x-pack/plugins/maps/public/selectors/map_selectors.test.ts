@@ -256,10 +256,7 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     const waitingForMapReadyLayerList: VectorLayerDescriptor[] =
       [] as unknown as VectorLayerDescriptor[];
     expect(
-      getQueryableUniqueIndexPatternIds.resultFunc(
-        layerList,
-        waitingForMapReadyLayerList
-      )
+      getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
     ).toEqual(['foo', 'bar']);
   });
 
@@ -278,10 +275,7 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
     ] as unknown as VectorLayerDescriptor[];
     expect(
-      getQueryableUniqueIndexPatternIds.resultFunc(
-        layerList,
-        waitingForMapReadyLayerList
-      )
+      getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
     ).toEqual(['foo', 'fbr']);
   });
 });
