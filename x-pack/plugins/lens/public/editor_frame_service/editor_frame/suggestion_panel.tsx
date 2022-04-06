@@ -41,7 +41,11 @@ import {
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import {
+  getMissingIndexPattern,
+  validateDatasourceAndVisualization,
+  getDatasourceLayers,
+} from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -235,7 +239,7 @@ export function SuggestionPanel({
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frame
+                  { datasourceLayers: getDatasourceLayers(currentDatasourceStates, datasourceMap) }
                 ) == null
               );
             }
