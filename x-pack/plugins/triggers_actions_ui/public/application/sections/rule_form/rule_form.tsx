@@ -533,7 +533,7 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      {selectedRuleType?.hasDiagnostics && onShowPreview && (
+      {onShowPreview && (
         <>
           <EuiHorizontalRule />
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -550,15 +550,16 @@ export const RuleForm = ({
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {!isValidRule(rule, errors, []) && (
+          {!isValidRule(rule, errors, []) ? (
             <EuiCallOut
               title="Must fill out rule params before previewing"
               color="warning"
               iconType="help"
               size="s"
             />
+          ) : (
+            <EuiButton onClick={() => onShowPreview()}>Preview</EuiButton>
           )}
-          <EuiButton onClick={() => onShowPreview()}>Preview</EuiButton>
           <EuiHorizontalRule />
         </>
       )}

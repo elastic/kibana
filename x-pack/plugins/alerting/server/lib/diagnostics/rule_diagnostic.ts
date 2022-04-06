@@ -38,7 +38,7 @@ export type CustomDiagnostic<Params extends RuleTypeParams> = (
   params: Params
 ) => DiagnosticResult[];
 
-const CARDINALITY_OVERALL_THRESHOLD = 10000;
+const CARDINALITY_OVERALL_THRESHOLD = 5; // 10000;
 const ONE_MINUTE_IN_MILLISSECONDS = 60000;
 type CardinalityAgg = estypes.AggregationsAggregateBase & {
   [property: string]: estypes.AggregationsCardinalityAggregate;
@@ -408,12 +408,16 @@ export class RuleDiagnostic {
 
     // test whether indices exist
     for (const index of indexes) {
-      const exists = await esClient.indices.exists({
-        index,
-      });
-
-      if (!exists) {
-        results.push(getIndexExistsError(index));
+      try {
+        const exists = await esClient.indices.exists({
+          index,
+        });
+        if (!exists) {
+          results.push(getIndexExistsError(index));
+        }
+      } catch (err) {
+        // error using indices.exists
+        // i think this means the user doesn't have access to the index given role
       }
     }
 
@@ -470,49 +474,53 @@ export class RuleDiagnostic {
     fields: string;
     esClient: ElasticsearchClient;
   }): Promise<DiagnosticResult[]> {
-    const body = await esClient.fieldCaps({ index: indices, fields });
-
-    const indexFields = body.fields ?? {};
-
-    // Get cardinality aggregation for aggregatable fields
-    const aggs = Object.keys(indexFields).reduce((acc, field) => {
-      const fieldCapData = indexFields[field];
-      const path = Object.keys(fieldCapData)[0];
-      const isAggregatable = indexFields[field][path].aggregatable;
-
-      return isAggregatable
-        ? {
-            ...acc,
-            [field]: {
-              cardinality: {
-                field,
-              },
-            },
-          }
-        : acc;
-    }, {});
-
-    const cardinalityResults = await esClient.search({
-      index: indices,
-      body: {
-        size: 0,
-        query: {
-          match_all: {},
-        },
-        aggs,
-      },
-    });
-
-    const cardinalities = cardinalityResults.aggregations as CardinalityAgg;
-
     const results: DiagnosticResult[] = [];
-    if (cardinalities) {
-      Object.keys(cardinalities).forEach((f) => {
-        const cardinality = cardinalities[f].value;
-        if (cardinality > CARDINALITY_OVERALL_THRESHOLD) {
-          results.push(getIndexCardinalityError(indices, f, cardinality, 'over all time'));
-        }
+    try {
+      const body = await esClient.fieldCaps({ index: indices, fields });
+
+      const indexFields = body.fields ?? {};
+
+      // Get cardinality aggregation for aggregatable fields
+      const aggs = Object.keys(indexFields).reduce((acc, field) => {
+        const fieldCapData = indexFields[field];
+        const path = Object.keys(fieldCapData)[0];
+        const isAggregatable = indexFields[field][path].aggregatable;
+
+        return isAggregatable
+          ? {
+              ...acc,
+              [field]: {
+                cardinality: {
+                  field,
+                },
+              },
+            }
+          : acc;
+      }, {});
+
+      const cardinalityResults = await esClient.search({
+        index: indices,
+        body: {
+          size: 0,
+          query: {
+            match_all: {},
+          },
+          aggs,
+        },
       });
+
+      const cardinalities = cardinalityResults.aggregations as CardinalityAgg;
+
+      if (cardinalities) {
+        Object.keys(cardinalities).forEach((f) => {
+          const cardinality = cardinalities[f].value;
+          if (cardinality > CARDINALITY_OVERALL_THRESHOLD) {
+            results.push(getIndexCardinalityError(indices, f, cardinality, 'over all time'));
+          }
+        });
+      }
+    } catch (err) {
+      // something went wrong
     }
 
     return results;

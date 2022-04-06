@@ -61,7 +61,6 @@ export interface RegistryRuleType
   > {
   id: string;
   enabledInLicense: boolean;
-  hasDiagnostics: boolean;
 }
 
 /**
@@ -369,7 +368,6 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
-          hasDiagnostics: !!diagnostics,
         })
       )
     );

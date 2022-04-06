@@ -29,8 +29,12 @@ export const RulePreviewWarnings = ({ errorsAndWarnings }: RulePreviewWarningsPr
         />
       ) : (
         <>
-          <h5>The following errors were encountered while previewing your rule:</h5>
-          <EuiSpacer size="m" />
+          {errors.length > 0 && (
+            <>
+              <h5>The following errors were encountered while previewing your rule:</h5>
+              <EuiSpacer size="m" />
+            </>
+          )}
           {errors.map((error: DiagnosticResult) => {
             return (
               <>
@@ -41,8 +45,12 @@ export const RulePreviewWarnings = ({ errorsAndWarnings }: RulePreviewWarningsPr
               </>
             );
           })}
-          <h5>The following warnings were encountered while previewing your rule:</h5>
-          <EuiSpacer size="m" />
+          {warnings.length > 0 && (
+            <>
+              <h5>The following warnings were encountered while previewing your rule:</h5>
+              <EuiSpacer size="m" />
+            </>
+          )}
           {warnings.map((warning: DiagnosticResult) => {
             return (
               <>

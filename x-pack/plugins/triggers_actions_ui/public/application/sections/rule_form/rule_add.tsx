@@ -89,7 +89,7 @@ const RuleAdd = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
-  const [isPreviewFlyoutVisible, setIsPreviewFlyoutVisible] = useState<boolean>(true);
+  const [isPreviewFlyoutVisible, setIsPreviewFlyoutVisible] = useState<boolean>(false);
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
 
   const setRule = (value: InitialRule) => {
