@@ -73,6 +73,7 @@ const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) =>
   return flattenedLinks[deepLinkId];
 };
 
+const applicationIdRegexp = /^[a-zA-Z0-9_-]+$/;
 const allApplicationsFilter = '__ALL__';
 
 interface AppUpdaterWrapper {
@@ -155,21 +156,27 @@ export class ApplicationService {
       };
     };
 
+    const validateApp = (app: App<unknown>) => {
+      if (this.registrationClosed) {
+        throw new Error(`Applications cannot be registered after "setup"`);
+      } else if (!applicationIdRegexp.test(app.id)) {
+        throw new Error(
+          `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
+        );
+      } else if (this.apps.has(app.id)) {
+        throw new Error(`An application is already registered with the id "${app.id}"`);
+      } else if (findMounter(this.mounters, app.appRoute)) {
+        throw new Error(`An application is already registered with the appRoute "${app.appRoute}"`);
+      } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
+        throw new Error('Cannot register an application route that includes HTTP base path');
+      }
+    };
+
     return {
-      register: (plugin, app: App<any>) => {
+      register: (plugin, app: App<unknown>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
-        if (this.registrationClosed) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        } else if (this.apps.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (findMounter(this.mounters, app.appRoute)) {
-          throw new Error(
-            `An application is already registered with the appRoute "${app.appRoute}"`
-          );
-        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
-          throw new Error('Cannot register an application route that includes HTTP base path');
-        }
+        validateApp(app);
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
