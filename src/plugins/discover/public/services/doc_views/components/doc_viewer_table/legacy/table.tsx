@@ -9,6 +9,7 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
+import { getTypeForFieldIcon } from '../../../../../application/main/components/sidebar/discover_field';
 import { useDiscoverServices } from '../../../../../utils/use_discover_services';
 import { flattenHit } from '../../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
@@ -73,7 +74,11 @@ export const DocViewerLegacyTable = ({
     .map((field) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
+      const fieldType = isNestedFieldParent(field, dataView)
+        ? 'nested'
+        : fieldMapping
+        ? getTypeForFieldIcon(fieldMapping)
+        : undefined;
       const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
       return {
         action: {

@@ -58,10 +58,19 @@ const FieldInfoIcon: React.FC = memo(() => (
   </EuiToolTip>
 ));
 
+/**
+ * Extracts the type from a data view field that will match the right icon.
+ *
+ * We define custom logic for Discover in order to distinguish between various "string" types.
+ */
+export const getTypeForFieldIcon = (field: DataViewField) =>
+  field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
+
 const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  // If it's a string type, we want to distinguish between keyword and text
-  const tempType = field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
-  return <FieldIcon type={tempType} label={getFieldTypeName(tempType)} scripted={field.scripted} />;
+  const typeForIcon = getTypeForFieldIcon(field);
+  return (
+    <FieldIcon type={typeForIcon} label={getFieldTypeName(typeForIcon)} scripted={field.scripted} />
+  );
 });
 
 const FieldName: React.FC<{ field: DataViewField }> = memo(({ field }) => {
