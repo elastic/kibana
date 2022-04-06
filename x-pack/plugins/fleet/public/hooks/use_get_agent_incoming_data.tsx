@@ -62,7 +62,7 @@ export const useGetAgentIncomingData = (
     text = i18n.translate('xpack.fleet.confirmIncomingData.installApmAgentButtonText', {
       defaultMessage: 'Install APM Agent',
     });
-    message = i18n.translate('xpack.fleet.confirmIncomingData.subtitle', {
+    message = i18n.translate('xpack.fleet.confirmIncomingData.APMsubtitle', {
       defaultMessage:
         'Next, install APM agents on your hosts to collect data from your applications and services.',
     });

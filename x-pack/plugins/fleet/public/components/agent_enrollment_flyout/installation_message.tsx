@@ -24,7 +24,11 @@ export const InstallationMessage: React.FunctionComponent = () => {
             </EuiLink>
           ),
           installationLink: (
-            <EuiLink target="_blank" external href="">
+            <EuiLink
+              target="_blank"
+              external
+              href="https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation.html"
+            >
               <FormattedMessage
                 id="xpack.fleet.enrollmentInstructions.installationMessage.link"
                 defaultMessage="installation docs"
