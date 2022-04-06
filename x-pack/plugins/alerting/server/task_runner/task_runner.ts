@@ -627,8 +627,11 @@ export class TaskRunner<
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
-      this.ruleProvider.loadRuleAttributesAndRun((fakeRequest, apiKey, rule) =>
-        this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
+      this.ruleProvider.loadRuleAttributesAndRun((fakeRequest, apiKey, rule) => {
+        this.ruleName = rule.name;
+        this.ruleConsumer = rule.consumer;
+        return this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
+      }
       )
     );
 
@@ -757,20 +760,23 @@ export class TaskRunner<
     };
 
     return {
-      state: map<RuleExecutionState, ElasticsearchError, RuleTaskState>(
-        state,
-        (executionState: RuleExecutionState) => transformExecutionStateToTaskState(executionState),
-        (err: ElasticsearchError) => {
-          const message = `Executing Rule ${spaceId}:${
-            this.ruleType.id
-          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-          if (isAlertSavedObjectNotFoundError(err, ruleId)) {
-            this.logger.debug(message);
-          } else {
-            this.logger.error(message);
+      state: this.ruleProvider.finalizeState(
+        map<RuleExecutionState, ElasticsearchError, RuleTaskState>(
+          state,
+          (executionState: RuleExecutionState) =>
+            transformExecutionStateToTaskState(executionState),
+          (err: ElasticsearchError) => {
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+            if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+              this.logger.debug(message);
+            } else {
+              this.logger.error(message);
+            }
+            return originalState;
           }
-          return originalState;
-        }
+        )
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
         if (isAlertSavedObjectNotFoundError(error, ruleId)) {

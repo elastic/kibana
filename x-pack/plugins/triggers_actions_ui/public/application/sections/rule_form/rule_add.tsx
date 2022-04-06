@@ -75,6 +75,10 @@ const RuleAdd = ({
   const [config, setConfig] = useState<TriggersActionsUiConfig>({});
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [lastRuleSimulationResult, setLastRuleSimulationResult] = useState<
+    RuleSimulationResult | undefined
+  >();
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
@@ -229,44 +233,7 @@ const RuleAdd = ({
   async function onSimulateRule(): Promise<RuleSimulationResult | undefined> {
     try {
       const simulationResult = await simulateRule({ http, rule: rule as RuleUpdates });
-      if (simulationResult.result.status === 'ok') {
-        toasts.addInfo(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.ruleAdd.simulateSuccessNoAlertsNotificationText',
-            {
-              defaultMessage: 'Simulated rule "{ruleName}": no alerts detected',
-              values: {
-                ruleName: rule.name,
-              },
-            }
-          )
-        );
-      } else if (simulationResult.result.status === 'active') {
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.ruleAdd.simulateSuccessDetectedAlertsNotificationText',
-            {
-              defaultMessage: 'Simulated rule "{ruleName}": alerts detected and actions scheduled"',
-              values: {
-                ruleName: rule.name,
-              },
-            }
-          )
-        );
-      } else {
-        toasts.addDanger(
-          simulationResult.result?.error?.message ??
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.ruleAdd.simulateErrorNotificationText',
-              {
-                defaultMessage: 'Simulating rule "{ruleName}" failed',
-                values: {
-                  ruleName: rule.name,
-                },
-              }
-            )
-        );
-      }
+      setLastRuleSimulationResult(simulationResult);
       return simulationResult;
     } catch (errorRes) {
       toasts.addDanger(
@@ -323,6 +290,8 @@ const RuleAdd = ({
             </EuiFlyoutBody>
             <RuleAddFooter
               isSaving={isSaving}
+              isSimulating={isSimulating}
+              lastRuleSimulationResult={lastRuleSimulationResult}
               isFormLoading={isLoading}
               onSave={async () => {
                 setIsSaving(true);
@@ -345,7 +314,7 @@ const RuleAdd = ({
                 }
               }}
               onSimulate={async () => {
-                setIsSaving(true);
+                setIsSimulating(true);
                 if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
                   setRule(
                     getRuleWithInvalidatedFields(
@@ -355,10 +324,10 @@ const RuleAdd = ({
                       ruleActionsErrors
                     )
                   );
-                  setIsSaving(false);
+                  setIsSimulating(false);
                 } else {
                   await onSimulateRule();
-                  setIsSaving(false);
+                  setIsSimulating(false);
                 }
               }}
               onCancel={checkForChangesAndCloseFlyout}

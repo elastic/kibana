@@ -64,6 +64,10 @@ export interface RuleExecutionStatus {
   };
 }
 
+export interface SimulatedRuleExecutionStatus extends RuleExecutionStatus {
+  numberOfDetectedAlerts?: number;
+}
+
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 

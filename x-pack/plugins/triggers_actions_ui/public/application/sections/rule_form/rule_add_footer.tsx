@@ -18,10 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHealthContext } from '../../context/health_context';
+import { RuleSimulationResult } from '../../lib/rule_api/simulate';
+import { RuleSimulationButton } from './rule_simulation_button';
 
 interface RuleAddFooterProps {
   isSaving: boolean;
+  isSimulating: boolean;
   isFormLoading: boolean;
+  lastRuleSimulationResult: RuleSimulationResult | undefined;
   onSave: () => void;
   onSimulate: () => void;
   onCancel: () => void;
@@ -29,10 +33,12 @@ interface RuleAddFooterProps {
 
 export const RuleAddFooter = ({
   isSaving,
+  isSimulating,
   onSave,
   onSimulate,
   onCancel,
   isFormLoading,
+  lastRuleSimulationResult,
 }: RuleAddFooterProps) => {
   const { loadingHealthCheck } = useHealthContext();
 
@@ -57,21 +63,13 @@ export const RuleAddFooter = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="accent"
-                data-test-subj="simulateRuleButton"
-                type="submit"
-                iconType="play"
-                isDisabled={loadingHealthCheck}
-                isLoading={isSaving}
-                onClick={onSimulate}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleAddFooter.simulateButtonLabel"
-                  defaultMessage="Simulate"
-                />
-              </EuiButton>
+              <RuleSimulationButton
+                isSaving={isSaving}
+                isSimulating={isSimulating}
+                isFormLoading={isFormLoading}
+                lastRuleSimulationResult={lastRuleSimulationResult}
+                onSimulate={onSimulate}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

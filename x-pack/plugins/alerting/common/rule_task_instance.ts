@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
-import { IntervalSchedule, RuleMonitoring } from './rule';
+import { IntervalSchedule, RuleMonitoring, RuleTypeState } from './rule';
 
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
@@ -48,8 +48,8 @@ export const ruleParamsSchema = t.intersection([
 ]);
 export type RuleTaskParams = t.TypeOf<typeof ruleParamsSchema>;
 
-export interface RuleExecutionRunResult {
-  state: RuleExecutionState;
+export interface RuleExecutionRunResult<State = RuleExecutionState> {
+  state: State;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }

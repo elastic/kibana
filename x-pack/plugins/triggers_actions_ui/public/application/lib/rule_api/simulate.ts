@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { RuleExecutionStatus } from '../../../../../alerting/common';
+import { SimulatedRuleExecutionStatus } from '../../../../../alerting/common';
 import { AsApiContract, RewriteResponseCase } from '../../../../../actions/common';
 import { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
@@ -30,9 +30,43 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   })),
 });
 
+const rewriteBodyResponse: (
+  requested: AsApiContract<{
+    id: string;
+    result: AsApiContract<SimulatedRuleExecutionStatus>;
+  }>
+) => RuleSimulationResult = ({
+  id,
+  result: {
+    number_of_triggered_actions: numberOfTriggeredActions,
+    number_of_scheduled_actions: numberOfScheduledActions,
+    number_of_detected_alerts: numberOfDetectedAlerts,
+    last_execution_date: lastExecutionDate,
+    last_duration: lastDuration,
+    ...result
+  },
+}): RuleSimulationResult => {
+  return {
+    id,
+    result: {
+      numberOfTriggeredActions,
+      numberOfScheduledActions,
+      numberOfDetectedAlerts,
+      lastExecutionDate,
+      lastDuration,
+      ...result,
+    },
+  };
+};
+
 export interface RuleSimulationResult {
   id: string;
-  result: RuleExecutionStatus;
+  result: SimulatedRuleExecutionStatus;
+}
+
+interface ApiResponseOfRuleSimulationResult {
+  id: string;
+  result: AsApiContract<SimulatedRuleExecutionStatus>;
 }
 
 export async function simulateRule({
@@ -42,10 +76,9 @@ export async function simulateRule({
   http: HttpSetup;
   rule: RuleCreateBody;
 }): Promise<RuleSimulationResult> {
-  return await http.post<AsApiContract<RuleSimulationResult>>(
-    `${BASE_ALERTING_API_PATH}/_simulate_rule`,
-    {
+  return rewriteBodyResponse(
+    await http.post<ApiResponseOfRuleSimulationResult>(`${BASE_ALERTING_API_PATH}/_simulate_rule`, {
       body: JSON.stringify(rewriteBodyRequest(rule)),
-    }
+    })
   );
 }

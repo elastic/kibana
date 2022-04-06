@@ -17,7 +17,7 @@ import {
 } from './lib';
 import { validateNotifyWhenType, BASE_ALERTING_API_PATH, RuleNotifyWhenType } from '../types';
 import { RouteOptions } from '.';
-import { RuleExecutionStatus, RuleTypeParams } from '../../common/rule';
+import { SimulatedRuleExecutionStatus, RuleTypeParams } from '../../common/rule';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -50,9 +50,10 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> 
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<RuleExecutionStatus> = ({
+const rewriteBodyRes: RewriteResponseCase<SimulatedRuleExecutionStatus> = ({
   numberOfTriggeredActions,
   numberOfScheduledActions,
+  numberOfDetectedAlerts,
   lastExecutionDate,
   lastDuration,
   ...rest
@@ -60,6 +61,7 @@ const rewriteBodyRes: RewriteResponseCase<RuleExecutionStatus> = ({
   ...rest,
   number_of_triggered_actions: numberOfTriggeredActions,
   number_of_scheduled_actions: numberOfScheduledActions,
+  number_of_detected_alerts: numberOfDetectedAlerts,
   last_execution_date: lastExecutionDate,
   last_duration: lastDuration,
 });
@@ -80,7 +82,7 @@ export const simulateRuleRoute = ({ router, licenseState, usageCounter }: RouteO
 
           try {
             const id = `simulation-${rule.rule_type_id}-${uuid.v4()}`;
-            const simulatedRuleExecutionStatus: RuleExecutionStatus =
+            const simulatedRuleExecutionStatus: SimulatedRuleExecutionStatus =
               await rulesClient.simulate<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,

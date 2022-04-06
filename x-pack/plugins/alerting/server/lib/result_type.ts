@@ -58,6 +58,13 @@ export function map<T, E, Resolution>(
   return isOk(result) ? onOk(result.value) : onErr(result.error);
 }
 
+export const mapOk = function <T, T2, E>(
+  onOk: (value: T) => Result<T2, E>,
+  result: Result<T, E>
+): Result<T2, E> {
+  return isOk(result) ? onOk(result.value) : result;
+};
+
 export function resolveErr<T, E>(result: Result<T, E>, onErr: (error: E) => T): T {
   return isOk(result) ? result.value : onErr(result.error);
 }

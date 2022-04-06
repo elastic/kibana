@@ -17,7 +17,7 @@ import {
   RuleMonitoring,
   RuleTypeRegistry,
 } from '../types';
-import { asOk, promiseResult, Resultable } from '../lib/result_type';
+import { asOk, mapOk, promiseResult, Resultable } from '../lib/result_type';
 import { EphemeralRuleTaskInstance } from './alert_task_instance';
 import {
   AlertInstanceContext,
@@ -39,6 +39,11 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
     },
   },
 });
+
+export interface EphemeralRuleExecutionState<Params extends RuleTypeParams>
+  extends RuleExecutionState {
+  rule?: SanitizedRule<Params>;
+}
 
 export class EphemeralRuleProvider<
   Params extends RuleTypeParams,
@@ -116,8 +121,8 @@ export class EphemeralRuleProvider<
       fakeRequest: KibanaRequest,
       apiKey: RawRule['apiKey'],
       rule: SanitizedRule<Params>
-    ) => Promise<RuleExecutionState>
-  ): Promise<Resultable<RuleExecutionRunResult, Error>> {
+    ) => Promise<EphemeralRuleExecutionState<Params>>
+  ): Promise<Resultable<RuleExecutionRunResult<EphemeralRuleExecutionState<Params>>, Error>> {
     const {
       params: { spaceId },
     } = this.taskInstance;
@@ -155,10 +160,19 @@ export class EphemeralRuleProvider<
 
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleExecutionState, Error>(
-        executor(fakeRequest, this.apiKey, rule)
+      state: mapOk<RuleExecutionState, EphemeralRuleExecutionState<Params>, Error>(
+        (state) => asOk({ ...state, rule }),
+        await promiseResult<EphemeralRuleExecutionState<Params>, Error>(
+          executor(fakeRequest, this.apiKey, rule)
+        )
       ),
       schedule: asOk(rule.schedule),
     };
+  }
+
+  public finalizeState(
+    state: EphemeralRuleExecutionState<Params>
+  ): EphemeralRuleExecutionState<Params> {
+    return { ...state, rule: this.rule };
   }
 }

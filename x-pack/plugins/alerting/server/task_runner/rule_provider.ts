@@ -20,7 +20,12 @@ import {
 } from '../types';
 import { asOk, promiseResult, Resultable } from '../lib/result_type';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { AlertInstanceContext, AlertInstanceState, MONITORING_HISTORY_LIMIT } from '../../common';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  MONITORING_HISTORY_LIMIT,
+  RuleTaskState,
+} from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RuleTaskInstance } from './types';
 import {
@@ -253,5 +258,9 @@ export class ConcreteRuleProvider<
         (await rulesClient.get({ id: ruleId })).schedule
       ),
     };
+  }
+
+  public finalizeState(state: RuleTaskState): RuleTaskState {
+    return state;
   }
 }

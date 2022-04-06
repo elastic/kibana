@@ -95,7 +95,11 @@ import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
-import { RuleExecutionStatusErrorReasons, RuleExecutionStatuses } from '../../common/rule';
+import {
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatuses,
+  SimulatedRuleExecutionStatus,
+} from '../../common/rule';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -528,7 +532,7 @@ export class RulesClient {
   public async simulate<Params extends RuleTypeParams = never>({
     data,
     options,
-  }: SimulateOptions<Params>): Promise<RuleExecutionStatus> {
+  }: SimulateOptions<Params>): Promise<SimulatedRuleExecutionStatus> {
     const id = options.id;
     const ruleTypeId = data.alertTypeId;
     const consumer = data.consumer;
@@ -611,7 +615,7 @@ export class RulesClient {
     };
 
     /* RUN simulation */
-    const executionResult: RuleExecutionStatus | undefined = await this.taskManager
+    const executionResult: SimulatedRuleExecutionStatus | undefined = await this.taskManager
       .ephemeralRunNow({
         taskType: `alerting:simulation:${ruleTypeId}`,
         params: {
@@ -629,12 +633,12 @@ export class RulesClient {
         scope: ['alerting'],
       })
       .then((result) => {
-        const numberOfAlerts = Object.keys(result.state?.alertInstances ?? {}).length;
-        const executionStatus: RuleExecutionStatus = {
-          status: numberOfAlerts ? 'active' : 'ok',
-          lastExecutionDate,
-        };
-        return executionStatus;
+        const numberOfDetectedAlerts = Object.keys(result.state?.alertInstances ?? {}).length;
+        const simulatedRuleAfterExecution: SanitizedRule<Params> | undefined = result.state?.rule;
+        if (!simulatedRuleAfterExecution) {
+          throw new Error(`Simulated Rule failed for an unknown reason`);
+        }
+        return { numberOfDetectedAlerts, ...simulatedRuleAfterExecution.executionStatus };
       })
       .catch((ex) => {
         const executionStatus: RuleExecutionStatus = {
