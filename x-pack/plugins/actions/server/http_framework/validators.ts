@@ -34,8 +34,8 @@ export const buildValidators = <Config, Secrets, Params>({
 }): ActionType['validate'] => {
   const subActions = buildSubActionParams(connector);
   return {
-    config: { validate: connector.schema.config.validate },
-    secrets: { validate: connector.schema.secrets.validate },
+    config: connector.schema.config,
+    secrets: connector.schema.secrets,
     params: schema.oneOf(subActions),
   };
 };
