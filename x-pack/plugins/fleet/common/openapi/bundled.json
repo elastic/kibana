@@ -3636,7 +3636,15 @@
                 "tls_required",
                 "api_keys",
                 "fleet_admin_user",
-                "fleet_server",
+                "fleet_server"
+              ]
+            }
+          },
+          "missing_optionnal_features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
                 "encrypted_saved_object_encryption_key_required"
               ]
             }
@@ -3644,7 +3652,8 @@
         },
         "required": [
           "isReady",
-          "missing_requirements"
+          "missing_requirements",
+          "missing_optionnal_features"
         ]
       },
       "agent_type": {

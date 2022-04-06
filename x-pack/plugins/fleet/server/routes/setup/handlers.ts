@@ -21,26 +21,25 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       context.core.elasticsearch.client.asInternalUser
     );
 
-    let isReady = true;
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
+    const missingOptionnalFeatures: GetFleetStatusResponse['missing_optionnal_features'] = [];
 
     if (!isApiKeysEnabled) {
-      isReady = false;
       missingRequirements.push('api_keys');
     }
 
     if (!isFleetServerSetup) {
-      isReady = false;
       missingRequirements.push('fleet_server');
     }
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-      missingRequirements.push('encrypted_saved_object_encryption_key_required');
+      missingOptionnalFeatures.push('encrypted_saved_object_encryption_key_required');
     }
 
     const body: GetFleetStatusResponse = {
-      isReady,
+      isReady: missingRequirements.length > 0,
       missing_requirements: missingRequirements,
+      missing_optionnal_features: missingOptionnalFeatures,
     };
 
     return response.ok({

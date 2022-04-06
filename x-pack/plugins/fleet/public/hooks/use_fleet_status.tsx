@@ -18,6 +18,7 @@ interface FleetStatusState {
   isReady: boolean;
   error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
+  missingOptionnalFeatures?: GetFleetStatusResponse['missing_optionnal_features'];
 }
 
 interface FleetStatus extends FleetStatusState {
@@ -47,6 +48,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
           isLoading: false,
           isReady: res.data?.isReady ?? false,
           missingRequirements: res.data?.missing_requirements,
+          missingOptionnalFeatures: res.data?.missing_optionnal_features,
         }));
       } catch (error) {
         setState((s) => ({ ...s, isLoading: false, error }));
