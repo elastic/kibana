@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import * as socManagerUser from './user.json';
+import * as socManagerRole from './role.json';
 
-export const CLOUD_SECURITY_POSTURE = i18n.translate('xpack.csp.cloudSecurityPosture', {
-  defaultMessage: 'Cloud Security Posture',
-});
+export { socManagerUser, socManagerRole };
