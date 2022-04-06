@@ -16,6 +16,7 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
   const find = getService('find');
   const header = getPageObject('header');
   const retry = getService('retry');
+  const config = getService('config');
 
   return {
     /**
@@ -26,7 +27,9 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
     async goToFirstListedCase() {
       await testSubjects.existOrFail('cases-table');
       await testSubjects.click('case-details-link');
-      await testSubjects.existOrFail('case-view-title');
+      await testSubjects.existOrFail('case-view-title', {
+        timeout: config.get('timeouts.waitFor'),
+      });
     },
 
     async bulkDeleteAllCases() {
