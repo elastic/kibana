@@ -20,7 +20,9 @@ import { pngsToPdf } from './pdf_maker';
  * => When creating a PDF intended for print multiple PNGs will be spread out across pages
  * => When creating a PDF from a Canvas workpad, each page in the workpad will be placed on a separate page
  */
-export type PdfLayoutParams = LayoutParams<Values<typeof LayoutTypes>>;
+export type PdfLayoutParams = LayoutParams<
+  Values<Pick<typeof LayoutTypes, 'PRESERVE_LAYOUT' | 'CANVAS' | 'PRINT'>>
+>;
 
 /**
  * Options that should be provided to a PDF screenshot request.

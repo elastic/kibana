@@ -12,7 +12,7 @@ import { LayoutTypes } from '../../common';
 /**
  * The layout parameters that are accepted by PNG screenshots
  */
-export type PngLayoutParams = LayoutParams<typeof LayoutTypes.PRESERVE_LAYOUT>;
+export type PngLayoutParams = LayoutParams<LayoutTypes.PRESERVE_LAYOUT>;
 
 /**
  * Options that should be provided to a screenshot PNG request
