@@ -60,7 +60,7 @@ export function SaveQueryForm({
   const titleExistsErrorText = i18n.translate(
     'unifiedSearch.search.searchBar.savedQueryForm.titleExistsText',
     {
-      defaultMessage: 'Name is required',
+      defaultMessage: 'Name is required.',
     }
   );
 
@@ -137,7 +137,7 @@ export function SaveQueryForm({
           defaultMessage: 'Name',
         })}
         helpText={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameHelpText', {
-          defaultMessage: 'Cannot contain leading or trailing whitespace and must be unique.',
+          defaultMessage: 'Name cannot contain leading or trailing whitespace and must be unique.',
         })}
         isInvalid={hasErrors}
         display="rowCompressed"

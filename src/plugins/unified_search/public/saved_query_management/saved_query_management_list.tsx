@@ -187,7 +187,7 @@ export function SavedQueryManagementList({
 
   const noSavedQueriesDescriptionText =
     i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
-      defaultMessage: 'There are no saved queries.',
+      defaultMessage: 'No saved queries.',
     }) +
     ' ' +
     savedQueryDescriptionText;
