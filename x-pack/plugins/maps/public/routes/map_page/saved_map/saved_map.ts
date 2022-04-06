@@ -53,8 +53,8 @@ import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
-    // base64 decode svg string
-    ? settings.customIcons.map((icon) => {
+    ? // base64 decode svg string
+      settings.customIcons.map((icon) => {
         return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
       })
     : [];
@@ -470,7 +470,7 @@ export class SavedMap {
         // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
         customIcons: mapSettings.customIcons.map((icon) => {
           return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
-        })
+        }),
       },
     } as SerializedMapState);
 
