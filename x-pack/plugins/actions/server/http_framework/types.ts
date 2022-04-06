@@ -7,32 +7,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { AxiosBasicCredentials } from 'axios';
 import type { Type } from '@kbn/config-schema';
 import type { LicenseType } from '../../../licensing/common/types';
+import { CaseConnector } from '../connectors/case';
 
-interface EndPointConfig<
-  Config extends Record<string, any> = Record<string, any>,
-  Secrets extends Record<string, any> = Record<string, any>,
-  Params extends Record<string, any> = Record<string, any>,
-  FetchResponse extends Record<string, any> = Record<string, any>
-> {
-  method: 'get' | 'post' | 'put' | 'delete' | 'patch';
-  params: Type<Params>;
-  responseSchema: Type<FetchResponse>;
-  getPath: (config: Config) => string;
-  getAuth: (secrets: Secrets) => AxiosBasicCredentials;
-  preFetch?: (params: Params) => void;
-  /**
-   * Is it possible to deduct the type of res from
-   * responseSchema
-   */
-  postFetch?: (res: FetchResponse) => void;
-}
-
-export type EndPointFunc = () => Promise<{}>;
-
-export type EndPoint<Config, Secrets> = EndPointConfig<Config, Secrets> | EndPointFunc;
+// TODO: Fix types
+type IService = new (...args: any[]) => CaseConnector<unknown>;
 
 export interface HTTPConnectorType<
   Config extends Record<string, any> = Record<string, any>,
@@ -45,8 +25,5 @@ export interface HTTPConnectorType<
     config: Type<Config>;
     secrets: Type<Secrets>;
   };
-  endpoints: Record<string, EndPoint<Config, Secrets>>;
+  Service: IService;
 }
-
-export type HandlerReturnType = Record<string, unknown> | Array<Record<string, unknown>>;
-export type HandlerFunc = () => Promise<HandlerReturnType>;

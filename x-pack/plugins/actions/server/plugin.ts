@@ -92,6 +92,7 @@ import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { createHTTPConnectorFramework } from './http_framework';
+import { ServiceNow } from './connectors/externals/servicenow';
 
 export interface PluginSetupContract {
   registerType<
@@ -306,6 +307,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger: this.logger,
       actionsConfigUtils,
     });
+
     httpFramework.registerConnector({
       id: '.test',
       name: 'Test',
@@ -314,19 +316,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         config: schema.object({ apiUrl: schema.string() }),
         secrets: schema.object({ username: schema.string(), password: schema.string() }),
       },
-      endpoints: {
-        createIncident: {
-          method: 'post',
-          params: schema.object({ category: schema.string() }),
-          responseSchema: schema.object({ id: schema.string() }),
-          getPath: (config) => `${config.apiUrl}/api/test`,
-          getAuth: (secrets) => {
-            return { username: secrets.username, password: secrets.password };
-          },
-          preFetch: (res) => {},
-          postFetch: (res) => {},
-        },
-      },
+      Service: ServiceNow,
     });
 
     // Routes

@@ -11,7 +11,7 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { Incident } from '../builtin_action_types/servicenow/types';
 
-interface CaseConnectorInterface<T extends unknown> {
+export interface CaseConnectorInterface<T extends unknown> {
   // TO DO need to implement a better type
   // addIncidentComment: (comment: any) => Promise<any>;
   createIncident: (incident: Partial<Incident>) => Promise<T>;
@@ -98,6 +98,9 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
       url
     );
     const { maxContentLength, timeout } = this.configurationUtilities.getResponseSettings();
+
+    // TODO: Add name of service/connector
+    this.logger.debug(`Request to external service. Method: ${method}. URL: ${normalizedURL}`);
 
     return await this.axiosInstance(normalizedURL, {
       ...rest,
