@@ -104,7 +104,7 @@ const convertTrendToEpochTime = (trend: PostureTrend) => ({
 });
 
 const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
-  const sortedEpochTimeTrend = trend.map(convertTrendToEpochTime);
+  const epochTimeTrend = trend.map(convertTrendToEpochTime);
 
   return (
     <Chart>
@@ -122,14 +122,22 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         }}
       />
       <AreaSeries
+        // EuiChart is using this id in the tooltip label
         id="Posture Score"
-        data={sortedEpochTimeTrend}
+        data={epochTimeTrend}
         xScaleType="time"
         xAccessor={'timestamp'}
         yAccessors={['postureScore']}
       />
-      <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(1))} />
-      <Axis ticks={3} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
+      <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(2))} />
+      <Axis
+        ticks={3}
+        id="left-axis"
+        position="left"
+        showGridLines
+        domain={{ min: 0, max: 100 }}
+        tickFormat={(v) => getPostureScorePercentage(v)}
+      />
     </Chart>
   );
 };
