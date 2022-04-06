@@ -22,7 +22,7 @@ exports[`XYChart component annotations should render basic annotation 1`] = `
           "label": "Annotation",
           "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={false}
@@ -78,7 +78,7 @@ exports[`XYChart component annotations should render grouped annotations preserv
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={true}
@@ -137,7 +137,7 @@ exports[`XYChart component annotations should render grouped annotations with de
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={true}
@@ -186,7 +186,7 @@ exports[`XYChart component annotations should render simplified annotation when 
           "label": "Annotation",
           "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={false}
