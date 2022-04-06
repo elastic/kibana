@@ -8,41 +8,38 @@
 import { i18n } from '@kbn/i18n';
 
 export const BENCHMARK_INTEGRATIONS = i18n.translate(
-  'xpack.csp.benchmarks.benchmark_integrations',
+  'xpack.csp.benchmarks.benchmarkIntegrationsTitle',
   {
     defaultMessage: 'Benchmark Integrations',
   }
 );
 
-export const LOADING_BENCHMARKS = i18n.translate('xpack.csp.benchmarks.loading_benchmarks', {
-  defaultMessage: 'Loading your benchmarks...',
-});
-
-export const ADD_A_CIS_INTEGRATION = i18n.translate('xpack.csp.benchmarks.add_a_cis_integration', {
-  defaultMessage: 'Add a CIS integration',
-});
-
 export const TABLE_COLUMN_HEADERS = {
-  INTEGRATION: i18n.translate('xpack.csp.benchmarks.table_column_headers.integrationNameLabel', {
+  INTEGRATION: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
     defaultMessage: 'Integration',
   }),
   INTEGRATION_TYPE: i18n.translate(
-    'xpack.csp.benchmarks.table_column_headers.integrationTypeLabel',
-    { defaultMessage: 'Integration Type' }
+    'xpack.csp.benchmarks.benchmarksTable.integrationTypeColumnTitle',
+    {
+      defaultMessage: 'Integration Type',
+    }
   ),
-  ACTIVE_RULES: i18n.translate('xpack.csp.benchmarks.table_column_headers.active_rules', {
+  ACTIVE_RULES: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
     defaultMessage: 'Active Rules',
   }),
-  AGENT_POLICY: i18n.translate('xpack.csp.benchmarks.table_column_headers.agent_policy', {
+  AGENT_POLICY: i18n.translate('xpack.csp.benchmarks.benchmarksTable.agentPolicyColumnTitle', {
     defaultMessage: 'Agent Policy',
   }),
-  NUMBER_OF_AGENTS: i18n.translate('xpack.csp.benchmarks.table_column_headers.number_of_agents', {
-    defaultMessage: 'Number of Agents',
-  }),
-  CREATED_BY: i18n.translate('xpack.csp.benchmarks.table_column_headers.created_by', {
+  NUMBER_OF_AGENTS: i18n.translate(
+    'xpack.csp.benchmarks.benchmarksTable.numberOfAgentsColumnTitle',
+    {
+      defaultMessage: 'Number of Agents',
+    }
+  ),
+  CREATED_BY: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdByColumnTitle', {
     defaultMessage: 'Created by',
   }),
-  CREATED_AT: i18n.translate('xpack.csp.benchmarks.table_column_headers.created_at', {
+  CREATED_AT: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdAtColumnTitle', {
     defaultMessage: 'Created at',
   }),
 };

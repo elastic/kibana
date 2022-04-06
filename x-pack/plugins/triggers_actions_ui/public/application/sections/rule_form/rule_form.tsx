@@ -587,7 +587,7 @@ export const RuleForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.rules.minimumScheduleInterval.value setting defines the minimum value. The xpack.alerting.rules.minimumScheduleInterval.enforce setting defines whether this minimum is required or suggested.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
         })}
       />
     </>
