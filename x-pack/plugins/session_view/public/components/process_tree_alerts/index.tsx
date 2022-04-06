@@ -13,7 +13,7 @@ import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
 export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
-  jumpToAlertID?: string;
+  investigatedAlertId?: string;
   isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
   onShowAlertDetails: (alertUuid: string) => void;
@@ -21,7 +21,7 @@ export interface ProcessTreeAlertsDeps {
 
 export function ProcessTreeAlerts({
   alerts,
-  jumpToAlertID,
+  investigatedAlertId,
   isProcessSelected = false,
   onAlertSelected,
   onShowAlertDetails,
@@ -30,13 +30,14 @@ export function ProcessTreeAlerts({
   const styles = useStyles();
 
   useEffect(() => {
-    const jumpToAlert = alerts.find(
-      (alert) => alert.kibana?.alert?.uuid && alert.kibana?.alert?.uuid === jumpToAlertID
-    );
-    if (jumpToAlertID && jumpToAlert) {
+    const jumpToAlert =
+      investigatedAlertId &&
+      alerts.find((alert) => alert.kibana?.alert?.uuid === investigatedAlertId);
+
+    if (jumpToAlert) {
       setSelectedAlert(jumpToAlert.kibana?.alert!);
     }
-  }, [jumpToAlertID, alerts]);
+  }, [investigatedAlertId, alerts]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -86,7 +87,7 @@ export function ProcessTreeAlerts({
           <ProcessTreeAlert
             key={`${alertUuid}-${idx}`}
             alert={alert}
-            isInvestigated={jumpToAlertID === alertUuid}
+            isInvestigated={investigatedAlertId === alertUuid}
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
             onClick={handleAlertClick}
             selectAlert={selectAlert}

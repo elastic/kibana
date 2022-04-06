@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Adobe Hijack Persistence",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"creation\" and\n  file.path : (\"?:\\\\Program Files (x86)\\\\Adobe\\\\Acrobat Reader DC\\\\Reader\\\\AcroCEF\\\\RdrCEF.exe\",\n               \"?:\\\\Program Files\\\\Adobe\\\\Acrobat Reader DC\\\\Reader\\\\AcroCEF\\\\RdrCEF.exe\") and\n  not process.name : \"msiexec.exe\"\n",
   "risk_score": 21,
   "rule_id": "2bf78aa2-9c56-48de-b139-f169bf99cf86",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

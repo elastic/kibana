@@ -34,7 +34,7 @@ describe('SourcesRouter', () => {
   });
 
   it('renders sources routes', () => {
-    const TOTAL_ROUTES = 86;
+    const TOTAL_ROUTES = 87;
     const wrapper = shallow(<SourcesRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);

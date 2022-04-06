@@ -38,12 +38,12 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
       const {
         start,
         end,
-        query_text: queryText = '',
-        status_filters: statusFilters = '',
+        query_text: queryText,
+        status_filters: statusFilters,
         page,
         per_page: perPage,
-        sort_field: sortField = 'timestamp',
-        sort_order: sortOrder = 'desc',
+        sort_field: sortField,
+        sort_order: sortOrder,
       } = request.query;
       const siemResponse = buildSiemResponse(response);
 
@@ -54,9 +54,9 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
           start,
           end,
           queryText,
-          statusFilters: statusFilters.length ? statusFilters.split(',') : [],
-          page: page != null ? parseInt(page, 10) : 0,
-          perPage: perPage != null ? parseInt(perPage, 10) : 10,
+          statusFilters,
+          page,
+          perPage,
           sortField,
           sortOrder,
         });
