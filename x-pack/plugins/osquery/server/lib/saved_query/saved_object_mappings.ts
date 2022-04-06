@@ -65,6 +65,18 @@ export const savedQueryType: SavedObjectsType = {
       path: `/app/osquery/saved_queries/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
+    onExport: (context, objects) =>
+      produce(objects, (draft) => {
+        draft.forEach((savedQuerySO) => {
+          // Only prebuilt saved queries should have a version
+          if (savedQuerySO.attributes.version) {
+            savedQuerySO.attributes.id += '_copy';
+            delete savedQuerySO.attributes.version;
+          }
+        });
+
+        return draft;
+      }),
   },
 };
 
@@ -192,8 +204,7 @@ export const packAssetType: SavedObjectsType = {
   name: packAssetSavedObjectType,
   hidden: false,
   management: {
-    importableAndExportable: true,
-    visibleInManagement: false,
+    importableAndExportable: false,
   },
   namespaceType: 'agnostic',
   mappings: packAssetSavedObjectMappings,
