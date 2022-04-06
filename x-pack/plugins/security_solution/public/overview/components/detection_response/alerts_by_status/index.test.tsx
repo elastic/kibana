@@ -82,43 +82,6 @@ describe('AlertsByStatus', () => {
     expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
   });
 
-  test('does Not render VisualizationActions if visualizationActionsOptions are not provided', () => {
-    const { container } = render(
-      <TestProviders>
-        <AlertsByStatus {...props} />
-      </TestProviders>
-    );
-    expect(
-      container.querySelector(`[data-test-subj="stat-alertsByStatus"]`)
-    ).not.toBeInTheDocument();
-  });
-
-  test('does Not render DonutChart if isInitialLoading is true', () => {
-    const { container } = render(
-      <TestProviders>
-        <AlertsByStatus {...props} />
-      </TestProviders>
-    );
-    expect(container.querySelector(`[data-test-subj="donut-chart"]`)).not.toBeInTheDocument();
-  });
-
-  test('render DonutChart if isInitialLoading is false', async () => {
-    const testProps = {
-      ...props,
-      isInitialLoading: false,
-    };
-    (useAlertsByStatus as jest.Mock).mockReturnValue({
-      items: parsedMockAlertsData,
-      isLoading: false,
-    });
-    const { container } = render(
-      <TestProviders>
-        <AlertsByStatus {...testProps} />
-      </TestProviders>
-    );
-    expect(container.querySelector(`[data-test-subj="donut-chart"]`)).toBeInTheDocument();
-  });
-
   test('render Legend', () => {
     const testProps = {
       ...props,
