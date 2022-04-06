@@ -37,7 +37,7 @@ download "kibana-$VERSION-linux-aarch64.tar.gz"
 download "kibana-$VERSION-linux-x86_64.tar.gz"
 
 download "kibana-$VERSION-darwin-x86_64.tar.gz"
-download "kibana-$VERSION-darwin-aarch64.gz"
+download "kibana-$VERSION-darwin-aarch64.tar.gz"
 
 download "kibana-$VERSION-windows-x86_64.zip"
 
