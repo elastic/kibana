@@ -73,7 +73,7 @@ const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) =>
   return flattenedLinks[deepLinkId];
 };
 
-const applicationIdRegexp = /^[a-zA-Z0-9_-]+$/;
+const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
 const allApplicationsFilter = '__ALL__';
 
 interface AppUpdaterWrapper {

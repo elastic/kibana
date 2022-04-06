@@ -6,7 +6,7 @@
 
 The unique identifier of the application.
 
-Can only be composed of alphanumeric characters, `-` and `_`
+Can only be composed of alphanumeric characters, `-`<!-- -->, `:` and `_`
 
 <b>Signature:</b>
 

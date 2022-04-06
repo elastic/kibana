@@ -109,7 +109,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
    * The unique identifier of the application.
    *
-   * Can only be composed of alphanumeric characters, `-` and `_`
+   * Can only be composed of alphanumeric characters, `-`, `:` and `_`
    */
   id: string;
 

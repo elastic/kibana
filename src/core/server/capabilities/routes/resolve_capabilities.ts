@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CapabilitiesResolver } from '../resolve_capabilities';
 
-const applicationIdRegexp = /^[a-zA-Z0-9_-]+$/;
+const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
 
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
   router.post(
