@@ -59,6 +59,13 @@ interface ExecutionLogTableSearchProps {
   onStatusFilterChange: (statusFilters: string[]) => void;
 }
 
+/**
+ * SearchBar + StatusFilters component to be used with the Rule Execution Log table
+ * NOTE: This component is currently not shown in the UI as custom search queries
+ * are not yet fully supported by the Rule Execution Log aggregation API since
+ * certain queries could result in missing data or inclusion of wrong events.
+ * Please see this comment for history/details: https://github.com/elastic/kibana/pull/127339/files#r825240516
+ */
 export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
   ({ onlyShowFilters, onSearch, onStatusFilterChange }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);

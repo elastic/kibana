@@ -64,7 +64,7 @@ see <<action-settings,Action settings>>.
 
 *Problem* 
 
-Rules  are taking a long time to execute and are impacting the overall health of your deployment.
+Rules are taking a long time to execute and are impacting the overall health of your deployment.
 
 [IMPORTANT]
 ==============================================
@@ -73,7 +73,23 @@ By default, only users with a `superuser` role can query the experimental[] {kib
 
 *Solution*
 
-Query for a list of rule ids, bucketed by their execution times:
+By default, rules have a `5m` timeout. Rules that run longer than this timeout are automatically cancelled to prevent them from consuming too much of {kib}'s resources. Alerts and actions that may have been scheduled before the rule timed out are discarded. When a rule times out, you will see this error in the {kib} logs:
+
+[source,sh]
+--------------------------------------------------
+[2022-03-28T13:14:04.062-04:00][WARN ][plugins.taskManager] Cancelling task alerting:.index-threshold "a6ea0070-aec0-11ec-9985-dd576a3fe205" as it expired at 2022-03-28T17:14:03.980Z after running for 05m 10s (with timeout set at 5m).
+--------------------------------------------------
+
+and in the <<rule-details,details page>>:
+
+[role="screenshot"]
+image::images/rule-details-timeout-error.png[Rule details page with timeout error]
+
+If you want your rules to run longer, update the `xpack.alerting.rules.execution.timeout` configuration in your <<alert-settings>>. You can also target a specific rule type by using `xpack.alerting.rules.execution.ruleTypeOverrides`.
+
+Rules that consistently run longer than their <<create-edit-rules, check interval>> may produce unexpected results. If the average run duration, visible on the <<rule-details,details page>>, is greater than the check interval, consider increasing the check interval.
+
+To get all long-running rules, you can query for a list of rule ids, bucketed by their execution times:
 
 [source,console]
 --------------------------------------------------
@@ -228,7 +244,7 @@ Use the <<get-rule-api,Get Rule API>> to retrieve additional information about r
 
 [float]
 [[rule-cannot-decrypt-api-key]]
-=== Rule cannot decrypt apiKey
+==== Rule cannot decrypt apiKey
 
 *Problem*:
 

@@ -69,8 +69,8 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../policy/store/services/ingest', () => {
-  const originalModule = jest.requireActual('../../policy/store/services/ingest');
+jest.mock('../../../services/policies/ingest', () => {
+  const originalModule = jest.requireActual('../../../services/policies/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),

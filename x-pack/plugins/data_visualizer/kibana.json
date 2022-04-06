@@ -12,7 +12,8 @@
     "discover",
     "fileUpload",
     "uiActions",
-    "charts"
+    "charts",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "security",
