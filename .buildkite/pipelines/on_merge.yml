@@ -1,3 +1,5 @@
+env:
+  REPORT_FAILED_TESTS_TO_GITHUB: 'false'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
