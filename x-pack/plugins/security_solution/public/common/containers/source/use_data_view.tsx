@@ -28,7 +28,7 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataview } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/api';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -125,7 +125,7 @@ export const useDataView = (): {
         };
         setLoading({ id: dataViewId, loading: true });
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataview(
+          const dataViewToUpdate = await getSourcererDataView(
             dataViewId,
             abortCtrl.current[dataViewId].signal
           );
