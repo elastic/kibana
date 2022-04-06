@@ -18,7 +18,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
-import { AlertStatusEventEntityIdMap, Process } from '../../../common/types/process_tree';
+import {
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { DisplayOptionsState } from '../../../common/types/session_view';
 import { SessionViewDeps } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
@@ -38,9 +42,17 @@ import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 export const SessionView = ({
   sessionEntityId,
   height,
-  jumpToEvent,
+  jumpToEntityId,
+  jumpToCursor,
+  investigatedAlertId,
   loadAlertDetails,
 }: SessionViewDeps) => {
+  // don't engage jumpTo if jumping to session leader.
+  if (jumpToEntityId === sessionEntityId) {
+    jumpToEntityId = undefined;
+    jumpToCursor = undefined;
+  }
+
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,12 +66,33 @@ export const SessionView = ({
   );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
+  const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
+  const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
   const styles = useStyles({ height });
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
   }, []);
+
+  const onJumpToEvent = useCallback(
+    (event: ProcessEvent) => {
+      if (event.process) {
+        const { entity_id: entityId } = event.process;
+        if (entityId !== sessionEntityId) {
+          const alert = event.kibana?.alert;
+          const cursor = alert ? alert?.original_time : event['@timestamp'];
+
+          if (cursor) {
+            setCurrentJumpToEntityId(entityId);
+            setCurrentJumpToCursor(cursor);
+          }
+        }
+        setSelectedProcess(null);
+      }
+    },
+    [sessionEntityId]
+  );
 
   const {
     data,
@@ -69,7 +102,7 @@ export const SessionView = ({
     isFetching,
     fetchPreviousPage,
     hasPreviousPage,
-  } = useFetchSessionViewProcessEvents(sessionEntityId, jumpToEvent);
+  } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
 
   const alertsQuery = useFetchSessionViewAlerts(sessionEntityId);
   const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
@@ -222,13 +255,15 @@ export const SessionView = ({
                 {hasData && (
                   <div css={styles.processTree}>
                     <ProcessTree
+                      key={sessionEntityId + currentJumpToCursor}
                       sessionEntityId={sessionEntityId}
                       data={data.pages}
                       alerts={alerts}
                       searchQuery={searchQuery}
                       selectedProcess={selectedProcess}
                       onProcessSelected={onProcessSelected}
-                      jumpToEvent={jumpToEvent}
+                      jumpToEntityId={currentJumpToEntityId}
+                      investigatedAlertId={investigatedAlertId}
                       isFetching={isFetching}
                       hasPreviousPage={hasPreviousPage}
                       hasNextPage={hasNextPage}
@@ -256,9 +291,9 @@ export const SessionView = ({
                   >
                     <SessionViewDetailPanel
                       alerts={alerts}
-                      investigatedAlert={jumpToEvent}
+                      investigatedAlertId={investigatedAlertId}
                       selectedProcess={selectedProcess}
-                      onProcessSelected={onProcessSelected}
+                      onJumpToEvent={onJumpToEvent}
                       onShowAlertDetails={onShowAlertDetails}
                     />
                   </EuiResizablePanel>
