@@ -28,12 +28,12 @@ import { RULE_DISK_USAGE, RULE_DETAILS } from '../../common/constants';
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { RawAlertInstance, SanitizedRule } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
 export class DiskUsageRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_DISK_USAGE,
       name: RULE_DETAILS[RULE_DISK_USAGE].label,

@@ -9,7 +9,7 @@ import { EuiCode, EuiDescribedFormGroup, EuiFieldText, EuiFormRow } from '@elast
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LogIndexNameReference } from '../../../../common/log_sources';
+import { LogIndexNameReference } from '../../../../common/log_views';
 import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
 import { FormValidationError } from './validation_errors';

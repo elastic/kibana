@@ -34,7 +34,10 @@ export type TrustedAppConditionEntryField =
   | 'process.executable.caseless'
   | 'process.Ext.code_signature';
 export type BlocklistConditionEntryField = 'file.hash.*' | 'file.path' | 'file.Ext.code_signature';
-export type AllConditionEntryFields = TrustedAppConditionEntryField | BlocklistConditionEntryField;
+export type AllConditionEntryFields =
+  | TrustedAppConditionEntryField
+  | BlocklistConditionEntryField
+  | 'file.path.text';
 
 export const enum OperatingSystem {
   LINUX = 'linux',
@@ -105,11 +108,16 @@ export const isPathValid = ({
   value,
 }: {
   os: OperatingSystem;
-  field: AllConditionEntryFields | 'file.path.text';
+  field: AllConditionEntryFields;
   type: EntryTypes;
   value: string;
 }): boolean => {
-  if (field === ConditionEntryField.PATH || field === 'file.path.text') {
+  const pathFields: AllConditionEntryFields[] = [
+    'process.executable.caseless',
+    'file.path',
+    'file.path.text',
+  ];
+  if (pathFields.includes(field)) {
     if (type === 'wildcard') {
       return os === OperatingSystem.WINDOWS
         ? isWindowsWildcardPathValid(value)
