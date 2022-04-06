@@ -16,6 +16,7 @@ import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '../../mocks';
 
 jest.mock('./core/document_migrator', () => {
   return {
@@ -286,6 +287,7 @@ const mockOptions = () => {
       retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
+    docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;
 };

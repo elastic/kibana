@@ -50,6 +50,7 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { DocLinksServiceSetup, DocLinksServiceStart } from '../doc_links';
 
 const kibanaIndex = '.kibana';
 
@@ -272,6 +273,7 @@ export interface SavedObjectsSetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   deprecations: InternalDeprecationsServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -284,6 +286,7 @@ interface WrappedClientFactoryWrapper {
 export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
   pluginsInitialized?: boolean;
+  docLinks: DocLinksServiceStart;
 }
 
 export class SavedObjectsService
@@ -312,7 +315,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations, docLinks } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -385,6 +388,7 @@ export class SavedObjectsService
   public async start({
     elasticsearch,
     pluginsInitialized = true,
+    docLinks,
   }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
@@ -396,7 +400,8 @@ export class SavedObjectsService
 
     const migrator = this.createMigrator(
       this.config.migration,
-      elasticsearch.client.asInternalUser
+      elasticsearch.client.asInternalUser,
+      docLinks
     );
 
     this.migrator$.next(migrator);
@@ -511,7 +516,8 @@ export class SavedObjectsService
 
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,
-    client: ElasticsearchClient
+    client: ElasticsearchClient,
+    docLinks: DocLinksServiceStart
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -520,6 +526,7 @@ export class SavedObjectsService
       soMigrationsConfig,
       kibanaIndex,
       client,
+      docLinks,
     });
   }
 

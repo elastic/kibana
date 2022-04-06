@@ -395,4 +395,7 @@ export interface DocLinks {
   readonly legal: {
     readonly privacyStatement: string;
   };
+  readonly savedObjects: {
+    readonly resolveMigrationFailures: string;
+  };
 }

@@ -32,6 +32,7 @@ export interface CloneIndexParams {
   target: string;
   /** only used for testing */
   timeout?: string;
+  migrationDocLinks: Record<string, string>;
 }
 /**
  * Makes a clone of the source index into the target.
@@ -48,6 +49,7 @@ export const cloneIndex = ({
   source,
   target,
   timeout = DEFAULT_TIMEOUT,
+  migrationDocLinks,
 }: CloneIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotFound,
   CloneIndexResponse
@@ -129,7 +131,7 @@ export const cloneIndex = ({
       } else {
         // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
-          waitForIndexStatusYellow({ client, index: target, timeout }),
+          waitForIndexStatusYellow({ client, index: target, timeout, migrationDocLinks }),
           TaskEither.map((value) => {
             /** When the index status is 'yellow' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };

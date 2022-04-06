@@ -242,6 +242,7 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      docLinks: docLinksSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
@@ -316,6 +317,7 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
+      docLinks: docLinkStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 

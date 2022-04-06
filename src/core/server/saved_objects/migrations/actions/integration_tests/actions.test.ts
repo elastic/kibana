@@ -73,6 +73,7 @@ describe('migration actions', () => {
         dynamic: true,
         properties: {},
       },
+      migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
     })();
     const sourceDocs = [
       { _source: { title: 'doc 1' } },
@@ -88,11 +89,17 @@ describe('migration actions', () => {
       refresh: 'wait_for',
     })();
 
-    await createIndex({ client, indexName: 'existing_index_2', mappings: { properties: {} } })();
+    await createIndex({
+      client,
+      indexName: 'existing_index_2',
+      mappings: { properties: {} },
+      migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
+    })();
     await createIndex({
       client,
       indexName: 'existing_index_with_write_block',
       mappings: { properties: {} },
+      migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
     })();
     await bulkOverwriteTransformedDocuments({
       client,
@@ -220,6 +227,7 @@ describe('migration actions', () => {
         client,
         indexName: 'new_index_without_write_block',
         mappings: { properties: {} },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
     });
     it('resolves right when setting the write block succeeds', async () => {
@@ -285,11 +293,13 @@ describe('migration actions', () => {
         client,
         indexName: 'existing_index_without_write_block_2',
         mappings: { properties: {} },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
       await createIndex({
         client,
         indexName: 'existing_index_with_write_block_2',
         mappings: { properties: {} },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
       await setWriteBlock({ client, index: 'existing_index_with_write_block_2' })();
     });
@@ -347,6 +357,7 @@ describe('migration actions', () => {
       const indexStatusPromise = waitForIndexStatusYellow({
         client,
         index: 'red_then_yellow_index',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
@@ -381,6 +392,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_target_1',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       });
       expect.assertions(1);
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -418,6 +430,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_then_yellow_index',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       let indexYellow = false;
@@ -448,7 +461,12 @@ describe('migration actions', () => {
     });
     it('resolves left index_not_found_exception if the source index does not exist', async () => {
       expect.assertions(1);
-      const task = cloneIndex({ client, source: 'no_such_index', target: 'clone_target_3' });
+      const task = cloneIndex({
+        client,
+        source: 'no_such_index',
+        target: 'clone_target_3',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
+      });
       await expect(task()).resolves.toMatchInlineSnapshot(`
           Object {
             "_tag": "Left",
@@ -483,6 +501,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '1s',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -511,6 +530,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '30s',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       await expect(cloneIndexPromise2).resolves.toMatchInlineSnapshot(`
@@ -692,7 +712,12 @@ describe('migration actions', () => {
       expect.assertions(2);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
-      await createIndex({ client, indexName: 'reindex_target_4', mappings: { properties: {} } })();
+      await createIndex({
+        client,
+        indexName: 'reindex_target_4',
+        mappings: { properties: {} },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
+      })();
       const sourceDocs = (
         (await searchForOutdatedDocuments(client, {
           batchSize: 1000,
@@ -765,6 +790,7 @@ describe('migration actions', () => {
             /** no title field */
           },
         },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       const {
@@ -804,6 +830,7 @@ describe('migration actions', () => {
           dynamic: false,
           properties: { title: { type: 'integer' } }, // integer is incompatible with string title
         },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       const {
@@ -900,6 +927,7 @@ describe('migration actions', () => {
       await waitForIndexStatusYellow({
         client,
         index: '.kibana_1',
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
 
       const res = (await reindex({
@@ -1315,6 +1343,7 @@ describe('migration actions', () => {
           dynamic: false,
           properties: {},
         },
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
       const sourceDocs = [
         { _source: { title: 'doc 1' } },
@@ -1543,6 +1572,7 @@ describe('migration actions', () => {
         client,
         indexName: 'red_then_yellow_index',
         mappings: undefined as any,
+        migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
       })();
       let indexYellow = false;
 
@@ -1572,7 +1602,12 @@ describe('migration actions', () => {
       // Creating an index with the same name as an existing alias to induce
       // failure
       await expect(
-        createIndex({ client, indexName: 'existing_index_2_alias', mappings: undefined as any })()
+        createIndex({
+          client,
+          indexName: 'existing_index_2_alias',
+          mappings: undefined as any,
+          migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
+        })()
       ).rejects.toThrow('invalid_index_name_exception');
     });
   });
