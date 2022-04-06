@@ -21,13 +21,6 @@ const baseColumns: Array<
 > = [
   {
     columnHeaderType: defaultColumnHeaderType,
-    displayAsText: i18n.ALERTS_HEADERS_RULE,
-    id: 'kibana.alert.rule.name',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    linkField: 'kibana.alert.rule.uuid',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
     id: 'kibana.alert.severity',
     initialWidth: 105,
@@ -82,6 +75,13 @@ export const columns: Array<
     id: '@timestamp',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
   },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    displayAsText: i18n.ALERTS_HEADERS_RULE,
+    id: 'kibana.alert.rule.name',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    linkField: 'kibana.alert.rule.uuid',
+  },
   ...baseColumns,
 ];
 
@@ -90,7 +90,7 @@ export const rulePreviewColumns: Array<
 > = [
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'kibana.original_event.time',
+    id: 'kibana.alert.original_time',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
   },
   ...baseColumns,
