@@ -105,7 +105,7 @@ image:images/document-table.png[Document Explorer with fields for manufacturer, 
 column header, and then select *Move left* or *Move right*.
 
 . To view more of the document table, click
-image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=50%]
+image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
 

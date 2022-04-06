@@ -1,10 +1,9 @@
 [[document-explorer]]
 == Document Explorer
 
-beta::[]
-
-*Discover* has a *Document Explorer* with resizable columns, better data sorting and comparison,
-and a fullscreen view.
+The *Document Explorer* displays your data table format,
+enabling you to perform advanced sorting, resize columns,
+adjust row density, view data in fullscreen, and more.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
@@ -19,12 +18,6 @@ data-type="inline"
 />
 </br>
 ++++
-
-To use the *Document Explorer* instead of the classic document table:
-
-. Open *Discover*.
-. In the toolbar, click *Options*, and then click *Try Document Explorer*.
-. Turn off the classic view and save the changes.
 
 [float]
 [[document-explorer-columns]]
@@ -61,7 +54,7 @@ image::images/document-explorer-row-height.png[Row height settings for Document 
 Sort your data by one or more fields, in ascending or descending order.
 The default sort is based on the time field, from new to old.
 
-. In the *Document Explorer*, click and open the *field sorted* options.
+. In the *Document Explorer*, click the *field sorted* option.
 +
 [role="screenshot"]
 image::images/document-explorer-sort-data.png[Pop-up in Document Explorer for sorting columns, width="75%"]

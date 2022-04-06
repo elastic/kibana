@@ -50,7 +50,7 @@ image::images/field-statistics-geo.png["Field statistics for a geo field."]
 . Explore additional field types to see the statistics that *Discover* provides.
 
 . To create a visualization of the field data, click
-image:images/chart-icon.png[Click the magnifying glass icon to create a visualization of the data in Lens]
+image:images/visualization-icon.png[Click the magnifying glass icon to create a visualization of the data in Lens]
 or
 image:images/map-icon.png[Click the Maps icon to explore the data in a map]
 in the *Actions* column.
