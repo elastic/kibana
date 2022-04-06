@@ -27,7 +27,7 @@ describe('getDefaultSort function', function () {
     expect(getDefaultSort(stubDataViewWithoutTimeField, 'asc', false)).toEqual([]);
   });
 
-  test('should return empty sourt for data view when time column is hidden', function () {
+  test('should return empty sort for data view when time column is hidden', function () {
     expect(getDefaultSort(stubDataView, 'desc', true)).toEqual([]);
     expect(getDefaultSort(stubDataView, 'asc', true)).toEqual([]);
   });
