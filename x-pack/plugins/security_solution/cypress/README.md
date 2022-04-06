@@ -411,8 +411,8 @@ Consider to extract all the elements you need to interact with to the `screens` 
 Consider to extract all the tasks a user should perfom into the `tasks` folder. In this way is going to be easier to undertsand what are we trying to mimic from the user perspective. Also in case there is change on the way the user has to perform the action, we 
 just need to update the value in one place.
 
-### Make sure your test fail
-Before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
+### Make sure your test fails
+Before open a PR with a new test, please first make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ### Minimize the use of es_archive
 When possible, create all the data that you need for executing the tests using the application APIS or the UI.
