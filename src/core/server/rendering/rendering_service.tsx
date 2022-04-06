@@ -104,6 +104,10 @@ export class RenderingService {
     });
 
     const publicPlugins = [...uiPlugins.public].filter(
+      // If this is an anonymous page, it filters out ALL plugins that do not have "enabledOnAnonymousPages" set in their manifest.
+      // This is intentional, it does not automatically include any required plugins/bundles.
+      // If additional required plugin dependencies are added in the future that need to be enabled on anonymous pages, that should be
+      // explicitly defined in the affected plugin manifest(s).
       ([, plugin]) => includeUserSettings || plugin.enabledOnAnonymousPages
     );
     const metadata: RenderingMetadata = {
