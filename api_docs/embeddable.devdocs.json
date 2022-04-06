@@ -1308,6 +1308,54 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Container.onRemoveEmbeddable",
+            "type": "Function",
+            "tags": [],
+            "label": "onRemoveEmbeddable",
+            "description": [
+              "\nControl the panels that are pushed to the input stream when an embeddable is\nremoved. This can be used if removing one embeddable has knock-on effects, like\nre-ordering embeddables that come after it."
+            ],
+            "signature": [
+              "(embeddableId: string) => { [key: string]: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.PanelState",
+                "text": "PanelState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              " & { id: string; }>; }"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.onRemoveEmbeddable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "embeddableId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Container.getChildIds",
             "type": "Function",
             "tags": [],

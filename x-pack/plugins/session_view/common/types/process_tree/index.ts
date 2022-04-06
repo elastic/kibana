@@ -121,7 +121,7 @@ export interface ProcessEventAlert {
   reason?: string;
   workflow_status?: string;
   status?: string;
-  original_time?: Date;
+  original_time?: string;
   original_event?: {
     action?: string;
   };

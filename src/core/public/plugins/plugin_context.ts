@@ -83,6 +83,7 @@ export function createPluginSetupContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
+    analytics: deps.analytics,
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
@@ -121,6 +122,7 @@ export function createPluginStartContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreStart {
   return {
+    analytics: deps.analytics,
     application: {
       applications$: deps.application.applications$,
       currentAppId$: deps.application.currentAppId$,

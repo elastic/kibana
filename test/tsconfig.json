@@ -18,6 +18,7 @@
   ],
   "exclude": [
     "target/**/*",
+    "analytics/__fixtures__/plugins/**/*",
     "interpreter_functional/plugins/**/*",
     "plugin_functional/plugins/**/*",
     "server_integration/__fixtures__/plugins/**/*",
@@ -54,6 +55,8 @@
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../src/plugins/data_view_management/tsconfig.json" },
     { "path": "../src/plugins/visualizations/tsconfig.json" },
+    { "path": "analytics/__fixtures__/plugins/analytics_ftr_helpers/tsconfig.json"},
+    { "path": "analytics/__fixtures__/plugins/analytics_plugin_a/tsconfig.json"},
     { "path": "interactive_setup_api_integration/fixtures/test_endpoints/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_app_status/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_provider_plugin/tsconfig.json" },
