@@ -10,6 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { AppMountParameters } from 'kibana/public';
+import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
 import {
   getCoreChrome,
@@ -18,6 +19,7 @@ import {
   getToasts,
   getEmbeddableService,
   getDocLinks,
+  getSharedUXPluginContext,
 } from './kibana_services';
 import {
   createKbnUrlStateStorage,
@@ -94,17 +96,19 @@ export async function renderApp(
     }
 
     return (
-      <MapPage
-        mapEmbeddableInput={mapEmbeddableInput}
-        embeddableId={embeddableId}
-        onAppLeave={onAppLeave}
-        setHeaderActionMenu={setHeaderActionMenu}
-        stateTransfer={stateTransfer}
-        originatingApp={originatingApp}
-        originatingPath={originatingPath}
-        history={history}
-        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
-      />
+      <SharedUxServicesProvider {...getSharedUXPluginContext().getContextServices()}>
+        <MapPage
+          mapEmbeddableInput={mapEmbeddableInput}
+          embeddableId={embeddableId}
+          onAppLeave={onAppLeave}
+          setHeaderActionMenu={setHeaderActionMenu}
+          stateTransfer={stateTransfer}
+          originatingApp={originatingApp}
+          originatingPath={originatingPath}
+          history={history}
+          key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
+        />
+      </SharedUxServicesProvider>
     );
   }
 
