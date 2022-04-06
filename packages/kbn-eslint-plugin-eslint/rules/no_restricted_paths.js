@@ -27,8 +27,8 @@
  * THE SOFTWARE.
  */
 const path = require('path');
-const resolve = require('eslint-module-utils/resolve').default;
 const mm = require('micromatch');
+const { resolveKibanaImport } = require('@kbn/eslint-plugin-imports');
 
 function isStaticRequire(node) {
   return (
@@ -90,6 +90,11 @@ module.exports = {
   },
 
   create(context) {
+    const sourcePath = context.getPhysicalFilename
+      ? context.getPhysicalFilename()
+      : context.getFilename();
+    const sourceDirname = path.dirname(sourcePath);
+
     const options = context.options[0] || {};
     const zones = options.zones || [];
     const basePath = options.basePath;
@@ -98,16 +103,15 @@ module.exports = {
     }
 
     function checkForRestrictedImportPath(importPath, node) {
-      const absoluteImportPath = importPath[0] === '.' ? resolve(importPath, context) : undefined;
+      const resolveReport = resolveKibanaImport(importPath, sourceDirname);
 
-      const currentFilename = context.getFilename();
+      if (resolveReport?.type !== 'file' || resolveReport.nodeModule) {
+        return;
+      }
+
       for (const { target, from, allowSameFolder, errorMessage = '' } of zones) {
-        const srcFilePath = resolve(currentFilename, context);
-
-        const relativeSrcFile = path.relative(basePath, srcFilePath);
-        const relativeImportFile = absoluteImportPath
-          ? path.relative(basePath, absoluteImportPath)
-          : importPath;
+        const relativeSrcFile = path.relative(basePath, sourcePath);
+        const relativeImportFile = path.relative(basePath, resolveReport.absolute);
 
         if (
           !mm([relativeSrcFile], target).length ||

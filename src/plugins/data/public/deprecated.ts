@@ -51,8 +51,6 @@ import {
   getEsQueryConfig,
 } from '../common';
 
-import { FilterLabel, FilterItem } from './ui';
-
 import {
   getDisplayValueFromFilter,
   generateFilters,
@@ -90,9 +88,6 @@ const convertRangeFilterToTimeRangeString = oldConvertRangeFilterToTimeRangeStri
  * @removeBy 8.1
  */
 export const esFilters = {
-  FilterLabel,
-  FilterItem,
-
   FILTERS,
   FilterStateStore,
 
