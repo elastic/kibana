@@ -19,7 +19,7 @@ import {
   Alert,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  AlertTypeState as RuleTypeState,
+  RuleTypeState,
 } from '../../../../../alerting/server';
 
 import {
@@ -42,7 +42,6 @@ import {
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
 } from '../../../../common/alerting/logs/log_threshold';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -99,7 +98,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async ({ services, params, startedAt }) => {
     const { alertWithLifecycle, savedObjectsClient, scopedClusterClient, getAlertStartedDate } =
       services;
-    const { sources, basePath } = libs;
+    const { basePath } = libs;
 
     const alertFactory: LogThresholdAlertFactory = (id, reason, value, threshold, actions) => {
       const alert = alertWithLifecycle({
@@ -131,16 +130,14 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       alert.replaceState({
         alertState: AlertStates.ALERT,
       });
+
       return alert;
     };
-    const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
-    const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
-      sourceConfiguration.configuration,
-      await libs.framework.getIndexPatternsService(
-        savedObjectsClient,
-        scopedClusterClient.asCurrentUser
-      )
-    );
+
+    const [, , { logViews }] = await libs.getStartServices();
+    const { indices, timestampField, runtimeMappings } = await logViews
+      .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+      .getResolvedLogView('default'); // TODO: move to params
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
