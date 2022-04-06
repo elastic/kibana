@@ -191,6 +191,67 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should handle bulk edit of rules appropriately when consumer is the same as producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                tags: ['foo'],
+                rule_type_id: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+          const payload = {
+            ids: [createdAlert.id],
+            operations: [
+              {
+                operation: 'add',
+                field: 'tags',
+                value: ['tag-A', 'tag-B'],
+              },
+            ],
+          };
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_edit`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(payload);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to find rules for any rule types',
+                statusCode: 403,
+              });
+              expect(response.statusCode).to.eql(403);
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'global_read at space1':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message:
+                  'Unauthorized to bulkEdit a "test.restricted-noop" rule for "alertsRestrictedFixture"',
+                statusCode: 403,
+              });
+              expect(response.statusCode).to.eql(403);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
+              expect(response.statusCode).to.eql(200);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should handle bulk edit of rules when operation is invalid', async () => {
           const payload = {
             filter: '',
