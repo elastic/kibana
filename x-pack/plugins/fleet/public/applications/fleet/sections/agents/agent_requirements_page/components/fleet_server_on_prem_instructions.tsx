@@ -379,7 +379,7 @@ export const AddFleetServerHostStepContent = ({
       } else {
         setError(
           i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostInvalidUrlError', {
-            defaultMessage: 'Invalid URL (should use https)',
+            defaultMessage: 'Valid https URL required.',
           })
         );
         return false;
