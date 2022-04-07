@@ -141,6 +141,21 @@
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
+    },
+    {
+      "groupName": "@testing-library",
+      "packageNames": [
+        "@testing-library/dom",
+        "@testing-library/jest-dom",
+        "@testing-library/react",
+        "@testing-library/react-hooks",
+        "@testing-library/user-event",
+        "@types/testing-library__jest-dom"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
     }
   ]
 }
