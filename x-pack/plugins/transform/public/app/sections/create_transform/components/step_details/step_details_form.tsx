@@ -32,6 +32,7 @@ import {
   isEsIngestPipelines,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
+import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -783,7 +784,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   'xpack.transform.stepDetailsForm.editFlyoutFormFrequencyPlaceholderText',
                   {
                     defaultMessage: 'Default: {defaultValue}',
-                    values: { defaultValue: '1m' },
+                    values: { defaultValue: DEFAULT_TRANSFORM_FREQUENCY },
                   }
                 )}
                 value={transformFrequency}

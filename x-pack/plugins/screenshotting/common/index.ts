@@ -9,3 +9,8 @@ export type { LayoutParams } from './layout';
 export { LayoutTypes } from './layout';
 import * as errors from './errors';
 export { errors };
+export {
+  SCREENSHOTTING_APP_ID,
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+} from './expression';

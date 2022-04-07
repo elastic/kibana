@@ -4,7 +4,9 @@
 
 ## App.id property
 
-The unique identifier of the application
+The unique identifier of the application.
+
+Can only be composed of alphanumeric characters, `-`<!-- -->, `:` and `_`
 
 <b>Signature:</b>
 
