@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ForLastExpression,
   IErrorObject,
@@ -43,7 +42,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 const defaultExpression = {

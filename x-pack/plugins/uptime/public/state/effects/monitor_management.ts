@@ -39,7 +39,7 @@ export function* fetchMonitorManagementEffect() {
     getMonitors,
     fetchEffectFactory(fetchMonitorManagementList, getMonitorsSuccess, getMonitorsFailure)
   );
-  yield takeLatest(
+  yield takeLeading(
     getServiceLocations,
     fetchEffectFactory(
       fetchServiceLocations,

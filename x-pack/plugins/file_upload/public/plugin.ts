@@ -17,7 +17,7 @@ import {
   analyzeFile,
 } from './api';
 import { setStartServices } from './kibana_services';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

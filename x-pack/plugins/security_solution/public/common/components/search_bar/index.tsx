@@ -83,9 +83,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           timefilter: { timefilter },
           filterManager,
         },
-        ui: { SearchBar },
       },
       storage,
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
     } = useKibana().services;
 
     useEffect(() => {

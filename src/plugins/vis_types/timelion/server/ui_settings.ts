@@ -7,19 +7,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from 'kibana/server';
 
 import { UI_SETTINGS } from '../common/constants';
-import { configSchema } from '../config';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
   defaultMessage: 'technical preview',
 });
 
-export function getUiSettings(
-  config: TypeOf<typeof configSchema>
-): Record<string, UiSettingsParams<unknown>> {
+export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.LEGACY_CHARTS_LIBRARY]: {
       name: i18n.translate('timelion.uiSettings.legacyChartsLibraryLabel', {
@@ -103,14 +100,12 @@ export function getUiSettings(
         description:
           'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
       }),
-      value: config.graphiteUrls && config.graphiteUrls.length ? config.graphiteUrls[0] : null,
+      value: '',
       description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
         defaultMessage:
-          '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
+          '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host.  If no URL is set, the first graphite URL configured in kibana.yml is used.',
         values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
       }),
-      type: 'select',
-      options: config.graphiteUrls || [],
       category: ['timelion'],
       schema: schema.nullable(schema.string()),
     },

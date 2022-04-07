@@ -29,13 +29,16 @@ import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 
 const container = document.createElement('div');
-let isOpen = false;
+let isMenuOpen = false;
 
-function SettingsMenu({
+// exported for testing purposes only
+export function SettingsMenu({
   anchorElement,
+  isOpen,
   onClose,
 }: {
   anchorElement: HTMLElement;
+  isOpen: boolean;
   onClose: () => void;
 }) {
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
@@ -79,27 +82,32 @@ function SettingsMenu({
 function closeSettingsMenu() {
   ReactDOM.unmountComponentAtNode(container);
   document.body.removeChild(container);
-  isOpen = false;
+  isMenuOpen = false;
 }
 
+/**
+ * Toggles the settings menu
+ *
+ * Note: the code inside this function is covered only at the functional test level
+ */
 export function toggleSettingsMenuOpen(props: {
   lensStore: Store<LensAppState>;
   anchorElement: HTMLElement;
   theme$: Observable<CoreTheme>;
 }) {
-  if (isOpen) {
+  if (isMenuOpen) {
     closeSettingsMenu();
     return;
   }
 
-  isOpen = true;
+  isMenuOpen = true;
   document.body.appendChild(container);
 
   const element = (
     <Provider store={props.lensStore}>
       <KibanaThemeProvider theme$={props.theme$}>
         <I18nProvider>
-          <SettingsMenu {...props} onClose={closeSettingsMenu} />
+          <SettingsMenu {...props} isOpen={isMenuOpen} onClose={closeSettingsMenu} />
         </I18nProvider>
       </KibanaThemeProvider>
     </Provider>

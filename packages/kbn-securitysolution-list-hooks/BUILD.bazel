@@ -49,7 +49,6 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
-  "@npm//@types/testing-library__react-hooks",
   "@npm//fp-ts",
   "@npm//tslib",
 ]

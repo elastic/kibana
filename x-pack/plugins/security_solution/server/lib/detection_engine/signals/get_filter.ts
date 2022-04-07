@@ -18,7 +18,7 @@ import {
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -30,7 +30,7 @@ interface GetFilterArgs {
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
 }
