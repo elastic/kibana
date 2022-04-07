@@ -209,7 +209,7 @@ export const PreviewHistogram = ({
               disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
               docValueFields,
               end: endDate,
-              entityType: 'alerts',
+              entityType: 'events',
               filters: [],
               globalFullScreen,
               graphEventId,
@@ -237,7 +237,7 @@ export const PreviewHistogram = ({
         </FullScreenContainer>
         <DetailsPanel
           browserFields={browserFields}
-          entityType={'alerts'}
+          entityType={'events'}
           docValueFields={docValueFields}
           isFlyoutView
           runtimeMappings={runtimeMappings}
