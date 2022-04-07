@@ -280,7 +280,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput('rule-1', false));
+        expect(bodyToCompare).to.eql({
+          ...getSimpleRuleOutput('rule-1', false),
+          output_index: '',
+        });
       });
 
       it('should be able to import two rules', async () => {
@@ -419,7 +422,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const ruleOutput = getSimpleRuleOutput('rule-1');
+        const ruleOutput = {
+          ...getSimpleRuleOutput('rule-1'),
+          output_index: '',
+        };
         ruleOutput.name = 'some other name';
         ruleOutput.version = 2;
         expect(bodyToCompare).to.eql(ruleOutput);
@@ -495,6 +501,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should be able to correctly read back a mixed import of different rules even if some cause conflicts', async () => {
+        const simpleRuleOutput = (ruleName: string) => ({
+          ...getSimpleRuleOutput(ruleName),
+          output_index: '',
+        });
+
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
@@ -527,9 +538,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompareOfRule3 = removeServerGeneratedProperties(bodyOfRule3);
 
         expect([bodyToCompareOfRule1, bodyToCompareOfRule2, bodyToCompareOfRule3]).to.eql([
-          getSimpleRuleOutput('rule-1'),
-          getSimpleRuleOutput('rule-2'),
-          getSimpleRuleOutput('rule-3'),
+          simpleRuleOutput('rule-1'),
+          simpleRuleOutput('rule-2'),
+          simpleRuleOutput('rule-3'),
         ]);
       });
 

@@ -429,7 +429,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   interval: '5m',
   rule_id: ruleId,
   language: 'kuery',
-  output_index: '',
+  output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 1,
   risk_score_mapping: [],
