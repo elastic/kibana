@@ -9,7 +9,6 @@ import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 
@@ -59,7 +58,7 @@ export async function fetchMissingMonitoringData(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: Globals.app.config.ui.ccs.remotePatterns,
   });
   const params = {
     index: indexPatterns,

@@ -9,7 +9,6 @@ import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
@@ -26,7 +25,7 @@ export async function fetchLogstashVersions(
     config: Globals.app.config,
     moduleType: 'logstash',
     dataset: 'node_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: Globals.app.config.ui.ccs.remotePatterns,
   });
   const params = {
     index: indexPatterns,

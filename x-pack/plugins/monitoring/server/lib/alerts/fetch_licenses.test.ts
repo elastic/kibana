@@ -12,7 +12,7 @@ jest.mock('../../static_globals', () => ({
     app: {
       config: {
         ui: {
-          ccs: { enabled: true },
+          ccs: { enabled: true, remotePatterns: '*' },
         },
       },
     },

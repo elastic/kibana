@@ -11,7 +11,6 @@ import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../comm
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 type TopHitType = ElasticsearchResponseHit & {
@@ -40,7 +39,7 @@ export async function fetchIndexShardSize(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'index',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: Globals.app.config.ui.ccs.remotePatterns,
   });
   const params = {
     index: indexPatterns,

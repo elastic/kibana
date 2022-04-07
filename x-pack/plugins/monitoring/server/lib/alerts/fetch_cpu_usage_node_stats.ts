@@ -13,7 +13,6 @@ import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/aler
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 
 interface NodeBucketESResponse {
   key: string;
@@ -43,7 +42,7 @@ export async function fetchCpuUsageNodeStats(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: Globals.app.config.ui.ccs.remotePatterns,
   });
   const params = {
     index: indexPatterns,

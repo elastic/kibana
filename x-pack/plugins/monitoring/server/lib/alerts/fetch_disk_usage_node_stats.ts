@@ -10,7 +10,6 @@ import { get } from 'lodash';
 import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchDiskUsageNodeStats(
@@ -25,7 +24,7 @@ export async function fetchDiskUsageNodeStats(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: Globals.app.config.ui.ccs.remotePatterns,
   });
   const params = {
     index: indexPatterns,

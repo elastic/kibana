@@ -6,12 +6,8 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { MonitoringConfig } from '../server/config';
+import { MonitoringConfig } from '../server/config';
 
-export function getConfigCcs(config: MonitoringConfig): boolean {
-  // TODO: (Mat) this function can probably be removed in favor of direct config access where it's used.
-  return config.ui.ccs.enabled;
-}
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
  *
@@ -20,20 +16,26 @@ export function getConfigCcs(config: MonitoringConfig): boolean {
  *
  * @param  {Object} config The Kibana configuration object.
  * @param  {String} indexPattern The index pattern name
- * @param  {String} ccs The optional cluster-prefix to prepend.
+ * @param  {Array} ccs The optional cluster-prefixes to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config: MonitoringConfig, indexPattern: string, ccs?: string) {
-  const ccsEnabled = getConfigCcs(config);
+export function prefixIndexPattern(config: MonitoringConfig, indexPattern: string, ccs?: string[]) {
+  const ccsEnabled = config.ui.ccs.enabled;
   if (!ccsEnabled || !ccs) {
     return indexPattern;
   }
 
   const patterns = indexPattern.split(',');
-  const prefixedPattern = patterns.map((pattern) => `${ccs}:${pattern}`).join(',');
+  // for each index pattern prefix with each remote ccs pattern
+  const prefixedPattern = patterns
+    .map((pattern) =>
+      Array.isArray(ccs) ? ccs.map((ccsValue) => `${ccsValue}:${pattern}`) : `${ccs}:${pattern}`
+    )
+    .join(',');
 
   // if a wildcard is used, then we also want to search the local indices
-  if (ccs === '*') {
+  // since we don't allow the user to an array with a *, this would only be the default value we set [*]
+  if (ccs.includes('*')) {
     return `${prefixedPattern},${indexPattern}`;
   }
   return prefixedPattern;

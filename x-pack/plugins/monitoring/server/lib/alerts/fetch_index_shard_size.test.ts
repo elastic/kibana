@@ -14,7 +14,7 @@ jest.mock('../../static_globals', () => ({
       getKeyStoreValue: () => '*',
       config: {
         ui: {
-          ccs: { enabled: true },
+          ccs: { enabled: true, remotePatterns: '*' },
         },
       },
     },

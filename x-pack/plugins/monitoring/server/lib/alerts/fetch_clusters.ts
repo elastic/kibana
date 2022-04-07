@@ -11,7 +11,6 @@ import { AlertCluster } from '../../../common/types/alerts';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 
 interface RangeFilter {
   [field: string]: {
@@ -28,7 +27,7 @@ export async function fetchClusters(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: Globals.app.config.ui.ccs.remotePatterns,
   });
   const params = {
     index: indexPatterns,
