@@ -19,7 +19,7 @@ import {
   Alert,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  AlertTypeState as RuleTypeState,
+  RuleTypeState,
 } from '../../../../../alerting/server';
 
 import {

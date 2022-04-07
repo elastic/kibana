@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Attempt to Remove File Quarantine Attribute",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.args : \"xattr\" and\n  (\n    (process.args : \"com.apple.quarantine\" and process.args : (\"-d\", \"-w\")) or\n    (process.args : \"-c\" and process.command_line :\n      (\n        \"/bin/bash -c xattr -c *\",\n        \"/bin/zsh -c xattr -c *\",\n        \"/bin/sh -c xattr -c *\"\n      )\n    )\n  )\n",
   "references": [
     "https://www.trendmicro.com/en_us/research/20/k/new-macos-backdoor-connected-to-oceanlotus-surfaces.html",
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
