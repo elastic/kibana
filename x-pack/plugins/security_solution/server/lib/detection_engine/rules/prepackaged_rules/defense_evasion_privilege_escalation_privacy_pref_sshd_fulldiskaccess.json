@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Privacy Control Bypass via Localhost Secure Copy",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and \n process.name:\"scp\" and\n process.args:\"StrictHostKeyChecking=no\" and \n process.command_line:(\"scp *localhost:/*\", \"scp *127.0.0.1:/*\") and\n not process.args:\"vagrant@*127.0.0.1*\"\n",
   "references": [
     "https://blog.trendmicro.com/trendlabs-security-intelligence/xcsset-mac-malware-infects-xcode-projects-performs-uxss-attack-on-safari-other-browsers-leverages-zero-day-exploits/"
@@ -60,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/unified_search/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';

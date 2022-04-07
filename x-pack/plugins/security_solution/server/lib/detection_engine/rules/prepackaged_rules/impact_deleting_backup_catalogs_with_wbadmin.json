@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Deleting Backup Catalogs with Wbadmin",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wbadmin.exe\" or process.pe.original_file_name == \"WBADMIN.EXE\") and\n  process.args : \"catalog\" and process.args : \"delete\"\n",
   "risk_score": 21,
   "rule_id": "581add16-df76-42bb-af8e-c979bfb39a59",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 10
+  "version": 11
 }

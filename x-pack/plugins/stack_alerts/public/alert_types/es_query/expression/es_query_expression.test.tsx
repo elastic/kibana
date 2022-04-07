@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
   DataPublicPluginStart,
@@ -98,6 +99,7 @@ const createDataPluginMock = () => {
 };
 
 const dataMock = createDataPluginMock();
+const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
 const defaultEsQueryExpressionParams: EsQueryAlertParams<SearchType.esQuery> = {
@@ -139,6 +141,7 @@ describe('EsQueryAlertTypeExpression', () => {
 
     const wrapper = mountWithIntl(
       <EsQueryExpression
+        unifiedSearch={unifiedSearchMock}
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"

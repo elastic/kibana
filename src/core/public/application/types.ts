@@ -821,6 +821,7 @@ export interface ApplicationStart {
    * ```
    *
    * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
+   * @param options - navigation options
    */
   navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
   /**

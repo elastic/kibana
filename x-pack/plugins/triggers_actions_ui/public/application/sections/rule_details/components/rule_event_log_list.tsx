@@ -25,6 +25,7 @@ import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constan
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
 import {
@@ -458,6 +459,10 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         columnVisibility={columnVisibilityProps}
         sorting={sortingProps}
         pagination={paginationProps}
+      />
+      <RefineSearchPrompt
+        documentSize={pagination.totalItemCount}
+        backToTopAnchor="rule_event_log_list"
       />
     </div>
   );
