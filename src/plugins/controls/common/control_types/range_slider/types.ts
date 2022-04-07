@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ControlInput } from '../../types';
+import { DataControlInput } from '../../types';
 
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 
 export type RangeValue = [string, string];
 
-export interface RangeSliderEmbeddableInput extends ControlInput {
+export interface RangeSliderEmbeddableInput extends DataControlInput {
   value: RangeValue;
 }

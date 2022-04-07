@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ControlInput } from '../../types';
+import { DataControlInput } from '../../types';
 
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 
-export interface TimeSliderControlEmbeddableInput extends ControlInput {
+export interface TimeSliderControlEmbeddableInput extends DataControlInput {
   value?: [number | null, number | null];
 }

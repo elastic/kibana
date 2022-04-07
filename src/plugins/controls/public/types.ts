@@ -29,12 +29,10 @@ export type ControlOutput = EmbeddableOutput & CommonControlOutput;
 
 export type ControlFactory = EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>;
 
-export interface ControlEmbeddable<
+export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> extends IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> {
-  resetSelections: () => void;
-}
+> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput>;
 
 /**
  * Control embeddable editor types
@@ -77,4 +75,4 @@ export interface ControlsPluginStartDeps {
 }
 
 // re-export from common
-export type { ControlWidth, ControlInput, ControlStyle } from '../common/types';
+export type { ControlWidth, ControlInput, DataControlInput, ControlStyle } from '../common/types';

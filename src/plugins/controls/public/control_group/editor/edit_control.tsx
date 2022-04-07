@@ -20,9 +20,9 @@ import { forwardAllContext } from './forward_all_context';
 import { ControlGroupStrings } from '../control_group_strings';
 import {
   IEditableControlFactory,
-  ControlInput,
   ControlEmbeddable,
   ControlOutput,
+  DataControlInput,
 } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
@@ -55,8 +55,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     latestPanelState.current = panels[embeddableId];
   }, [panels, embeddableId]);
 
-  let inputToReturn: Partial<ControlInput> = {};
-  let embeddable: ControlEmbeddable<ControlInput, ControlOutput> | undefined;
+  let inputToReturn: Partial<DataControlInput> = {};
+  let embeddable: ControlEmbeddable<DataControlInput, ControlOutput> | undefined;
   const shouldResetSelections = useMemo(() => {
     return (
       inputToReturn.fieldName !== embeddable?.getInput().fieldName ||
@@ -69,7 +69,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const factory = getControlFactory(panel.type);
     inputToReturn = {};
     embeddable = (await untilEmbeddableLoaded(embeddableId)) as ControlEmbeddable<
-      ControlInput,
+      DataControlInput,
       ControlOutput
     >;
     const controlGroup = embeddable.getRoot() as ControlGroupContainer;
@@ -122,7 +122,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
             }
             if (shouldResetSelections) {
-              embeddable?.resetSelections();
+              embeddable?.getInput().resetSelections();
             }
             updateInputForChild(embeddableId, inputToReturn);
             flyoutInstance.close();
