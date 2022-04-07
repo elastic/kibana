@@ -249,6 +249,11 @@ export function ProcessTreeNode({
             </>
           ) : (
             <span>
+              {timeStampOn && (
+                <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
+                  {timeStampsNormal}
+                </span>
+              )}
               <EuiToolTip position="top" content={iconTooltip}>
                 <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
               </EuiToolTip>{' '}
@@ -263,11 +268,6 @@ export function ProcessTreeNode({
                   </small>
                 )}
               </span>
-              {timeStampOn && (
-                <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
-                  {timeStampsNormal}
-                </span>
-              )}
             </span>
           )}
 
