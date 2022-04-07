@@ -23,6 +23,5 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./metrics_process_list_chart'));
     loadTestFile(require.resolve('./infra_log_analysis_validation_log_entry_datasets'));
     loadTestFile(require.resolve('./inventory_threshold_alert'));
-    loadTestFile(require.resolve('./log_threshold_alert'));
   });
 }

@@ -11,7 +11,7 @@ import {
   executeAlert,
   executeRatioAlert,
 } from '../../../../plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor';
-import { DATES } from './constants';
+import { DATES } from '../metrics_ui/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Comparator,
