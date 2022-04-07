@@ -25,8 +25,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
   const localArchiveDirectory = 'test/functional/fixtures/kbn_archiver/discover';
   const remoteArchiveDirectory = 'test/functional/fixtures/kbn_archiver/ccs/discover';
-  let esNode: EsArchiver;
-  let kbnDirectory: string;
+  const esNode = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : esArchiver;
+  const kbnDirectory = config.get('esTestCluster.ccs')
+    ? remoteArchiveDirectory
+    : localArchiveDirectory;
 
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
@@ -41,13 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      if (config.get('esTestCluster.ccs')) {
-        esNode = getService('remoteEsArchiver' as 'esArchiver');
-        kbnDirectory = remoteArchiveDirectory;
-      } else {
-        esNode = esArchiver;
-        kbnDirectory = localArchiveDirectory;
-      }
       await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load(kbnDirectory);

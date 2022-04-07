@@ -40,11 +40,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: defaultIndexPatternString,
   };
-  let esNode: EsArchiver;
-  let kbnArchives: {
-    nested: string;
-    discover: string;
-  };
+  const esNode: EsArchiver = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : getService('esArchiver');
+  const kbnArchives = config.get('esTestCluster.ccs')
+    ? remoteArchiveDirectories
+    : localArchiveDirectories;
 
   const setUpQueriesWithFilters = async () => {
     // set up a query with filters and a time filter
@@ -60,13 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      if (config.get('esTestCluster.ccs')) {
-        esNode = getService('remoteEsArchiver' as 'esArchiver');
-        kbnArchives = remoteArchiveDirectories;
-      } else {
-        esNode = esArchiver;
-        kbnArchives = localArchiveDirectories;
-      }
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
       await kibanaServer.importExport.load(kbnArchives.discover);
