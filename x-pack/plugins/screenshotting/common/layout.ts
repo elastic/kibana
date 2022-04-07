@@ -40,12 +40,12 @@ export interface LayoutSelectorDictionary {
 /**
  * Screenshot layout parameters.
  */
-export type LayoutParams<ID = string> = Ensure<
+export type LayoutParams<Id = string> = Ensure<
   {
     /**
      * Unique layout name.
      */
-    id?: ID;
+    id?: Id;
 
     /**
      * Layout sizing.
@@ -68,8 +68,8 @@ export type LayoutParams<ID = string> = Ensure<
 /**
  * Supported layout types.
  */
-export const LayoutTypes = {
-  PRESERVE_LAYOUT: 'preserve_layout' as const,
-  PRINT: 'print' as const,
-  CANVAS: 'canvas' as const, // no margins or branding in the layout
-};
+export enum LayoutTypes {
+  PRESERVE_LAYOUT = 'preserve_layout',
+  PRINT = 'print',
+  CANVAS = 'canvas',
+}
