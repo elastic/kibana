@@ -139,7 +139,7 @@ ElasticsearchModule-->|/_bulk|Pipeline
 
 Enterprise Search doesn't have a filebeat module, but the logs can be ingested using the configuration found at https://github.com/elastic/ent-search-monitoring/blob/main/filebeat/filebeat.yml 
 
-Beats also doesn't have filebeat module or recommended configuration, but the logs can be ingested using a basic JSON filebeat configuration should work.
+Beats also doesn't have filebeat module or recommended configuration, but the logs can be ingested using a basic JSON filebeat configuration.
 
 ## Unified collection
 
