@@ -47,7 +47,7 @@ export const useSearchIndicesNav = () => {
     },
     {
       id: 'overview',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndex.nav.overviewTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.overviewTitle', {
         defaultMessage: 'Overview',
       }),
       ...generateNavLink({ to: generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug }) }),
@@ -55,7 +55,7 @@ export const useSearchIndicesNav = () => {
     },
     {
       id: 'documents',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndex.nav.documentsTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle', {
         defaultMessage: 'Documents',
       }),
       ...generateNavLink({ to: generatePath(SEARCH_INDEX_DOCUMENTS_PATH, { indexSlug }) }),
@@ -63,7 +63,7 @@ export const useSearchIndicesNav = () => {
     },
     {
       id: 'schema',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndex.nav.schemaTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.schemaTitle', {
         defaultMessage: 'Schema',
       }),
       ...generateNavLink({ to: generatePath(SEARCH_INDEX_SCHEMA_PATH, { indexSlug }) }),
@@ -71,7 +71,7 @@ export const useSearchIndicesNav = () => {
     },
     {
       id: 'logs',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndex.nav.logsitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.logsitle', {
         defaultMessage: 'Logs',
       }),
       ...generateNavLink({ to: generatePath(SEARCH_INDEX_LOGS_PATH, { indexSlug }) }),

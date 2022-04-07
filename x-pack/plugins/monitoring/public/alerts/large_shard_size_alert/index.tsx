@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertTypeParams } from '../../../../alerting/common';
+import type { RuleTypeParams } from '../../../../alerting/common';
 import type { RuleTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
   RULE_DETAILS,
@@ -20,7 +20,7 @@ import {
   LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
-interface ValidateOptions extends AlertTypeParams {
+interface ValidateOptions extends RuleTypeParams {
   indexPattern: string;
 }
 

@@ -9,16 +9,13 @@ import React, { useMemo } from 'react';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
-import { filterHostExternalAlertData } from '../../../common/components/visualization_actions/utils';
+import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { AlertsComponentQueryProps } from './types';
 
 export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, ...rest } = alertsProps;
   const hostPageFilters = useMemo(
-    () =>
-      pageFilters != null
-        ? [...filterHostExternalAlertData, ...pageFilters]
-        : filterHostExternalAlertData,
+    () => (pageFilters != null ? [...hostNameExistsFilter, ...pageFilters] : hostNameExistsFilter),
     [pageFilters]
   );
 

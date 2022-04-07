@@ -228,6 +228,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
+        // @ts-expect-error 'properties' does not exist on type 'MappingMatchOnlyTextProperty'
         isECS: !!indexMappings[name]?.mappings?.properties?.ecs?.properties?.version?.type,
         shipper: indexMappings[name]?.mappings?._meta?.beat,
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,

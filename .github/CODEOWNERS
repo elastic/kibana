@@ -82,6 +82,7 @@
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data_view_management/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
+/src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
@@ -219,20 +220,23 @@
 /src/setup_node_env/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
+/packages/kbn-ambient-ui-types/ @elastic/kibana-operations
+/packages/kbn-ambient-storybook-types/ @elastic/kibana-operations
+/packages/kbn-bazel-packages/ @elastic/kibana-operations
+/packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
+/packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
+/packages/kbn-eslint-plugin-imports/ @elastic/kibana-operations
+/packages/kbn-generate/ @elastic/kibana-operations
 /packages/kbn-optimizer/ @elastic/kibana-operations
+/packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-type-summarizer/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
-/packages/kbn-bazel-packages/ @elastic/kibana-operations
-/packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
-/packages/kbn-cli-dev-mode/ @elastic/kibana-operations
-/packages/kbn-generate/ @elastic/kibana-operations
-/packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
@@ -267,6 +271,7 @@
 /x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
+/packages/elastic-analytics/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
@@ -482,5 +487,6 @@ x-pack/plugins/session_view @elastic/awp-platform
 
 ## Shared UX
 /src/plugins/shared_ux/ @elastic/shared-ux
+/packages/shared-ux-*/ @elastic/shared-ux
 /src/plugins/kibana_react/ @elastic/shared-ux
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
+/src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation

@@ -104,7 +104,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can edit range slider control', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
+
+        const saveButton = await testSubjects.find('control-editor-save');
+        expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
+        expect(await saveButton.isEnabled()).to.be(false);
         await dashboardControls.controlsEditorSetfield('dayOfWeek');
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
