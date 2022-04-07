@@ -46,13 +46,6 @@ export async function send({
     asSystemRequest,
   };
 
-  if (path.includes('/_mvt/')) {
-    delete options.dataType;
-    options.xhrFields = {
-      responseType: 'arraybuffer',
-    };
-  }
-
   return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, options);
 }
 
