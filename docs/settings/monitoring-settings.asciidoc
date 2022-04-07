@@ -88,7 +88,7 @@ which has a default value of `30000`.
 `monitoring.ui.elasticsearch.ssl`::
 Shares the same configuration as <<elasticsearch-ssl-cert-key, `elasticsearch.ssl`>>. These settings configure encrypted communication between {kib} and the monitoring cluster.
 
-`monitoring.cluster_alerts.allowedSpaces` {ess-icon}::
+[[kibana-monitoring-clusterAlerts-allowedSpaces]] `monitoring.cluster_alerts.allowedSpaces` {ess-icon}::
 deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Specifies the spaces where cluster Stack Monitoring alerts can be created. You must specify all spaces where you want to generate alerts, including the default space. Defaults to `[ "default" ]`.
 
