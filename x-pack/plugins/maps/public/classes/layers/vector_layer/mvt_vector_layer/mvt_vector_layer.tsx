@@ -304,17 +304,31 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   _getJoinFilterExpression(): unknown | undefined {
     const { join, joinPropertiesMap } = this._getJoinResults();
-    return join && joinPropertiesMap
+    if (!join) {
+      return undefined;
+    }
+
+    // When there are no join results, return a filter that hides all features
+    // work around for 'match' with empty array not filtering out features
+    // This filter always returns false because features will never have `__kbn_never_prop__` property
+    const hideAllFilter = ['has', '__kbn_never_prop__'];
+
+    if (!joinPropertiesMap) {
+      return hideAllFilter;
+    }
+
+    const joinKeys = Array.from(joinPropertiesMap.keys());
+    return joinKeys.length
       ? // Unable to check FEATURE_VISIBLE_PROPERTY_NAME flag since filter expressions do not support feature-state
         // Instead, remove unjoined source features by filtering out features without matching join keys
         [
           'match',
           ['get', join.getLeftField().getName()],
-          Array.from(joinPropertiesMap.keys()),
-          true,
-          false,
+          joinKeys,
+          true, // match value
+          false, // fallback - value with no match
         ]
-      : undefined;
+      : hideAllFilter;
   }
 
   _syncFeatureState(mbMap: MbMap) {
