@@ -35,8 +35,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
-import { getFieldTypeDescription } from './lib/get_field_type_description';
-import { usePager } from '../../../../utils/use_pager';
+import { GetFieldTypeDescription } from './lib/get_field_type_description';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 export interface State {
@@ -113,7 +112,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
       .map((element, index) => ({
         id: index,
         dataType: element,
-        description: getFieldTypeDescription(element),
+        description: GetFieldTypeDescription(element),
       }));
   }, [presentFieldTypes]);
 
@@ -137,6 +136,8 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
     {
       field: 'description',
       name: 'Description',
+      // eslint-disable-next-line react/no-danger
+      render: (description: string) => <div dangerouslySetInnerHTML={{ __html: description }} />,
     },
   ];
 

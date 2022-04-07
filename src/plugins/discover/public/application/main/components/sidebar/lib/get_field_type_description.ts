@@ -7,8 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { useDiscoverServices } from '../../../../../utils/use_discover_services';
 
-export function getFieldTypeDescription(type: string) {
+export function GetFieldTypeDescription(type: string) {
+  const { docLinks } = useDiscoverServices();
   switch (type) {
     case 'boolean':
       return i18n.translate('discover.fieldNameDescription.booleanField', {
@@ -23,8 +25,24 @@ export function getFieldTypeDescription(type: string) {
         defaultMessage: 'A date string or the number of seconds or milliseconds since 1/1/1970.',
       });
     case 'date_range':
-      return i18n.translate('discover.fieldNameDescription.dateField', {
-        defaultMessage: 'Range of date values.',
+      return i18n.translate('discover.fieldNameDescription.dateRangeField', {
+        defaultMessage: 'Range of {dateFieldTypeLink} values. {viewSupportedDateFormatsLink}',
+        values: {
+          dateFieldTypeLink:
+            `<a href=${docLinks.links.discover.dateFieldTypeDocs}
+          target="_blank" rel="noopener">` +
+            i18n.translate('discover.fieldNameDescription.dateRangeFieldLinkText', {
+              defaultMessage: 'date',
+            }) +
+            '</a>',
+          viewSupportedDateFormatsLink:
+            `<a href=${docLinks.links.discover.dateFormatsDocs}
+          target="_blank" rel="noopener">` +
+            i18n.translate('discover.fieldNameDescription.viewSupportedDateFormatsLinkText', {
+              defaultMessage: 'View supported date formats.',
+            }) +
+            '</a>',
+        },
       });
     case 'geo_point':
       return i18n.translate('discover.fieldNameDescription.geoPointField', {
@@ -39,7 +57,7 @@ export function getFieldTypeDescription(type: string) {
         defaultMessage: 'IPv4 and IPv6 addresses.',
       });
     case 'ip_range':
-      return i18n.translate('discover.fieldNameDescription.ipAddressField', {
+      return i18n.translate('discover.fieldNameDescription.ipAddressRangeField', {
         defaultMessage: 'Range of ip values supporting either IPv4 or IPv6 (or mixed) addresses.',
       });
     case 'murmur3':
@@ -70,7 +88,19 @@ export function getFieldTypeDescription(type: string) {
       });
     case 'version':
       return i18n.translate('discover.fieldNameDescription.versionField', {
-        defaultMessage: 'Software versions. Supports Semantic Versioning precedence rules.',
+        defaultMessage: 'Software versions. Supports {SemanticVersioningLink} precedence rules.',
+        values: {
+          SemanticVersioningLink:
+            `<a href="https://semver.org/"
+            target="_blank" rel="noopener">` +
+            i18n.translate(
+              'discover.advancedSettings.discover.fieldNameDescription.versionFieldLinkText',
+              {
+                defaultMessage: 'Semantic Versioning',
+              }
+            ) +
+            '</a>',
+        },
       });
     default:
       return i18n.translate('discover.fieldNameDescription.unknownField', {

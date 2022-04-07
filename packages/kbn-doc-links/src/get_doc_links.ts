@@ -68,6 +68,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
       fieldTypeHelp: `${ELASTICSEARCH_DOCS}mapping-types.html`,
+      dateFieldTypeDocs: `${ELASTICSEARCH_DOCS}date.html`,
+      dateFormatsDocs: `${ELASTICSEARCH_DOCS}mapping-date-format.html`,
       documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
     },
     filebeat: {
