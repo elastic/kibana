@@ -57,8 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await queryBar.setQuery('response:200');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/124990
-  describe.only('saved queries saved objects', function describeIndexTests() {
+  describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       if (config.get('esTestCluster.ccs')) {
@@ -125,7 +124,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/124986
     describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
