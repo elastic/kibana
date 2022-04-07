@@ -21,6 +21,11 @@ export interface CaseConnectorInterface<T extends unknown> {
   // getIncident: (incidentId: string) => Promise<any>;
 }
 
+interface SubAction {
+  name: string;
+  method: string;
+}
+
 const isObject = (v: unknown): v is Record<string, unknown> => {
   return typeof v === 'object' && v !== null;
 };
@@ -28,6 +33,7 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
 export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
   private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http', 'https'];
+  public subActions: SubAction[] | undefined;
 
   constructor(
     public configurationUtilities: ActionsConfigurationUtilities,
@@ -86,16 +92,15 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     }
   }
 
-  public async request<D = unknown, R = unknown>({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async request<D = unknown, R = any>({
     url,
     data,
     method = 'get',
-    responseSchema,
   }: {
     url: string;
     data?: D;
     method?: Method;
-    responseSchema: Type<R>;
   }): Promise<AxiosResponse<R>> {
     this.assertURL(url);
     this.ensureUriAllowed(url);
@@ -121,9 +126,6 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
       maxContentLength,
       timeout,
     });
-
-    // TODO: use namespace configuration
-    responseSchema.validate(res);
 
     return res;
   }

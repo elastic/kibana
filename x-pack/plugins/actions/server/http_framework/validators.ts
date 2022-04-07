@@ -13,7 +13,7 @@ import { HTTPConnectorType } from './types';
 const buildSubActionParams = <Config, Secrets, Params>(
   connector: HTTPConnectorType<Config, Secrets>
 ) => {
-  const getMethods = Object.getOwnPropertyNames(connector.Service.prototype);
+  const getMethods = Object.getOwnPropertyNames(connector.Service);
   const subActions = getMethods.map((method) => {
     return schema.object({
       subAction: schema.literal(method),

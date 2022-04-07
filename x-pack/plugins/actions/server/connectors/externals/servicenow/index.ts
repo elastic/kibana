@@ -7,15 +7,19 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import { AxiosBasicCredentials } from 'axios';
+import { AxiosBasicCredentials, AxiosResponse } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
+import { ExecutorSubActionPushParamsSchemaITSM } from '../../../builtin_action_types/servicenow/schema';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
   ExecutorParams,
+  ExternalServiceParamsUpdate,
   GetApplicationInfoResponse,
   ImportSetApiResponse,
   ImportSetApiResponseError,
   Incident,
+  PushToServiceApiHandlerArgs,
+  PushToServiceResponse,
   ServiceNowIncident,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
@@ -26,7 +30,10 @@ import {
   getPushedDate,
   prepareIncident,
 } from '../../../builtin_action_types/servicenow/utils';
+import { validate } from '../../../builtin_action_types/swimlane/validators';
+import { validateParams } from '../../../lib';
 import { CaseConnector } from '../../case';
+import { SubAction, Validate } from '../../decorator';
 
 const incidentSchema = schema.object({
   result: schema.object({
@@ -81,7 +88,6 @@ const importSetTableResponse = schema.oneOf([
 ]);
 
 export class ServiceNow extends CaseConnector<ServiceNowIncident> {
-  private secrets: ServiceNowSecretConfigurationType;
   private urls: {
     basic: string;
     importSetTableUrl: string;
@@ -140,20 +146,71 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     this.appScope = internalConfig.appScope;
   }
 
+  // @SubAction('pushToService', , )
+  async pushToServiceHandler({
+    externalService,
+    params,
+    secrets,
+    commentFieldKey,
+  }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> {
+    const {
+      comments,
+      incident: { externalId, ...rest },
+    } = params;
+    let res: PushToServiceResponse;
+    // const { externalId, ...rest } = params.incident;
+    const incident: Incident = rest;
+
+    if (externalId != null) {
+      res = await this.updateIncident({
+        incidentId: externalId,
+        incident,
+      });
+    } else {
+      res = await this.createIncident({
+        ...incident,
+        caller_id: secrets.username,
+        opened_by: secrets.username,
+      });
+    }
+
+    if (comments && Array.isArray(comments) && comments.length > 0) {
+      res.comments = [];
+
+      for (const currentComment of comments) {
+        await this.updateIncident({
+          incidentId: res.id,
+          incident: {
+            ...incident,
+            [commentFieldKey]: currentComment.comment,
+          },
+        });
+        res.comments = [
+          ...(res.comments ?? []),
+          {
+            commentId: currentComment.commentId,
+            pushedDate: res.pushedDate,
+          },
+        ];
+      }
+    }
+    return res;
+  }
+
+  @Validate(schema.string(), importSetTableResponse)
   async getIncident(id: string): Promise<ServiceNowIncident> {
     try {
       const res = await this.request({
         url: `${this.urls.tableApiIncidentUrl}/${id}`,
         method: 'get',
-        responseSchema: incidentSchema,
       });
-
       return { ...res.data.result };
     } catch (error) {
       throw createServiceError(error, `Unable to get incident with id ${id}`);
     }
   }
 
+  @Validate(ExecutorSubActionPushParamsSchemaITSM, importSetTableResponse)
   async createIncident(incident: Partial<Incident>): Promise<ServiceNowIncident> {
     try {
       await this.checkIfApplicationIsInstalled();
@@ -162,8 +219,9 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
         url: this.useTableApi ? this.urls.tableApiIncidentUrl : this.urls.importSetTableUrl,
         method: 'post',
         data: prepareIncident(this.useTableApi, incident),
-        responseSchema: importSetTableResponse,
       });
+
+      this.checkInstance(res);
 
       if (!this.useTableApi) {
         this.throwIfImportSetApiResponseIsAnError(res.data);
@@ -183,7 +241,45 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     }
   }
 
-  async checkIfApplicationIsInstalled(): Promise<void> {
+  // TODO need to add validation
+  private async updateIncident({ incidentId, incident }: ExternalServiceParamsUpdate) {
+    try {
+      await this.checkIfApplicationIsInstalled();
+
+      const res = await this.request({
+        url: this.useTableApi
+          ? `${this.urls.tableApiIncidentUrl}/${incidentId}`
+          : this.urls.importSetTableUrl,
+        // Import Set API supports only POST.
+        method: this.useTableApi ? 'patch' : 'post',
+        data: {
+          ...prepareIncident(this.useTableApi, incident),
+          // elastic_incident_id is used to update the incident when using the Import Set API.
+          ...(this.useTableApi ? {} : { elastic_incident_id: incidentId }),
+        },
+      });
+
+      this.checkInstance(res);
+
+      if (!this.useTableApi) {
+        this.throwIfImportSetApiResponseIsAnError(res.data);
+      }
+
+      const id = this.useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
+      const updatedIncident = await this.getIncident(id);
+
+      return {
+        title: updatedIncident.number,
+        id: updatedIncident.sys_id,
+        pushedDate: getPushedDate(updatedIncident.sys_updated_on),
+        url: this.urls.incidentViewURL(updatedIncident.sys_id),
+      };
+    } catch (error) {
+      throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
+    }
+  }
+
+  private async checkIfApplicationIsInstalled(): Promise<void> {
     if (!this.useTableApi) {
       const { version, scope } = await this.getApplicationInformation(this.appScope);
       this.logger.debug(
@@ -192,18 +288,28 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     }
   }
 
+  @Validate(schema.string(), applicationInformationSchema)
   private async getApplicationInformation(appScope: string): Promise<GetApplicationInfoResponse> {
     const versionUrl = `${this.urls.basic}/api/${appScope}/elastic_api/health`;
     try {
       const res = await this.request({
         url: versionUrl,
         method: 'get',
-        responseSchema: applicationInformationSchema,
       });
 
       return { ...res.data.result };
     } catch (error) {
       throw createServiceError(error, 'Unable to get application version');
+    }
+  }
+
+  private checkInstance(res: AxiosResponse) {
+    if (res.status >= 200 && res.status < 400 && res.data.result == null) {
+      throw new Error(
+        `There is an issue with your Service Now Instance. Please check ${
+          res.request?.connection?.servername ?? ''
+        }.`
+      );
     }
   }
 

@@ -4,10 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { ServiceNow } from '.';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
+import {
+  ExecutorSubActionCommonFieldsParamsSchema,
+  ExecutorSubActionGetChoicesParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionPushParamsSchemaITSM,
+} from '../../../builtin_action_types/servicenow/schema';
 import {
   ExecutorParams,
   ServiceNowPublicConfigurationType,
@@ -24,6 +31,29 @@ export class ServiceNowItsm extends ServiceNow {
     commentFieldKey: 'work_notes',
     appId: '7148dbc91bf1f450ced060a7234bcb88',
   };
+
+  public subActionParamsSchema = schema.oneOf([
+    schema.object({
+      subAction: schema.literal('getFields'),
+      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+    }),
+    schema.object({
+      subAction: schema.literal('getIncident'),
+      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+    }),
+    schema.object({
+      subAction: schema.literal('handshake'),
+      subActionParams: ExecutorSubActionHandshakeParamsSchema,
+    }),
+    schema.object({
+      subAction: schema.literal('pushToService'),
+      subActionParams: ExecutorSubActionPushParamsSchemaITSM,
+    }),
+    schema.object({
+      subAction: schema.literal('getChoices'),
+      subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+    }),
+  ]);
 
   constructor({
     config,
