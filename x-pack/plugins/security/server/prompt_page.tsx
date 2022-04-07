@@ -19,6 +19,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IBasePath } from 'src/core/server';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '../../../../src/core/server/rendering/views/fonts';
 
 // Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
