@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { useSessionView } from './use_session_view';
+import { useSessionViewNavigation, useSessionView } from './use_session_view';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
@@ -34,7 +34,10 @@ interface Props {
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
-  const { SessionView, shouldShowDetailsPanel, DetailsPanel, Navigation } = useSessionView({
+  const { Navigation } = useSessionViewNavigation({
+    timelineId,
+  });
+  const { SessionView, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
     timelineId,
   });
 

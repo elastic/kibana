@@ -46,6 +46,7 @@ export interface SessionViewConfig {
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
 `;
+
 interface NavigationProps {
   fullScreen: boolean;
   globalFullScreen: boolean;
@@ -106,14 +107,7 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-export const useSessionView = ({
-  timelineId,
-  entityType,
-}: {
-  timelineId: TimelineId;
-  entityType?: EntityType;
-}) => {
-  const { sessionView } = useKibana().services;
+export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -185,32 +179,6 @@ export const useSessionView = ({
     setGlobalFullScreen,
     globalFullScreen,
   ]);
-  const sourcererScope = useMemo(() => {
-    if (timelineId === TimelineId.active) {
-      return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(timelineId)) {
-      return SourcererScopeName.detections;
-    } else {
-      return SourcererScopeName.default;
-    }
-  }, [timelineId]);
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: timelineId !== TimelineId.active,
-    entityType,
-    sourcererScope,
-    timelineId,
-    tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
-  });
-
-  const sessionViewComponent = useMemo(() => {
-    return sessionViewConfig !== null
-      ? sessionView.getSessionView({
-          ...sessionViewConfig,
-          loadAlertDetails: openDetailsPanel,
-        })
-      : null;
-  }, [openDetailsPanel, sessionView, sessionViewConfig]);
-
   const navigation = useMemo(() => {
     return (
       <Navigation
@@ -237,10 +205,53 @@ export const useSessionView = ({
 
   return {
     onCloseOverlay,
+    Navigation: navigation,
+  };
+};
+
+export const useSessionView = ({
+  timelineId,
+  entityType,
+}: {
+  timelineId: TimelineId;
+  entityType?: EntityType;
+}) => {
+  const { sessionView } = useKibana().services;
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { sessionViewConfig } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+
+  const sourcererScope = useMemo(() => {
+    if (timelineId === TimelineId.active) {
+      return SourcererScopeName.timeline;
+    } else if (detectionsTimelineIds.includes(timelineId)) {
+      return SourcererScopeName.detections;
+    } else {
+      return SourcererScopeName.default;
+    }
+  }, [timelineId]);
+  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
+    isFlyoutView: timelineId !== TimelineId.active,
+    entityType,
+    sourcererScope,
+    timelineId,
+    tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
+  });
+
+  const sessionViewComponent = useMemo(() => {
+    return sessionViewConfig !== null
+      ? sessionView.getSessionView({
+          ...sessionViewConfig,
+          loadAlertDetails: openDetailsPanel,
+        })
+      : null;
+  }, [openDetailsPanel, sessionView, sessionViewConfig]);
+
+  return {
     openDetailsPanel,
     shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
     DetailsPanel,
-    Navigation: navigation,
   };
 };
