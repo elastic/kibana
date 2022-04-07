@@ -183,7 +183,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery),
+    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
     []
   );
 

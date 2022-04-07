@@ -230,7 +230,7 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
-function stashJobForCloning(
+export function stashJobForCloning(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
   includeTimeRange: boolean = false

@@ -45,57 +45,74 @@ export function createSearchItems(
   // a lucene query_string.
   // Using a blank query will cause match_all:{} to be used
   // when passed through luceneStringToDsl
+  const query: Query = {
+    query: '',
+    language: 'lucene',
+  };
+  const combinedQuery: any = getDefaultDatafeedQuery();
+
+  if (savedSearch === null) {
+    return {
+      query,
+      combinedQuery,
+    };
+  }
+
+  const data = getQueryFromSavedSearchObject(savedSearch);
+  return createQueries(data, indexPattern, kibanaConfig);
+}
+
+export function createQueries(
+  data: { query: Query; filter: any[] },
+  indexPattern: DataViewBase | undefined,
+  kibanaConfig: IUiSettingsClient
+) {
   let query: Query = {
     query: '',
     language: 'lucene',
   };
-
   let combinedQuery: any = getDefaultDatafeedQuery();
-  if (savedSearch !== null) {
-    const data = getQueryFromSavedSearchObject(savedSearch);
 
-    query = data.query;
-    const filter = data.filter;
+  query = data.query;
+  const filter = data.filter;
+  const filters = Array.isArray(filter) ? filter : [];
 
-    const filters = Array.isArray(filter) ? filter : [];
-
-    if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-      const ast = fromKueryExpression(query.query);
-      if (query.query !== '') {
-        combinedQuery = toElasticsearchQuery(ast, indexPattern);
-      }
-      const filterQuery = buildQueryFromFilters(filters, indexPattern);
-
-      if (combinedQuery.bool === undefined) {
-        combinedQuery.bool = {};
-        // toElasticsearchQuery may add a single multi_match item to the
-        // root of its returned query, rather than putting it inside
-        // a bool.should
-        // in this case, move it to a bool.should
-        if (combinedQuery.multi_match !== undefined) {
-          combinedQuery.bool.should = {
-            multi_match: combinedQuery.multi_match,
-          };
-          delete combinedQuery.multi_match;
-        }
-      }
-
-      if (Array.isArray(combinedQuery.bool.filter) === false) {
-        combinedQuery.bool.filter =
-          combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
-      }
-
-      if (Array.isArray(combinedQuery.bool.must_not) === false) {
-        combinedQuery.bool.must_not =
-          combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
-      }
-
-      combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
-      combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
-    } else {
-      const esQueryConfigs = getEsQueryConfig(kibanaConfig);
-      combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+  if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+    const ast = fromKueryExpression(query.query);
+    if (query.query !== '') {
+      combinedQuery = toElasticsearchQuery(ast, indexPattern);
     }
+    const filterQuery = buildQueryFromFilters(filters, indexPattern);
+
+    if (combinedQuery.bool === undefined) {
+      combinedQuery.bool = {};
+      // toElasticsearchQuery may add a single multi_match item to the
+      // root of its returned query, rather than putting it inside
+      // a bool.should
+      // in this case, move it to a bool.should
+      if (combinedQuery.multi_match !== undefined) {
+        combinedQuery.bool.should = {
+          multi_match: combinedQuery.multi_match,
+        };
+        delete combinedQuery.multi_match;
+      }
+    }
+
+    if (Array.isArray(combinedQuery.bool.filter) === false) {
+      combinedQuery.bool.filter =
+        combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
+    }
+
+    if (Array.isArray(combinedQuery.bool.must_not) === false) {
+      combinedQuery.bool.must_not =
+        combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
+    }
+
+    combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
+    combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
+  } else {
+    const esQueryConfigs = getEsQueryConfig(kibanaConfig);
+    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
   }
 
   return {

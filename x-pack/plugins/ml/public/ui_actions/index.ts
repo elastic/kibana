@@ -8,6 +8,7 @@
 import { CoreSetup } from 'kibana/public';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
+import { createMLADJobAction } from './open_in_ml_action';
 import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
@@ -26,6 +27,7 @@ export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
+export { CREATE_ML_AD_JOB_ACTION } from './open_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
 /**
  * Register ML UI actions
@@ -42,6 +44,7 @@ export function registerMlUiActions(
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
+  const mLADJobAction = createMLADJobAction();
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);
@@ -65,4 +68,5 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInExplorerAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
   uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, mLADJobAction);
 }

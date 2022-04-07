@@ -72,7 +72,7 @@ export const SplitCards: FC<Props> = memo(
           <div key={fieldName} ref={(ref) => storePanels(ref, marginBottom)} style={style}>
             <EuiPanel
               paddingSize="m"
-              style={{ paddingTop: '4px' }}
+              style={{ paddingTop: '4px', border: '1px solid #ddd' }}
               data-test-subj="mlSplitCard back"
             >
               <div
@@ -112,7 +112,7 @@ export const SplitCards: FC<Props> = memo(
               {getBackPanels()}
               <EuiPanel
                 paddingSize="m"
-                style={{ paddingTop: '4px' }}
+                style={{ paddingTop: '4px', border: '1px solid #ddd' }}
                 data-test-subj="mlSplitCard front"
               >
                 <div
