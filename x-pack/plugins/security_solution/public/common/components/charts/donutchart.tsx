@@ -21,6 +21,7 @@ export const NO_LEGEND_DATA: LegendItem[] = [];
 interface DonutChartData {
   key: string;
   value: number;
+  group?: string;
 }
 
 export interface DonutChartProps {
@@ -52,10 +53,10 @@ export const DonutChart = ({
   fillColor,
   height = 90,
   label,
+  legendItems,
   link,
   title,
   totalCount,
-  legendItems,
 }: DonutChartProps) => {
   const theme = useTheme();
 
