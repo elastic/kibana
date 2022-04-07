@@ -199,7 +199,7 @@ export const useSessionView = ({
     entityType,
     sourcererScope,
     timelineId,
-    tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
+    tabType: timelineId === TimelineId.active ? activeTab : TimelineTabs.query,
   });
 
   const sessionViewComponent = useMemo(() => {

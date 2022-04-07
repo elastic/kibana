@@ -11,22 +11,25 @@ import styled from 'styled-components';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useSessionView } from './use_session_view';
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  margin: 0;
-  width: 100%;
-  overflow: hidden;
+const FlexItemWithMargin = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
 `;
 
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-  width: 100%;
+const MaxWidthPageFlexGroup = styled(EuiFlexGroup)`
+  max-width: 100%;
+  box-sizing: border-box;
 `;
 
 const VerticalRule = styled.div`
   width: 2px;
   height: 100%;
   background: ${({ theme }) => theme.eui.euiColorLightShade};
+`;
+
+const StyledFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  height: 100%;
+  min-width: 320px;
 `;
 
 interface Props {
@@ -39,18 +42,18 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
   });
 
   return (
-    <FullWidthFlexGroup gutterSize="none">
-      <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
-        <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-        <ScrollableFlexItem>{SessionView}</ScrollableFlexItem>
-      </EuiFlexGroup>
+    <MaxWidthPageFlexGroup alignItems="flexStart" gutterSize="none">
+      <FlexItemWithMargin grow={false}>
+        {Navigation}
+        {SessionView}
+      </FlexItemWithMargin>
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />
-          <ScrollableFlexItem grow={1}>{DetailsPanel}</ScrollableFlexItem>
+          <StyledFlexItem grow={1}>{DetailsPanel}</StyledFlexItem>
         </>
       )}
-    </FullWidthFlexGroup>
+    </MaxWidthPageFlexGroup>
   );
 };
 

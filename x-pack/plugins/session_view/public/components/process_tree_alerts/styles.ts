@@ -23,6 +23,7 @@ export const useStyles = () => {
       borderColor: colors.lightShade,
       borderWidth: border.width.thin,
       borderRadius: border.radius.medium,
+      boxSizing: 'border-box',
       maxWidth: 800,
       maxHeight: 378,
       overflowY: 'auto',
