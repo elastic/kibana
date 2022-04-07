@@ -5,34 +5,33 @@
  * 2.0.
  */
 
-import { ScreenshotResult, ScreenshotOptions } from '../screenshots';
-import { LayoutParams, LayoutTypes } from '../../common';
-import { FormattedScreenshotResult } from './types';
-
-const supportedLayouts = [LayoutTypes.PRESERVE_LAYOUT];
+import type { CaptureResult, CaptureOptions } from '../screenshots';
+import type { LayoutParams } from '../../common';
+import { LayoutTypes } from '../../common';
 
 /**
  * The layout parameters that are accepted by PNG screenshots
  */
-export type PngLayoutParams = LayoutParams<typeof supportedLayouts[number]>;
+export type PngLayoutParams = LayoutParams<LayoutTypes.PRESERVE_LAYOUT>;
 
 /**
  * Options that should be provided to a screenshot PNG request
  */
-export interface PngScreenshotOptions extends ScreenshotOptions<'png'> {
+export interface PngScreenshotOptions extends CaptureOptions {
+  /**
+   * Whether to format the output as a PNG.
+   * @default 'png'
+   */
+  format?: 'png';
+
   layout: PngLayoutParams;
 }
 
 /**
  * The final output of a PNG screenshot
  */
-export interface PngScreenshotResult extends FormattedScreenshotResult {
-  metadata: undefined;
-}
+export type PngScreenshotResult = CaptureResult;
 
-export async function toPng({
-  layout: _,
-  ...rest
-}: ScreenshotResult): Promise<PngScreenshotResult> {
-  return { ...rest, metadata: undefined };
+export async function toPng(result: CaptureResult): Promise<PngScreenshotResult> {
+  return result;
 }

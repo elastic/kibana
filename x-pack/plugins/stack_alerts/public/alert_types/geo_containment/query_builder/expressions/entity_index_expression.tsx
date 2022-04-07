@@ -10,6 +10,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -33,6 +34,7 @@ interface Props {
   indexPattern: DataView;
   isInvalid: boolean;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 interface KibanaDeps {
@@ -49,9 +51,10 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   dateField: timeField,
   geoField,
   data,
+  unifiedSearch,
 }) => {
   const { http } = useKibana<KibanaDeps>().services;
-  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
+  const IndexPatternSelect = (unifiedSearch.ui && unifiedSearch.ui.IndexPatternSelect) || null;
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();

@@ -39,15 +39,17 @@ export const useRuleExecutionEvents = ({
   return useQuery<GetAggregateRuleExecutionEventsResponse>(
     [
       'ruleExecutionEvents',
-      ruleId,
-      start,
-      end,
-      queryText,
-      statusFilters,
-      page,
-      perPage,
-      sortField,
-      sortOrder,
+      {
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+      },
     ],
     async ({ signal }) => {
       return fetchRuleExecutionEvents({

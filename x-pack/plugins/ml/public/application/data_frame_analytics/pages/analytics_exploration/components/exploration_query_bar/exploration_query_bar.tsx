@@ -14,7 +14,8 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
-import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
+import { Query } from '../../../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../../../../src/plugins/unified_search/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
