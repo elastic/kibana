@@ -174,7 +174,9 @@ export const convertSeriesToDataTable = async (
           const termsValue = Array.isArray(termsSplitKey)
             ? new MultiFieldKey({ key: termsSplitKey })
             : termsSplitKey;
-          splitValue = { [rowId]: isSplitByTerms && termsValue ? termsValue : [label].flat()[0] };
+          splitValue = {
+            [rowId]: isSplitByTerms && termsValue !== undefined ? termsValue : [label].flat()[0],
+          };
         }
 
         return splitValue ? { ...rowsData, ...splitValue } : rowsData;
