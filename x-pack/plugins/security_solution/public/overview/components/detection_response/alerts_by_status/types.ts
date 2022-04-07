@@ -54,6 +54,7 @@ export interface AlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined>
 export interface SeverityBuckets {
   key: Severity;
   value: number;
+  label?: string;
 }
 export type ParsedAlertsData = Partial<
   Record<Status, { total: number; severities: SeverityBuckets[] }>

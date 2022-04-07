@@ -75,3 +75,11 @@ export const ALERTS_TITLE = i18n.translate(
     defaultMessage: 'Alerts',
   }
 );
+
+export const UPDATING = i18n.translate('xpack.securitySolution.responseOps.updating', {
+  defaultMessage: 'Updating...',
+});
+
+export const UPDATED = i18n.translate('xpack.securitySolution.responseOps.updated', {
+  defaultMessage: 'Updated',
+});

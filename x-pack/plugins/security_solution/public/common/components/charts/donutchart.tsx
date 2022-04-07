@@ -8,7 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
 import React, { useContext } from 'react';
 
-import { Chart, Datum, Partition, Settings, PartitionLayout } from '@elastic/charts';
+import {
+  Chart,
+  Datum,
+  Partition,
+  Settings,
+  PartitionLayout,
+  defaultPartitionValueFormatter,
+} from '@elastic/charts';
 import styled from 'styled-components';
 import { ThemeContext } from './donut_theme_context';
 import { useTheme } from './common';
@@ -22,6 +29,7 @@ interface DonutChartData {
   key: string;
   value: number;
   group?: string;
+  label?: string;
 }
 
 export interface DonutChartProps {
@@ -103,6 +111,7 @@ export const DonutChart = ({
               data={data}
               layout={PartitionLayout.sunburst}
               valueAccessor={(d: Datum) => d.value as number}
+              valueFormatter={(d: number) => `${defaultPartitionValueFormatter(d)}`}
               layers={[
                 {
                   groupByRollup: (d: Datum) => d.group,
@@ -120,7 +129,7 @@ export const DonutChart = ({
                to make the ring thinner.
                */
                 {
-                  groupByRollup: (d: Datum) => d.key,
+                  groupByRollup: (d: Datum) => d.label ?? d.key,
                   nodeLabel: (d: Datum) => d,
                   shape: {
                     fillColor,

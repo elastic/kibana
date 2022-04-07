@@ -12,12 +12,14 @@ interface DonutChartEmptyProps {
   donutWidth?: number;
 }
 
+export const emptyDonutColor = '#FAFBFD';
+
 const BigRing = styled.div<DonutChartEmptyProps>`
   border-radius: 50%;
   ${({ size }) =>
     `height: ${size}px;
     width: ${size}px;
-    background-color: #FAFBFD;
+    background-color: ${emptyDonutColor};
     text-align: center;
     line-height: ${size}px;`}
 `;

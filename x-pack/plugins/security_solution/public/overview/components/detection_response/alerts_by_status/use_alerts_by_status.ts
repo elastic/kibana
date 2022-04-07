@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
+import {
+  STATUS_CRITICAL_LABEL,
+  STATUS_HIGH_LABEL,
+  STATUS_LOW_LABEL,
+  STATUS_MEDIUM_LABEL,
+} from '../translations';
+
+export const severityLabels: Record<Severity, string> = {
+  critical: STATUS_CRITICAL_LABEL,
+  high: STATUS_HIGH_LABEL,
+  medium: STATUS_MEDIUM_LABEL,
+  low: STATUS_LOW_LABEL,
+};
 
 export const getAlertsByStatusQuery = ({ from, to }: { from: string; to: string }) => ({
   size: 0,
@@ -53,6 +67,7 @@ export const parseAlertsData = (
         severities: severityBuckets.map((severityBucket) => ({
           key: severityBucket.key,
           value: severityBucket.doc_count,
+          label: severityLabels[severityBucket.key],
         })),
       },
     };
@@ -69,6 +84,7 @@ export const useAlertsByStatus = ({
   skip?: boolean;
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const [updatedAt, setUpdatedAt] = useState(Date.now());
 
   const {
     loading: isLoading,
@@ -102,6 +118,12 @@ export const useAlertsByStatus = ({
     );
   }, [setAlertsQuery, from, to]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      setUpdatedAt(Date.now());
+    }
+  }, [isLoading]);
+
   const refetch = useCallback(() => {
     if (!skip && refetchQuery) {
       refetchQuery();
@@ -120,5 +142,5 @@ export const useAlertsByStatus = ({
     loading: isLoading,
   });
 
-  return { items, isLoading };
+  return { items, isLoading, updatedAt };
 };
