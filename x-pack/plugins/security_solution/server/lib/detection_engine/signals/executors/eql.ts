@@ -11,7 +11,7 @@ import { Logger } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
@@ -51,7 +51,7 @@ export const eqlExecutor = async ({
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
   bulkCreate: BulkCreate;

@@ -307,7 +307,7 @@
         "tags": [],
         "label": "InfraConfig",
         "description": [],
-        "path": "x-pack/plugins/infra/server/types.ts",
+        "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
         "deprecated": false,
         "children": [
           {
@@ -320,7 +320,7 @@
             "signature": [
               "{ inventory_threshold: { group_by_page_size: number; }; metric_threshold: { group_by_page_size: number; }; }"
             ],
-            "path": "x-pack/plugins/infra/server/types.ts",
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false
           },
           {
@@ -333,7 +333,7 @@
             "signature": [
               "{ compositeSize: number; }"
             ],
-            "path": "x-pack/plugins/infra/server/types.ts",
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false
           },
           {
@@ -346,7 +346,7 @@
             "signature": [
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/infra/server/types.ts",
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false
           }
         ],
@@ -380,7 +380,7 @@
       "tags": [],
       "label": "InfraPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/infra/server/plugin.ts",
+      "path": "x-pack/plugins/infra/server/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -395,7 +395,7 @@
             "InfraStaticSourceConfiguration",
             ") => void"
           ],
-          "path": "x-pack/plugins/infra/server/plugin.ts",
+          "path": "x-pack/plugins/infra/server/types.ts",
           "deprecated": false,
           "children": [
             {
@@ -408,7 +408,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/infra/server/plugin.ts",
+              "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
               "isRequired": true
             },
@@ -422,15 +422,55 @@
               "signature": [
                 "InfraStaticSourceConfiguration"
               ],
-              "path": "x-pack/plugins/infra/server/plugin.ts",
+              "path": "x-pack/plugins/infra/server/types.ts",
               "deprecated": false,
               "isRequired": true
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginSetup.logViews",
+          "type": "Object",
+          "tags": [],
+          "label": "logViews",
+          "description": [],
+          "signature": [
+            "LogViewsServiceSetup"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "infra",
+      "id": "def-server.InfraPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InfraPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/infra/server/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.logViews",
+          "type": "Object",
+          "tags": [],
+          "label": "logViews",
+          "description": [],
+          "signature": [
+            "LogViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },

@@ -9,7 +9,7 @@ import { chunk } from 'lodash/fp';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
-import { RulesClient, PartialAlert } from '../../../../../alerting/server';
+import { RulesClient, PartialRule } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
@@ -64,7 +64,7 @@ export const createPromises = (
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
   ruleExecutionLog: IRuleExecutionLogForRoutes
-): Array<Promise<PartialAlert<RuleParams> | null>> => {
+): Array<Promise<PartialRule<RuleParams> | null>> => {
   return rules.map(async (rule) => {
     const {
       author,
@@ -197,7 +197,7 @@ export const createPromises = (
         // the existing rule
         exceptionsList,
         actions: migratedRule.actions.map(transformAlertToRuleAction), // Actions come from the existing rule
-      })) as PartialAlert<RuleParams>; // TODO: Replace AddPrepackagedRulesSchema with type specific rules schema so we can clean up these types
+      })) as PartialRule<RuleParams>; // TODO: Replace AddPrepackagedRulesSchema with type specific rules schema so we can clean up these types
     } else {
       // Note: we do not pass down enabled as we do not want to suddenly disable
       // or enable rules on the user when they were not expecting it if a rule updates

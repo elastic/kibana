@@ -16,7 +16,7 @@ import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { PartialAlert } from '../../../../../../alerting/server';
+import { PartialRule } from '../../../../../../alerting/server';
 import { isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform } from './utils';
@@ -26,7 +26,7 @@ import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rul
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [RulesSchema | null, string | null] => {
@@ -39,7 +39,7 @@ export const transformValidate = (
 };
 
 export const newTransformValidate = (
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
@@ -53,7 +53,7 @@ export const newTransformValidate = (
 
 export const transformValidateBulkError = (
   ruleId: string,
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null
 ): RulesSchema | BulkError => {
   if (isAlertType(rule)) {
