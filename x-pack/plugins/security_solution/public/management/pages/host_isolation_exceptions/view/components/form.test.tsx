@@ -27,6 +27,8 @@ import {
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../common/endpoint/service/artifacts';
 import { HttpFetchOptionsWithPath } from 'kibana/public';
 
+jest.mock('../../../../../common/components/user_privileges');
+
 describe('When on the host isolation exceptions entry form', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -61,8 +63,12 @@ describe('When on the host isolation exceptions entry form', () => {
         ).resolves.toHaveLength(10);
       });
 
-      act(() => {
-        userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton'));
+      await act(async () => {
+        await waitFor(() => {
+          userEvent.click(
+            renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton')
+          );
+        });
       });
 
       await act(async () => {
