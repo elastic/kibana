@@ -50,6 +50,7 @@ import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfigResult, XYChartProps, XYProps } from '../../common/types';
 import { eventAnnotationServiceMock } from '../../../../event_annotation/public/mocks';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
+import { DataLayers } from './data_layers';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -125,9 +126,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(LineSeries)).toHaveLength(2);
-    expect(component.find(LineSeries).at(0).prop('yAccessors')).toEqual(['a']);
-    expect(component.find(LineSeries).at(1).prop('yAccessors')).toEqual(['b']);
+
+    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+    expect(lineSeries).toHaveLength(2);
+    expect(lineSeries.at(0).prop('yAccessors')).toEqual(['a']);
+    expect(lineSeries.at(1).prop('yAccessors')).toEqual(['b']);
   });
 
   describe('date range', () => {
@@ -712,9 +715,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(BarSeries)).toHaveLength(2);
-    expect(component.find(BarSeries).at(0).prop('yAccessors')).toEqual(['a']);
-    expect(component.find(BarSeries).at(1).prop('yAccessors')).toEqual(['b']);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries).toHaveLength(2);
+    expect(barSeries.at(0).prop('yAccessors')).toEqual(['a']);
+    expect(barSeries.at(1).prop('yAccessors')).toEqual(['b']);
   });
 
   test('it renders area', () => {
@@ -729,9 +734,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(AreaSeries)).toHaveLength(2);
-    expect(component.find(AreaSeries).at(0).prop('yAccessors')).toEqual(['a']);
-    expect(component.find(AreaSeries).at(1).prop('yAccessors')).toEqual(['b']);
+
+    const areaSeries = component.find(DataLayers).dive().find(AreaSeries);
+    expect(areaSeries).toHaveLength(2);
+    expect(areaSeries.at(0).prop('yAccessors')).toEqual(['a']);
+    expect(areaSeries.at(1).prop('yAccessors')).toEqual(['b']);
   });
 
   test('it renders horizontal bar', () => {
@@ -746,9 +753,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(BarSeries)).toHaveLength(2);
-    expect(component.find(BarSeries).at(0).prop('yAccessors')).toEqual(['a']);
-    expect(component.find(BarSeries).at(1).prop('yAccessors')).toEqual(['b']);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries).toHaveLength(2);
+    expect(barSeries.at(0).prop('yAccessors')).toEqual(['a']);
+    expect(barSeries.at(1).prop('yAccessors')).toEqual(['b']);
     expect(component.find(Settings).prop('rotation')).toEqual(90);
   });
 
@@ -1235,9 +1244,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(BarSeries)).toHaveLength(2);
-    expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
-    expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries).toHaveLength(2);
+    expect(barSeries.at(0).prop('stackAccessors')).toHaveLength(1);
+    expect(barSeries.at(1).prop('stackAccessors')).toHaveLength(1);
   });
 
   test('it renders stacked area', () => {
@@ -1252,9 +1263,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(AreaSeries)).toHaveLength(2);
-    expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toHaveLength(1);
-    expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toHaveLength(1);
+
+    const areaSeries = component.find(DataLayers).dive().find(AreaSeries);
+    expect(areaSeries).toHaveLength(2);
+    expect(areaSeries.at(0).prop('stackAccessors')).toHaveLength(1);
+    expect(areaSeries.at(1).prop('stackAccessors')).toHaveLength(1);
   });
 
   test('it renders stacked horizontal bar', () => {
@@ -1271,9 +1284,11 @@ describe('XYChart component', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find(BarSeries)).toHaveLength(2);
-    expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
-    expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries).toHaveLength(2);
+    expect(barSeries.at(0).prop('stackAccessors')).toHaveLength(1);
+    expect(barSeries.at(1).prop('stackAccessors')).toHaveLength(1);
     expect(component.find(Settings).prop('rotation')).toEqual(90);
   });
 
@@ -1297,15 +1312,17 @@ describe('XYChart component', () => {
       />
     );
 
-    expect(component.find(BarSeries)).toHaveLength(0);
+    expect(component.find(DataLayers)).toHaveLength(0);
     expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
   });
 
   test('it passes time zone to the series', () => {
     const { args } = sampleArgs();
     const component = shallow(<XYChart {...defaultProps} args={args} timeZone="CEST" />);
-    expect(component.find(LineSeries).at(0).prop('timeZone')).toEqual('CEST');
-    expect(component.find(LineSeries).at(1).prop('timeZone')).toEqual('CEST');
+
+    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+    expect(lineSeries.at(0).prop('timeZone')).toEqual('CEST');
+    expect(lineSeries.at(1).prop('timeZone')).toEqual('CEST');
   });
 
   test('it applies histogram mode to the series for single series', () => {
@@ -1320,7 +1337,9 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer] }} />
     );
-    expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
+    expect(
+      component.find(DataLayers).dive().find(BarSeries).at(0).prop('enableHistogramMode')
+    ).toEqual(true);
   });
 
   test('it does not apply histogram mode to more than one bar series for unstacked bar chart', () => {
@@ -1334,8 +1353,10 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer] }} />
     );
-    expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
-    expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries.at(0).prop('enableHistogramMode')).toEqual(false);
+    expect(barSeries.at(1).prop('enableHistogramMode')).toEqual(false);
   });
 
   test('it applies histogram mode to more than one the series for unstacked line/area chart', () => {
@@ -1355,8 +1376,10 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, layers: [firstLayer, secondLayer] }} />
     );
-    expect(component.find(LineSeries).at(0).prop('enableHistogramMode')).toEqual(true);
-    expect(component.find(LineSeries).at(1).prop('enableHistogramMode')).toEqual(true);
+
+    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+    expect(lineSeries.at(0).prop('enableHistogramMode')).toEqual(true);
+    expect(lineSeries.at(1).prop('enableHistogramMode')).toEqual(true);
   });
 
   test('it applies histogram mode to the series for stacked series', () => {
@@ -1376,8 +1399,10 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
-    expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries.at(0).prop('enableHistogramMode')).toEqual(true);
+    expect(barSeries.at(1).prop('enableHistogramMode')).toEqual(true);
   });
 
   test('it does not apply histogram mode for splitted series', () => {
@@ -1393,8 +1418,10 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
-    expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
+
+    const barSeries = component.find(DataLayers).dive().find(BarSeries);
+    expect(barSeries.at(0).prop('enableHistogramMode')).toEqual(false);
+    expect(barSeries.at(1).prop('enableHistogramMode')).toEqual(false);
   });
 
   describe('y axes', () => {
@@ -1453,8 +1480,10 @@ describe('XYChart component', () => {
       const component = getRenderedComponent(newArgs);
       const axes = component.find(Axis);
       expect(axes).toHaveLength(3);
-      expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(axes.at(1).prop('groupId'));
-      expect(component.find(LineSeries).at(1).prop('groupId')).toEqual(axes.at(2).prop('groupId'));
+
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+      expect(lineSeries.at(0).prop('groupId')).toEqual(axes.at(1).prop('groupId'));
+      expect(lineSeries.at(1).prop('groupId')).toEqual(axes.at(2).prop('groupId'));
     });
 
     test('multiple axes because of incompatible formatters', () => {
@@ -1472,8 +1501,10 @@ describe('XYChart component', () => {
       const component = getRenderedComponent(newArgs);
       const axes = component.find(Axis);
       expect(axes).toHaveLength(3);
-      expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(axes.at(1).prop('groupId'));
-      expect(component.find(LineSeries).at(1).prop('groupId')).toEqual(axes.at(2).prop('groupId'));
+
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+      expect(lineSeries.at(0).prop('groupId')).toEqual(axes.at(1).prop('groupId'));
+      expect(lineSeries.at(1).prop('groupId')).toEqual(axes.at(2).prop('groupId'));
     });
 
     test('single axis despite different formatters if enforced', () => {
@@ -1558,20 +1589,21 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
       expect(
-        (component.find(LineSeries).at(0).prop('color') as Function)!({
+        (lineSeries.at(0).prop('color') as Function)!({
           yAccessor: 'a',
           seriesKeys: ['a'],
         })
       ).toEqual('#550000');
       expect(
-        (component.find(LineSeries).at(1).prop('color') as Function)!({
+        (lineSeries.at(1).prop('color') as Function)!({
           yAccessor: 'b',
           seriesKeys: ['b'],
         })
       ).toEqual('#FFFF00');
       expect(
-        (component.find(LineSeries).at(2).prop('color') as Function)!({
+        (lineSeries.at(2).prop('color') as Function)!({
           yAccessor: 'c',
           seriesKeys: ['c'],
         })
@@ -1602,14 +1634,16 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
+
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
       expect(
-        (component.find(LineSeries).at(0).prop('color') as Function)!({
+        (lineSeries.at(0).prop('color') as Function)!({
           yAccessor: 'a',
           seriesKeys: ['a'],
         })
       ).toEqual('blue');
       expect(
-        (component.find(LineSeries).at(1).prop('color') as Function)!({
+        (lineSeries.at(1).prop('color') as Function)!({
           yAccessor: 'c',
           seriesKeys: ['c'],
         })
@@ -1642,7 +1676,11 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+      const nameFn = component
+        .find(DataLayers)
+        .dive()
+        .find(LineSeries)
+        .prop('name') as SeriesNameFn;
 
       // In this case, the ID is used as the name. This shouldn't happen in practice
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual(null);
@@ -1665,11 +1703,15 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+      const nameFn = component
+        .find(DataLayers)
+        .dive()
+        .find(LineSeries)
+        .prop('name') as SeriesNameFn;
 
       // In this case, the ID is used as the name. This shouldn't happen in practice
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
     test('simplest xy chart with human-readable name', () => {
@@ -1688,7 +1730,11 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+      const nameFn = component
+        .find(DataLayers)
+        .dive()
+        .find(LineSeries)
+        .prop('name') as SeriesNameFn;
 
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Column A');
     });
@@ -1709,14 +1755,16 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
+
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
+      const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
 
       // This accessor has a human-readable name
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
       // This accessor does not
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
-      expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual(null);
+      expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
     test('split series without formatting and single y accessor', () => {
@@ -1735,7 +1783,11 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+      const nameFn = component
+        .find(DataLayers)
+        .dive()
+        .find(LineSeries)
+        .prop('name') as SeriesNameFn;
 
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('split1');
     });
@@ -1756,7 +1808,11 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+      const nameFn = component
+        .find(DataLayers)
+        .dive()
+        .find(LineSeries)
+        .prop('name') as SeriesNameFn;
 
       convertSpy.mockReturnValueOnce('formatted');
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual('formatted');
@@ -1779,8 +1835,10 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
+      const nameFn2 = lineSeries.at(0).prop('name') as SeriesNameFn;
 
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
         'split1 - Label A'
@@ -1806,8 +1864,10 @@ describe('XYChart component', () => {
       };
 
       const component = getRenderedComponent(newArgs);
-      const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
+
+      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
+      const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
 
       convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
@@ -1831,8 +1891,10 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(component.find(LineSeries).at(0).prop('xScaleType')).toEqual(ScaleType.Ordinal);
-    expect(component.find(LineSeries).at(1).prop('xScaleType')).toEqual(ScaleType.Ordinal);
+
+    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+    expect(lineSeries.at(0).prop('xScaleType')).toEqual(ScaleType.Ordinal);
+    expect(lineSeries.at(1).prop('xScaleType')).toEqual(ScaleType.Ordinal);
   });
 
   test('it set the scale of the y axis according to the args prop', () => {
@@ -1847,8 +1909,10 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(component.find(LineSeries).at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
-    expect(component.find(LineSeries).at(1).prop('yScaleType')).toEqual(ScaleType.Sqrt);
+
+    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
+    expect(lineSeries.at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
+    expect(lineSeries.at(1).prop('yScaleType')).toEqual(ScaleType.Sqrt);
   });
 
   test('it gets the formatter for the x axis', () => {
@@ -2112,7 +2176,7 @@ describe('XYChart component', () => {
 
     const component = shallow(<XYChart {...defaultProps} args={args} />);
 
-    const series = component.find(LineSeries);
+    const series = component.find(DataLayers).dive().find(LineSeries);
 
     // Only one series should be rendered, even though 2 are configured
     // This one series should only have one row, even though 2 are sent
@@ -2185,7 +2249,7 @@ describe('XYChart component', () => {
 
     const component = shallow(<XYChart {...defaultProps} args={args} />);
 
-    const series = component.find(LineSeries);
+    const series = component.find(DataLayers).dive().find(LineSeries);
 
     expect(series.prop('data')).toEqual([
       { a: 0, b: 2, c: 5 },
@@ -2359,13 +2423,13 @@ describe('XYChart component', () => {
     const component = shallow(
       <XYChart {...defaultProps} args={{ ...args, fittingFunction: 'Carry' }} />
     );
-
-    expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
-    expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
-    expect(component.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
-    expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
-    expect(component.find(AreaSeries).at(1).prop('fit')).toEqual({ type: Fit.Carry });
-    expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
+    const dataLayers = component.find(DataLayers).dive();
+    expect(dataLayers.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
+    expect(dataLayers.find(BarSeries).prop('fit')).toEqual(undefined);
+    expect(dataLayers.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
+    expect(dataLayers.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
+    expect(dataLayers.find(AreaSeries).at(1).prop('fit')).toEqual({ type: Fit.Carry });
+    expect(dataLayers.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
   });
 
   test('it should apply None fitting function if not specified', () => {
@@ -2375,7 +2439,9 @@ describe('XYChart component', () => {
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
-    expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
+    expect(component.find(DataLayers).dive().find(LineSeries).prop('fit')).toEqual({
+      type: Fit.None,
+    });
   });
 
   test('it should apply the xTitle if is specified', () => {
@@ -2477,7 +2543,7 @@ describe('XYChart component', () => {
       <XYChart {...defaultProps} formatFactory={getCustomFormatSpy} args={{ ...args }} />
     );
 
-    expect(component.find(LineSeries).at(1).prop('data')).toEqual([
+    expect(component.find(DataLayers).dive().find(LineSeries).at(1).prop('data')).toEqual([
       {
         a: 5,
         b: 2,
