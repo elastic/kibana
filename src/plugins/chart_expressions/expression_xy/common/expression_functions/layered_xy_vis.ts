@@ -174,7 +174,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     },
     axes: {
       types: [AXIS_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.axes.help', {
         defaultMessage: 'Specifies the configs for axes',
       }),
       multi: true,

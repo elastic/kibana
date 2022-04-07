@@ -30,13 +30,6 @@ import { RenderMode } from '../../../../expressions/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { SeriesType, XYChartProps } from '../../common/types';
-import {
-  isHorizontalChart,
-  getAnnotationsLayers,
-  getDataLayers,
-  Series,
-  getAreAlreadyFormattedLayersInfo,
-} from '../helpers';
 import { EventAnnotationServiceType } from '../../../../event_annotation/public';
 import {
   ChartsPluginSetup,
@@ -46,6 +39,11 @@ import {
 } from '../../../../../plugins/charts/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common';
 import {
+  isHorizontalChart,
+  getAnnotationsLayers,
+  getDataLayers,
+  AxisConfiguration,
+  getAreAlreadyFormattedLayersInfo,
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
@@ -234,11 +232,11 @@ export function XYChart({
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
 
-  const getYAxesTitles = (axisSeries: Series[], groupId: string) => {
-    const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
+  const getYAxesTitles = (axis: AxisConfiguration) => {
+    const yTitle = axis.title || (axis.groupId === 'right' ? args.yRightTitle : args.yTitle);
     return (
       yTitle ||
-      axisSeries
+      axis.series
         .map(
           (series) =>
             layers[series.layer].table.columns.find((column) => column.id === series.accessor)?.name
@@ -580,14 +578,14 @@ export function XYChart({
             id={axis.groupId}
             groupId={axis.groupId}
             position={axis.position}
-            title={getYAxesTitles(axis.series, axis.groupId)}
+            title={getYAxesTitles(axis)}
             gridLine={{
               visible:
                 axis.groupId === 'right'
                   ? gridlinesVisibilitySettings?.yRight
                   : gridlinesVisibilitySettings?.yLeft,
             }}
-            hide={dataLayers[0]?.hide}
+            hide={axis.hide || dataLayers[0]?.hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
             style={getYAxesStyle(axis.groupId as 'left' | 'right')}
             domain={getYAxisDomain(axis)}

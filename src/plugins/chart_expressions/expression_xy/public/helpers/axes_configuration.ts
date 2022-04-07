@@ -35,12 +35,16 @@ interface AxesSeries {
   [key: string]: FormattedMetric[];
 }
 
-export type GroupsConfiguration = Array<{
+export interface AxisConfiguration {
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
-}>;
+  title?: string;
+  hide?: boolean;
+}
+
+export type GroupsConfiguration = Array<AxisConfiguration>;
 
 export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
@@ -150,6 +154,8 @@ export function getAxesConfiguration(
         position: axis.position || Position.Left,
         formatter: formatFactory?.(series[axis.id][0].fieldFormat),
         series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
+        title: axis.title,
+        hide: axis.hide,
       });
     }
   });

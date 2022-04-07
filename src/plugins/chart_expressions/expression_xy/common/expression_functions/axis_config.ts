@@ -20,14 +20,14 @@ export const axisConfigFunction: ExpressionFunctionDefinition<
   name: AXIS_CONFIG,
   aliases: [],
   type: AXIS_CONFIG,
-  help: i18n.translate('expressionXY.axisExtentConfig.help', {
+  help: i18n.translate('expressionXY.axisConfig.help', {
     defaultMessage: `Configure the xy chart's axis config`,
   }),
   inputTypes: ['null'],
   args: {
     title: {
       types: ['string'],
-      help: i18n.translate('expressionXY.axisConfig.id.help', {
+      help: i18n.translate('expressionXY.axisConfig.title.help', {
         defaultMessage: 'Title of axis',
       }),
     },
