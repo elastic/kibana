@@ -64,8 +64,11 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
-import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
+import {
+  MonitoringCollectionSetup,
+  MonitoringCollectionStart,
+} from '../../monitoring_collection/server';
+import { registerClusterCollector, NodeLevelMetrics } from './monitoring';
 import { getExecutionConfigForRuleType } from './lib/get_rules_config';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 
@@ -141,11 +144,13 @@ export interface AlertingPluginsStart {
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  monitoringCollection?: MonitoringCollectionStart;
 }
 
 export class AlertingPlugin {
   private readonly config: AlertingConfig;
   private readonly logger: Logger;
+  private readonly metricCollectionLogger: Logger;
   private ruleTypeRegistry?: RuleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
@@ -159,17 +164,17 @@ export class AlertingPlugin {
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
-  private inMemoryMetrics: InMemoryMetrics;
+  private nodeLevelMetrics?: NodeLevelMetrics;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
+    this.metricCollectionLogger = initializerContext.logger.get('node_level_metrics');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
   }
 
   public setup(
@@ -213,7 +218,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       licensing: plugins.licensing,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
-      inMemoryMetrics: this.inMemoryMetrics,
+      nodeLevelMetrics: this.nodeLevelMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -251,6 +256,13 @@ export class AlertingPlugin {
       this.config
     );
 
+    if (plugins.monitoringCollection) {
+      registerClusterCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        core,
+      });
+    }
+
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'Alerting is (probably) ready',
@@ -264,17 +276,6 @@ export class AlertingPlugin {
       this.createRouteHandlerContext(core)
     );
 
-    if (plugins.monitoringCollection) {
-      registerNodeCollector({
-        monitoringCollection: plugins.monitoringCollection,
-        inMemoryMetrics: this.inMemoryMetrics,
-      });
-      registerClusterCollector({
-        monitoringCollection: plugins.monitoringCollection,
-        core,
-      });
-    }
-
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
@@ -283,6 +284,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      monitoringCollection: plugins.monitoringCollection,
     });
 
     return {
@@ -355,6 +357,13 @@ export class AlertingPlugin {
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: ['alert'],
     });
+
+    if (plugins.monitoringCollection) {
+      this.nodeLevelMetrics = new NodeLevelMetrics(
+        this.metricCollectionLogger,
+        plugins.monitoringCollection
+      );
+    }
 
     const spaceIdToNamespace = (spaceId?: string) => {
       return plugins.spaces && spaceId

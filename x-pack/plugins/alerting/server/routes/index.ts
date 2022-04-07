@@ -7,6 +7,7 @@
 
 import { IRouter } from 'kibana/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
@@ -32,11 +33,13 @@ import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
 import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
+import { defineMonitoringRoutes } from './monitoring';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
   usageCounter?: UsageCounter;
 }
 
@@ -67,4 +70,5 @@ export function defineRoutes(opts: RouteOptions) {
   updateRuleApiKeyRoute(router, licenseState);
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
+  defineMonitoringRoutes(opts);
 }

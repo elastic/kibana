@@ -31,7 +31,7 @@ import {
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
-import { InMemoryMetrics } from './monitoring';
+import { NodeLevelMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
@@ -41,7 +41,7 @@ export interface ConstructorOptions {
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
-  inMemoryMetrics: InMemoryMetrics;
+  nodeLevelMetrics?: NodeLevelMetrics;
 }
 
 export interface RegistryRuleType
@@ -138,7 +138,7 @@ export class RuleTypeRegistry {
   private readonly licenseState: ILicenseState;
   private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
-  private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly nodeLevelMetrics?: NodeLevelMetrics;
 
   constructor({
     logger,
@@ -147,7 +147,7 @@ export class RuleTypeRegistry {
     licenseState,
     licensing,
     minimumScheduleInterval,
-    inMemoryMetrics,
+    nodeLevelMetrics,
   }: ConstructorOptions) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -155,7 +155,7 @@ export class RuleTypeRegistry {
     this.licenseState = licenseState;
     this.licensing = licensing;
     this.minimumScheduleInterval = minimumScheduleInterval;
-    this.inMemoryMetrics = inMemoryMetrics;
+    this.nodeLevelMetrics = nodeLevelMetrics;
   }
 
   public has(id: string) {
@@ -274,7 +274,7 @@ export class RuleTypeRegistry {
             InstanceContext,
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedRuleType, context, this.inMemoryMetrics),
+          >(normalizedRuleType, context, this.nodeLevelMetrics),
       },
     });
     // No need to notify usage on basic alert types

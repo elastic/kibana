@@ -289,14 +289,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
 
     if (plugins.monitoringCollection) {
-      registerNodeCollector({
-        monitoringCollection: plugins.monitoringCollection,
-        inMemoryMetrics: this.inMemoryMetrics,
-      });
-      registerClusterCollector({
-        monitoringCollection: plugins.monitoringCollection,
-        core,
-      });
+      // registerNodeCollector({
+      //   monitoringCollection: plugins.monitoringCollection,
+      //   inMemoryMetrics: this.inMemoryMetrics,
+      // });
+      // registerClusterCollector({
+      //   monitoringCollection: plugins.monitoringCollection,
+      //   core,
+      // });
     }
 
     // Routes

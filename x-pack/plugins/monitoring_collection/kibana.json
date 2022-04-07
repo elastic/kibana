@@ -6,7 +6,7 @@
     "name": "Stack Monitoring",
     "githubTeam": "stack-monitoring-ui"
   },
-  "configPath": ["monitoring_collection"],
+  "configPath": ["xpack", "monitoring_collection"],
   "requiredPlugins": [],
   "optionalPlugins": [
   ],

@@ -63,7 +63,7 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { NodeLevelMetrics } from '../monitoring';
 import {
   ActionsCompletion,
   AlertExecutionStore,
@@ -115,7 +115,7 @@ export class TaskRunner<
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly nodeLevelMetrics?: NodeLevelMetrics;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -132,7 +132,7 @@ export class TaskRunner<
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics
+    nodeLevelMetrics?: NodeLevelMetrics
   ) {
     this.context = context;
     this.logger = context.logger;
@@ -145,7 +145,7 @@ export class TaskRunner<
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
-    this.inMemoryMetrics = inMemoryMetrics;
+    this.nodeLevelMetrics = nodeLevelMetrics;
   }
 
   private async getDecryptedAttributes(
@@ -855,9 +855,12 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
-      this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+      this.nodeLevelMetrics?.execution(
+        ruleId,
+        event.event?.duration ? event.event?.duration / Millis2Nanos : undefined
+      );
       if (executionStatus.error) {
-        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+        this.nodeLevelMetrics?.failure(ruleId, executionStatus.error.reason);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
@@ -989,7 +992,7 @@ export class TaskRunner<
     };
     eventLogger.logEvent(event);
 
-    this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
+    this.nodeLevelMetrics?.timeout(ruleId, this.ruleType.ruleTaskTimeout);
 
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {

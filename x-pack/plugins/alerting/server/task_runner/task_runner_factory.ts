@@ -33,7 +33,7 @@ import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-import { InMemoryMetrics } from '../monitoring';
+import { NodeLevelMetrics } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -88,7 +88,7 @@ export class TaskRunnerFactory {
       RecoveryActionGroupId
     >,
     { taskInstance }: RunContext,
-    inMemoryMetrics: InMemoryMetrics
+    nodeLevelMetrics?: NodeLevelMetrics
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -102,6 +102,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+    >(ruleType, taskInstance, this.taskRunnerContext!, nodeLevelMetrics);
   }
 }
