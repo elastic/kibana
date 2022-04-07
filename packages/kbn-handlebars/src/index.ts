@@ -31,6 +31,8 @@ export declare namespace ExtendedHandlebars {
   export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
 }
 
+export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'compile' : 'compileAST';
+
 const originalCreate = OriginalHandlebars.create;
 const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = OriginalHandlebars as any;
 
@@ -651,5 +653,14 @@ function transformLiteralToPath(node: { path: hbs.AST.PathExpression | hbs.AST.L
       original: original + '',
       loc: literal.loc,
     };
+  }
+}
+
+function allowUnsafeEval() {
+  try {
+    new Function();
+    return true;
+  } catch (e) {
+    return false;
   }
 }

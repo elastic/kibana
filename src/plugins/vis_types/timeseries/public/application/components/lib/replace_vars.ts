@@ -7,7 +7,7 @@
  */
 
 import { encode, RisonValue } from 'rison-node';
-import Handlebars, { ExtendedCompileOptions } from '@kbn/handlebars';
+import Handlebars, { ExtendedCompileOptions, compileFnName } from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
 
@@ -58,7 +58,7 @@ export function replaceVars(
   try {
     /** we need add '[]' for emptyLabel because this value contains special characters.
      * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
-    const template = handlebars.compileAST(str.split(emptyLabel).join(`[${emptyLabel}]`), {
+    const template = handlebars[compileFnName](str.split(emptyLabel).join(`[${emptyLabel}]`), {
       strict: true,
       knownHelpersOnly: true,
       knownHelpers: {
