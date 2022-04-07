@@ -40,6 +40,7 @@ import {
 export const SessionView = ({
   sessionEntityId,
   height,
+  isFullScreen = false,
   jumpToEntityId,
   jumpToCursor,
   investigatedAlertId,
@@ -64,7 +65,7 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
-  const styles = useStyles({ height });
+  const styles = useStyles({ height, isFullScreen });
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
