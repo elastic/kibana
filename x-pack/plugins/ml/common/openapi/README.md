@@ -5,7 +5,16 @@ The current self-contained spec file can be used for online tools like those fou
 A guide about the openApi specification can be found at [https://swagger.io/docs/specification/about/](https://swagger.io/docs/specification/about/).
 
  ## Tools
-It is possible to validate the docs before bundling them with the following command:
+
+It is possible to validate the docs before bundling them by running the following command in the `x-pack/plugins/ml/common/openapi/` folder:
   ```
-    npx swagger-cli validate x-pack/plugins/ml/common/openapi/ml_apis.yaml
+    npx swagger-cli validate ml_apis.yaml
   ```
+
+Then generate the `bundled` files with the following commands:
+
+    ```
+    npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
+    npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
+    ```
+
