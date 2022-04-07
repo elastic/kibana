@@ -62,7 +62,7 @@ docker run --rm \
   -e VAULT_ADDR \
   -e VAULT_ROLE_ID \
   -e VAULT_SECRET_ID \
-  --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts \
+  --mount type=bind,readonly=false,src="$PWD/target",target=/artifacts/target \
   docker.elastic.co/infra/release-manager:latest \
     cli collect \
       --project kibana \
