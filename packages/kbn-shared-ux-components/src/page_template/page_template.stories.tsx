@@ -24,7 +24,7 @@ export default {
   },
 };
 
-type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader'>;
+type Params = Pick<KibanaPageTemplateProps, 'isEmptyState' | 'pageHeader' | 'solutionNav'>;
 
 const noDataConfig = {
   solution: 'Kibana',
@@ -73,7 +73,7 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
   },
 ];
 
-const solutionNav = {
+const solutionNavBar = {
   items,
   logo: 'logoKibana',
   name: 'Kibana',
@@ -100,16 +100,16 @@ export const WithNoDataConfig = () => {
 };
 
 export const WithNoDataConfigAndSolutionNav = () => {
-  return <KibanaPageTemplate noDataConfig={noDataConfig} solutionNav={solutionNav} />;
-};
-
-export const WithSolutionNav = () => {
-  return <KibanaPageTemplate solutionNav={solutionNav}>{content}</KibanaPageTemplate>;
+  return <KibanaPageTemplate noDataConfig={noDataConfig} solutionNav={solutionNavBar} />;
 };
 
 export const PureComponent = (params: Params) => {
   return (
-    <KibanaPageTemplate {...params} pageHeader={params.pageHeader ? header : undefined}>
+    <KibanaPageTemplate
+      {...params}
+      pageHeader={params.pageHeader ? header : undefined}
+      solutionNav={params.solutionNav ? solutionNavBar : undefined}
+    >
       {content}
     </KibanaPageTemplate>
   );
@@ -124,6 +124,10 @@ PureComponent.argTypes = {
     control: 'boolean',
     defaultValue: true,
   },
+  solutionNav: {
+    control: 'boolean',
+    defaultValue: true,
+  },
 };
 
 PureComponent.parameters = {
@@ -135,9 +139,5 @@ WithNoDataConfig.parameters = {
 };
 
 WithNoDataConfigAndSolutionNav.parameters = {
-  layout: 'fullscreen',
-};
-
-WithSolutionNav.parameters = {
   layout: 'fullscreen',
 };
