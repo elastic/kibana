@@ -269,6 +269,31 @@ export interface CreatePercolatorQueriesOptions {
   // reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
+export interface GetThreatListOptions {
+  buildRuleMessage: BuildRuleMessage;
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  index: string[];
+  language: ThreatLanguageOrUndefined;
+  logger: Logger;
+  perPage?: number;
+  query: string;
+  searchAfter: estypes.SortResults | undefined;
+  threatFilters: unknown[];
+  threatListConfig: ThreatListConfig;
+  pitId: OpenPointInTimeResponse['id'];
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+}
+
+export interface ThreatListCountOptions {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  index: string[];
+  language: ThreatLanguageOrUndefined;
+  query: string;
+  threatFilters: unknown[];
+}
+
 export interface FetchItemsOptions<T> {
   esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
@@ -379,3 +404,9 @@ export type GetDocumentListInterface = (params: {
 export type CreateSignalInterface = (
   params: EventItem[] | IndicatorHit[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
+
+/**
+ * This is an ECS document being returned, but the user could return or use non-ecs based
+ * documents potentially.
+ */
+export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;

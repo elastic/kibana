@@ -16,7 +16,7 @@ import { filterEventsAgainstList } from '../../../signals/filters/filter_events_
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../../alerting/server';
 import { BuildRuleMessage } from '../../../signals/rule_messages';
 import { ListClient } from '../../../../../../../lists/server';
@@ -37,7 +37,7 @@ export interface FindPercolateEnrichOptions {
   query: string;
   ruleId: string;
   ruleVersion: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   spaceId: string;
   timestampOverride?: string;
   tuple: RuleRangeTuple;
