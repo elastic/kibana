@@ -58,9 +58,9 @@ trap 'docker logout docker.elastic.co' EXIT
 docker pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
-VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
-VAULT_ADDR="https://secrets.elastic.co:8200"
+export VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
+export VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
+export VAULT_ADDR="https://secrets.elastic.co:8200"
 QUALIFIER=""
 BASE_VERSION="$(jq -r '.version' package.json)"
 docker run --rm \
