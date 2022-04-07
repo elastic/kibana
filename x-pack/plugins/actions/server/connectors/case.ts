@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Type } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
 import * as i18n from './translations';
@@ -78,6 +78,22 @@ export abstract class CaseConnector implements CaseConnectorInterface {
   ) {
     this.axiosInstance = axios.create({
       auth,
+    });
+
+    this.registerSubAction({
+      name: 'pushToService',
+      method: 'pushToService',
+      schema: schema.object({
+        externalId: schema.nullable(schema.string()),
+        comments: schema.nullable(
+          schema.arrayOf(
+            schema.object({
+              comment: schema.string(),
+              commentId: schema.string(),
+            })
+          )
+        ),
+      }),
     });
   }
 
