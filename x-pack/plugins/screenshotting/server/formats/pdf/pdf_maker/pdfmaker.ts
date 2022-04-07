@@ -65,7 +65,7 @@ export class PdfMaker {
   constructor(
     private readonly layout: Layout,
     private readonly logo: string | undefined,
-    { dist }: PackageInfo, // FIXME: is this even needed?
+    { dist }: PackageInfo,
     private readonly logger: Logger
   ) {
     this.title = '';
