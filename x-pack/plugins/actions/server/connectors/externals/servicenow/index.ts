@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import { AxiosBasicCredentials, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { ExecutorSubActionPushParamsSchemaITSM } from '../../../builtin_action_types/servicenow/schema';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
@@ -18,8 +18,6 @@ import {
   ImportSetApiResponse,
   ImportSetApiResponseError,
   Incident,
-  PushToServiceApiHandlerArgs,
-  PushToServiceResponse,
   ServiceNowIncident,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
@@ -30,62 +28,9 @@ import {
   getPushedDate,
   prepareIncident,
 } from '../../../builtin_action_types/servicenow/utils';
-import { validate } from '../../../builtin_action_types/swimlane/validators';
-import { validateParams } from '../../../lib';
 import { CaseConnector } from '../../case';
-import { SubAction, Validate } from '../../decorator';
-
-const incidentSchema = schema.object({
-  result: schema.object({
-    sys_id: schema.string(),
-    number: schema.string(),
-    sys_created_on: schema.string(),
-    sys_updated_on: schema.string(),
-  }),
-});
-
-const applicationInformationSchema = schema.object({
-  result: schema.object({
-    name: schema.string(),
-    scope: schema.string(),
-    version: schema.string(),
-  }),
-});
-
-const importSetTableSuccessResponse = schema.object({
-  import_set: schema.string(),
-  staging_table: schema.string(),
-  result: schema.arrayOf(
-    schema.object({
-      display_name: schema.string(),
-      display_value: schema.string(),
-      record_link: schema.string(),
-      status: schema.string(),
-      sys_id: schema.string(),
-      table: schema.string(),
-      transform_map: schema.string(),
-    })
-  ),
-});
-
-const importSetTableErrorResponse = schema.object({
-  import_set: schema.string(),
-  staging_table: schema.string(),
-  result: schema.arrayOf(
-    schema.object({
-      error_message: schema.string(),
-      status_message: schema.string(),
-      status: schema.string(),
-      transform_map: schema.string(),
-    })
-  ),
-});
-
-const importSetTableResponse = schema.oneOf([
-  importSetTableSuccessResponse,
-  importSetTableErrorResponse,
-  incidentSchema,
-]);
+import { Validate } from '../../decorator';
+import { importSetTableResponse, applicationInformationSchema } from './schema';
 
 export class ServiceNow extends CaseConnector<ServiceNowIncident> {
   private urls: {
@@ -144,57 +89,6 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
 
     this.useTableApi = !internalConfig.useImportAPI || usesTableApiConfigValue;
     this.appScope = internalConfig.appScope;
-  }
-
-  // @SubAction('pushToService', , )
-  async pushToServiceHandler({
-    externalService,
-    params,
-    secrets,
-    commentFieldKey,
-  }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> {
-    const {
-      comments,
-      incident: { externalId, ...rest },
-    } = params;
-    let res: PushToServiceResponse;
-    // const { externalId, ...rest } = params.incident;
-    const incident: Incident = rest;
-
-    if (externalId != null) {
-      res = await this.updateIncident({
-        incidentId: externalId,
-        incident,
-      });
-    } else {
-      res = await this.createIncident({
-        ...incident,
-        caller_id: secrets.username,
-        opened_by: secrets.username,
-      });
-    }
-
-    if (comments && Array.isArray(comments) && comments.length > 0) {
-      res.comments = [];
-
-      for (const currentComment of comments) {
-        await this.updateIncident({
-          incidentId: res.id,
-          incident: {
-            ...incident,
-            [commentFieldKey]: currentComment.comment,
-          },
-        });
-        res.comments = [
-          ...(res.comments ?? []),
-          {
-            commentId: currentComment.commentId,
-            pushedDate: res.pushedDate,
-          },
-        ];
-      }
-    }
-    return res;
   }
 
   @Validate(schema.string(), importSetTableResponse)

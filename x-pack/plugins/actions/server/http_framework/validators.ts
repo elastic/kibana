@@ -13,16 +13,15 @@ import { HTTPConnectorType } from './types';
 const buildSubActionParams = <Config, Secrets, Params>(
   connector: HTTPConnectorType<Config, Secrets>
 ) => {
-  const getMethods = Object.getOwnPropertyNames(connector.Service);
-  const subActions = getMethods.map((method) => {
+  const subActionsSchema = connector.subActions.map(({ name }) => {
     return schema.object({
-      subAction: schema.literal(method),
+      subAction: schema.literal(name),
       // We should somehow validate the params inside the Service
       subActionParams: schema.object({}, { unknowns: 'allow' }),
     });
   });
 
-  return subActions;
+  return subActionsSchema;
 };
 
 export const buildValidators = <Config, Secrets, Params>({

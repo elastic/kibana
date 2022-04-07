@@ -316,6 +316,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         config: schema.object({ apiUrl: schema.string() }),
         secrets: schema.object({ username: schema.string(), password: schema.string() }),
       },
+      subActions: [{ name: 'getIncident', method: 'getIncident' }],
       Service: ServiceNowItsm,
     });
 

@@ -31,8 +31,13 @@ export const buildExecutor = <Config, Secrets>({
       secrets,
     });
 
-    const data = service[subAction](subActionParams);
+    const method = connector.subActions.find(({ name }) => name === subAction)?.method;
 
+    if (!method || !service[method]) {
+      throw new Error('Unsupported subAction');
+    }
+
+    const data = service[method](subActionParams);
     return { status: 'ok', data, actionId };
   };
 };

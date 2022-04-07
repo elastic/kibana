@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
 import * as i18n from './translations';
@@ -21,11 +20,6 @@ export interface CaseConnectorInterface<T extends unknown> {
   // getIncident: (incidentId: string) => Promise<any>;
 }
 
-interface SubAction {
-  name: string;
-  method: string;
-}
-
 const isObject = (v: unknown): v is Record<string, unknown> => {
   return typeof v === 'object' && v !== null;
 };
@@ -33,7 +27,6 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
 export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
   private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http', 'https'];
-  public subActions: SubAction[] | undefined;
 
   constructor(
     public configurationUtilities: ActionsConfigurationUtilities,
@@ -90,6 +83,51 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     } catch (allowedListError) {
       return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
     }
+  }
+
+  public async pushToServiceHandler(params) {
+    const {
+      comments,
+      incident: { externalId, ...rest },
+    } = params;
+    let res: PushToServiceResponse;
+    // const { externalId, ...rest } = params.incident;
+    const incident: Incident = rest;
+
+    if (externalId != null) {
+      res = await this.updateIncident({
+        incidentId: externalId,
+        incident,
+      });
+    } else {
+      res = await this.createIncident({
+        ...incident,
+        caller_id: this.secrets.username,
+        opened_by: this.secrets.username,
+      });
+    }
+
+    if (comments && Array.isArray(comments) && comments.length > 0) {
+      res.comments = [];
+
+      for (const currentComment of comments) {
+        await this.updateIncident({
+          incidentId: res.id,
+          incident: {
+            ...incident,
+            [commentFieldKey]: currentComment.comment,
+          },
+        });
+        res.comments = [
+          ...(res.comments ?? []),
+          {
+            commentId: currentComment.commentId,
+            pushedDate: res.pushedDate,
+          },
+        ];
+      }
+    }
+    return res;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

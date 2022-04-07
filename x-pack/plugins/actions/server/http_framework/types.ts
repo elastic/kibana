@@ -14,6 +14,11 @@ import { CaseConnector } from '../connectors/case';
 // TODO: Fix types
 export type IService = new (...args: any[]) => CaseConnector<unknown>;
 
+interface SubAction {
+  name: string;
+  method: string;
+}
+
 export interface HTTPConnectorType<
   Config extends Record<string, any> = Record<string, any>,
   Secrets extends Record<string, any> = Record<string, any>
@@ -25,5 +30,6 @@ export interface HTTPConnectorType<
     config: Type<Config>;
     secrets: Type<Secrets>;
   };
+  subActions: SubAction[];
   Service: IService;
 }
