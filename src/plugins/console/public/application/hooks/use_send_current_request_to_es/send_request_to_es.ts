@@ -68,7 +68,6 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
       const startTime = Date.now();
 
-
       try {
         const { response, body } = await es.send({
           http: args.http,
