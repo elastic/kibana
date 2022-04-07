@@ -38,7 +38,7 @@ function getMockUsageCollection() {
 }
 
 const getLicenseMock =
-  (licenseType = 'platinum') =>
+  (licenseType = 'gold') =>
   () => {
     return Promise.resolve({
       isAvailable: () => true,
@@ -47,7 +47,7 @@ const getLicenseMock =
   };
 
 function getPluginsMock(
-  { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
+  { license, usageCollection = getMockUsageCollection() } = { license: 'gold' }
 ) {
   return {
     licensing: { license$: Rx.of(getLicenseMock(license)) },
@@ -128,14 +128,14 @@ describe('license checks', () => {
     });
   });
 
-  describe('with platinum license', () => {
+  describe('with gold license', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'platinum' });
+      const plugins = getPluginsMock({ license: 'gold' });
       const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
-        getLicenseMock('platinum'),
+        getLicenseMock('gold'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
@@ -377,7 +377,7 @@ describe('Ready for collection observable', () => {
     const makeCollectorSpy = sinon.spy();
     usageCollection.makeUsageCollector = makeCollectorSpy;
 
-    const plugins = getPluginsMock({ usageCollection, license: 'platinum' });
+    const plugins = getPluginsMock({ usageCollection, license: 'gold' });
     registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;
