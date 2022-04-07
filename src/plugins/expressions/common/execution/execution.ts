@@ -489,10 +489,6 @@ export class Execution<
           continue;
         }
 
-        if (!aliases?.length && name === '_') {
-          throw new Error(`${fnDef.name} requires an argument`);
-        }
-
         // use an alias if _ is the missing arg
         const errorArg = name === '_' ? aliases[0] : name;
         throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
