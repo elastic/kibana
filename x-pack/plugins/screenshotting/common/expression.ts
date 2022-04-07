@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export type { PdfScreenshotOptions, PdfScreenshotResult } from './pdf';
-export { toPdf } from './pdf';
-export type { PngScreenshotOptions, PngScreenshotResult } from './png';
-export { toPng } from './png';
+export const SCREENSHOTTING_APP_ID = 'screenshotting';
+export const SCREENSHOTTING_EXPRESSION = 'expression';
+export const SCREENSHOTTING_EXPRESSION_INPUT = 'input';

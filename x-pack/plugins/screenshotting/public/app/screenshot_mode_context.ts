@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export type { PdfScreenshotOptions, PdfScreenshotResult } from './pdf';
-export { toPdf } from './pdf';
-export type { PngScreenshotOptions, PngScreenshotResult } from './png';
-export { toPng } from './png';
+import { createContext } from 'react';
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+
+export const ScreenshotModeContext = createContext<ScreenshotModePluginSetup | undefined>(
+  undefined
+);

@@ -9,10 +9,10 @@ import type { Logger } from 'src/core/server';
 import { PdfMaker } from './pdfmaker';
 import type { Layout } from '../../../layouts';
 import { getTracker } from './tracker';
-import { ScreenshotResult } from '../../../screenshots';
+import type { CaptureResult } from '../../../screenshots';
 
 interface PngsToPdfArgs {
-  results: ScreenshotResult['results'];
+  results: CaptureResult['results'];
   layout: Layout;
   logger: Logger;
   logo?: string;
@@ -25,7 +25,7 @@ export async function pngsToPdf({
   logo,
   title,
   logger,
-}: PngsToPdfArgs): Promise<{ buffer: Buffer; pageCount: number }> {
+}: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
   const pdfMaker = new PdfMaker(layout, logo, logger);
   const tracker = getTracker();
   if (title) {
@@ -57,5 +57,5 @@ export async function pngsToPdf({
     tracker.end();
   }
 
-  return { buffer: Buffer.from(buffer.buffer), pageCount: pdfMaker.getPageCount() };
+  return { buffer: Buffer.from(buffer.buffer), pages: pdfMaker.getPageCount() };
 }

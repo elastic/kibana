@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type { PdfScreenshotOptions, PdfScreenshotResult } from './pdf';
-export { toPdf } from './pdf';
-export type { PngScreenshotOptions, PngScreenshotResult } from './png';
-export { toPng } from './png';
+import { ScreenshottingPlugin } from './plugin';
+
+export function plugin() {
+  return new ScreenshottingPlugin();
+}
+
+export type { LayoutParams } from '../common';
+export { LayoutTypes } from '../common';
