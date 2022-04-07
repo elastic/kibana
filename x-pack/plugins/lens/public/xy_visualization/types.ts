@@ -28,6 +28,7 @@ import type {
   FittingFunction,
   LabelsOrientationConfig,
   EndValue,
+  ExtendedYConfig,
   YConfig,
   YScaleType,
   XScaleType,
@@ -54,7 +55,7 @@ export interface XYDataLayerConfig {
 export interface XYReferenceLineLayerConfig {
   layerId: string;
   accessors: string[];
-  yConfig?: YConfig[];
+  yConfig?: ExtendedYConfig[];
   palette?: PaletteOutput;
   layerType: 'referenceLine';
 }

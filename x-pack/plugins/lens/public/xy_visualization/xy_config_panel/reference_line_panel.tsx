@@ -14,7 +14,7 @@ import { State, XYState, XYReferenceLineLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import {
   FillStyle,
-  YConfig,
+  ExtendedYConfig,
 } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { ColorPicker } from './color_picker';
@@ -53,7 +53,7 @@ export const ReferenceLinePanel = (
   );
 
   const setConfig = useCallback(
-    (yConfig: Partial<YConfig> | undefined) => {
+    (yConfig: Partial<ExtendedYConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
@@ -103,7 +103,7 @@ export const ReferenceLinePanel = (
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
-  axisMode: YConfig['axisMode'];
+  axisMode: ExtendedYConfig['axisMode'];
 }
 
 function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
@@ -149,8 +149,8 @@ export const FillSetting = ({
   setConfig,
   isHorizontal,
 }: {
-  currentConfig?: YConfig;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: ExtendedYConfig;
+  setConfig: (yConfig: Partial<ExtendedYConfig> | undefined) => void;
   isHorizontal: boolean;
 }) => {
   return (

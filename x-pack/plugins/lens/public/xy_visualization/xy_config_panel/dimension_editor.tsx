@@ -14,7 +14,7 @@ import { State, XYState, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import {
   YAxisMode,
-  YConfig,
+  ExtendedYConfig,
 } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
@@ -60,7 +60,7 @@ export function DimensionEditor(
   const axisMode = localYConfig?.axisMode || 'auto';
 
   const setConfig = useCallback(
-    (yConfig: Partial<YConfig> | undefined) => {
+    (yConfig: Partial<ExtendedYConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }

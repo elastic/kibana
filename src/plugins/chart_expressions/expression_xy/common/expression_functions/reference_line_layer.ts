@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { LayerTypes, REFERENCE_LINE_LAYER, Y_CONFIG } from '../constants';
+import { EXTENDED_Y_CONFIG, LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
 import { ReferenceLineLayerArgs, ReferenceLineLayerConfigResult } from '../types';
 
 export const referenceLineLayerFunction: ExpressionFunctionDefinition<
@@ -33,7 +33,7 @@ export const referenceLineLayerFunction: ExpressionFunctionDefinition<
       multi: true,
     },
     yConfig: {
-      types: [Y_CONFIG],
+      types: [EXTENDED_Y_CONFIG],
       help: i18n.translate('expressionXY.referenceLineLayer.yConfig.help', {
         defaultMessage: 'Additional configuration for y axes',
       }),

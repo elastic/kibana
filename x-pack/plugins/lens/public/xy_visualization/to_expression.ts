@@ -20,7 +20,10 @@ import {
 import type { ValidXYDataLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { YConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type {
+  ExtendedYConfig,
+  YConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -408,7 +411,7 @@ const referenceLineLayerToExpression = (
         arguments: {
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
-                yConfigToExpression(yConfig, defaultReferenceLineColor)
+                extendedYConfigToExpression(yConfig, defaultReferenceLineColor)
               )
             : [],
           accessors: layer.accessors,
@@ -533,6 +536,23 @@ const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
       {
         type: 'function',
         function: 'yConfig',
+        arguments: {
+          forAccessor: [yConfig.forAccessor],
+          axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+          color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
+        },
+      },
+    ],
+  };
+};
+
+const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: string): Ast => {
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'extendedYConfig',
         arguments: {
           forAccessor: [yConfig.forAccessor],
           axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],

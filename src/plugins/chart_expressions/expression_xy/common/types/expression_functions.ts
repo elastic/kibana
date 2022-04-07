@@ -39,6 +39,7 @@ import {
   ANNOTATION_LAYER,
   EndValues,
   EXTENDED_ANNOTATION_LAYER,
+  EXTENDED_Y_CONFIG,
 } from '../constants';
 
 export type EndValue = $Values<typeof EndValues>;
@@ -72,16 +73,19 @@ export interface AxisConfig {
   hide?: boolean;
 }
 
-export interface YConfig {
-  forAccessor: string;
-  axisMode?: YAxisMode;
-  color?: string;
+export interface ExtendedYConfig extends YConfig {
   icon?: string;
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+}
+
+export interface YConfig {
+  forAccessor: string;
+  axisMode?: YAxisMode;
+  color?: string;
 }
 
 export interface DataLayerArgs {
@@ -270,13 +274,13 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
 export interface ReferenceLineLayerArgs {
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
 }
 
 export interface ExtendedReferenceLineLayerArgs {
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
   table?: Datatable;
 }
 
@@ -328,6 +332,7 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
+export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
   type: typeof AXIS_TITLES_VISIBILITY_CONFIG;

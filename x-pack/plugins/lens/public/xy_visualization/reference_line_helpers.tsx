@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { layerTypes } from '../../common';
 import type {
   YAxisMode,
-  YConfig,
+  ExtendedYConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
@@ -37,7 +37,7 @@ export interface ReferenceLineBase {
  * * what groups are current defined in data layers
  * * what existing reference line are currently defined in reference layers
  */
-export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: ExtendedYConfig[] }>(
   referenceLayers: T[],
   state: XYState | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>,

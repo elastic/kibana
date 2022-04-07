@@ -9,7 +9,7 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import classnames from 'classnames';
-import type { IconPosition, YAxisMode, YConfig } from '../../common/types';
+import type { IconPosition, YAxisMode, ExtendedYConfig } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon } from './icon';
 import { annotationsIconSet } from './annotations_icon_set';
@@ -20,7 +20,7 @@ export const LINES_MARKER_SIZE = 20;
 
 export const getLinesCausedPaddings = (
   visualConfigs: Array<
-    Pick<YConfig, 'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'> | undefined
+    Pick<ExtendedYConfig, 'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'> | undefined
   >,
   axesMap: Record<'left' | 'right', unknown>
 ) => {
@@ -32,7 +32,7 @@ export const getLinesCausedPaddings = (
       return;
     }
     const { axisMode, icon, iconPosition, textVisibility } = config;
-    if (axisMode && (hasIcon(icon) || textVisibility)) {
+    if (axisMode && textVisibility) {
       const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
       paddings[placement] = Math.max(
         paddings[placement] || 0,
