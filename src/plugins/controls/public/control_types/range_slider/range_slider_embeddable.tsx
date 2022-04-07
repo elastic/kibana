@@ -315,6 +315,10 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.fetchMinMax();
   };
 
+  public resetSelections = () => {
+    this.updateInput({ value: ['', ''] });
+  };
+
   public destroy = () => {
     super.destroy();
     this.subscriptions.unsubscribe();

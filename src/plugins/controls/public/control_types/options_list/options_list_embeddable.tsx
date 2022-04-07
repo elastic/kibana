@@ -288,6 +288,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.subscriptions.unsubscribe();
   };
 
+  public resetSelections = () => {
+    this.updateInput({ selectedOptions: [] });
+  };
+
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);

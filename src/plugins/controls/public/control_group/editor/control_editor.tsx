@@ -218,7 +218,12 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => onSave(selectedType)}
+              onClick={() => {
+                if (!isCreate) {
+                  embeddable?.resetSelections();
+                }
+                onSave(selectedType);
+              }}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

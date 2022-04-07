@@ -294,6 +294,10 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     this.fetchAvailableTimerange();
   };
 
+  public resetSelections = () => {
+    this.updateInput({ value: [null, null] });
+  };
+
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
