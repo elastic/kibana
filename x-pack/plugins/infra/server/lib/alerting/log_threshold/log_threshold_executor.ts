@@ -175,9 +175,15 @@ export async function executeAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
-  timestamp: number
+  executionTimestamp: number
 ) {
-  const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings, timestamp);
+  const query = getESQuery(
+    ruleParams,
+    timestampField,
+    indexPattern,
+    runtimeMappings,
+    executionTimestamp
+  );
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
@@ -197,7 +203,7 @@ export async function executeRatioAlert(
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
-  timestamp: number
+  executionTimestamp: number
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
@@ -215,14 +221,14 @@ export async function executeRatioAlert(
     timestampField,
     indexPattern,
     runtimeMappings,
-    timestamp
+    executionTimestamp
   );
   const denominatorQuery = getESQuery(
     denominatorParams,
     timestampField,
     indexPattern,
     runtimeMappings,
-    timestamp
+    executionTimestamp
   );
 
   if (!numeratorQuery || !denominatorQuery) {
@@ -259,11 +265,23 @@ const getESQuery = (
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  timestamp: number
+  executionTimestamp: number
 ) => {
   return hasGroupBy(alertParams)
-    ? getGroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings, timestamp)
-    : getUngroupedESQuery(alertParams, timestampField, indexPattern, runtimeMappings, timestamp);
+    ? getGroupedESQuery(
+        alertParams,
+        timestampField,
+        indexPattern,
+        runtimeMappings,
+        executionTimestamp
+      )
+    : getUngroupedESQuery(
+        alertParams,
+        timestampField,
+        indexPattern,
+        runtimeMappings,
+        executionTimestamp
+      );
 };
 
 export const processUngroupedResults = (
@@ -465,13 +483,13 @@ export const processGroupByRatioResults = (
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
-  timestamp: number
+  executionTimestamp: number
 ) => {
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMs = intervalAsSeconds * 1000;
-  const to = timestamp;
+  const to = executionTimestamp;
   const from = to - intervalAsMs;
 
   const positiveComparators = getPositiveComparators();
@@ -525,7 +543,7 @@ export const getGroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  timestamp: number
+  executionTimestamp: number
 ): estypes.SearchRequest | undefined => {
   // IMPORTANT:
   // For the group by scenario we need to account for users utilizing "less than" configurations
@@ -547,7 +565,7 @@ export const getGroupedESQuery = (
   const { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
-    timestamp
+    executionTimestamp
   );
 
   if (isOptimizableGroupedThreshold(comparator, value)) {
@@ -632,12 +650,12 @@ export const getUngroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  timestamp: number
+  executionTimestamp: number
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
-    timestamp
+    executionTimestamp
   );
 
   const body: estypes.SearchRequest['body'] = {
