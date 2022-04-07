@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-
+import { CUSTOM_PALETTE } from '@kbn/coloring';
 import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
@@ -42,7 +42,6 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
 import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
