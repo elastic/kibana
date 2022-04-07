@@ -45,7 +45,7 @@ export async function send({
     asResponse,
     asSystemRequest,
   };
-  return await http.post<HttpResponse>(API_BASE_PATH, options);
+  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, options);
 }
 
 export function constructESUrl(baseUri: string, path: string) {
