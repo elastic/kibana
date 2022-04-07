@@ -6,7 +6,6 @@
 
 1. Add the file system path you want to use to elasticsearch.yml or as part of starting up ES. Note that this path should point to a directory that exists.
 
-
 ```
 path:
   repo: /tmp/es-backups
