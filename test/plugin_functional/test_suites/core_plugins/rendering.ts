@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '../../plugins/core_provider_plugin/types';
@@ -73,7 +74,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           allExposedConfigKeys.push(`${configPath}.${exposedConfigKey} (${type})`);
         }
       }
-      expect(allExposedConfigKeys.sort()).to.eql([
+      const expectedExposedConfigKeys = [
         // NOTE: each exposed config key has its schema type at the end in "(parentheses)".
         // The schema type comes from Joi; in particular, "(any)" can mean a string or a few other data types.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
@@ -163,10 +164,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.data_enhanced.search.sessions.trackingInterval (duration)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
-        'xpack.fleet.agents.elasticsearch.ca_sha256 (any)',
-        'xpack.fleet.agents.elasticsearch.hosts (array)',
         'xpack.fleet.agents.enabled (boolean)',
-        'xpack.fleet.agents.fleet_server.hosts (array)',
         'xpack.global_search.search_timeout (duration)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',
@@ -206,7 +204,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-      ]);
+      ];
+      // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
+      // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
+      // when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
+      const extraKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
+      expect(extraKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing MORE config keys than this test expects
+      const missingKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
+      expect(missingKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing FEWER config keys than this test expects
     });
 
     // FLAKY
