@@ -85,7 +85,11 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
       const performance = getService('performance');
       const logger = getService('log');
 
-      await performance.runUserJourney('flight_dashboard', getFlightDashboardSteps(config, logger));
+      await performance.runUserJourney(
+        'flight_dashboard',
+        getFlightDashboardSteps(config, logger),
+        false
+      );
     });
   });
 }

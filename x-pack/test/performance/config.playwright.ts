@@ -23,7 +23,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
   const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuid()}`;
   const executionId = uuid();
 
-  log.info(`👷 BUILD ID ${testBuildId}\nJOB ID ${testJobId}\nEXECUTION ID:${executionId}`);
+  log.info(` 👷‍♀️ BUILD ID ${testBuildId}\n 👷 JOB ID ${testJobId}\n 👷‍♂️ EXECUTION ID:${executionId}`);
 
   return {
     testFiles,

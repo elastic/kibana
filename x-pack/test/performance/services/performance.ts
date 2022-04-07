@@ -7,7 +7,6 @@
 
 /* eslint-disable no-console */
 
-import Url from 'url';
 import { inspect } from 'util';
 import apm, { Span, Transaction } from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
@@ -29,19 +28,14 @@ type StepFn = (ctx: StepCtx) => Promise<void>;
 export type Steps = Array<{ name: string; handler: StepFn }>;
 
 export class PerformanceTestingService extends FtrService {
-  private readonly config;
-  private readonly inputDelays;
+  private readonly auth = this.ctx.getService('auth');
 
   private browser: ChromiumBrowser | undefined;
-  private storageState: StorageState | undefined;
   private currentSpanStack: Array<Span | null> = [];
   private currentTransaction: Transaction | undefined | null = undefined;
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
-
-    this.config = ctx.getService('config');
-    this.inputDelays = ctx.getService('inputDelays');
   }
 
   private async withTransaction<T>(name: string, block: () => Promise<T>) {
@@ -96,48 +90,12 @@ export class PerformanceTestingService extends FtrService {
       ?.traceparent;
   }
 
-  private async getStorageState() {
-    if (this.storageState) {
-      return this.storageState;
-    }
-
-    await this.withSpan('initial login', undefined, async () => {
-      const kibanaUrl = Url.format({
-        protocol: this.config.get('servers.kibana.protocol'),
-        hostname: this.config.get('servers.kibana.hostname'),
-        port: this.config.get('servers.kibana.port'),
-      });
-
-      const browser = await this.getBrowserInstance();
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      await this.interceptBrowserRequests(page);
-      await page.goto(`${kibanaUrl}`);
-
-      const usernameLocator = page.locator('[data-test-subj=loginUsername]');
-      const passwordLocator = page.locator('[data-test-subj=loginPassword]');
-      const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
-
-      await usernameLocator?.type('elastic', { delay: this.inputDelays.TYPING });
-      await passwordLocator?.type('changeme', { delay: this.inputDelays.TYPING });
-      await submitButtonLocator?.click({ delay: this.inputDelays.MOUSE_CLICK });
-
-      await page.waitForSelector('#headerUserMenu');
-
-      this.storageState = await page.context().storageState();
-      await page.close();
-      await context.close();
-    });
-
-    return this.storageState;
-  }
-
   private async getBrowserInstance() {
     if (this.browser) {
       return this.browser;
     }
     return await this.withSpan('browser creation', 'setup', async () => {
-      const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
+      const headless = process.env.TEST_BROWSER_HEADLESS === '1' || process.env.CI === 'true';
       this.browser = await playwright.chromium.launch({ headless, timeout: 60000 });
       return this.browser;
     });
@@ -170,12 +128,15 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  public runUserJourney(journeyName: string, steps: Steps) {
+  public runUserJourney(journeyName: string, steps: Steps, isLoginJourney: boolean) {
     return this.withTransaction(`Journey ${journeyName}`, async () => {
       const browser = await this.getBrowserInstance();
-      const storageState = await this.getStorageState();
       const viewport = { width: 1600, height: 1200 };
-      const context = await browser.newContext({ viewport, storageState });
+      const context = await browser.newContext({ viewport });
+      if (!isLoginJourney) {
+        const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
+        await context.addCookies([cookie]);
+      }
 
       const page = await context.newPage();
       if (!process.env.NO_BROWSER_LOG) {
@@ -195,6 +156,12 @@ export class PerformanceTestingService extends FtrService {
       await client.detach();
       await page.close();
       await context.close();
+    }
+  }
+
+  public async shutdownBrowser() {
+    if (this.browser) {
+      await (await this.getBrowserInstance()).close();
     }
   }
 

@@ -67,7 +67,11 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
       const performance = getService('performance');
       const logger = getService('log');
 
-      await performance.runUserJourney('weblogs_dashboard', getWeblogDashboard(config, logger));
+      await performance.runUserJourney(
+        'weblogs_dashboard',
+        getWeblogDashboard(config, logger),
+        false
+      );
     });
   });
 }

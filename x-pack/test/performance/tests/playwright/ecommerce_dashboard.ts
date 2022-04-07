@@ -67,7 +67,11 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
       const performance = getService('performance');
       const logger = getService('log');
 
-      await performance.runUserJourney('ecommerce_dashboard', getEcommerceSteps(config, logger));
+      await performance.runUserJourney(
+        'ecommerce_dashboard',
+        getEcommerceSteps(config, logger),
+        false
+      );
     });
   });
 }

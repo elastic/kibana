@@ -87,7 +87,8 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
     it('promotion_tracking_dashboard', async () => {
       await performance.runUserJourney(
         'promotion_tracking_dashboard',
-        getPromotionTrackingDashboardSteps(config)
+        getPromotionTrackingDashboardSteps(config),
+        false
       );
     });
   });
