@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
-import { KibanaPageTemplateInner } from './page_template_inner';
+// imports from npm packages
 import React from 'react';
+import { shallow } from 'enzyme';
+
+// imports from elastic packages
 import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+
+// imports from immediate files
+import { KibanaPageTemplateInner } from './page_template_inner';
 
 describe('KibanaPageTemplateInner', () => {
   const pageHeader = {

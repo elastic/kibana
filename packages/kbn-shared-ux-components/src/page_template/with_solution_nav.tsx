@@ -63,15 +63,14 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
     } as EuiPageSideBarProps; // needed because for some reason 'none' is not recognized as a valid value for paddingSize
     return (
       <WrappedComponent
-        {...propagatedProps}
-        pageSideBar={pageSideBar}
-        pageSideBarProps={pageSideBarProps}
-        template={templateToUse}
+        {...{ ...propagatedProps, pageSideBar, pageSideBarProps, template: templateToUse }}
       >
         {children}
       </WrappedComponent>
     );
   };
+
   WithSolutionNav.displayName = `WithSolutionNavBar(${getDisplayName(WrappedComponent)})`;
+
   return WithSolutionNav;
 };

@@ -9,6 +9,7 @@
 import React, { FunctionComponent } from 'react';
 
 import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+
 import { withSolutionNav } from './with_solution_nav';
 import { KibanaPageTemplateProps } from './types';
 import { getClasses } from './util';
@@ -31,17 +32,20 @@ export const KibanaPageTemplateInner: FunctionComponent<Props> = ({
    */
   const emptyStateDefaultTemplate = 'centeredBody';
   let header = pageHeader;
+
   if (isEmptyState) {
     if (pageHeader && !children) {
       template = template ?? emptyStateDefaultTemplate;
       const { iconType, pageTitle, description, rightSideItems } = pageHeader;
+      const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
+      const body = description ? <p>{description}</p> : undefined;
       header = undefined;
       children = (
         <EuiEmptyPrompt
           iconType={iconType}
-          iconColor={''} // This is likely a solution or app logo, so keep it multi-color
-          title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
-          body={description ? <p>{description}</p> : undefined}
+          iconColor="" // This is likely a solution or app logo, so keep it multi-color
+          title={title}
+          body={body}
           actions={rightSideItems}
         />
       );
