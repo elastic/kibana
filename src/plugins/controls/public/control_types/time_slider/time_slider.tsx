@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -75,10 +75,13 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   const onChangeComplete = useCallback(
     (range: [number | null, number | null]) => {
       debouncedDispatchChange(range);
-      setSelectedValue(range);
     },
-    [setSelectedValue, debouncedDispatchChange]
+    [debouncedDispatchChange]
   );
+
+  useEffect(() => {
+    setSelectedValue(value ?? [null, null]);
+  }, [value]);
 
   return (
     <Component
