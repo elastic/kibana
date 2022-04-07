@@ -33,6 +33,20 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       await testSubjects.existOrFail('case-view-title', {
         timeout: config.get('timeouts.waitFor'),
       });
+      await testSubjects.existOrFail('euiToastHeader', {
+        timeout: config.get('timeouts.waitFor'),
+      });
+    },
+
+    async deleteFirstListedCase() {
+      await testSubjects.existOrFail('action-delete', {
+        timeout: config.get('timeouts.waitFor'),
+      });
+      await testSubjects.click('action-delete');
+      await testSubjects.existOrFail('confirmModalConfirmButton', {
+        timeout: config.get('timeouts.waitFor'),
+      });
+      await testSubjects.click('confirmModalConfirmButton');
     },
 
     async bulkDeleteAllCases() {
@@ -72,6 +86,7 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
         this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeDeleted() {

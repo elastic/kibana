@@ -64,9 +64,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes a case correctly from the list', async () => {
-        await testSubjects.click('action-delete');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.existOrFail('euiToastHeader');
+        cases.casesTable.deleteFirstListedCase();
         await cases.casesTable.waitForTableToFinishLoading();
 
         await retry.tryForTime(2000, async () => {
