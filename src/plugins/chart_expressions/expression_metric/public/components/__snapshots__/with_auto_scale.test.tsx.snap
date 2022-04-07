@@ -1,30 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AutoScale withAutoScale renders 1`] = `
+.emotion-0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
 <Component>
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "1l2vzaf",
-        "next": undefined,
-        "styles": "display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <div
-      style={
-        Object {
-          "transform": "scale(0)",
-        }
-      }
+      className="emotion-0"
     >
-      <Component>
-        <h1>
-          Hoi!
-        </h1>
-      </Component>
+      <div
+        style={
+          Object {
+            "transform": "scale(0)",
+          }
+        }
+      >
+        <Component>
+          <h1>
+            Hoi!
+          </h1>
+        </Component>
+      </div>
     </div>
   </div>
 </Component>

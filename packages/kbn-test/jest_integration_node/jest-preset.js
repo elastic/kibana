@@ -43,4 +43,9 @@ module.exports = {
   testEnvironment: 'node',
   snapshotSerializers: [],
   setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js'],
+
+  transform: {
+    ...preset.transform,
+    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform_node.js',
+  },
 };

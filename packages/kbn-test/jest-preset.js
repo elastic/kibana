@@ -105,7 +105,8 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform.js',
+    '^.+\\.(js|tsx?)$':
+      '<rootDir>/node_modules/@kbn/test/target_node/jest/babel_transform_browser.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },

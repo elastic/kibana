@@ -1,6 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ExitFullScreenButton /> is rendered 1`] = `
+.emotion-0 {
+  bottom: 8px;
+  left: 8px;
+  position: fixed;
+  z-index: 5;
+}
+
+.emotion-1 {
+  padding: 4px 8px;
+  background: #000;
+  border-radius: 4px;
+  height: 32px;
+  color: #ffffff;
+  outline-color: #FFF;
+  bottom: 8px;
+  left: 8px;
+  position: fixed;
+  z-index: 5;
+}
+
 <SharedUxServicesProvider
   application={
     Object {
@@ -53,97 +73,95 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
     onExit={[MockFunction]}
   >
     <ExitFullScreenButton
-      css={
-        Object {
-          "map": undefined,
-          "name": "knjqgf",
-          "next": undefined,
-          "styles": "
-    bottom: 8px;
-    left: 8px;
-    position: fixed;
-    z-index: 5;
-  ",
-          "toString": [Function],
-        }
-      }
+      css="unknown styles"
       onClick={[Function]}
     >
-      <div>
-        <EuiScreenReaderOnly>
-          <p
-            aria-live="polite"
-            className="euiScreenReaderOnly"
-          >
-            In full screen mode, press ESC to exit.
-          </p>
-        </EuiScreenReaderOnly>
-        <button
-          className="exitFullScreenButton"
-          data-test-subj="exitFullScreenModeButton"
-          onClick={[Function]}
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            component="span"
-            gutterSize="s"
-            responsive={false}
-          >
-            <span
-              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+      <ExitFullScreenButton
+        className="emotion-0"
+        onClick={[Function]}
+      >
+        <div>
+          <EuiScreenReaderOnly>
+            <p
+              aria-live="polite"
+              className="euiScreenReaderOnly"
             >
-              <EuiFlexItem
+              In full screen mode, press ESC to exit.
+            </p>
+          </EuiScreenReaderOnly>
+          <button
+            css="unknown styles"
+            data-test-subj="exitFullScreenModeButton"
+            onClick={[Function]}
+          >
+            <button
+              className="exitFullScreenButton emotion-1"
+              data-test-subj="exitFullScreenModeButton"
+              onClick={[Function]}
+            >
+              <EuiFlexGroup
+                alignItems="center"
                 component="span"
-                grow={false}
+                gutterSize="s"
+                responsive={false}
               >
                 <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                 >
-                  <EuiIcon
-                    size="m"
-                    type="logoElastic"
+                  <EuiFlexItem
+                    component="span"
+                    grow={false}
                   >
                     <span
-                      data-euiicon-type="logoElastic"
-                      size="m"
-                    />
-                  </EuiIcon>
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="span"
-                data-test-subj="exitFullScreenModeText"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                  data-test-subj="exitFullScreenModeText"
-                >
-                  Exit full screen
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem
-                component="span"
-                grow={false}
-              >
-                <span
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <EuiIcon
-                    size="s"
-                    type="fullScreenExit"
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <EuiIcon
+                        size="m"
+                        type="logoElastic"
+                      >
+                        <span
+                          data-euiicon-type="logoElastic"
+                          size="m"
+                        />
+                      </EuiIcon>
+                    </span>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    component="span"
+                    data-test-subj="exitFullScreenModeText"
+                    grow={false}
                   >
                     <span
-                      data-euiicon-type="fullScreenExit"
-                      size="s"
-                    />
-                  </EuiIcon>
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                      data-test-subj="exitFullScreenModeText"
+                    >
+                      Exit full screen
+                    </span>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    component="span"
+                    grow={false}
+                  >
+                    <span
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <EuiIcon
+                        size="s"
+                        type="fullScreenExit"
+                      >
+                        <span
+                          data-euiicon-type="fullScreenExit"
+                          size="s"
+                        />
+                      </EuiIcon>
+                    </span>
+                  </EuiFlexItem>
                 </span>
-              </EuiFlexItem>
-            </span>
-          </EuiFlexGroup>
-        </button>
-      </div>
+              </EuiFlexGroup>
+            </button>
+          </button>
+        </div>
+      </ExitFullScreenButton>
     </ExitFullScreenButton>
   </ExitFullScreenButton>
 </SharedUxServicesProvider>

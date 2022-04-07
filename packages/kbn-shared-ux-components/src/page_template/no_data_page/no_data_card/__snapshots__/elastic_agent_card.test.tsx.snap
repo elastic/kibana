@@ -171,12 +171,7 @@ exports[`ElasticAgentCard renders 1`] = `
             title="Add Elastic Agent"
           >
             <EuiCard
-              css={
-                Object {
-                  "marginInline": "auto",
-                  "maxWidth": 400,
-                }
-              }
+              css="unknown styles"
               description="Use Elastic Agent for a simple, unified way to collect data from your machines."
               footer={
                 <EuiButton
@@ -190,12 +185,20 @@ exports[`ElasticAgentCard renders 1`] = `
               paddingSize="l"
               title="Add Elastic Agent"
             >
-              <EuiPanel
-                css="unknown styles"
-                element="div"
-                hasShadow={true}
-                onClick={[Function]}
+              <EuiCard
+                className="emotion-0"
+                description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+                footer={
+                  <EuiButton
+                    fill={true}
+                  >
+                    Add Elastic Agent
+                  </EuiButton>
+                }
+                href="/app/integrations/browse"
+                image="test-file-stub"
                 paddingSize="l"
+                title="Add Elastic Agent"
               >
                 <EuiPanel
                   className="euiCard euiCard--centerAligned euiCard--isClickable emotion-0"
@@ -306,7 +309,7 @@ exports[`ElasticAgentCard renders 1`] = `
                     </div>
                   </div>
                 </EuiPanel>
-              </EuiPanel>
+              </EuiCard>
             </EuiCard>
           </NoDataCard>
         </div>

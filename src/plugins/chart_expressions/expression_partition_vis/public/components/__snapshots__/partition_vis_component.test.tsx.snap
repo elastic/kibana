@@ -2,40 +2,11 @@
 
 exports[`PartitionVisComponent should render correct structure for donut 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -398,40 +369,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
 
 exports[`PartitionVisComponent should render correct structure for mosaic 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -825,40 +767,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
 
 exports[`PartitionVisComponent should render correct structure for pie 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -1205,40 +1118,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
 
 exports[`PartitionVisComponent should render correct structure for treemap 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -1616,40 +1500,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
 
 exports[`PartitionVisComponent should render correct structure for waffle 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
