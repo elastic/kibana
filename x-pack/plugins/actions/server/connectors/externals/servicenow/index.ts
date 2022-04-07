@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { AxiosResponse } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
@@ -106,6 +105,7 @@ export class ServiceNow extends CaseConnector {
         method: 'get',
         responseSchema: incidentSchema,
       });
+
       return {
         title: res.data.result.number,
         id: res.data.result.sys_id,
@@ -208,16 +208,6 @@ export class ServiceNow extends CaseConnector {
       return { ...res.data.result };
     } catch (error) {
       throw createServiceError(error, 'Unable to get application version');
-    }
-  }
-
-  private checkInstance(res: AxiosResponse) {
-    if (res.status >= 200 && res.status < 400 && res.data.result == null) {
-      throw new Error(
-        `There is an issue with your Service Now Instance. Please check ${
-          res.request?.connection?.servername ?? ''
-        }.`
-      );
     }
   }
 
