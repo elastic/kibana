@@ -96,6 +96,7 @@ export const ProcessTree = ({
     alerts,
     searchQuery,
     updatedAlertsStatus,
+    jumpToEntityId,
   });
 
   const eventsRemaining = useMemo(() => {
