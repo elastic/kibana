@@ -12,7 +12,6 @@ import {
   render as reactTestLibRender,
   MatcherFunction,
   RenderOptions,
-  Nullish,
 } from '@testing-library/react';
 import { Router, Route } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -289,7 +288,7 @@ const forNearestTag =
   (tag: string) =>
   (getByText: (f: MatcherFunction) => HTMLElement | null) =>
   (text: string): HTMLElement | null =>
-    getByText((_content: string, node: Nullish<Element>) => {
+    getByText((_content: string, node: Element | null) => {
       if (!node) return false;
       const noOtherButtonHasText = Array.from(node.children).every(
         (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== tag)
@@ -345,7 +344,7 @@ const finderWithClassWrapper =
     customAttribute?: keyof Element | keyof HTMLElement
   ) =>
   (text: string): HTMLElement | null =>
-    getterFn((_content: string, node: Nullish<Element>) => {
+    getterFn((_content: string, node: Element | null) => {
       if (!node) return false;
       // There are actually properties that are not in Element but which
       // appear on the `node`, so we must cast the customAttribute as a keyof Element

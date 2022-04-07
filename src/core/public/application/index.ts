@@ -28,6 +28,7 @@ export type {
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
   PublicAppInfo,
   PublicAppDeepLinkInfo,
   // Internal types

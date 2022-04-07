@@ -26,7 +26,7 @@ import {
   AdministrationRouteSpyState,
   UsersRouteSpyState,
 } from '../../../utils/route/types';
-import { getAppOverviewUrl } from '../../link_to';
+import { getAppLandingUrl } from '../../link_to/redirect_to_landing';
 import { timelineActions } from '../../../../../public/timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TabNavigationProps } from '../tab_navigation/types';
@@ -91,10 +91,11 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.overview });
+  const landingPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.landing });
+
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
-    href: getAppOverviewUrl(overviewPath),
+    href: getAppLandingUrl(landingPath),
   };
   if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };

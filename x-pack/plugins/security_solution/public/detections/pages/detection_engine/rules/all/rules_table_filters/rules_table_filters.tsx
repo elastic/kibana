@@ -16,11 +16,21 @@ import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from '../../translations';
+import { SEARCH_CAPABILITIES_TOUR_ANCHOR } from '../feature_tour/rules_feature_tour';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
+`;
+
+const SearchBarWrapper = styled(EuiFlexItem)`
+  & .euiPopover,
+  & .euiPopover__anchor {
+    // This is needed to "cancel" styles passed down from EuiTourStep that
+    // interfere with EuiFieldSearch and don't allow it to take the full width
+    display: block;
+  }
 `;
 
 interface RulesTableFiltersProps {
@@ -69,15 +79,16 @@ const RulesTableFiltersComponent = ({
 
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow>
+      <SearchBarWrapper grow>
         <EuiFieldSearch
+          id={SEARCH_CAPABILITIES_TOUR_ANCHOR}
           aria-label={i18n.SEARCH_RULES}
           fullWidth
           incremental={false}
           placeholder={i18n.SEARCH_PLACEHOLDER}
           onSearch={handleOnSearch}
         />
-      </EuiFlexItem>
+      </SearchBarWrapper>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <TagsFilterPopover

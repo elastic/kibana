@@ -8,6 +8,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 
@@ -74,10 +75,10 @@ export const ProcessTreeAlert = ({
       />
       <EuiIcon type="alert" css={styles.alertRowItem} />
       <EuiText size="s" css={styles.alertRuleName}>
-        {name}
+        {dataOrDash(name)}
       </EuiText>
       <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
-        {status}
+        {dataOrDash(status)}
       </EuiBadge>
     </EuiText>
   );

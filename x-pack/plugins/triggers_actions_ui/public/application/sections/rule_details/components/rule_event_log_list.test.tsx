@@ -14,6 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList } from './rule_event_log_list';
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { Rule } from '../../../../types';
 
@@ -500,5 +501,44 @@ describe('rule_event_log_list', () => {
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
     ).toEqual([...RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
+  });
+
+  it('does not show the refine search prompt normally', async () => {
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RefineSearchPrompt).text()).toBeFalsy();
+  });
+
+  it('shows the refine search prompt when our queries return too much data', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 1000,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
+      'These are the first 1000 matching your search, refine your search to see others. Back to top.'
+    );
   });
 });

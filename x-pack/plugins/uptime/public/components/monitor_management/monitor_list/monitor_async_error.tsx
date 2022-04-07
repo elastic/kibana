@@ -36,11 +36,15 @@ export const MonitorAsyncError = () => {
           />
         </p>
         <ul>
-          {Object.values(syncErrors).map((e) => {
+          {Object.values(syncErrors ?? {}).map((e) => {
             return (
-              <li key={e.locationId}>{`${
-                locations.find((location) => location.id === e.locationId)?.label
-              } - ${STATUS_LABEL}: ${e.error.status}; ${REASON_LABEL}: ${e.error.reason}.`}</li>
+              <li key={e.locationId}>
+                {`${
+                  locations.find((location) => location.id === e.locationId)?.label
+                } - ${STATUS_LABEL}: ${e.error?.status ?? NOT_AVAILABLE_LABEL}; ${REASON_LABEL}: ${
+                  e.error?.reason ?? NOT_AVAILABLE_LABEL
+                }`}
+              </li>
             );
           })}
         </ul>
@@ -64,6 +68,13 @@ const STATUS_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorSync.failure.statusLabel',
   {
     defaultMessage: 'Status',
+  }
+);
+
+const NOT_AVAILABLE_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.monitorSync.failure.notAvailable',
+  {
+    defaultMessage: 'Not available',
   }
 );
 

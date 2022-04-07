@@ -2277,10 +2277,16 @@ components:
               - api_keys
               - fleet_admin_user
               - fleet_server
+        missing_optional_features:
+          type: array
+          items:
+            type: string
+            enum:
               - encrypted_saved_object_encryption_key_required
       required:
         - isReady
         - missing_requirements
+        - missing_optional_features
     agent_type:
       type: string
       title: Agent type

@@ -53,6 +53,7 @@ import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { useDiscoverServices } from './utils/use_discover_services';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
 const DocViewerLegacyTable = React.lazy(
@@ -170,6 +171,7 @@ export interface DiscoverStartPlugins {
   usageCollection?: UsageCollectionSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 /**
@@ -274,7 +276,12 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+        const services = buildServices(
+          coreStart,
+          discoverStartPlugins,
+          this.initializerContext,
+          this.locator!
+        );
 
         // make sure the index pattern list is up to date
         await discoverStartPlugins.data.indexPatterns.clearCache();
@@ -364,7 +371,7 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      return buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+      return buildServices(coreStart, discoverStartPlugins, this.initializerContext, this.locator!);
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);

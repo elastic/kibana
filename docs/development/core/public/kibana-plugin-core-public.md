@@ -85,6 +85,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
 |  [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 |  [NavigateToAppOptions](./kibana-plugin-core-public.navigatetoappoptions.md) | Options for the [navigateToApp API](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) |
+|  [NavigateToUrlOptions](./kibana-plugin-core-public.navigatetourloptions.md) | Options for the [navigateToUrl API](./kibana-plugin-core-public.applicationstart.navigatetourl.md) |
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
@@ -150,6 +151,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AnalyticsServiceSetup](./kibana-plugin-core-public.analyticsservicesetup.md) | Exposes the public APIs of the AnalyticsClient during the setup phase.  |
+|  [AnalyticsServiceStart](./kibana-plugin-core-public.analyticsservicestart.md) | Exposes the public APIs of the AnalyticsClient during the start phase  |
 |  [AppDeepLink](./kibana-plugin-core-public.appdeeplink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>deepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [AppLeaveAction](./kibana-plugin-core-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) |
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
