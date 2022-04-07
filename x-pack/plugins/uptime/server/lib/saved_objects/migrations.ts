@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import { SavedObjectMigrationFn } from 'src/core/server';
 import { DynamicSettings } from '../../../common/runtime_types';
 
-export const add820Indices = (doc: SavedObjectUnsanitizedDoc<DynamicSettings>) => {
+export const add820Indices: SavedObjectMigrationFn<DynamicSettings, DynamicSettings> = (doc) => {
   const heartbeatIndices = doc.attributes?.heartbeatIndices;
 
   const indicesArr = !heartbeatIndices ? [] : heartbeatIndices.split(',');
