@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  HttpSetup,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
@@ -56,7 +62,7 @@ export class SecurityPlugin
     >
 {
   private readonly config: ConfigType;
-  private sessionTimeout!: SessionTimeout;
+  private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
@@ -74,16 +80,6 @@ export class SecurityPlugin
     core: CoreSetup<PluginStartDependencies>,
     { home, licensing, management, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
-    const { http, notifications } = core;
-    const { anonymousPaths } = http;
-
-    const logoutUrl = `${core.http.basePath.serverBasePath}/logout`;
-    const tenant = core.http.basePath.serverBasePath;
-
-    const sessionExpired = new SessionExpired(logoutUrl, tenant);
-    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
-
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
     this.securityCheckupService.setup({ http: core.http });
@@ -99,7 +95,7 @@ export class SecurityPlugin
     this.navControlService.setup({
       securityLicense: license,
       authc: this.authc,
-      logoutUrl,
+      logoutUrl: getLogoutUrl(core.http),
     });
 
     accountManagementApp.create({
@@ -149,19 +145,25 @@ export class SecurityPlugin
     core: CoreStart,
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
+    const { application, http, notifications, docLinks } = core;
+    const { anonymousPaths } = http;
+
+    const logoutUrl = getLogoutUrl(http);
+    const tenant = http.basePath.serverBasePath;
+
+    const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
+    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
+    this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
+
     this.sessionTimeout.start();
-    this.securityCheckupService.start({
-      http: core.http,
-      notifications: core.notifications,
-      docLinks: core.docLinks,
-    });
+    this.securityCheckupService.start({ http, notifications, docLinks });
 
     if (management) {
-      this.managementService.start({ capabilities: core.application.capabilities });
+      this.managementService.start({ capabilities: application.capabilities });
     }
 
     if (share) {
-      this.anonymousAccessService.start({ http: core.http });
+      this.anonymousAccessService.start({ http });
     }
 
     return {
@@ -172,11 +174,15 @@ export class SecurityPlugin
   }
 
   public stop() {
-    this.sessionTimeout.stop();
+    this.sessionTimeout?.stop();
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();
   }
+}
+
+function getLogoutUrl(http: HttpSetup) {
+  return `${http.basePath.serverBasePath}/logout`;
 }
 
 export interface SecurityPluginSetup {
