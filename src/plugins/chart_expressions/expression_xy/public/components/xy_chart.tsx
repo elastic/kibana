@@ -377,9 +377,11 @@ export function XYChart({
     const xyGeometry = geometry as GeometryValue;
 
     const layerIndex = dataLayers.findIndex((l) =>
-      xySeries.seriesKeys.some((key: string | number) => l.accessors.some((accessor) =>
-      getAccessorByDimension(accessor, l.table.columns) === key.toString()
-    ))
+      xySeries.seriesKeys.some((key: string | number) =>
+        l.accessors.some(
+          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+        )
+      )
     );
 
     if (layerIndex === -1) {

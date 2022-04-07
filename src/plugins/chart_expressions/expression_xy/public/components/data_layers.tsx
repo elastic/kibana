@@ -14,6 +14,7 @@ import {
 } from '@elastic/charts';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import { PaletteRegistry } from '../../../../charts/public';
 import { FormatFactory } from '../../../../field_formats/common';
 import { Datatable } from '../../../../expressions';
@@ -74,6 +75,10 @@ export const DataLayers: FC<Props> = ({
       {layers.flatMap((layer, layerIndex) =>
         layer.accessors.map((accessor, accessorIndex) => {
           const { splitAccessor, seriesType, xAccessor, table, columnToLabel, xScaleType } = layer;
+          const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
+          const splitColumnId =
+            splitAccessor && getAccessorByDimension(splitAccessor, table.columns);
+          const yColumnId = accessor && getAccessorByDimension(accessor, table.columns);
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -94,15 +99,15 @@ export const DataLayers: FC<Props> = ({
           // To not display them in the legend, they need to be filtered out.
           const rows = formattedTable.rows.filter(
             (row) =>
-              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
+              !(xColumnId && typeof row[xColumnId] === 'undefined') &&
               !(
-                splitAccessor &&
-                typeof row[splitAccessor] === 'undefined' &&
-                typeof row[accessor] === 'undefined'
+                splitColumnId &&
+                typeof row[splitColumnId] === 'undefined' &&
+                typeof row[yColumnId] === 'undefined'
               )
           );
 
-          if (!xAccessor) {
+          if (!xColumnId) {
             rows.forEach((row) => {
               row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
                 defaultMessage: '(empty)',
@@ -111,13 +116,13 @@ export const DataLayers: FC<Props> = ({
           }
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
 
           const seriesProps = getSeriesProps({
             layer,
             layerId: layerIndex,
-            accessor,
+            accessor: yColumnId,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
