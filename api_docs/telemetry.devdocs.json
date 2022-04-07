@@ -647,7 +647,7 @@
         ],
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Omit<",
-          "ClusterStatsResponse",
+          "ClusterStatsStatsResponseBase",
           ", \"cluster_name\" | \"_nodes\">; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",

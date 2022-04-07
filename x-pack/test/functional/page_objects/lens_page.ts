@@ -722,6 +722,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      const searchInput = await testSubjects.find('lnsChartSwitchSearch');
+      await searchInput.focus();
       await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
       await PageObjects.header.waitUntilLoadingHasFinished();

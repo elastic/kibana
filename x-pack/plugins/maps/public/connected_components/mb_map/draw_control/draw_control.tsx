@@ -129,7 +129,10 @@ export class DrawControl extends Component<Props> {
     } else if (this.props.drawShape === DRAW_SHAPE.WAIT) {
       this.props.mbMap.getCanvas().style.cursor = 'wait';
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
-    } else {
+    } else if (
+      (drawMode !== SIMPLE_SELECT && !this.props.drawShape) ||
+      this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT
+    ) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
     }
   }
