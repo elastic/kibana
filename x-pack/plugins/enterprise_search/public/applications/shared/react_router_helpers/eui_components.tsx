@@ -12,6 +12,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonEmptyProps,
+  EuiButtonIcon,
+  EuiButtonIconProps,
   EuiButtonProps,
   EuiLinkAnchorProps,
   EuiListGroupItem,
@@ -52,6 +54,16 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   ...rest
 }) => (
   <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
+
+type ReactRouterEuiButtonIconProps = ReactRouterProps & EuiButtonIconProps;
+export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <EuiButtonIcon {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
 );
 
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;
