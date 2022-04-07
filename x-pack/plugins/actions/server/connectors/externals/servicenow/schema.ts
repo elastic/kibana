@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const incidentSchema = schema.object({
   result: schema.object({
@@ -58,3 +58,11 @@ export const importSetTableORIncidentTableResponse = schema.oneOf([
   importSetTableErrorResponse,
   incidentSchema,
 ]);
+
+export type ServiceNowResponse = TypeOf<typeof importSetTableORIncidentTableResponse>;
+export type ServiceNowTableAPIResponse = TypeOf<typeof incidentSchema>;
+export type ServiceNowImportSetAPIErrorResponse = TypeOf<typeof importSetTableErrorResponse>;
+export type ServiceNowImportSetAPISuccessResponse = TypeOf<typeof importSetTableSuccessResponse>;
+export type ServiceNowImportSetAPIResponse =
+  | TypeOf<typeof importSetTableSuccessResponse>
+  | TypeOf<typeof importSetTableErrorResponse>;

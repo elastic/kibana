@@ -10,26 +10,30 @@ import { AxiosResponse } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
+  ServiceNowPublicConfigurationType,
+  SNProductsConfigValue,
+  ServiceNowSecretConfigurationType,
   ExternalServiceParamsUpdate,
   GetApplicationInfoResponse,
-  ImportSetApiResponse,
   ImportSetApiResponseError,
   Incident,
-  ServiceNowIncident,
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  SNProductsConfigValue,
 } from '../../../builtin_action_types/servicenow/types';
+
 import {
   createServiceError,
   getPushedDate,
   prepareIncident,
 } from '../../../builtin_action_types/servicenow/utils';
 import { CaseConnector } from '../../case';
+import { ExternalServiceIncidentResponse } from '../../types';
 import {
   applicationInformationSchema,
   importSetTableORIncidentTableResponse,
   incidentSchema,
+  ServiceNowImportSetAPIResponse,
+  ServiceNowImportSetAPISuccessResponse,
+  ServiceNowResponse,
+  ServiceNowTableAPIResponse,
 } from './schema';
 
 export class ServiceNow extends CaseConnector {
@@ -95,20 +99,30 @@ export class ServiceNow extends CaseConnector {
     return this.updateIncident({ incidentId, incident: { [this.commentFieldKey]: comment } });
   }
 
-  async getIncident({ id }: { id: string }): Promise<unknown> {
+  public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
     try {
       const res = await this.request({
         url: `${this.urls.tableApiIncidentUrl}/${id}`,
         method: 'get',
         responseSchema: incidentSchema,
       });
-      return { ...res.data.result };
+      return {
+        title: res.data.result.number,
+        id: res.data.result.sys_id,
+        pushedDate: getPushedDate(res.data.result.sys_created_on),
+        url: this.urls.incidentViewURL(res.data.result.sys_id),
+      };
     } catch (error) {
       throw createServiceError(error, `Unable to get incident with id ${id}`);
     }
   }
 
-  async createIncident(incident: Partial<Incident>): Promise<ServiceNowIncident> {
+  private isTableAPIResponse = (res: ServiceNowResponse): res is ServiceNowTableAPIResponse =>
+    this.useTableApi;
+
+  public async createIncident(
+    incident: Partial<Incident>
+  ): Promise<ExternalServiceIncidentResponse> {
     try {
       await this.checkIfApplicationIsInstalled();
 
@@ -119,28 +133,25 @@ export class ServiceNow extends CaseConnector {
         responseSchema: importSetTableORIncidentTableResponse,
       });
 
-      this.checkInstance(res);
-
-      if (!this.useTableApi) {
+      if (!this.isTableAPIResponse(res.data)) {
         this.throwIfImportSetApiResponseIsAnError(res.data);
       }
 
-      const incidentId = this.useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
-      const insertedIncident = await this.getIncident(incidentId);
+      const incidentId = this.isTableAPIResponse(res.data)
+        ? res.data.result.sys_id
+        : res.data.result[0].sys_id;
+      const insertedIncident = await this.getIncident({ id: incidentId });
 
       return {
-        title: insertedIncident.number,
-        id: insertedIncident.sys_id,
-        pushedDate: getPushedDate(insertedIncident.sys_created_on),
-        url: this.urls.incidentViewURL(insertedIncident.sys_id),
-      } as unknown as ServiceNowIncident;
+        ...insertedIncident,
+      };
     } catch (error) {
       throw createServiceError(error, 'Unable to create incident');
     }
   }
 
   // TODO need to add validation
-  async updateIncident({ incidentId, incident }: ExternalServiceParamsUpdate) {
+  public async updateIncident({ incidentId, incident }: ExternalServiceParamsUpdate) {
     try {
       await this.checkIfApplicationIsInstalled();
 
@@ -158,20 +169,18 @@ export class ServiceNow extends CaseConnector {
         responseSchema: importSetTableORIncidentTableResponse,
       });
 
-      this.checkInstance(res);
-
-      if (!this.useTableApi) {
+      if (!this.isTableAPIResponse(res.data)) {
         this.throwIfImportSetApiResponseIsAnError(res.data);
       }
 
-      const id = this.useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
-      const updatedIncident = await this.getIncident(id);
+      const id = this.isTableAPIResponse(res.data)
+        ? res.data.result.sys_id
+        : res.data.result[0].sys_id;
+
+      const updatedIncident = await this.getIncident({ id });
 
       return {
-        title: updatedIncident.number,
-        id: updatedIncident.sys_id,
-        pushedDate: getPushedDate(updatedIncident.sys_updated_on),
-        url: this.urls.incidentViewURL(updatedIncident.sys_id),
+        ...updatedIncident,
       };
     } catch (error) {
       throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
@@ -212,7 +221,9 @@ export class ServiceNow extends CaseConnector {
     }
   }
 
-  private throwIfImportSetApiResponseIsAnError(res: ImportSetApiResponse) {
+  private throwIfImportSetApiResponseIsAnError(
+    res: ServiceNowImportSetAPIResponse
+  ): asserts res is ServiceNowImportSetAPISuccessResponse {
     if (res.result.length === 0) {
       throw new Error('Unexpected result');
     }

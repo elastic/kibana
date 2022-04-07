@@ -11,36 +11,12 @@ import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } fr
 import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
-
-type ExtractFunctionKeys<T> = { [P in keyof T]-?: T[P] extends Function ? P : never }[keyof T];
-
-interface SubAction {
-  name: string;
-  method: ExtractFunctionKeys<CaseConnector>;
-  schema: Type<unknown>;
-}
-
-interface PushToServiceParams {
-  externalId: string;
-  comments: Array<{ commentId: string; comment: string }>;
-  [x: string]: unknown;
-}
-
-interface ExternalServiceIncidentResponse {
-  id: string;
-  title: string;
-  url: string;
-  pushedDate: string;
-}
-
-interface ExternalServiceCommentResponse {
-  commentId: string;
-  pushedDate: string;
-  externalCommentId?: string;
-}
-export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
-  comments?: ExternalServiceCommentResponse[];
-}
+import {
+  ExternalServiceIncidentResponse,
+  PushToServiceParams,
+  PushToServiceResponse,
+  SubAction,
+} from './types';
 
 export interface CaseConnectorInterface {
   addComment: ({
