@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
+import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import type { DataViewField, DataView } from '../../../../../../data_views/public';
@@ -57,14 +58,6 @@ const FieldInfoIcon: React.FC = memo(() => (
     />
   </EuiToolTip>
 ));
-
-/**
- * Extracts the type from a data view field that will match the right icon.
- *
- * We define custom logic for Discover in order to distinguish between various "string" types.
- */
-export const getTypeForFieldIcon = (field: DataViewField) =>
-  field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
 
 const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
   const typeForIcon = getTypeForFieldIcon(field);

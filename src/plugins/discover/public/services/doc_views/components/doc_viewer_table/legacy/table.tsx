@@ -9,7 +9,7 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { getTypeForFieldIcon } from '../../../../../application/main/components/sidebar/discover_field';
+import { getTypeForFieldIcon } from '../../../../../utils/get_type_for_field_icon';
 import { useDiscoverServices } from '../../../../../utils/use_discover_services';
 import { flattenHit } from '../../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
