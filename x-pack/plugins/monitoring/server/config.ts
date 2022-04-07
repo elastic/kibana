@@ -22,6 +22,27 @@ export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.ext
   hosts: schema.maybe(schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })])),
 });
 
+const validateSingleCcsRemotePattern = (value: string) => {
+  if (value.includes(' ')) {
+    return 'Spaces are not allowed in a remote name.';
+  }
+  if (value.match(/[^a-zA-Z\d\-_]/g)) {
+    return 'Remote names contain only letters, numbers, underscores, and dashes.';
+  }
+};
+const ccsSingleRemotePatternsSchema = schema.string({
+  validate(value) {
+    return validateSingleCcsRemotePattern(value);
+  },
+});
+const ccsMultiRemotePatternsSchema = schema.string({
+  validate(value) {
+    if (value === '*') {
+      return 'Cannot use the default wildcard (*) value in an array.';
+    }
+    return validateSingleCcsRemotePattern(value);
+  },
+});
 export const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -29,6 +50,15 @@ export const configSchema = schema.object({
     debug_log_path: schema.string({ defaultValue: '' }),
     ccs: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      remotePatterns: schema.oneOf(
+        [
+          ccsSingleRemotePatternsSchema,
+          schema.arrayOf(ccsMultiRemotePatternsSchema, { minSize: 1, maxSize: 10 }),
+        ],
+        {
+          defaultValue: '*',
+        }
+      ),
     }),
     logs: schema.object({
       index: schema.string({ defaultValue: 'filebeat-*' }),
@@ -97,6 +127,10 @@ type MonitoringConfigTypeOverriddenUI = Omit<MonitoringConfigSchema, 'ui'>;
 interface MonitoringConfigTypeOverriddenUIElasticsearch
   extends Omit<MonitoringConfigSchema['ui'], 'elasticsearch'> {
   elasticsearch: MonitoringElasticsearchConfig;
+  ccs: {
+    enabled: MonitoringConfigSchema['ui']['ccs']['enabled'];
+    remotePatterns: string[];
+  };
 }
 
 /**
@@ -114,6 +148,12 @@ export function createConfig(config: MonitoringConfigSchema): MonitoringConfig {
     ...config,
     ui: {
       ...config.ui,
+      ccs: {
+        ...config.ui.ccs,
+        remotePatterns: Array.isArray(config.ui.ccs.remotePatterns)
+          ? config.ui.ccs.remotePatterns
+          : [config.ui.ccs.remotePatterns],
+      },
       elasticsearch: new MonitoringElasticsearchConfig(config.ui.elasticsearch),
     },
   };

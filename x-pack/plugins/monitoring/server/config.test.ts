@@ -56,6 +56,7 @@ describe('config schema', () => {
         "ui": Object {
           "ccs": Object {
             "enabled": true,
+            "remotePatterns": "*",
           },
           "container": Object {
             "apm": Object {
@@ -149,5 +150,60 @@ describe('createConfig()', () => {
       certificateAuthorities: ['contents-of-packages/kbn-dev-utils/certs/ca.crt'],
     });
     expect(config.ui.elasticsearch.ssl).toEqual(expected);
+  });
+  it('accepts both string and array of strings for ui.ccs.remotePatterns', () => {
+    let configValue = createConfig(
+      configSchema.validate({
+        ui: {
+          ccs: {
+            remotePatterns: 'remote1',
+          },
+        },
+      })
+    );
+    expect(configValue.ui.ccs.remotePatterns).toEqual(['remote1']);
+    configValue = createConfig(
+      configSchema.validate({
+        ui: {
+          ccs: {
+            remotePatterns: ['remote1'],
+          },
+        },
+      })
+    );
+    expect(configValue.ui.ccs.remotePatterns).toEqual(['remote1']);
+    configValue = createConfig(
+      configSchema.validate({
+        ui: {
+          ccs: {
+            remotePatterns: ['remote1', 'remote2'],
+          },
+        },
+      })
+    );
+    expect(configValue.ui.ccs.remotePatterns).toEqual(['remote1', 'remote2']);
+  });
+});
+
+describe('throws when config is invalid', () => {
+  describe('ui.ccs.remotePattern errors', () => {
+    it('throws error with a space', () => {
+      expect(() => {
+        configSchema.validate({ ui: { ccs: { remotePatterns: 'my remote' } } });
+      }).toThrowError();
+    });
+    it('throws error when wildcard (*) pattern is used in an array', () => {
+      expect(() => {
+        configSchema.validate({ ui: { ccs: { remotePatterns: ['remote1', '*'] } } });
+      }).toThrowError();
+    });
+    it('throws error with an invalid remote name', () => {
+      expect(() => {
+        configSchema.validate({ ui: { ccs: { remotePatterns: 'remote-*' } } });
+      }).toThrowError();
+      expect(() => {
+        configSchema.validate({ ui: { ccs: { remotePatterns: 'remote1, remote2' } } });
+      }).toThrowError();
+    });
   });
 });
