@@ -30,9 +30,9 @@ import {
   Datasource,
   Visualization,
   FramePublicAPI,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import {
@@ -501,7 +501,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
+    const updatedLayerApis: DatasourceLayers = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );
