@@ -67,8 +67,8 @@ export const SearchPanel: FC<Props> = ({
     services: {
       uiSettings,
       notifications: { toasts },
-      data: {
-        query: queryManager,
+      data: { query: queryManager },
+      unifiedSearch: {
         ui: { SearchBar },
       },
     },

@@ -13,6 +13,7 @@ import { CoreContext, PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.
 import { ScopedHistory } from './application';
 
+import { analyticsServiceMock } from './analytics/analytics_service.mock';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -31,6 +32,7 @@ import { executionContextServiceMock } from './execution_context/execution_conte
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+export { analyticsServiceMock } from './analytics/analytics_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
@@ -54,6 +56,7 @@ function createCoreSetupMock({
   pluginStartContract?: any;
 } = {}) {
   const mock = {
+    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     application: applicationServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createSetupContract(),
@@ -76,6 +79,7 @@ function createCoreSetupMock({
 
 function createCoreStartMock({ basePath = '' } = {}) {
   const mock = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),

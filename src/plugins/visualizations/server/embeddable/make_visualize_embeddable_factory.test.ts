@@ -9,6 +9,7 @@
 import semverGte from 'semver/functions/gte';
 import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 import { GetMigrationFunctionObjectFn } from 'src/plugins/kibana_utils/common';
 
