@@ -20,6 +20,28 @@ interface SubAction {
   schema: Type<unknown>;
 }
 
+interface PushToServiceParams {
+  externalId: string;
+  comments: Array<{ commentId: string; comment: string }>;
+  [x: string]: unknown;
+}
+
+interface ExternalServiceIncidentResponse {
+  id: string;
+  title: string;
+  url: string;
+  pushedDate: string;
+}
+
+interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
+}
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
+}
+
 export interface CaseConnectorInterface {
   addComment: ({
     incidentId,
@@ -28,15 +50,16 @@ export interface CaseConnectorInterface {
     incidentId: string;
     comment: string;
   }) => Promise<unknown>;
-  createIncident: (incident: Record<string, unknown>) => Promise<unknown>;
+  createIncident: (incident: Record<string, unknown>) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: ({
     incidentId,
     incident,
   }: {
     incidentId: string;
     incident: Record<string, unknown>;
-  }) => Promise<unknown>;
+  }) => Promise<ExternalServiceIncidentResponse>;
   getIncident: ({ id }: { id: string }) => Promise<unknown>;
+  pushToService: (params: PushToServiceParams) => Promise<PushToServiceResponse>;
 }
 
 const isObject = (v: unknown): v is Record<string, unknown> => {
@@ -66,15 +89,17 @@ export abstract class CaseConnector implements CaseConnectorInterface {
     comment: string;
   }): Promise<unknown>;
 
-  public abstract createIncident(incident: Record<string, unknown>): Promise<unknown>;
+  public abstract createIncident(
+    incident: Record<string, unknown>
+  ): Promise<ExternalServiceIncidentResponse>;
   public abstract updateIncident({
     incidentId,
     incident,
   }: {
     incidentId: string;
     incident: Record<string, unknown>;
-  }): Promise<unknown>;
-  public abstract getIncident({ id }: { id: string }): Promise<unknown>;
+  }): Promise<ExternalServiceIncidentResponse>;
+  public abstract getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse>;
 
   private normalizeURL(url: string) {
     const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
@@ -167,10 +192,10 @@ export abstract class CaseConnector implements CaseConnectorInterface {
     return res;
   }
 
-  public async pushToService(params) {
+  public async pushToService(params: PushToServiceParams) {
     const { externalId, comments, ...rest } = params;
 
-    let res: Record<string, { comments: Array<{ commentId: string }> }>;
+    let res: PushToServiceResponse;
 
     if (externalId != null) {
       res = await this.updateIncident({
@@ -178,7 +203,7 @@ export abstract class CaseConnector implements CaseConnectorInterface {
         incident: rest,
       });
     } else {
-      res = await await this.createIncident({
+      res = await this.createIncident({
         ...rest,
       });
     }
@@ -201,5 +226,7 @@ export abstract class CaseConnector implements CaseConnectorInterface {
         ];
       }
     }
+
+    return res;
   }
 }
