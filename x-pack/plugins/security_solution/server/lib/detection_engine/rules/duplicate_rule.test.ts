@@ -81,7 +81,7 @@ describe('duplicateRule', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "actions": Array [],
-        "alertTypeId": "siem.signals",
+        "alertTypeId": "siem.queryRule",
         "consumer": "siem",
         "enabled": false,
         "name": "test [Duplicate]",
