@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  AggregationsCardinalityAggregate,
+  AggregationsMaxAggregate,
+  AggregationsMinAggregate,
+  AggregationsMultiTermsAggregate,
+  AggregationsMultiTermsBucket,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
@@ -16,14 +23,12 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
 import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
   MultiAggBucket,
-  SignalSource,
   SignalSearchResponse,
   ThresholdSignalHistory,
   BulkCreate,
@@ -129,9 +134,10 @@ const getTransformedHits = (
   };
 
   // TODO: handle single term (use terms aggregations)
-  console.log('THE SEARCH RESPONSE');
-  console.log(JSON.stringify(results));
-  return results.aggregations.thresholdTerms.buckets.map((bucket, i) => ({
+  return (
+    (results.aggregations.thresholdTerms as AggregationsMultiTermsAggregate)
+      .buckets as AggregationsMultiTermsBucket[]
+  ).map((bucket, i) => ({
     _index: inputIndex,
     _id: calculateThresholdSignalUuid(
       ruleId,
@@ -140,11 +146,11 @@ const getTransformedHits = (
       bucket.key.sort().join(',')
     ),
     _source: {
-      [TIMESTAMP]: bucket.max_timestamp.value_as_string,
+      [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
       ...bucket.key.reduce(
-        (acc, val, i) => ({
+        (acc, val, j) => ({
           ...acc,
-          [threshold.field[i]]: val,
+          [threshold.field[j]]: val,
         }),
         {}
       ),
@@ -153,9 +159,11 @@ const getTransformedHits = (
           field: threshold.field[j],
           value: term,
         })),
-        cardinality: bucket.cardinality_count?.value,
+        cardinality: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
         count: bucket.doc_count,
-        from: new Date(bucket.min_timestamp.value_as_string) ?? from,
+        from:
+          new Date((bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string) ??
+          from,
       },
     },
   }));
@@ -226,8 +234,6 @@ export const transformThresholdResultsToEcs = (
     threshold,
     ruleId
   );
-  console.log('TRANSFORMED HITS');
-  console.log(JSON.stringify(transformedHits));
   const thresholdResults = {
     ...results,
     hits: {

@@ -218,8 +218,6 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
         ? threshold.field
         : [threshold.field];
 
-      console.log(aggregationFields);
-      console.log(thresholdResult);
       return {
         thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
         thresholdTo: originalTime.toISOString(),
@@ -433,7 +431,6 @@ const createThresholdTimeline = async (
     const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
 
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(alertDoc);
-    console.log('GOT AGG DATA');
     const exceptions = await getExceptions(ecsData);
     const exceptionsFilter =
       buildExceptionFilter({

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import {
@@ -83,11 +82,13 @@ export const findThresholdSignals = async ({
   const thresholdFields = threshold.field;
 
   // order buckets by cardinality (https://github.com/elastic/kibana/issues/95258)
-  const thresholdFieldCount = thresholdFields.length;
+  // const thresholdFieldCount = thresholdFields.length;
+  /*
   const orderByCardinality = (i: number = 0) =>
     (thresholdFieldCount === 0 || i === thresholdFieldCount - 1) && threshold.cardinality?.length
       ? { order: { cardinality_count: 'desc' } }
       : {};
+  */
 
   // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
