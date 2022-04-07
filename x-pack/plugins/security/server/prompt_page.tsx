@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-// @ts-expect-error no definitions in component folder
-import { EuiEmptyPrompt } from '@elastic/eui/lib/components/empty_prompt';
+import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiProvider } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
-// @ts-expect-error no definitions in component folder
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui/lib/components/page';
 import type { ReactNode } from 'react';
 import React from 'react';
 
@@ -22,7 +19,6 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IBasePath } from 'src/core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '../../../../src/core/server/rendering/views/fonts';
 
 // Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
@@ -77,19 +73,21 @@ export function PromptPage({
       </head>
       <body>
         <I18nProvider>
-          <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
-            <EuiPageBody>
-              <EuiPageContent verticalPosition="center" horizontalPosition="center">
-                <EuiEmptyPrompt
-                  iconType="alert"
-                  iconColor="danger"
-                  title={<h2>{title}</h2>}
-                  body={body}
-                  actions={actions}
-                />
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
+          <EuiProvider colorMode="light">
+            <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
+              <EuiPageBody>
+                <EuiPageContent verticalPosition="center" horizontalPosition="center">
+                  <EuiEmptyPrompt
+                    iconType="alert"
+                    iconColor="danger"
+                    title={<h2>{title}</h2>}
+                    body={body}
+                    actions={actions}
+                  />
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </EuiProvider>
         </I18nProvider>
       </body>
     </html>
