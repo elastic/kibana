@@ -314,18 +314,20 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
           )}
         </UtilityBarSection>
         <UtilityBarSection>
-          <UtilityBarText dataTestSubj="executionsShowing">
-            {timelines.getLastUpdated({
-              showUpdating: isLoading || isFetching,
-              updatedAt: dataUpdatedAt,
-            })}
-          </UtilityBarText>
-          <UtilitySwitch
-            label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
-            checked={showMetricColumns}
-            compressed={true}
-            onChange={(e) => onShowMetricColumnsCallback(e.target.checked)}
-          />
+          <UtilityBarGroup>
+            <UtilityBarText dataTestSubj="executionsShowing">
+              {timelines.getLastUpdated({
+                showUpdating: isLoading || isFetching,
+                updatedAt: dataUpdatedAt,
+              })}
+            </UtilityBarText>
+            <UtilitySwitch
+              label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
+              checked={showMetricColumns}
+              compressed={true}
+              onChange={(e) => onShowMetricColumnsCallback(e.target.checked)}
+            />
+          </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
       <EuiBasicTable
