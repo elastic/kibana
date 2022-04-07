@@ -19,6 +19,7 @@ import { shallow } from 'enzyme';
 import {
   EuiLink,
   EuiButton,
+  EuiButtonIcon,
   EuiButtonEmpty,
   EuiListGroupItem,
   EuiPanel,
@@ -29,6 +30,7 @@ import {
   EuiLinkTo,
   EuiButtonTo,
   EuiButtonEmptyTo,
+  EuiButtonIconTo,
   EuiListGroupItemTo,
   EuiPanelTo,
   EuiCardTo,
@@ -51,6 +53,12 @@ describe('React Router EUI component helpers', () => {
     const wrapper = shallow(<EuiButtonEmptyTo to="/" />);
 
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
+  });
+
+  it('renders an EuiButtonIconTo', () => {
+    const wrapper = shallow(<EuiButtonIconTo iconType="pencil" to="/" />);
+
+    expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
   });
 
   it('renders an EuiListGroupItem', () => {
