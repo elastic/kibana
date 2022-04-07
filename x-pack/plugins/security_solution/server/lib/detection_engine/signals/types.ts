@@ -386,7 +386,7 @@ export interface ThreatMatchExecutorOptions {
   listClient: ListClient;
   logger: Logger;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   tuple: RuleRangeTuple;
   version: string;
   wrapHits: WrapHits;

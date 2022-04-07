@@ -265,8 +265,6 @@ export interface CreatePercolatorQueriesOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
-  // pitId: OpenPointInTimeResponse['id'];
-  // reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface GetThreatListOptions {
@@ -354,7 +352,8 @@ export type GetMatchedThreats = (ids: string[]) => Promise<IndicatorHit[]>;
 
 export interface BuildThreatEnrichmentOptions {
   exceptionItems: ExceptionListItemSchema[];
-  logDebugMessage: (message: string) => void;
+  buildRuleMessage: BuildRuleMessage;
+  logger: Logger;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;

@@ -23,7 +23,7 @@ const createThreatQueriesMock = createThreatQueries as jest.Mock;
 createThreatQueriesMock.mockResolvedValue([]);
 
 describe('createPercolatorQueries', () => {
-  const abortableEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +31,7 @@ describe('createPercolatorQueries', () => {
 
   it('makes the expected requests', () => {
     createPercolatorQueries({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       logDebugMessage: jest.fn(),
       perPage: DETECTION_ENGINE_MAX_PER_PAGE,
@@ -52,7 +52,7 @@ describe('createPercolatorQueries', () => {
 
     // removing mocks to prevent `Received: serializes to the same string` error
     const actualGetNextPageArgs = getNextPageMock.mock.calls[0][0];
-    delete actualGetNextPageArgs.abortableEsClient;
+    delete actualGetNextPageArgs.esClient;
     delete actualGetNextPageArgs.logDebugMessage;
 
     const expectedGetNextPageArgs = {
@@ -77,7 +77,7 @@ describe('createPercolatorQueries', () => {
     getNextPageMock.mockResolvedValueOnce(searchResultOneEvent.searchResult);
 
     await createPercolatorQueries({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       logDebugMessage: jest.fn(),
       perPage: DETECTION_ENGINE_MAX_PER_PAGE,

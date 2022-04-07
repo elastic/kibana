@@ -12,7 +12,7 @@ import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({
   exceptionItems,
-  logDebugMessage,
+  buildRuleMessage,
   services,
   threatFilters,
   threatIndex,
@@ -21,6 +21,7 @@ export const buildThreatEnrichment = ({
   threatQuery,
   pitId,
   reassignPitId,
+  logger,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {
@@ -35,12 +36,12 @@ export const buildThreatEnrichment = ({
     const threatResponse = await getThreatList({
       esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
-      filters: [...threatFilters, matchedThreatsFilter],
+      threatFilters: [...threatFilters, matchedThreatsFilter],
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
       searchAfter: undefined,
-      logDebugMessage,
+      buildRuleMessage,
       perPage: undefined,
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
@@ -48,6 +49,7 @@ export const buildThreatEnrichment = ({
       },
       pitId,
       reassignPitId,
+      logger,
     });
 
     return threatResponse.hits.hits;

@@ -128,7 +128,8 @@ export const createThreatSignals = async ({
     threatQuery,
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
-    logDebugMessage: (message: string) => logger.debug(buildRuleMessage(message)),
+    buildRuleMessage,
+    logger,
   });
 
   const createSignals = async ({

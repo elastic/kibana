@@ -44,7 +44,7 @@ describe('findPercolateEnrichEvents', () => {
   const buildRuleMessage = jest.fn();
   const listClient = getListClientMock();
   const logger = mockLogger;
-  const services = alertsMock.createAlertServices();
+  const services = alertsMock.createRuleExecutorServices();
 
   beforeEach(() => {
     jest.clearAllMocks();

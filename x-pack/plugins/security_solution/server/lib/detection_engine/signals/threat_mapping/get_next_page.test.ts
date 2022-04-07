@@ -9,17 +9,17 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { DETECTION_ENGINE_MAX_PER_PAGE } from '../../../../../common/constants';
 
 describe('getNextPage', () => {
-  const abortableEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   beforeEach(() => {
     jest.clearAllMocks();
     // @ts-ignore
-    abortableEsClient.search.mockResolvedValue({ body: { hits: { hits: [] } } });
+    esClient.search.mockResolvedValue({ hits: { hits: [] } });
   });
 
   it('throws error when perPage exceeds 10000', () => {
     getNextPage({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       filters: [],
       index: ['test-index'],
@@ -34,7 +34,7 @@ describe('getNextPage', () => {
 
   it('makes the expected request', () => {
     getNextPage({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       filters: [],
       index: ['test-index'],
@@ -46,7 +46,7 @@ describe('getNextPage', () => {
       threatListConfig: { _source: true, fields: undefined },
     });
 
-    expect(abortableEsClient.search).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
         sort: ['_doc', { '@timestamp': 'asc' }],
@@ -61,7 +61,7 @@ describe('getNextPage', () => {
 
   it('can override threatListConfig', () => {
     getNextPage({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       filters: [],
       index: ['test-index'],
@@ -73,7 +73,7 @@ describe('getNextPage', () => {
       threatListConfig: { _source: false, fields: ['test-field'] },
     });
 
-    expect(abortableEsClient.search).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
         sort: ['_doc', { '@timestamp': 'asc' }],
@@ -89,7 +89,7 @@ describe('getNextPage', () => {
 
   it('can have a searchAfter value', () => {
     getNextPage({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       filters: [],
       index: ['test-index'],
@@ -101,7 +101,7 @@ describe('getNextPage', () => {
       threatListConfig: { _source: true, fields: undefined },
     });
 
-    expect(abortableEsClient.search).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
         search_after: [13371337],
@@ -117,7 +117,7 @@ describe('getNextPage', () => {
 
   it('can have a custom perPage value', () => {
     getNextPage({
-      abortableEsClient,
+      esClient,
       exceptionItems: [],
       filters: [],
       index: ['test-index'],
@@ -129,7 +129,7 @@ describe('getNextPage', () => {
       threatListConfig: { _source: true, fields: undefined },
     });
 
-    expect(abortableEsClient.search).toHaveBeenCalledWith({
+    expect(esClient.search).toHaveBeenCalledWith({
       body: {
         query: { bool: { must: [], filter: [], should: [], must_not: [] } },
         sort: ['_doc', { '@timestamp': 'asc' }],
