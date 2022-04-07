@@ -137,6 +137,27 @@ export function groupAxesByType(
   return series;
 }
 
+function getPosition(position: Position, shouldRotate: boolean) {
+  if (shouldRotate) {
+    switch (position) {
+      case Position.Bottom: {
+        return Position.Right;
+      }
+      case Position.Right: {
+        return Position.Top;
+      }
+      case Position.Top: {
+        return Position.Left;
+      }
+      case Position.Left: {
+        return Position.Bottom;
+      }
+    }
+  }
+
+  return position;
+}
+
 export function getAxesConfiguration(
   layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
   shouldRotate: boolean,
@@ -151,7 +172,7 @@ export function getAxesConfiguration(
     if (series[axis.id] && series[axis.id].length > 0) {
       axisGroups.push({
         groupId: `axis-${axis.id}`,
-        position: axis.position || Position.Left,
+        position: getPosition(axis.position || Position.Left, shouldRotate),
         formatter: formatFactory?.(series[axis.id][0].fieldFormat),
         series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
         title: axis.title,
