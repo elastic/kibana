@@ -6,7 +6,8 @@
  */
 
 import type { AgentPolicy, Settings } from '../../types';
-import type { InstalledIntegrationPolicy } from '../../hooks/use_get_agent_incoming_data';
+
+import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
 export type K8sMode = 'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES';
 export type FlyoutMode = 'managed' | 'standalone';

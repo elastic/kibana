@@ -189,44 +189,6 @@ describe('<AgentEnrollmentFlyout />', () => {
         expect(exists('agent-enrollment-key-selection-step')).toBe(true);
       });
     });
-
-    // Skipped due to implementation details in the step components. See https://github.com/elastic/kibana/issues/103894
-    describe.skip('"View data" extension point', () => {
-      it('shows the "View data" step when UI extension is provided', async () => {
-        jest.clearAllMocks();
-        await act(async () => {
-          testBed = await setup({
-            onClose: jest.fn(),
-          });
-          testBed.component.update();
-        });
-        const { exists, actions } = testBed;
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('view-data-step')).toBe(true);
-
-        jest.clearAllMocks();
-        actions.goToStandaloneTab();
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('view-data-step')).toBe(false);
-      });
-
-      it('does not call the "View data" step when UI extension is not provided', async () => {
-        jest.clearAllMocks();
-        await act(async () => {
-          testBed = await setup({
-            onClose: jest.fn(),
-          });
-          testBed.component.update();
-        });
-        const { exists, actions } = testBed;
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('view-data-step')).toBe(false);
-
-        jest.clearAllMocks();
-        actions.goToStandaloneTab();
-        expect(exists('view-data-step')).toBe(false);
-      });
-    });
   });
 
   // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
@@ -234,7 +196,6 @@ describe('<AgentEnrollmentFlyout />', () => {
   describe.skip('standalone instructions', () => {
     it('uses the agent policy selection step', async () => {
       const { exists, actions } = testBed;
-
       actions.goToStandaloneTab();
 
       expect(exists('agentEnrollmentFlyout')).toBe(true);

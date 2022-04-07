@@ -25,7 +25,7 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * Hook for finding agents enrolled since component was rendered. Should be
  * used by parent component to power rendering
  * @param policyId
- * @returns
+ * @returns agentIds
  */
 export const usePollingAgentCount = (policyId: string) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);

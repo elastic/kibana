@@ -76,10 +76,6 @@ jest.mock('./steps', () => {
       'data-test-subj': 'agent-enrollment-key-selection-step',
       title: 'agent-enrollment-key-selection-step',
     }),
-    ViewDataStep: jest.fn().mockReturnValue({
-      'data-test-subj': 'view-data-step',
-      title: 'view-data-step',
-    }),
     DownloadStep: jest
       .fn()
       .mockReturnValue({ 'data-test-subj': 'download-step', title: 'download-step' }),

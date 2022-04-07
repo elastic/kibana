@@ -260,7 +260,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     if (selectedPolicy && enrolledAgentIds.length) {
       steps.push(
         IncomingDataConfirmationStep({
-          agentsIds: enrolledAgentIds,
+          agentIds: enrolledAgentIds,
           agentDataConfirmed,
           setAgentDataConfirmed,
           installedPolicy: installedPackagePolicy,

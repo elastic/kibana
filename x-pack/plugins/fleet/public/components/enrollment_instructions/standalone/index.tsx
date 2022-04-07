@@ -14,16 +14,19 @@ export const StandaloneInstructions = (
   const KUBERNETES_RUN_INSTRUCTIONS = 'kubectl apply -f elastic-agent-standalone-kubernetes.yaml';
 
   const STANDALONE_RUN_INSTRUCTIONS_LINUX = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
-  tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
-  sudo ./elastic-agent install`;
+tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-linux-x86_64
+sudo ./elastic-agent install`;
 
   const STANDALONE_RUN_INSTRUCTIONS_MAC = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
-  tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
-  sudo ./elastic-agent install`;
+tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-darwin-x86_64
+sudo ./elastic-agent install`;
 
   const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-  Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
-  .\\elastic-agent.exe install`;
+Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+cd elastic-agent-${kibanaVersion}-windows-x86_64
+.\\elastic-agent.exe install`;
 
   const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
   sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;

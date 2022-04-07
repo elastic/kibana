@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { IncomingDataList } from '../../common/types/rest_spec/agent';
+import type { IncomingDataList } from '../../../common/types/rest_spec/agent';
 
-import { sendGetAgentIncomingData, useLink } from './index';
+import { sendGetAgentIncomingData, useLink } from '../../hooks/index';
 
 export interface InstalledIntegrationPolicy {
   name: string;
@@ -17,25 +17,9 @@ export interface InstalledIntegrationPolicy {
 }
 
 export const useGetAgentIncomingData = (
-  agentsIds: string[],
+  incomingData: IncomingDataList[],
   installedPolicy?: InstalledIntegrationPolicy
 ) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
-
-  useEffect(() => {
-    const getIncomingData = async () => {
-      const { data } = await sendGetAgentIncomingData({ agentsIds });
-      if (data?.items) {
-        setIncomingData(data?.items);
-        setIsLoading(false);
-      }
-    };
-    if (agentsIds) {
-      getIncomingData();
-    }
-  }, [agentsIds]);
-
   const enrolledAgents = useMemo(() => incomingData.length, [incomingData.length]);
   const numAgentsWithData = useMemo(
     () =>
@@ -83,8 +67,47 @@ export const useGetAgentIncomingData = (
   return {
     enrolledAgents,
     numAgentsWithData,
-    isLoading,
     linkButton,
     message,
   };
+};
+
+/**
+ * Hook for polling incoming data for the selected agent policy.
+ * @param agentIds
+ * @returns incomingData, isLoading
+ */
+const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
+
+export const usePollingIncomingData = (agentsIds: string[]) => {
+  const timeout = useRef<number | undefined>(undefined);
+  const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isAborted = false;
+
+    const poll = () => {
+      timeout.current = window.setTimeout(async () => {
+        const { data } = await sendGetAgentIncomingData({ agentsIds });
+
+        if (data?.items) {
+          setIncomingData(data?.items);
+          setIsLoading(false);
+        }
+        if (!isAborted) {
+          poll();
+        }
+      }, POLLING_INTERVAL_MS);
+    };
+
+    poll();
+    if (isAborted || incomingData.length > 0) clearTimeout(timeout.current);
+
+    return () => {
+      isAborted = true;
+    };
+  }, [agentsIds, incomingData]);
+
+  return { incomingData, isLoading };
 };

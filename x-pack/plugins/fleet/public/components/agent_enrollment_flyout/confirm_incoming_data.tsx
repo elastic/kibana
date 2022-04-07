@@ -9,23 +9,29 @@ import React from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { InstalledIntegrationPolicy } from '../../hooks';
-import { useGetAgentIncomingData } from '../../hooks';
+import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
+import { useGetAgentIncomingData, usePollingIncomingData } from './use_get_agent_incoming_data';
+
 interface Props {
-  agentsIds: string[];
+  agentIds: string[];
   installedPolicy?: InstalledIntegrationPolicy;
   agentDataConfirmed: boolean;
   setAgentDataConfirmed: (v: boolean) => void;
 }
 
 export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
-  agentsIds,
+  agentIds,
   installedPolicy,
   agentDataConfirmed,
   setAgentDataConfirmed,
 }) => {
-  const { enrolledAgents, numAgentsWithData, isLoading, linkButton, message } =
-    useGetAgentIncomingData(agentsIds, installedPolicy);
+  const { incomingData, isLoading } = usePollingIncomingData(agentIds);
+
+  const { enrolledAgents, numAgentsWithData, linkButton, message } = useGetAgentIncomingData(
+    incomingData,
+    installedPolicy
+  );
+
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
   }

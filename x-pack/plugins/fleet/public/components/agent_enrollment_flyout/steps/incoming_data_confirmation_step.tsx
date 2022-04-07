@@ -11,17 +11,17 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { InstalledIntegrationPolicy } from '../../../hooks';
+import type { InstalledIntegrationPolicy } from '../use_get_agent_incoming_data';
 
 import { ConfirmIncomingData } from '../confirm_incoming_data';
 
 export const IncomingDataConfirmationStep = ({
-  agentsIds,
+  agentIds,
   installedPolicy,
   agentDataConfirmed,
   setAgentDataConfirmed,
 }: {
-  agentsIds: string[];
+  agentIds: string[];
   installedPolicy?: InstalledIntegrationPolicy;
   agentDataConfirmed: boolean;
   setAgentDataConfirmed: (v: boolean) => void;
@@ -36,7 +36,7 @@ export const IncomingDataConfirmationStep = ({
         }),
     children: (
       <ConfirmIncomingData
-        agentsIds={agentsIds}
+        agentIds={agentIds}
         installedPolicy={installedPolicy}
         agentDataConfirmed={agentDataConfirmed}
         setAgentDataConfirmed={setAgentDataConfirmed}
