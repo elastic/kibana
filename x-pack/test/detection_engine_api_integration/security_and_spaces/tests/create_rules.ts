@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
-            output_index: '.siem-signals-default',
+            output_index: '',
             max_signals: 100,
             risk_score: 1,
             risk_score_mapping: [],

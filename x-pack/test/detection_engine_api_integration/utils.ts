@@ -429,7 +429,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial
   interval: '5m',
   rule_id: ruleId,
   language: 'kuery',
-  output_index: '.siem-signals-default',
+  output_index: '',
   max_signals: 100,
   risk_score: 1,
   risk_score_mapping: [],
@@ -723,7 +723,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   enabled: false,
   index: ['auditbeat-*', 'filebeat-*'],
   interval: '5m',
-  output_index: '.siem-signals-default',
+  output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {
@@ -812,7 +812,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   index: ['auditbeat-*', 'filebeat-*'],
   immutable: false,
   interval: '5m',
-  output_index: '.siem-signals-default',
+  output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
       as_deep_structured_as_you_need: {

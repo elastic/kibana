@@ -46,7 +46,7 @@ const getImportRuleBuffer = (connectorId: string) => {
     risk_score: 21,
     severity: 'low',
     license: '',
-    output_index: '.siem-signals-devin-hurley-7',
+    output_index: '',
     meta: { from: '1m', kibana_siem_app_url: 'http://0.0.0.0:5601/s/7/app/security' },
     author: [],
     false_positives: [],
