@@ -8,6 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useQueryClient } from 'react-query';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -21,6 +22,7 @@ import {
   useExecutionContext,
 } from '../../../../shared_imports';
 
+import { LOAD_POLICIES_KEY } from '../../../services/http/policy_requests';
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
@@ -40,6 +42,7 @@ interface MatchParams {
 export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   history,
 }) => {
+  const queryClient = useQueryClient();
   const { policyName } = useDecodedParams<MatchParams>();
   const {
     error,
@@ -74,9 +77,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     }
   };
 
-  const onPolicyExecuted = () => {
-    // reload();
-    // should reload policies when executed..
+  const invalidatePoliciesListQuery = () => {
+    queryClient.invalidateQueries(LOAD_POLICIES_KEY);
   };
 
   // Track component loaded
@@ -158,9 +160,9 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
       </EuiPageContent>
     );
   } else {
-    const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
-    const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
-    const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+    const policySchedules = policies?.map((policy: SlmPolicy) => policy.schedule);
+    const hasDuplicateSchedules = policySchedules!.length > new Set(policySchedules).size;
+    const hasRetention = Boolean(policies?.find((policy: SlmPolicy) => policy.retention));
 
     content = (
       <section data-test-subj="policyList">
@@ -196,10 +198,10 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
         <PolicyTable
           policies={policies || []}
-          reload={() => { /* should reload*/ }}
+          reload={invalidatePoliciesListQuery}
           openPolicyDetailsUrl={openPolicyDetailsUrl}
           onPolicyDeleted={onPolicyDeleted}
-          onPolicyExecuted={onPolicyExecuted}
+          onPolicyExecuted={invalidatePoliciesListQuery}
         />
       </section>
     );
@@ -215,7 +217,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                 policyName={policyName}
                 onClose={closePolicyDetails}
                 onPolicyDeleted={onPolicyDeleted}
-                onPolicyExecuted={onPolicyExecuted}
+                onPolicyExecuted={invalidatePoliciesListQuery}
               />
             ) : null}
             {content}
