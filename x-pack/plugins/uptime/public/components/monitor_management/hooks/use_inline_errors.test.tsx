@@ -70,7 +70,7 @@ describe('useInlineErrors', function () {
         {
           error: { monitorList: null, serviceLocations: null, enablement: null },
           enablement: null,
-          list: { monitors: [], page: 1, perPage: 10, total: null },
+          list: { monitors: [], page: 1, perPage: 10, total: null, syncErrors: null },
           loading: { monitorList: false, serviceLocations: false, enablement: false },
           locations: [],
           syntheticsService: {

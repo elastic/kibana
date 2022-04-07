@@ -7,15 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from 'kibana/server';
 
 import { UI_SETTINGS } from '../common/constants';
-import { configSchema } from '../config';
 
-export function getUiSettings(
-  config: TypeOf<typeof configSchema>
-): Record<string, UiSettingsParams<unknown>> {
+export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.LEGACY_CHARTS_LIBRARY]: {
       name: i18n.translate('timelion.uiSettings.legacyChartsLibraryLabel', {
