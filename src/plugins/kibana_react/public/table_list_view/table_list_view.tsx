@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart } from 'kibana/public';
+import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from 'kibana/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
@@ -58,6 +58,7 @@ export interface TableListViewProps<V> {
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
   theme: ThemeServiceStart;
+  application: ApplicationStart;
 }
 
 export interface TableListViewState<V> {
@@ -275,6 +276,10 @@ class TableListView<V extends {}> extends React.Component<
 
   renderListingLimitWarning() {
     if (this.state.showLimitError) {
+      const setting = 'savedObjects:listingLimit';
+      const advancedSettingsLink = this.props.application.getUrlForApp('management', {
+        path: `/kibana/settings?query=${setting}`,
+      });
       return (
         <React.Fragment>
           <EuiCallOut
@@ -298,7 +303,7 @@ class TableListView<V extends {}> extends React.Component<
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: <strong>listingLimit</strong>,
                   advancedSettingsLink: (
-                    <EuiLink href="#/management/kibana/settings">
+                    <EuiLink href={advancedSettingsLink}>
                       <FormattedMessage
                         id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
                         defaultMessage="Advanced Settings"

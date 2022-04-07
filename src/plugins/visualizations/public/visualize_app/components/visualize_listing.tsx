@@ -209,6 +209,7 @@ export const VisualizeListing = () => {
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
       theme={theme}
+      application={application}
     >
       {dashboardCapabilities.createNew && (
         <>

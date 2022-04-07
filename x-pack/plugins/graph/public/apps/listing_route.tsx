@@ -103,6 +103,7 @@ export function ListingRoute({
           defaultMessage: 'Graphs',
         })}
         theme={coreStart.theme}
+        application={coreStart.application}
       />
     </I18nProvider>
   );

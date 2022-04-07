@@ -304,6 +304,7 @@ export const DashboardListing = ({
         tableColumns,
       }}
       theme={core.theme}
+      application={core.application}
     >
       <DashboardUnsavedListing
         redirectTo={redirectTo}
