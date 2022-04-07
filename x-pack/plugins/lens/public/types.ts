@@ -296,14 +296,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (
-    state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
-    dateRange?: {
-      fromDate: string;
-      toDate: string;
-    }
-  ) =>
+  getErrorMessages: (state: T) =>
     | Array<{
         shortMessage: string;
         longMessage: React.ReactNode;

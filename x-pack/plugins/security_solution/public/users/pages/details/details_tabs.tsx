@@ -19,7 +19,7 @@ import { usersDetailsPagePath } from '../constants';
 import { TimelineId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 import { AlertsView } from '../../../common/components/alerts_viewer';
-import { filterUserExternalAlertData } from './helpers';
+import { userNameExistsFilter } from './helpers';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -64,9 +64,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
 
     const alertsPageFilters = useMemo(
       () =>
-        pageFilters != null
-          ? [...filterUserExternalAlertData, ...pageFilters]
-          : filterUserExternalAlertData,
+        pageFilters != null ? [...userNameExistsFilter, ...pageFilters] : userNameExistsFilter,
       [pageFilters]
     );
 

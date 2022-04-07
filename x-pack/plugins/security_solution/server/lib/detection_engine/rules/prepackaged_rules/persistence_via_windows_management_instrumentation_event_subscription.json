@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via WMI Event Subscription",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n",
   "risk_score": 21,
   "rule_id": "9b6813a1-daf1-457e-b0e6-0bb4e55b8a4c",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }
