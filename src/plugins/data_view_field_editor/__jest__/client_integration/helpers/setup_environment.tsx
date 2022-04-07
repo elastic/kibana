@@ -64,10 +64,10 @@ let apiService: ApiService;
 
 export const setupEnvironment = () => {
   apiService = initApi(mockHttpClient);
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+  const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
 
   return {
-    server,
+    server: httpSetup,
     httpRequestsMockHelpers,
   };
 };

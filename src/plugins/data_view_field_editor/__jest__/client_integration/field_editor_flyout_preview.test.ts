@@ -32,7 +32,6 @@ describe('Field editor Preview panel', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   let testBed: FieldEditorFlyoutContentTestBed;
@@ -55,8 +54,8 @@ describe('Field editor Preview panel', () => {
   ];
 
   beforeEach(async () => {
-    server.respondImmediately = true;
-    server.autoRespond = true;
+    // server.respondImmediately = true;
+    // server.autoRespond = true;
 
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
     setIndexPatternFields(indexPatternFields);
@@ -282,7 +281,7 @@ describe('Field editor Preview panel', () => {
           toggleFormRow,
           fields,
           waitForUpdates,
-          getLatestPreviewHttpRequest,
+          // getLatestPreviewHttpRequest,
           getRenderedFieldsPreview,
         },
       } = testBed;
@@ -291,10 +290,12 @@ describe('Field editor Preview panel', () => {
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
       await waitForUpdates(); // Run validations
-      const request = getLatestPreviewHttpRequest(server);
+      // todo might not need anymore
+      // const request = getLatestPreviewHttpRequest(server);
 
       // Make sure the payload sent is correct
-      expect(request.requestBody).toEqual({
+      console.log('checking calls');
+      expect(server.post.mock.calls[0]).toEqual({
         context: 'keyword_field',
         document: {
           description: 'First doc - description',
@@ -373,8 +374,8 @@ describe('Field editor Preview panel', () => {
     test('should display an updating indicator while fetching the docs and the preview', async () => {
       // We want to test if the loading indicator is in the DOM, for that we don't want the server to
       // respond immediately. We'll manualy send the response.
-      server.respondImmediately = false;
-      server.autoRespond = false;
+      // server.respondImmediately = false;
+      // server.autoRespond = false;
 
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
 
@@ -394,7 +395,7 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true); // indicator while getting preview
 
-      server.respond();
+      // server.respond();
       await waitForUpdates();
       expect(exists('isUpdatingIndicator')).toBe(false);
     });
@@ -403,8 +404,8 @@ describe('Field editor Preview panel', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
       // We want to test if the loading indicator is in the DOM, for that we need to manually
       // send the response from the server
-      server.respondImmediately = false;
-      server.autoRespond = false;
+      // server.respondImmediately = false;
+      // server.autoRespond = false;
 
       const {
         exists,
@@ -417,7 +418,7 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true);
 
-      server.respond();
+      // server.respond();
       await waitForDocumentsAndPreviewUpdate();
 
       expect(exists('isUpdatingIndicator')).toBe(false);
