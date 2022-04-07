@@ -214,7 +214,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private generateUiPluginsConfigs(
     uiPlugins: Map<string, DiscoveredPlugin>
-  ): Map<PluginName, Observable<ReturnType<typeof createBrowserConfig>>> {
+  ): Map<PluginName, Observable<unknown>> {
     return new Map(
       [...uiPlugins]
         .filter(([pluginId, _]) => {
