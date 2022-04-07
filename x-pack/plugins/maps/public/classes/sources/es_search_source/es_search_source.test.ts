@@ -106,7 +106,6 @@ describe('ESSearchSource', () => {
         applyGlobalTime: true,
         applyForceRefresh: true,
         isForceRefresh: false,
-        isFeatureEditorOpenForLayer: false,
       };
 
       it('Should only include required props', async () => {

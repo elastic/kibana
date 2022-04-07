@@ -178,7 +178,6 @@ describe('ESGeoGridSource', () => {
     sourceMeta: null,
     zoom: 0,
     isForceRefresh: false,
-    isFeatureEditorOpenForLayer: false,
   };
 
   describe('getGeoJsonWithMeta', () => {

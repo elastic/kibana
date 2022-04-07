@@ -59,7 +59,6 @@ describe('syncMvtSourceData', () => {
         fieldNames: [],
         sourceMeta: {},
         isForceRefresh: false,
-        isFeatureEditorOpenForLayer: false,
       },
       source: mockSource,
       syncContext,
