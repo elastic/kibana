@@ -11,10 +11,10 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('Performance tests', () => {
     loadTestFile(require.resolve('./login'));
-    loadTestFile(require.resolve('./ecommerce_dashboard'));
-    loadTestFile(require.resolve('./flight_dashboard'));
-    loadTestFile(require.resolve('./web_logs_dashboard'));
-    loadTestFile(require.resolve('./promotion_tracking_dashboard'));
+    // loadTestFile(require.resolve('./ecommerce_dashboard'));
+    // loadTestFile(require.resolve('./flight_dashboard'));
+    // loadTestFile(require.resolve('./web_logs_dashboard'));
+    // loadTestFile(require.resolve('./promotion_tracking_dashboard'));
 
     after(async () => {
       await performance.shutdownBrowser();
