@@ -17,3 +17,4 @@ export * from './icon';
 export * from './color_assignment';
 export * from './annotations_icon_set';
 export * from './annotations';
+export * from './data_layers';
