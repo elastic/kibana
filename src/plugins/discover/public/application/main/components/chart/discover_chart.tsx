@@ -258,9 +258,9 @@ export function DiscoverChart({
               Probability: <b>{samplingProbability}</b>
             </div>
             <EuiRange
-              min={0.1}
+              min={0.01}
               max={0.5}
-              step={0.05}
+              step={0.01}
               value={samplingProbability}
               onChange={(e) => onSamplingProbabilityChanged(e.target.value)}
               showLabels
