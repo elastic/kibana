@@ -4,10 +4,10 @@
 
 ## DiscoveredPlugin.enabledOnAnonymousPages property
 
-Specifies whether this plugin will be enabled for anonymous pages (login page, status page when configured, etc.) Default is false.
+Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when configured, etc.) Default is false.
 
 <b>Signature:</b>
 
 ```typescript
-enabledOnAnonymousPages?: boolean;
+readonly enabledOnAnonymousPages?: boolean;
 ```

@@ -9,14 +9,14 @@
 import type { DiscoveredPlugin, PluginName, UiPlugins } from '../plugins';
 import { filterUiPlugins } from './filter_ui_plugins';
 
-interface CreateMockPluginParams {
-  requiredPlugins: string[];
-  enabledOnAnonymousPages?: boolean;
-}
-function createMockPlugin(params: CreateMockPluginParams) {
-  const { requiredPlugins = [], enabledOnAnonymousPages } = params;
+function createMockPlugin(params: Partial<DiscoveredPlugin>) {
+  const { requiredPlugins, optionalPlugins, enabledOnAnonymousPages } = params;
   // other DiscoveredPlugin fields don't matter for this test suite
-  return { requiredPlugins, enabledOnAnonymousPages } as unknown as DiscoveredPlugin;
+  return {
+    requiredPlugins,
+    optionalPlugins,
+    enabledOnAnonymousPages,
+  } as DiscoveredPlugin;
 }
 
 describe('filterUiPlugins', () => {
@@ -27,7 +27,7 @@ describe('filterUiPlugins', () => {
       .set('two', createMockPlugin({ requiredPlugins: ['three'] }))
       .set('three', createMockPlugin({ requiredPlugins: ['four'], enabledOnAnonymousPages: true }))
       .set('four', createMockPlugin({ requiredPlugins: ['five'] }))
-      .set('five', createMockPlugin({ requiredPlugins: [] }))
+      .set('five', createMockPlugin({ requiredPlugins: [], optionalPlugins: ['six'] })) // optional plugin dependencies are ignored
       .set('six', createMockPlugin({ requiredPlugins: [] })),
   } as UiPlugins;
 

@@ -895,7 +895,7 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 // @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
-    enabledOnAnonymousPages?: boolean;
+    readonly enabledOnAnonymousPages?: boolean;
     readonly id: PluginName;
     readonly optionalPlugins: readonly PluginName[];
     readonly requiredBundles: readonly PluginName[];
