@@ -673,6 +673,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
+  _getJoinFilterExpression(): unknown | undefined {
+    return undefined;
+  }
+
   _setMbPointsProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
@@ -727,7 +731,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     }
 
-    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
+    const filterExpr = getPointFilterExpression(this._getJoinFilterExpression(), timesliceMaskConfig);
     if (!_.isEqual(filterExpr, mbMap.getFilter(markerLayerId))) {
       mbMap.setFilter(markerLayerId, filterExpr);
     }
@@ -760,7 +764,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
 
-    const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
       const mbLayer: MbLayer = {
         id: fillLayerId,
@@ -793,16 +796,18 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       lineLayerId,
     });
 
+    const joinFilter = this._getJoinFilterExpression();
+
     this.syncVisibilityWithMb(mbMap, fillLayerId);
     mbMap.setLayerZoomRange(fillLayerId, this.getMinZoom(), this.getMaxZoom());
-    const fillFilterExpr = getFillFilterExpression(hasJoins, timesliceMaskConfig);
+    const fillFilterExpr = getFillFilterExpression(joinFilter, timesliceMaskConfig);
     if (!_.isEqual(fillFilterExpr, mbMap.getFilter(fillLayerId))) {
       mbMap.setFilter(fillLayerId, fillFilterExpr);
     }
 
     this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this.getMinZoom(), this.getMaxZoom());
-    const lineFilterExpr = getLineFilterExpression(hasJoins, timesliceMaskConfig);
+    const lineFilterExpr = getLineFilterExpression(joinFilter, timesliceMaskConfig);
     if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
@@ -829,8 +834,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getLabelFilterExpression(
-      this.hasJoins(),
       isSourceGeoJson,
+      this._getJoinFilterExpression(),
       timesliceMaskConfig
     );
     if (!_.isEqual(filterExpr, mbMap.getFilter(labelLayerId))) {

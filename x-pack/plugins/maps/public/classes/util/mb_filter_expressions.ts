@@ -7,7 +7,6 @@
 
 import {
   GEO_JSON_TYPE,
-  FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
 } from '../../../common/constants';
 
@@ -22,15 +21,15 @@ export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE]
 
 function getFilterExpression(
   filters: unknown[],
-  hasJoins: boolean,
+  joinFilter?: unknown,
   timesliceMaskConfig?: TimesliceMaskConfig
 ) {
   const allFilters: unknown[] = [...filters];
 
-  /* if (hasJoins) {
-    allFilters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
-  }*/
-
+  if (joinFilter) {
+    allFilters.push(joinFilter);
+  }
+  
   if (timesliceMaskConfig) {
     allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);
     allFilters.push([
@@ -49,7 +48,7 @@ function getFilterExpression(
 }
 
 export function getFillFilterExpression(
-  hasJoins: boolean,
+  joinFilter?: unknown,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
@@ -61,13 +60,13 @@ export function getFillFilterExpression(
         ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
       ],
     ],
-    hasJoins,
+    joinFilter,
     timesliceMaskConfig
   );
 }
 
 export function getLineFilterExpression(
-  hasJoins: boolean,
+  joinFilter?: unknown,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
@@ -81,7 +80,7 @@ export function getLineFilterExpression(
         ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
       ],
     ],
-    hasJoins,
+    joinFilter,
     timesliceMaskConfig
   );
 }
@@ -93,19 +92,19 @@ const IS_POINT_FEATURE = [
 ];
 
 export function getPointFilterExpression(
-  hasJoins: boolean,
+  joinFilter?: unknown,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   return getFilterExpression(
     [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
-    hasJoins,
+    joinFilter,
     timesliceMaskConfig
   );
 }
 
 export function getLabelFilterExpression(
-  hasJoins: boolean,
   isSourceGeoJson: boolean,
+  joinFilter?: unknown,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): unknown[] {
   const filters: unknown[] = [];
@@ -117,5 +116,5 @@ export function getLabelFilterExpression(
     filters.push(IS_POINT_FEATURE);
   }
 
-  return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
+  return getFilterExpression(filters, joinFilter, timesliceMaskConfig);
 }

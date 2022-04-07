@@ -160,6 +160,13 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
+  _getJoinFilterExpression(): unknown | undefined {
+    return this.hasJoins()
+      // Remove unjoined source features by filtering out features without GeoJSON feature.property[FEATURE_VISIBLE_PROPERTY_NAME] is true
+      ? ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]
+      : undefined;
+  }
+
   _syncFeatureCollectionWithMb(mbMap: MbMap) {
     const mbGeoJSONSource = mbMap.getSource(this.getId()) as MbGeoJSONSource;
     const featureCollection = this._getSourceFeatureCollection();

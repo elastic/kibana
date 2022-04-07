@@ -26,12 +26,14 @@ import {
 import { IMvtVectorSource } from '../../../sources/vector_source';
 import { DataRequestContext } from '../../../../actions';
 import {
+  DataRequestMeta,
   StyleMetaDescriptor,
   TileMetaFeature,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { IESSource } from '../../../sources/es_source';
+import { InnerJoin } from '../../../joins/inner_join';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
 import { PropertiesMap } from '../../../../../common/elasticsearch_util';
@@ -69,22 +71,15 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // Add filter to narrow bounds to features with matching join keys
     let joinKeyFilter;
     if (this.getSource().isESSource()) {
-      const joins = this.getValidJoins();
-      if (joins.length) {
-        const join = joins[0];
-        const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-        if (joinDataRequest) {
-          const joinPropertiesMap = joinDataRequest?.getData() as PropertiesMap | undefined;
-          if (joinPropertiesMap) {
-            const indexPattern = await (this.getSource() as IESSource).getIndexPattern();
-            const joinField = getField(indexPattern, join.getLeftField().getName());
-            joinKeyFilter = buildPhrasesFilter(
-              joinField,
-              Array.from(joinPropertiesMap.keys()),
-              indexPattern
-            );
-          }
-        }
+      const { join, joinPropertiesMap } = this._getJoinResults();
+      if (join && joinPropertiesMap) {
+        const indexPattern = await (this.getSource() as IESSource).getIndexPattern();
+        const joinField = getField(indexPattern, join.getLeftField().getName());
+        joinKeyFilter = buildPhrasesFilter(
+          joinField,
+          Array.from(joinPropertiesMap.keys()),
+          indexPattern
+        );
       }
     }
 
@@ -290,27 +285,36 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this.getMbSourceId() === mbSourceId;
   }
 
-  _getJoinDataRequest() {
+  _getJoinResults(): { join?: InnerJoin, joinPropertiesMap?: PropertiesMap; joinRequestMeta?: DataRequestMeta } {
     const joins = this.getValidJoins();
-    if (!joins.length) {
-      return;
+    if (!joins) {
+      return {};
     }
 
     const join = joins[0];
-    return this.getDataRequest(join.getSourceDataRequestId());
+    const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+    return { 
+      join,
+      joinPropertiesMap: joinDataRequest?.getData() as PropertiesMap | undefined,
+      joinRequestMeta: joinDataRequest?.getMeta(),
+    };
   }
 
   _getMbTooManyFeaturesLayerId() {
     return this.makeMbLayerId('toomanyfeatures');
   }
 
-  _syncFeatureState(mbMap: MbMap) {
-    const joinDataRequest = this._getJoinDataRequest();
-    if (!joinDataRequest) {
-      return;
-    }
+  _getJoinFilterExpression(): unknown | undefined {
+    const { join, joinPropertiesMap } = this._getJoinResults();
+    return join && joinPropertiesMap
+      // Unable to check FEATURE_VISIBLE_PROPERTY_NAME flag since filter expressions do not support feature-state
+      // Instead, remove unjoined source features by filtering out features without matching join keys
+      ? ['match', ['get', join.getLeftField().getName()], Array.from(joinPropertiesMap.keys()), true, false]
+      : undefined;
+  }
 
-    const joinPropertiesMap = joinDataRequest.getData() as PropertiesMap | undefined;
+  _syncFeatureState(mbMap: MbMap) {
+    const { joinPropertiesMap, joinRequestMeta } = this._getJoinResults();
     if (!joinPropertiesMap) {
       return;
     }
@@ -321,8 +325,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       sourceLayer: this._source.getTileSourceLayer(),
       id: firstKey,
     });
-    const requestMeta = joinDataRequest.getMeta();
-    if (firstKeyFeatureState?.requestStopTime === requestMeta.requestStopTime) {
+    const joinRequestStopTime = joinRequestMeta?.requestStopTime;
+    if (firstKeyFeatureState?.requestStopTime === joinRequestStopTime) {
       // Do not update feature state when it already contains current join results
       return;
     }
@@ -345,7 +349,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       featureIdentifier.id = key;
       mbMap.setFeatureState(featureIdentifier, {
         ...value,
-        requestStopTime: requestMeta.requestStopTime,
+        requestStopTime: joinRequestStopTime,
       });
     });
   }
@@ -480,8 +484,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
-    const joinDataRequest = this._getJoinDataRequest();
-    const joinPropertiesMap = joinDataRequest?.getData() as PropertiesMap | undefined;
+    const { joinPropertiesMap } = this._getJoinResults();
     return await pluckStyleMeta(
       this._getMetaFromTiles(),
       joinPropertiesMap,
