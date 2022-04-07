@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import { AxiosResponse } from 'axios';
 import { ActionsConfigurationUtilities } from '../../../actions_config';
-import { ExecutorSubActionPushParamsSchemaITSM } from '../../../builtin_action_types/servicenow/schema';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
-  ExecutorParams,
   ExternalServiceParamsUpdate,
   GetApplicationInfoResponse,
   ImportSetApiResponse,
@@ -29,10 +26,13 @@ import {
   prepareIncident,
 } from '../../../builtin_action_types/servicenow/utils';
 import { CaseConnector } from '../../case';
-import { Validate } from '../../decorator';
-import { importSetTableResponse, applicationInformationSchema } from './schema';
+import {
+  applicationInformationSchema,
+  importSetTableORIncidentTableResponse,
+  incidentSchema,
+} from './schema';
 
-export class ServiceNow extends CaseConnector<ServiceNowIncident> {
+export class ServiceNow extends CaseConnector {
   private urls: {
     basic: string;
     importSetTableUrl: string;
@@ -43,20 +43,19 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
   };
   private useTableApi: boolean;
   private appScope: string;
+  private commentFieldKey: string;
 
   constructor({
     config,
     configurationUtilities,
     internalConfig,
     logger,
-    params,
     secrets,
   }: {
     config: ServiceNowPublicConfigurationType;
     configurationUtilities: ActionsConfigurationUtilities;
     internalConfig: SNProductsConfigValue;
     logger: Logger;
-    params: ExecutorParams;
     secrets: ServiceNowSecretConfigurationType;
   }) {
     const { apiUrl: url, usesTableApi: usesTableApiConfigValue } = config;
@@ -89,14 +88,19 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
 
     this.useTableApi = !internalConfig.useImportAPI || usesTableApiConfigValue;
     this.appScope = internalConfig.appScope;
+    this.commentFieldKey = internalConfig.commentFieldKey;
   }
 
-  @Validate(schema.string(), importSetTableResponse)
-  async getIncident(id: string): Promise<ServiceNowIncident> {
+  public addComment({ incidentId, comment }: { incidentId: string; comment: string }) {
+    return this.updateIncident({ incidentId, incident: { [this.commentFieldKey]: comment } });
+  }
+
+  async getIncident({ id }: { id: string }): Promise<unknown> {
     try {
       const res = await this.request({
         url: `${this.urls.tableApiIncidentUrl}/${id}`,
         method: 'get',
+        responseSchema: incidentSchema,
       });
       return { ...res.data.result };
     } catch (error) {
@@ -104,7 +108,6 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     }
   }
 
-  @Validate(ExecutorSubActionPushParamsSchemaITSM, importSetTableResponse)
   async createIncident(incident: Partial<Incident>): Promise<ServiceNowIncident> {
     try {
       await this.checkIfApplicationIsInstalled();
@@ -113,6 +116,7 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
         url: this.useTableApi ? this.urls.tableApiIncidentUrl : this.urls.importSetTableUrl,
         method: 'post',
         data: prepareIncident(this.useTableApi, incident),
+        responseSchema: importSetTableORIncidentTableResponse,
       });
 
       this.checkInstance(res);
@@ -136,7 +140,7 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
   }
 
   // TODO need to add validation
-  private async updateIncident({ incidentId, incident }: ExternalServiceParamsUpdate) {
+  async updateIncident({ incidentId, incident }: ExternalServiceParamsUpdate) {
     try {
       await this.checkIfApplicationIsInstalled();
 
@@ -151,6 +155,7 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
           // elastic_incident_id is used to update the incident when using the Import Set API.
           ...(this.useTableApi ? {} : { elastic_incident_id: incidentId }),
         },
+        responseSchema: importSetTableORIncidentTableResponse,
       });
 
       this.checkInstance(res);
@@ -182,13 +187,13 @@ export class ServiceNow extends CaseConnector<ServiceNowIncident> {
     }
   }
 
-  @Validate(schema.string(), applicationInformationSchema)
   private async getApplicationInformation(appScope: string): Promise<GetApplicationInfoResponse> {
     const versionUrl = `${this.urls.basic}/api/${appScope}/elastic_api/health`;
     try {
       const res = await this.request({
         url: versionUrl,
         method: 'get',
+        responseSchema: applicationInformationSchema,
       });
 
       return { ...res.data.result };

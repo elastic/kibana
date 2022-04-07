@@ -12,11 +12,12 @@ import type { LicenseType } from '../../../licensing/common/types';
 import { CaseConnector } from '../connectors/case';
 
 // TODO: Fix types
-export type IService = new (...args: any[]) => CaseConnector<unknown>;
+export type IService = new (...args: any[]) => CaseConnector;
 
 interface SubAction {
   name: string;
   method: string;
+  schema: Type<any>;
 }
 
 export interface HTTPConnectorType<

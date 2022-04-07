@@ -5,28 +5,39 @@
  * 2.0.
  */
 
+import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
 import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
-import { Incident } from '../builtin_action_types/servicenow/types';
 
-export interface CaseConnectorInterface<T extends unknown> {
-  // TODO: need to implement a better type
-  // addIncidentComment: (comment: any) => Promise<any>;
-  createIncident: (incident: Partial<Incident>) => Promise<T>;
-  // deleteIncident: (incident: any) => Promise<any>;
-  // getIncident: (incidentId: string) => Promise<any>;
+export interface CaseConnectorInterface {
+  addComment: ({
+    incidentId,
+    comment,
+  }: {
+    incidentId: string;
+    comment: string;
+  }) => Promise<unknown>;
+  createIncident: (incident: Record<string, unknown>) => Promise<unknown>;
+  updateIncident: ({
+    incidentId,
+    incident,
+  }: {
+    incidentId: string;
+    incident: Record<string, unknown>;
+  }) => Promise<unknown>;
+  getIncident: ({ id }: { id: string }) => Promise<unknown>;
 }
 
 const isObject = (v: unknown): v is Record<string, unknown> => {
   return typeof v === 'object' && v !== null;
 };
 
-export abstract class CaseConnector<T extends unknown> implements CaseConnectorInterface<T> {
+export abstract class CaseConnector implements CaseConnectorInterface {
   private axiosInstance: AxiosInstance;
-  private validProtocols: string[] = ['http', 'https'];
+  private validProtocols: string[] = ['http:', 'https:'];
 
   constructor(
     public configurationUtilities: ActionsConfigurationUtilities,
@@ -38,11 +49,23 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     });
   }
 
-  // abstract addIncidentComment: (comment: any) => Promise<any>;
-  // abstract deleteIncident: (incident: any) => Promise<any>;
-  // abstract getFields: () => Promise<any>;
-  abstract createIncident(incident: Partial<Incident>): Promise<T>;
-  // abstract getIncident: (incidentId: string) => Promise<any>;
+  public abstract addComment({
+    incidentId,
+    comment,
+  }: {
+    incidentId: string;
+    comment: string;
+  }): Promise<unknown>;
+
+  public abstract createIncident(incident: Record<string, unknown>): Promise<unknown>;
+  public abstract updateIncident({
+    incidentId,
+    incident,
+  }: {
+    incidentId: string;
+    incident: Record<string, unknown>;
+  }): Promise<unknown>;
+  public abstract getIncident({ id }: { id: string }): Promise<unknown>;
 
   private normalizeURL(url: string) {
     const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
@@ -85,58 +108,15 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
     }
   }
 
-  public async pushToServiceHandler(params) {
-    const {
-      comments,
-      incident: { externalId, ...rest },
-    } = params;
-    let res: PushToServiceResponse;
-    // const { externalId, ...rest } = params.incident;
-    const incident: Incident = rest;
-
-    if (externalId != null) {
-      res = await this.updateIncident({
-        incidentId: externalId,
-        incident,
-      });
-    } else {
-      res = await this.createIncident({
-        ...incident,
-        caller_id: this.secrets.username,
-        opened_by: this.secrets.username,
-      });
-    }
-
-    if (comments && Array.isArray(comments) && comments.length > 0) {
-      res.comments = [];
-
-      for (const currentComment of comments) {
-        await this.updateIncident({
-          incidentId: res.id,
-          incident: {
-            ...incident,
-            [commentFieldKey]: currentComment.comment,
-          },
-        });
-        res.comments = [
-          ...(res.comments ?? []),
-          {
-            commentId: currentComment.commentId,
-            pushedDate: res.pushedDate,
-          },
-        ];
-      }
-    }
-    return res;
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async request<D = unknown, R = any>({
     url,
     data,
     method = 'get',
+    responseSchema,
   }: {
     url: string;
+    responseSchema: Type<R>;
     data?: D;
     method?: Method;
   }): Promise<AxiosResponse<R>> {
@@ -164,6 +144,8 @@ export abstract class CaseConnector<T extends unknown> implements CaseConnectorI
       maxContentLength,
       timeout,
     });
+
+    responseSchema.validate(res);
 
     return res;
   }

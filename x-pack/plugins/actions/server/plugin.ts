@@ -92,7 +92,7 @@ import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { createHTTPConnectorFramework } from './http_framework';
-import { ServiceNowItsm } from './connectors/externals/servicenow';
+import { ServiceNowItsm } from './connectors/externals/servicenow/itsm';
 
 export interface PluginSetupContract {
   registerType<
@@ -316,7 +316,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         config: schema.object({ apiUrl: schema.string() }),
         secrets: schema.object({ username: schema.string(), password: schema.string() }),
       },
-      subActions: [{ name: 'getIncident', method: 'getIncident' }],
+      subActions: [
+        {
+          name: 'getIncident',
+          method: 'getIncident',
+          schema: schema.object({ id: schema.string() }),
+        },
+      ],
       Service: ServiceNowItsm,
     });
 

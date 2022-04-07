@@ -13,12 +13,8 @@ interface ValidatorType {
   validate(value: unknown): unknown;
 }
 
-export function Validate<Params>(inputValidate: ValidatorType, outputValidate: ValidatorType) {
-  return function (
-    target: CaseConnector<Params>,
-    propertyKey: string,
-    propDesc: PropertyDescriptor
-  ) {
+export function Validate(inputValidate: ValidatorType, outputValidate: ValidatorType) {
+  return function (target: CaseConnector, propertyKey: string, propDesc: PropertyDescriptor) {
     const method = propDesc.value;
     propDesc.value = function () {
       inputValidate.validate(arguments[0]);

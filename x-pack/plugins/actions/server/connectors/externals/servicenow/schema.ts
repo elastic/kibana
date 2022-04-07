@@ -53,7 +53,7 @@ export const importSetTableErrorResponse = schema.object({
   ),
 });
 
-export const importSetTableResponse = schema.oneOf([
+export const importSetTableORIncidentTableResponse = schema.oneOf([
   importSetTableSuccessResponse,
   importSetTableErrorResponse,
   incidentSchema,

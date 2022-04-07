@@ -42,7 +42,6 @@ export class ServiceNowItsm extends ServiceNow {
       configurationUtilities,
       internalConfig: ServiceNowItsm.internalConfig,
       logger,
-      params,
       secrets,
     });
   }
