@@ -209,7 +209,6 @@ export function ProcessTreeNode({
     tty,
     parent,
     working_directory: workingDirectory,
-    exit_code: exitCode,
     start,
   } = processDetails.process;
 
@@ -256,12 +255,6 @@ export function ProcessTreeNode({
                 <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>&nbsp;
                 <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>{' '}
                 {args?.slice(1).join(' ')}
-                {exitCode !== undefined && (
-                  <small data-test-subj="sessionView:processTreeNodeExitCode">
-                    {' '}
-                    [exit_code: {exitCode}]
-                  </small>
-                )}
               </span>
               {timeStampOn && (
                 <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
