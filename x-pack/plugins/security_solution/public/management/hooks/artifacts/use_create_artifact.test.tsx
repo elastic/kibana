@@ -13,7 +13,7 @@ import {
   getFakeListDefinition,
   getFakeHttpService,
   renderMutation,
-} from './test_utils';
+} from '../test_utils';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
