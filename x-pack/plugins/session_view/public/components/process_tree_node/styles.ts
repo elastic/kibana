@@ -21,7 +21,6 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
 
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
-    console.log({size});
 
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
 

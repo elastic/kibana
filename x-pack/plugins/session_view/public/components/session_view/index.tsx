@@ -285,7 +285,7 @@ export const SessionView = ({
                   <EuiResizablePanel
                     id="session-detail-panel"
                     initialSize={25}
-                    minSize="100px"
+                    minSize="320px"
                     paddingSize="none"
                     css={styles.detailPanel}
                   >
