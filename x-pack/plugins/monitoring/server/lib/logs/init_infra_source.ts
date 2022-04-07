@@ -13,7 +13,11 @@ import { InfraPluginSetup } from '../../../../infra/server';
 
 export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPluginSetup) => {
   if (infraPlugin) {
-    const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
+    const filebeatIndexPattern = prefixIndexPattern(
+      config,
+      config.ui.logs.index,
+      config.ui.ccs.remotePatterns
+    );
     infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
       logIndices: {

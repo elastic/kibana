@@ -33,7 +33,7 @@ export function handleResponse(clusterUuid: string, response: ElasticsearchRespo
   };
 }
 
-export function getApmsForClusters(req: LegacyRequest, clusters: Cluster[], ccs?: string) {
+export function getApmsForClusters(req: LegacyRequest, clusters: Cluster[], ccs?: string[]) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const config = req.server.config;

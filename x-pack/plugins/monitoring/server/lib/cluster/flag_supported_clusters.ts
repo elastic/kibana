@@ -16,7 +16,7 @@ import { Globals } from '../../static_globals';
 async function findSupportedBasicLicenseCluster(
   req: LegacyRequest,
   clusters: ElasticsearchModifiedSource[],
-  ccs: string,
+  ccs: string[],
   kibanaUuid: string,
   serverLog: (message: string) => void
 ) {
@@ -88,7 +88,7 @@ async function findSupportedBasicLicenseCluster(
  * Non-Basic license clusters and any cluster in a single-cluster environment
  * are also flagged as supported in this method.
  */
-export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
+export function flagSupportedClusters(req: LegacyRequest, ccs: string[]) {
   const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
   const flagAllSupported = (clusters: ElasticsearchModifiedSource[]) => {
     clusters.forEach((cluster) => {

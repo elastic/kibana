@@ -24,9 +24,11 @@ import { Globals } from '../../static_globals';
  *
  * @param  {Object} req The incoming user's request
  * @param  {String} clusterUuid (optional) If not undefined, getClusters will filter for a single cluster
+ * @param  {Array} ccs (optional) remote names to search for remote clusters, only called without ccs in getClusterStats
+ * when we're only searching for a particular cluster by clusterUuid from a view
  * @return {Promise} A promise containing an array of clusters.
  */
-export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
+export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string[]) {
   return (
     fetchClusterStats(req, clusterUuid, ccs)
       .then((response) => handleClusterStats(response))
@@ -40,16 +42,17 @@ export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?:
  *
  * @param {Object} req (required) - server request
  * @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
+ * @param  {Array} ccs (optional) remote names to search for remote clusters, only called without ccs in getClusterStats
+ * when we're only searching for a particular cluster by clusterUuid from a view
  * @return {Promise} Object representing each cluster.
  */
-function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
+function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: string[]) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
-    // this is will be either *, a request value, or null
     ccs: ccs || req.payload.ccs,
   });
 

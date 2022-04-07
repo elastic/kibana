@@ -45,7 +45,11 @@ export function esIndexRoute(server) {
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
+        const filebeatIndexPattern = prefixIndexPattern(
+          config,
+          config.ui.logs.index,
+          config.ui.ccs.remotePatterns
+        );
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 

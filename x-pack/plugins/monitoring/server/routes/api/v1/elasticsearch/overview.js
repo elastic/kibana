@@ -37,7 +37,11 @@ export function esOverviewRoute(server) {
     async handler(req) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
+      const filebeatIndexPattern = prefixIndexPattern(
+        config,
+        config.ui.logs.index,
+        config.ui.ccs.remotePatterns
+      );
 
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;

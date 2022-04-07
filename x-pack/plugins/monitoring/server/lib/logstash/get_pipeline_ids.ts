@@ -18,7 +18,7 @@ interface GetLogstashPipelineIdsParams {
   clusterUuid?: string;
   size: number;
   logstashUuid?: string;
-  ccs?: string;
+  ccs?: string[];
 }
 export async function getLogstashPipelineIds({
   req,

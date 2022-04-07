@@ -38,6 +38,7 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
+import { Globals } from '../../static_globals';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -52,6 +53,7 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid?: string; start?: number; end?: number; codePaths: string[] }
 ) {
+  const configCcsRemotePatterns = Globals.app.config.ui.ccs.remotePatterns;
   const { filebeatIndexPattern } = indexPatterns;
 
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -62,11 +64,11 @@ export async function getClustersFromRequest(
     clusters.push(getStandaloneClusterDefinition());
   } else {
     // get clusters with stats and cluster state
-    clusters = await getClustersStats(req, clusterUuid, '*');
+    clusters = await getClustersStats(req, clusterUuid, configCcsRemotePatterns);
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    if (await hasStandaloneClusters(req, '*')) {
+    if (await hasStandaloneClusters(req, configCcsRemotePatterns)) {
       clusters.push(getStandaloneClusterDefinition());
     }
   }
@@ -90,7 +92,7 @@ export async function getClustersFromRequest(
 
     // add ml jobs and alerts data
     const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
-      ? await getMlJobsForCluster(req, cluster, '*')
+      ? await getMlJobsForCluster(req, cluster, configCcsRemotePatterns)
       : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
@@ -113,7 +115,7 @@ export async function getClustersFromRequest(
     }
 
     // update clusters with license check results
-    const getSupportedClusters = flagSupportedClusters(req, '*');
+    const getSupportedClusters = flagSupportedClusters(req, configCcsRemotePatterns);
     clusters = await getSupportedClusters(clusters);
 
     // add alerts data
@@ -169,7 +171,7 @@ export async function getClustersFromRequest(
   // add kibana data
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, clusters, '*')
+      ? await getKibanasForClusters(req, clusters, configCcsRemotePatterns)
       : [];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
@@ -182,8 +184,13 @@ export async function getClustersFromRequest(
 
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
-    const logstashes = await getLogstashForClusters(req, clusters, '*');
-    const pipelines = await getLogstashPipelineIds({ req, clusterUuid, size: 1, ccs: '*' });
+    const logstashes = await getLogstashForClusters(req, clusters, configCcsRemotePatterns);
+    const pipelines = await getLogstashPipelineIds({
+      req,
+      clusterUuid,
+      size: 1,
+      ccs: configCcsRemotePatterns,
+    });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>
@@ -199,7 +206,7 @@ export async function getClustersFromRequest(
 
   // add beats data
   const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
-    ? await getBeatsForClusters(req, clusters, '*')
+    ? await getBeatsForClusters(req, clusters, configCcsRemotePatterns)
     : [];
   beatsByCluster.forEach((beats) => {
     const clusterIndex = clusters.findIndex(
@@ -211,7 +218,7 @@ export async function getClustersFromRequest(
 
   // add apm data
   const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
-    ? await getApmsForClusters(req, clusters, '*')
+    ? await getApmsForClusters(req, clusters, configCcsRemotePatterns)
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = clusters.findIndex(
@@ -229,7 +236,7 @@ export async function getClustersFromRequest(
 
   // add Enterprise Search data
   const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
-    ? await getEnterpriseSearchForClusters(req, clusters, '*')
+    ? await getEnterpriseSearchForClusters(req, clusters, configCcsRemotePatterns)
     : [];
   enterpriseSearchByCluster.forEach((entSearch) => {
     const clusterIndex = clusters.findIndex(
@@ -244,7 +251,7 @@ export async function getClustersFromRequest(
   });
 
   // check ccr configuration
-  const isCcrEnabled = await checkCcrEnabled(req, '*');
+  const isCcrEnabled = await checkCcrEnabled(req, configCcsRemotePatterns);
 
   const kibanaUuid = req.server.instanceUuid;
 

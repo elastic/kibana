@@ -47,7 +47,11 @@ export function esNodeRoute(server) {
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
+      const filebeatIndexPattern = prefixIndexPattern(
+        config,
+        config.ui.logs.index,
+        config.ui.ccs.remotePatterns
+      );
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;

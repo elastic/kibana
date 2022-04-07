@@ -29,7 +29,7 @@ function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
 export function getEnterpriseSearchForClusters(
   req: LegacyRequest,
   clusters: Cluster[],
-  ccs: string
+  ccs: string[]
 ) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
