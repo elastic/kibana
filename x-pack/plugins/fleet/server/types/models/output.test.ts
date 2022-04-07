@@ -14,7 +14,7 @@ describe('Output model', () => {
     });
 
     it('should return an error for an invalid host', () => {
-      expect(validateLogstashHost('!@#%&!#!@')).toMatchInlineSnapshot(`"Invalid logstash host"`);
+      expect(validateLogstashHost('!@#%&!#!@')).toMatchInlineSnapshot(`"Invalid Logstash host"`);
     });
 
     it('should return an error for an invalid host with http scheme', () => {
