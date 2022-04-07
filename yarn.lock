@@ -2924,6 +2924,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ambient-storybook-types@link:bazel-bin/packages/kbn-ambient-storybook-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ambient-ui-types@link:bazel-bin/packages/kbn-ambient-ui-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -2953,6 +2961,10 @@
   uid ""
 
 "@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
+  version "0.0.0"
+  uid ""
+
+"@kbn/coloring@link:bazel-bin/packages/kbn-coloring":
   version "0.0.0"
   uid ""
 
@@ -5976,6 +5988,10 @@
   uid ""
 
 "@types/kbn__cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__coloring@link:bazel-bin/packages/kbn-coloring/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -12,7 +12,7 @@ import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-import { UiPlugins } from '../plugins';
+import type { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
@@ -27,6 +27,7 @@ import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
 import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
+import { filterUiPlugins } from './filter_ui_plugins';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 
@@ -79,7 +80,7 @@ export class RenderingService {
     { http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { includeUserSettings = true, vars }: IRenderOptions = {}
+    { isAnonymousPage = false, vars }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -90,7 +91,7 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
-      user: includeUserSettings ? await uiSettings.getUserProvided() : {},
+      user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
@@ -103,10 +104,12 @@ export class RenderingService {
       buildNum,
     });
 
+    const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
+    const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${basePath}/ui`,
-      bootstrapScriptUrl: `${basePath}/bootstrap.js`,
+      bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
@@ -132,7 +135,7 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          [...uiPlugins.public].map(async ([id, plugin]) => ({
+          filteredPlugins.map(async ([id, plugin]) => ({
             id,
             plugin,
             config: await getUiConfig(uiPlugins, id),
