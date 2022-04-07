@@ -474,7 +474,7 @@ describe('dashboard', () => {
   });
 
   describe('7.10.0 - hidden panel titles', () => {
-    const migration = migrations['7.10.0'];
+    const migration = migrations['7.17.3'];
     const doc: DashboardDoc730ToLatest = {
       attributes: {
         description: '',
