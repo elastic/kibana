@@ -241,7 +241,7 @@ export function DiscoverLayout({
                   savedSearchTitle: savedSearch.title,
                 },
               })
-            : i18n.translate('discover.pageTitleWithSavedSearch', {
+            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
                 defaultMessage: 'Discover - Search not yet saved',
               })}
         </h1>
