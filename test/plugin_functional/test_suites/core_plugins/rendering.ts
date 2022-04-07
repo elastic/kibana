@@ -227,7 +227,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
     // FLAKY
     it.skip('renders "core" application without user settings', async () => {
-      await navigateTo('/render/core?includeUserSettings=false');
+      await navigateTo('/render/core?isAnonymousPage=true');
 
       const [loadingMessage, userSettings] = await Promise.all([
         findLoadingMessage(),

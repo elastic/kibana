@@ -104,6 +104,8 @@ export const getPinnedEvent = async (
   return getSavedPinnedEvent(request, pinnedEventId);
 };
 
+export const PINNED_EVENTS_PER_PAGE = 10000; // overrides the saved object client's FIND_DEFAULT_PER_PAGE (20)
+
 export const getAllPinnedEventsByTimelineId = async (
   request: FrameworkRequest,
   timelineId: string
@@ -111,6 +113,7 @@ export const getAllPinnedEventsByTimelineId = async (
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
     hasReference: { type: timelineSavedObjectType, id: timelineId },
+    perPage: PINNED_EVENTS_PER_PAGE,
   };
   return getAllSavedPinnedEvents(request, options);
 };

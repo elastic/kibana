@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { exportTimeline } from '../../tasks/timelines';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   expectedExportedTimelineTemplate,
   getTimeline as getTimelineTemplate,
@@ -18,7 +18,7 @@ import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 
 describe('Export timelines', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     cy.intercept({
       method: 'POST',
@@ -28,10 +28,11 @@ describe('Export timelines', () => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
     });
+    login();
   });
 
   it('Exports a custom timeline template', function () {
-    loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
     exportTimeline(this.templateId);
 
     cy.wait('@export').then(({ response }) => {
