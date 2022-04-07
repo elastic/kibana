@@ -27,6 +27,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
       container: true,
       ccs: {
         enabled: true,
+        remotePatterns: true,
       },
     },
     kibana: true,

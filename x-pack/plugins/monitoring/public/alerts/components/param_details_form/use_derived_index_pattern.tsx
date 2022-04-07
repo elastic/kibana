@@ -22,7 +22,11 @@ export const useDerivedIndexPattern = (
   dataViews: DataViewsPublicPluginStart,
   config?: MonitoringConfig
 ): { loading: boolean; derivedIndexPattern?: DataView } => {
-  const indexPattern = prefixIndexPattern(config || ({} as MonitoringConfig), INDEX_PATTERNS, '*');
+  const indexPattern = prefixIndexPattern(
+    config || ({} as MonitoringConfig),
+    INDEX_PATTERNS,
+    config?.ui.ccs.remotePatterns
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [dataView, setDataView] = useState<DataView>();
   useEffect(() => {
