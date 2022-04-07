@@ -33,9 +33,6 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       await testSubjects.existOrFail('case-view-title', {
         timeout: config.get('timeouts.waitFor'),
       });
-      await testSubjects.existOrFail('euiToastHeader', {
-        timeout: config.get('timeouts.waitFor'),
-      });
     },
 
     async deleteFirstListedCase() {
@@ -47,6 +44,9 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
         timeout: config.get('timeouts.waitFor'),
       });
       await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('euiToastHeader', {
+        timeout: config.get('timeouts.waitFor'),
+      });
     },
 
     async bulkDeleteAllCases() {
