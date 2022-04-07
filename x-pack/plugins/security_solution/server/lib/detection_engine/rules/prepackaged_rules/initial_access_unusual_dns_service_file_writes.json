@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual File Modification by dns.exe",
-  "note": "## Triage and analysis\n\n### Investigating Unusual File Write\nDetection alerts from this rule indicate potential unusual/abnormal file writes from the DNS Server service process (`dns.exe`) after exploitation from CVE-2020-1350 (SigRed) has occurred. Here are some possible avenues of investigation:\n- Post-exploitation, adversaries may write additional files or payloads to the system as additional discovery/exploitation/persistence mechanisms.\n- Any suspicious or abnormal files written from `dns.exe` should be reviewed and investigated with care.",
+  "note": "## Triage and analysis\n\n### Investigating Unusual File Write\nDetection alerts from this rule indicate potential unusual/abnormal file writes from the DNS Server service process (`dns.exe`) after exploitation from CVE-2020-1350 (SigRed) has occurred. Here are some possible avenues of investigation:\n- Post-exploitation, adversaries may write additional files or payloads to the system as additional discovery/exploitation/persistence mechanisms.\n- Any suspicious or abnormal files written from `dns.exe` should be reviewed and investigated with care.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where process.name : \"dns.exe\" and event.type in (\"creation\", \"deletion\", \"change\") and\n  not file.name : \"dns.log\"\n",
   "references": [
     "https://research.checkpoint.com/2020/resolving-your-way-into-domain-admin-exploiting-a-17-year-old-bug-in-windows-dns-servers/",
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

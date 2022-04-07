@@ -659,7 +659,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:04.218Z'),
+        original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
           action: 'exec',
         },
@@ -844,7 +844,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:05.202Z'),
+        original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
           action: 'exit',
         },
@@ -1019,6 +1019,230 @@ export const mockData: ProcessEventsPage[] = [
   {
     events: mockEvents,
     cursor: '2021-11-23T15:25:04.210Z',
+  },
+];
+
+export const nullMockEvents: ProcessEvent[] = [
+  {
+    '@timestamp': null!,
+    user: {
+      name: null!,
+      id: null!,
+    },
+    group: {
+      id: null!,
+      name: null!,
+    },
+    process: {
+      pid: null!,
+      user: null!,
+      group: null!,
+      executable: null!,
+      command_line: null!,
+      interactive: null!,
+      entity_id: null!,
+      tty: null!,
+      parent: null!,
+      session_leader: null!,
+      entry_leader: null!,
+      group_leader: null!,
+      name: null!,
+      args_count: null!,
+      args: null!,
+      working_directory: null!,
+      start: null!,
+    },
+    event: {
+      action: null!,
+      category: null!,
+      kind: null!,
+    },
+    host: {
+      architecture: null!,
+      hostname: null!,
+      id: null!,
+      ip: null!,
+      mac: null!,
+      name: null!,
+      os: null!,
+    },
+  },
+];
+
+export const nullMockData: ProcessEventsPage[] = [
+  {
+    events: nullMockEvents,
+    cursor: undefined,
+  },
+];
+
+export const deepNullMockEvents: ProcessEvent[] = [
+  {
+    '@timestamp': null!,
+    event: {
+      action: null!,
+      category: null!,
+      kind: null!,
+    },
+    group: {
+      id: null!,
+      name: null!,
+    },
+    host: {
+      architecture: null!,
+      hostname: null!,
+      id: null!,
+      ip: null!,
+      mac: null!,
+      name: null!,
+      os: {
+        family: null!,
+        full: null!,
+        kernel: null!,
+        name: null!,
+        platform: null!,
+        version: null!,
+      },
+    },
+    process: {
+      args: [null!, null!],
+      args_count: null!,
+      command_line: null!,
+      entity_id: null!,
+      entry_leader: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        entry_meta: {
+          source: {
+            ip: null!,
+          },
+          type: null!,
+        },
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      executable: null!,
+      group_leader: {
+        args: [null!, null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      interactive: null!,
+      name: null!,
+      parent: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      pid: null!,
+      session_leader: {
+        args: [null!],
+        args_count: null!,
+        command_line: null!,
+        entity_id: null!,
+        executable: null!,
+        group: {
+          id: null!,
+          name: null!,
+        },
+        interactive: null!,
+        name: null!,
+        pid: null!,
+        start: null!,
+        tty: {
+          char_device: {
+            major: null!,
+            minor: null!,
+          },
+        },
+        user: {
+          id: null!,
+          name: null!,
+        },
+        working_directory: null!,
+      },
+      start: null!,
+      tty: {
+        char_device: {
+          major: null!,
+          minor: null!,
+        },
+      },
+      working_directory: null!,
+    },
+    user: {
+      id: null!,
+      name: null!,
+    },
+  },
+];
+
+export const deepNullMockData: ProcessEventsPage[] = [
+  {
+    events: deepNullMockEvents,
+    cursor: undefined,
   },
 ];
 
@@ -1294,8 +1518,8 @@ export const sessionViewAlertProcessMock: Process = {
 
 export const mockProcessMap = mockEvents.reduce(
   (processMap, event) => {
-    processMap[event.process.entity_id] = {
-      id: event.process.entity_id,
+    processMap[event.process!.entity_id!] = {
+      id: event.process!.entity_id!,
       events: [event],
       alerts: [],
       children: [],
