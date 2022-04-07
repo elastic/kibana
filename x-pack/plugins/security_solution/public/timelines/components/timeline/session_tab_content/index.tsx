@@ -12,6 +12,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { useSessionView } from './use_session_view';
 
 const FlexItemWithMargin = styled(EuiFlexItem)`
+  width: 100%;
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
 `;
 
