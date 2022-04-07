@@ -26,7 +26,7 @@ function generator({
   }`;
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   const dockerBuild = dockerCrossCompile
-    ? `docker build -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;`
+    ? `docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;`
     : `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`;
   return dedent(`
   #!/usr/bin/env bash
