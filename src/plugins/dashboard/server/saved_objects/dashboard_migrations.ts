@@ -307,9 +307,9 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.0.0': flow(migrations700),
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
-    '7.10.0': flow(migrateExplicitlyHiddenTitles),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
     '7.14.0': flow(replaceIndexPatternReference),
+    '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
 
   return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
