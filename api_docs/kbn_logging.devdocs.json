@@ -658,7 +658,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"user\" | \"error\" | \"end\" | \"info\" | \"group\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"user\" | \"error\" | \"info\" | \"group\" | \"end\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "packages/kbn-logging/src/ecs/event.ts",
         "deprecated": false,

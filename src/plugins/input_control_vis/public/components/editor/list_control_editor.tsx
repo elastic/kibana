@@ -14,7 +14,7 @@ import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPatternSelectProps } from '../../../../data/public';
+import { IndexPatternSelectProps } from '../../../../unified_search/public';
 import { DataView, DataViewField } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
@@ -93,9 +93,9 @@ export class ListControlEditor extends PureComponent<
   };
 
   async getIndexPatternSelect() {
-    const [, { data }] = await this.props.deps.core.getStartServices();
+    const [, { unifiedSearch }] = await this.props.deps.core.getStartServices();
     this.setState({
-      IndexPatternSelect: data.ui.IndexPatternSelect,
+      IndexPatternSelect: unifiedSearch.ui.IndexPatternSelect,
     });
   }
 

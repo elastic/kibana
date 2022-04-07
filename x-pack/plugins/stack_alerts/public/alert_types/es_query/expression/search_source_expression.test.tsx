@@ -8,6 +8,7 @@
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
 import { DataPublicPluginStart, ISearchStart } from 'src/plugins/data/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
@@ -21,6 +22,7 @@ const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart &
   search: ISearchStart & { searchSource: { create: jest.MockedFunction<any> } };
 };
 const chartsStartMock = chartPluginMock.createStartContract();
+const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 
 const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchSource> = {
   size: 100,
@@ -60,6 +62,7 @@ const setup = async (alertParams: EsQueryAlertParams<SearchType.searchSource>) =
       setRuleParams={() => {}}
       setRuleProperty={() => {}}
       errors={errors}
+      unifiedSearch={unifiedSearchMock}
       data={dataMock}
       defaultActionGroupId=""
       actionGroups={[]}
