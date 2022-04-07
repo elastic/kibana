@@ -20,7 +20,7 @@ import {
   INGEST_API_EPM_PACKAGES,
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
-} from '../../policy/store/services/ingest';
+} from '../../../services/policies/ingest';
 import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
