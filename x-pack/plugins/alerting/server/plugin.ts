@@ -218,7 +218,6 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       licensing: plugins.licensing,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
-      nodeLevelMetrics: this.nodeLevelMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -436,6 +435,7 @@ export class AlertingPlugin {
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       usageCounter: this.usageCounter,
+      nodeLevelMetrics: this.nodeLevelMetrics,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

@@ -63,7 +63,6 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
-import { NodeLevelMetrics } from '../monitoring';
 import {
   ActionsCompletion,
   AlertExecutionStore,
@@ -115,7 +114,6 @@ export class TaskRunner<
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly nodeLevelMetrics?: NodeLevelMetrics;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -131,8 +129,7 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext,
-    nodeLevelMetrics?: NodeLevelMetrics
+    context: TaskRunnerContext
   ) {
     this.context = context;
     this.logger = context.logger;
@@ -145,7 +142,6 @@ export class TaskRunner<
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
-    this.nodeLevelMetrics = nodeLevelMetrics;
   }
 
   private async getDecryptedAttributes(
@@ -855,12 +851,12 @@ export class TaskRunner<
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
-      this.nodeLevelMetrics?.execution(
+      this.context.nodeLevelMetrics?.execution(
         ruleId,
         event.event?.duration ? event.event?.duration / Millis2Nanos : undefined
       );
       if (executionStatus.error) {
-        this.nodeLevelMetrics?.failure(ruleId, executionStatus.error.reason);
+        this.context.nodeLevelMetrics?.failure(ruleId, executionStatus.error.reason);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
@@ -992,7 +988,7 @@ export class TaskRunner<
     };
     eventLogger.logEvent(event);
 
-    this.nodeLevelMetrics?.timeout(ruleId, this.ruleType.ruleTaskTimeout);
+    this.context.nodeLevelMetrics?.timeout(ruleId, this.ruleType.ruleTaskTimeout);
 
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
