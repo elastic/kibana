@@ -17,6 +17,7 @@ function download {
   buildkite-agent artifact download "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   buildkite-agent artifact download "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   sha512sum -c "$1.sha512.txt"
+  rm "$1.sha512.txt"
 }
 
 mkdir -p target
@@ -57,6 +58,7 @@ VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kiban
 VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
 VAULT_ADDR="https://secrets.elastic.co:8200"
 QUALIFIER=""
+BASE_VERSION="$(jq -r '.version' package.json)"
 docker run --rm \
   --name release-manager \
   -e VAULT_ADDR \
@@ -69,6 +71,6 @@ docker run --rm \
       --branch "$KIBANA_BASE_BRANCH" \
       --commit "$GIT_COMMIT" \
       --workflow "$WORKFLOW" \
-      --version "$VERSION" \
+      --version "$BASE_VERSION" \
       --qualifier "$QUALIFIER" \
       --artifact-set main
