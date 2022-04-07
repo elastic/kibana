@@ -209,7 +209,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     guideLink: (
                       <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
                         <FormattedMessage
-                          id="xpack.fleet.settings.fleetUserGuideLink"
+                          id="xpack.fleet.settings.fleetSettingsLink"
                           defaultMessage="Learn more"
                         />
                       </EuiLink>
