@@ -1,5 +1,5 @@
 [[show-field-statistics]]
-== Explore the fields in your data
+== View field statistics
 
 beta::[]
 

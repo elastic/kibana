@@ -61,7 +61,8 @@ from the {data-source} dropdown.
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
 +
 To create a data view for your own data,
-click the ellipsis icon (…​), and then click *Create new data view*.
+click
+image:images/actions-icon.png[three dots icon next to data view dropdown], and then click *Create new data view*.
 For details, refer to <<data-views, Create a data view.>>
 
 . Adjust the <<set-time-filter,time range>> to view data for the *Last 7 days*.
@@ -77,10 +78,10 @@ click and drag the mouse over the chart.
 [[explore-fields-in-your-data]]
 === Explore the fields in your data
 
-**Discover** includes a table, also called the Document Explorer,
+**Discover** includes a table
 that shows all the documents that match your search.
-By default, the Document Explorer includes columns for the time field and the document `_source`.
-You’ll modify the Document Explorer to display your fields of interest.
+By default, the document table includes columns for the time field and the document `_source`.
+You’ll modify the document table to display your fields of interest.
 
 . Scan through the list of **Available fields** until you find the `manufacturer` field.
 You can also search for the field by name.
@@ -93,13 +94,13 @@ image:images/discover-sidebar-available-fields.png[Fields list that displays the
 [role="screenshot"]
 image:images/find-manufacturer-field.png[Fields list that displays the top five search results, width=75%]
 
-. Click image:images/add-icon.png[Add icon] to toggle the field into the Document Explorer.
+. Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
 . Find the `customer_first_name` and `customer_last_name` fields and add
-them to the Document Explorer. Your table should look similar to this:
+them to the document table. Your table should look similar to this:
 +
 [role="screenshot"]
-image:images/document-table.png[Document Explorer with fields for manufacturer, customer_first_name, and customer_last_name]
+image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
 . To rearrange the table columns, click a
 column header, and then select *Move left* or *Move right*.
@@ -119,7 +120,8 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Click the ellipsis icon (...), and then click *Add field*.
+. Click
+image:images/actions-icon.png[three dots icon next to data view dropdown], and then click *Add field*.
 +
 [role="screenshot"]
 image:images/add-field-to-data-view.png[Dropdown menu located next to {data-source} field with item for adding a field to a {data-source}, width=50%]
@@ -136,10 +138,10 @@ emit("Hello World!");
 
 . Click *Save*.
 
-. In the fields list, search for the *hello* field, and then add it to the Document Explorer to view it's value.
+. In the fields list, search for the *hello* field, and then add it to the document table to view it's value.
 +
 [role="screenshot"]
-image:images/hello-field.png[hello field in the Document Explorer]
+image:images/hello-field.png[hello field in the document tables]
 
 . Create a second field named `customer` that combines customer last name and first initial.
 +
@@ -148,7 +150,7 @@ String str = doc['customer_first_name.keyword'].value;
 char ch1 = str.charAt(0);
 emit(doc['customer_last_name.keyword'].value + ", " + ch1);
 ```
-. Remove `customer_first_name` and `customer_last_name` from the Document Explorer and add `customer` in their place.
+. Remove `customer_first_name` and `customer_last_name` from the document table and add `customer` in their place.
 +
 [role="screenshot"]
 image:images/customer.png[Customer last name, first initial in the document table]
@@ -213,18 +215,21 @@ click the close icon (x) next to its name in the filter bar.
 Dive into an individual document to view its fields and the documents
 that occurred before and after it.
 
-. In the Document Explorer, expand any document.
+. In the document table, click the expand icon
+image:images/expand-icon-2.png[double arrow icon to open a flyout with the document details]
+to show document details.
 +
 [role="screenshot"]
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-click the ellipsis (...) in the *Actions* column for filters and other controls.
+click 
+image:images/actions-icon.png[three dots icon next to data view dropdown] in the *Actions* column for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click
-<<discover-view-surrounding-documents, Surrounding documents>>.
+**Surrounding documents**.
 
-. For direct access to a particular document, click **<<discover-view-single-document,Single document>>**.
+. For direct access to a particular document, click **Single document**.
 +
 You can bookmark this document and share the link.
 
@@ -236,7 +241,7 @@ You can bookmark this document and share the link.
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query text, filters,
 and current view of *Discover*, including the columns selected in
-the Document Explorer, the sort order, and the {data-source}.
+the document table, the sort order, and the {data-source}.
 
 . In the toolbar, click **Save**.
 
@@ -288,8 +293,6 @@ the table columns that display by default, and more.
 
 --
 include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
-
-include::{kib-repo-dir}/discover/view-document.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 
