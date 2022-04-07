@@ -17,7 +17,7 @@ import {
   useTimelineFullScreen,
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
-import { useSessionView } from './use_session_view';
+import { useSessionView, useSessionViewNavigation } from './use_session_view';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/hooks/use_selector');
@@ -137,7 +137,7 @@ describe('useSessionView with active timeline and a session id and graph event i
         const testProps = {
           timelineId: TimelineId.active,
         };
-        return useSessionView(testProps);
+        return useSessionViewNavigation(testProps);
       },
       { wrapper: Wrapper }
     );
@@ -174,7 +174,7 @@ describe('useSessionView with active timeline and a session id and graph event i
           const testProps = {
             timelineId: TimelineId.hostsPageEvents,
           };
-          return useSessionView(testProps);
+          return useSessionViewNavigation(testProps);
         },
         { wrapper: Wrapper }
       );
