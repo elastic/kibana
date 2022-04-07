@@ -23,6 +23,8 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/event_f
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
+import { NoPermissions } from '../../../../../components/no_permissons';
 
 export const TRUSTED_APPS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -97,6 +99,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
   (props) => {
     const http = useHttp();
     const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+    const { canAccessEndpointManagement } = useEndpointPrivileges();
 
     const trustedAppsApiClientInstance = useMemo(
       () => TrustedAppsApiClient.getInstance(http),
@@ -113,47 +116,62 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       [http]
     );
 
-    const bloklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
-
-    return (
-      <div data-test-subj="fleetEndpointPackageCustomContent">
-        <FleetArtifactsCard
-          {...props}
-          artifactApiClientInstance={trustedAppsApiClientInstance}
-          getArtifactsPath={getTrustedAppsListPath}
-          labels={TRUSTED_APPS_LABELS}
-          data-test-subj="trustedApps"
-        />
-        <EuiSpacer />
-        <FleetArtifactsCard
-          {...props}
-          artifactApiClientInstance={eventFiltersApiClientInstance}
-          getArtifactsPath={getEventFiltersListPath}
-          labels={EVENT_FILTERS_LABELS}
-          data-test-subj="eventFilters"
-        />
-        {canSeeHostIsolationExceptions && (
-          <>
-            <EuiSpacer />
-            <FleetArtifactsCard
-              {...props}
-              artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
-              getArtifactsPath={getHostIsolationExceptionsListPath}
-              labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
-              data-test-subj="hostIsolationExceptions"
-            />
-          </>
-        )}
-        <EuiSpacer />
-        <FleetArtifactsCard
-          {...props}
-          artifactApiClientInstance={bloklistsApiClientInstance}
-          getArtifactsPath={getBlocklistsListPath}
-          labels={BLOCKLISTS_LABELS}
-          data-test-subj="blocklists"
-        />
-      </div>
+    const blocklistsApiClientInstance = useMemo(
+      () => BlocklistsApiClient.getInstance(http),
+      [http]
     );
+
+    const artifactCards = useMemo(
+      () => (
+        <div data-test-subj="fleetEndpointPackageCustomContent">
+          <FleetArtifactsCard
+            {...props}
+            artifactApiClientInstance={trustedAppsApiClientInstance}
+            getArtifactsPath={getTrustedAppsListPath}
+            labels={TRUSTED_APPS_LABELS}
+            data-test-subj="trustedApps"
+          />
+          <EuiSpacer />
+          <FleetArtifactsCard
+            {...props}
+            artifactApiClientInstance={eventFiltersApiClientInstance}
+            getArtifactsPath={getEventFiltersListPath}
+            labels={EVENT_FILTERS_LABELS}
+            data-test-subj="eventFilters"
+          />
+          {canSeeHostIsolationExceptions && (
+            <>
+              <EuiSpacer />
+              <FleetArtifactsCard
+                {...props}
+                artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
+                getArtifactsPath={getHostIsolationExceptionsListPath}
+                labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+                data-test-subj="hostIsolationExceptions"
+              />
+            </>
+          )}
+          <EuiSpacer />
+          <FleetArtifactsCard
+            {...props}
+            artifactApiClientInstance={blocklistsApiClientInstance}
+            getArtifactsPath={getBlocklistsListPath}
+            labels={BLOCKLISTS_LABELS}
+            data-test-subj="blocklists"
+          />
+        </div>
+      ),
+      [
+        blocklistsApiClientInstance,
+        canSeeHostIsolationExceptions,
+        eventFiltersApiClientInstance,
+        hostIsolationExceptionsApiClientInstance,
+        trustedAppsApiClientInstance,
+        props,
+      ]
+    );
+
+    return canAccessEndpointManagement ? artifactCards : <NoPermissions />;
   }
 );
 
