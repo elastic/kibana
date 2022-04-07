@@ -11,7 +11,6 @@ import { Query } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
-  getCustomIcons,
   getEditState,
   getLayerById,
   getLayerList,
@@ -175,7 +174,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id, false));
-    const layer = createLayerInstance(layerDescriptor, getCustomIcons(getState()));
+    const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
   };
