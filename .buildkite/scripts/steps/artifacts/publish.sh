@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
   VERSION="$(jq -r '.version' package.json)"
   WORKFLOW="staging"
