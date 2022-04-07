@@ -1528,6 +1528,10 @@ const mockLibs: any = {
   metricsRules: {
     createLifecycleRuleExecutor: createLifecycleRuleExecutorMock,
   },
+  basePath: {
+    publicBaseUrl: 'http://localhost:5601',
+    prepend: (path: string) => path,
+  },
 };
 
 const executor = createMetricThresholdExecutor(mockLibs);
