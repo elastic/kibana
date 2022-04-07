@@ -14,7 +14,7 @@ It is possible to validate the docs before bundling them by running the followin
 Then generate the `bundled` files with the following commands:
 
     ```
-    npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml entrypoint.yaml
-    npx @redocly/openapi-cli bundle --ext json --output bundled.json entrypoint.yaml
+    npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml ml_apis.yaml
+    npx @redocly/openapi-cli bundle --ext json --output bundled.json ml_apis.json
     ```
 
