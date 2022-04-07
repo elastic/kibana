@@ -64,9 +64,10 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     stackByField: userName ? AuthStackByField.hostName : AuthStackByField.userName,
   });
 
-  const columns = userName
-    ? getUserDetailsAuthenticationColumns()
-    : getUsersPageAuthenticationColumns();
+  const columns = useMemo(
+    () => (userName ? getUserDetailsAuthenticationColumns() : getUsersPageAuthenticationColumns()),
+    [userName]
+  );
 
   const updateLimitPagination = useCallback(
     (newLimit) =>
