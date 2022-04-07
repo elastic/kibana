@@ -58,7 +58,7 @@ export const buildTimelineEventsAllQuery = ({
       return {
         [field]: {
           order: item.direction,
-          unmapped_type: item.type,
+          unmapped_type: 'keyword',
         },
       };
     });
