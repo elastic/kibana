@@ -2587,7 +2587,9 @@ describe('Task Runner', () => {
       attributes: { ...SAVED_OBJECT.attributes, enabled: false },
     });
     const runnerResult = await taskRunner.run();
-    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt.toISOString());
+    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(
+      state.previousStartedAt.toISOString()
+    );
     expect(runnerResult.schedule).toStrictEqual(mockedTaskInstance.schedule);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
