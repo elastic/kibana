@@ -13,7 +13,5 @@ export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export type RangeValue = [string, string];
 
 export interface RangeSliderEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
   value: RangeValue;
 }

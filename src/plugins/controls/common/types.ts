@@ -26,4 +26,7 @@ export type ControlInput = EmbeddableInput & {
   timeRange?: TimeRange;
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
+
+  fieldName: string;
+  dataViewId: string;
 };

@@ -11,7 +11,5 @@ import { ControlInput } from '../../types';
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 
 export interface TimeSliderControlEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
   value?: [number | null, number | null];
 }

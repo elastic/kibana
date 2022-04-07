@@ -13,9 +13,6 @@ import { ControlInput } from '../../types';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export interface OptionsListEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
-
   selectedOptions?: string[];
   singleSelect?: boolean;
   loading?: boolean;
