@@ -28,8 +28,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
             should: [
               {
                 match: {
-                  // TODO: update to process.entry_leader.same_as_process once ECS is updated to support same_as_process
-                  'process.is_entry_leader': true,
+                  'process.entry_leader.same_as_process': true,
                 },
               },
             ],
@@ -42,7 +41,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   meta: {
     alias: null,
     disabled: false,
-    key: 'process.is_entry_leader',
+    key: 'process.entry_leader.same_as_process',
     negate: false,
     params: {},
     type: 'boolean',

@@ -22,7 +22,7 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
   // Current action are: 'start', 'exec', 'end', so we usually have three events per process.
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.created',
+    id: '@timestamp',
     display: 'process.end',
   },
   {
