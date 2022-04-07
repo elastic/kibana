@@ -126,6 +126,12 @@ describe('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-node/transaction_types?*'
+      ).as('transactionTypesRequest');
+      cy.wait('@transactionTypesRequest');
+
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -143,6 +149,11 @@ describe('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on View Transactions link', () => {
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-node/transaction_types?*'
+      ).as('transactionTypesRequest');
+      cy.wait('@transactionTypesRequest');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
