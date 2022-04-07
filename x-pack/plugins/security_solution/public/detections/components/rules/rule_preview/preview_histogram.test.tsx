@@ -96,37 +96,4 @@ describe('PreviewHistogram', () => {
     expect(wrapper.findByTestId('preview-histogram-loading')).toBeTruthy();
     expect(wrapper.findByText(i18n.QUERY_PREVIEW_SUBTITLE_LOADING)).toBeTruthy();
   });
-
-  test('it configures data and subtitle', () => {
-    (usePreviewHistogram as jest.Mock).mockReturnValue([
-      false,
-      {
-        inspect: { dsl: [], response: [] },
-        totalCount: 9154,
-        refetch: jest.fn(),
-        data: [
-          { x: 1602247050000, y: 2314, g: 'All others' },
-          { x: 1602247162500, y: 3471, g: 'All others' },
-          { x: 1602247275000, y: 3369, g: 'All others' },
-        ],
-        buckets: [],
-      },
-    ]);
-
-    const wrapper = render(
-      <TestProviders>
-        <PreviewHistogram
-          addNoiseWarning={jest.fn()}
-          timeFrame="M"
-          previewId={'test-preview-id'}
-          spaceId={'default'}
-          ruleType={'query'}
-          index={['']}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.queryByTestId('preview-histogram-loading')).toBeFalsy();
-    expect(wrapper.findByText(i18n.QUERY_PREVIEW_TITLE(9154))).toBeTruthy();
-  });
 });

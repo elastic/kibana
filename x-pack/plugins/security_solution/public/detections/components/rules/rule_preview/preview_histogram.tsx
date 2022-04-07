@@ -80,6 +80,7 @@ export const PreviewHistogram = ({
   const startDate = useMemo(() => formatDate(from), [from]);
   const endDate = useMemo(() => formatDate(to), [to]);
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
+  const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
   const [isLoading, { data, inspect, totalCount, refetch }] = usePreviewHistogram({
     previewId,
@@ -155,11 +156,6 @@ export const PreviewHistogram = ({
 
   const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
 
-  const subtitle = useMemo(
-    (): string =>
-      isLoading ? i18n.QUERY_PREVIEW_SUBTITLE_LOADING : i18n.QUERY_PREVIEW_TITLE(totalCount),
-    [isLoading, totalCount]
-  );
   const CasesContext = cases.ui.getCasesContext();
 
   return (
@@ -171,7 +167,6 @@ export const PreviewHistogram = ({
               id={`${ID}-${previewId}`}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
-              subtitle={subtitle}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
@@ -189,7 +184,11 @@ export const PreviewHistogram = ({
             <>
               <EuiSpacer />
               <EuiText size="s" color="subdued">
-                <p>{i18n.QUERY_PREVIEW_DISCLAIMER}</p>
+                <p>
+                  {isMlRule
+                    ? i18n.ML_PREVIEW_HISTOGRAM_DISCLAIMER
+                    : i18n.PREVIEW_HISTOGRAM_DISCLAIMER}
+                </p>
               </EuiText>
             </>
           </EuiFlexItem>

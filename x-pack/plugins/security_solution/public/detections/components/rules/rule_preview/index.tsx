@@ -29,6 +29,13 @@ import { LoadingHistogram } from './loading_histogram';
 import { FieldValueThreshold } from '../threshold_input';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 
+const HelpTextComponent = (
+  <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexItem>{i18n.QUERY_PREVIEW_HELP_TEXT}</EuiFlexItem>
+    <EuiFlexItem>{i18n.QUERY_PREVIEW_DISCLAIMER}</EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export interface RulePreviewProps {
   index: string[];
   isDisabled: boolean;
@@ -116,7 +123,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     <>
       <EuiFormRow
         label={i18n.QUERY_PREVIEW_LABEL}
-        helpText={i18n.QUERY_PREVIEW_HELP_TEXT}
+        helpText={HelpTextComponent}
         error={undefined}
         isInvalid={false}
         data-test-subj="rule-preview"
