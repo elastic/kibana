@@ -80,7 +80,7 @@ export class RenderingService {
     { http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { isAnonymousPage = false, vars }: IRenderOptions = {}
+    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -141,7 +141,7 @@ export class RenderingService {
               id,
               plugin,
               config: browserConfig,
-              exposedConfigKeys, // TODO: only include this for integration tests (what's the best way to do this?)
+              ...(includeExposedConfigKeys && { exposedConfigKeys }),
             };
           })
         ),
