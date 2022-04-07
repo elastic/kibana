@@ -212,7 +212,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
     const sub = rateLimitingForkJoin<
       AggregatableFieldOverallStats | IKibanaSearchResponse | undefined
-      >(
+    >(
       [
         // documentCountStats$,
         // documentCountStatsRandom$,
