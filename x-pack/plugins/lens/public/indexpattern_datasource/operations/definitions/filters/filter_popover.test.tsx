@@ -13,14 +13,14 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
 import { QueryInput } from '../../../query_input';
-import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../../src/plugins/unified_search/public';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,
   defaultLabel: 'label',
 }));
 
-jest.mock('../../../../../../../../src/plugins/data/public', () => ({
+jest.mock('../../../../../../../../src/plugins/unified_search/public', () => ({
   QueryStringInput: () => {
     return 'QueryStringInput';
   },

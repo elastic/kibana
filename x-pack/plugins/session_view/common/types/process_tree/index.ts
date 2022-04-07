@@ -35,6 +35,7 @@ export interface Group {
 }
 
 export interface ProcessEventResults {
+  total?: number;
   events?: any[];
 }
 
@@ -121,7 +122,7 @@ export interface ProcessEventAlert {
   reason?: string;
   workflow_status?: string;
   status?: string;
-  original_time?: Date;
+  original_time?: string;
   original_event?: {
     action?: string;
   };
@@ -147,6 +148,7 @@ export interface ProcessEvent {
 export interface ProcessEventsPage {
   events?: ProcessEvent[];
   cursor?: string;
+  total?: number; // total count of all items across all pages (as reported by ES client)
 }
 
 export interface Process {

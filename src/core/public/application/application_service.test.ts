@@ -65,6 +65,16 @@ describe('#setup()', () => {
       );
     });
 
+    it('throws an error if app is registered with an invalid id', () => {
+      const { register } = service.setup(setupDeps);
+
+      expect(() =>
+        register(Symbol(), createApp({ id: 'invalid&app' }))
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid application id: it can only be composed of alphanum chars, '-' and '_'"`
+      );
+    });
+
     it('throws error if additional apps are registered after setup', async () => {
       const { register } = service.setup(setupDeps);
 

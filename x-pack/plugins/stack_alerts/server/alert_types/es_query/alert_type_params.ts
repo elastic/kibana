@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, Type, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 import { RuleTypeState } from '../../../../alerting/server';
 import { Comparator } from '../../../common/comparator_types';
 import { ComparatorFnNames } from '../lib';
+import { getComparatorSchemaType } from '../lib/comparator';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
@@ -25,7 +26,7 @@ const EsQueryAlertParamsSchemaProperties = {
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-  thresholdComparator: schema.string({ validate: validateComparator }) as Type<Comparator>,
+  thresholdComparator: getComparatorSchemaType(validateComparator),
   searchType: schema.nullable(schema.literal('searchSource')),
   // searchSource alert param only
   searchConfiguration: schema.conditional(
@@ -94,8 +95,8 @@ function validateParams(anyParams: unknown): string | undefined {
   }
 }
 
-function validateComparator(comparator: string): string | undefined {
-  if (ComparatorFnNames.has(comparator as Comparator)) return;
+function validateComparator(comparator: Comparator): string | undefined {
+  if (ComparatorFnNames.has(comparator)) return;
 
   return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {
     defaultMessage: 'invalid thresholdComparator specified: {comparator}',
