@@ -39,8 +39,8 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
-  data: DataPublicPluginStart;
   features: FeaturesPluginStart;
+  data?: DataPublicPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
