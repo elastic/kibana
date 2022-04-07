@@ -100,14 +100,19 @@ const getRuleAlertsItemsFromAggs = (
   });
 };
 
-export const useRuleAlertsItems = ({
-  queryId,
-  signalIndexName,
-  skip = false,
-}: {
+export type UseRuleAlertsItems = (param: {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
+}) => {
+  items: RuleAlertsItem[];
+  isLoading: boolean;
+};
+
+export const useRuleAlertsItems: UseRuleAlertsItems = ({
+  queryId,
+  signalIndexName,
+  skip = false,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
@@ -161,5 +166,5 @@ export const useRuleAlertsItems = ({
     loading: isLoading,
   });
 
-  return { items, isLoading, queryId };
+  return { items, isLoading };
 };

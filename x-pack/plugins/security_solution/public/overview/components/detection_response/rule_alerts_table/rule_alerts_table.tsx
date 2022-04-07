@@ -27,7 +27,7 @@ import * as i18n from '../translations';
 import { useRuleAlertsItems, RuleAlertsItem } from './rule_alerts_items';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import { encodeRisonUrlState } from '../../../../common/components/url_state/helpers';
-import { SecurityPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export interface RuleAlertsTableProps {
@@ -92,7 +92,7 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
       return (
         <EuiToolTip data-test-subj={`${id}-tooltip`} content={i18n.OPEN_RULE_ALERTS_TOOLTIP}>
           <EuiLink
-            data-test-subj="severityRuleAlertsTable-name"
+            data-test-subj="severityRuleAlertsTable-alerts"
             // Doing a hard redirect using href only, due to this bug https://github.com/elastic/kibana/issues/123838
             // TODO: Uncomment the onClick function and change the parameter to "?filters=" when the bug is fixed.
             href={url}
@@ -143,16 +143,20 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
         hideSubtitle
       />
       {toggleStatus &&
-        (isLoading || items.length > 0 ? (
+        // (isLoading || items.length > 0 ? (
           <>
             <EuiBasicTable
               data-test-subj="ruleAlertsTable"
               columns={columns}
               items={items}
               loading={isLoading}
+              noItemsMessage={
+                <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+              }
             />
             <EuiSpacer size="m" />
             <EuiButton
+              data-test-subj="ruleAlertsTable-openAlertsButton"
               onClick={() => {
                 navigateTo({ deepLinkId: SecurityPageName.alerts });
               }}
@@ -160,9 +164,10 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
               {i18n.OPEN_ALL_ALERTS_BUTTON}
             </EuiButton>
           </>
-        ) : (
-          <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-        ))}
+        // ) : (
+        //   <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+        // ))
+        }
     </EuiPanel>
   );
 });
