@@ -973,7 +973,7 @@
         "label": "STATUS_VALUES",
         "description": [],
         "signature": [
-          "\"open\" | \"in-progress\" | \"acknowledged\" | \"closed\""
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

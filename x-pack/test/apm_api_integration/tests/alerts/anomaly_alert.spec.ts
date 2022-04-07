@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { apm, timerange } from '@elastic/apm-synthtrace';
-import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { AlertType } from '../../../../plugins/apm/common/alert_types';
@@ -15,20 +15,22 @@ import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
-  const ml = getService('ml');
+
   const supertest = getService('supertest');
+  const ml = getService('ml');
   const log = getService('log');
+
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      const spikeStart = datemath.parse('now-2h')!.valueOf();
-      const spikeEnd = datemath.parse('now')!.valueOf();
+      const start = '2021-01-01T00:00:00.000Z';
+      const end = '2021-01-08T00:15:00.000Z';
 
-      const start = datemath.parse('now-2w')!.valueOf();
-      const end = datemath.parse('now')!.valueOf();
+      const spikeStart = new Date('2021-01-07T23:15:00.000Z').getTime();
+      const spikeEnd = new Date('2021-01-08T00:15:00.000Z').getTime();
 
       const NORMAL_DURATION = 100;
       const NORMAL_RATE = 1;
@@ -36,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string | undefined;
 
       before(async () => {
-        const serviceA = apm.service('service-a', 'production', 'java').instance('a');
+        const serviceA = apm.service('a', 'production', 'java').instance('a');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
@@ -60,46 +62,54 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
         await synthtraceEsClient.index(events);
-        await createAndRunApmMlJob({ environment: 'production', ml });
-        const { body: createdRule } = await supertest
-          .post(`/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            params: {
-              environment: 'production',
-              serviceName: 'service-a',
-              transactionType: 'request',
-              windowSize: 30,
-              windowUnit: 'm',
-              anomalySeverityType: 'warning',
-            },
-            consumer: 'apm',
-            schedule: {
-              interval: '1m',
-            },
-            tags: ['apm', 'service.name:service-a'],
-            name: 'Latency anomaly | service-a',
-            rule_type_id: AlertType.Anomaly,
-            notify_when: 'onActiveAlert',
-            actions: [],
-          });
-        ruleId = createdRule.id;
       });
 
       after(async () => {
         await synthtraceEsClient.clean();
-        await ml.cleanMlIndices();
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       });
 
-      it('checks if alert is active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId,
-          expectedStatus: 'active',
-          supertest,
-          log,
+      describe('with ml jobs', () => {
+        before(async () => {
+          await createAndRunApmMlJob({ environment: 'production', ml });
         });
-        expect(executionStatus.status).to.be('active');
+
+        after(async () => {
+          await ml.cleanMlIndices();
+        });
+
+        it('checks if alert is active', async () => {
+          const { body: createdRule } = await supertest
+            .post(`/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                environment: 'production',
+                windowSize: 99,
+                windowUnit: 'y',
+                anomalySeverityType: 'warning',
+              },
+              consumer: 'apm',
+              schedule: {
+                interval: '1m',
+              },
+              tags: ['apm', 'service.name:service-a'],
+              name: 'Latency anomaly | service-a',
+              rule_type_id: AlertType.Anomaly,
+              notify_when: 'onActiveAlert',
+              actions: [],
+            });
+
+          ruleId = createdRule.id;
+
+          const executionStatus = await waitForRuleStatus({
+            id: ruleId,
+            expectedStatus: 'active',
+            supertest,
+            log,
+          });
+          expect(executionStatus.status).to.be('active');
+        });
       });
     }
   );

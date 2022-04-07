@@ -2011,7 +2011,7 @@ export const mockTimelineModel: TimelineModel = {
   savedObjectId: 'ef579e40-jibber-jabber',
   selectAll: false,
   selectedEventIds: {},
-  sessionViewId: null,
+  sessionViewConfig: null,
   show: false,
   showCheckboxes: false,
   sort: [
@@ -2133,7 +2133,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedObjectId: null,
     selectAll: false,
     selectedEventIds: {},
-    sessionViewId: null,
+    sessionViewConfig: null,
     show: false,
     showCheckboxes: false,
     sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],

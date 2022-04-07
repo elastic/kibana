@@ -12,7 +12,6 @@ import { stringify } from 'query-string';
 import {
   render as reactTestLibRender,
   RenderOptions,
-  Nullish,
   MatcherFunction,
 } from '@testing-library/react';
 import { Route, Router } from 'react-router-dom';
@@ -43,11 +42,11 @@ import * as useValuesListHook from '../../../hooks/use_values_list';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
+import { setIndexPatterns } from '../../../../../../../src/plugins/unified_search/public/services';
 import type {
   DataView,
   DataViewsContract,
-} from '../../../../../../../src/plugins/data_views/common';
+} from '../../../../../../../src/plugins/data_views/public';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
 import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
@@ -151,7 +150,6 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
   const dataView = mockDataView;
-
   setIndexPatterns({
     ...[dataView],
     get: async () => dataView,
@@ -168,7 +166,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   );
 }
 
-export function MockRouter<ExtraCore>({
+export function MockRouter<ExtraCore extends Partial<CoreStart>>({
   children,
   core,
   history = createMemoryHistory(),
@@ -386,7 +384,7 @@ export const mockDataView = createStubDataView({
 export const forNearestButton =
   (getByText: (f: MatcherFunction) => HTMLElement | null) =>
   (text: string): HTMLElement | null =>
-    getByText((_content: string, node: Nullish<Element>) => {
+    getByText((_content: string, node: Element | null) => {
       if (!node) return false;
       const noOtherButtonHasText = Array.from(node.children).every(
         (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
