@@ -11,7 +11,7 @@ import { createFleetContextRendererMock, generateFleetPackageInfo } from '../moc
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
 import { useEndpointPrivileges as _useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { trustedAppsAllHttpMocks } from '../../../../mocks';
+import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
 import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
@@ -59,12 +59,8 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     });
     // Mock APIs. Using Trusted Apps http mock here, which will still work
     // for exceptions since the mocks don't currently check for list id
-    const apiMocks = trustedAppsAllHttpMocks(http);
+    exceptionsListAllHttpMocks(http);
     render();
-
-    await waitFor(() => {
-      expect(apiMocks.responseProvider.trustedAppsList).toHaveBeenCalled();
-    });
 
     await waitFor(() => {
       expect(renderResult.getByTestId('hostIsolationExceptions-fleetCard')).toBeTruthy();
