@@ -7,31 +7,31 @@ steps:
 
   - wait
 
-  # - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
-  #   label: Package testing for deb
-  #   agents:
-  #     queue: n2-4-virt
-  #   timeout_in_minutes: 30
+  - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for deb
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 30
 
-  # - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
-  #   label: Package testing for rpm
-  #   agents:
-  #     queue: n2-4-virt
-  #   timeout_in_minutes: 30
+  - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for rpm
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 30
 
-  # - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
-  #   label: Package testing for docker
-  #   agents:
-  #     queue: n2-4-virt
-  #   timeout_in_minutes: 30
+  - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for docker
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 30
 
-  # - command: .buildkite/scripts/steps/artifacts/docker_context.sh
-  #   label: 'Docker Build Context'
-  #   agents:
-  #     queue: n2-2
-  #   timeout_in_minutes: 30
+  - command: .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Build Context'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 30
 
-  # - wait
+  - wait
 
   - command: .buildkite/scripts/steps/artifacts/publish.sh
     label: 'Publish artifacts'
