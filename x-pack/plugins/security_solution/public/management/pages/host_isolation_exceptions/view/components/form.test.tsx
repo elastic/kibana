@@ -15,11 +15,13 @@ import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 import { HostIsolationExceptionsList } from '../host_isolation_exceptions_list';
 import { act, waitFor } from '@testing-library/react';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
-import { fleetGetEndpointPackagePolicyListHttpMock } from '../../../mocks';
+import {
+  exceptionsListAllHttpMocks,
+  fleetGetEndpointPackagePolicyListHttpMock,
+} from '../../../mocks';
 import {
   clickOnEffectedPolicy,
   isEffectedPolicySelected,
