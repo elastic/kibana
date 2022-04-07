@@ -51,7 +51,6 @@ export const getVisualizeCapabilities = () => coreStart.application.capabilities
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
-export const getSavedObjects = () => pluginsStart.savedObjects;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;

@@ -12,7 +12,14 @@ import { EuiLink } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { goToSpecifiedPath } from '../../render_app';
-import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import {
+  APP_ID,
+  getEditPath,
+  MAP_PATH,
+  MAP_SAVED_OBJECT_TYPE,
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+} from '../../../common/constants';
 import {
   getMapsCapabilities,
   getToasts,
@@ -21,7 +28,7 @@ import {
   getNavigateToApp,
   getSavedObjectsClient,
   getSavedObjectsTagging,
-  getSavedObjects,
+  getUiSettings,
   getTheme,
   getApplication,
 } from '../../kibana_services';
@@ -94,7 +101,7 @@ async function findMaps(searchQuery: string) {
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
-    perPage: getSavedObjects().settings.getListingLimit(),
+    perPage: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
     page: 1,
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND',
@@ -130,6 +137,8 @@ export function MapsListView() {
   });
 
   const isReadOnly = !getMapsCapabilities().save;
+  const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   getCoreChrome().docTitle.change(getAppTitle());
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
@@ -142,9 +151,9 @@ export function MapsListView() {
       findItems={findMaps}
       deleteItems={isReadOnly ? undefined : deleteMaps}
       tableColumns={tableColumns}
-      listingLimit={getSavedObjects().settings.getListingLimit()}
+      listingLimit={listingLimit}
       initialFilter={''}
-      initialPageSize={getSavedObjects().settings.getPerPage()}
+      initialPageSize={initialPageSize}
       entityName={i18n.translate('xpack.maps.mapListing.entityName', {
         defaultMessage: 'map',
       })}
