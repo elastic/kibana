@@ -38,13 +38,15 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 
-const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisible = false }) => ({
-  style: {
-    display: $isVisible ? 'flex' : 'none',
-  },
-}))<{ $isVisible: boolean }>`
+const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
+  ({ $isVisible = false, isOverflowYScroll = false }) => ({
+    style: {
+      display: $isVisible ? 'flex' : 'none',
+      overflow: isOverflowYScroll ? 'hidden scroll' : 'hidden',
+    },
+  })
+)<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
   flex: 1;
-  overflow: hidden;
 `;
 
 const QueryTabContent = lazy(() => import('../query_tab_content'));
@@ -198,6 +200,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         )}
         <HideShowContainer
           $isVisible={isGraphOrNotesTabs}
+          isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
           data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}

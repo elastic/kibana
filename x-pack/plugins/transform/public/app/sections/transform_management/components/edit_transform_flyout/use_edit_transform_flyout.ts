@@ -14,6 +14,10 @@ import { i18n } from '@kbn/i18n';
 
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import {
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../../../../common/constants';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
@@ -317,8 +321,12 @@ const getUpdateValue = (
         }, {})
       : {};
 
-  if (formValue === formStateAttribute.defaultValue && formStateAttribute.isOptional) {
-    return formValue !== configValue ? dependsOnConfig : {};
+  if (
+    formValue === formStateAttribute.defaultValue &&
+    formValue === configValue &&
+    formStateAttribute.isOptional
+  ) {
+    return {};
   }
 
   // If the resettable section the form field belongs to is disabled,
@@ -332,7 +340,11 @@ const getUpdateValue = (
   }
 
   return enabledBasedOnSection && (formValue !== configValue || enforceFormValue)
-    ? setNestedProperty(dependsOnConfig, formStateAttribute.configFieldName, formValue)
+    ? setNestedProperty(
+        dependsOnConfig,
+        formStateAttribute.configFieldName,
+        formValue === '' && formStateAttribute.isOptional ? undefined : formValue
+      )
     : {};
 };
 
@@ -357,7 +369,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // top level attributes
     description: initializeField('description', 'description', config),
     frequency: initializeField('frequency', 'frequency', config, {
-      defaultValue: '1m',
+      defaultValue: DEFAULT_TRANSFORM_FREQUENCY,
       validator: 'frequency',
     }),
 
@@ -379,6 +391,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
       isNullable: true,
+      isOptional: true,
       validator: 'integerAboveZero',
       valueParser: (v) => (v === '' ? null : +v),
     }),
@@ -387,7 +400,9 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       'settings.max_page_search_size',
       config,
       {
-        defaultValue: '500',
+        defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
+        isNullable: true,
+        isOptional: true,
         validator: 'integerRange10To10000',
         valueParser: (v) => +v,
       }

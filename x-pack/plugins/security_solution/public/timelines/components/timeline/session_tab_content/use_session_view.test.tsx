@@ -72,10 +72,12 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
+const mockDetails = () => {};
+
 jest.mock('../../side_panel/hooks/use_detail_panel', () => {
   return {
     useDetailPanel: () => ({
-      openDetailsPanel: () => {},
+      openDetailsPanel: mockDetails,
       handleOnDetailsPanelClosed: () => {},
       DetailsPanel: () => <div />,
       shouldShowDetailsPanel: false,
@@ -144,6 +146,24 @@ describe('useSessionView with active timeline and a session id and graph event i
     const navigation = result.current.Navigation;
     const renderResult = render(<TestProviders>{navigation}</TestProviders>);
     expect(renderResult.getByText('Close session')).toBeTruthy();
+  });
+
+  it('uses an optional height when passed', () => {
+    renderHook(
+      () => {
+        const testProps = {
+          timelineId: TimelineId.test,
+          height: 1118,
+        };
+        return useSessionView(testProps);
+      },
+      { wrapper: Wrapper }
+    );
+    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalledWith({
+      height: 1000,
+      sessionEntityId: 'test',
+      loadAlertDetails: mockDetails,
+    });
   });
 
   describe('useSessionView with non active timeline and graph event id set', () => {
