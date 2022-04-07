@@ -46,7 +46,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -63,7 +62,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -95,7 +93,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -123,7 +120,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -156,7 +152,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -184,7 +179,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -220,7 +214,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 
@@ -255,7 +248,6 @@ describe('importRules', () => {
       rulesClient: context.alerting.getRulesClient(),
       exceptionsClient: context.lists?.getExceptionListClient(),
       spaceId: 'default',
-      signalsIndex: '.signals-index',
       existingLists: {},
     });
 

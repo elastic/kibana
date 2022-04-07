@@ -45,7 +45,6 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param savedObjectsClient {object}
  * @param exceptionsClient {object}
  * @param spaceId {string} - space being used during import
- * @param signalsIndex {string} - the signals index name
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -59,7 +58,6 @@ export const importRules = async ({
   savedObjectsClient,
   exceptionsClient,
   spaceId,
-  signalsIndex,
   existingLists,
 }: {
   ruleChunks: PromiseFromStreams[][];
@@ -70,7 +68,6 @@ export const importRules = async ({
   savedObjectsClient: SavedObjectsClientContract;
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
-  signalsIndex: string;
   existingLists: Record<string, ExceptionListSchema>;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
@@ -184,7 +181,7 @@ export const importRules = async ({
                     language,
                     license,
                     machineLearningJobId,
-                    outputIndex: signalsIndex,
+                    outputIndex: '',
                     savedId,
                     timelineId,
                     timelineTitle,

@@ -75,7 +75,7 @@ describe('import_rules_route', () => {
   });
 
   describe('unhappy paths', () => {
-    it('returns a 403 error object if ML Authz fails', async () => {
+    test('returns a 403 error object if ML Authz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -113,21 +113,6 @@ describe('import_rules_route', () => {
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
 
       transformMock.mockRestore();
-    });
-
-    test('returns an error when cluster throws error', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise({
-          body: new Error('Test error'),
-        })
-      );
-
-      const response = await server.inject(request, context);
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        message: 'Test error',
-        status_code: 500,
-      });
     });
 
     test('returns 400 if file extension type is not .ndjson', async () => {

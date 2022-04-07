@@ -81,7 +81,6 @@ export const importRulesRoute = (
           includedHiddenTypes: ['action'],
         });
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
         const exceptionsClient = context.lists?.getExceptionListClient();
 
         const mlAuthz = buildMlAuthz({
@@ -100,7 +99,6 @@ export const importRulesRoute = (
           });
         }
 
-        const signalsIndex = siemClient.getSignalsIndex();
         const objectLimit = config.maxRuleImportExportSize;
 
         // parse file to separate out exceptions from rules
@@ -163,7 +161,6 @@ export const importRulesRoute = (
           savedObjectsClient,
           exceptionsClient,
           spaceId: context.securitySolution.getSpaceId(),
-          signalsIndex,
           existingLists: foundReferencedExceptionLists,
         });
 
