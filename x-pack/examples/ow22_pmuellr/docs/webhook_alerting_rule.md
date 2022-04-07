@@ -1,5 +1,7 @@
 # Webhook Alerting Rule
 
+_part of [on-week 2022 - Patrick Mueller](./README.md)_
+
 Kibana alerting rule that runs the rule via webhook URL supplied as a parameter.
 
 The idea is to see what happens if we break the existing in-process boundary of

@@ -1,5 +1,7 @@
 # SQL Alerting Rule 
 
+_part of [on-week 2022 - Patrick Mueller](./README.md)_
+
 Adds a Kibana alerting rule that uses SQL, with the resulting SQL columns
 selecting both the alert id (AKA alert instance id, like a host name) and
 context variables.

@@ -1,5 +1,7 @@
 # V8 Profiler
 
+_part of [on-week 2022 - Patrick Mueller](./README.md)_
+
 HTTP endpoints in Kibana to run a CPU profile for specified duration, and
 obtain a heap snapshot. 
 
