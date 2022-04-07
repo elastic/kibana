@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import { RunContext, TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
 import { Logger } from '../../../../src/core/server';
 
 /**
@@ -23,7 +23,7 @@ export const REMOVED_TYPES: string[] = [
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export interface TaskRegisterDefinition {
+export interface TaskRegisterDefinition<Context extends RunContext = RunContext> {
   /**
    * A brief, human-friendly title for this task.
    */
@@ -52,7 +52,7 @@ export interface TaskRegisterDefinition {
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
-  createTaskRunner: TaskRunCreatorFunction;
+  createTaskRunner: TaskRunCreatorFunction<Context>;
 
   /**
    * Up to how many times the task should retry when it fails to run. This will
@@ -71,7 +71,10 @@ export interface TaskRegisterDefinition {
 /**
  * A mapping of task type id to the task definition.
  */
-export type TaskDefinitionRegistry = Record<string, TaskRegisterDefinition>;
+export type TaskDefinitionRegistry<Context extends RunContext = RunContext> = Record<
+  string,
+  TaskRegisterDefinition<Context>
+>;
 
 export class TaskTypeDictionary {
   private definitions = new Map<string, TaskDefinition>();
@@ -114,7 +117,9 @@ export class TaskTypeDictionary {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
+  public registerTaskDefinitions<Context extends RunContext = RunContext>(
+    taskDefinitions: TaskDefinitionRegistry<Context>
+  ) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
@@ -141,7 +146,9 @@ export class TaskTypeDictionary {
  *
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
-export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry): TaskDefinition[] {
+export function sanitizeTaskDefinitions<Context extends RunContext = RunContext>(
+  taskDefinitions: TaskDefinitionRegistry<Context>
+): TaskDefinition[] {
   return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
     return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
   });

@@ -263,8 +263,4 @@ export class ConcreteRuleProvider<
       ),
     };
   }
-
-  public finalizeState(state: RuleTaskState): RuleTaskState {
-    return state;
-  }
 }

@@ -93,7 +93,9 @@ export interface CancellableTask {
   cancel?: CancelFunction;
 }
 
-export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type TaskRunCreatorFunction<Context extends RunContext = RunContext> = (
+  context: Context
+) => CancellableTask;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -151,7 +153,9 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
+export type TaskDefinition<Context extends RunContext = RunContext> = TypeOf<
+  typeof taskDefinitionSchema
+> & {
   /**
    * Function that customizes how the task should behave when the task fails. This
    * function can return `true`, `false` or a Date. True will tell task manager
@@ -165,7 +169,7 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
-  createTaskRunner: TaskRunCreatorFunction;
+  createTaskRunner: TaskRunCreatorFunction<Context>;
 };
 
 export enum TaskStatus {

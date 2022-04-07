@@ -27,7 +27,7 @@ import {
   ClaimTaskErr,
   TaskClaimErrorType,
 } from './task_events';
-import { Middleware } from './lib/middleware';
+import { addMiddlewareToChain, Middleware } from './lib/middleware';
 import {
   ConcreteTaskInstance,
   TaskInstanceWithId,
@@ -36,6 +36,7 @@ import {
   TaskLifecycleResult,
   TaskStatus,
   EphemeralTask,
+  RunContext,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -140,15 +141,22 @@ export class TaskScheduling {
    * @param task - The ephemeral task being queued.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async ephemeralRunNow(
-    task: EphemeralTask,
-    options?: Record<string, unknown>
-  ): Promise<RunNowResult> {
+  public async ephemeralRunNow<
+    EphemeralMiddleware extends Middleware = Middleware,
+    Result extends RunNowResult = RunNowResult
+  >(task: EphemeralTask, middleware?: Partial<EphemeralMiddleware>): Promise<Result> {
     const id = uuid.v4();
-    const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...options,
+    const ephemeralMiddleware = middleware
+      ? addMiddlewareToChain<RunContext>(
+          this.middleware,
+          middleware as Partial<Middleware<RunContext>>
+        )
+      : this.middleware;
+
+    const { taskInstance: modifiedTask } = await ephemeralMiddleware.beforeSave({
       taskInstance: task,
     });
+
     return new Promise(async (resolve, reject) => {
       try {
         // The actual promise returned from this function is resolved after the awaitTaskRunResult promise resolves.
@@ -161,19 +169,23 @@ export class TaskScheduling {
         const { cancel, resolveOnCancel } = cancellablePromise();
         this.awaitTaskRunResult(id, resolveOnCancel)
           .then((arg: RunNowResult) => {
-            resolve(arg);
+            resolve(arg as Result);
           })
           .catch((err: Error) => {
             reject(err);
           });
-        const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun({
-          id,
-          scheduledAt: new Date(),
-          runAt: new Date(),
-          status: TaskStatus.Idle,
-          ownerId: this.taskManagerId,
-          ...modifiedTask,
-        });
+
+        const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun(
+          {
+            ...modifiedTask,
+            id,
+            scheduledAt: new Date(),
+            runAt: new Date(),
+            status: TaskStatus.Idle,
+            ownerId: this.taskManagerId,
+          },
+          ephemeralMiddleware
+        );
 
         if (isErr(attemptToRunResult)) {
           cancel();

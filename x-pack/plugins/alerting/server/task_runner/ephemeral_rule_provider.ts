@@ -18,7 +18,6 @@ import {
   RuleTypeRegistry,
 } from '../types';
 import { asOk, mapOk, promiseResult, Resultable } from '../lib/result_type';
-import { EphemeralRuleTaskInstance } from './alert_task_instance';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -30,6 +29,7 @@ import {
   SanitizedRule,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
+import { EphemeralRuleTaskContext, RuleTaskInstance } from './types';
 
 export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
@@ -55,9 +55,10 @@ export class EphemeralRuleProvider<
   RecoveryActionGroupId extends string
 > {
   private context: TaskRunnerContext;
-  private taskInstance: EphemeralRuleTaskInstance<Params>;
+  private taskInstance: RuleTaskInstance;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private rule: SanitizedRule<Params>;
+  private updateEphemeralRule: EphemeralRuleTaskContext<Params>['updateEphemeralRule'];
   private apiKey: string | null;
 
   constructor(
@@ -70,13 +71,17 @@ export class EphemeralRuleProvider<
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    taskInstance: EphemeralRuleTaskInstance<Params>,
-    context: TaskRunnerContext
+    taskInstance: RuleTaskInstance,
+    context: TaskRunnerContext,
+    ephemeralRule: SanitizedRule<Params>,
+    updateEphemeralRule: EphemeralRuleTaskContext<Params>['updateEphemeralRule'],
+    apiKey: string
   ) {
     this.context = context;
     this.taskInstance = taskInstance;
-    this.rule = this.taskInstance.params.rule;
-    this.apiKey = this.taskInstance.params.apiKey;
+    this.rule = ephemeralRule;
+    this.updateEphemeralRule = updateEphemeralRule;
+    this.apiKey = apiKey;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
   }
 
@@ -118,6 +123,7 @@ export class EphemeralRuleProvider<
     attributes: { executionStatus?: RuleExecutionStatus; monitoring?: RuleMonitoring }
   ) {
     this.rule = { ...this.rule, ...attributes };
+    this.updateEphemeralRule(this.rule);
   }
 
   public async loadRuleAttributesAndRun(
@@ -172,11 +178,5 @@ export class EphemeralRuleProvider<
       ),
       schedule: asOk(rule.schedule),
     };
-  }
-
-  public finalizeState(
-    state: EphemeralRuleExecutionState<Params>
-  ): EphemeralRuleExecutionState<Params> {
-    return { ...state, rule: this.rule };
   }
 }

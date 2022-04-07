@@ -29,7 +29,7 @@ import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTask } from './task';
+import { EphemeralTask, RunContext } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 
@@ -43,7 +43,9 @@ export interface TaskManagerSetupContract {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  registerTaskDefinitions: <Context extends RunContext = RunContext>(
+    taskDefinitions: TaskDefinitionRegistry<Context>
+  ) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -155,7 +157,9 @@ export class TaskManagerPlugin
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
-      registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
+      registerTaskDefinitions: <Context extends RunContext = RunContext>(
+        taskDefinition: TaskDefinitionRegistry<Context>
+      ) => {
         this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
@@ -238,7 +242,10 @@ export class TaskManagerPlugin
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
-      ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
+      ephemeralRunNow: <EphemeralMiddleware extends Middleware = Middleware>(
+        task: EphemeralTask,
+        middleware?: Partial<EphemeralMiddleware>
+      ) => taskScheduling.ephemeralRunNow(task, middleware),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
     };
   }

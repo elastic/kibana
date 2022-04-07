@@ -11,6 +11,8 @@ import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodas
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Subject } from 'rxjs';
+import { last } from 'rxjs/operators';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -48,7 +50,14 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import {
+  ConcreteTaskInstance,
+  Middleware,
+  RunContext,
+  RunNowResult,
+  SuccessfulRunResult,
+  TaskManagerStartContract,
+} from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -91,7 +100,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogWithErrorsResult } from '../../common';
+import { IExecutionLogWithErrorsResult, RawAlertInstanceMeta, RuleTaskParams } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -614,30 +623,51 @@ export class RulesClient {
       monitoring: getDefaultRuleMonitoring(),
     };
 
+    const simulatedRuleUpdated$ = new Subject<SanitizedRule<Params>>();
+
     /* RUN simulation */
-    const executionResult: SimulatedRuleExecutionStatus | undefined = await this.taskManager
-      .ephemeralRunNow({
-        taskType: `alerting:simulation:${ruleTypeId}`,
-        params: {
-          alertId: id,
-          spaceId: this.spaceId,
-          consumer,
-          rule: simulatedRule,
-          apiKey,
+    const executionResult: SimulatedRuleExecutionStatus | undefined = await Promise.all([
+      simulatedRuleUpdated$.pipe(last()).toPromise(),
+      this.taskManager.ephemeralRunNow<
+        Middleware<
+          RunContext & { ephemeralRule?: SanitizedRule<Params>; apiKey?: string },
+          SuccessfulRunResult & { simulatedRule?: SanitizedRule<Params> }
+        >,
+        RunNowResult & { simulatedRule?: SanitizedRule<Params> }
+      >(
+        {
+          taskType: `alerting:simulation:${ruleTypeId}`,
+          params: {
+            alertId: id,
+            spaceId: this.spaceId,
+            consumer,
+          },
+          state: {
+            previousStartedAt: null,
+            alertTypeState: {},
+            alertInstances: {},
+          },
+          scope: ['alerting'],
         },
-        state: {
-          previousStartedAt: null,
-          alertTypeState: {},
-          alertInstances: {},
-        },
-        scope: ['alerting'],
-      })
-      .then((result) => {
-        const numberOfDetectedAlerts = Object.keys(result.state?.alertInstances ?? {}).length;
-        const simulatedRuleAfterExecution: SanitizedRule<Params> | undefined = result.state?.rule;
-        if (!simulatedRuleAfterExecution) {
-          throw new Error(`Simulated Rule failed for an unknown reason`);
+        {
+          beforeRun: async (context) => {
+            Object.assign(context, {
+              ephemeralRule: simulatedRule,
+              updateEphemeralRule: (rule: SanitizedRule<Params>) =>
+                simulatedRuleUpdated$.next(rule),
+              apiKey,
+            });
+            return context;
+          },
+          afterRun: async (context) => {
+            simulatedRuleUpdated$.complete();
+            return context;
+          },
         }
+      ),
+    ])
+      .then(([simulatedRuleAfterExecution, result]) => {
+        const numberOfDetectedAlerts = Object.keys(result.state?.alertInstances ?? {}).length;
         return { numberOfDetectedAlerts, ...simulatedRuleAfterExecution.executionStatus };
       })
       .catch((ex) => {
@@ -766,7 +796,10 @@ export class RulesClient {
     });
     if (alert.scheduledTaskId) {
       const { state } = taskInstanceToAlertTaskInstance(
-        await this.taskManager.get(alert.scheduledTaskId),
+        (await this.taskManager.get(alert.scheduledTaskId)) as ConcreteTaskInstance<
+          RawAlertInstanceMeta,
+          RuleTaskParams
+        >,
         alert
       );
       return state;
@@ -1698,7 +1731,10 @@ export class RulesClient {
     if (this.eventLogger && attributes.scheduledTaskId) {
       try {
         const { state } = taskInstanceToAlertTaskInstance(
-          await this.taskManager.get(attributes.scheduledTaskId),
+          (await this.taskManager.get(attributes.scheduledTaskId)) as ConcreteTaskInstance<
+            RawAlertInstanceMeta,
+            RuleTaskParams
+          >,
           attributes as unknown as SanitizedRule
         );
 

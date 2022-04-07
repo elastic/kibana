@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import {
@@ -26,6 +26,7 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { RawRuleTaskInstance } from './types';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -52,7 +53,7 @@ const ruleType: UntypedNormalizedRuleType = {
 let fakeTimer: sinon.SinonFakeTimers;
 
 describe('Task Runner Factory', () => {
-  let mockedTaskInstance: ConcreteTaskInstance;
+  let mockedTaskInstance: RawRuleTaskInstance;
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -66,7 +67,7 @@ describe('Task Runner Factory', () => {
       startedAt: new Date(),
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
       state: {
-        startedAt: new Date(Date.now() - 5 * 60 * 1000),
+        startedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
       },
       taskType: 'alerting:test',
       params: {

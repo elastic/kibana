@@ -59,7 +59,7 @@ type Opts = {
   instance: EphemeralTaskInstance;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   executionContext: ExecutionContextStart;
-} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
+} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning' | 'afterRun'>;
 
 // ephemeral tasks cannot be rescheduled or scheduled to run again in the future
 type EphemeralSuccessfulRunResult = Omit<SuccessfulRunResult, 'runAt' | 'schedule'>;
@@ -78,6 +78,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
+  private afterRun: Middleware['afterRun'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
@@ -96,6 +97,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     definitions,
     logger,
     beforeRun,
+    afterRun,
     beforeMarkRunning,
     onTaskEvent = identity,
     executionContext,
@@ -105,6 +107,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.logger = logger;
     this.beforeRun = beforeRun;
     this.beforeMarkRunning = beforeMarkRunning;
+    this.afterRun = afterRun;
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
     this.uuid = uuid.v4();
@@ -234,6 +237,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
         { name: 'process ephemeral result', type: 'task manager' },
         () => this.processResult(validatedResult, stopTaskTimer())
       );
+      this.afterRun({ context: modifiedContext, result: processedResult });
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
@@ -247,6 +251,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
             stopTaskTimer()
           )
       );
+      this.afterRun({ context: modifiedContext, result: processedResult });
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
     }

@@ -237,6 +237,7 @@ export class TaskPollingLifecycle {
       store: this.bufferedStore,
       definitions: this.definitions,
       beforeRun: this.middleware.beforeRun,
+      afterRun: this.middleware.afterRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,

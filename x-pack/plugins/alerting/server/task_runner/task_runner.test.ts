@@ -15,6 +15,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleExecutionStatusWarningReasons,
+  RuleTaskState,
+  RuleTaskParams,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -71,6 +73,9 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
+import { ConcreteRuleProvider } from './rule_provider';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { RuleTaskInstance } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -86,11 +91,11 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 describe('Task Runner', () => {
-  let mockedTaskInstance: ConcreteTaskInstance;
+  let mockedTaskInstance: ConcreteTaskInstance<RuleTaskState, RuleTaskParams>;
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
-    mockedTaskInstance = mockTaskInstance();
+    mockedTaskInstance = taskInstanceToAlertTaskInstance(mockTaskInstance());
   });
 
   afterAll(() => fakeTimer.restore());
@@ -184,15 +189,17 @@ describe('Task Runner', () => {
   });
 
   test('successfully executes the task', async () => {
+    const taskInstance: ConcreteTaskInstance<RuleTaskState, RuleTaskParams> = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        previousStartedAt: new Date(Date.now() - 5 * 60 * 1000),
+      },
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -297,6 +304,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
+        new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -399,6 +407,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -512,6 +521,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
+        new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
         taskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -564,6 +574,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
+        new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -618,26 +629,28 @@ describe('Task Runner', () => {
           executorServices.alertFactory.create('2').scheduleActions('default');
         }
       );
-      const taskRunner = new TaskRunner(
-        ruleType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '2': {
-                meta: {
-                  lastScheduledActions: { date: moment().toISOString(), group: 'default' },
-                },
-                state: {
-                  bar: false,
-                  start: DATE_1969,
-                  duration: MOCK_DURATION,
-                },
+      const taskInstance: RuleTaskInstance = {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '2': {
+              meta: {
+                lastScheduledActions: { date: moment().toDate(), group: 'default' },
+              },
+              state: {
+                bar: false,
+                start: DATE_1969,
+                duration: MOCK_DURATION,
               },
             },
           },
         },
+      };
+      const taskRunner = new TaskRunner(
+        ruleType,
+        taskInstance,
+        new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
         taskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -681,6 +694,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
+        new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -717,26 +731,28 @@ describe('Task Runner', () => {
         executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {
-            '1': {
-              meta: {
-                lastScheduledActions: { date: DATE_1970, group: 'default' },
-              },
-              state: {
-                bar: false,
-                start: DATE_1969,
-                duration: MOCK_DURATION,
-              },
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {
+          '1': {
+            meta: {
+              lastScheduledActions: { date: new Date(DATE_1970), group: 'default' },
+            },
+            state: {
+              bar: false,
+              start: DATE_1969,
+              duration: MOCK_DURATION,
             },
           },
         },
       },
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -807,22 +823,24 @@ describe('Task Runner', () => {
           executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
-      const taskRunner = new TaskRunner(
-        ruleType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {
-                  lastScheduledActions: { group: 'newGroup', date: new Date().toISOString() },
-                },
-                state: { bar: false },
+      const taskInstance = {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: { group: 'newGroup', date: new Date() },
               },
+              state: { bar: false },
             },
           },
         },
+      };
+      const taskRunner = new TaskRunner(
+        ruleType,
+        taskInstance,
+        new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -877,26 +895,28 @@ describe('Task Runner', () => {
             .scheduleActionsWithSubGroup('default', 'subgroup1');
         }
       );
-      const taskRunner = new TaskRunner(
-        ruleType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {
-                  lastScheduledActions: {
-                    group: 'default',
-                    subgroup: 'newSubgroup',
-                    date: new Date().toISOString(),
-                  },
+      const taskInstance = {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: {
+                  group: 'default',
+                  subgroup: 'newSubgroup',
+                  date: new Date(),
                 },
-                state: { bar: false },
               },
+              state: { bar: false },
             },
           },
         },
+      };
+      const taskRunner = new TaskRunner(
+        ruleType,
+        taskInstance,
+        new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -953,6 +973,7 @@ describe('Task Runner', () => {
       const taskRunner = new TaskRunner(
         ruleType,
         mockedTaskInstance,
+        new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -1067,32 +1088,34 @@ describe('Task Runner', () => {
           executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
-      const taskRunner = new TaskRunner(
-        ruleType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {},
-                state: {
-                  bar: false,
-                  start: DATE_1969,
-                  duration: 80000000000,
-                },
+      const taskInstance = {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {},
+              state: {
+                bar: false,
+                start: DATE_1969,
+                duration: 80000000000,
               },
-              '2': {
-                meta: {},
-                state: {
-                  bar: false,
-                  start: '1969-12-31T06:00:00.000Z',
-                  duration: 70000000000,
-                },
+            },
+            '2': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
               },
             },
           },
         },
+      };
+      const taskRunner = new TaskRunner(
+        ruleType,
+        taskInstance,
+        new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -1223,21 +1246,23 @@ describe('Task Runner', () => {
           executorServices.alertFactory.create('3');
         }
       );
-      const taskRunner = new TaskRunner(
-        ruleType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': { meta: {}, state: { bar: false } },
-              '2': { meta: {}, state: { bar: false } },
-            },
-          },
-          params: {
-            alertId,
+      const taskInstance = {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
           },
         },
+        params: {
+          alertId,
+        },
+      };
+      const taskRunner = new TaskRunner(
+        ruleType,
+        taskInstance,
+        new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -1304,18 +1329,20 @@ describe('Task Runner', () => {
           executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
-      const taskRunner = new TaskRunner(
-        ruleTypeWithCustomRecovery,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': { meta: {}, state: { bar: false } },
-              '2': { meta: {}, state: { bar: false } },
-            },
+      const taskInstance = {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': { meta: {}, state: { bar: false } },
+            '2': { meta: {}, state: { bar: false } },
           },
         },
+      };
+      const taskRunner = new TaskRunner(
+        ruleTypeWithCustomRecovery,
+        taskInstance,
+        new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
         customTaskRunnerFactoryInitializerParams,
         inMemoryMetrics
       );
@@ -1366,33 +1393,35 @@ describe('Task Runner', () => {
         executorServices.alertFactory.create('1').scheduleActions('default');
       }
     );
-    const date = new Date().toISOString();
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {
-            '1': {
-              meta: { lastScheduledActions: { group: 'default', date } },
-              state: {
-                bar: false,
-                start: DATE_1969,
-                duration: 80000000000,
-              },
+    const date = new Date();
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {
+          '1': {
+            meta: { lastScheduledActions: { group: 'default', date } },
+            state: {
+              bar: false,
+              start: DATE_1969,
+              duration: 80000000000,
             },
-            '2': {
-              meta: { lastScheduledActions: { group: 'default', date } },
-              state: {
-                bar: false,
-                start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
-              },
+          },
+          '2': {
+            meta: { lastScheduledActions: { group: 'default', date } },
+            state: {
+              bar: false,
+              start: '1969-12-31T06:00:00.000Z',
+              duration: 70000000000,
             },
           },
         },
       },
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1454,6 +1483,13 @@ describe('Task Runner', () => {
   });
 
   test('validates params before executing the alert type', async () => {
+    const taskInstance = {
+      ...mockedTaskInstance,
+      params: {
+        ...mockedTaskInstance.params,
+        spaceId: 'foo',
+      },
+    };
     const taskRunner = new TaskRunner(
       {
         ...ruleType,
@@ -1463,13 +1499,8 @@ describe('Task Runner', () => {
           }),
         },
       },
-      {
-        ...mockedTaskInstance,
-        params: {
-          ...mockedTaskInstance.params,
-          spaceId: 'foo',
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1487,6 +1518,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1515,6 +1547,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1545,6 +1578,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1581,6 +1615,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1624,6 +1659,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1667,6 +1703,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1711,6 +1748,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1747,6 +1785,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1786,6 +1825,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       legacyTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1800,7 +1840,7 @@ describe('Task Runner', () => {
 
   test(`doesn't change previousStartedAt when it fails to run`, async () => {
     const originalAlertSate = {
-      previousStartedAt: DATE_1970,
+      previousStartedAt: new Date(DATE_1970),
     };
 
     ruleType.executor.mockImplementation(
@@ -1817,12 +1857,14 @@ describe('Task Runner', () => {
       }
     );
 
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: originalAlertSate,
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        state: originalAlertSate,
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1843,15 +1885,17 @@ describe('Task Runner', () => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
     });
 
+    const taskInstance = {
+      ...mockedTaskInstance,
+      params: {
+        ...mockedTaskInstance.params,
+        spaceId: 'foo',
+      },
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        params: {
-          ...mockedTaskInstance.params,
-          spaceId: 'foo',
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1882,6 +1926,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1897,14 +1942,16 @@ describe('Task Runner', () => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', '1');
     });
 
+    const taskInstance = {
+      ...mockedTaskInstance,
+      schedule: {
+        interval: '1d',
+      },
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        schedule: {
-          interval: '1d',
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1921,15 +1968,17 @@ describe('Task Runner', () => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
     });
 
+    const taskInstance = {
+      ...mockedTaskInstance,
+      params: {
+        ...mockedTaskInstance.params,
+        spaceId: 'test space',
+      },
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        params: {
-          ...mockedTaskInstance.params,
-          spaceId: 'test space',
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -1968,15 +2017,17 @@ describe('Task Runner', () => {
         executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {},
+      },
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {},
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2076,32 +2127,34 @@ describe('Task Runner', () => {
         executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {
-            '1': {
-              meta: {},
-              state: {
-                bar: false,
-                start: DATE_1969,
-                duration: 80000000000,
-              },
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {
+          '1': {
+            meta: {},
+            state: {
+              bar: false,
+              start: DATE_1969,
+              duration: 80000000000,
             },
-            '2': {
-              meta: {},
-              state: {
-                bar: false,
-                start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
-              },
+          },
+          '2': {
+            meta: {},
+            state: {
+              bar: false,
+              start: '1969-12-31T06:00:00.000Z',
+              duration: 70000000000,
             },
           },
         },
       },
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2180,24 +2233,26 @@ describe('Task Runner', () => {
         executorServices.alertFactory.create('2').scheduleActions('default');
       }
     );
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {
-            '1': {
-              meta: {},
-              state: { bar: false },
-            },
-            '2': {
-              meta: {},
-              state: { bar: false },
-            },
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {
+          '1': {
+            meta: {},
+            state: { bar: false },
+          },
+          '2': {
+            meta: {},
+            state: { bar: false },
           },
         },
       },
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2257,32 +2312,34 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     ruleType.executor.mockImplementation(async () => {});
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {
-            '1': {
-              meta: {},
-              state: {
-                bar: false,
-                start: DATE_1969,
-                duration: 80000000000,
-              },
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {
+          '1': {
+            meta: {},
+            state: {
+              bar: false,
+              start: DATE_1969,
+              duration: 80000000000,
             },
-            '2': {
-              meta: {},
-              state: {
-                bar: false,
-                start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
-              },
+          },
+          '2': {
+            meta: {},
+            state: {
+              bar: false,
+              start: '1969-12-31T06:00:00.000Z',
+              duration: 70000000000,
             },
           },
         },
       },
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2357,24 +2414,26 @@ describe('Task Runner', () => {
         string
       >) => {}
     );
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          alertInstances: {
-            '1': {
-              meta: {},
-              state: { bar: false },
-            },
-            '2': {
-              meta: {},
-              state: { bar: false },
-            },
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        alertInstances: {
+          '1': {
+            meta: {},
+            state: { bar: false },
+          },
+          '2': {
+            meta: {},
+            state: { bar: false },
           },
         },
       },
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2430,15 +2489,17 @@ describe('Task Runner', () => {
   });
 
   test('successfully executes the task with ephemeral tasks enabled', async () => {
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state: {
+        ...mockedTaskInstance.state,
+        previousStartedAt: new Date(Date.now() - 5 * 60 * 1000),
+      },
+    };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       {
         ...taskRunnerFactoryInitializerParams,
         supportsEphemeralTasks: true,
@@ -2507,14 +2568,16 @@ describe('Task Runner', () => {
   test('successfully bails on execution if the rule is disabled', async () => {
     const state = {
       ...mockedTaskInstance.state,
-      previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      previousStartedAt: new Date(Date.now() - 5 * 60 * 1000),
+    };
+    const taskInstance = {
+      ...mockedTaskInstance,
+      state,
     };
     const taskRunner = new TaskRunner(
       ruleType,
-      {
-        ...mockedTaskInstance,
-        state,
-      },
+      taskInstance,
+      new ConcreteRuleProvider(ruleType, taskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2524,7 +2587,7 @@ describe('Task Runner', () => {
       attributes: { ...SAVED_OBJECT.attributes, enabled: false },
     });
     const runnerResult = await taskRunner.run();
-    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt);
+    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt.toISOString());
     expect(runnerResult.schedule).toStrictEqual(mockedTaskInstance.schedule);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -2556,6 +2619,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2570,6 +2634,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2596,6 +2661,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2629,6 +2695,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2711,6 +2778,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleTypeWithConfig,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -2831,6 +2899,7 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );

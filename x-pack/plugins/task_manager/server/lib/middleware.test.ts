@@ -7,16 +7,24 @@
 
 import moment from 'moment';
 import { ConcreteTaskInstance, RunContext, TaskInstance, TaskStatus } from '../task';
-import { addMiddlewareToChain } from './middleware';
+import { addMiddlewareToChain, AfterRunContextFunction, Middleware } from './middleware';
 
 interface BeforeSaveOpts {
   taskInstance: TaskInstance;
 }
 
-const getMockTaskInstance = () => ({
-  taskType: 'nice_task',
+const getMockTaskInstance = (): ConcreteTaskInstance => ({
+  id: 'hy8o99o83',
+  attempts: 0,
+  status: TaskStatus.Idle,
+  runAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
+  scheduledAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
+  startedAt: null,
+  retryAt: null,
   state: {},
+  taskType: 'nice_task',
   params: { abc: 'def' },
+  ownerId: null,
 });
 const getMockConcreteTaskInstance = () => {
   const concrete: {
@@ -55,34 +63,40 @@ const getMockRunContext = (runTask: ConcreteTaskInstance) => ({
   kbnServer: {},
 });
 
-const defaultBeforeSave = async (opts: BeforeSaveOpts) => {
+const defaultBeforeSave: Middleware<RunContext>['beforeSave'] = async (opts) => {
   return opts;
 };
 
-const defaultBeforeRun = async (opts: RunContext) => {
+const defaultBeforeRun: Middleware<RunContext>['beforeRun'] = async (opts) => {
+  return opts;
+};
+
+const defaultAfterRun: AfterRunContextFunction = async (opts) => {
   return opts;
 };
 
 describe('addMiddlewareToChain', () => {
   it('chains the beforeSave functions', async () => {
-    const m1 = {
-      beforeSave: async (opts: BeforeSaveOpts) => {
+    // type MiddlewareMockContext = RunContext & { m1?: boolean; m2?: boolean };
+    const m1: Middleware = {
+      beforeSave: async (opts) => {
         Object.assign(opts.taskInstance.params, { m1: true });
         return opts;
       },
       beforeRun: defaultBeforeRun,
+      afterRun: defaultAfterRun,
       beforeMarkRunning: defaultBeforeRun,
     };
-    const m2 = {
-      beforeSave: async (opts: BeforeSaveOpts) => {
+    const m2: Partial<Middleware> = {
+      beforeSave: async (opts) => {
         Object.assign(opts.taskInstance.params, { m2: true });
         return opts;
       },
       beforeRun: defaultBeforeRun,
       beforeMarkRunning: defaultBeforeRun,
     };
-    const m3 = {
-      beforeSave: async (opts: BeforeSaveOpts) => {
+    const m3: Partial<Middleware> = {
+      beforeSave: async (opts) => {
         Object.assign(opts.taskInstance.params, { m3: true });
         return opts;
       },
@@ -100,13 +114,21 @@ describe('addMiddlewareToChain', () => {
         expect(saveOpts).toMatchInlineSnapshot(`
           Object {
             "taskInstance": Object {
+              "attempts": 0,
+              "id": "hy8o99o83",
+              "ownerId": null,
               "params": Object {
                 "abc": "def",
                 "m1": true,
                 "m2": true,
                 "m3": true,
               },
+              "retryAt": null,
+              "runAt": 2018-09-18T05:33:09.588Z,
+              "scheduledAt": 2018-09-18T05:33:09.588Z,
+              "startedAt": null,
               "state": Object {},
+              "status": "idle",
               "taskType": "nice_task",
             },
           }
@@ -115,19 +137,20 @@ describe('addMiddlewareToChain', () => {
   });
 
   it('chains the beforeRun functions', async () => {
-    const m1 = {
+    const m1: Middleware = {
       beforeSave: defaultBeforeSave,
-      beforeRun: async (opts: RunContext) => {
+      beforeRun: async (opts) => {
         return {
           ...opts,
           m1: true,
         };
       },
+      afterRun: defaultAfterRun,
       beforeMarkRunning: defaultBeforeRun,
     };
-    const m2 = {
+    const m2: Partial<Middleware> = {
       beforeSave: defaultBeforeSave,
-      beforeRun: async (opts: RunContext) => {
+      beforeRun: async (opts) => {
         return {
           ...opts,
           m2: true,
@@ -135,9 +158,9 @@ describe('addMiddlewareToChain', () => {
       },
       beforeMarkRunning: defaultBeforeRun,
     };
-    const m3 = {
+    const m3: Partial<Middleware> = {
       beforeSave: defaultBeforeSave,
-      beforeRun: async (opts: RunContext) => {
+      beforeRun: async (opts) => {
         return {
           ...opts,
           m3: true,

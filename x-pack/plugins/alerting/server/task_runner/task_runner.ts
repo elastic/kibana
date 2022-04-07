@@ -35,10 +35,7 @@ import {
 } from '../types';
 import { asErr, map, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
-import {
-  isEphemeralAlertTaskInstance,
-  taskInstanceToAlertTaskInstance,
-} from './alert_task_instance';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
@@ -65,8 +62,7 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
-import { ConcreteRuleProvider, RuleProvider } from './rule_provider';
-import { EphemeralRuleProvider } from './ephemeral_rule_provider';
+import { RuleProvider } from './rule_provider';
 import {
   Rule,
   RuleExecutionStatus,
@@ -141,7 +137,16 @@ export class TaskRunner<
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    taskInstance: ConcreteTaskInstance,
+    taskInstance: RuleTaskInstance,
+    ruleProvider: RuleProvider<
+      Params,
+      ExtractedParams,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >,
     context: TaskRunnerContext,
     inMemoryMetrics: InMemoryMetrics
   ) {
@@ -151,15 +156,13 @@ export class TaskRunner<
     this.ruleType = ruleType;
     this.ruleName = null;
     this.ruleConsumer = null;
-    this.taskInstance = taskInstanceToAlertTaskInstance<Params>(taskInstance);
+    this.taskInstance = taskInstance;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
-    this.ruleProvider = isEphemeralAlertTaskInstance<Params>(this.taskInstance)
-      ? new EphemeralRuleProvider(ruleType, this.taskInstance, context)
-      : new ConcreteRuleProvider(ruleType, this.taskInstance, context);
+    this.ruleProvider = ruleProvider;
   }
 
   private getExecutionHandler(
@@ -756,23 +759,20 @@ export class TaskRunner<
     };
 
     return {
-      state: this.ruleProvider.finalizeState(
-        map<RuleExecutionState, ElasticsearchError, RuleTaskState>(
-          state,
-          (executionState: RuleExecutionState) =>
-            transformExecutionStateToTaskState(executionState),
-          (err: ElasticsearchError) => {
-            const message = `Executing Rule ${spaceId}:${
-              this.ruleType.id
-            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-            if (isAlertSavedObjectNotFoundError(err, ruleId)) {
-              this.logger.debug(message);
-            } else {
-              this.logger.error(message);
-            }
-            return originalState;
+      state: map<RuleExecutionState, ElasticsearchError, RuleTaskState>(
+        state,
+        (executionState: RuleExecutionState) => transformExecutionStateToTaskState(executionState),
+        (err: ElasticsearchError) => {
+          const message = `Executing Rule ${spaceId}:${
+            this.ruleType.id
+          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+          if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+            this.logger.debug(message);
+          } else {
+            this.logger.error(message);
           }
-        )
+          return originalState;
+        }
       ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
         if (isAlertSavedObjectNotFoundError(error, ruleId)) {

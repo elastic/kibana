@@ -41,17 +41,16 @@ export class EphemeralTaskLifecycle {
   private events$ = new Subject<TaskLifecycleEvent>();
   private ephemeralTaskQueue: Array<{
     task: EphemeralTaskInstanceRequest;
+    middleware: Middleware;
     enqueuedAt: number;
   }> = [];
   private logger: Logger;
   private config: TaskManagerConfig;
-  private middleware: Middleware;
   private lifecycleSubscription: Subscription = Subscription.EMPTY;
   private readonly executionContext: ExecutionContextStart;
 
   constructor({
     logger,
-    middleware,
     definitions,
     pool,
     lifecycleEvent,
@@ -59,7 +58,6 @@ export class EphemeralTaskLifecycle {
     executionContext,
   }: EphemeralTaskLifecycleOpts) {
     this.logger = logger;
-    this.middleware = middleware;
     this.definitions = definitions;
     this.pool = pool;
     this.lifecycleEvent = lifecycleEvent;
@@ -112,7 +110,7 @@ export class EphemeralTaskLifecycle {
                   asOk(Date.now() - ephemeralTask.enqueuedAt)
                 )
               );
-              return this.createTaskRunnerForTask(ephemeralTask.task);
+              return this.createTaskRunnerForTask(ephemeralTask.task, ephemeralTask.middleware);
             });
 
           if (tasksWithinCapacity.length) {
@@ -155,14 +153,15 @@ export class EphemeralTaskLifecycle {
     this.events$.next(event);
   };
 
-  public attemptToRun(task: EphemeralTaskInstanceRequest) {
+  public attemptToRun(task: EphemeralTaskInstanceRequest, middleware: Middleware) {
     if (this.lifecycleSubscription.closed) {
       return asErr(task);
     }
     return pushIntoSetWithTimestamp(
       this.ephemeralTaskQueue,
       this.config.ephemeral_tasks.request_capacity,
-      task
+      task,
+      middleware
     );
   }
 
@@ -171,8 +170,10 @@ export class EphemeralTaskLifecycle {
   }
 
   private createTaskRunnerForTask = (
-    instance: EphemeralTaskInstanceRequest
+    instance: EphemeralTaskInstanceRequest,
+    middleware: Middleware
   ): EphemeralTaskManagerRunner => {
+    const { beforeRun, beforeMarkRunning, afterRun } = middleware;
     return new EphemeralTaskManagerRunner({
       logger: this.logger,
       instance: {
@@ -180,8 +181,9 @@ export class EphemeralTaskLifecycle {
         startedAt: new Date(),
       },
       definitions: this.definitions,
-      beforeRun: this.middleware.beforeRun,
-      beforeMarkRunning: this.middleware.beforeMarkRunning,
+      beforeRun,
+      beforeMarkRunning,
+      afterRun,
       onTaskEvent: this.emitEvent,
       executionContext: this.executionContext,
     });
@@ -197,14 +199,16 @@ export class EphemeralTaskLifecycle {
 function pushIntoSetWithTimestamp(
   set: Array<{
     task: EphemeralTaskInstanceRequest;
+    middleware: Middleware;
     enqueuedAt: number;
   }>,
   maxCapacity: number,
-  task: EphemeralTaskInstanceRequest
+  task: EphemeralTaskInstanceRequest,
+  middleware: Middleware
 ): Result<EphemeralTaskInstanceRequest, EphemeralTaskInstanceRequest> {
   if (set.length >= maxCapacity) {
     return asErr(task);
   }
-  set.push({ task, enqueuedAt: Date.now() });
+  set.push({ task, middleware, enqueuedAt: Date.now() });
   return asOk(task);
 }

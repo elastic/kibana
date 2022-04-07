@@ -12,7 +12,7 @@ import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { Logger } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -33,6 +33,7 @@ import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
+import { EphemeralRuleTaskContext, RuleTaskContext } from './task_runner/types';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -261,11 +262,11 @@ export class RuleTypeRegistry {
       /** stripping the typing is required in order to store the RuleTypes in a Map */
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
-    this.taskManager.registerTaskDefinitions({
+    this.taskManager.registerTaskDefinitions<RuleTaskContext>({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
-        createTaskRunner: (context: RunContext) =>
+        createTaskRunner: (context) =>
           this.taskRunnerFactory.create<
             Params,
             ExtractedParams,
@@ -276,11 +277,13 @@ export class RuleTypeRegistry {
             RecoveryActionGroupId | RecoveredActionGroupId
           >(normalizedRuleType, context, this.inMemoryMetrics),
       },
+    });
+    this.taskManager.registerTaskDefinitions<EphemeralRuleTaskContext<Params>>({
       [`alerting:simulation:${ruleType.id}`]: {
         title: `Simulation:${ruleType.name}`,
         timeout: ruleType.ruleTaskTimeout,
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create<
+        createTaskRunner: (context) =>
+          this.taskRunnerFactory.createEphemeral<
             Params,
             ExtractedParams,
             State,
