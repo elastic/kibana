@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useSessionView } from './use_session_view';
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  margin: 0;
-  width: 100%;
-  overflow: hidden;
+const FlexItemWithMargin = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
 `;
 
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
-  overflow: hidden;
-  width: 100%;
+const MaxWidthPageFlexGroup = styled(EuiFlexGroup)`
+  max-width: 100%;
+  box-sizing: border-box;
 `;
 
 const VerticalRule = styled.div`
@@ -29,28 +26,46 @@ const VerticalRule = styled.div`
   background: ${({ theme }) => theme.eui.euiColorLightShade};
 `;
 
+const StyledFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  height: 100%;
+  min-width: 320px;
+`;
+
 interface Props {
   timelineId: TimelineId;
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
+  const [height, setHeight] = useState(0);
+  const measuredRef = useCallback((node) => {
+    if (node !== null) {
+      setHeight(node.getBoundingClientRect().height);
+    }
+  }, []);
   const { SessionView, shouldShowDetailsPanel, DetailsPanel, Navigation } = useSessionView({
     timelineId,
+    height,
   });
 
   return (
-    <FullWidthFlexGroup gutterSize="none">
-      <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
-        <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-        <ScrollableFlexItem>{SessionView}</ScrollableFlexItem>
-      </EuiFlexGroup>
+    <MaxWidthPageFlexGroup
+      alignItems="flexStart"
+      gutterSize="none"
+      ref={measuredRef}
+      data-test-subj="timeline-session-content"
+    >
+      <FlexItemWithMargin grow={false}>
+        {Navigation}
+        {SessionView}
+      </FlexItemWithMargin>
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />
-          <ScrollableFlexItem grow={1}>{DetailsPanel}</ScrollableFlexItem>
+          <StyledFlexItem grow={1}>{DetailsPanel}</StyledFlexItem>
         </>
       )}
-    </FullWidthFlexGroup>
+    </MaxWidthPageFlexGroup>
   );
 };
 
