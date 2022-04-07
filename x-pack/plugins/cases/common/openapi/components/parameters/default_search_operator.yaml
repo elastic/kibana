@@ -1,0 +1,7 @@
+in: query
+name: defaultSearchOperator
+description: The default operator to use for the simple_query_string.
+schema:
+  type: string
+  default: OR
+example: OR

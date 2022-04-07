@@ -1,0 +1,61 @@
+openapi: 3.0.1
+tags: []
+info:
+  title: Cases
+  description: OpenAPI schema for Cases endpoints
+  version: '0.1'
+  contact:
+    name: Cases Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: 'http://localhost:5601'
+    description: local
+paths:
+  /api/cases/_find:
+    $ref: paths/api@cases@_find.yaml  
+  '/s/{spaceId}/api/cases/_find':
+    $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
+#  '/api/cases/{caseId}':
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/{caseId}':
+#    #$ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
+#    $ref: paths/get-cases.yaml
+#  '/api/cases/{caseId}/user_actions':
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/{caseId}/user_actions':
+#   # $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
+#    $ref: paths/get-cases.yaml
+#  /api/cases/status:
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/status':
+#    $ref: paths/get-cases.yaml
+#  /api/cases/configure/connectors/_find:
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/configure/connectors/_find':
+#    $ref: paths/get-cases.yaml
+#  '/api/cases/{caseId}/comments':
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/{caseId}/comments':
+#    $ref: paths/get-cases.yaml
+#    # also in put-cases.yaml
+#  /api/cases/tags:
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/tags':
+#    $ref: paths/get-cases.yaml
+#  '/api/cases/{caseId}/comments/{commentId}':
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
+#    $ref: paths/get-cases.yaml
+#  /api/cases/configure:
+#    $ref: paths/get-cases.yaml
+#  '/s/{spaceId}/api/cases/configure':
+#    $ref: paths/get-cases.yaml
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basics
+security:
+  - basicAuth: []

@@ -1,0 +1,6 @@
+type: string
+title: Owner apps
+enum:
+  - cases
+  - observability
+  - securitySolution

@@ -1,0 +1,6 @@
+in: path
+name: caseId
+description: An identifier for the case.
+required: true
+schema:
+  type: string

@@ -1,0 +1,238 @@
+openapi: 3.0.1
+tags: []
+info:
+  title: Cases
+  description: OpenAPI schema for Cases endpoints
+  version: '0.1'
+  contact:
+    name: Cases Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: http://localhost:5601
+    description: local
+paths:
+  /api/cases/_find:
+    get:
+      description: Retrieves a paginated subset of cases.
+      parameters:
+        - $ref: '#/components/parameters/default_search_operator'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/reporters'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/search_fields'
+        - $ref: '#/components/parameters/sort_field'
+        - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/tags'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/_find:
+    get:
+      description: Retrieves a paginated subset of cases.
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/default_search_operator'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/reporters'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/search_fields'
+        - $ref: '#/components/parameters/sort_field'
+        - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/tags'
+        - $ref: '#/components/parameters/to'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basics
+  parameters:
+    default_search_operator:
+      in: query
+      name: defaultSearchOperator
+      description: The default operator to use for the simple_query_string.
+      schema:
+        type: string
+        default: OR
+      example: OR
+    fields:
+      in: query
+      name: fields
+      description: The fields in the entity to return in the response.
+      schema:
+        type: array
+        items:
+          type: string
+    from:
+      in: query
+      name: from
+      description: >-
+        Returns only cases that were created after a specific date. The date
+        must be specified as a KQL data range or date match expression.
+      schema:
+        type: string
+      example: now-1d
+    owner:
+      in: query
+      name: owner
+      description: >-
+        A filter to limit the retrieved cases to a specific set of applications.
+        Valid values are:cases, observability, and securitySolution. If this
+        parameter is omitted, the response contains all cases that the user has
+        access to read.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/owners'
+          - type: array
+            items:
+              $ref: '#/components/schemas/owners'
+      example: cases
+    page:
+      in: query
+      name: page
+      description: The page number to return.
+      schema:
+        type: integer
+        default: 1
+      example: 1
+    per_page:
+      in: query
+      name: perPage
+      description: The number of rules to return per page.
+      schema:
+        type: integer
+        default: 20
+      example: 20
+    reporters:
+      in: query
+      name: reporters
+      description: Filters the returned cases by the user name of the reporter.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      example: elastic
+    search:
+      in: query
+      name: search
+      description: >-
+        An Elasticsearch simple_query_string query that filters the objects in
+        the response.
+      schema:
+        type: string
+      example: '%2A'
+    search_fields:
+      in: query
+      name: searchFields
+      description: The fields to perform the simple_query_string parsed query against.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+    sort_field:
+      in: query
+      name: sortField
+      description: Determines which field is used to sort the results.
+      schema:
+        type: string
+        enum:
+          - createdAt
+          - updatedAt
+        default: createdAt
+      example: updatedAt
+    sort_order:
+      in: query
+      name: sortOrder
+      description: Determines the sort order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+      example: asc
+    status:
+      in: query
+      name: status
+      description: Filters the returned cases by state.
+      schema:
+        type: string
+        enum:
+          - closed
+          - in-progress
+          - open
+      example: open
+    tags:
+      in: query
+      name: tags
+      description: Filters the returned cases by tags.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      example: phishing
+    to:
+      in: query
+      name: to
+      description: >-
+        Returns only cases that were created before a specific date. The date
+        must be specified as a KQL data range or date match expression.
+      schema:
+        type: string
+      example: now%2B1d
+    space_id:
+      in: path
+      name: spaceId
+      description: An identifier for the space.
+      required: true
+      schema:
+        type: string
+  schemas:
+    owners:
+      type: string
+      title: Owner apps
+      enum:
+        - cases
+        - observability
+        - securitySolution
+security:
+  - basicAuth: []

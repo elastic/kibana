@@ -1,0 +1,6 @@
+in: query
+name: from
+description: Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.
+schema:
+  type: string
+example: now-1d

@@ -1,0 +1,30 @@
+get:
+  description: Retrieves a paginated subset of cases.
+  parameters:
+  - $ref: '../components/parameters/space_id.yaml'
+  - $ref: '../components/parameters/default_search_operator.yaml'
+  - $ref: '../components/parameters/fields.yaml'
+  - $ref: '../components/parameters/from.yaml'
+  - $ref: '../components/parameters/owner.yaml'
+  - $ref: '../components/parameters/page.yaml'
+  - $ref: '../components/parameters/per_page.yaml'
+  - $ref: '../components/parameters/reporters.yaml'
+  - $ref: '../components/parameters/search.yaml'
+  - $ref: '../components/parameters/search_fields.yaml'
+  - $ref: '../components/parameters/sort_field.yaml'
+  - $ref: '../components/parameters/sort_order.yaml'
+  - $ref: '../components/parameters/status.yaml'
+  - $ref: '../components/parameters/tags.yaml'
+  - $ref: '../components/parameters/to.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+          examples: {}
+  servers:
+    - url: https://localhost:5601
+servers:
+    - url: https://localhost:5601

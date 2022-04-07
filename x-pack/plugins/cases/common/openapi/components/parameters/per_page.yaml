@@ -1,0 +1,7 @@
+in: query
+name: perPage
+description:  The number of rules to return per page.
+schema:
+  type: integer
+  default: 20
+example: 20

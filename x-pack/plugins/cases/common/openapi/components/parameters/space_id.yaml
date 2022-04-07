@@ -1,0 +1,6 @@
+in: path
+name: spaceId
+description: An identifier for the space.
+required: true
+schema:
+  type: string
