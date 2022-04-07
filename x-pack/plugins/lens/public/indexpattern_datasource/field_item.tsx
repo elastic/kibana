@@ -460,7 +460,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
-  } else if (field.type.includes('range') || field.type === 'murmur3') {
+  } else if (field.type.includes('range')) {
     return (
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
@@ -468,6 +468,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <EuiText size="s">
           {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
             defaultMessage: `Summary information is not available for range type fields.`,
+          })}
+        </EuiText>
+      </>
+    );
+  } else if (field.type === 'murmur3') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsMurmur3Limited', {
+            defaultMessage: `Summary information is not available for murmur3 fields.`,
           })}
         </EuiText>
       </>
