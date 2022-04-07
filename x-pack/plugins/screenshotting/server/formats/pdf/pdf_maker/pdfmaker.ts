@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from 'src/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
@@ -34,6 +34,8 @@ export class PdfMaker {
   private worker?: Worker;
   private pageCount: number = 0;
 
+  // FIXME: require different path for the worker in the dist rather than having both worker.js and worker.ts
+  // files
   protected workerModulePath = path.resolve(__dirname, './worker.js');
 
   /**
@@ -65,6 +67,7 @@ export class PdfMaker {
   constructor(
     private readonly layout: Layout,
     private readonly logo: string | undefined,
+    private readonly packageInfo: PackageInfo,
     private readonly logger: Logger
   ) {
     this.title = '';
