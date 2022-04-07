@@ -9,33 +9,33 @@ import { getTrendsFromQueryResult, ScoreTrendDoc } from './get_trends';
 
 const trendDocs: ScoreTrendDoc[] = [
   {
-    '@timestamp': '2022-04-06T15:00:00Z',
-    total_findings: 40,
-    passed_findings: 25,
-    failed_findings: 15,
-    score_by_cluster_id: {
-      first_cluster_id: {
-        total_findings: 20,
-        passed_findings: 10,
-        failed_findings: 10,
-      },
-      second_cluster_id: {
-        total_findings: 20,
-        passed_findings: 15,
-        failed_findings: 5,
-      },
-    },
-  },
-  {
     '@timestamp': '2022-04-06T15:30:00Z',
     total_findings: 20,
     passed_findings: 5,
     failed_findings: 15,
     score_by_cluster_id: {
-      third_cluster_id: {
+      first_cluster_id: {
         total_findings: 20,
         passed_findings: 5,
         failed_findings: 15,
+      },
+    },
+  },
+  {
+    '@timestamp': '2022-04-06T15:00:00Z',
+    total_findings: 40,
+    passed_findings: 25,
+    failed_findings: 15,
+    score_by_cluster_id: {
+      second_cluster_id: {
+        total_findings: 20,
+        passed_findings: 10,
+        failed_findings: 10,
+      },
+      third_cluster_id: {
+        total_findings: 20,
+        passed_findings: 15,
+        failed_findings: 5,
       },
     },
   },
@@ -64,6 +64,46 @@ describe('getTrendsFromQueryResult', () => {
     const trends = getTrendsFromQueryResult(trendDocs);
     expect(trends).toEqual([
       {
+        timestamp: '2022-04-06T15:30:00Z',
+        summary: {
+          totalFindings: 20,
+          totalPassed: 5,
+          totalFailed: 15,
+          postureScore: 25.0,
+        },
+        clusters: {
+          first_cluster_id: {
+            totalFindings: 20,
+            totalPassed: 5,
+            totalFailed: 15,
+            postureScore: 25.0,
+          },
+        },
+      },
+      {
+        timestamp: '2022-04-06T15:00:00Z',
+        summary: {
+          totalFindings: 40,
+          totalPassed: 25,
+          totalFailed: 15,
+          postureScore: 62.5,
+        },
+        clusters: {
+          second_cluster_id: {
+            totalFindings: 20,
+            totalPassed: 10,
+            totalFailed: 10,
+            postureScore: 50.0,
+          },
+          third_cluster_id: {
+            totalFindings: 20,
+            totalPassed: 15,
+            totalFailed: 5,
+            postureScore: 75.0,
+          },
+        },
+      },
+      {
         timestamp: '2022-04-05T15:30:00Z',
         summary: {
           totalFindings: 30,
@@ -83,46 +123,6 @@ describe('getTrendsFromQueryResult', () => {
             totalPassed: 0,
             totalFailed: 5,
             postureScore: 0,
-          },
-        },
-      },
-      {
-        timestamp: '2022-04-06T15:00:00Z',
-        summary: {
-          totalFindings: 40,
-          totalPassed: 25,
-          totalFailed: 15,
-          postureScore: 62.5,
-        },
-        clusters: {
-          first_cluster_id: {
-            totalFindings: 20,
-            totalPassed: 10,
-            totalFailed: 10,
-            postureScore: 50.0,
-          },
-          second_cluster_id: {
-            totalFindings: 20,
-            totalPassed: 15,
-            totalFailed: 5,
-            postureScore: 75.0,
-          },
-        },
-      },
-      {
-        timestamp: '2022-04-06T15:30:00Z',
-        summary: {
-          totalFindings: 20,
-          totalPassed: 5,
-          totalFailed: 15,
-          postureScore: 25.0,
-        },
-        clusters: {
-          third_cluster_id: {
-            totalFindings: 20,
-            totalPassed: 5,
-            totalFailed: 15,
-            postureScore: 25.0,
           },
         },
       },

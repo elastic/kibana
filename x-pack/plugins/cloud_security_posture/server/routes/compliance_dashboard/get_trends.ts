@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SearchResponse } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
@@ -28,11 +28,7 @@ export interface ScoreTrendDoc {
 export const getTrendsAggsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_PATTERN,
   size: 5,
-  sort: {
-    '@timestamp': {
-      order: 'desc',
-    },
-  },
+  sort: '@timestamp:desc',
 });
 
 export type Trends = Array<{
@@ -41,42 +37,34 @@ export type Trends = Array<{
   clusters: Record<string, Stats>;
 }>;
 
-type CorrectSearchResponse<TDocument> = Record<'body', SearchResponse<TDocument>>;
-
 export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trends =>
-  scoreTrendDocs
-    .map((data) => ({
-      timestamp: data['@timestamp'],
-      summary: {
-        totalFindings: data.total_findings,
-        totalFailed: data.failed_findings,
-        totalPassed: data.passed_findings,
-        postureScore: calculatePostureScore(data.passed_findings, data.failed_findings),
-      },
-      clusters: Object.fromEntries(
-        Object.entries(data.score_by_cluster_id).map(([clusterId, cluster]) => [
-          clusterId,
-          {
-            totalFindings: cluster.total_findings,
-            totalFailed: cluster.failed_findings,
-            totalPassed: cluster.passed_findings,
-            postureScore: calculatePostureScore(cluster.passed_findings, cluster.failed_findings),
-          },
-        ])
-      ),
-    }))
-    .sort((a, b) => new Date(a.timestamp).getDate() - new Date(b.timestamp).getDate());
+  scoreTrendDocs.map((data) => ({
+    timestamp: data['@timestamp'],
+    summary: {
+      totalFindings: data.total_findings,
+      totalFailed: data.failed_findings,
+      totalPassed: data.passed_findings,
+      postureScore: calculatePostureScore(data.passed_findings, data.failed_findings),
+    },
+    clusters: Object.fromEntries(
+      Object.entries(data.score_by_cluster_id).map(([clusterId, cluster]) => [
+        clusterId,
+        {
+          totalFindings: cluster.total_findings,
+          totalFailed: cluster.failed_findings,
+          totalPassed: cluster.passed_findings,
+          postureScore: calculatePostureScore(cluster.passed_findings, cluster.failed_findings),
+        },
+      ])
+    ),
+  }));
 
 export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
-  const trendsQueryResult = (await esClient.search<ScoreTrendDoc>(
-    // @ts-ignore the sorting function used does not match ES search type
-    getTrendsAggsQuery(),
-    { meta: true }
-  )) as unknown as CorrectSearchResponse<ScoreTrendDoc>;
+  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsAggsQuery());
 
-  if (!trendsQueryResult.body.hits.hits) throw new Error('missing trend results from score index');
+  if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
 
-  const scoreTrendDocs = trendsQueryResult.body.hits.hits.map((hit) => {
+  const scoreTrendDocs = trendsQueryResult.hits.hits.map((hit) => {
     if (!hit._source) throw new Error('missing _source data for one or more of trend results');
     return hit._source;
   });
