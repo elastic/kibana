@@ -92,7 +92,7 @@ export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';
-export const LICENSE_TYPE_STANDARD = 'standard';
+export const LICENSE_TYPE_CLOUD_STANDARD = 'standard';
 export const LICENSE_TYPE_GOLD = 'gold';
 export const LICENSE_TYPE_PLATINUM = 'platinum';
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise';

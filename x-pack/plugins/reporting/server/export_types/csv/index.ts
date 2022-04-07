@@ -11,7 +11,7 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
 import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
@@ -32,7 +32,7 @@ export const getExportType = (): ExportTypeDefinition<
   validLicenses: [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_BASIC,
-    LICENSE_TYPE_STANDARD,
+    LICENSE_TYPE_CLOUD_STANDARD,
     LICENSE_TYPE_GOLD,
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
