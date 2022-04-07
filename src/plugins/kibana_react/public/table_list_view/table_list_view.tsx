@@ -276,6 +276,7 @@ class TableListView<V extends {}> extends React.Component<
 
   renderListingLimitWarning() {
     if (this.state.showLimitError) {
+      const canEditAdvancedSettings = this.props.application.capabilities.advancedSettings.save;
       const setting = 'savedObjects:listingLimit';
       const advancedSettingsLink = this.props.application.getUrlForApp('management', {
         path: `/kibana/settings?query=${setting}`,
@@ -293,25 +294,39 @@ class TableListView<V extends {}> extends React.Component<
             iconType="help"
           >
             <p>
-              <FormattedMessage
-                id="kibana-react.tableListView.listing.listingLimitExceededDescription"
-                defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+              {canEditAdvancedSettings ? (
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.listingLimitExceededDescription"
+                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                 the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
-                values={{
-                  entityNamePlural: this.props.entityNamePlural,
-                  totalItems: this.state.totalItems,
-                  listingLimitValue: this.props.listingLimit,
-                  listingLimitText: <strong>listingLimit</strong>,
-                  advancedSettingsLink: (
-                    <EuiLink href={advancedSettingsLink}>
-                      <FormattedMessage
-                        id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
-                        defaultMessage="Advanced Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
+                  values={{
+                    entityNamePlural: this.props.entityNamePlural,
+                    totalItems: this.state.totalItems,
+                    listingLimitValue: this.props.listingLimit,
+                    listingLimitText: <strong>listingLimit</strong>,
+                    advancedSettingsLink: (
+                      <EuiLink href={advancedSettingsLink}>
+                        <FormattedMessage
+                          id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
+                          defaultMessage="Advanced Settings"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.listingLimitExceededDescriptionNoPermissions"
+                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+                  the table below from displaying more than {listingLimitValue}. Contact your system administrator to change this setting."
+                  values={{
+                    entityNamePlural: this.props.entityNamePlural,
+                    totalItems: this.state.totalItems,
+                    listingLimitValue: this.props.listingLimit,
+                    listingLimitText: <strong>listingLimit</strong>,
+                  }}
+                />
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
