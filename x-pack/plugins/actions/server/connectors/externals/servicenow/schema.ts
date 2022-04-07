@@ -8,12 +8,15 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const incidentSchema = schema.object({
-  result: schema.object({
-    sys_id: schema.string(),
-    number: schema.string(),
-    sys_created_on: schema.string(),
-    sys_updated_on: schema.string(),
-  }),
+  result: schema.object(
+    {
+      sys_id: schema.string(),
+      number: schema.string(),
+      sys_created_on: schema.string(),
+      sys_updated_on: schema.string(),
+    },
+    { unknowns: 'ignore' }
+  ),
 });
 
 export const applicationInformationSchema = schema.object({

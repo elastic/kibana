@@ -59,17 +59,20 @@ export abstract class CaseConnector implements CaseConnectorInterface {
     this.registerSubAction({
       name: 'pushToService',
       method: 'pushToService',
-      schema: schema.object({
-        externalId: schema.nullable(schema.string()),
-        comments: schema.nullable(
-          schema.arrayOf(
-            schema.object({
-              comment: schema.string(),
-              commentId: schema.string(),
-            })
-          )
-        ),
-      }),
+      schema: schema.object(
+        {
+          externalId: schema.nullable(schema.string()),
+          comments: schema.nullable(
+            schema.arrayOf(
+              schema.object({
+                comment: schema.string(),
+                commentId: schema.string(),
+              })
+            )
+          ),
+        },
+        { unknowns: 'allow' }
+      ),
     });
   }
 
@@ -179,7 +182,7 @@ export abstract class CaseConnector implements CaseConnectorInterface {
       timeout,
     });
 
-    responseSchema.validate(res);
+    responseSchema.validate(res.data);
 
     return res;
   }
