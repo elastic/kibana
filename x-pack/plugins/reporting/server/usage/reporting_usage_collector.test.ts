@@ -24,7 +24,7 @@ import {
 const exportTypesRegistry = getExportTypesRegistry();
 
 const getLicenseMock =
-  (licenseType = 'platinum') =>
+  (licenseType = 'gold') =>
   () => {
     return Promise.resolve({
       isAvailable: () => true,
@@ -104,13 +104,13 @@ describe('license checks', () => {
     });
   });
 
-  describe('with platinum license', () => {
+  describe('with gold license', () => {
     let usageStats: any;
     beforeAll(async () => {
       const collector = getReportingUsageCollector(
         mockCore,
         usageCollectionSetup,
-        getLicenseMock('platinum'),
+        getLicenseMock('gold'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
