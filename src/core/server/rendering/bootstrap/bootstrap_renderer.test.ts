@@ -180,18 +180,22 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  it('calls getPluginsBundlePaths with the correct parameters', async () => {
-    const request = httpServerMock.createKibanaRequest();
+  [false, true].forEach((isAnonymousPage) => {
+    it(`calls getPluginsBundlePaths with the correct parameters when isAnonymousPage=${isAnonymousPage}`, async () => {
+      const request = httpServerMock.createKibanaRequest();
 
-    await renderer({
-      request,
-      uiSettingsClient,
-    });
+      await renderer({
+        request,
+        uiSettingsClient,
+        isAnonymousPage,
+      });
 
-    expect(getPluginsBundlePathsMock).toHaveBeenCalledTimes(1);
-    expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
-      uiPlugins,
-      regularBundlePath: '/base-path/42/bundles',
+      expect(getPluginsBundlePathsMock).toHaveBeenCalledTimes(1);
+      expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
+        isAnonymousPage,
+        uiPlugins,
+        regularBundlePath: '/base-path/42/bundles',
+      });
     });
   });
 
