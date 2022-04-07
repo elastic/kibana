@@ -19,8 +19,12 @@ export * from './deprecated';
  */
 
 export { getEsQueryConfig, FilterStateStore } from '../common';
-export { FilterLabel, FilterItem } from './ui';
-export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
+export {
+  getDisplayValueFromFilter,
+  generateFilters,
+  extractTimeRange,
+  getIndexPatternFromFilter,
+} from './query';
 
 /**
  * Exporters (CSV)
@@ -254,15 +258,6 @@ export const search = {
  * UI components
  */
 
-export type {
-  SearchBarProps,
-  StatefulSearchBarProps,
-  IndexPatternSelectProps,
-  QueryStringInputProps,
-} from './ui';
-
-export { QueryStringInput, SearchBar } from './ui';
-
 /**
  * Types to be shared externally
  * @public
@@ -276,6 +271,8 @@ export {
   getDefaultQuery,
   FilterManager,
   TimeHistory,
+  getQueryLog,
+  mapAndFlattenFilters,
 } from './query';
 
 export type {
@@ -288,6 +285,9 @@ export type {
   QueryStateChange,
   QueryStart,
   AutoRefreshDoneFn,
+  PersistedLog,
+  QueryStringContract,
+  QuerySetup,
 } from './query';
 
 export type { AggsStart } from './search/aggs';
@@ -298,8 +298,6 @@ export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
 
-export type { ApplyGlobalFilterActionContext } from './actions';
-export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
@@ -316,7 +314,6 @@ export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 

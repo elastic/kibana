@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+echo '--- Agent Debug Info'
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"

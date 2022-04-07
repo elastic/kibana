@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   FramePublicAPI,
   OperationDescriptor,
@@ -17,7 +18,6 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { PaletteRegistry } from 'src/plugins/charts/public';
 import { act } from 'react-dom/test-utils';
 import { PalettePanelContainer } from '../../shared_components';
 import { layerTypes } from '../../../common';

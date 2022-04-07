@@ -48,6 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/triggers_actions_ui'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
@@ -110,6 +111,30 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+        },
+        discover_alert: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+                discover: ['all'],
+                advancedSettings: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['search-source-alert', 'search-source-alert-output'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
         },
       },
       defaultRoles: ['superuser'],

@@ -28,10 +28,9 @@ import {
   OperatingSystem,
   BlocklistConditionEntryField,
   isPathValid,
-  hasSimpleExecutableName,
 } from '@kbn/securitysolution-utils';
 import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
 import { OS_TITLES } from '../../../../common/translations';
@@ -66,8 +65,11 @@ import { isValidHash } from '../../../../../../common/endpoint/service/trusted_a
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 
-interface BlocklistEntry {
+const testIdPrefix = 'blocklist-form';
+
+export interface BlocklistEntry {
   field: BlocklistConditionEntryField;
   operator: 'included';
   type: 'match_any';
@@ -104,8 +106,8 @@ function isValid(itemValidation: ItemValidation): boolean {
   return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
-export const BlockListForm = memo(
-  ({ item, policies, policiesIsLoading, onChange, mode }: ArtifactFormComponentProps) => {
+export const BlockListForm = memo<ArtifactFormComponentProps>(
+  ({ item, policies, policiesIsLoading, onChange, mode }) => {
     const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({
       name: false,
       value: false,
@@ -141,6 +143,8 @@ export const BlockListForm = memo(
 
       setSelectedPolicies(policiesData);
     }, [hasFormChanged, item.tags, policies]);
+
+    const getTestId = useTestIdGenerator(testIdPrefix);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
@@ -240,15 +244,6 @@ export const BlockListForm = memo(
         newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
       }
 
-      // warn if wildcard
-      if (
-        field !== 'file.hash.*' &&
-        !isInvalidPath &&
-        values.some((value) => !hasSimpleExecutableName({ os, type, value }))
-      ) {
-        newValueWarnings.WILDCARD_PRESENT = createValidationMessage(ERRORS.WILDCARD_PRESENT);
-      }
-
       // warn if duplicates
       if (values.length !== uniq(values).length) {
         newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
@@ -287,16 +282,19 @@ export const BlockListForm = memo(
 
     const handleOnDescriptionChange = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const nextItem = {
+          ...item,
+          description: event.target.value,
+        };
+        validateValues(nextItem);
+
         onChange({
           isValid: isValid(errorsRef.current),
-          item: {
-            ...item,
-            description: event.target.value,
-          },
+          item: nextItem,
         });
         setHasFormChanged(true);
       },
-      [onChange, item]
+      [onChange, item, validateValues]
     );
 
     const handleOnOsChange = useCallback(
@@ -434,7 +432,7 @@ export const BlockListForm = memo(
         </EuiTitle>
         <EuiSpacer size="xs" />
         {mode === 'create' && (
-          <EuiText size="s">
+          <EuiText size="s" data-test-subj={getTestId('header-description')}>
             <p>{DETAILS_HEADER_DESCRIPTION}</p>
           </EuiText>
         )}
@@ -453,6 +451,7 @@ export const BlockListForm = memo(
             onBlur={handleOnNameBlur}
             required={visited.name}
             maxLength={256}
+            data-test-subj={getTestId('name-input')}
             fullWidth
           />
         </EuiFormRow>
@@ -461,6 +460,7 @@ export const BlockListForm = memo(
             name="description"
             value={item.description}
             onChange={handleOnDescriptionChange}
+            data-test-subj={getTestId('description-input')}
             fullWidth
             compressed
             maxLength={256}
@@ -482,6 +482,7 @@ export const BlockListForm = memo(
             options={osOptions}
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
             fullWidth
           />
         </EuiFormRow>
@@ -496,6 +497,7 @@ export const BlockListForm = memo(
                   options={fieldOptions}
                   valueOfSelected={blocklistEntry.field}
                   onChange={handleOnFieldChange}
+                  data-test-subj={getTestId('field-select')}
                   fullWidth
                 />
               </EuiFormRow>
@@ -521,6 +523,7 @@ export const BlockListForm = memo(
             onSearchChange={handleOnValueTextChange}
             onChange={handleOnValueChange}
             onCreateOption={handleOnValueAdd}
+            data-test-subj={getTestId('values-input')}
             fullWidth
             noSuggestions
           />

@@ -30,15 +30,6 @@ export const getTransformChangesForHosts: GetTransformChanges = ({
         factoryQueryType: HostsQueries.hostsEntities,
       };
     }
-    case HostsQueries.authentications: {
-      return {
-        indices: createIndicesFromPrefix({
-          prefix: settings.prefix,
-          transformIndices: ['user_ent*'],
-        }),
-        factoryQueryType: HostsQueries.authenticationsEntities,
-      };
-    }
     default: {
       return undefined;
     }
