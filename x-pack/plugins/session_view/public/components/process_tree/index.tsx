@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
+import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
 import {
   AlertStatusEventEntityIdMap,
   Process,
@@ -18,8 +18,23 @@ import {
 } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
+import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
 
 type FetchFunction = () => void;
+
+const LOAD_NEXT_TEXT = i18n.translate('xpack.sessionView.processTree.loadMore', {
+  defaultMessage: 'Show {pageSize} next events',
+  values: {
+    pageSize: PROCESS_EVENTS_PER_PAGE,
+  },
+});
+
+const LOAD_PREVIOUS_TEXT = i18n.translate('xpack.sessionView.processTree.loadPrevious', {
+  defaultMessage: 'Show {pageSize} previous events',
+  values: {
+    pageSize: PROCESS_EVENTS_PER_PAGE,
+  },
+});
 
 export interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
@@ -82,6 +97,15 @@ export const ProcessTree = ({
     searchQuery,
     updatedAlertsStatus,
   });
+
+  const eventsRemaining = useMemo(() => {
+    const total = data?.[0]?.total || 0;
+    const loadedSoFar = data.reduce((prev, current) => {
+      return prev + (current?.events?.length || 0);
+    }, 0);
+
+    return total - loadedSoFar;
+  }, [data]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const selectionAreaRef = useRef<HTMLDivElement>(null);
@@ -197,11 +221,6 @@ export const ProcessTree = ({
         css={styles.scroller}
         data-test-subj="sessionView:sessionViewProcessTree"
       >
-        {hasPreviousPage && (
-          <EuiButton fullWidth onClick={fetchPreviousPage} isLoading={isFetching}>
-            <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />
-          </EuiButton>
-        )}
         {sessionLeader && (
           <ProcessTreeNode
             isSessionLeader
@@ -216,6 +235,28 @@ export const ProcessTree = ({
             timeStampOn={timeStampOn}
             verboseModeOn={verboseModeOn}
             searchResults={searchResults}
+            loadPreviousButton={
+              hasPreviousPage ? (
+                <ProcessTreeLoadMoreButton
+                  text={LOAD_PREVIOUS_TEXT}
+                  onClick={fetchPreviousPage}
+                  isFetching={isFetching}
+                  eventsRemaining={eventsRemaining}
+                  forward={false}
+                />
+              ) : null
+            }
+            loadNextButton={
+              hasNextPage ? (
+                <ProcessTreeLoadMoreButton
+                  text={LOAD_NEXT_TEXT}
+                  onClick={fetchNextPage}
+                  isFetching={isFetching}
+                  eventsRemaining={eventsRemaining}
+                  forward={true}
+                />
+              ) : null
+            }
           />
         )}
         <div
@@ -223,11 +264,6 @@ export const ProcessTree = ({
           ref={selectionAreaRef}
           css={styles.selectionArea}
         />
-        {hasNextPage && (
-          <EuiButton fullWidth onClick={fetchNextPage} isLoading={isFetching}>
-            <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />
-          </EuiButton>
-        )}
       </div>
       {!isInvestigatedEventVisible && (
         <BackToInvestigatedAlert
