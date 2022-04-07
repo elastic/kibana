@@ -221,8 +221,8 @@ export const useSessionView = ({
   const { sessionView } = useKibana().services;
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen } = useTimelineFullScreen();
 
   const { sessionViewConfig, activeTab } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
