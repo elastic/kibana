@@ -162,8 +162,8 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
 
   _getJoinFilterExpression(): unknown | undefined {
     return this.hasJoins()
-      // Remove unjoined source features by filtering out features without GeoJSON feature.property[FEATURE_VISIBLE_PROPERTY_NAME] is true
-      ? ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]
+      ? // Remove unjoined source features by filtering out features without GeoJSON feature.property[FEATURE_VISIBLE_PROPERTY_NAME] is true
+        ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]
       : undefined;
   }
 

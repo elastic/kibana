@@ -285,7 +285,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this.getMbSourceId() === mbSourceId;
   }
 
-  _getJoinResults(): { join?: InnerJoin, joinPropertiesMap?: PropertiesMap; joinRequestMeta?: DataRequestMeta } {
+  _getJoinResults(): {
+    join?: InnerJoin;
+    joinPropertiesMap?: PropertiesMap;
+    joinRequestMeta?: DataRequestMeta;
+  } {
     const joins = this.getValidJoins();
     if (!joins) {
       return {};
@@ -293,7 +297,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
     const join = joins[0];
     const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-    return { 
+    return {
       join,
       joinPropertiesMap: joinDataRequest?.getData() as PropertiesMap | undefined,
       joinRequestMeta: joinDataRequest?.getMeta(),
@@ -307,9 +311,15 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   _getJoinFilterExpression(): unknown | undefined {
     const { join, joinPropertiesMap } = this._getJoinResults();
     return join && joinPropertiesMap
-      // Unable to check FEATURE_VISIBLE_PROPERTY_NAME flag since filter expressions do not support feature-state
-      // Instead, remove unjoined source features by filtering out features without matching join keys
-      ? ['match', ['get', join.getLeftField().getName()], Array.from(joinPropertiesMap.keys()), true, false]
+      ? // Unable to check FEATURE_VISIBLE_PROPERTY_NAME flag since filter expressions do not support feature-state
+        // Instead, remove unjoined source features by filtering out features without matching join keys
+        [
+          'match',
+          ['get', join.getLeftField().getName()],
+          Array.from(joinPropertiesMap.keys()),
+          true,
+          false,
+        ]
       : undefined;
   }
 

@@ -731,7 +731,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     }
 
-    const filterExpr = getPointFilterExpression(this._getJoinFilterExpression(), timesliceMaskConfig);
+    const filterExpr = getPointFilterExpression(
+      this._getJoinFilterExpression(),
+      timesliceMaskConfig
+    );
     if (!_.isEqual(filterExpr, mbMap.getFilter(markerLayerId))) {
       mbMap.setFilter(markerLayerId, filterExpr);
     }

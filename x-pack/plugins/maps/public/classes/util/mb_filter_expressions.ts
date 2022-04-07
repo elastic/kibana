@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  GEO_JSON_TYPE,
-  KBN_IS_CENTROID_FEATURE,
-} from '../../../common/constants';
+import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE } from '../../../common/constants';
 
 import { Timeslice } from '../../../common/descriptor_types';
 
@@ -29,7 +26,7 @@ function getFilterExpression(
   if (joinFilter) {
     allFilters.push(joinFilter);
   }
-  
+
   if (timesliceMaskConfig) {
     allFilters.push(['has', timesliceMaskConfig.timesliceMaskField]);
     allFilters.push([
