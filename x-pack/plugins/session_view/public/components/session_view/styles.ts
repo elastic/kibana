@@ -11,11 +11,11 @@ import { CSSObject } from '@emotion/react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
-  height?: string;
+  height?: number;
   isFullScreen?: boolean;
 }
 
-export const useStyles = ({ height = '500px', isFullScreen }: StylesDeps) => {
+export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -23,7 +23,7 @@ export const useStyles = ({ height = '500px', isFullScreen }: StylesDeps) => {
 
     // 118px = Session View Toolbar height + Close Session button height + spacing margin at the bottom
     const sessionView: CSSObject = {
-      height: `${isFullScreen ? 'calc(100vh - 118px)' : height}`,
+      height: `${isFullScreen ? 'calc(100vh - 118px)' : height + 'px'}`,
     };
 
     const processTree: CSSObject = {

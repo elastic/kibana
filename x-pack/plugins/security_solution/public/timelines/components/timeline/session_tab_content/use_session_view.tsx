@@ -109,9 +109,11 @@ const Navigation = React.memo(NavigationComponent);
 export const useSessionView = ({
   timelineId,
   entityType,
+  height,
 }: {
   timelineId: TimelineId;
   entityType?: EntityType;
+  height?: number;
 }) => {
   const { sessionView } = useKibana().services;
   const dispatch = useDispatch();
@@ -203,14 +205,17 @@ export const useSessionView = ({
   });
 
   const sessionViewComponent = useMemo(() => {
+    const sessionViewSearchBarHeight = 118;
+    const heightMinusSearchBar = height ? height - sessionViewSearchBarHeight : undefined;
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
           loadAlertDetails: openDetailsPanel,
           isFullScreen: fullScreen,
+          height: heightMinusSearchBar,
         })
       : null;
-  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig]);
+  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig, height]);
 
   const navigation = useMemo(() => {
     return (

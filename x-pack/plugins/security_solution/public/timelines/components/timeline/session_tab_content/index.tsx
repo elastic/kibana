@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -37,12 +37,24 @@ interface Props {
 }
 
 const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
+  const [height, setHeight] = useState(0);
+  const measuredRef = useCallback((node) => {
+    if (node !== null) {
+      setHeight(node.getBoundingClientRect().height);
+    }
+  }, []);
   const { SessionView, shouldShowDetailsPanel, DetailsPanel, Navigation } = useSessionView({
     timelineId,
+    height,
   });
 
   return (
-    <MaxWidthPageFlexGroup alignItems="flexStart" gutterSize="none">
+    <MaxWidthPageFlexGroup
+      alignItems="flexStart"
+      gutterSize="none"
+      ref={measuredRef}
+      data-test-subj="timeline-session-content"
+    >
       <FlexItemWithMargin grow={false}>
         {Navigation}
         {SessionView}
