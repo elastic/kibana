@@ -262,6 +262,7 @@ describe('ALL - Packs', () => {
     it('should load prebuilt packs', () => {
       cy.contains('Load Elastic prebuilt packs').click();
       cy.contains('Load Elastic prebuilt packs').should('not.exist');
+      cy.wait(1000);
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });

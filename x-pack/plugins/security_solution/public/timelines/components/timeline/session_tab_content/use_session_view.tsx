@@ -212,14 +212,25 @@ export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineI
 export const useSessionView = ({
   timelineId,
   entityType,
+  height,
 }: {
   timelineId: TimelineId;
   entityType?: EntityType;
+  height?: number;
 }) => {
   const { sessionView } = useKibana().services;
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { sessionViewConfig } = useDeepEqualSelector(
+
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+
+  const { sessionViewConfig, activeTab } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+
+  const fullScreen = useMemo(
+    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
+    [globalFullScreen, timelineId, timelineFullScreen]
   );
 
   const sourcererScope = useMemo(() => {
@@ -236,17 +247,21 @@ export const useSessionView = ({
     entityType,
     sourcererScope,
     timelineId,
-    tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
+    tabType: timelineId === TimelineId.active ? activeTab : TimelineTabs.query,
   });
 
   const sessionViewComponent = useMemo(() => {
+    const sessionViewSearchBarHeight = 118;
+    const heightMinusSearchBar = height ? height - sessionViewSearchBarHeight : undefined;
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
           loadAlertDetails: openDetailsPanel,
+          isFullScreen: fullScreen,
+          height: heightMinusSearchBar,
         })
       : null;
-  }, [openDetailsPanel, sessionView, sessionViewConfig]);
+  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig, height]);
 
   return {
     openDetailsPanel,

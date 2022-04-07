@@ -7,13 +7,14 @@
 
 import { useEffect } from 'react';
 import * as React from 'react';
-import { EuiAccordion, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { StepsList } from '../../../synthetics/check_steps/steps_list';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { useBrowserRunOnceMonitors } from './use_browser_run_once_monitors';
 import { TestResultHeader } from '../test_result_header';
+import { StdErrorLogs } from '../../../synthetics/check_steps/stderr_logs';
 
 interface Props {
   monitorId: string;
@@ -74,10 +75,24 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, onDone }: Prop
       data-test-subj="expandResults"
       initialIsOpen={true}
     >
-      {isStepsLoading && <EuiText>{LOADING_STEPS}</EuiText>}
+      {isStepsLoading && (
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText>{LOADING_STEPS}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {isStepsLoadingFailed && (
         <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
       )}
+
+      {isStepsLoadingFailed &&
+        summaryDoc?.error?.message?.includes('journey did not finish executing') && (
+          <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
+        )}
 
       {stepEnds.length > 0 && stepListData?.steps && (
         <StepsList

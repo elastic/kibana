@@ -54,7 +54,9 @@ export function TableHeader({
             customLabel={indexPattern.getFieldByName(col.name)?.customLabel}
             isTimeColumn={indexPattern.timeFieldName === col.name}
             sortOrder={
-              sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+              sortOrder.length
+                ? sortOrder
+                : getDefaultSort(indexPattern, defaultSortOrder, hideTimeColumn)
             }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
