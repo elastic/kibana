@@ -208,11 +208,7 @@ export function XYChart({
     yRight: true,
   };
 
-  const labelsOrientation = args.labelsOrientation || {
-    x: 0,
-    yLeft: 0,
-    yRight: 0,
-  };
+  const labelsOrientation = args.labelsOrientation || { x: 0, yLeft: 0, yRight: 0 };
 
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
 
@@ -440,12 +436,7 @@ export function XYChart({
       });
     }
     const context: FilterEvent['data'] = {
-      data: points.map((point) => ({
-        row: point.row,
-        column: point.column,
-        value: point.value,
-        table,
-      })),
+      data: points.map(({ row, column, value }) => ({ row, column, value, table })),
     };
     onClickValue(context);
   };
@@ -464,11 +455,7 @@ export function XYChart({
       dataLayers[0].xAccessor && getAccessorByDimension(dataLayers[0].xAccessor, table.columns);
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
 
-    const context: BrushEvent['data'] = {
-      range: [min, max],
-      table,
-      column: xAxisColumnIndex,
-    };
+    const context: BrushEvent['data'] = { range: [min, max], table, column: xAxisColumnIndex };
     onSelectRange(context);
   };
 

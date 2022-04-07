@@ -168,6 +168,59 @@ const getSeriesName: GetSeriesNameFn = (
   return splitColumnId ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
 };
 
+const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
+  visible: !xAccessor,
+  radius: xAccessor && !emphasizeFitting ? 5 : 0,
+});
+
+const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
+
+type GetColorFn = (
+  seriesIdentifier: XYChartSeriesIdentifier,
+  config: {
+    layer: CommonXYDataLayerConfigResult;
+    layerId: number;
+    accessor: string;
+    colorAssignments: ColorAssignments;
+    columnToLabelMap: Record<string, string>;
+    paletteService: PaletteRegistry;
+    syncColors?: boolean;
+  }
+) => string | null;
+
+const getColor: GetColorFn = (
+  { yAccessor, seriesKeys },
+  { layer, layerId, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
+) => {
+  const overwriteColor = getSeriesColor(layer, accessor);
+  if (overwriteColor !== null) {
+    return overwriteColor;
+  }
+  const colorAssignment = colorAssignments[layer.palette.name];
+  const seriesLayers: SeriesLayer[] = [
+    {
+      name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+      totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+      rankAtDepth: colorAssignment.getRank(
+        layer,
+        layerId,
+        String(seriesKeys[0]),
+        String(yAccessor)
+      ),
+    },
+  ];
+  return paletteService.get(layer.palette.name).getCategoricalColor(
+    seriesLayers,
+    {
+      maxDepth: 1,
+      behindText: false,
+      totalSeries: colorAssignment.totalSeriesCount,
+      syncColors,
+    },
+    layer.palette.params
+  );
+};
+
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
   layerId,
@@ -191,7 +244,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   const xColumnId = layer.xAccessor && getAccessorByDimension(layer.xAccessor, table.columns);
   const splitColumnId =
     layer.splitAccessor && getAccessorByDimension(layer.splitAccessor, table.columns);
-  const yColumnId = accessor && getAccessorByDimension(accessor, table.columns);
   const enableHistogramMode =
     layer.isHistogram &&
     (isStacked || !layer.splitAccessor) &&
@@ -221,7 +273,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       !(
         splitColumnId &&
         typeof row[splitColumnId] === 'undefined' &&
-        typeof row[yColumnId] === 'undefined'
+        typeof row[accessor] === 'undefined'
       )
   );
 
@@ -235,71 +287,39 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   return {
     splitSeriesAccessors: splitColumnId ? [splitColumnId] : [],
     stackAccessors: isStacked ? [xColumnId as string] : [],
-    id: splitColumnId ? `${splitColumnId}-${yColumnId}` : yColumnId,
+    id: splitColumnId ? `${splitColumnId}-${accessor}` : accessor,
     xAccessor: xColumnId || 'unifiedX',
-    yAccessors: [yColumnId],
+    yAccessors: [accessor],
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && layer.yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
         : layer.yScaleType,
-    color: ({ yAccessor, seriesKeys }) => {
-      const overwriteColor = getSeriesColor(layer, accessor);
-      if (overwriteColor !== null) {
-        return overwriteColor;
-      }
-      const colorAssignment = colorAssignments[layer.palette.name];
-      const seriesLayers: SeriesLayer[] = [
-        {
-          name: splitColumnId ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
-          totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-          rankAtDepth: colorAssignment.getRank(
-            layer,
-            layerId,
-            String(seriesKeys[0]),
-            String(yAccessor)
-          ),
-        },
-      ];
-      return paletteService.get(layer.palette.name).getCategoricalColor(
-        seriesLayers,
-        {
-          maxDepth: 1,
-          behindText: false,
-          totalSeries: colorAssignment.totalSeriesCount,
-          syncColors,
-        },
-        layer.palette.params
-      );
-    },
+    color: (series) =>
+      getColor(series, {
+        layer,
+        layerId,
+        accessor,
+        colorAssignments,
+        columnToLabelMap,
+        paletteService,
+        syncColors,
+      }),
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: {
-        visible: !xColumnId,
-        radius: xColumnId && !emphasizeFitting ? 5 : 0,
-      },
+      point: getPointConfig(xColumnId, emphasizeFitting),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
-        fit: {
-          area: { opacity: fillOpacity || 0.5 },
-          line: { visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] },
-        },
+        fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
       }),
     },
     lineSeriesStyle: {
-      point: {
-        visible: !xColumnId,
-        radius: xColumnId && !emphasizeFitting ? 5 : 0,
-      },
-      ...(emphasizeFitting && {
-        fit: {
-          line: { visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] },
-        },
-      }),
+      point: getPointConfig(xColumnId, emphasizeFitting),
+      ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
     },
     name(d) {
       return getSeriesName(d, {
