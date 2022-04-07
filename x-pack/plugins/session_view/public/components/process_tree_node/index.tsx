@@ -20,6 +20,7 @@ import React, {
   useCallback,
   useMemo,
   RefObject,
+  ReactElement,
 } from 'react';
 import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -47,6 +48,8 @@ export interface ProcessDeps {
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
   onShowAlertDetails: (alertUuid: string) => void;
+  loadNextButton?: ReactElement | null;
+  loadPreviousButton?: ReactElement | null;
 }
 
 /**
@@ -66,6 +69,8 @@ export function ProcessTreeNode({
   scrollerRef,
   onChangeJumpToEventVisibility,
   onShowAlertDetails,
+  loadPreviousButton,
+  loadNextButton,
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -249,8 +254,8 @@ export function ProcessTreeNode({
               </EuiToolTip>{' '}
               <span ref={textRef}>
                 <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>&nbsp;
-                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>&nbsp;
-                {dataOrDash(args?.slice(1).join(' '))}
+                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>{' '}
+                {args?.slice(1).join(' ')}
                 {exitCode !== undefined && (
                   <small data-test-subj="sessionView:processTreeNodeExitCode">
                     {' '}
@@ -303,6 +308,7 @@ export function ProcessTreeNode({
 
       {shouldRenderChildren && (
         <div css={styles.children}>
+          {loadPreviousButton}
           {children.map((child) => {
             return (
               <ProcessTreeNode
@@ -322,6 +328,7 @@ export function ProcessTreeNode({
               />
             );
           })}
+          {loadNextButton}
         </div>
       )}
     </div>
