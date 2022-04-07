@@ -13,12 +13,17 @@ import { TemplateContext } from '../template_context';
 function generator({
   imageTag,
   imageFlavor,
+  dockerCrossCompile,
   version,
   dockerTargetFilename,
   baseOSImage,
   architecture,
 }: TemplateContext) {
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
+  const dockerTargetName = `${imageTag}${imageFlavor}:${version}`;
+  const dockerBuild = dockerCrossCompile
+    ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f Dockerfile . || exit 1;`
+    : `docker build -t ${dockerTargetName} -f Dockerfile . || exit 1;`;
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -55,7 +60,7 @@ function generator({
   retry_docker_pull ${baseOSImage}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
-  docker buildx build --platform ${dockerArchitecture} -t ${imageTag}${imageFlavor}:${version} -f Dockerfile . || exit 1;
+  ${dockerBuild}
 
   docker save ${imageTag}${imageFlavor}:${version} | gzip -c > ${dockerTargetFilename}
 

@@ -86,6 +86,7 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
+    dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
