@@ -150,6 +150,59 @@ const getSeriesName: GetSeriesNameFn = (
   return layer.splitAccessor ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
 };
 
+const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
+  visible: !xAccessor,
+  radius: xAccessor && !emphasizeFitting ? 5 : 0,
+});
+
+const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
+
+type GetColorFn = (
+  seriesIdentifier: XYChartSeriesIdentifier,
+  config: {
+    layer: CommonXYDataLayerConfigResult;
+    layerId: number;
+    accessor: string;
+    colorAssignments: ColorAssignments;
+    columnToLabelMap: Record<string, string>;
+    paletteService: PaletteRegistry;
+    syncColors?: boolean;
+  }
+) => string | null;
+
+const getColor: GetColorFn = (
+  { yAccessor, seriesKeys },
+  { layer, layerId, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
+) => {
+  const overwriteColor = getSeriesColor(layer, accessor);
+  if (overwriteColor !== null) {
+    return overwriteColor;
+  }
+  const colorAssignment = colorAssignments[layer.palette.name];
+  const seriesLayers: SeriesLayer[] = [
+    {
+      name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+      totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+      rankAtDepth: colorAssignment.getRank(
+        layer,
+        layerId,
+        String(seriesKeys[0]),
+        String(yAccessor)
+      ),
+    },
+  ];
+  return paletteService.get(layer.palette.name).getCategoricalColor(
+    seriesLayers,
+    {
+      maxDepth: 1,
+      behindText: false,
+      totalSeries: colorAssignment.totalSeriesCount,
+      syncColors,
+    },
+    layer.palette.params
+  );
+};
+
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
   layerId,
@@ -220,62 +273,30 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       formatter?.id === 'bytes' && layer.yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
         : layer.yScaleType,
-    color: ({ yAccessor, seriesKeys }) => {
-      const overwriteColor = getSeriesColor(layer, accessor);
-      if (overwriteColor !== null) {
-        return overwriteColor;
-      }
-      const colorAssignment = colorAssignments[layer.palette.name];
-      const seriesLayers: SeriesLayer[] = [
-        {
-          name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
-          totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-          rankAtDepth: colorAssignment.getRank(
-            layer,
-            layerId,
-            String(seriesKeys[0]),
-            String(yAccessor)
-          ),
-        },
-      ];
-      return paletteService.get(layer.palette.name).getCategoricalColor(
-        seriesLayers,
-        {
-          maxDepth: 1,
-          behindText: false,
-          totalSeries: colorAssignment.totalSeriesCount,
-          syncColors,
-        },
-        layer.palette.params
-      );
-    },
+    color: (series) =>
+      getColor(series, {
+        layer,
+        layerId,
+        accessor,
+        colorAssignments,
+        columnToLabelMap,
+        paletteService,
+        syncColors,
+      }),
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: {
-        visible: !layer.xAccessor,
-        radius: layer.xAccessor && !emphasizeFitting ? 5 : 0,
-      },
+      point: getPointConfig(layer.xAccessor, emphasizeFitting),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
-        fit: {
-          area: { opacity: fillOpacity || 0.5 },
-          line: { visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] },
-        },
+        fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
       }),
     },
     lineSeriesStyle: {
-      point: {
-        visible: !layer.xAccessor,
-        radius: layer.xAccessor && !emphasizeFitting ? 5 : 0,
-      },
-      ...(emphasizeFitting && {
-        fit: {
-          line: { visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] },
-        },
-      }),
+      point: getPointConfig(layer.xAccessor, emphasizeFitting),
+      ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
     },
     name(d) {
       return getSeriesName(d, {
