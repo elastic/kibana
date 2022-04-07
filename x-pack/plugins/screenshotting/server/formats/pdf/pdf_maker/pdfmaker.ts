@@ -34,9 +34,7 @@ export class PdfMaker {
   private worker?: Worker;
   private pageCount: number = 0;
 
-  // FIXME: require different path for the worker in the dist rather than having both worker.js and worker.ts
-  // files
-  protected workerModulePath = path.resolve(__dirname, './worker.js');
+  protected workerModulePath: string;
 
   /**
    * The maximum heap size for old memory region of the worker thread.
@@ -67,11 +65,15 @@ export class PdfMaker {
   constructor(
     private readonly layout: Layout,
     private readonly logo: string | undefined,
-    private readonly packageInfo: PackageInfo,
+    { dist }: PackageInfo, // FIXME: is this even needed?
     private readonly logger: Logger
   ) {
     this.title = '';
     this.content = [];
+
+    // `worker.ts` will become `worker.js` in the dist,
+    // so we must require different path for the worker in the dist
+    this.workerModulePath = path.resolve(__dirname, './worker_dist.js');
   }
 
   _addContents(contents: Content[]) {
