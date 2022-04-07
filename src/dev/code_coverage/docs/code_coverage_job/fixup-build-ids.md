@@ -20,3 +20,23 @@ GET kibana_code_coverage/_search?_source_includes=ciRunUrl,BUILD_ID
   }
 }
 ```
+
+### Example painless snippet to get the correct value
+This is just a simple learning spike on using painless.  
+It takes the ciRunUrl, and parses out the build number, from it.
+```
+POST /_scripts/painless/_execute
+{
+  "script": {
+    "source": """
+def buildNum(def x) { /(.*\/)(\d*$)/.matcher(x).replaceAll('$2') }
+
+return buildNum(params.ciRunUrl)
+    """,
+    "params": {
+      "ciRunUrl": "https://buildkite.com/elastic/kibana-code-coverage-main/builds/249",
+      "BUILD_ID": "3733f02a-9aef-490e-a798-c2a193d3ec90"
+    }
+  }
+}
+```
