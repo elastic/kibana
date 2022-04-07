@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
   height?: number;
