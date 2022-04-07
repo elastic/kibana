@@ -18,7 +18,7 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border } = euiTheme;
+    const { border, colors } = euiTheme;
 
     const processTree: CSSObject = {
       height: `${height}`,
@@ -41,11 +41,11 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
     };
     const searchBar: CSSObject = {
       position: 'relative',
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs}`,
     };
 
     const buttonsEyeDetail: CSSObject = {
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs}`,
     };
 
     const sessionViewerComponent: CSSObject = {
@@ -54,7 +54,7 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
     };
 
     const toolBar: CSSObject = {
-      backgroundColor: `${theme.euiFormBackgroundDisabledColor} !important`,
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
