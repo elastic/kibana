@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent, useEffect } from 'react';
+import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -50,7 +50,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   onDeleteConfig,
 }) => {
   const serviceType = 'external';
-  const { fetchExternalSource, saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
+  const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
   const {
     formDisabled,
@@ -60,10 +60,6 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     sourceConfigData,
     urlValid,
   } = useValues(ExternalConnectorLogic);
-
-  useEffect(() => {
-    fetchExternalSource();
-  }, []);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();

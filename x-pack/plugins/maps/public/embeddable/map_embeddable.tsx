@@ -25,12 +25,8 @@ import {
   omitGenericEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  TimeRange,
-  Query,
-} from '../../../../../src/plugins/data/public';
+import { APPLY_FILTER_TRIGGER, TimeRange, Query } from '../../../../../src/plugins/data/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/unified_search/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -196,7 +192,7 @@ export class MapEmbeddable
       ? this._savedMap.getAttributes().title
       : '';
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
