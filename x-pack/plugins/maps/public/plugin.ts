@@ -52,6 +52,7 @@ import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
@@ -78,6 +79,7 @@ import type { CloudSetup } from '../../cloud/public';
 import type { LensPublicSetup } from '../../lens/public';
 
 import { setupLensChoroplethChart } from './lens';
+import { SharedUXPluginStart } from '../../../../src/plugins/shared_ux/public';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -95,6 +97,7 @@ export interface MapsPluginSetupDependencies {
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
@@ -112,6 +115,7 @@ export interface MapsPluginStartDependencies {
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   usageCollection?: UsageCollectionSetup;
+  sharedUX: SharedUXPluginStart;
 }
 
 /**

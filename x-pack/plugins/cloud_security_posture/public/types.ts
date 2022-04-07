@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -25,6 +26,6 @@ export interface CspClientPluginSetupDeps {
 export interface CspClientPluginStartDeps {
   // required
   data: DataPublicPluginStart;
-
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   // optional
 }

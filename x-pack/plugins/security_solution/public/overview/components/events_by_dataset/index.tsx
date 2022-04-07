@@ -9,7 +9,6 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
-import uuid from 'uuid';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
@@ -52,6 +51,8 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
+  // Make a unique query type everywhere this query is used
+  queryType: 'topN' | 'overview';
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   showSpacer?: boolean;
@@ -80,6 +81,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   onlyField,
   paddingSize,
   query,
+  queryType,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   showLegend,
@@ -88,8 +90,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   toggleTopN,
 }) => {
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
   useEffect(() => {
     return () => {
