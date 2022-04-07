@@ -57,4 +57,4 @@ export interface SeverityBuckets {
 }
 export type ParsedAlertsData = Partial<
   Record<Status, { total: number; severities: SeverityBuckets[] }>
->;
+> | null;

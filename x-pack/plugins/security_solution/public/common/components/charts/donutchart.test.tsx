@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Partition, Settings } from '@elastic/charts';
 import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
 import { DonutChart, DonutChartProps } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
+import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import uuid from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -52,15 +56,29 @@ jest.mock('./common', () => {
     })),
   };
 });
+
+const testColors = {
+  critical: '#EF6550',
+  high: '#EE9266',
+  medium: '#F3B689',
+  low: '#F8D9B2',
+};
+
 describe('DonutChart', () => {
   const props: DonutChartProps = {
-    data: parsedMockAlertsData[0].buckets,
-    isEmptyChart: false,
+    data: parsedMockAlertsData?.open?.severities,
     label: 'Open',
     link: null,
-    legendField: 'kibana.alert.severity',
-    sum: <>{28149}</>,
+    title: <ChartLabel count={parsedMockAlertsData?.open?.total} />,
     fillColor: jest.fn(() => '#ccc'),
+    totalCount: parsedMockAlertsData?.open?.total,
+    legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
+      color: testColors[d],
+      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d}`),
+      timelineId: undefined,
+      field: 'kibana.alert.severity',
+      value: d,
+    })),
   };
 
   beforeEach(() => {
@@ -95,10 +113,10 @@ describe('DonutChart', () => {
   test('should render an empty chart', () => {
     const testProps = {
       ...props,
-      data: parsedMockAlertsData[1].buckets,
+      data: parsedMockAlertsData?.acknowledged?.severities,
       label: 'Acknowledged',
-      isEmptyChart: true,
-      sum: 0,
+      title: <ChartLabel count={parsedMockAlertsData?.acknowledged?.total} />,
+      totalCount: parsedMockAlertsData?.acknowledged?.total,
     };
     const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="empty-donut"]`)).toBeInTheDocument();
@@ -107,7 +125,9 @@ describe('DonutChart', () => {
   test('should render chart Partition', () => {
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-partition"]`)).toBeInTheDocument();
-    expect((Partition as jest.Mock).mock.calls[0][0].data).toEqual(parsedMockAlertsData[0].buckets);
+    expect((Partition as jest.Mock).mock.calls[0][0].data).toEqual(
+      parsedMockAlertsData?.open?.severities
+    );
     expect((Partition as jest.Mock).mock.calls[0][0].layout).toEqual('sunburst');
     expect((Partition as jest.Mock).mock.calls[0][0].layers.length).toEqual(3);
   });
@@ -150,7 +170,7 @@ describe('DonutChart', () => {
   test('should NOT render chart legend if showLegend is false', () => {
     const testProps = {
       ...props,
-      showLegend: false,
+      legendItems: null,
     };
     const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="legend"]`)).not.toBeInTheDocument();

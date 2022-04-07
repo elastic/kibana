@@ -39,6 +39,10 @@ export const parseAlertsData = (
 ): ParsedAlertsData => {
   const statusBuckets = response?.aggregations?.alertsByStatus?.buckets ?? [];
 
+  if (statusBuckets.length === 0) {
+    return null;
+  }
+
   return statusBuckets.reduce<ParsedAlertsData>((parsedAlertsData, statusBucket) => {
     const severityBuckets = statusBucket.statusBySeverity?.buckets ?? [];
 

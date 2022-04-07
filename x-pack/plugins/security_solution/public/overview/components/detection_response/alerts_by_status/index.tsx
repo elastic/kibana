@@ -56,7 +56,6 @@ const panelSettings = {
   paddingSize: 'm' as PaddingSize,
 };
 const legendField = 'kibana.alert.severity';
-const colors = SEVERITY_COLOR;
 const legends: Severity[] = ['critical', 'high', 'medium', 'low'];
 const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
@@ -93,7 +92,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
   const legendItems: LegendItem[] = useMemo(
     () =>
       legends.map((d) => ({
-        color: colors[d],
+        color: SEVERITY_COLOR[d],
         dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d}`),
         timelineId: undefined,
         field: legendField,
@@ -103,8 +102,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
   );
 
   const totalAlerts =
-    loading || !donutData
-      ? null
+    loading || donutData == null
+      ? 0
       : (donutData?.open?.total ?? 0) +
         (donutData?.acknowledged?.total ?? 0) +
         (donutData?.closed?.total ?? 0);
@@ -112,17 +111,18 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
   const fillColor = useCallback((d: Datum) => {
     switch (d.dataName) {
       case 'low':
-        return colors.low;
+        return SEVERITY_COLOR.low;
       case 'medium':
-        return colors.medium;
+        return SEVERITY_COLOR.medium;
       case 'high':
-        return colors.high;
+        return SEVERITY_COLOR.high;
       case 'critical':
-        return colors.critical;
+        return SEVERITY_COLOR.critical;
       default:
-        return colors.low;
+        return SEVERITY_COLOR.low;
     }
   }, []);
+
   return (
     <>
       <HoverVisibilityContainer show={true} targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
@@ -158,7 +158,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           </HeaderSection>
           {toggleStatus && (
             <>
-              {!loading && totalAlerts != null && (
+              {!loading && (
                 <EuiText className="eui-textCenter">
                   <b>
                     <FormattedCount count={totalAlerts} />
@@ -171,39 +171,36 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                 {!loading && (
                   <EuiFlexItem key={`alerts-status-open`}>
                     <DonutChart
-                      colors={SEVERITY_COLOR}
                       data={donutData?.open?.severities}
                       fillColor={fillColor}
                       height={donutHeight}
                       label={STATUS_OPEN}
-                      showLegend={false}
-                      title={<ChartLabel count={donutData?.open?.total} />}
+                      title={<ChartLabel count={donutData?.open?.total ?? 0} />}
+                      totalCount={donutData?.open?.total ?? 0}
                     />
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem key={`alerts-status-acknowledged`}>
                   {!loading && (
                     <DonutChart
-                      colors={SEVERITY_COLOR}
                       data={donutData?.acknowledged?.severities}
                       fillColor={fillColor}
                       height={donutHeight}
                       label={STATUS_ACKNOWLEDGED}
-                      showLegend={false}
-                      title={<ChartLabel count={donutData?.acknowledged?.total} />}
+                      title={<ChartLabel count={donutData?.acknowledged?.total ?? 0} />}
+                      totalCount={donutData?.acknowledged?.total ?? 0}
                     />
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem key={`alerts-status-closed`}>
                   {!loading && (
                     <DonutChart
-                      colors={SEVERITY_COLOR}
                       data={donutData?.closed?.severities}
                       fillColor={fillColor}
                       height={donutHeight}
                       label={STATUS_CLOSED}
-                      showLegend={false}
-                      title={<ChartLabel count={donutData?.closed?.total} />}
+                      title={<ChartLabel count={donutData?.closed?.total ?? 0} />}
+                      totalCount={donutData?.closed?.total ?? 0}
                     />
                   )}
                 </EuiFlexItem>

@@ -60,14 +60,22 @@ export function compactNotationParts(
 const FormattedCountComponent: React.FC<{ count: number | null }> = ({ count }) => {
   const [mantissa, scale, hasRemainder] = useMemo(() => compactNotationParts(count || 0), [count]);
 
-  return count != null ? (
+  if (count == null) {
+    return null;
+  }
+
+  if (count === 0) {
+    return <>{0}</>;
+  }
+
+  return (
     <FormattedMessage
       id="xpack.securitySolution.formattedNumber.countsLabel"
       description=""
       defaultMessage="{mantissa}{scale}{hasRemainder}"
       values={{ mantissa: <EuiI18nNumber value={mantissa} />, scale, hasRemainder }}
     />
-  ) : null;
+  );
 };
 
 export const FormattedCount = React.memo(FormattedCountComponent);

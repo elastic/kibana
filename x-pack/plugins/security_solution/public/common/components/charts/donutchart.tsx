@@ -6,16 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 
 import { Chart, Datum, Partition, Settings, PartitionLayout } from '@elastic/charts';
-import uuid from 'uuid';
 import styled from 'styled-components';
 import { ThemeContext } from './donut_theme_context';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DonutChartEmpty } from './donutchart_empty';
 
 export const NO_LEGEND_DATA: LegendItem[] = [];
@@ -26,15 +24,14 @@ interface DonutChartData {
 }
 
 export interface DonutChartProps {
-  colors: Record<string, string>;
   data: DonutChartData[] | null | undefined;
   fillColor: (d: Datum) => string;
   height?: number;
   label: string;
-  legendField?: string;
+  legendItems?: LegendItem[] | null | undefined;
   link?: string | null;
-  showLegend?: boolean;
   title: React.ReactElement | string | number | null;
+  totalCount: number | null | undefined;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -51,35 +48,19 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const DonutChart = ({
-  colors,
   data,
   fillColor,
   height = 90,
   label,
-  legendField,
   link,
-  showLegend = true,
   title,
+  totalCount,
+  legendItems,
 }: DonutChartProps) => {
   const theme = useTheme();
 
   const { chartTheme } = useContext(ThemeContext);
 
-  const legendItems: LegendItem[] = useMemo(
-    () =>
-      data != null && legendField
-        ? data.map((d, i) => {
-            return {
-              color: colors[d.key],
-              dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d.key}`),
-              timelineId: undefined,
-              field: legendField,
-              value: d.key,
-            };
-          })
-        : NO_LEGEND_DATA,
-    [colors, data, legendField]
-  );
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -111,7 +92,7 @@ export const DonutChart = ({
             {data && link && <EuiLink className="eui-textTruncate">{label}</EuiLink>}
           </EuiFlexItem>
         </StyledEuiFlexGroup>
-        {data == null ? (
+        {data == null || totalCount == null || totalCount === 0 ? (
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
@@ -135,12 +116,10 @@ export const DonutChart = ({
                   },
                 },
                 /* The layers above are for styling purpose,
-               to make the one above thinner.
+               to make the ring thinner.
                */
                 {
-                  groupByRollup: (d: Datum) => {
-                    return d.key;
-                  },
+                  groupByRollup: (d: Datum) => d.key,
                   nodeLabel: (d: Datum) => d,
                   shape: {
                     fillColor,
@@ -151,7 +130,7 @@ export const DonutChart = ({
           </Chart>
         )}
       </StyledEuiFlexItem>
-      {showLegend && legendItems.length > 0 && (
+      {legendItems && legendItems?.length > 0 && (
         <EuiFlexItem>
           <DraggableLegend legendItems={legendItems} height={height} />
         </EuiFlexItem>
