@@ -94,7 +94,7 @@ const EditSavedQueryPageComponent = () => {
                     <StyledEuiCallOut size="s">
                       <FormattedMessage
                         id="xpack.osquery.viewSavedQuery.prebuiltInfo"
-                        defaultMessage="This is a prebuilt Elastic query. You can modify the scheduled agent policies, but you cannot edit queries itself."
+                        defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."
                       />
                     </StyledEuiCallOut>
                   )}

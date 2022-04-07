@@ -424,9 +424,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           },
         }}
         onChange={onTypeChange}
+        disabled={euiFieldProps?.isDisabled}
       />
     ),
-    [onTypeChange, resultType.value]
+    [euiFieldProps?.isDisabled, onTypeChange, resultType.value]
   );
 
   useEffect(() => {
@@ -1157,18 +1158,17 @@ export const ECSMappingEditorField = React.memo(
             isDisabled={!!euiFieldProps?.isDisabled}
           />
         ))}
-        {!euiFieldProps?.isDisabled && (
-          <ECSMappingEditorForm
-            // eslint-disable-next-line
-            ref={(formRef) => {
-              if (formRef) {
-                formRefs.current.new = formRef;
-              }
-            }}
-            osquerySchemaOptions={osquerySchemaOptions}
-            onAdd={handleAddRow}
-          />
-        )}
+        <ECSMappingEditorForm
+          // eslint-disable-next-line
+          ref={(formRef) => {
+            if (formRef) {
+              formRefs.current.new = formRef;
+            }
+          }}
+          osquerySchemaOptions={osquerySchemaOptions}
+          onAdd={handleAddRow}
+          isDisabled={euiFieldProps?.isDisabled}
+        />
       </>
     );
   },

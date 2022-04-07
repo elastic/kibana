@@ -94,6 +94,7 @@ const SavedQueryFormComponent = forwardRef<SavedQueryFormRefObject, SavedQueryFo
               component={ECSMappingEditorField}
               query={query}
               fieldRef={ecsFieldRef}
+              euiFieldProps={euiFieldProps}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -153,7 +154,11 @@ const SavedQueryFormComponent = forwardRef<SavedQueryFormRefObject, SavedQueryFo
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+            <CommonUseField
+              path="platform"
+              component={PlatformCheckBoxGroupField}
+              euiFieldProps={euiFieldProps}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {playgroundVisible && (
