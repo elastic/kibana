@@ -37,8 +37,10 @@ describe('Canvas Shareable Workpad API', () => {
     });
 
     expect(wrapper.html()).toMatchSnapshot();
+
     share();
     await tick();
+
     expect(wrapper.html()).toMatchSnapshot();
   });
 
