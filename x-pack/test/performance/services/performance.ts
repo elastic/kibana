@@ -12,8 +12,6 @@ import apm, { Span, Transaction } from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
-type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
-
 apm.start({
   serviceName: 'functional test runner',
   serverUrl: 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443',
