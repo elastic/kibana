@@ -17,7 +17,7 @@ import { SortOrder } from '../components/table_header/helpers';
 export function getDefaultSort(
   indexPattern: DataView | undefined,
   defaultSortOrder: string = 'desc',
-  hidingTimeColumn: boolean
+  hidingTimeColumn: boolean = false
 ): SortOrder[] {
   if (
     indexPattern?.timeFieldName &&
