@@ -59,7 +59,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     });
 
   describe('rendering service', () => {
-    it('exposes plugin config settings', async () => {
+    it('exposes plugin config settings to authenticated users', async () => {
       await navigateTo('/render/core');
       const injectedMetadata = await getInjectedMetadata();
       expect(injectedMetadata).to.not.be.empty();
@@ -204,6 +204,39 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
+      ];
+      // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
+      // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
+      // when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
+      const extraKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
+      expect(extraKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing MORE config keys than this test expects
+      const missingKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
+      expect(missingKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing FEWER config keys than this test expects
+    });
+
+    it('exposes plugin config settings to unauthenticated users', async () => {
+      await navigateTo('/render/core?isAnonymousPage=true');
+      const injectedMetadata = await getInjectedMetadata();
+      expect(injectedMetadata).to.not.be.empty();
+      expect(injectedMetadata.uiPlugins).to.not.be.empty();
+
+      const allExposedConfigKeys = [];
+      for (const { plugin, exposedConfigKeys } of injectedMetadata.uiPlugins) {
+        const configPath = Array.isArray(plugin.configPath)
+          ? plugin.configPath.join('.')
+          : plugin.configPath;
+        for (const [exposedConfigKey, type] of Object.entries(exposedConfigKeys)) {
+          allExposedConfigKeys.push(`${configPath}.${exposedConfigKey} (${type})`);
+        }
+      }
+      const expectedExposedConfigKeys = [
+        // NOTE: each exposed config key has its schema type at the end in "(parentheses)".
+        // The schema type comes from Joi; in particular, "(any)" can mean a string or a few other data types.
+        // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
+        // Ensure that your change does not unintentionally expose any sensitive values!
+        'xpack.security.loginAssistanceMessage (any)',
+        'xpack.security.sameSiteCookies (alternatives)',
+        'xpack.security.showInsecureClusterWarning (boolean)',
       ];
       // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
       // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
