@@ -19,7 +19,7 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { DETECTION_RESPONSE_TITLE, UPDATED, UPDATING } from './translations';
 import { inputsSelectors } from '../../common/store/selectors';
-import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
+import { AlertsByStatus } from '../components/detection_response/alerts_by_status/';
 import { useUserInfo } from '../../detections/components/user_info';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
