@@ -7,8 +7,9 @@
 
 import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -29,7 +30,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../../common/store';
 
-const OverlayStyle = `
+const OverlayStyle = css`
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -40,13 +41,13 @@ const OverlayContainer = styled.div`
   ${OverlayStyle}
 `;
 
-const FullScreenOverlayStyles = `
+const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 3000;
+  z-index: ${euiThemeVars.euiZLevel3};
 `;
 
 const FullScreenOverlayContainer = styled.div`
@@ -146,9 +147,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
 
   useLayoutEffect(() => {
     if (fullScreen && sessionContainerRef.current) {
-      sessionContainerRef.current.setAttribute('style', FullScreenOverlayStyles);
+      sessionContainerRef.current.setAttribute('style', FullScreenOverlayStyles.join(''));
     } else if (sessionContainerRef.current) {
-      sessionContainerRef.current.setAttribute('style', OverlayStyle);
+      sessionContainerRef.current.setAttribute('style', OverlayStyle.join(''));
     }
   }, [fullScreen]);
 
