@@ -1008,7 +1008,13 @@
                 "label": "settings",
                 "description": [],
                 "signature": [
-                  "EmbeddableContainerSettings",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddableContainerSettings",
+                    "text": "EmbeddableContainerSettings"
+                  },
                   " | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
@@ -1286,6 +1292,54 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.Container.removeEmbeddable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "embeddableId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Container.onRemoveEmbeddable",
+            "type": "Function",
+            "tags": [],
+            "label": "onRemoveEmbeddable",
+            "description": [
+              "\nControl the panels that are pushed to the input stream when an embeddable is\nremoved. This can be used if removing one embeddable has knock-on effects, like\nre-ordering embeddables that come after it."
+            ],
+            "signature": [
+              "(embeddableId: string) => { [key: string]: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.PanelState",
+                "text": "PanelState"
+              },
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
+              " & { id: string; }>; }"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.onRemoveEmbeddable.$1",
                 "type": "string",
                 "tags": [],
                 "label": "embeddableId",
@@ -6019,6 +6073,49 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddableContainerSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableContainerSettings",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.initializeSequentially",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initializeSequentially",
+            "description": [
+              "\nIf true, the container will wait for each embeddable to load after creation before loading the next embeddable."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.childIdInitializeOrder",
+            "type": "Array",
+            "tags": [],
+            "label": "childIdInitializeOrder",
+            "description": [
+              "\nInitialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

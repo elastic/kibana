@@ -85,11 +85,11 @@ interface Props {
   button: EuiCollapsibleNavProps['button'];
 }
 
-const overviewIDsToHide = ['kibanaOverview', 'enterpriseSearch'];
+const overviewIDsToHide = ['kibanaOverview'];
 const overviewIDs = [
   ...overviewIDsToHide,
   'observability-overview',
-  'securitySolutionUI:overview',
+  'securitySolutionUI:get_started',
   'management',
 ];
 

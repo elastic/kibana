@@ -50,6 +50,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
           i18n: { Context: I18nContext },
           docLinks,
           application: { getUrlForApp },
+          executionContext,
         } = coreStart;
 
         docTitle.change(PLUGIN.TITLE);
@@ -62,6 +63,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
           history,
           getUrlForApp,
           theme$,
+          executionContext,
         });
 
         return () => {

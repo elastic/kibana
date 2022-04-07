@@ -30,7 +30,7 @@ export interface EuiTableMetaData {
 }
 
 export interface TestBed<T = string> {
-  /** The comonent under test */
+  /** The component under test */
   component: ReactWrapper;
   /**
    * Pass it a `data-test-subj` and it will return true if it exists or false if it does not exist.

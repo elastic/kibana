@@ -17,11 +17,18 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { ConnectorSettings } from './components/connector_settings';
+import { CrawlerSettings } from './components/crawler_settings';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
-import { SETUP_GUIDE_PATH, ROOT_PATH, SEARCH_INDICES_PATH, SETTINGS_PATH } from './routes';
+import {
+  SETUP_GUIDE_PATH,
+  ROOT_PATH,
+  SEARCH_INDICES_PATH,
+  CONNECTOR_SETTINGS_PATH,
+  CRAWLER_SETTINGS_PATH,
+} from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -71,8 +78,11 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
       </Route>
-      <Route path={SETTINGS_PATH}>
-        <Settings />
+      <Route path={CONNECTOR_SETTINGS_PATH}>
+        <ConnectorSettings />
+      </Route>
+      <Route path={CRAWLER_SETTINGS_PATH}>
+        <CrawlerSettings />
       </Route>
       <Route>
         <NotFound />
