@@ -28,7 +28,7 @@ docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
-docker push "KIBANA_TEST_IMAGE"
+docker push "$KIBANA_TEST_IMAGE"
 docker logout docker.elastic.co
 
 cd -
@@ -50,7 +50,6 @@ jq '
   ' .buildkite/scripts/steps/cloud/deploy.json > "$DEPLOYMENT_SPEC"
 
 ecctl deployment create --track --output json --file "$DEPLOYMENT_SPEC" &> "$LOGS"
-
 CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$LOGS")
 CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$LOGS")
 CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$LOGS")
@@ -58,6 +57,8 @@ CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]'
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
+
+trap 'echo "--- Shutdown deployment" && ecctl deployment shutdown --force --track --output json &> "$LOGS"' EXIT
 
 echo "--- Run functional tests"
 # TODO
@@ -72,6 +73,3 @@ echo "--- Run functional tests"
 # TEST_ES_PORT=9200
 # TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
 # TEST_ES_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
-
-echo "--- Shutdown deployment"
-ecctl deployment shutdown --force --track --output json &> "$LOGS"
