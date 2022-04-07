@@ -208,9 +208,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
       // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
       // when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
-      const extraKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
+      const extraKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
       expect(extraKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing MORE config keys than this test expects
-      const missingKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
+      const missingKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
       expect(missingKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing FEWER config keys than this test expects
     });
 
@@ -241,9 +241,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
       // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
       // when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
-      const extraKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
+      const extraKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
       expect(extraKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing MORE config keys than this test expects
-      const missingKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
+      const missingKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
       expect(missingKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing FEWER config keys than this test expects
     });
 
