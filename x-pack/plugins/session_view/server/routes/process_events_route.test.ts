@@ -36,6 +36,7 @@ describe('process_events_route.ts', () => {
       const body = await doSearch(client, 'asdf', undefined);
 
       expect(body.events.length).toBe(0);
+      expect(body.total).toBe(0);
     });
 
     it('returns results for a particular session entity_id', async () => {
@@ -44,6 +45,7 @@ describe('process_events_route.ts', () => {
       const body = await doSearch(client, 'mockId', undefined);
 
       expect(body.events.length).toBe(mockEvents.length);
+      expect(body.total).toBe(body.events.length);
     });
 
     it('returns hits in reverse order when paginating backwards', async () => {
