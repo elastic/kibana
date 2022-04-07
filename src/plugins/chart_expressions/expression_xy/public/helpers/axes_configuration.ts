@@ -44,7 +44,7 @@ export interface AxisConfiguration {
   hide?: boolean;
 }
 
-export type GroupsConfiguration = Array<AxisConfiguration>;
+export type GroupsConfiguration = AxisConfiguration[];
 
 export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
