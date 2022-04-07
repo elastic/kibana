@@ -6,7 +6,7 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { getAlertMock, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
+import { getRuleMock, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
@@ -18,12 +18,12 @@ describe('read_tags', () => {
 
   describe('readRawTags', () => {
     test('it should return the intersection of tags to where none are repeating', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
@@ -36,12 +36,12 @@ describe('read_tags', () => {
     });
 
     test('it should return the intersection of tags to where some are repeating values', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
@@ -54,12 +54,12 @@ describe('read_tags', () => {
     });
 
     test('it should work with no tags defined between two results', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = [];
@@ -72,7 +72,7 @@ describe('read_tags', () => {
     });
 
     test('it should work with a single tag which has repeating values in it', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
@@ -85,7 +85,7 @@ describe('read_tags', () => {
     });
 
     test('it should work with a single tag which has empty tags', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
@@ -100,12 +100,12 @@ describe('read_tags', () => {
 
   describe('readTags', () => {
     test('it should return the intersection of tags to where none are repeating', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
@@ -118,12 +118,12 @@ describe('read_tags', () => {
     });
 
     test('it should return the intersection of tags to where some are repeating values', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
@@ -136,12 +136,12 @@ describe('read_tags', () => {
     });
 
     test('it should work with no tags defined between two results', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = [];
@@ -154,7 +154,7 @@ describe('read_tags', () => {
     });
 
     test('it should work with a single tag which has repeating values in it', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
@@ -167,7 +167,7 @@ describe('read_tags', () => {
     });
 
     test('it should work with a single tag which has empty tags', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
@@ -180,7 +180,7 @@ describe('read_tags', () => {
     });
 
     test('it should filter out any __internal tags for things such as alert_id', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [
@@ -197,7 +197,7 @@ describe('read_tags', () => {
     });
 
     test('it should filter out any __internal tags with two different results', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [
@@ -210,7 +210,7 @@ describe('read_tags', () => {
         'tag 5',
       ];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = [
@@ -232,12 +232,12 @@ describe('read_tags', () => {
 
   describe('convertTagsToSet', () => {
     test('it should convert the intersection of two tag systems without duplicates', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
@@ -255,12 +255,12 @@ describe('read_tags', () => {
 
   describe('convertToTags', () => {
     test('it should convert the two tag systems together with duplicates', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
@@ -281,18 +281,18 @@ describe('read_tags', () => {
     });
 
     test('it should filter out anything that is not a tag', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '99979e67-19a7-455f-b452-8eded6135716';
       result2.params.ruleId = 'rule-2';
       // @ts-expect-error
       delete result2.tags;
 
-      const result3 = getAlertMock(getQueryRuleParams());
+      const result3 = getRuleMock(getQueryRuleParams());
       result3.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result3.params.ruleId = 'rule-2';
       result3.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];

@@ -12,7 +12,7 @@ import {
   getReadBulkRequest,
   getFindResultWithSingleHit,
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   createBulkMlRuleRequest,
   getBasicEmptySearchResponse,
   getBasicNoShardsSearchResponse,
@@ -37,7 +37,7 @@ describe('create_rules_bulk', () => {
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful creation
+    clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful creation
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())

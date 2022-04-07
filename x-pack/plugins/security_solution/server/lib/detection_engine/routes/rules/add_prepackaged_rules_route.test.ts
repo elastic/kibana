@@ -9,7 +9,7 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
-  getAlertMock,
+  getRuleMock,
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
@@ -81,7 +81,7 @@ describe('add_prepackaged_rules_route', () => {
     mockExceptionsClient = listMock.getExceptionListClient();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({

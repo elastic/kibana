@@ -8,8 +8,8 @@
 import { readRules } from './read_rules';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import {
-  resolveAlertMock,
-  getAlertMock,
+  resolveRuleMock,
+  getRuleMock,
   getFindResultWithSingleHit,
 } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
@@ -34,18 +34,18 @@ describe('read_rules', () => {
   describe('readRules', () => {
     test('should return the output from rulesClient if id is set but ruleId is undefined', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.resolve.mockResolvedValue(resolveAlertMock(getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(resolveRuleMock(getQueryRuleParams()));
 
       const rule = await readRules({
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
       });
-      expect(rule).toEqual(getAlertMock(getQueryRuleParams()));
+      expect(rule).toEqual(getRuleMock(getQueryRuleParams()));
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = resolveAlertMock(getQueryRuleParams());
+      const result = resolveRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete result.alertTypeId;
       rulesClient.resolve.mockResolvedValue(result);
@@ -90,7 +90,7 @@ describe('read_rules', () => {
 
     test('should return the output from rulesClient if id is undefined but ruleId is set', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const rule = await readRules({
@@ -98,12 +98,12 @@ describe('read_rules', () => {
         id: undefined,
         ruleId: 'rule-1',
       });
-      expect(rule).toEqual(getAlertMock(getQueryRuleParams()));
+      expect(rule).toEqual(getRuleMock(getQueryRuleParams()));
     });
 
     test('should return null if the output from rulesClient with ruleId set is empty', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       rulesClient.find.mockResolvedValue({ data: [], page: 0, perPage: 1, total: 0 });
 
       const rule = await readRules({
@@ -116,7 +116,7 @@ describe('read_rules', () => {
 
     test('should return the output from rulesClient if id is null but ruleId is set', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const rule = await readRules({
@@ -124,12 +124,12 @@ describe('read_rules', () => {
         id: undefined,
         ruleId: 'rule-1',
       });
-      expect(rule).toEqual(getAlertMock(getQueryRuleParams()));
+      expect(rule).toEqual(getRuleMock(getQueryRuleParams()));
     });
 
     test('should return null if id and ruleId are undefined', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const rule = await readRules({

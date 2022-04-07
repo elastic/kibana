@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
-  getAlertMock,
+  getRuleMock,
   getFindRequest,
   getFindResultWithSingleHit,
   getEmptySavedObjectsResponse,
@@ -29,7 +29,7 @@ describe('find_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
       getRuleExecutionSummaries()

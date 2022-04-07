@@ -10,7 +10,7 @@ import {
   getImportRulesRequest,
   getImportRulesRequestOverwriteTrue,
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
@@ -46,7 +46,7 @@ describe('import_rules_route', () => {
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -142,7 +142,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({

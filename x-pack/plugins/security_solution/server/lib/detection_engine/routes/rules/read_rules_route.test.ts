@@ -17,7 +17,7 @@ import {
   nonRuleFindResult,
   getEmptySavedObjectsResponse,
   getRuleExecutionSummarySucceeded,
-  resolveAlertMock,
+  resolveRuleMock,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
@@ -40,7 +40,7 @@ describe('read_rules', () => {
     );
 
     clients.rulesClient.resolve.mockResolvedValue({
-      ...resolveAlertMock({
+      ...resolveRuleMock({
         ...getQueryRuleParams(),
       }),
       id: myFakeId,
@@ -61,7 +61,7 @@ describe('read_rules', () => {
 
     test('returns 200 when reading a single rule outcome === aliasMatch', async () => {
       clients.rulesClient.resolve.mockResolvedValue({
-        ...resolveAlertMock({
+        ...resolveRuleMock({
           ...getQueryRuleParams(),
         }),
         id: myFakeId,
@@ -73,7 +73,7 @@ describe('read_rules', () => {
 
     test('returns 200 when reading a single rule outcome === conflict', async () => {
       clients.rulesClient.resolve.mockResolvedValue({
-        ...resolveAlertMock({
+        ...resolveRuleMock({
           ...getQueryRuleParams(),
         }),
         id: myFakeId,

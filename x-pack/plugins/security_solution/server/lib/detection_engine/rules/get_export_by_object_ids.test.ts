@@ -7,7 +7,7 @@
 
 import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
 import {
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   FindHit,
   getEmptySavedObjectsResponse,
@@ -114,7 +114,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it does not export immutable rules', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const result = getRuleMock(getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -124,7 +124,7 @@ describe('get_export_by_object_ids', () => {
         data: [result],
       };
 
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
@@ -214,7 +214,7 @@ describe('get_export_by_object_ids', () => {
 
     test('it does not transform the rule if the rule is an immutable rule and designates it as a missing rule', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const result = getRuleMock(getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {

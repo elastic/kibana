@@ -11,7 +11,7 @@ import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,
 } from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { getAlertMock } from '../routes/__mocks__/request_responses';
+import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 export const getUpdateRulesOptionsMock = () => ({
@@ -19,8 +19,8 @@ export const getUpdateRulesOptionsMock = () => ({
   rulesClient: rulesClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
-  existingRule: getAlertMock(getQueryRuleParams()),
-  migratedRule: getAlertMock(getQueryRuleParams()),
+  existingRule: getRuleMock(getQueryRuleParams()),
+  migratedRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateRulesSchemaMock(),
 });
 
@@ -29,7 +29,7 @@ export const getUpdateMlRulesOptionsMock = () => ({
   rulesClient: rulesClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
-  existingRule: getAlertMock(getQueryRuleParams()),
-  migratedRule: getAlertMock(getQueryRuleParams()),
+  existingRule: getRuleMock(getQueryRuleParams()),
+  migratedRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
 });

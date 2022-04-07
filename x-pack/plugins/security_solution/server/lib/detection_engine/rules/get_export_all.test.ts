@@ -6,7 +6,7 @@
  */
 
 import {
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   FindHit,
   getEmptySavedObjectsResponse,
@@ -38,7 +38,7 @@ describe('getExportAll', () => {
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
     const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const alert = getRuleMock(getQueryRuleParams());
 
     alert.params = {
       ...alert.params,

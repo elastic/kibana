@@ -8,7 +8,7 @@
 import { requestContextMock } from '../../__mocks__';
 import { importRules } from './import_rules_utils';
 import {
-  getAlertMock,
+  getRuleMock,
   getEmptyFindResult,
   getFindResultWithSingleHit,
 } from '../../__mocks__/request_responses';
@@ -30,7 +30,7 @@ describe('importRules', () => {
 
   beforeEach(() => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.actionsClient.getAll.mockResolvedValue([]);
 
     jest.clearAllMocks();

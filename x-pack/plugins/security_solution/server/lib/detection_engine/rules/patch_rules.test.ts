@@ -9,7 +9,7 @@ import { patchRules } from './patch_rules';
 import { getPatchRulesOptionsMock, getPatchMlRulesOptionsMock } from './patch_rules.mock';
 import { PatchRulesOptions } from './types';
 import { RulesClientMock } from '../../../../../alerting/server/rules_client.mock';
-import { getAlertMock } from '../routes/__mocks__/request_responses';
+import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 describe('patchRules', () => {
@@ -20,7 +20,7 @@ describe('patchRules', () => {
       enabled: false,
     };
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getRuleMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.disable).toHaveBeenCalledWith(
@@ -40,7 +40,7 @@ describe('patchRules', () => {
       ruleOptions.rule.enabled = false;
     }
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getRuleMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.enable).toHaveBeenCalledWith(
@@ -60,7 +60,7 @@ describe('patchRules', () => {
       ruleOptions.rule.enabled = false;
     }
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getRuleMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
@@ -86,7 +86,7 @@ describe('patchRules', () => {
       ruleOptions.rule.enabled = false;
     }
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getRuleMock(getQueryRuleParams())
     );
     await patchRules(ruleOptions);
     expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
@@ -118,7 +118,7 @@ describe('patchRules', () => {
         ],
       };
       (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-        getAlertMock(getQueryRuleParams())
+        getRuleMock(getQueryRuleParams())
       );
       await patchRules(ruleOptions);
       expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
@@ -155,7 +155,7 @@ describe('patchRules', () => {
         ];
       }
       (ruleOptions.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-        getAlertMock(getQueryRuleParams())
+        getRuleMock(getQueryRuleParams())
       );
       await patchRules(ruleOptions);
       expect(ruleOptions.rulesClient.update).toHaveBeenCalledWith(
