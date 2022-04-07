@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import type {
   FeatureIdentifier,
   Map as MbMap,
@@ -260,20 +261,13 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
 
-    const joins = this.getValidJoins();
-    const promoteId = joins.length
-      ? {
-          [this._source.getTileSourceLayer()]: joins[0].getLeftField().getName(),
-        }
-      : undefined;
-
     const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
       tiles: [sourceData.tileUrl],
       minzoom: sourceData.tileMinZoom,
       maxzoom: sourceData.tileMaxZoom,
-      promoteId,
+      promoteId: this._getSourcePromoteId(),
     });
   }
 
@@ -291,7 +285,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     joinRequestMeta?: DataRequestMeta;
   } {
     const joins = this.getValidJoins();
-    if (!joins) {
+    if (!joins || !joins.length) {
       return {};
     }
 
@@ -427,6 +421,18 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
+  _getSourcePromoteId() {
+    const { join } = this._getJoinResults();
+    return join
+    ? {
+        [this._source.getTileSourceLayer()]: join.getLeftField().getName(),
+      }
+    : undefined;
+  }
+
+  // Maplibre does not expose API for updating source attributes.
+  // Must remove/add vector source to update source attributes.
+  // _requiresPrevSourceCleanup returns true when vector source needs to be removed so it can be re-added with updated attributes
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
     const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
     if (!mbSource) {
@@ -450,7 +456,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const isSourceDifferent =
       mbTileSource.tiles?.[0] !== sourceData.tileUrl ||
       mbTileSource.minzoom !== sourceData.tileMinZoom ||
-      mbTileSource.maxzoom !== sourceData.tileMaxZoom;
+      mbTileSource.maxzoom !== sourceData.tileMaxZoom ||
+      !_.isEqual(mbTileSource.promoteId, this._getSourcePromoteId());
 
     if (isSourceDifferent) {
       return true;
