@@ -38,6 +38,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.legendConfig.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
+      strict: true,
     },
     showSingleSeries: {
       types: ['boolean'],
@@ -58,6 +59,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
         defaultMessage:
           'Specifies the horizontal alignment of the legend when it is displayed inside chart.',
       }),
+      strict: true,
     },
     verticalAlignment: {
       types: ['string'],
@@ -66,6 +68,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
         defaultMessage:
           'Specifies the vertical alignment of the legend when it is displayed inside chart.',
       }),
+      strict: true,
     },
     floatingColumns: {
       types: ['number'],

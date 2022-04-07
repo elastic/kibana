@@ -25,7 +25,7 @@ import {
 export function getAccessors(args: DataLayerArgs, table: Datatable) {
   let splitAccessor = args.splitAccessor;
   let xAccessor = args.xAccessor;
-  let accessors = args.accessors;
+  let accessors = args.accessors ?? [];
   if (!splitAccessor && !xAccessor && !(accessors && accessors.length)) {
     const y = table.columns.find((column) => column.id === PointSeriesColumnNames.Y)?.id;
     xAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.X)?.id;
@@ -69,6 +69,8 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.dataLayer.seriesType.help', {
         defaultMessage: 'The type of chart to display.',
       }),
+      required: true,
+      strict: true,
     },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],
@@ -76,6 +78,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The scale type of the x axis',
       }),
       default: XScaleTypes.ORDINAL,
+      strict: true,
     },
     isHistogram: {
       types: ['boolean'],
@@ -90,6 +93,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The scale type of the y axes',
       }),
       default: YScaleTypes.LINEAR,
+      strict: true,
     },
     splitAccessor: {
       types: ['string'],

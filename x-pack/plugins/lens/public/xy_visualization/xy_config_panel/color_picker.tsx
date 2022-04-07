@@ -75,7 +75,7 @@ export const ColorPicker = ({
 
     const colorAssignments = getColorAssignments(
       getDataLayers(state.layers),
-      { tables: frame.activeData },
+      { tables: frame.activeData ?? {} },
       formatFactory
     );
     const mappedAccessors = getAccessorColorConfig(
@@ -89,7 +89,7 @@ export const ColorPicker = ({
     );
 
     return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
-  }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
+  }, [overwriteColor, frame, layer, state.layers, formatFactory, paletteService, accessor]);
 
   const [color, setColor] = useState(currentColor);
 

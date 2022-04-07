@@ -714,7 +714,7 @@ describe('Execution', () => {
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[requiredArg] > requiredArg requires an argument',
+          message: '[requiredArg] > requiredArg requires an "arg" argument',
         },
       });
     });

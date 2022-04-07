@@ -588,7 +588,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
-interface VisualizationDimensionChangeProps<T> {
+export interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
@@ -922,7 +922,20 @@ export interface Visualization<T = unknown> {
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
 
+  /**
+   * `datasourceExpressionsByLayers` will be passed to the params of `toExpression` and `toPreviewExpression`
+   * functions and datasource expressions will not be appended to the expression automatically.
+   */
   shouldBuildDatasourceExpressionManually?: () => boolean;
+
+  /**
+   * Converts `activeData`, came from expressions in the form of hashmap as `{ [index]: table, ...}`, to the hashmap of
+   * layer ids and tables as `{ [layerId]: table }`.
+   */
+  convertActiveData?: (
+    activeData?: FramePublicAPI['activeData'],
+    state?: T
+  ) => FramePublicAPI['activeData'];
 }
 
 export interface LensFilterEvent {

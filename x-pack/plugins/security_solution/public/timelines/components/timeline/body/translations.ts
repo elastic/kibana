@@ -28,6 +28,13 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
   }
 );
 
+export const OPEN_SESSION_VIEW = i18n.translate(
+  'xpack.securitySolution.timeline.body.openSessionViewLabel',
+  {
+    defaultMessage: 'Open Session View',
+  }
+);
+
 export const INVESTIGATE = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.investigateLabel',
   {

@@ -348,6 +348,7 @@ export class Embeddable
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
+
     return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
@@ -458,11 +459,21 @@ export class Embeddable
       this.embeddableTitle = this.getTitle();
       isDirty = true;
     }
+
     return isDirty;
   }
 
   private updateActiveData: ExpressionWrapperProps['onData$'] = (_, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
+    if (this.savedVis?.visualizationType) {
+      const { activeData } = this.activeDataInfo;
+      this.activeDataInfo.activeData =
+        this.deps.visualizationMap[this.savedVis.visualizationType].convertActiveData?.(
+          activeData,
+          this.savedVis.state.visualization
+        ) ?? activeData;
+    }
+
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);

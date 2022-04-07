@@ -30,8 +30,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { defaultAnnotationLabel } from './annotations/config_panel';
-import { getUniqueLabels } from './annotations/helpers';
+import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
@@ -77,7 +76,6 @@ export const toExpression = (
     metadata,
     datasourceLayers,
     paletteService,
-    attributes,
     datasourceExpressionsByLayers,
     eventAnnotationService
   );
@@ -164,7 +162,6 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
@@ -206,8 +203,6 @@ export const buildExpression = (
         type: 'function',
         function: 'layeredXyVis',
         arguments: {
-          title: [attributes?.title || ''],
-          description: [attributes?.description || ''],
           xTitle: [state.xTitle || ''],
           yTitle: [state.yTitle || ''],
           yRightTitle: [state.yRightTitle || ''],
@@ -418,7 +413,7 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          table: [buildTableExpression(datasourceExpression)],
+          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
         },
       },
     ],
@@ -435,11 +430,10 @@ const annotationLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'annotationLayer',
+        function: 'extendedAnnotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
-          layerId: [layer.layerId],
-          table: [buildTableExpression(datasourceExpression)],
+          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>
@@ -500,7 +494,7 @@ const dataLayerToExpression = (
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          table: [buildTableExpression(datasourceExpression)],
+          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
           palette: [
             {
               type: 'expression',

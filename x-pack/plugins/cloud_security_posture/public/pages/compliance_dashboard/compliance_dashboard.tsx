@@ -6,40 +6,51 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiIcon } from '@elastic/eui';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
-import { useCloudPostureStatsApi } from '../../common/api';
-import { CspPageTemplate } from '../../components/page_template';
-import * as TEXT from './translations';
+import { useComplianceDashboardDataApi } from '../../common/api';
+import { CspPageTemplate } from '../../components/csp_page_template';
+import { type KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
+import { CLOUD_POSTURE, NO_DATA_CONFIG_TEXT } from './translations';
 
-const CompliancePage = () => {
-  const getStats = useCloudPostureStatsApi();
-  if (getStats.isLoading) return null;
-
-  return (
-    <>
-      <SummarySection />
-      <EuiSpacer />
-      <BenchmarksSection />
-      <EuiSpacer />
-    </>
-  );
-};
+const getNoDataConfig = (onClick: () => void): KibanaPageTemplateProps['noDataConfig'] => ({
+  pageTitle: NO_DATA_CONFIG_TEXT.PAGE_TITLE,
+  solution: NO_DATA_CONFIG_TEXT.SOLUTION,
+  // TODO: Add real docs link once we have it
+  docsLink: 'https://www.elastic.co/guide/index.html',
+  logo: 'logoSecurity',
+  actions: {
+    dashboardNoDataCard: {
+      icon: <EuiIcon type="refresh" size="xxl" />,
+      onClick,
+      title: NO_DATA_CONFIG_TEXT.BUTTON_TITLE,
+      description: NO_DATA_CONFIG_TEXT.DESCRIPTION,
+    },
+  },
+});
 
 export const ComplianceDashboard = () => {
+  const getDashboardDataQuery = useComplianceDashboardDataApi();
   useCspBreadcrumbs([allNavigationItems.dashboard]);
 
   return (
     <CspPageTemplate
-      pageHeader={{
-        pageTitle: TEXT.CLOUD_POSTURE,
-      }}
+      pageHeader={{ pageTitle: CLOUD_POSTURE }}
       restrictWidth={1600}
+      query={getDashboardDataQuery}
+      noDataConfig={getNoDataConfig(getDashboardDataQuery.refetch)}
     >
-      <CompliancePage />
+      {getDashboardDataQuery.data && (
+        <>
+          <SummarySection complianceData={getDashboardDataQuery.data} />
+          <EuiSpacer />
+          <BenchmarksSection complianceData={getDashboardDataQuery.data} />
+          <EuiSpacer />
+        </>
+      )}
     </CspPageTemplate>
   );
 };

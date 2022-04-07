@@ -193,6 +193,13 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
+  {
+    defaultMessage: 'Apply timeline template',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
@@ -401,7 +408,8 @@ export const SEARCH_RULES = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
-    defaultMessage: 'Search by rule name, index pattern, or MITRE ATT&CK tactic or technique',
+    defaultMessage:
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
   }
 );
 

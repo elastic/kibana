@@ -57,8 +57,8 @@ export const getXDomain = (
   if (isHistogram && isFullyQualified(baseDomain)) {
     const xValues = uniq(
       layers
-        .flatMap(({ table, xAccessor }) =>
-          table.rows.map((row) => row[xAccessor!].valueOf() as number)
+        .flatMap<number>(({ table, xAccessor }) =>
+          table.rows.map((row) => row[xAccessor!].valueOf())
         )
         .sort()
     );

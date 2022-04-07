@@ -66,7 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create and edit', async () => {
       it('can create a new range slider control from a blank state', async () => {
-        await dashboardControls.createRangeSliderControl({ fieldName: 'bytes', width: 'small' });
+        await dashboardControls.createRangeSliderControl({
+          dataViewTitle: 'logstash-*',
+          fieldName: 'bytes',
+          width: 'small',
+        });
         expect(await dashboardControls.getControlsCount()).to.be(1);
       });
 
@@ -184,7 +188,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('disables inputs when no data available', async () => {
-        await dashboardControls.createRangeSliderControl({ fieldName: 'bytes', width: 'small' });
+        await dashboardControls.createRangeSliderControl({
+          dataViewTitle: 'logstash-*',
+          fieldName: 'bytes',
+          width: 'small',
+        });
         const secondId = (await dashboardControls.getAllControlIds())[1];
         expect(
           await dashboardControls.rangeSliderGetLowerBoundAttribute(secondId, 'disabled')

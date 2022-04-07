@@ -50,6 +50,7 @@ export const referenceLineLayerFunction: ExpressionFunctionDefinition<
     return {
       type: REFERENCE_LINE_LAYER,
       ...args,
+      accessors: args.accessors ?? [],
       layerType: LayerTypes.REFERENCELINE,
       table,
     };
