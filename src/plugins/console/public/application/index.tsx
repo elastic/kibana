@@ -75,6 +75,7 @@ export function renderApp({
               notifications,
               trackUiMetric,
               objectStorageClient,
+              http,
             },
             theme$,
           }}

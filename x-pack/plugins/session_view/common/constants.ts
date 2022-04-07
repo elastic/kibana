@@ -33,7 +33,7 @@ export const ALERT_STATUS = {
 //    if not 100s of thousands of events, and to be required to page through these sessions to find more search matches is not a great experience. Future iterations of the
 //    search functionality will instead use a separate ES backend search to avoid this.
 // 3. Fewer round trips to the backend!
-export const PROCESS_EVENTS_PER_PAGE = 2000;
+export const PROCESS_EVENTS_PER_PAGE = 1000;
 
 // As an initial approach, we won't be implementing pagination for alerts.
 // Instead we will load this fixed amount of alerts as a maximum for a session.
@@ -50,6 +50,7 @@ export const ALERT_COUNT_THRESHOLD = 999;
 // react-query caching keys
 export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
 export const QUERY_KEY_ALERTS = 'sessionViewAlerts';
+export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 

@@ -22,6 +22,7 @@ export const StepImage = ({ step, compactView }: Props) => {
         <PingTimestamp
           checkGroup={step.monitor.check_group}
           initialStepNo={step.synthetics?.step?.index}
+          stepStatus={step.synthetics.payload?.status}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 80 }}>
