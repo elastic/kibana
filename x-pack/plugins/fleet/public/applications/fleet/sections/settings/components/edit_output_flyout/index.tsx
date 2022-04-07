@@ -138,7 +138,17 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               isLogstashOutput && (
                 <FormattedMessage
                   id="xpack.fleet.editOutputFlyout.logstashTypeOutputBetaHelpText"
-                  defaultMessage="Logstash output is in beta. Please send feedback to report bugs or suggest improvements."
+                  defaultMessage="Logstash output is in beta. Click {sendFeedback} to report bugs and suggest improvements."
+                  values={{
+                    sendFeedback: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.fleet.editOutputFlyout.sendFeedback"
+                          defaultMessage="Send feedback"
+                        />
+                      </strong>
+                    ),
+                  }}
                 />
               )
             }
@@ -194,7 +204,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
-                  defaultMessage="Specify the URLs that your agents will use to connect to Logstash. {guideLink}."
+                  defaultMessage="Specify the addresses that your agents will use to connect to Logstash. {guideLink}."
                   values={{
                     guideLink: (
                       <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>

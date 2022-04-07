@@ -72,7 +72,7 @@ describe('Output form validation', () => {
       const res = validateLogstashHosts(['https://test.fr:5044']);
 
       expect(res).toEqual([
-        { index: 0, message: 'Host URL must begin with a domain name or IP address' },
+        { index: 0, message: 'Host address must begin with a domain name or IP address' },
       ]);
     });
 

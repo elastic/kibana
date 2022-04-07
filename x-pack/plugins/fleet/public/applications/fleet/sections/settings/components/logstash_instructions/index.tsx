@@ -34,14 +34,14 @@ export const LogstashInstructions = () => {
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"
-          defaultMessage="You must configure Logstash for Elastic Agent"
+          defaultMessage="Additional Logstash configuration required"
         />
       }
     >
       <>
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.description"
-          defaultMessage="You must add an Elastic Agent pipeline configuration to Logstash.
+          defaultMessage="Add an Elastic Agent pipeline configuration to Logstash to receive events from the Elastic Agent framework.
           {documentationLink}."
           values={{
             documentationLink: (
@@ -190,13 +190,6 @@ const LogstashInstructionSteps = () => {
                 ),
               }}
             />
-            <EuiSpacer size="m" />
-            <EuiButton href={docLinks.links.fleet.guide} target="_blank">
-              <FormattedMessage
-                id="xpack.fleet.settings.logstashInstructions.viewDocumentationButtonLabel"
-                defaultMessage="View documentation"
-              />
-            </EuiButton>
             <EuiSpacer size="m" />
           </>
         ),

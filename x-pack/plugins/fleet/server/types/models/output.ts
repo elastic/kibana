@@ -11,7 +11,7 @@ import { outputType } from '../../../common/constants';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
-    return 'Host URL must begin with a domain name or IP address';
+    return 'Host address must begin with a domain name or IP address';
   }
 
   try {

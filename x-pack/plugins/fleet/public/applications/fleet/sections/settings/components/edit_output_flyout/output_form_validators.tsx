@@ -67,7 +67,7 @@ export function validateLogstashHosts(value: string[]) {
       if (val.match(/^http([s]){0,1}:\/\//)) {
         res.push({
           message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostProtocolError', {
-            defaultMessage: 'Host URL must begin with a domain name or IP address',
+            defaultMessage: 'Host address must begin with a domain name or IP address',
           }),
           index: idx,
         });
