@@ -94,14 +94,24 @@ docker run -it --rm alpine nslookup host.docker.internal
 To run the Fleet Server Docker container:
 
 ```
-docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=elastic -e KIBANA_PASSWORD=changeme -e ELASTICSEARCH_HOST=http://{YOUR-IP}:9200 -e KIBANA_FLEET_SETUP=1 -e FLEET_SERVER_ENABLE=1 -e FLEET_SERVER_INSECURE_HTTP=1 -e FLEET_SERVER_POLICY_ID=fleet-server-policy -p 8220:8220 docker.elastic.co/beats/elastic-agent:{VERSION}
+docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=elastic -e KIBANA_PASSWORD=changeme -e ELASTICSEARCH_HOST=http://{YOUR-IP}:9200 -e KIBANA_FLEET_SETUP=1 -e FLEET_SERVER_ENABLE=1 -e FLEET_SERVER_POLICY_ID=fleet-server-policy -p 8220:8220 docker.elastic.co/beats/elastic-agent:{VERSION}
 ```
 
 Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
 
 For the latest version, use `8.0.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
 
-Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `http://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes.
+Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `https://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes, or with Docker (recommended) see next section.
+
+### Running Elastic Agent Locally in a Container (managed mode)
+
+1. Create a new agent policy from the Fleet UI, by going to the Fleet app in Kibana > Agent policies > Add agent policy
+2. Click "Add Agent"
+3. Scroll down to the bottom of the flyout that opens to view the enrollment command, copy the contents of the `--enrollment-token` option
+4. Run this docker command:
+    ```
+    docker run -e FLEET_ENROLL=true -e FLEET_INSECURE=true -e FLEET_URL=https://192.168.65.2:8220 -e FLEET_ENROLLMENT_TOKEN=<pasted from step 3> --rm docker.elastic.co/beats/elastic-agent:{VERSION}
+    ```
 
 ### Tests
 

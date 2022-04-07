@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via TelemetryController Scheduled Task Hijack",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"CompatTelRunner.exe\" and process.args : \"-cv*\" and\n  not process.name : (\"conhost.exe\",\n                      \"DeviceCensus.exe\",\n                      \"CompatTelRunner.exe\",\n                      \"DismHost.exe\",\n                      \"rundll32.exe\",\n                      \"powershell.exe\")\n",
   "references": [
     "https://www.trustedsec.com/blog/abusing-windows-telemetry-for-persistence/?utm_content=131234033&utm_medium=social&utm_source=twitter&hss_channel=tw-403811306"
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 7
 }

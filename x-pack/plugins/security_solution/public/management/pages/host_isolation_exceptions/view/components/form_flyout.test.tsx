@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/mock/endpoint';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
 import {
   createHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,

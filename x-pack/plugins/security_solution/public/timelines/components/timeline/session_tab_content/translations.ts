@@ -17,6 +17,6 @@ export const CLOSE_ANALYZER = i18n.translate(
 export const CLOSE_SESSION = i18n.translate(
   'xpack.securitySolution.timeline.graphOverlay.closeSessionButton',
   {
-    defaultMessage: 'Close Session',
+    defaultMessage: 'Close session',
   }
 );

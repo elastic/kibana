@@ -8,7 +8,6 @@
 import { drag, drop } from '../common';
 import {
   EVENTS_VIEWER_FIELDS_BUTTON,
-  EVENTS_VIEWER_PAGINATION,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
@@ -16,7 +15,6 @@ import {
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 import { DATAGRID_HEADERS } from '../../screens/timeline';
-import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const addsHostGeoCityNameToHeader = () => {
   cy.get(HOST_GEO_CITY_NAME_CHECKBOX).check({
@@ -45,8 +43,6 @@ export const opensInspectQueryModal = () => {
 
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
-  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Update query');
-  cy.get(EVENTS_VIEWER_PAGINATION).should('exist');
 };
 
 export const dragAndDropColumn = ({

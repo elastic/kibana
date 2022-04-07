@@ -617,18 +617,23 @@ export function getIndexPatternDatasource({
       return ids.filter((id) => !state.indexPatterns[id]);
     },
     isTimeBased: (state) => {
-      const { layers } = state;
+      if (!state) return false;
+      const { layers, indexPatterns } = state;
       return (
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
-          const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-          return buckets.some((colId) => {
-            const column = layer.columns[colId];
-            return (
-              isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
-              !column.params.ignoreTimeRange
-            );
-          });
+          return (
+            Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
+            layer.columnOrder
+              .filter((colId) => layer.columns[colId].isBucketed)
+              .some((colId) => {
+                const column = layer.columns[colId];
+                return (
+                  isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+                  !column.params.ignoreTimeRange
+                );
+              })
+          );
         })
       );
     },
