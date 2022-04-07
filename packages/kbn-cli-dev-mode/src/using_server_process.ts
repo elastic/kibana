@@ -35,7 +35,6 @@ export function usingServerProcess<T>(
           ...process.env,
           NODE_OPTIONS: process.env.NODE_OPTIONS,
           isDevCliChild: 'true',
-          ELASTIC_APM_SERVICE_NAME: 'kibana',
           ...(process.stdout.isTTY ? { FORCE_COLOR: 'true' } : {}),
         },
       });

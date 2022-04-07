@@ -8,7 +8,6 @@
 
 import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-import apm from 'elastic-apm-node';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
 import { sampleSize } from 'lodash';
@@ -156,7 +155,6 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
             await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
