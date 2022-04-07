@@ -89,8 +89,7 @@ export class HeatmapLayer extends AbstractLayer {
         this.getSource().getFieldNames(),
         syncContext.dataFilters,
         this.getQuery(),
-        syncContext.isForceRefresh,
-        syncContext.isFeatureEditorOpenForLayer
+        syncContext.isForceRefresh
       ),
       source: this.getSource() as IMvtVectorSource,
       syncContext,

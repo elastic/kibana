@@ -237,8 +237,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
           syncContext.isForceRefresh,
           syncContext.dataFilters,
           source,
-          style,
-          syncContext.isFeatureEditorOpenForLayer
+          style
         ),
         syncContext,
         source,

@@ -232,8 +232,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         syncContext.isForceRefresh,
         syncContext.dataFilters,
         this.getSource(),
-        this.getCurrentStyle(),
-        syncContext.isFeatureEditorOpenForLayer
+        this.getCurrentStyle()
       ),
       source: this.getSource() as IMvtVectorSource,
       syncContext,

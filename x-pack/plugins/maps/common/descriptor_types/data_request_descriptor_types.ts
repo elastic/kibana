@@ -41,7 +41,6 @@ export type VectorSourceRequestMeta = DataFilters & {
   sourceQuery?: Query;
   sourceMeta: object | null;
   isForceRefresh: boolean;
-  isFeatureEditorOpenForLayer: boolean;
 };
 
 export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;

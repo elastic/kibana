@@ -230,10 +230,16 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
       allFilters.push(extentFilter);
     }
+
+    let isFeatureEditorOpenForLayer = false;
+    if ('isFeatureEditorOpenForLayer' in searchFilters) {
+      isFeatureEditorOpenForLayer = searchFilters.isFeatureEditorOpenForLayer;
+    }
+
     if (
       searchFilters.applyGlobalTime &&
       (await this.isTimeAware()) &&
-      !searchFilters.isFeatureEditorOpenForLayer
+      !isFeatureEditorOpenForLayer
     ) {
       const timeRange = searchFilters.timeslice
         ? {
@@ -254,11 +260,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (searchFilters.applyGlobalQuery && !searchFilters.isFeatureEditorOpenForLayer) {
+    if (searchFilters.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
       searchSource.setField('query', searchFilters.query);
     }
 
-    if (searchFilters.sourceQuery && !searchFilters.isFeatureEditorOpenForLayer) {
+    if (searchFilters.sourceQuery && !isFeatureEditorOpenForLayer) {
       const layerSearchSource = searchService.searchSource.createEmpty();
 
       layerSearchSource.setField('index', indexPattern);

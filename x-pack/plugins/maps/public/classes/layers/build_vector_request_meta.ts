@@ -16,8 +16,7 @@ export function buildVectorRequestMeta(
   fieldNames: string[],
   dataFilters: DataFilters,
   sourceQuery: Query | null | undefined,
-  isForceRefresh: boolean,
-  isFeatureEditorOpenForLayer: boolean
+  isForceRefresh: boolean
 ): VectorSourceRequestMeta {
   return {
     ...dataFilters,
@@ -29,6 +28,5 @@ export function buildVectorRequestMeta(
     sourceMeta: source.getSyncMeta(),
     applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
     isForceRefresh,
-    isFeatureEditorOpenForLayer,
   };
 }

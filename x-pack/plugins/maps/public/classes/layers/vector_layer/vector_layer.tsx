@@ -366,8 +366,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     isForceRefresh: boolean,
     dataFilters: DataFilters,
     source: IVectorSource,
-    style: IVectorStyle,
-    isFeatureEditorOpenForLayer: boolean
+    style: IVectorStyle
   ): Promise<VectorSourceRequestMeta> {
     const fieldNames = [
       ...source.getFieldNames(),
@@ -379,14 +378,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-    return buildVectorRequestMeta(
-      source,
-      fieldNames,
-      dataFilters,
-      this.getQuery(),
-      isForceRefresh,
-      isFeatureEditorOpenForLayer
-    );
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery(), isForceRefresh);
   }
 
   async _syncSourceStyleMeta(

@@ -298,8 +298,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
-      this.getCurrentStyle(),
-      syncContext.isFeatureEditorOpenForLayer
+      this.getCurrentStyle()
     );
     const source = this.getSource();
 
