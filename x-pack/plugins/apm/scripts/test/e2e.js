@@ -61,7 +61,7 @@ if (server) {
 const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
 const grepArg = grep ? `--grep "${grep}"` : '';
 const bailArg = bail ? `--bail` : '';
-const cmd = `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
+const cmd = `ELASTIC_APM_ACTIVE=true ELASTIC_APM_TRANSACTION_SAMPLE_RATE=1.0 ELASTIC_APM_ENVIRONMENT=giorgos node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
 
 console.log(`Running "${cmd}"`);
 childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });
