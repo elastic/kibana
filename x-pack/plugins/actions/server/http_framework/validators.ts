@@ -10,39 +10,19 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionType } from '../types';
 import { HTTPConnectorType } from './types';
 
-const buildSubActionParams = <Config, Secrets, Params>(
-  connector: HTTPConnectorType<Config, Secrets>
-) => {
-  const subActionsSchema = connector.subActions.map(({ name, schema: subActionSchema }) => {
-    return schema.object({
-      subAction: schema.literal(name),
-      subActionParams: subActionSchema,
-    });
-  });
-
-  return [
-    ...subActionsSchema,
-    schema.object({
-      subAction: schema.literal('pushToService'),
-      subActionParams: schema.object(
-        { externalId: schema.nullable(schema.string()) },
-        { unknowns: 'allow' }
-      ),
-    }),
-  ];
-};
-
-export const buildValidators = <Config, Secrets, Params>({
+export const buildValidators = ({
   connector,
   configurationUtilities,
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
-  connector: HTTPConnectorType<Config, Secrets>;
+  connector: HTTPConnectorType;
 }): ActionType['validate'] => {
-  const subActions = buildSubActionParams(connector);
   return {
     config: connector.schema.config,
     secrets: connector.schema.secrets,
-    params: schema.oneOf(subActions),
+    params: schema.object({
+      subAction: schema.string(),
+      subActionParams: schema.object({}, { unknowns: 'allow' }),
+    }),
   };
 };

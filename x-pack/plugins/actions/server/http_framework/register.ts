@@ -21,7 +21,7 @@ const validateService = (Service: IService) => {
   }
 };
 
-export const register = <Config, Secrets>({
+export const register = ({
   actionTypeRegistry,
   connector,
   logger,
@@ -29,13 +29,13 @@ export const register = <Config, Secrets>({
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
   actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
-  connector: HTTPConnectorType<Config, Secrets>;
+  connector: HTTPConnectorType;
   logger: Logger;
 }) => {
   validateService(connector.Service);
 
   const validators = buildValidators({ connector, configurationUtilities });
-  const executor = buildExecutor<Config, Secrets>({
+  const executor = buildExecutor({
     connector,
     logger,
     configurationUtilities,

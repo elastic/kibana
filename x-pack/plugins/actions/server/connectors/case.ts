@@ -12,6 +12,14 @@ import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 
+type ExtractFunctionKeys<T> = { [P in keyof T]-?: T[P] extends Function ? P : never }[keyof T];
+
+interface SubAction {
+  name: string;
+  method: ExtractFunctionKeys<CaseConnector>;
+  schema: Type<unknown>;
+}
+
 export interface CaseConnectorInterface {
   addComment: ({
     incidentId,
@@ -38,6 +46,7 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
 export abstract class CaseConnector implements CaseConnectorInterface {
   private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http:', 'https:'];
+  private subActions: Map<string, SubAction> = new Map();
 
   constructor(
     public configurationUtilities: ActionsConfigurationUtilities,
@@ -108,6 +117,14 @@ export abstract class CaseConnector implements CaseConnectorInterface {
     }
   }
 
+  public registerSubAction(subAction: SubAction) {
+    this.subActions.set(subAction.name, subAction);
+  }
+
+  public getSubActions() {
+    return this.subActions;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async request<D = unknown, R = any>({
     url,
@@ -148,5 +165,41 @@ export abstract class CaseConnector implements CaseConnectorInterface {
     responseSchema.validate(res);
 
     return res;
+  }
+
+  public async pushToService(params) {
+    const { externalId, comments, ...rest } = params;
+
+    let res: Record<string, { comments: Array<{ commentId: string }> }>;
+
+    if (externalId != null) {
+      res = await this.updateIncident({
+        incidentId: externalId,
+        incident: rest,
+      });
+    } else {
+      res = await await this.createIncident({
+        ...rest,
+      });
+    }
+
+    if (comments && Array.isArray(comments) && comments.length > 0) {
+      res.comments = [];
+
+      for (const currentComment of comments) {
+        await this.addComment({
+          incidentId: res.id,
+          comment: currentComment.comment,
+        });
+
+        res.comments = [
+          ...(res.comments ?? []),
+          {
+            commentId: currentComment.commentId,
+            pushedDate: res.pushedDate,
+          },
+        ];
+      }
+    }
   }
 }

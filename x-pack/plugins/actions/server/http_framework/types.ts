@@ -10,19 +10,14 @@
 import type { Type } from '@kbn/config-schema';
 import type { LicenseType } from '../../../licensing/common/types';
 import { CaseConnector } from '../connectors/case';
+import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 
 // TODO: Fix types
 export type IService = new (...args: any[]) => CaseConnector;
 
-interface SubAction {
-  name: string;
-  method: string;
-  schema: Type<any>;
-}
-
 export interface HTTPConnectorType<
-  Config extends Record<string, any> = Record<string, any>,
-  Secrets extends Record<string, any> = Record<string, any>
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
 > {
   id: string;
   name: string;
@@ -31,6 +26,12 @@ export interface HTTPConnectorType<
     config: Type<Config>;
     secrets: Type<Secrets>;
   };
-  subActions: SubAction[];
   Service: IService;
 }
+
+interface CaseParams {
+  subAction: string;
+  subActionParams: Record<string, unknown>;
+}
+
+export type ExecutorParams = CaseParams;

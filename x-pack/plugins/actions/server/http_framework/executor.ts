@@ -7,19 +7,18 @@
 
 import { Logger } from 'kibana/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { CaseConnectorInterface } from '../connectors/case';
-import { ActionTypeConfig, ActionTypeParams, ActionTypeSecrets, ExecutorType } from '../types';
-import { HTTPConnectorType } from './types';
+import { ActionTypeConfig, ActionTypeSecrets, ExecutorType } from '../types';
+import { ExecutorParams, HTTPConnectorType } from './types';
 
-export const buildExecutor = <Config, Secrets>({
+export const buildExecutor = ({
   configurationUtilities,
   connector,
   logger,
 }: {
-  connector: HTTPConnectorType<Config, Secrets>;
+  connector: HTTPConnectorType;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ExecutorType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
+}): ExecutorType<ActionTypeConfig, ActionTypeSecrets, ExecutorParams, unknown> => {
   return async ({ actionId, params, config, secrets }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
@@ -32,56 +31,16 @@ export const buildExecutor = <Config, Secrets>({
       secrets,
     });
 
-    const method = connector.subActions.find(({ name }) => name === subAction)?.method as
-      | keyof CaseConnectorInterface
-      | 'pushToService'
-      | undefined;
+    const subActions = service.getSubActions();
+    const action = subActions.get(subAction);
 
-    if (!method) {
-      throw new Error('Method not registered');
+    if (!action) {
+      throw new Error('Unsupported sub action');
     }
 
-    if (method === 'pushToService') {
-      const { externalId, comments, ...rest } = subActionParams as {
-        externalId: string;
-        comments: Array<{ comment: string; commentId: string }>;
-        [x: string]: unknown;
-      };
+    action.schema.validate(subActionParams);
 
-      let res: Record<string, { comments: Array<{ commentId: string }> }>;
-
-      if (externalId != null) {
-        res = await service.updateIncident({
-          incidentId: externalId,
-          incident: rest,
-        });
-      } else {
-        res = await await service.createIncident({
-          ...rest,
-        });
-      }
-
-      if (comments && Array.isArray(comments) && comments.length > 0) {
-        res.comments = [];
-
-        for (const currentComment of comments) {
-          await service.addComment({
-            incidentId: res.id,
-            comment: currentComment.comment,
-          });
-
-          res.comments = [
-            ...(res.comments ?? []),
-            {
-              commentId: currentComment.commentId,
-              pushedDate: res.pushedDate,
-            },
-          ];
-        }
-      }
-    }
-
-    const data = await service[method](subActionParams);
+    const data = await service[action.method](subActionParams);
     return { status: 'ok', data, actionId };
   };
 };
