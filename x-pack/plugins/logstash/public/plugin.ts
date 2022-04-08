@@ -11,10 +11,7 @@ import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
 import { Capabilities, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import {
-  HomePublicPluginSetup,
-  FeatureCatalogueCategory,
-} from '../../../../src/plugins/home/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
