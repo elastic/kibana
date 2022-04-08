@@ -135,6 +135,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -259,6 +260,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -368,6 +370,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -476,6 +479,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
         });
       });

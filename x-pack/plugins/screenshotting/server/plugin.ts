@@ -82,7 +82,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       const browserDriverFactory = await this.browserDriverFactory;
       const logger = this.logger.get('screenshot');
 
-      return new Screenshots(browserDriverFactory, logger, this.config);
+      return new Screenshots(browserDriverFactory, logger, http, this.config);
     })();
     // Already handled in `browserDriverFactory`
     this.screenshots.catch(() => {});
@@ -94,10 +94,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     return {
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-      getScreenshots: (options) =>
+      getScreenshots: ((options) =>
         from(this.screenshots).pipe(
           switchMap((screenshots) => screenshots.getScreenshots(options))
-        ),
+        )) as ScreenshottingStart['getScreenshots'],
     };
   }
 

@@ -288,7 +288,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       return null;
     }
 
-    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    let chartData = table.rows.filter(
+      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
+    );
     if (!chartData || !chartData.length) {
       return <EmptyPlaceholder icon={HeatmapIcon} />;
     }
@@ -481,6 +483,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
+              legendSize={args.legend.legendSize}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}

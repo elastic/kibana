@@ -782,9 +782,22 @@ export class VisualBuilderPageObject extends FtrService {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(byField, field);
+    });
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setAnotherGroupByTermsField(field: string) {
+    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
+    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    await this.common.sleep(2000);
+    const byFields = await this.testSubjects.findAll('fieldSelectItem');
+    const selectedByField = byFields[byFields.length - 1];
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(selectedByField, field);
+    });
   }
 
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
@@ -821,9 +834,14 @@ export class VisualBuilderPageObject extends FtrService {
     await filterLabelInput[nth].type(label);
   }
 
-  public async setChartType(type: string, nth: number = 0) {
+  public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
     const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
     return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setStackedType(stackedType: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
   }
 
   public async setSeriesFilter(query: string) {

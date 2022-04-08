@@ -32,6 +32,10 @@ node scripts/build \
   --skip-docker-ubuntu \
   --skip-docker-contexts
 
+ELASTICSEARCH_MANIFEST_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$(jq -r '.version' package.json)/manifest-latest-verified.json"
+ELASTICSEARCH_SHA=$(curl -s $ELASTICSEARCH_MANIFEST_URL | jq -r '.sha')
+ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud:$VERSION-$ELASTICSEARCH_SHA"
+
 CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
@@ -40,6 +44,7 @@ JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+    .resources.elasticsearch[0].plan.elasticsearch.docker_image = "'$ELASTICSEARCH_CLOUD_IMAGE'" |
     .name = "'$CLOUD_DEPLOYMENT_NAME'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
@@ -87,7 +92,9 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
 
-  Image: $CLOUD_IMAGE
+  Kibana image: \`$CLOUD_IMAGE\`
+
+  Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"

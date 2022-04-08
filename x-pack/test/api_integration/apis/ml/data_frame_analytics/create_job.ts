@@ -91,12 +91,12 @@ export default ({ getService }: FtrProviderContext) => {
           const analyticsId = `${testConfig.jobId}`;
           const requestBody = testConfig.config;
 
-          const { body } = await supertest
+          const { body, status } = await supertest
             .put(`/api/ml/data_frame/analytics/${analyticsId}`)
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS)
-            .send(requestBody)
-            .expect(200);
+            .send(requestBody);
+          ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).not.to.be(undefined);
 
@@ -113,12 +113,12 @@ export default ({ getService }: FtrProviderContext) => {
         const analyticsId = `${testJobConfigs[0].jobId}`;
         const requestBody = testJobConfigs[0].config;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .put(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(403);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -128,12 +128,12 @@ export default ({ getService }: FtrProviderContext) => {
         const analyticsId = `${testJobConfigs[0].jobId}`;
         const requestBody = testJobConfigs[0].config;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .put(`/api/ml/data_frame/analytics/${analyticsId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(403);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');

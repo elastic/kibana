@@ -41,6 +41,7 @@ import {
   mockRuntimeMappings,
 } from '../containers/source/mock';
 import { usersModel } from '../../users/store';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -87,6 +88,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -108,6 +110,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -203,7 +206,11 @@ export const mockGlobalState: State = {
         [usersModel.UsersTableType.allUsers]: {
           activePage: 0,
           limit: 10,
-          // TODO sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [usersModel.UsersTableType.authentications]: {
+          activePage: 0,
+          limit: 10,
         },
         [usersModel.UsersTableType.anomalies]: null,
         [usersModel.UsersTableType.risk]: {
@@ -215,11 +222,15 @@ export const mockGlobalState: State = {
           },
           severitySelection: [],
         },
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
     details: {
       queries: {
         [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+        [usersModel.UsersTableType.alerts]: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -310,6 +321,7 @@ export const mockGlobalState: State = {
           end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: false,
         showCheckboxes: false,
         pinnedEventIds: {},

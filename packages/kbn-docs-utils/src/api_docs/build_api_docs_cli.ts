@@ -283,10 +283,12 @@ function getTsProject(repoPath: string) {
   const xpackTsConfig = `${repoPath}/tsconfig.json`;
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
+    // We'll use the files added below instead.
+    skipAddingFilesFromTsConfig: true,
   });
-  project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   project.resolveSourceFileDependencies();
   return project;
 }

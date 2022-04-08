@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistent Scripts in the Startup Directory",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and user.domain != \"NT AUTHORITY\" and\n  \n  /* detect shortcuts created by wscript.exe or cscript.exe */\n  (file.path : \"C:\\\\*\\\\Programs\\\\Startup\\\\*.lnk\" and\n     process.name : (\"wscript.exe\", \"cscript.exe\")) or\n\n  /* detect vbs or js files created by any process */\n  file.path : (\"C:\\\\*\\\\Programs\\\\Startup\\\\*.vbs\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.vbe\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.wsh\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.wsf\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.js\")\n",
   "risk_score": 47,
   "rule_id": "f7c4dc5a-a58d-491d-9f14-9b66507121c0",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

@@ -111,11 +111,11 @@ Object {
       "data_stream": Object {
         "namespace": "default",
       },
-      "id": "apm-apmserver-elastic-cloud-apm",
+      "id": "elastic-cloud-apm",
       "meta": Object {
         "package": Object {
           "name": "apm",
-          "version": "8.2.0-dev4",
+          "version": "8.3.0-dev1",
         },
       },
       "name": "Elastic APM",

@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-
+import { CUSTOM_PALETTE } from '@kbn/coloring';
 import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
@@ -42,7 +42,6 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
 import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
@@ -255,6 +254,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [firstTable, isNumericMap, columnConfig]);
 
+  const headerRowHeight = props.args.headerRowHeight ?? 'single';
+  const headerRowLines = props.args.headerRowHeightLines ?? 1;
+
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
@@ -268,7 +270,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         formatFactory,
         onColumnResize,
         onColumnHide,
-        alignments
+        alignments,
+        headerRowHeight,
+        headerRowLines
       ),
     [
       bucketColumns,
@@ -282,6 +286,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       onColumnResize,
       onColumnHide,
       alignments,
+      headerRowHeight,
+      headerRowLines,
     ]
   );
 

@@ -33,8 +33,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     namespace_type: ['agnostic'],
     page: 1,
     per_page: 10,
-    sort_field: undefined,
-    sort_order: undefined,
+    sort_field: 'created_at',
+    sort_order: 'desc',
   },
 });
 
@@ -165,6 +165,16 @@ describe('Policy details artifacts list', () => {
     );
 
     expect(renderResult.queryByTestId('remove-from-policy-action')).toBeNull();
+  });
+
+  it('should replace old url search pagination params with correct ones', async () => {
+    history.replace(`${history.location.pathname}?page_index=0&page_size=10`);
+    await render();
+
+    expect(history.location.search).toMatch('pageSize=10');
+    expect(history.location.search).toMatch('page=1');
+    expect(history.location.search).not.toMatch('page_index');
+    expect(history.location.search).not.toMatch('page_size');
   });
 
   describe('without external privileges', () => {

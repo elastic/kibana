@@ -7,14 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TypeOf } from '@kbn/config-schema';
 
 import type {
   PluginStart,
   DataRequestHandlerContext,
 } from '../../../../../src/plugins/data/server';
+import type { PluginStart as DataViewPluginStart } from '../../../../../src/plugins/data_views/server';
 import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../../src/core/server';
-import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
 import { runRoute } from './routes/run';
@@ -23,6 +22,7 @@ import { getUiSettings } from './ui_settings';
 
 export interface TimelionPluginStartDeps {
   data: PluginStart;
+  dataViews: DataViewPluginStart;
 }
 
 /**
@@ -32,8 +32,6 @@ export class TimelionPlugin implements Plugin<void, void, TimelionPluginStartDep
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<TimelionPluginStartDeps>): void {
-    const config = this.initializerContext.config.get<TypeOf<typeof configSchema>>();
-
     const configManager = new ConfigManager(this.initializerContext.config);
 
     const functions = loadFunctions('series_functions');
@@ -66,7 +64,7 @@ export class TimelionPlugin implements Plugin<void, void, TimelionPluginStartDep
     functionsRoute(router, deps);
     runRoute(router, deps);
 
-    core.uiSettings.register(getUiSettings(config));
+    core.uiSettings.register(getUiSettings());
   }
 
   public start() {

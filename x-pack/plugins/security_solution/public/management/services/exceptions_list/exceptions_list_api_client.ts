@@ -31,7 +31,13 @@ export class ExceptionsListApiClient {
   constructor(
     private readonly http: HttpStart,
     public readonly listId: ListId,
-    private readonly listDefinition: CreateExceptionListSchema
+    private readonly listDefinition: CreateExceptionListSchema,
+    private readonly readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
+    private readonly writeTransform?: <
+      T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
+    >(
+      item: T
+    ) => T
   ) {
     this.ensureListExists = this.createExceptionList();
   }
@@ -94,7 +100,11 @@ export class ExceptionsListApiClient {
   public static getInstance(
     http: HttpStart,
     listId: string,
-    listDefinition: CreateExceptionListSchema
+    listDefinition: CreateExceptionListSchema,
+    readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
+    writeTransform?: <T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
+      item: T
+    ) => T
   ): ExceptionsListApiClient {
     if (
       !ExceptionsListApiClient.instance.has(listId) ||
@@ -102,14 +112,20 @@ export class ExceptionsListApiClient {
     ) {
       ExceptionsListApiClient.instance.set(
         listId,
-        new ExceptionsListApiClient(http, listId, listDefinition)
+        new ExceptionsListApiClient(http, listId, listDefinition, readTransform, writeTransform)
       );
     }
     const currentInstance = ExceptionsListApiClient.instance.get(listId);
     if (currentInstance) {
       return currentInstance;
     } else {
-      return new ExceptionsListApiClient(http, listId, listDefinition);
+      return new ExceptionsListApiClient(
+        http,
+        listId,
+        listDefinition,
+        readTransform,
+        writeTransform
+      );
     }
   }
 
@@ -159,17 +175,26 @@ export class ExceptionsListApiClient {
     filter: string;
   }> = {}): Promise<FoundExceptionListItemSchema> {
     await this.ensureListExists;
-    return this.http.get<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
-      query: {
-        page,
-        per_page: perPage,
-        sort_field: sortField,
-        sort_order: sortOrder,
-        list_id: [this.listId],
-        namespace_type: ['agnostic'],
-        filter,
-      },
-    });
+    const result = await this.http.get<FoundExceptionListItemSchema>(
+      `${EXCEPTION_LIST_ITEM_URL}/_find`,
+      {
+        query: {
+          page,
+          per_page: perPage,
+          sort_field: sortField,
+          sort_order: sortOrder,
+          list_id: [this.listId],
+          namespace_type: ['agnostic'],
+          filter,
+        },
+      }
+    );
+
+    if (this.readTransform) {
+      result.data = result.data.map(this.readTransform);
+    }
+
+    return result;
   }
 
   /**
@@ -182,13 +207,19 @@ export class ExceptionsListApiClient {
     }
 
     await this.ensureListExists;
-    return this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    let result = await this.http.get<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
       query: {
         id,
         item_id: itemId,
         namespace_type: 'agnostic',
       },
     });
+
+    if (this.readTransform) {
+      result = this.readTransform(result);
+    }
+
+    return result;
   }
 
   /**
@@ -199,8 +230,14 @@ export class ExceptionsListApiClient {
     await this.ensureListExists;
     this.checkIfIsUsingTheRightInstance(exception.list_id);
     delete exception.meta;
+
+    let transformedException = exception;
+    if (this.writeTransform) {
+      transformedException = this.writeTransform(exception);
+    }
+
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(exception),
+      body: JSON.stringify(transformedException),
     });
   }
 
@@ -210,8 +247,16 @@ export class ExceptionsListApiClient {
    */
   async update(exception: UpdateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
+
+    let transformedException = exception;
+    if (this.writeTransform) {
+      transformedException = this.writeTransform(exception);
+    }
+
     return this.http.put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exception)),
+      body: JSON.stringify(
+        ExceptionsListApiClient.cleanExceptionsBeforeUpdate(transformedException)
+      ),
     });
   }
 

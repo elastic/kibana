@@ -589,6 +589,97 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-public.WelcomeServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "WelcomeServiceSetup",
+        "description": [],
+        "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-public.WelcomeServiceSetup.registerOnRendered",
+            "type": "Function",
+            "tags": [],
+            "label": "registerOnRendered",
+            "description": [
+              "\nRegister listeners to be called when the Welcome component is mounted.\nIt can be called multiple times to register multiple listeners."
+            ],
+            "signature": [
+              "(onRendered: () => void) => void"
+            ],
+            "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-public.WelcomeServiceSetup.registerOnRendered.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "onRendered",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-public.WelcomeServiceSetup.registerTelemetryNoticeRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "registerTelemetryNoticeRenderer",
+            "description": [
+              "\nRegister a renderer of the telemetry notice to be shown below the Welcome page."
+            ],
+            "signature": [
+              "(renderTelemetryNotice: ",
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.WelcomeRenderTelemetryNotice",
+                "text": "WelcomeRenderTelemetryNotice"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "home",
+                "id": "def-public.WelcomeServiceSetup.registerTelemetryNoticeRenderer.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "renderTelemetryNotice",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "home",
+                    "scope": "public",
+                    "docId": "kibHomePluginApi",
+                    "section": "def-public.WelcomeRenderTelemetryNotice",
+                    "text": "WelcomeRenderTelemetryNotice"
+                  }
+                ],
+                "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -785,6 +876,22 @@
         ],
         "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
+        "id": "def-public.WelcomeRenderTelemetryNotice",
+        "type": "Type",
+        "tags": [],
+        "label": "WelcomeRenderTelemetryNotice",
+        "description": [],
+        "signature": [
+          "() => JSX.Element | null"
+        ],
+        "path": "src/plugins/home/public/services/welcome/welcome_service.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       }
     ],
@@ -1074,6 +1181,25 @@
         },
         {
           "parentPluginId": "home",
+          "id": "def-public.HomePublicPluginSetup.welcomeScreen",
+          "type": "Object",
+          "tags": [],
+          "label": "welcomeScreen",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "home",
+              "scope": "public",
+              "docId": "kibHomePluginApi",
+              "section": "def-public.WelcomeServiceSetup",
+              "text": "WelcomeServiceSetup"
+            }
+          ],
+          "path": "src/plugins/home/public/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "home",
           "id": "def-public.HomePublicPluginSetup.environment",
           "type": "Object",
           "tags": [
@@ -1096,6 +1222,7 @@
           ],
           "path": "src/plugins/home/public/plugin.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "cloud",

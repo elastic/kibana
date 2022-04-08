@@ -34,8 +34,13 @@ import {
   getCase,
   getServiceNowSimulationServer,
   createConfiguration,
+  getSignalsWithES,
 } from '../../../../common/lib/utils';
-import { CaseConnector, CaseStatuses } from '../../../../../../plugins/cases/common/api';
+import {
+  CaseConnector,
+  CaseStatuses,
+  CommentType,
+} from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -50,6 +55,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('push_case', () => {
     const actionsRemover = new ActionsRemover(supertest);
@@ -292,6 +298,103 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         connectorId: connector.id,
         expectedHttpCode: 409,
+      });
+    });
+
+    describe('alerts', () => {
+      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+      const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
+
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+        await deleteAllCaseItems(es);
+      });
+
+      const attachAlertsAndPush = async ({ syncAlerts = true }: { syncAlerts?: boolean } = {}) => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          createCaseReq: { ...getPostCaseRequest(), settings: { syncAlerts } },
+          configureReq: {
+            closure_type: 'close-by-pushing',
+          },
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: signalID,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            alertId: signalID2,
+            index: defaultSignalsIndex,
+            rule: { id: 'test-rule-id', name: 'test-index-id' },
+            type: CommentType.alert,
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        await es.indices.refresh({ index: defaultSignalsIndex });
+
+        const signals = await getSignalsWithES({
+          es,
+          indices: defaultSignalsIndex,
+          ids: [signalID, signalID2],
+        });
+
+        return signals;
+      };
+
+      it('should change the status of all alerts attached to a case to closed when closure_type: close-by-pushing and syncAlerts: true', async () => {
+        const signals = await attachAlertsAndPush();
+        /**
+         * The status of the alerts should be changed to closed when pushing a case and the
+         * closure_type is set to close-by-pushing
+         */
+        expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
+          CaseStatuses.closed
+        );
+
+        expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
+          CaseStatuses.closed
+        );
+      });
+
+      it('should NOT change the status of all alerts attached to a case to closed when closure_type: close-by-pushing and syncAlerts: false', async () => {
+        const signals = await attachAlertsAndPush({ syncAlerts: false });
+        /**
+         * The status of the alerts should NOT be changed to closed when pushing a case and the
+         * closure_type is set to close-by-pushing and syncAlert is set to false
+         */
+        expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal?.status).to.be(
+          CaseStatuses.open
+        );
+
+        expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal?.status).to.be(
+          CaseStatuses.open
+        );
       });
     });
 

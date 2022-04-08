@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { PaletteOutput } from '@kbn/coloring';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
@@ -22,13 +23,46 @@ import type {
   SeriesType,
   LegendConfig,
   AxisExtentConfig,
-  XYLayerConfig,
   XYCurveType,
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
-} from '../../common/expressions';
+  EndValue,
+  YConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
+
+export interface XYDataLayerConfig {
+  layerId: string;
+  accessors: string[];
+  layerType: 'data';
+  seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
+  yConfig?: YConfig[];
+  splitAccessor?: string;
+  palette?: PaletteOutput;
+}
+
+export interface XYReferenceLineLayerConfig {
+  layerId: string;
+  accessors: string[];
+  yConfig?: YConfig[];
+  layerType: 'referenceLine';
+}
+
+export interface XYAnnotationLayerConfig {
+  layerId: string;
+  layerType: 'annotations';
+  annotations: EventAnnotationConfig[];
+  hide?: boolean;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {
@@ -36,6 +70,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  emphasizeFitting?: boolean;
+  endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
@@ -53,6 +89,7 @@ export interface XYState {
 }
 
 export type State = XYState;
+
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
 });

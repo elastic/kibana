@@ -126,9 +126,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   useEffect(() => {
     const legendShow = showLegendDefault();
-    setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+    const showLegendDef = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+    if (showLegendDef !== legendShow) {
+      setShowLegend(legendShow);
+      props.uiState?.set('vis.legendOpen', legendShow);
+    }
+  }, [showLegendDefault, props.uiState, visParams.legendDisplay, visType, bucketColumns]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -387,6 +390,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
                 }
                 legendPosition={legendPosition}
+                legendSize={visParams.legendSize}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}

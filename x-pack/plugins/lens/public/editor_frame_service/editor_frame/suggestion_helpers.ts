@@ -6,7 +6,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -149,7 +149,8 @@ export function getSuggestions({
             currentVisualizationState,
             subVisualizationId,
             palette,
-            visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext
+            visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
+            activeData
           );
         });
     })
@@ -207,7 +208,8 @@ function getVisualizationSuggestions(
   currentVisualizationState: unknown,
   subVisualizationId?: string,
   mainPalette?: PaletteOutput,
-  isFromContext?: boolean
+  isFromContext?: boolean,
+  activeData?: Record<string, Datatable>
 ) {
   return visualization
     .getSuggestions({
@@ -217,6 +219,7 @@ function getVisualizationSuggestions(
       subVisualizationId,
       mainPalette,
       isFromContext,
+      activeData,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,

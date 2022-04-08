@@ -21,7 +21,7 @@ import {
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
+import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
@@ -60,7 +60,12 @@ const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLa
   defaultMessage: 'Missing field',
 });
 
-function ofName(name?: string, count: number = 0, rare: boolean = false) {
+function ofName(
+  name?: string,
+  secondaryFieldsCount: number = 0,
+  rare: boolean = false,
+  termsSize: number = 0
+) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
       defaultMessage: 'Rare values of {name}',
@@ -69,19 +74,22 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
       },
     });
   }
-  if (count) {
+  if (secondaryFieldsCount) {
     return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
       defaultMessage: 'Top values of {name} + {count} {count, plural, one {other} other {others}}',
       values: {
         name: name ?? missingFieldLabel,
-        count,
+        count: secondaryFieldsCount,
       },
     });
   }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top values of {name}',
+    defaultMessage:
+      'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
     values: {
       name: name ?? missingFieldLabel,
+      termsCount: termsSize,
+      numberOfTermsLabel: termsSize > 1 ? `${termsSize} ` : '',
     },
   });
 }
@@ -270,7 +278,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     ofName(
       indexPattern.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
-      column.params.orderBy.type === 'rare'
+      column.params.orderBy.type === 'rare',
+      column.params.size
     ),
   onFieldChange: (oldColumn, field, params) => {
     const newParams = {
@@ -285,6 +294,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
       newParams.orderBy = { type: 'alphabetical' };
     }
+
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -293,7 +303,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         : ofName(
             field.displayName,
             newParams.secondaryFields?.length,
-            newParams.orderBy.type === 'rare'
+            newParams.orderBy.type === 'rare',
+            newParams.size
           ),
       sourceField: field.name,
       params: newParams,
@@ -344,11 +355,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       existingFields,
       operationSupportMatrix,
       updateLayer,
+      dimensionGroups,
+      groupId,
+      incompleteParams,
     } = props;
     const onFieldSelectChange = useCallback(
       (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
-        const secondaryFields = fields.length > 1 ? fields.slice(1) : undefined;
+        const [sourcefield, ...secondaryFields] = fields;
         const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
         const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
         const newParams = {
@@ -357,9 +371,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         if ('format' in newParams && newDataType !== 'number') {
           delete newParams.format;
         }
-        const mainField = indexPattern.getFieldByName(fields[0]);
+        const mainField = indexPattern.getFieldByName(sourcefield);
         if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') {
           newParams.orderBy = { type: 'alphabetical' };
+        }
+        // in single field mode, allow the automatic switch of the function to
+        // the most appropriate one
+        if (fields.length === 1) {
+          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const termsSupported = possibleOperations?.has('terms');
+          if (!termsSupported) {
+            const newFieldOp = possibleOperations?.values().next().value;
+            return updateLayer(
+              insertOrReplaceColumn({
+                layer,
+                columnId,
+                indexPattern,
+                op: newFieldOp,
+                field: mainField,
+                visualizationGroups: dimensionGroups,
+                targetGroup: groupId,
+                incompleteParams,
+              })
+            );
+          }
         }
         updateLayer({
           ...layer,
@@ -368,13 +403,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             [columnId]: {
               ...column,
               dataType: newDataType,
-              sourceField: fields[0],
+              sourceField: sourcefield,
               label: column.customLabel
                 ? column.label
                 : ofName(
-                    indexPattern.getFieldByName(fields[0])?.displayName,
+                    mainField?.displayName,
                     fields.length - 1,
-                    newParams.orderBy.type === 'rare'
+                    newParams.orderBy.type === 'rare',
+                    newParams.size
                   ),
               params: {
                 ...newParams,
@@ -388,7 +424,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           } as Record<string, TermsIndexPatternColumn>,
         });
       },
-      [columnId, indexPattern, layer, updateLayer]
+      [
+        columnId,
+        dimensionGroups,
+        groupId,
+        incompleteParams,
+        indexPattern,
+        layer,
+        operationSupportMatrix.operationByField,
+        updateLayer,
+      ]
     );
     const currentColumn = layer.columns[columnId];
 
@@ -489,20 +534,37 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       });
     }
 
+    const secondaryFieldsCount = currentColumn.params.secondaryFields
+      ? currentColumn.params.secondaryFields.length
+      : 0;
+
     return (
       <>
         <ValuesInput
           value={currentColumn.params.size}
           disabled={currentColumn.params.orderBy.type === 'rare'}
           onChange={(value) => {
-            updateLayer(
-              updateColumnParam({
-                layer,
-                columnId,
-                paramName: 'size',
-                value,
-              })
-            );
+            updateLayer({
+              ...layer,
+              columns: {
+                ...layer.columns,
+                [columnId]: {
+                  ...currentColumn,
+                  label: currentColumn.customLabel
+                    ? currentColumn.label
+                    : ofName(
+                        indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
+                        secondaryFieldsCount,
+                        currentColumn.params.orderBy.type === 'rare',
+                        value
+                      ),
+                  params: {
+                    ...currentColumn.params,
+                    size: value,
+                  },
+                },
+              } as Record<string, TermsIndexPatternColumn>,
+            });
           }}
         />
         {currentColumn.params.orderBy.type === 'rare' && (

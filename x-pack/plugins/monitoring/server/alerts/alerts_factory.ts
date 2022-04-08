@@ -39,7 +39,7 @@ import {
   RULE_LARGE_SHARD_SIZE,
 } from '../../common/constants';
 import { RulesClient } from '../../../alerting/server';
-import { Alert } from '../../../alerting/common';
+import { Rule } from '../../../alerting/common';
 import { CommonAlertParams } from '../../common/types/alerts';
 
 const BY_TYPE = {
@@ -77,7 +77,7 @@ export class AlertsFactory {
     if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
       return [];
     }
-    return alertClientAlerts.data.map((alert) => new alertCls(alert as Alert) as BaseRule);
+    return alertClientAlerts.data.map((alert) => new alertCls(alert as Rule) as BaseRule);
   }
 
   public static getAll() {

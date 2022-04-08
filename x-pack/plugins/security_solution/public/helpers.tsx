@@ -18,7 +18,7 @@ import {
   RULES_PATH,
   SERVER_APP_ID,
   CASES_FEATURE_ID,
-  OVERVIEW_PATH,
+  LANDING_PATH,
   CASES_PATH,
 } from '../common/constants';
 import { Ecs } from '../common/ecs';
@@ -138,7 +138,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       break;
     default:
       application.navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.overview,
+        deepLinkId: SecurityPageName.landing,
         replace: true,
         path,
       });
@@ -147,7 +147,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
 };
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
-  response: StrategyResponseType<T> | TimelineEqlResponse,
+  response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
@@ -197,12 +197,12 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   const overviewAvailable = isSubPluginAvailable('overview', capabilities);
   const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
   if (overviewAvailable) {
-    return <Redirect to={OVERVIEW_PATH} />;
+    return <Redirect to={LANDING_PATH} />;
   }
   if (casesAvailable) {
     return <Redirect to={CASES_PATH} />;
   }
-  return <Redirect to={OVERVIEW_PATH} />;
+  return <Redirect to={LANDING_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
 

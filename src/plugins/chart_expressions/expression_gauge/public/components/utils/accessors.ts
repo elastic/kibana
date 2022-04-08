@@ -8,7 +8,7 @@
 
 import type { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { getAccessorByDimension } from '../../../../../visualizations/common/utils';
-import { Accessors, GaugeArguments } from '../../../common';
+import { Accessors, GaugeArguments, CustomPaletteParams } from '../../../common';
 
 export const getValueFromAccessor = (
   accessor: string,
@@ -54,17 +54,30 @@ function getNiceNumber(localRange: number) {
   return niceFraction * Math.pow(10, exponent);
 }
 
-export const getMaxValue = (row?: DatatableRow, accessors?: Accessors): number => {
+export const getMaxValue = (
+  row?: DatatableRow,
+  accessors?: Accessors,
+  paletteParams?: CustomPaletteParams,
+  isRespectRanges?: boolean
+): number => {
   const FALLBACK_VALUE = 100;
   const currentValue = accessors?.max ? getValueFromAccessor(accessors.max, row) : undefined;
   if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
+
+  if (isRespectRanges && paletteParams?.rangeMax) {
+    const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
+    return !metricValue || metricValue < paletteParams?.rangeMax
+      ? paletteParams?.rangeMax
+      : metricValue;
+  }
+
   if (row && accessors) {
     const { metric, goal } = accessors;
     const metricValue = metric && row[metric];
     const goalValue = goal && row[goal];
-    const minValue = getMinValue(row, accessors);
+    const minValue = getMinValue(row, accessors, paletteParams, isRespectRanges);
     if (metricValue != null) {
       const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
       const maxValue = Math.max(...numberValues);
@@ -74,11 +87,24 @@ export const getMaxValue = (row?: DatatableRow, accessors?: Accessors): number =
   return FALLBACK_VALUE;
 };
 
-export const getMinValue = (row?: DatatableRow, accessors?: Accessors) => {
+export const getMinValue = (
+  row?: DatatableRow,
+  accessors?: Accessors,
+  paletteParams?: CustomPaletteParams,
+  isRespectRanges?: boolean
+) => {
   const currentValue = accessors?.min ? getValueFromAccessor(accessors.min, row) : undefined;
   if (currentValue !== undefined && currentValue !== null) {
     return currentValue;
   }
+
+  if (isRespectRanges && paletteParams?.rangeMin) {
+    const metricValue = accessors?.metric ? getValueFromAccessor(accessors.metric, row) : undefined;
+    return !metricValue || metricValue > paletteParams?.rangeMin
+      ? paletteParams?.rangeMin
+      : metricValue;
+  }
+
   const FALLBACK_VALUE = 0;
   if (row && accessors) {
     const { metric, max } = accessors;

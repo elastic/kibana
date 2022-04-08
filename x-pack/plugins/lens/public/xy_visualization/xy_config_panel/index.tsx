@@ -11,7 +11,10 @@ import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@el
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
-import { AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
+import {
+  AxesSettingsConfig,
+  AxisExtentConfig,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -392,6 +395,16 @@ export const XyToolbar = memo(function XyToolbar(
               setState({
                 ...state,
                 valuesInLegend: !state.valuesInLegend,
+              });
+            }}
+            legendSize={state.legend.legendSize}
+            onLegendSizeChange={(legendSize) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  legendSize,
+                },
               });
             }}
           />

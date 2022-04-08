@@ -7,9 +7,10 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange, EuiFieldText } from '@elastic/eui';
 import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnFormatted } from '../operations/definitions/helpers';
+import { useDebouncedValue } from '../../shared_components';
 
 const supportedFormats: Record<string, { title: string }> = {
   number: {
@@ -46,6 +47,10 @@ const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel
   defaultMessage: 'Decimals',
 });
 
+const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
+  defaultMessage: 'Suffix',
+});
+
 interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
@@ -61,6 +66,30 @@ export function FormatSelector(props: FormatSelectorProps) {
     : undefined;
 
   const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
+
+  const onChangeSuffix = useCallback(
+    (suffix: string) => {
+      if (!currentFormat) {
+        return;
+      }
+      onChange({
+        id: currentFormat.id,
+        params: {
+          ...currentFormat.params,
+          suffix,
+        },
+      });
+    },
+    [currentFormat, onChange]
+  );
+
+  const { handleInputChange: setSuffix, inputValue: suffix } = useDebouncedValue(
+    {
+      onChange: onChangeSuffix,
+      value: currentFormat?.params?.suffix ?? '',
+    },
+    { allowFalsyValue: true }
+  );
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
   const stableOptions = useMemo(
@@ -135,6 +164,7 @@ export function FormatSelector(props: FormatSelectorProps) {
                   onChange({
                     id: currentFormat.id,
                     params: {
+                      ...currentFormat.params,
                       decimals: validatedValue,
                     },
                   });
@@ -144,6 +174,18 @@ export function FormatSelector(props: FormatSelectorProps) {
                 fullWidth
                 prepend={decimalsLabel}
                 aria-label={decimalsLabel}
+              />
+              <EuiSpacer size="xs" />
+              <EuiFieldText
+                value={suffix}
+                onChange={(e) => {
+                  setSuffix(e.currentTarget.value);
+                }}
+                data-test-subj="indexPattern-dimension-formatSuffix"
+                compressed
+                fullWidth
+                prepend={suffixLabel}
+                aria-label={suffixLabel}
               />
             </>
           ) : null}

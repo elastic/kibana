@@ -742,20 +742,24 @@ include::api.asciidoc[tag=using-the-APIs]
 [[apm-create-agent-key]]
 ==== Create agent key
 
-Create an APM agent key. Specify privileges in the request body at creation time.
+Create an APM agent API key. Specify API key privileges in the request body at creation time.
 
 [[apm-create-agent-key-privileges]]
 ===== Privileges
 
-Users must have at least the `manage_own_api_key` cluster privilege and the required application privileges.
+The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege
+and the APM application-level privileges that it wishes to grant.
 
-====== Example role:
+====== Example role
+
+The example below uses the Kibana <<role-management-api,role management API>> to create a role named `apm_agent_key_user`.
+Create and assign this role to a user that wishes to create APM agent API keys.
 
 [source,js]
 --------------------------------------------------
 POST /_security/role/apm_agent_key_user
 {
-  "cluster": ["manage_own_api_key"], 
+  "cluster": ["manage_own_api_key"],
   "applications": [{
     "application": "apm",
     "privileges": ["event:write", "sourcemap:write", "config_agent:read"],

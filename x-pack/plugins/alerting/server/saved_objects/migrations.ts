@@ -17,7 +17,7 @@ import {
   SavedObjectAttribute,
   SavedObjectReference,
 } from '../../../../../src/core/server';
-import { RawRule, RawAlertAction } from '../types';
+import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
@@ -280,7 +280,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
-      },
+      } as RawRuleExecutionStatus,
     },
   };
 }
@@ -353,7 +353,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.jira') {
         const { title, comments, description, issueType, priority, labels, parent, summary } =
           action.params.subActionParams as {
@@ -385,7 +385,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
@@ -413,12 +413,12 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       }
     }
 
     return [...acc, action];
-  }, [] as RawAlertAction[]);
+  }, [] as RawRuleAction[]);
 
   return {
     ...doc,
@@ -855,13 +855,13 @@ function addMappedParams(
 function getCorrespondingAction(
   actions: SavedObjectAttribute,
   connectorRef: string
-): RawAlertAction | null {
+): RawRuleAction | null {
   if (!Array.isArray(actions)) {
     return null;
   } else {
     return actions.find(
-      (action) => (action as RawAlertAction)?.actionRef === connectorRef
-    ) as RawAlertAction;
+      (action) => (action as RawRuleAction)?.actionRef === connectorRef
+    ) as RawRuleAction;
   }
 }
 

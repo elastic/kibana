@@ -18,7 +18,12 @@ import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
 import { EmbeddableSetup } from '../../../embeddable/server';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
+import {
+  serializableToRawAttributes,
+  DashboardDoc700To720,
+  DashboardDoc730ToLatest,
+  rawAttributesToSerializable,
+} from '../../common';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
 import {
   convertPanelStateToSavedDashboardPanel,
@@ -32,6 +37,7 @@ import {
   MigrateFunctionsObject,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
+import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -158,17 +164,78 @@ type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
   savedVis?: Serializable;
 };
 
+/**
+ * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced
+ * with a usage of the existing hidePanelTitles key. Even though blank string titles still technically work
+ * in versions > 7.10, they are less explicit than using the hidePanelTitles key. This migration transforms all
+ * blank string titled panels to panels with the titles explicitly hidden.
+ */
+export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (doc) => {
+  const { attributes } = doc;
+
+  // Skip if panelsJSON is missing
+  if (typeof attributes?.panelsJSON !== 'string') return doc;
+
+  try {
+    const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
+    // Same here, prevent failing saved object import if ever panels aren't an array.
+    if (!Array.isArray(panels)) return doc;
+
+    const newPanels: SavedDashboardPanel[] = [];
+    panels.forEach((panel) => {
+      // Convert each panel into the dashboard panel state
+      const originalPanelState =
+        convertSavedDashboardPanelToPanelState<ValueOrReferenceInput>(panel);
+      newPanels.push(
+        convertPanelStateToSavedDashboardPanel(
+          {
+            ...originalPanelState,
+            explicitInput: {
+              ...originalPanelState.explicitInput,
+              ...(originalPanelState.explicitInput.title === '' &&
+              !originalPanelState.explicitInput.hidePanelTitles
+                ? { hidePanelTitles: true }
+                : {}),
+            },
+          },
+          panel.version
+        )
+      );
+    });
+    return {
+      ...doc,
+      attributes: {
+        ...attributes,
+        panelsJSON: JSON.stringify(newPanels),
+      },
+    };
+  } catch {
+    return doc;
+  }
+};
+
 // Runs the embeddable migrations on each panel
 const migrateByValuePanels =
   (migrate: MigrateFunction, version: string): SavedObjectMigrationFn =>
   (doc: any) => {
     const { attributes } = doc;
+
+    if (attributes?.controlGroupInput) {
+      const controlGroupInput = rawAttributesToSerializable(attributes.controlGroupInput);
+      const migratedControlGroupInput = migrate({
+        ...controlGroupInput,
+        type: CONTROL_GROUP_TYPE,
+      });
+      attributes.controlGroupInput = serializableToRawAttributes(migratedControlGroupInput);
+    }
+
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
     // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
     // object has panelsJSON in all previous versions of kibana.
     if (typeof attributes?.panelsJSON !== 'string') {
       return doc;
     }
+
     const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
     // Same here, prevent failing saved object import if ever panels aren't an array.
     if (!Array.isArray(panels)) {
@@ -241,14 +308,8 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
-
-    /**
-     * Any dashboard saved object migrations that come after this point will have to be wary of
-     * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
-     */
-    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
-
     '7.14.0': flow(replaceIndexPatternReference),
+    '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
 
   return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);

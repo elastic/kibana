@@ -6,8 +6,8 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference } from 'kibana/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { CoreSetup, SavedObjectReference, SavedObjectsResolveResponse } from 'kibana/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
@@ -198,6 +198,12 @@ interface ChartSettings {
   };
 }
 
+export type GetDropProps<T = unknown> = DatasourceDimensionDropProps<T> & {
+  groupId: string;
+  dragging: DragContextState['dragging'];
+  prioritizedOperation?: string;
+};
+
 /**
  * Interface for the datasource registry
  */
@@ -227,10 +233,8 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     value: {
       columnId: string;
-      label: string;
-      dataType: string;
-      staticValue?: unknown;
       groupId: string;
+      staticValue?: unknown;
     }
   ) => T;
 
@@ -251,11 +255,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: DatasourceDimensionDropProps<T> & {
-      groupId: string;
-      dragging: DragContextState['dragging'];
-      prioritizedOperation?: string;
-    }
+    props: GetDropProps<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   /**
@@ -296,14 +296,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (
-    state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
-    dateRange?: {
-      fromDate: string;
-      toDate: string;
-    }
-  ) =>
+  getErrorMessages: (state: T) =>
     | Array<{
         shortMessage: string;
         longMessage: React.ReactNode;
@@ -368,10 +361,13 @@ export interface DatasourcePublicAPI {
   /**
    * Collect all defined filters from all the operations in the layer
    */
-  getFilters: (activeData?: FramePublicAPI['activeData']) => {
-    kuery: Query[][];
-    lucene: Query[][];
-  };
+  getFilters: (activeData?: FramePublicAPI['activeData']) => Record<
+    'enabled' | 'disabled',
+    {
+      kuery: Query[][];
+      lucene: Query[][];
+    }
+  >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -582,6 +578,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
+  labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -643,6 +640,7 @@ export interface SuggestionRequest<T = unknown> {
    * Different suggestions can be generated for each subtype of the visualization
    */
   subVisualizationId?: string;
+  activeData?: Record<string, Datatable>;
 }
 
 /**
@@ -782,14 +780,13 @@ export interface Visualization<T = unknown> {
     type: LayerType;
     label: string;
     icon?: IconType;
+    noDatasource?: boolean;
     disabled?: boolean;
     toolTipContent?: string;
     initialDimensions?: Array<{
-      groupId: string;
       columnId: string;
-      dataType: string;
-      label: string;
-      staticValue: unknown;
+      groupId: string;
+      staticValue?: unknown;
     }>;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -854,7 +851,20 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-
+  /**
+   * Renders dimension trigger. Used only for noDatasource layers
+   */
+  renderDimensionTrigger?: (props: {
+    columnId: string;
+    label: string;
+    hideTooltip?: boolean;
+    invalid?: boolean;
+    invalidMessage?: string;
+  }) => JSX.Element | null;
+  /**
+   * Creates map of columns ids and unique lables. Used only for noDatasource layers
+   */
+  getUniqueLabels?: (state: T) => Record<string, string>;
   /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:
@@ -976,8 +986,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 

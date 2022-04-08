@@ -24,7 +24,12 @@ import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
-import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
+import {
+  PdfScreenshotResult,
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
+} from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import type { SpacesPluginSetup } from '../../spaces/server';
@@ -37,7 +42,7 @@ import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { ReportingPluginRouter, ScreenshotOptions } from './types';
+import type { ReportingPluginRouter, PngScreenshotOptions, PdfScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -357,13 +362,16 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  public getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  public getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
         const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-
           timeouts: {
             loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
             openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
@@ -381,7 +389,7 @@ export class ReportingCore {
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
           ),
-        });
+        } as ScreenshotOptions);
       })
     );
   }

@@ -35,8 +35,10 @@ import { setExtensionsService } from '../../public/application/store/selectors/e
 import { ExtensionsService } from '../../public/services';
 import { kibanaVersion } from '../client_integration/helpers';
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
+import {
+  notificationServiceMock,
+  executionContextServiceMock,
+} from '../../../../../src/core/public/mocks';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
@@ -164,7 +166,14 @@ describe('index table', () => {
 
     store = indexManagementStore(services);
 
-    const appDependencies = { services, core: {}, plugins: {} };
+    const appDependencies = {
+      services,
+      core: {
+        getUrlForApp: () => {},
+        executionContext: executionContextServiceMock.createStartContract(),
+      },
+      plugins: {},
+    };
 
     component = (
       <Provider store={store}>

@@ -38,6 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
         });
 
+        // This fails and should be investigated or removed if it no longer applies
         it.skip('should report that signals index does not exist', async () => {
           const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
           expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });

@@ -35,7 +35,9 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>
@@ -96,7 +98,9 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>
@@ -157,7 +161,9 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>
@@ -218,7 +224,9 @@ exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>
@@ -261,7 +269,9 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
             size="s"
-          />
+          >
+            
+          </span>
         </span>
       </div>
     </div>

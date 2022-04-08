@@ -90,6 +90,10 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+|[[elasticsearch-maxSockets]] `elasticsearch.maxSockets`
+ | The maximum number of sockets that can be used for communications with elasticsearch.
+*Default: `Infinity`*
+
 | `elasticsearch.customHeaders:`
  | Header names and values to send to {es}. Any custom headers cannot be
 overwritten by client-side headers, regardless of the
@@ -278,7 +282,7 @@ on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
 |[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+ | If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
@@ -671,12 +675,14 @@ out through *Advanced Settings*. *Default: `true`*
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
 | `xpack.ccr.ui.enabled`
-Set this value to false to disable the Cross-Cluster Replication UI.
+| Set this value to false to disable the Cross-Cluster Replication UI.
 *Default: `true`*
 
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
+
+  When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
 
 |[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`

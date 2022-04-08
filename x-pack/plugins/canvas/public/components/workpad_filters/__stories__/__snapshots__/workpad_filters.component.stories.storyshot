@@ -72,7 +72,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Empty filt
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -157,7 +159,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -184,7 +188,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -195,7 +198,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -298,7 +303,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -325,7 +332,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -336,7 +342,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -439,7 +447,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -466,7 +476,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -477,7 +486,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -580,7 +591,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -607,7 +620,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -618,7 +630,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
             <button
               aria-controls="canvas-filter-group-0"
@@ -663,7 +677,6 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               aria-expanded={true}
               aria-labelledby="generated-id"
               className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
-              disabled={false}
               onClick={[Function]}
               tabIndex={-1}
               type="button"
@@ -674,7 +687,9 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
                 color="inherit"
                 data-euiicon-type="arrowRight"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
             <button
               aria-controls="canvas-filter-group-1"

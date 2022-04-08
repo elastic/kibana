@@ -2,7 +2,7 @@
 
 ## Yarn and internal collection
 
-For the simplest Elasticsearch & Kibana stack monitoring setup from a kibana clone, using [internal collection](../reference/terminology.md#internal-collection), first start elasticsearch with monitoring and a local [exporter](../reference/terminology.md#exporter) enabled.
+For the simplest Elasticsearch & Kibana stack monitoring setup from a kibana clone, using [internal collection](../reference/terminology.md#internal-collection), first start elasticsearch with monitoring and a local [exporter](https://www.elastic.co/guide/en/elasticsearch/reference/current/es-monitoring-exporters.html) enabled.
 
 ```shell
 yarn es snapshot --license trial \
@@ -69,12 +69,30 @@ docker run --name filebeat \
   docker.elastic.co/beats/filebeat:master-SNAPSHOT
 ```
 
+## Standalone Cluster
+
+The "[Standalone Cluster](../reference/terminology.md#standalone-cluster)" entry appears in Stack Monitoring when there are monitoring documents that lack a `cluster_uuid`. Beats will send these in some timing/failure cases, but the easiest way to generate them intentionally to start a logstash node with monitoring enabled and no elasticsearch output.
+
+For example using docker and [metricbeat collection](#yarn-and-metricbeat-collection):
+
+```shell
+docker run --name logstash \
+  --pull always --rm \
+  --hostname=logstash \
+  --publish=9600:9600 \
+  --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/logstash.yml:/usr/share/logstash/config/logstash.yml:ro" \
+  docker.elastic.co/logstash/logstash:master-SNAPSHOT \
+  -e 'input { java_generator { eps => 1 } } output { file { path => "/dev/null" } }'
+```
+
 # Complete docker setup
 
 We also maintain an internal docker-compose setup for running a full stack with monitoring enabled for all components.
 
 See (internal) https://github.com/elastic/observability-dev/tree/main/tools/docker-testing-cluster for more details.
 
-# Running more stack components from source
+# Complete source setup
 
-See (internal) https://github.com/elastic/observability-dev/blob/main/docs/monitoring/monitoring-simulation-notes.md for details.
+For some types of changes (for example, new fields, templates, endpoints or data processing logic), you may want to run stack components from source.
+
+See [Running Components from Source](running_components_from_source.md) for details on how to do this for each component.

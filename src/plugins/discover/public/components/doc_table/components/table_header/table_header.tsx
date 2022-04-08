@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 import { getDefaultSort } from '../../lib/get_default_sort';
@@ -54,7 +54,9 @@ export function TableHeader({
             customLabel={indexPattern.getFieldByName(col.name)?.customLabel}
             isTimeColumn={indexPattern.timeFieldName === col.name}
             sortOrder={
-              sortOrder.length ? sortOrder : getDefaultSort(indexPattern, defaultSortOrder)
+              sortOrder.length
+                ? sortOrder
+                : getDefaultSort(indexPattern, defaultSortOrder, hideTimeColumn)
             }
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}

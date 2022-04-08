@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { MutableRefObject } from 'react';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { FieldVisConfig } from '../../stats_table/types';
 import { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
@@ -22,7 +22,7 @@ import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../../../../../src/plug
 import { APP_ID } from '../../../../../../common/constants';
 
 export function getActions(
-  indexPattern: IndexPattern,
+  dataView: DataView,
   services: Partial<DataVisualizerKibanaReactContextValue['services']>,
   combinedQuery: CombinedQuery,
   dataViewEditorRef: MutableRefObject<(() => void | undefined) | undefined> | undefined
@@ -53,7 +53,7 @@ export function getActions(
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
       onClick: (item: FieldVisConfig) => {
-        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, filters, item);
+        const lensAttributes = getLensAttributes(dataView, combinedQuery, filters, item);
         if (lensAttributes) {
           lensPlugin.navigateToPrefilledEditor({
             id: `dataVisualizer-${item.fieldName}`,
@@ -83,9 +83,9 @@ export function getActions(
         return item.type === JOB_FIELD_TYPES.GEO_POINT || item.type === JOB_FIELD_TYPES.GEO_SHAPE;
       },
       onClick: async (item: FieldVisConfig) => {
-        if (services?.uiActions && indexPattern) {
+        if (services?.uiActions && dataView) {
           const triggerOptions = {
-            indexPatternId: indexPattern.id,
+            indexPatternId: dataView.id,
             fieldName: item.fieldName,
             contextualFields: [],
             originatingApp: APP_ID,
@@ -121,7 +121,7 @@ export function getActions(
         icon: 'indexEdit',
         onClick: (item: FieldVisConfig) => {
           dataViewEditorRef.current = services.dataViewFieldEditor?.openEditor({
-            ctx: { dataView: indexPattern },
+            ctx: { dataView },
             fieldName: item.fieldName,
             onSave: refreshPage,
           });
@@ -145,7 +145,7 @@ export function getActions(
         },
         onClick: (item: FieldVisConfig) => {
           dataViewEditorRef.current = services.dataViewFieldEditor?.openDeleteModal({
-            ctx: { dataView: indexPattern },
+            ctx: { dataView },
             fieldName: item.fieldName!,
             onDelete: refreshPage,
           });

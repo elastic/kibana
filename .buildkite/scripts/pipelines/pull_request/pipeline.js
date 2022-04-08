@@ -8,7 +8,6 @@
 
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-// eslint-disable-next-line import/no-unresolved
 const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
 
 const SKIPPABLE_PATHS = [

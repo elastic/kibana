@@ -7,7 +7,7 @@
  */
 
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
-import { DataView } from '../../../../../data/common';
+import { DataView } from '../../../../../data_views/public';
 
 /**
  * Helper function returning an index pattern

@@ -24,7 +24,7 @@ export function useDockerRegistry() {
 
   let dockerProcess: ChildProcess | undefined;
   async function startDockerRegistryServer() {
-    const dockerImage = `docker.elastic.co/package-registry/distribution@sha256:b3dfc6a11ff7dce82ba8689ea9eeb54e353c6b4bfd2d28127b20ef72fd8883e9`;
+    const dockerImage = `docker.elastic.co/package-registry/distribution:e1a3906e0c9944ecade05308022ba35eb0ebd00a`;
 
     const args = ['run', '--rm', '-p', `${packageRegistryPort}:8080`, dockerImage];
 

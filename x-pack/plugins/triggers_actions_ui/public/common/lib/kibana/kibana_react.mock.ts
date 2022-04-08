@@ -8,6 +8,7 @@
 import React from 'react';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import {
   coreMock,
   scopedHistoryMock,
@@ -37,6 +38,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),

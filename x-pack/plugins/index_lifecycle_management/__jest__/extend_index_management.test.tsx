@@ -113,7 +113,6 @@ const indexWithLifecycleError = {
     step_info: {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
-      stack_trace: 'fakestacktrace',
     },
     phase_execution: {
       policy: 'testy',
