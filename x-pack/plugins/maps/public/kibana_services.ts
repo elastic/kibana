@@ -6,10 +6,10 @@
  */
 
 import type { CoreStart } from 'kibana/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
-import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 
 let coreStart: CoreStart;
