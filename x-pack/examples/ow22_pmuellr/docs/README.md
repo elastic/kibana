@@ -1,4 +1,4 @@
-# on-week 2022 - Patrick Mueller
+# on-week 2022@1 - Patrick Mueller
 
 Some mini-projects I worked on, all lumped together to cut down on
 boilerplate, and because there are some structural similarities between
@@ -22,4 +22,6 @@ things here, like routes and rule types.
 
 - [Task Grapher](task_grapher.md)
   
+  _ran out of time on this one.  next on-week!_
+
   come up with ways of graphing task execution on a timeline

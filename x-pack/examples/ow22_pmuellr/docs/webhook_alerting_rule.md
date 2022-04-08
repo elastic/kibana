@@ -1,6 +1,6 @@
 # Webhook Alerting Rule
 
-_part of [on-week 2022 - Patrick Mueller](./README.md)_
+_part of [on-week 2022@1 - Patrick Mueller](./README.md)_
 
 Kibana alerting rule that runs the rule via webhook URL supplied as a parameter.
 
@@ -32,8 +32,8 @@ There are 4 possible instances: Alfa, Bravo, Charlie, and Delta.
 
 A counter is maintained in the rule state, and updated and returned from the
 webhook.  The counter just counts the number of times the webhook has been
-invoked, for this rule, since it last became active.  The counter is
-embedded in the `message` context variable.
+invoked, for this rule, since it last became active.  The counter value is
+included in the `message` context variable.
 
 Edit the rule to change the query param to the available values to see the
 effect.
@@ -50,7 +50,7 @@ So, the example doesn't do much :-).  But the main idea is to show it's
 possible to externalize an alerting rule execution, for at least as far
 as I pushed it.
 
-There's plenty of remaining "hole":
+There's plenty of missing functionality:
 
 - nice client side library mirroring our "instance" methods, to schedule
   actions, unschedule them, etc.  With the code today, this information

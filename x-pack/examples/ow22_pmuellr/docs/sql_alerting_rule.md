@@ -1,6 +1,6 @@
 # SQL Alerting Rule 
 
-_part of [on-week 2022 - Patrick Mueller](./README.md)_
+_part of [on-week 2022@1 - Patrick Mueller](./README.md)_
 
 _this was a dust-off-and-polish effort; the original code is here: https://github.com/pmuellr/kbn-sample-plugins/blob/master/plugins/alert_type_examples/server/alert_types/essql.ts; cleaned things up and added some (not great) UX_
 
