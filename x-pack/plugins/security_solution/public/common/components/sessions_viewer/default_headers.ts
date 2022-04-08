@@ -29,10 +29,6 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.action',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
     id: 'process.executable',
   },
   {

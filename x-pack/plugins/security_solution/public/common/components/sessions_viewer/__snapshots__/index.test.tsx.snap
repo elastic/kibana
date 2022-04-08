@@ -79,9 +79,6 @@ exports[`SessionsView renders correctly against snapshot 1`] = `
             process.end
           </div>
           <div>
-            event.action
-          </div>
-          <div>
             process.executable
           </div>
           <div>
