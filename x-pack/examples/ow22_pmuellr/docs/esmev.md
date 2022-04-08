@@ -62,3 +62,18 @@ and added the following lines to my `.vscode/settings.json` file:
 Why having both config_schema AND ts types is good:
 
 https://2ality.com/2020/06/validating-data-typescript.html#example%3A-validating-data-via-the-library-zod
+
+
+debugging requires manual connection in vscode
+some glitchy bits; renamed files continue to show previous errors after fixed and renamed kinda things
+
+# run the tool
+> x-pack/examples/ow22_pmuellr/scripts/esmev.ts x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects.yaml
+esmev.ts: processing: x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects.yaml
+esmev.ts: generating: x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects_mappings.json
+esmev.ts: generating: x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects_schema.ts
+esmev.ts: generating: x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects_types.ts
+esmev.ts: generating: x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects_doc.md
+
+# compare generated alerting SO mappings to currently mainted one: no diffs!
+> diff x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects_mappings.json x-pack/plugins/alerting/server/saved_objects/mappings.json

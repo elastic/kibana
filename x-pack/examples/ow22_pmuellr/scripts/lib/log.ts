@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { basename } from 'https://deno.land/std@0.134.0/path/mod.ts';
+
+const Program = basename(Deno.mainModule);
+
 export function log(message: string) {
   // eslint-disable-next-line no-console
-  console.log(`${Deno.mainModule}: ${message}`);
+  console.log(`${Program}: ${message}`);
 }
 
 export function logExit(code: number, message: string) {

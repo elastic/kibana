@@ -20,25 +20,22 @@ export function readEsMappings(
 
   const type = dataObject.type ?? 'object';
   const isArray = dataObject.$is_array ?? false;
+  const usage = dataObject.$usage ?? 'general';
   const description = dataObject.$description ?? '';
+  const optional = dataObject.$optional ?? false;
+  const nullable = dataObject.$nullable ?? false;
   const properties = dataObject.properties;
 
   const esParameters = JSON.parse(JSON.stringify(dataObject));
-  delete esParameters.$isArray;
-  delete esParameters.$description;
   delete esParameters.properties;
 
-  if (typeof type !== 'string') {
-    return `at ${currPath}, expecting type property to be a string, but was ${typeof type}`;
-  }
-
-  if (typeof isArray !== 'boolean') {
-    return `at ${currPath}, expecting $isArray property to be a string, but was ${typeof isArray}`;
-  }
-
-  if (typeof description !== 'string') {
-    return `at ${currPath}, expecting $description property to be a string, but was ${typeof description}`;
-  }
+  if (typeof type !== 'string') return typeErr(currPath, 'type', type, 'string');
+  if (typeof isArray !== 'boolean') return typeErr(currPath, '$isArray', isArray, 'boolean');
+  if (typeof usage !== 'string') return typeErr(currPath, '$usage', usage, 'string');
+  if (typeof optional !== 'boolean') return typeErr(currPath, '$optional', optional, 'boolean');
+  if (typeof nullable !== 'boolean') return typeErr(currPath, '$nullable', nullable, 'boolean');
+  if (typeof description !== 'string')
+    return typeErr(currPath, '$description', description, 'string');
 
   let propMap: Record<string, EsMapping> | undefined;
 
@@ -55,16 +52,23 @@ export function readEsMappings(
       const propMappings = readEsMappings(propKey, propValue, path);
       if (typeof propMappings === 'string') return propMappings;
 
-      propMap[propKey] = propMappings;
+      if (!propKey.startsWith('$')) {
+        propMap[propKey] = propMappings;
+      }
     }
   }
 
   return {
-    name,
-    type,
-    description,
+    name: name.trim(),
+    type: type.trim(),
+    description: description.trim(),
     esParameters,
     isArray,
+    usage: usage.trim(),
     properties: propMap,
   };
+}
+
+function typeErr(path: string, name: string, actual: unknown, expected: string) {
+  return `at ${path}, expecting ${name} property to be a ${expected}, but was ${typeof actual}`;
 }

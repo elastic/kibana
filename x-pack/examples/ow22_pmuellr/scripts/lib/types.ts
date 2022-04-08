@@ -12,7 +12,10 @@ export interface EsMapping {
   name: string;
   type: string;
   isArray: boolean;
+  usage: string;
   description: string;
   esParameters: Record<string, Json>;
   properties: Record<string, EsMapping> | undefined;
 }
+
+export type EsMappings = Record<string, EsMapping>;
