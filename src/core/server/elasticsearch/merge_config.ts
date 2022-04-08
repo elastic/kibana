@@ -27,5 +27,5 @@ export const mergeConfig = (
     delete writableBaseConfig.serviceAccountToken;
   }
 
-  return merge({}, writableBaseConfig, configOverrides);
+  return merge(writableBaseConfig, configOverrides);
 };

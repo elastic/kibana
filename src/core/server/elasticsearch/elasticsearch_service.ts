@@ -155,9 +155,9 @@ export class ElasticsearchService
   private createClusterClient(
     type: string,
     baseConfig: ElasticsearchClientConfig,
-    clientConfig?: Partial<ElasticsearchClientConfig>
+    clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
-    const config = clientConfig ? mergeConfig(baseConfig, clientConfig) : baseConfig;
+    const config = mergeConfig(baseConfig, clientConfig);
     return new ClusterClient({
       config,
       logger: this.coreContext.logger.get('elasticsearch'),
