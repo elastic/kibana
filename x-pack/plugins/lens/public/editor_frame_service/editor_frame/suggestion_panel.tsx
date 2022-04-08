@@ -491,7 +491,9 @@ function getPreviewExpression(
     return null;
   }
 
-  const suggestionFrameApi: FramePublicAPI = { datasourceLayers: { ...frame.datasourceLayers } };
+  const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
+    datasourceLayers: { ...frame.datasourceLayers },
+  };
 
   // use current frame api and patch apis for changed datasource layers
   if (

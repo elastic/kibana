@@ -384,7 +384,7 @@ export const getReferenceConfiguration = ({
   sortedAccessors,
 }: {
   state: XYState;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
 }) => {

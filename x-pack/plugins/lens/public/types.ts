@@ -585,7 +585,7 @@ interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
 }
 export interface Suggestion {
   visualizationId: string;
@@ -681,6 +681,7 @@ export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
 
 export interface FramePublicAPI {
   datasourceLayers: DatasourceLayers;
+  dateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
@@ -689,7 +690,6 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
 }
 export interface FrameDatasourceAPI extends FramePublicAPI {
-  dateRange: DateRange;
   query: Query;
   filters: Filter[];
 }
