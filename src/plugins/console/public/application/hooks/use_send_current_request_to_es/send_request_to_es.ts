@@ -90,7 +90,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
           if (isSuccess) {
             let value;
             // check if object is ArrayBuffer
-            if ((body as ArrayBuffer).byteLength > 0) {
+            if (body instanceof ArrayBuffer) {
               value = body;
             } else {
               value = JSON.stringify(body, null, 2);
