@@ -361,4 +361,18 @@ describe('EditConnector ', () => {
       expect(result.queryByTestId('has-data-to-push-button')).toBe(null);
     });
   });
+
+  it('does not show the edit connectors pencil if the user does not have read access to actions', async () => {
+    const defaultProps = getDefaultProps();
+    const props = { ...defaultProps, connectors: [] };
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      actions: { save: false, show: false },
+    };
+
+    const result = appMockRender.render(<EditConnector {...props} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('connector-edit')).toBe(null);
+    });
+  });
 });
