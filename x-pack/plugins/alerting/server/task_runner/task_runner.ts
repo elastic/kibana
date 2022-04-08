@@ -10,7 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
+import {  throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
@@ -35,7 +35,6 @@ import {
 } from '../types';
 import { asErr, map, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
-import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';

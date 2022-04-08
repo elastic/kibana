@@ -6,9 +6,10 @@
  */
 
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
-import { AlertingTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
-import { RuleTypeParams, SanitizedRule } from '../types';
+import { RawAlertInstanceMeta, RuleTaskParams, SanitizedRule } from '../types';
+import { RuleTaskInstance } from './types';
 
 const alert: SanitizedRule<{
   bar: boolean;
@@ -42,7 +43,7 @@ const alert: SanitizedRule<{
 describe('Alert Task Instance', () => {
   test(`validates that a TaskInstance has valid Alert Task State`, () => {
     const lastScheduledActionsDate = new Date();
-    const taskInstance: ConcreteTaskInstance = {
+    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
       id: uuid.v4(),
       attempts: 0,
       status: TaskStatus.Running,
@@ -75,8 +76,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> =
-      taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: RuleTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual({
       ...taskInstance,
@@ -101,7 +101,7 @@ describe('Alert Task Instance', () => {
   });
 
   test(`throws if state is invalid`, () => {
-    const taskInstance: ConcreteTaskInstance = {
+    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
       id: '215ee69b-1df9-428e-ab1a-ccf274f8fa5b',
       attempts: 0,
       status: TaskStatus.Running,
@@ -132,7 +132,7 @@ describe('Alert Task Instance', () => {
   });
 
   test(`throws with Alert id when alert is present and state is invalid`, () => {
-    const taskInstance: ConcreteTaskInstance = {
+    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
       id: '215ee69b-1df9-428e-ab1a-ccf274f8fa5b',
       attempts: 0,
       status: TaskStatus.Running,
@@ -165,7 +165,7 @@ describe('Alert Task Instance', () => {
   });
 
   test(`allows an initial empty state`, () => {
-    const taskInstance: ConcreteTaskInstance = {
+    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
       id: uuid.v4(),
       attempts: 0,
       status: TaskStatus.Running,
@@ -182,14 +182,13 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> =
-      taskInstanceToAlertTaskInstance(taskInstance);
+    const alertTaskInsatnce: RuleTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
 
     expect(alertTaskInsatnce).toEqual(taskInstance);
   });
 
   test(`validates that a TaskInstance has valid Params`, () => {
-    const taskInstance: ConcreteTaskInstance = {
+    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
       id: uuid.v4(),
       attempts: 0,
       status: TaskStatus.Running,
@@ -206,7 +205,7 @@ describe('Alert Task Instance', () => {
       ownerId: null,
     };
 
-    const alertTaskInsatnce: AlertingTaskInstance<RuleTypeParams> = taskInstanceToAlertTaskInstance(
+    const alertTaskInsatnce: RuleTaskInstance = taskInstanceToAlertTaskInstance(
       taskInstance,
       alert
     );
@@ -215,7 +214,7 @@ describe('Alert Task Instance', () => {
   });
 
   test(`throws if params are invalid`, () => {
-    const taskInstance: ConcreteTaskInstance = {
+    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
       id: '215ee69b-1df9-428e-ab1a-ccf274f8fa5b',
       attempts: 0,
       status: TaskStatus.Running,
@@ -226,7 +225,9 @@ describe('Alert Task Instance', () => {
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
       state: {},
       taskType: 'alerting:test',
-      params: {},
+      params: {
+        alertId: uuid.v4(),
+      },
       ownerId: null,
     };
 

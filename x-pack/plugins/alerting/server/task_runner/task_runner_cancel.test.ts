@@ -32,7 +32,7 @@ import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
-import { Rule, RecoveredActionGroup } from '../../common';
+import { Rule, RecoveredActionGroup, RuleTaskState, RuleTaskParams } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
