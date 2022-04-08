@@ -27,6 +27,7 @@ export class ServiceNowItsm extends ServiceNow {
     configurationUtilities,
     logger,
     secrets,
+    services,
   }: ServiceParams<ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType>) {
     super({
       config,
@@ -34,6 +35,7 @@ export class ServiceNowItsm extends ServiceNow {
       internalConfig: ServiceNowItsm.internalConfig,
       logger,
       secrets,
+      services,
     });
   }
 }

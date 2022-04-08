@@ -10,12 +10,13 @@ import { Logger } from '@kbn/logging';
 import type { LicenseType } from '../../../licensing/common/types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { BasicConnector } from '../connectors/basic';
-import { ActionTypeParams } from '../types';
+import { ActionTypeParams, Services } from '../types';
 export interface ServiceParams<Config, Secrets> {
   config: Config;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
   secrets: Secrets;
+  services: Services;
 }
 
 export type IService<Config, Secrets> = new (
