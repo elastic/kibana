@@ -214,7 +214,7 @@ describe('Alert Task Instance', () => {
   });
 
   test(`throws if params are invalid`, () => {
-    const taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> = {
+    const taskInstance: ConcreteTaskInstance = {
       id: '215ee69b-1df9-428e-ab1a-ccf274f8fa5b',
       attempts: 0,
       status: TaskStatus.Running,
@@ -225,14 +225,16 @@ describe('Alert Task Instance', () => {
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
       state: {},
       taskType: 'alerting:test',
-      params: {
-        alertId: uuid.v4(),
-      },
+      params: {},
       ownerId: null,
     };
 
     expect(() =>
-      taskInstanceToAlertTaskInstance(taskInstance, alert)
+      taskInstanceToAlertTaskInstance(
+        // force wrong typing to simulate invalid input (this can still happen if data is invalid in ES)
+        taskInstance as ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams>,
+        alert
+      )
     ).toThrowErrorMatchingInlineSnapshot(
       `"Task \\"215ee69b-1df9-428e-ab1a-ccf274f8fa5b\\" (underlying Alert \\"alert-123\\") has an invalid param at .0.alertId"`
     );
