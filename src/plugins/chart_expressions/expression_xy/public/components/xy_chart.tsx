@@ -177,9 +177,15 @@ export function XYChart({
   const dataLayers: CommonXYDataLayerConfigResult[] = filteredLayers.filter(isDataLayer);
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
+  const xAxisColumn = dataLayers[0].xAccessor
+    ? getColumnByAccessor(dataLayers[0].xAccessor, dataLayers[0]?.table.columns)
+    : undefined;
 
-  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
+  const xAxisFormatter = formatFactory(
+    dataLayers[0].xAccessor
+      ? getFormatByAccessor(dataLayers[0].xAccessor, dataLayers[0]?.table.columns)
+      : undefined
+  );
   const areLayersAlreadyFormatted = getAreAlreadyFormattedLayersInfo(dataLayers, formatFactory);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
@@ -391,7 +397,9 @@ export function XYChart({
     const xAccessor = layer.xAccessor ? getAccessorByDimension(layer.xAccessor, table.columns) : '';
     const currentXFormatter =
       layer.xAccessor && areLayersAlreadyFormatted[layerIndex]?.[xAccessor] && xColumn
-        ? formatFactory(getFormatByAccessor(layer.xAccessor!, table.columns))
+        ? formatFactory(
+            layer.xAccessor ? getFormatByAccessor(layer.xAccessor, table.columns) : undefined
+          )
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {

@@ -65,10 +65,8 @@ export function groupAxesByType(
     layer.accessors.forEach((accessor) => {
       const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
-        layer.yConfig?.find(
-          (yAxisConfig) =>
-            getAccessorByDimension(yAxisConfig.forAccessor, table?.columns || []) === yAccessor
-        )?.axisMode || 'auto';
+        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode ||
+        'auto';
       let formatter: SerializedFieldFormat = getFormatByAccessor(
         accessor,
         table?.columns || []

@@ -62,7 +62,7 @@ export const getFormattedTable = (
   xAccessor: string | ExpressionValueVisDimension | undefined,
   xScaleType: XScaleType
 ): Datatable => {
-  const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : '';
+  const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined;
   return {
     ...table,
     rows: table.rows.map((row: DatatableRow) => {
@@ -74,9 +74,11 @@ export const getFormattedTable = (
           // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
           (!isPrimitive(record) || (column.id === xColumnId && xScaleType === 'ordinal'))
         ) {
-          newRow[column.id] = formatFactory(getFormatByAccessor(xColumnId, table.columns))!.convert(
-            record
-          );
+          newRow[column.id] = formatFactory(
+            column.id === xColumnId
+              ? getFormatByAccessor(xColumnId, table.columns)
+              : column.meta.params
+          )!.convert(record);
         }
       }
       return newRow;
