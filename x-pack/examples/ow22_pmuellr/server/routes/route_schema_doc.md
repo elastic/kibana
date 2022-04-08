@@ -2,7 +2,7 @@
 
 request body for POST webhook rule example
 
-```typescript
+```ts
 {
   
 /** the id of the rule being run */
@@ -23,7 +23,7 @@ request body for POST webhook rule example
 
 query string for POST webhook rule example
 
-```typescript
+```ts
 {
   
 /** use this param to make all instances active */
@@ -41,7 +41,7 @@ query string for POST webhook rule example
 
 response body for POST webhook rule example
 
-```typescript
+```ts
 {
   
 /** new rule state to Kibana */

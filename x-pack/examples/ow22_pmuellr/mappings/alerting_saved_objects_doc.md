@@ -2,7 +2,7 @@
 
 this mapping is for the alerting rule saved object
 
-```typescript
+```ts
 {
   enabled: boolean;
   name: string;

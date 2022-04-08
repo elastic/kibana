@@ -22,7 +22,7 @@ export async function generateMarkdown(baseFileName: string, allMappings: EsMapp
 
     if (description) lineWriter.addLine(`\n${description}`);
 
-    lineWriter.addLine('\n```typescript');
+    lineWriter.addLine('\n```ts');
     lineWriter.addLine('{');
     lineWriter.indent();
 
