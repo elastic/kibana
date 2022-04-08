@@ -7,40 +7,50 @@
 
 import { Logger } from 'kibana/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeConfig, ActionTypeSecrets, ExecutorType } from '../types';
+import { ExecutorType } from '../types';
 import { ExecutorParams, HTTPConnectorType } from './types';
 
-export const buildExecutor = ({
+export const buildExecutor = <Config, Secrets>({
   configurationUtilities,
   connector,
   logger,
 }: {
-  connector: HTTPConnectorType;
+  connector: HTTPConnectorType<Config, Secrets>;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ExecutorType<ActionTypeConfig, ActionTypeSecrets, ExecutorParams, unknown> => {
+}): ExecutorType<Config, Secrets, ExecutorParams, unknown> => {
   return async ({ actionId, params, config, secrets }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
     const service = new connector.Service({
       config,
+      secrets,
       configurationUtilities,
       logger,
-      params,
-      secrets,
     });
 
     const subActions = service.getSubActions();
+
+    if (subActions.size === 0) {
+      throw new Error('You should register at least one subAction for your connector type');
+    }
+
     const action = subActions.get(subAction);
 
     if (!action) {
-      throw new Error('Unsupported sub action');
+      throw new Error('Sub action not registered');
+    }
+
+    const method = action?.method;
+
+    if (!service[method]) {
+      throw new Error('Not valid method for registered sub action');
     }
 
     action.schema.validate(subActionParams);
 
-    const data = await service[action.method](subActionParams);
+    const data = await service[method](subActionParams);
     return { status: 'ok', data, actionId };
   };
 };

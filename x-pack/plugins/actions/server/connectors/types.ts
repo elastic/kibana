@@ -6,15 +6,10 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { CaseConnector } from './case';
-
-export type ExtractFunctionKeys<T> = {
-  [P in keyof T]-?: T[P] extends Function ? P : never;
-}[keyof T];
 
 export interface SubAction {
   name: string;
-  method: ExtractFunctionKeys<CaseConnector>;
+  method: string;
   schema: Type<unknown>;
 }
 

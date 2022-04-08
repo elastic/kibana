@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/logging';
 import { ServiceNow } from '.';
-import { ActionsConfigurationUtilities } from '../../../actions_config';
 import {
-  ExecutorParams,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
   SNProductsConfigValue,
 } from '../../../builtin_action_types/servicenow/types';
+import { ServiceParams } from '../../../http_framework/types';
 
 export class ServiceNowItsm extends ServiceNow {
   private static internalConfig: SNProductsConfigValue = {
@@ -28,15 +26,8 @@ export class ServiceNowItsm extends ServiceNow {
     config,
     configurationUtilities,
     logger,
-    params,
     secrets,
-  }: {
-    config: ServiceNowPublicConfigurationType;
-    configurationUtilities: ActionsConfigurationUtilities;
-    logger: Logger;
-    params: ExecutorParams;
-    secrets: ServiceNowSecretConfigurationType;
-  }) {
+  }: ServiceParams<ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType>) {
     super({
       config,
       configurationUtilities,

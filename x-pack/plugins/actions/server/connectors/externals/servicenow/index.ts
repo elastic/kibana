@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { ActionsConfigurationUtilities } from '../../../actions_config';
 import { SYS_DICTIONARY_ENDPOINT } from '../../../builtin_action_types/servicenow/service';
 import {
   ServiceNowPublicConfigurationType,
@@ -23,6 +21,7 @@ import {
   getPushedDate,
   prepareIncident,
 } from '../../../builtin_action_types/servicenow/utils';
+import { ServiceParams } from '../../../http_framework/types';
 import { CaseConnector } from '../../case';
 import { ExternalServiceIncidentResponse } from '../../types';
 import {
@@ -54,12 +53,8 @@ export class ServiceNow extends CaseConnector {
     internalConfig,
     logger,
     secrets,
-  }: {
-    config: ServiceNowPublicConfigurationType;
-    configurationUtilities: ActionsConfigurationUtilities;
+  }: ServiceParams<ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType> & {
     internalConfig: SNProductsConfigValue;
-    logger: Logger;
-    secrets: ServiceNowSecretConfigurationType;
   }) {
     const { apiUrl: url, usesTableApi: usesTableApiConfigValue } = config;
     const { username, password } = secrets;

@@ -73,7 +73,7 @@ export abstract class BasicConnector {
     }
   }
 
-  public registerSubAction(subAction: SubAction) {
+  protected registerSubAction(subAction: SubAction) {
     this.subActions.set(subAction.name, subAction);
   }
 
@@ -82,7 +82,7 @@ export abstract class BasicConnector {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async request<D = unknown, R = any>({
+  protected async request<D = unknown, R = any>({
     url,
     data,
     method = 'get',

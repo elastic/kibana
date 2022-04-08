@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { Type } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
 import type { LicenseType } from '../../../licensing/common/types';
-import { CaseConnector } from '../connectors/case';
-import { ActionTypeConfig, ActionTypeSecrets } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { BasicConnector } from '../connectors/basic';
+import { ActionTypeParams } from '../types';
+export interface ServiceParams<Config, Secrets> {
+  config: Config;
+  configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
+  secrets: Secrets;
+}
 
-// TODO: Fix types
-export type IService = new (...args: any[]) => CaseConnector;
+export type IService<Config, Secrets> = new (
+  params: ServiceParams<Config, Secrets>
+) => BasicConnector;
 
-export interface HTTPConnectorType<
-  Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
-> {
+export interface HTTPConnectorType<Config, Secrets> {
   id: string;
   name: string;
   minimumLicenseRequired: LicenseType;
@@ -26,12 +30,14 @@ export interface HTTPConnectorType<
     config: Type<Config>;
     secrets: Type<Secrets>;
   };
-  Service: IService;
+  Service: IService<Config, Secrets>;
 }
 
-interface CaseParams {
+export interface ExecutorParams extends ActionTypeParams {
   subAction: string;
   subActionParams: Record<string, unknown>;
 }
 
-export type ExecutorParams = CaseParams;
+export type ExtractFunctionKeys<T> = {
+  [P in keyof T]-?: T[P] extends Function ? P : never;
+}[keyof T];
