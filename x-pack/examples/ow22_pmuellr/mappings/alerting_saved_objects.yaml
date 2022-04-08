@@ -6,7 +6,6 @@ alert:
     name:
       type: text
       fields: { keyword: { type: keyword } }
-      $description: the name of the rule
     tags:
       type: keyword 
       $is_array: true
@@ -26,7 +25,6 @@ alert:
           enabled: false
           type: object
     params:
-      $description: alert params, not available as a structured type
       type: flattened
       ignore_above: 4096
     mapped_params:

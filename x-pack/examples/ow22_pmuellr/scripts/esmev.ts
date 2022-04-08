@@ -28,6 +28,7 @@ async function main() {
     const json = await parseFile(fileName);
     const jsonObject = ensureJsonObject(json);
 
+    const allMappings: EsMapping[] = [];
     for (const name of Object.keys(jsonObject)) {
       const mappingsSource = jsonObject[name];
       const mappings = readEsMappings(name, mappingsSource);
@@ -36,12 +37,14 @@ async function main() {
         return logExit(1, mappings);
       }
 
-      const baseFileName = getBaseFileName(fileName);
-      await generateEsMappings(baseFileName, json);
-      await generateConfigSchema(baseFileName, mappings);
-      await generateTypeScriptTypes(baseFileName, mappings);
-      await generateMarkdown(baseFileName, mappings);
+      allMappings.push(mappings);
     }
+
+    const baseFileName = getBaseFileName(fileName);
+    await generateEsMappings(baseFileName, json);
+    await generateConfigSchema(baseFileName, allMappings);
+    await generateTypeScriptTypes(baseFileName, allMappings);
+    await generateMarkdown(baseFileName, allMappings);
   }
 }
 

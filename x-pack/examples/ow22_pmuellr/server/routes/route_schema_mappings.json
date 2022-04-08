@@ -1,0 +1,52 @@
+{
+  "PostWebhookRuleExampleRequestBody": {
+    "properties": {
+      "ruleId": {
+        "type": "text"
+      },
+      "executionId": {
+        "type": "text"
+      },
+      "params": {
+        "type": "object"
+      },
+      "state": {
+        "type": "object"
+      }
+    }
+  },
+  "PostWebhookRuleExampleRequestQuery": {
+    "properties": {
+      "active": {
+        "type": "text"
+      },
+      "off": {
+        "type": "text"
+      },
+      "random": {
+        "type": "text"
+      }
+    }
+  },
+  "PostWebhookRuleExampleResponseBody": {
+    "properties": {
+      "state": {
+        "type": "object"
+      },
+      "instances": {
+        "type": "nested",
+        "properties": {
+          "instanceId": {
+            "type": "text"
+          },
+          "actionGroup": {
+            "type": "text"
+          },
+          "context": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

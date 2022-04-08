@@ -10,31 +10,33 @@ import { EsMapping, EsMappings } from '../lib/types.ts';
 import { createLineWriter, LineWriter } from '../lib/line_writer.ts';
 import { esTypeToTsType } from '../lib/type_names.ts';
 
-export async function generateTypeScriptTypes(baseFileName: string, mappings: EsMapping) {
+export async function generateTypeScriptTypes(baseFileName: string, allMappings: EsMapping[]) {
   const oFileName = `${baseFileName}_types.ts`;
   log(`generating: ${oFileName}`);
 
-  const isMappings = mappings.usage === 'mappings';
-
   const lineWriter = createLineWriter();
 
-  const { name, description, properties } = mappings;
   lineWriter.addLine(await getCopyrightLines());
 
-  if (description) lineWriter.addLine(`\n/** ${description} */`);
-  lineWriter.addLine(`export interface ${capitalize(name)} {`);
-  lineWriter.indent();
+  for (const mappings of allMappings) {
+    const isMappings = mappings.usage === 'mappings';
+    const { name, description, properties } = mappings;
 
-  if (properties) {
-    if (isMappings) {
-      generateRecordContentMappings(lineWriter, properties);
-    } else {
-      generateRecordContentGeneral(lineWriter, properties);
+    if (description) lineWriter.addLine(`\n/** ${description} */`);
+    lineWriter.addLine(`export interface ${capitalize(name)} {`);
+    lineWriter.indent();
+
+    if (properties) {
+      if (isMappings) {
+        generateRecordContentMappings(lineWriter, properties);
+      } else {
+        generateRecordContentGeneral(lineWriter, properties);
+      }
     }
-  }
 
-  lineWriter.dedent();
-  lineWriter.addLine('}\n');
+    lineWriter.dedent();
+    lineWriter.addLine('}\n');
+  }
 
   const content = lineWriter.getContent();
   await Deno.writeTextFile(oFileName, content);
@@ -43,14 +45,15 @@ export async function generateTypeScriptTypes(baseFileName: string, mappings: Es
 export function generateRecordContentMappings(lineWriter: LineWriter, properties: EsMappings) {
   for (const name of Object.keys(properties)) {
     const subProperties = properties[name];
+    const { type } = subProperties;
     if (subProperties.description) {
-      lineWriter.addLine(`/** ${subProperties.description} */`);
+      lineWriter.addLine(`\n/** ${subProperties.description} */`);
     }
     if (subProperties.properties == null) {
-      lineWriter.addLine(`${name}?: ${esTypeToTsType(subProperties.type)} | null;`);
+      lineWriter.addLine(`${name}?: ${esTypeToTsType(type)} | null;`);
     } else {
       if (objectIsEmpty(subProperties.properties)) {
-        lineWriter.addLine(`${name}?: unknown;`);
+        lineWriter.addLine(`${name}?: Record<string, any>;`);
       } else {
         lineWriter.addLine(`${name}?: {`);
         lineWriter.indent();
@@ -58,7 +61,11 @@ export function generateRecordContentMappings(lineWriter: LineWriter, properties
         generateRecordContentMappings(lineWriter, subProperties.properties);
 
         lineWriter.dedent();
-        lineWriter.addLine(`} | null;`);
+        if (type === 'nested') {
+          lineWriter.addLine(`}[] | null;`);
+        } else {
+          lineWriter.addLine(`} | null;`);
+        }
       }
     }
   }
@@ -68,21 +75,27 @@ export function generateRecordContentGeneral(lineWriter: LineWriter, properties:
   for (const name of Object.keys(properties)) {
     const subProperties = properties[name];
     if (subProperties.description) {
-      lineWriter.addLine(`/** ${subProperties.description} */`);
+      lineWriter.addLine(`\n/** ${subProperties.description} */`);
     }
+    const { optional, type } = subProperties;
+    const optSuffix = optional ? '?' : '';
     if (subProperties.properties == null) {
-      lineWriter.addLine(`${name}: ${esTypeToTsType(subProperties.type)};`);
+      lineWriter.addLine(`${name}${optSuffix}: ${esTypeToTsType(type)};`);
     } else {
       if (objectIsEmpty(subProperties.properties)) {
-        lineWriter.addLine(`${name}: {};`);
+        lineWriter.addLine(`${name}${optSuffix}: Record<string, any>;`);
       } else {
-        lineWriter.addLine(`${name}: {`);
+        lineWriter.addLine(`${name}${optSuffix}: {`);
         lineWriter.indent();
 
         generateRecordContentGeneral(lineWriter, subProperties.properties);
 
         lineWriter.dedent();
-        lineWriter.addLine(`};`);
+        if (type === 'nested') {
+          lineWriter.addLine(`}[];`);
+        } else {
+          lineWriter.addLine(`};`);
+        }
       }
     }
   }

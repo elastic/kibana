@@ -61,10 +61,12 @@ export function readEsMappings(
   return {
     name: name.trim(),
     type: type.trim(),
-    description: description.trim(),
-    esParameters,
-    isArray,
     usage: usage.trim(),
+    description: description.trim(),
+    isArray,
+    optional,
+    nullable,
+    esParameters,
     properties: propMap,
   };
 }

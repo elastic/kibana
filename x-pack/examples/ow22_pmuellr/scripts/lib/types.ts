@@ -11,9 +11,11 @@ export type JsonObject = Record<string, Json>;
 export interface EsMapping {
   name: string;
   type: string;
-  isArray: boolean;
   usage: string;
   description: string;
+  isArray: boolean;
+  optional: boolean;
+  nullable: boolean;
   esParameters: Record<string, Json>;
   properties: Record<string, EsMapping> | undefined;
 }

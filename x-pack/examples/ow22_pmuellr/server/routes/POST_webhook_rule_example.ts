@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { Logger, IRouter } from 'kibana/server';
-import { WebhookRuleResponse, WebhookRuleActionGroupId, WebhookAlertInstance } from '../../common';
-
-const routeValidation = {
-  body: schema.object({
-    ruleId: schema.string(),
-    executionId: schema.string(),
-    params: schema.recordOf(schema.string(), schema.any()),
-    state: schema.recordOf(schema.string(), schema.any()),
-  }),
-  query: schema.object({
-    active: schema.maybe(schema.string()),
-    off: schema.maybe(schema.string()),
-    random: schema.maybe(schema.string()),
-  }),
-};
+import { WebhookRuleActionGroupId } from '../../common';
+import {
+  PostWebhookRuleExampleRequestBodySchema,
+  PostWebhookRuleExampleRequestQuerySchema,
+  validatePostWebhookRuleExampleRequestBody,
+  validatePostWebhookRuleExampleRequestQuery,
+  validatePostWebhookRuleExampleResponseBody,
+} from './route_schema_schema';
+import { PostWebhookRuleExampleResponseBody } from './route_schema_types';
 
 const routeConfig = {
   path: '/_dev/webhook_rule_example',
-  validate: routeValidation,
+  validate: {
+    body: PostWebhookRuleExampleRequestBodySchema,
+    query: PostWebhookRuleExampleRequestQuerySchema,
+  },
 };
 
 export function registerRoute(logger: Logger, router: IRouter): void {
@@ -33,7 +29,7 @@ export function registerRoute(logger: Logger, router: IRouter): void {
     // const { duration, interval } = request.query;
     const { body, query } = request;
 
-    const { ruleId, executionId, state } = body;
+    const { ruleId, executionId, state } = validatePostWebhookRuleExampleRequestBody(body);
     logger.debug(`webhook server executing rule: ${ruleId} executionId: ${executionId}`);
 
     if (state.counter == null || typeof state.counter !== 'number') {
@@ -42,13 +38,19 @@ export function registerRoute(logger: Logger, router: IRouter): void {
       state.counter++;
     }
 
-    const { active, off, random } = query;
+    const { active, off, random } = validatePostWebhookRuleExampleRequestQuery(query);
     logger.debug(`webhook active: "${active}", off: "${off}", random: "${random}"`);
 
-    const ruleResponse: WebhookRuleResponse = {
+    const ruleResponse: PostWebhookRuleExampleResponseBody = {
       state,
       instances: instancesForQuery(state.counter, active, off, random),
     };
+
+    try {
+      validatePostWebhookRuleExampleResponseBody(ruleResponse);
+    } catch (err) {
+      logger.warn(`error validating response: ${err}`);
+    }
 
     return response.ok({
       body: ruleResponse,
@@ -56,15 +58,22 @@ export function registerRoute(logger: Logger, router: IRouter): void {
   });
 }
 
-function instancesForQuery(counter: number, active?: string, off?: string, random?: string) {
+type Instances = PostWebhookRuleExampleResponseBody['instances'];
+
+function instancesForQuery(
+  counter: number,
+  active?: string,
+  off?: string,
+  random?: string
+): Instances {
   const message = `webhook invoked ${counter} times for this rule`;
   const actionGroupContext = { [WebhookRuleActionGroupId]: { message } };
-  const allActive = {
-    Alfa: actionGroupContext,
-    Bravo: actionGroupContext,
-    Charlie: actionGroupContext,
-    Delta: actionGroupContext,
-  };
+  const allActive = [
+    { instanceId: 'Alfa', actionGroup: WebhookRuleActionGroupId, context: actionGroupContext },
+    { instanceId: 'Bravo', actionGroup: WebhookRuleActionGroupId, context: actionGroupContext },
+    { instanceId: 'Charlie', actionGroup: WebhookRuleActionGroupId, context: actionGroupContext },
+    { instanceId: 'Delta', actionGroup: WebhookRuleActionGroupId, context: actionGroupContext },
+  ];
 
   // passing query params with no value, eg ?xyz, yields an empty string!
   if (active === '') {
@@ -72,14 +81,14 @@ function instancesForQuery(counter: number, active?: string, off?: string, rando
   }
 
   if (off === '') {
-    return {};
+    return [];
   }
 
-  const randomActive: Record<string, WebhookAlertInstance> = {};
-  if (Math.random() > 0.5) randomActive.Alfa = actionGroupContext;
-  if (Math.random() > 0.5) randomActive.Bravo = actionGroupContext;
-  if (Math.random() > 0.5) randomActive.Charlie = actionGroupContext;
-  if (Math.random() > 0.5) randomActive.Delta = actionGroupContext;
+  const randomActive: Instances = [];
+  if (Math.random() > 0.5) randomActive.push(allActive[0]);
+  if (Math.random() > 0.5) randomActive.push(allActive[1]);
+  if (Math.random() > 0.5) randomActive.push(allActive[2]);
+  if (Math.random() > 0.5) randomActive.push(allActive[3]);
 
   return randomActive;
 }

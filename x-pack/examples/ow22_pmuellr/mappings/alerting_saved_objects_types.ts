@@ -8,7 +8,6 @@
 /** this mapping is for the alerting rule saved object */
 export interface Alert {
   enabled?: boolean | null;
-  /** the name of the rule */
   name?: string | null;
   tags?: string | null;
   alertTypeId?: string | null;
@@ -21,9 +20,8 @@ export interface Alert {
     group?: string | null;
     actionRef?: string | null;
     actionTypeId?: string | null;
-    params?: unknown;
-  } | null;
-  /** alert params, not available as a structured type */
+    params?: Record<string, any>;
+  }[] | null;
   params?: object | null;
   mapped_params?: {
     risk_score?: number | null;

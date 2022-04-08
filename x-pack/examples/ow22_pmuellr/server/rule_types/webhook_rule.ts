@@ -21,9 +21,11 @@ import {
   RuleProducer,
   WebhookRuleId,
   WebhookRuleActionGroupId,
-  WebhookRuleRequest,
   WebhookRuleName,
 } from '../../common';
+
+import { validatePostWebhookRuleExampleResponseBody } from '../routes/route_schema_schema';
+import { PostWebhookRuleExampleRequestBody } from '../routes/route_schema_types';
 
 type Params = TypeOf<typeof ParamsSchema>;
 
@@ -34,11 +36,6 @@ const ParamsSchema = schema.object({
 interface ActionContext extends AlertInstanceContext {
   message: string;
 }
-
-const ruleResponseSchema = schema.object({
-  state: schema.recordOf(schema.string(), schema.any()),
-  instances: schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.any())),
-});
 
 type WebhookRuleType = RuleType<
   Params,
@@ -81,7 +78,7 @@ export function getRuleTypeWebhook(logger: Logger): WebhookRuleType {
 async function executor(logger: Logger, options: ExecutorOptions) {
   const url = options.params.url;
   const headers = { 'kbn-xsrf': 'foo' };
-  const ruleData: WebhookRuleRequest = {
+  const ruleData: PostWebhookRuleExampleRequestBody = {
     ruleId: options.alertId,
     executionId: options.executionId,
     params: options.params,
@@ -101,18 +98,18 @@ async function executor(logger: Logger, options: ExecutorOptions) {
     throw new Error(`webhook returned status ${status}: ${JSON.stringify(data)}`);
   }
 
-  const ruleResponse = ruleResponseSchema.validate(data);
+  const ruleResponse = validatePostWebhookRuleExampleResponseBody(data);
 
   const { alertFactory } = options.services;
-  for (const alertId of Object.keys(ruleResponse.instances)) {
-    const alert = alertFactory.create(alertId);
-    const groupContext = ruleResponse.instances[alertId];
-    for (const group of Object.keys(groupContext)) {
-      if (group !== 'found') {
-        logger.warn(`rule attempted to set unexpected group "${group}"`);
-      } else {
-        alert.scheduleActions(group, groupContext[group]);
-      }
+  for (const alertData of ruleResponse.instances) {
+    const alert = alertFactory.create(alertData.instanceId);
+    const groupContext = alertData.context;
+    const group = alertData.actionGroup;
+
+    if (group !== 'found') {
+      logger.warn(`rule attempted to set unexpected group "${group}"`);
+    } else {
+      alert.scheduleActions(group, groupContext[group]);
     }
   }
 

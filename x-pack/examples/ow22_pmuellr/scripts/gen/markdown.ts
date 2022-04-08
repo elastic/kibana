@@ -11,27 +11,29 @@ import { EsMapping } from '../lib/types.ts';
 import { createLineWriter } from '../lib/line_writer.ts';
 import { generateRecordContentGeneral } from './typescript_types.ts';
 
-export async function generateMarkdown(baseFileName: string, mappings: EsMapping) {
+export async function generateMarkdown(baseFileName: string, allMappings: EsMapping[]) {
   const oFileName = `${baseFileName}_doc.md`;
   log(`generating: ${oFileName}`);
   const lineWriter = createLineWriter();
 
-  const { name, description, properties } = mappings;
-  lineWriter.addLine(`# ${name}`);
+  for (const mappings of allMappings) {
+    const { name, description, properties } = mappings;
+    lineWriter.addLine(`# ${name}`);
 
-  if (description) lineWriter.addLine(`\n${description}`);
+    if (description) lineWriter.addLine(`\n${description}`);
 
-  lineWriter.addLine('\n```');
-  lineWriter.addLine('{');
-  lineWriter.indent();
+    lineWriter.addLine('\n```typescript');
+    lineWriter.addLine('{');
+    lineWriter.indent();
 
-  if (properties) {
-    generateRecordContentGeneral(lineWriter, properties);
+    if (properties) {
+      generateRecordContentGeneral(lineWriter, properties);
+    }
+
+    lineWriter.dedent();
+    lineWriter.addLine('}');
+    lineWriter.addLine('```\n');
   }
-
-  lineWriter.dedent();
-  lineWriter.addLine('}');
-  lineWriter.addLine('```\n');
 
   const content = lineWriter.getContent();
   await Deno.writeTextFile(oFileName, content);

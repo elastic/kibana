@@ -2,10 +2,9 @@
 
 this mapping is for the alerting rule saved object
 
-```
+```typescript
 {
   enabled: boolean;
-  /** the name of the rule */
   name: string;
   tags: string;
   alertTypeId: string;
@@ -18,9 +17,8 @@ this mapping is for the alerting rule saved object
     group: string;
     actionRef: string;
     actionTypeId: string;
-    params: {};
-  };
-  /** alert params, not available as a structured type */
+    params: Record<string, any>;
+  }[];
   params: object;
   mapped_params: {
     risk_score: number;
