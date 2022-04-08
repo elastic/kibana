@@ -54,14 +54,12 @@ describe('Field editor Preview panel', () => {
   ];
 
   beforeEach(async () => {
-    // server.respondImmediately = true;
-    // server.autoRespond = true;
-
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
     setIndexPatternFields(indexPatternFields);
     setSearchResponse(mockDocuments);
     setSearchResponseLatency(0);
 
+    // testBed = await setup(undefined, { server });
     testBed = await setup();
   });
 
@@ -290,12 +288,10 @@ describe('Field editor Preview panel', () => {
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
       await waitForUpdates(); // Run validations
-      // todo might not need anymore
-      // const request = getLatestPreviewHttpRequest(server);
 
       // Make sure the payload sent is correct
-      console.log('checking calls');
-      expect(server.post.mock.calls[0]).toEqual({
+      const payload = JSON.parse(server.post.mock.calls[0][1]?.body);
+      expect(payload).toEqual({
         context: 'keyword_field',
         document: {
           description: 'First doc - description',
@@ -374,10 +370,8 @@ describe('Field editor Preview panel', () => {
     test('should display an updating indicator while fetching the docs and the preview', async () => {
       // We want to test if the loading indicator is in the DOM, for that we don't want the server to
       // respond immediately. We'll manualy send the response.
-      // server.respondImmediately = false;
-      // server.autoRespond = false;
 
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
 
       const {
         exists,
@@ -401,11 +395,9 @@ describe('Field editor Preview panel', () => {
     });
 
     test('should not display the updating indicator when neither the type nor the script has changed', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
       // We want to test if the loading indicator is in the DOM, for that we need to manually
       // send the response from the server
-      // server.respondImmediately = false;
-      // server.autoRespond = false;
 
       const {
         exists,
