@@ -41,7 +41,11 @@ import {
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import {
+  getMissingIndexPattern,
+  validateDatasourceAndVisualization,
+  getDatasourceLayers,
+} from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -226,16 +230,28 @@ export function SuggestionPanel({
               visualizationId,
               visualizationState: suggestionVisualizationState,
               datasourceState: suggestionDatasourceState,
-              datasourceId: suggetionDatasourceId,
+              datasourceId: suggestionDatasourceId,
             }) => {
               return (
                 !hide &&
                 validateDatasourceAndVisualization(
-                  suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                  suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frame
+                  {
+                    datasourceLayers: getDatasourceLayers(
+                      suggestionDatasourceId
+                        ? {
+                            [suggestionDatasourceId]: {
+                              isLoading: true,
+                              state: suggestionDatasourceState,
+                            },
+                          }
+                        : {},
+                      datasourceMap
+                    ),
+                  }
                 ) == null
               );
             }
@@ -284,6 +300,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    frame.activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);

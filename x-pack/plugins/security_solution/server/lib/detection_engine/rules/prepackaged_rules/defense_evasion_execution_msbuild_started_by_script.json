@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by a Script Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n  (process.name : \"MSBuild.exe\" or process.pe.original_file_name == \"MSBuild.exe\") and\n  process.parent.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\", \"cscript.exe\", \"wscript.exe\", \"mshta.exe\")\n",
   "risk_score": 21,
   "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae2",
@@ -61,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 10
+  "version": 11
 }
