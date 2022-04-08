@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -14,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
