@@ -241,9 +241,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
-        // 'expected.setting.that.is.not.actually.exposed (string)',
       ];
-      actualExposedConfigKeys.push('actual.setting.that.is.unexpectedly.exposed (number)');
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
       // abundantly clear when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
