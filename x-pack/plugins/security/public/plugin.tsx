@@ -44,8 +44,8 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
-  dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;

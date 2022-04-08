@@ -52,7 +52,10 @@ describe('useSendCurrentRequestToES', () => {
 
     const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
     await act(() => result.current());
-    expect(sendRequestToES).toHaveBeenCalledWith({ requests: ['test'] });
+    expect(sendRequestToES).toHaveBeenCalledWith({
+      http: mockContextValue.services.http,
+      requests: ['test'],
+    });
 
     // Second call should be the request success
     const [, [requestSucceededCall]] = (dispatch as jest.Mock).mock.calls;

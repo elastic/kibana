@@ -7,3 +7,4 @@
  */
 
 export { MAJOR_VERSION } from './plugin';
+export { API_BASE_PATH } from './api';
