@@ -22,6 +22,9 @@ declare global {
   }
 }
 
+const EXPOSED_CONFIG_SETTINGS_ERROR =
+  'Actual config settings exposed to the browser do not match what is expected; this assertion fails if extra settings are present and/or expected settings are missing';
+
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
   const browser = getService('browser');
@@ -65,18 +68,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(injectedMetadata).to.not.be.empty();
       expect(injectedMetadata.uiPlugins).to.not.be.empty();
 
-      const allExposedConfigKeys = [];
+      const actualExposedConfigKeys = [];
       for (const { plugin, exposedConfigKeys } of injectedMetadata.uiPlugins) {
         const configPath = Array.isArray(plugin.configPath)
           ? plugin.configPath.join('.')
           : plugin.configPath;
         for (const [exposedConfigKey, type] of Object.entries(exposedConfigKeys)) {
-          allExposedConfigKeys.push(`${configPath}.${exposedConfigKey} (${type})`);
+          actualExposedConfigKeys.push(`${configPath}.${exposedConfigKey} (${type})`);
         }
       }
       const expectedExposedConfigKeys = [
-        // NOTE: each exposed config key has its schema type at the end in "(parentheses)".
-        // The schema type comes from Joi; in particular, "(any)" can mean a string or a few other data types.
+        // NOTE: each exposed config key has its schema type at the end in "(parentheses)". The schema type comes from Joi; in particular,
+        // "(any)" can mean a few other data types. This is only intended to be a hint to make it easier for future reviewers to understand
+        // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.ui.enabled (boolean)',
@@ -87,28 +91,28 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.autocomplete.valueSuggestions.tiers (array)',
         'data.autocomplete.valueSuggestions.timeout (duration)',
         'data.search.aggs.shardDelay.enabled (boolean)',
-        'enterpriseSearch.host (any)',
+        'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
-        'map.emsFileApiUrl (any)',
-        'map.emsFontLibraryUrl (any)',
-        'map.emsLandingPageUrl (any)',
-        'map.emsTileApiUrl (any)',
-        'map.emsTileLayerId.bright (any)',
-        'map.emsTileLayerId.dark (any)',
-        'map.emsTileLayerId.desaturated (any)',
-        'map.emsUrl (any)',
+        'map.emsFileApiUrl (string)',
+        'map.emsFontLibraryUrl (string)',
+        'map.emsLandingPageUrl (string)',
+        'map.emsTileApiUrl (string)',
+        'map.emsTileLayerId.bright (string)',
+        'map.emsTileLayerId.dark (string)',
+        'map.emsTileLayerId.desaturated (string)',
+        'map.emsUrl (string)',
         'map.includeElasticMapsService (boolean)',
-        'map.tilemap.options.attribution (any)',
+        'map.tilemap.options.attribution (string)',
         'map.tilemap.options.bounds (array)',
         'map.tilemap.options.default (boolean)',
-        'map.tilemap.options.errorTileUrl (any)',
+        'map.tilemap.options.errorTileUrl (string)',
         'map.tilemap.options.maxZoom (number)',
         'map.tilemap.options.minZoom (number)',
         'map.tilemap.options.reuseTiles (boolean)',
         'map.tilemap.options.subdomains (array)',
         'map.tilemap.options.tileSize (number)',
         'map.tilemap.options.tms (boolean)',
-        'map.tilemap.url (any)',
+        'map.tilemap.url (string)',
         'monitoring.kibana.collection.enabled (boolean)',
         'monitoring.kibana.collection.interval (number)',
         'monitoring.ui.ccs.enabled (boolean)',
@@ -120,7 +124,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.show_license_expiration (boolean)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
-        'newsfeed.service.pathTemplate (any)',
+        'newsfeed.service.pathTemplate (string)',
         'newsfeed.service.urlRoot (any)',
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
@@ -138,16 +142,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.ui.transactionGroupBucketSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
         'xpack.ccr.ui.enabled (boolean)',
-        'xpack.cloud.base_url (any)',
-        'xpack.cloud.chat.chatURL (any)',
+        'xpack.cloud.base_url (string)',
+        'xpack.cloud.chat.chatURL (string)',
         'xpack.cloud.chat.enabled (boolean)',
-        'xpack.cloud.cname (any)',
-        'xpack.cloud.deployment_url (any)',
+        'xpack.cloud.cname (string)',
+        'xpack.cloud.deployment_url (string)',
         'xpack.cloud.full_story.enabled (boolean)',
         'xpack.cloud.full_story.org_id (any)',
-        'xpack.cloud.id (any)',
-        'xpack.cloud.organization_url (any)',
-        'xpack.cloud.profile_url (any)',
+        'xpack.cloud.id (string)',
+        'xpack.cloud.organization_url (string)',
+        'xpack.cloud.profile_url (string)',
         'xpack.data_enhanced.search.sessions.cleanupInterval (duration)',
         'xpack.data_enhanced.search.sessions.defaultExpiration (duration)',
         'xpack.data_enhanced.search.sessions.enabled (boolean)',
@@ -186,15 +190,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.js).
          * It will be re-enabled once #102552 is completed.
          */
-        // 'xpack.reporting.roles.enabled (boolean)',
         // 'xpack.reporting.roles.allow (array)',
+        // 'xpack.reporting.roles.enabled (boolean)',
         // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',
         // 'xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier (number)',
         // 'xpack.reporting.poll.jobsRefresh.interval (number)',
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration)',
-        'xpack.security.loginAssistanceMessage (any)',
+        'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.securitySolution.enableExperimental (array)',
@@ -205,13 +209,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
       ];
-      // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
-      // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
-      // when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
-      const extraKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
-      expect(extraKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing MORE config keys than this test expects
-      const missingKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
-      expect(missingKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing FEWER config keys than this test expects
+      // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
+      // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
+      // abundantly clear when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
+      const extra = _.difference(actualExposedConfigKeys, expectedExposedConfigKeys).sort();
+      const missing = _.difference(expectedExposedConfigKeys, actualExposedConfigKeys).sort();
+      expect({ extra, missing: [] }).to.eql({ extra: [], missing }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
     it('exposes plugin config settings to unauthenticated users', async () => {
@@ -220,31 +223,33 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(injectedMetadata).to.not.be.empty();
       expect(injectedMetadata.uiPlugins).to.not.be.empty();
 
-      const allExposedConfigKeys = [];
+      const actualExposedConfigKeys = [];
       for (const { plugin, exposedConfigKeys } of injectedMetadata.uiPlugins) {
         const configPath = Array.isArray(plugin.configPath)
           ? plugin.configPath.join('.')
           : plugin.configPath;
         for (const [exposedConfigKey, type] of Object.entries(exposedConfigKeys)) {
-          allExposedConfigKeys.push(`${configPath}.${exposedConfigKey} (${type})`);
+          actualExposedConfigKeys.push(`${configPath}.${exposedConfigKey} (${type})`);
         }
       }
       const expectedExposedConfigKeys = [
-        // NOTE: each exposed config key has its schema type at the end in "(parentheses)".
-        // The schema type comes from Joi; in particular, "(any)" can mean a string or a few other data types.
+        // NOTE: each exposed config key has its schema type at the end in "(parentheses)". The schema type comes from Joi; in particular,
+        // "(any)" can mean a few other data types. This is only intended to be a hint to make it easier for future reviewers to understand
+        // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
-        'xpack.security.loginAssistanceMessage (any)',
+        'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
+        // 'expected.setting.that.is.not.actually.exposed (string)',
       ];
-      // We don't assert that allExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large arrays
-      // are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's abundantly clear
-      // when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
-      const extraKeys = _.difference(expectedExposedConfigKeys, allExposedConfigKeys);
-      expect(extraKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing MORE config keys than this test expects
-      const missingKeys = _.difference(allExposedConfigKeys, expectedExposedConfigKeys);
-      expect(missingKeys.sort()).to.eql([]); // This assertion detects when Kibana is exposing FEWER config keys than this test expects
+      actualExposedConfigKeys.push('actual.setting.that.is.unexpectedly.exposed (number)');
+      // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
+      // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
+      // abundantly clear when the test fails that (A) Kibana is exposing a new key, or (B) Kibana is no longer exposing a key.
+      const extra = _.difference(actualExposedConfigKeys, expectedExposedConfigKeys).sort();
+      const missing = _.difference(expectedExposedConfigKeys, actualExposedConfigKeys).sort();
+      expect({ extra, missing: [] }).to.eql({ extra: [], missing }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
     // FLAKY
