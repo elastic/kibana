@@ -10,6 +10,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import {
   DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
@@ -53,7 +54,11 @@ export function getStateDefaults({
   const defaultState = {
     query,
     sort: !sort.length
-      ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
+      ? getDefaultSort(
+          indexPattern,
+          config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+          config.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
+        )
       : sort,
     columns,
     index: indexPattern?.id,

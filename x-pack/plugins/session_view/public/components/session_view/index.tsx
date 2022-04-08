@@ -42,6 +42,7 @@ import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 export const SessionView = ({
   sessionEntityId,
   height,
+  isFullScreen = false,
   jumpToEntityId,
   jumpToCursor,
   investigatedAlertId,
@@ -61,7 +62,7 @@ export const SessionView = ({
     LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
     {
       timestamp: true,
-      verboseMode: true,
+      verboseMode: false,
     }
   );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
@@ -69,7 +70,7 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
-  const styles = useStyles({ height });
+  const styles = useStyles({ height, isFullScreen });
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
