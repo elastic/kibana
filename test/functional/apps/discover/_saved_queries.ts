@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: defaultIndexPatternString,
   };
-  const esNode: EsArchiver = config.get('esTestCluster.ccs')
+  const esNode = config.get('esTestCluster.ccs')
     ? getService('remoteEsArchiver' as 'esArchiver')
     : getService('esArchiver');
   const kbnArchives = config.get('esTestCluster.ccs')
