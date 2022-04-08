@@ -59,7 +59,6 @@ describe('Field editor Preview panel', () => {
     setSearchResponse(mockDocuments);
     setSearchResponseLatency(0);
 
-    // testBed = await setup(undefined, { server });
     testBed = await setup();
   });
 
@@ -275,13 +274,7 @@ describe('Field editor Preview panel', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
 
       const {
-        actions: {
-          toggleFormRow,
-          fields,
-          waitForUpdates,
-          // getLatestPreviewHttpRequest,
-          getRenderedFieldsPreview,
-        },
+        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
       } = testBed;
 
       await toggleFormRow('value');
@@ -290,7 +283,8 @@ describe('Field editor Preview panel', () => {
       await waitForUpdates(); // Run validations
 
       // Make sure the payload sent is correct
-      const payload = JSON.parse(server.post.mock.calls[0][1]?.body);
+      const firstCall = server.post.mock.calls[0] as Array<{ body: any }>;
+      const payload = JSON.parse(firstCall[1]?.body);
       expect(payload).toEqual({
         context: 'keyword_field',
         document: {
