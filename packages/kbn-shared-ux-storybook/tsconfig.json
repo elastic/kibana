@@ -8,7 +8,8 @@
     "stripInternal": false,
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-storybook-types",
     ]
   },
   "include": [
