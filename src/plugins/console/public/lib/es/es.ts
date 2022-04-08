@@ -9,10 +9,9 @@
 import type { HttpResponse, HttpSetup } from 'kibana/public';
 import { parse } from 'query-string';
 import { trimStart } from 'lodash';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, KIBANA_API_KEYWORD } from '../../../common/constants';
 
 const esVersion: string[] = [];
-export const KIBANA_API_KEYWORD = 'kbn:';
 
 export function getVersion() {
   return esVersion;
