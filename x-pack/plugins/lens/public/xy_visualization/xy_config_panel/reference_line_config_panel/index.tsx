@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AnnotationsPanel } from './annotations_panel';
+export { ReferenceLinePanel } from './reference_line_panel';

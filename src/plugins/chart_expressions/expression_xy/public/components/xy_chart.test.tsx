@@ -2634,7 +2634,7 @@ describe('XYChart component', () => {
           annotations: [
             {
               ...sampleStyledAnnotation,
-              icon: 'square',
+              icon: 'asterisk',
               color: 'blue',
               lineStyle: 'dotted',
               lineWidth: 10,

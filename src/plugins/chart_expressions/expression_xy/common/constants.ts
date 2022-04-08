@@ -114,3 +114,21 @@ export const ValueLabelModes = {
   INSIDE: 'inside',
   OUTSIDE: 'outside',
 } as const;
+
+export const AvailableReferenceLineIcons = {
+  EMPTY: 'empty',
+  ASTERISK: 'asterisk',
+  ALERT: 'alert',
+  BELL: 'bell',
+  BOLT: 'bolt',
+  BUG: 'bug',
+  CIRCLE: 'circle',
+  EDITOR_COMMENT: 'editorComment',
+  FLAG: 'flag',
+  HEART: 'heart',
+  MAP_MARKER: 'mapMarker',
+  PIN_FILLED: 'pinFilled',
+  STAR_EMPTY: 'starEmpty',
+  TAG: 'tag',
+  TRIANGLE: 'triangle',
+} as const;

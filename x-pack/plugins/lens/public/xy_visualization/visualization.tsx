@@ -74,7 +74,7 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';

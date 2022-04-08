@@ -9,25 +9,26 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
-import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState, XYReferenceLineLayerConfig } from '../types';
-import { FormatFactory } from '../../../common';
+import type { VisualizationDimensionEditorProps } from '../../../types';
+import { State, XYState, XYReferenceLineLayerConfig } from '../../types';
+import { FormatFactory } from '../../../../common';
 import {
   FillStyle,
   ExtendedYConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
-import { ColorPicker } from './color_picker';
-import { updateLayer } from '.';
-import { useDebouncedValue } from '../../shared_components';
-import { idPrefix } from './dimension_editor';
-import { isHorizontalChart } from '../state_helpers';
+import { ColorPicker } from '../color_picker';
+import { updateLayer } from '..';
+import { useDebouncedValue } from '../../../shared_components';
+import { idPrefix } from '../dimension_editor';
+import { isHorizontalChart } from '../../state_helpers';
 import {
   IconSelectSetting,
   MarkerDecorationPosition,
   TextDecorationSetting,
-} from './shared/marker_decoration_settings';
-import { LineStyleSettings } from './shared/line_style_settings';
+} from '../shared/marker_decoration_settings';
+import { LineStyleSettings } from '../shared/line_style_settings';
+import { referenceLineIconsSet } from './icon_set';
 
 export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -77,7 +78,11 @@ export const ReferenceLinePanel = (
   return (
     <>
       <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
-      <IconSelectSetting setConfig={setConfig} currentConfig={localConfig} />
+      <IconSelectSetting
+        setConfig={setConfig}
+        currentConfig={localConfig}
+        customIconSet={referenceLineIconsSet}
+      />
       <MarkerDecorationPosition
         isHorizontal={isHorizontal}
         setConfig={setConfig}

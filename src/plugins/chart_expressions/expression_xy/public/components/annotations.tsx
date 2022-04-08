@@ -26,7 +26,8 @@ import type {
   AnnotationLayerArgs,
   ExtendedAnnotationLayerArgs,
   CommonXYAnnotationLayerConfigResult,
-} from '../../common/types';
+  CollectiveConfig,
+} from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
@@ -45,12 +46,6 @@ export interface AnnotationsProps {
   hide?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
-}
-
-interface CollectiveConfig extends EventAnnotationArgs {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }
 
 const groupVisibleConfigsByInterval = (

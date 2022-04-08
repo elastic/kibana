@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-export * from './interval';
-export * from './layers';
-export * from './state';
-export * from './visualization';
-export * from './fitting_functions';
-export * from './axes_configuration';
-export * from './reference_lines';
-export * from './icon';
-export * from './color_assignment';
-export * from './annotations';
-export * from './data_layers';
+export const AvailableAnnotationIcons = {
+  ASTERISK: 'asterisk',
+  ALERT: 'alert',
+  BELL: 'bell',
+  BOLT: 'bolt',
+  BUG: 'bug',
+  CIRCLE: 'circle',
+  EDITOR_COMMENT: 'editorComment',
+  FLAG: 'flag',
+  HEART: 'heart',
+  MAP_MARKER: 'mapMarker',
+  PIN_FILLED: 'pinFilled',
+  STAR_EMPTY: 'starEmpty',
+  TAG: 'tag',
+  TRIANGLE: 'triangle',
+} as const;

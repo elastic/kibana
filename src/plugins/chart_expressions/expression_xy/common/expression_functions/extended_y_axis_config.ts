@@ -8,7 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { EXTENDED_Y_CONFIG, FillStyles, IconPositions, LineStyles, YAxisModes } from '../constants';
+import {
+  AvailableReferenceLineIcons,
+  EXTENDED_Y_CONFIG,
+  FillStyles,
+  IconPositions,
+  LineStyles,
+  YAxisModes,
+} from '../constants';
 import { ExtendedYConfig, ExtendedYConfigResult } from '../types';
 
 export const extendedYAxisConfigFunction: ExpressionFunctionDefinition<
@@ -64,6 +71,8 @@ export const extendedYAxisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.yConfig.icon.help', {
         defaultMessage: 'An optional icon used for reference lines',
       }),
+      options: [...Object.values(AvailableReferenceLineIcons)],
+      strict: true,
     },
     iconPosition: {
       types: ['string'],

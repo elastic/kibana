@@ -40,6 +40,7 @@ import {
   EndValues,
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_Y_CONFIG,
+  AvailableReferenceLineIcons,
 } from '../constants';
 
 export type EndValue = $Values<typeof EndValues>;
@@ -55,6 +56,7 @@ export type IconPosition = $Values<typeof IconPositions>;
 export type ValueLabelMode = $Values<typeof ValueLabelModes>;
 export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
+export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 
 export interface AxesSettingsConfig {
   x: boolean;
@@ -74,7 +76,7 @@ export interface AxisConfig {
 }
 
 export interface ExtendedYConfig extends YConfig {
-  icon?: string;
+  icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
