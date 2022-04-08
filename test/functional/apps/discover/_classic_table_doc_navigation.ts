@@ -19,12 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
-  describe('doc link in discover', function contextSize() {
+  describe('classic table doc link', function contextSize() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
         'doc_table:legacy': true,
         'discover:searchFieldsFromSource': true,
       });
@@ -35,6 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+    });
+
+    beforeEach(async function () {
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
@@ -58,35 +65,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // no longer relevant as null field won't be returned in the Fields API response
-    xit('add filter should create an exists filter if value is null (#7189)', async function () {
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      // Filter special document
-      await filterBar.addFilter('agent', 'is', 'Missing/Fields');
+    it('should create an exists filter from the doc view of the selected document', async function () {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await retry.try(async () => {
-        // navigate to the doc view
-        await docTable.clickRowToggle({ rowIndex: 0 });
+      await docTable.clickRowToggle({ rowIndex: 0 });
 
-        const details = await docTable.getDetailsRow();
-        await docTable.addInclusiveFilter(details, 'referer');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.click('addExistsFilterButton-@timestamp');
 
-        const hasInclusiveFilter = await filterBar.hasFilter(
-          'referer',
-          'exists',
-          true,
-          false,
-          true
-        );
-        expect(hasInclusiveFilter).to.be(true);
-
-        await docTable.removeInclusiveFilter(details, 'referer');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
-        expect(hasExcludeFilter).to.be(true);
-      });
+      const hasExistsFilter = await filterBar.hasFilter('@timestamp', 'exists', true, false, false);
+      expect(hasExistsFilter).to.be(true);
     });
   });
 }

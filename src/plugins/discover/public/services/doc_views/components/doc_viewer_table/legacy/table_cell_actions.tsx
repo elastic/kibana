@@ -49,6 +49,7 @@ export const TableActions = ({
         onClick={() => onToggleColumn(field)}
       />
       <DocViewTableRowBtnFilterExists
+        field={field}
         disabled={!fieldMapping || !fieldMapping.filterable}
         onClick={() => onFilter('_exists_', field, '+')}
         scripted={fieldMapping && fieldMapping.scripted}
