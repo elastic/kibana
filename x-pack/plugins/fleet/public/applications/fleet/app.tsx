@@ -279,7 +279,7 @@ const FleetTopNav = memo(
     const topNavConfig: TopNavMenuData[] = [
       {
         label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-          defaultMessage: 'Send Feedback',
+          defaultMessage: 'Send feedback',
         }),
         iconType: 'popout',
         run: () => window.open(FEEDBACK_URL),

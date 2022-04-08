@@ -19,8 +19,10 @@ export const useErrorToast = () => {
       toasts.remove(errorToast);
     }
     if (error) {
-      // @ts-expect-error update types
-      setErrorToast(toasts.addError(error, opts));
+      setErrorToast(
+        // @ts-expect-error update types
+        toasts.addError(error, { title: error?.body?.error || error?.body?.message, ...opts })
+      );
     }
   };
 };

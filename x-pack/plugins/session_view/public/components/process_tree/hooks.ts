@@ -31,6 +31,7 @@ interface UseProcessTreeDeps {
   alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  jumpToEntityId?: string;
 }
 
 export class ProcessImpl implements Process {
@@ -79,6 +80,10 @@ export class ProcessImpl implements Process {
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
       return children.filter((child) => {
+        if (child.events.length === 0) {
+          return false;
+        }
+
         const { group_leader: groupLeader, session_leader: sessionLeader } =
           child.getDetails().process ?? {};
 
@@ -109,6 +114,14 @@ export class ProcessImpl implements Process {
     return !!this.alerts.length;
   }
 
+  hasAlert(alertUuid: string | undefined) {
+    if (!alertUuid) {
+      return false;
+    }
+
+    return !!this.alerts.find((event) => event.kibana?.alert?.uuid === alertUuid);
+  }
+
   getAlerts() {
     return this.alerts;
   }
@@ -134,6 +147,11 @@ export class ProcessImpl implements Process {
     return '';
   }
 
+  getEndTime() {
+    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    return endEvent?.['@timestamp'] || '';
+  }
+
   // isUserEntered is a best guess at which processes were initiated by a real person
   // In most situations a user entered command in a shell such as bash, will cause bash
   // to fork, create a new process group, and exec the command (e.g ls). If the session
@@ -143,6 +161,10 @@ export class ProcessImpl implements Process {
   // only used to auto expand parts of the tree that could be of interest.
   isUserEntered() {
     const event = this.getDetails();
+
+    if (!event) {
+      return false;
+    }
 
     const {
       pid,
@@ -207,6 +229,7 @@ export const useProcessTree = ({
   alerts,
   searchQuery,
   updatedAlertsStatus,
+  jumpToEntityId,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
@@ -216,6 +239,8 @@ export const useProcessTree = ({
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
+    fakeLeaderEvent.user = fakeLeaderEvent?.process?.entry_leader?.user;
+    fakeLeaderEvent.group = fakeLeaderEvent?.process?.entry_leader?.group;
     fakeLeaderEvent.process = {
       ...fakeLeaderEvent.process,
       ...fakeLeaderEvent.process?.entry_leader,
@@ -271,15 +296,16 @@ export const useProcessTree = ({
     // currently we are loading a single page of alerts, with no pagination
     // so we only need to add these alert events to processMap once.
     if (!alertsProcessed) {
-      updateProcessMap(processMap, alerts);
+      const updatedProcessMap = updateProcessMap(processMap, alerts);
+      setProcessMap({ ...updatedProcessMap });
       setAlertsProcessed(true);
     }
   }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
-    autoExpandProcessTree(processMap);
-  }, [searchQuery, processMap]);
+    autoExpandProcessTree(processMap, jumpToEntityId);
+  }, [searchQuery, processMap, jumpToEntityId]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

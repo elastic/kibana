@@ -38,28 +38,27 @@ export function generatePdfObservable(
   ]) as UrlOrUrlLocatorTuple[];
   const screenshots$ = reporting.getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
-      if (metrics) {
+      if (metrics.cpu) {
         tracker.setCpuUsage(metrics.cpu);
+      }
+      if (metrics.memory) {
         tracker.setMemoryUsage(metrics.memory);
       }
     }),
-    mergeMap(async ({ metrics, result }) => {
+    mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
       tracker.endScreenshots();
       const warnings: string[] = [];
-      if (result.errors) {
-        warnings.push(...result.errors.map((error) => error.message));
+      if (errors) {
+        warnings.push(...errors.map((error) => error.message));
       }
-      if (result.renderErrors) {
-        warnings.push(...result.renderErrors);
+      if (renderErrors) {
+        warnings.push(...renderErrors);
       }
 
       return {
-        buffer: result.data,
+        buffer,
+        metrics,
         warnings,
-        metrics: {
-          ...metrics,
-          pages: metrics.pageCount,
-        },
       };
     })
   );
