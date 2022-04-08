@@ -309,8 +309,8 @@ module.exports = {
      */
     {
       files: [
-        'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
         'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [

@@ -6,7 +6,7 @@
  */
 
 import { buildQueryFilter, Filter } from '@kbn/es-query';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { maxBy, minBy } from 'lodash';
 import { ExpressionValueFilter } from '../../types';
 // @ts-expect-error untyped local
