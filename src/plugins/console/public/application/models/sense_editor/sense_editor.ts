@@ -8,7 +8,8 @@
 
 import _ from 'lodash';
 
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { KIBANA_API_KEYWORD } from '../../../../common/constants';
+import { XJson } from '../../../../../es_ui_shared/public';
 
 import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';
@@ -19,7 +20,6 @@ import * as es from '../../../lib/es/es';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 import createAutocompleter from '../../../lib/autocomplete/autocomplete';
-import { KIBANA_API_KEYWORD } from '../../../lib/es/es';
 
 const { collapseLiteralStrings } = XJson;
 
