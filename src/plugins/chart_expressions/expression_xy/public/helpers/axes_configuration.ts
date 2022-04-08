@@ -11,6 +11,8 @@ import {
   AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
+  ExtendedYConfig,
+  YConfig,
 } from '../../common';
 import type {
   IFieldFormat,
@@ -59,9 +61,9 @@ export function groupAxesByType(
   layers.forEach((layer, index) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
       let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
         ?.meta?.params || { id: 'number' };
       if (

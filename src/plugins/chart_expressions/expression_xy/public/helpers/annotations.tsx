@@ -32,7 +32,7 @@ export const getLinesCausedPaddings = (
       return;
     }
     const { axisMode, icon, iconPosition, textVisibility } = config;
-    if (axisMode && textVisibility) {
+    if (axisMode && (hasIcon(icon) || textVisibility)) {
       const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
       paddings[placement] = Math.max(
         paddings[placement] || 0,
@@ -48,6 +48,7 @@ export const getLinesCausedPaddings = (
       paddings[placement] = LINES_MARKER_SIZE;
     }
   });
+
   return paddings;
 };
 
