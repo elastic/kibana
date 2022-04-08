@@ -23586,8 +23586,6 @@
     "xpack.securitySolution.detectionEngine.pageTitle": "検出エンジン",
     "xpack.securitySolution.detectionEngine.panelSubtitleShowing": "表示中",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel": "カウント",
-    "xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer": "注：このプレビューは、ルール例外とタイムスタンプオーバーライドの効果を除外します。",
-    "xpack.securitySolution.detectionEngine.queryPreview.queryGraphHitsTitle": "ヒット数",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError": "プレビュー取得エラー",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewInspectTitle": "クエリプレビュー",
     "xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewNoiseWarning": "ノイズ警告：このルールではノイズが多く生じる可能性があります。クエリを絞り込むことを検討してください。これは1時間ごとに1アラートという線形進行に基づいています。",
