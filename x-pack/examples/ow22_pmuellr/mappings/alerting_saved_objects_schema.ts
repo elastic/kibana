@@ -19,12 +19,14 @@ export const AlertSchema = schema.object({
   }),
   consumer: schema.maybe(schema.nullable(schema.string())),
   legacyId: schema.maybe(schema.nullable(schema.string())),
-  actions: schema.arrayOf(schema.object({
-    group: schema.maybe(schema.nullable(schema.string())),
-    actionRef: schema.maybe(schema.nullable(schema.string())),
-    actionTypeId: schema.maybe(schema.nullable(schema.string())),
-    params: schema.maybe(schema.nullable(schema.any())),
-  })),
+  actions: schema.arrayOf(
+    schema.object({
+      group: schema.maybe(schema.nullable(schema.string())),
+      actionRef: schema.maybe(schema.nullable(schema.string())),
+      actionTypeId: schema.maybe(schema.nullable(schema.string())),
+      params: schema.maybe(schema.nullable(schema.any())),
+    })
+  ),
   params: schema.maybe(schema.nullable(schema.any())),
   mapped_params: schema.object({
     risk_score: schema.maybe(schema.nullable(schema.number())),
@@ -74,7 +76,7 @@ export const AlertSchema = schema.object({
     }),
   }),
   snoozeEndTime: schema.maybe(schema.nullable(schema.string())),
-})
+});
 
 export function validateAlert(data: unknown): Alert {
   return AlertSchema.validate(data);

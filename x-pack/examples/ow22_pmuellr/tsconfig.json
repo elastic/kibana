@@ -11,7 +11,10 @@
     "common/**/*.ts",
     "../../../typings/**/*",
   ],
-  "exclude": [],
+  "exclude": [
+    "mappings/**/*.ts",
+    "scripts/**/*.ts"
+  ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },

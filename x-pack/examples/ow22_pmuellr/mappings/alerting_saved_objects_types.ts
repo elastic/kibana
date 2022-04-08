@@ -16,12 +16,12 @@ export interface Alert {
   } | null;
   consumer?: string | null;
   legacyId?: string | null;
-  actions?: {
+  actions?: Array<{
     group?: string | null;
     actionRef?: string | null;
     actionTypeId?: string | null;
     params?: Record<string, any>;
-  }[] | null;
+  }> | null;
   params?: object | null;
   mapped_params?: {
     risk_score?: number | null;
