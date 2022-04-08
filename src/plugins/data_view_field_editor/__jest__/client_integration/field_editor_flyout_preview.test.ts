@@ -383,7 +383,6 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true); // indicator while getting preview
 
-      // server.respond();
       await waitForUpdates();
       expect(exists('isUpdatingIndicator')).toBe(false);
     });
@@ -404,7 +403,6 @@ describe('Field editor Preview panel', () => {
       await fields.updateScript('echo("hello")');
       expect(exists('isUpdatingIndicator')).toBe(true);
 
-      // server.respond();
       await waitForDocumentsAndPreviewUpdate();
 
       expect(exists('isUpdatingIndicator')).toBe(false);
