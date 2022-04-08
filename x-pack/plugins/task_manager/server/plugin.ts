@@ -38,7 +38,7 @@ export interface TaskManagerSetupContract {
    * @deprecated
    */
   index: string;
-  addMiddleware: (middleware: Middleware) => void;
+  addMiddleware: (middleware: Partial<Middleware<RunContext>>) => void;
   /**
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
@@ -66,7 +66,7 @@ export class TaskManagerPlugin
   private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
-  private middleware: Middleware = createInitialMiddleware();
+  private middleware: Middleware<RunContext> = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -153,9 +153,9 @@ export class TaskManagerPlugin
 
     return {
       index: TASK_MANAGER_INDEX,
-      addMiddleware: (middleware: Middleware) => {
+      addMiddleware: (middleware: Partial<Middleware<RunContext>>) => {
         this.assertStillInSetup('add Middleware');
-        this.middleware = addMiddlewareToChain(this.middleware, middleware);
+        this.middleware = addMiddlewareToChain<RunContext>(this.middleware, middleware);
       },
       registerTaskDefinitions: <Context extends RunContext = RunContext>(
         taskDefinition: TaskDefinitionRegistry<Context>
