@@ -119,9 +119,7 @@ export function updateCustomIcons(customIcons: CustomIcon[]) {
   return {
     type: UPDATE_MAP_SETTING,
     settingKey: 'customIcons',
-    settingValue: customIcons.map((icon) => {
-      return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
-    }),
+    settingValue: customIcons,
   };
 }
 

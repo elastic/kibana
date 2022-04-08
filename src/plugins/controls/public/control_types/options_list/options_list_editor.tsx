@@ -85,10 +85,13 @@ export const OptionsListEditor = ({
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
             setLastUsedDataViewId?.(dataViewId);
+            if (dataViewId === dataView?.id) return;
+
             onChange({ dataViewId });
-            get(dataViewId).then((newDataView) =>
-              setState((s) => ({ ...s, dataView: newDataView }))
-            );
+            setState((s) => ({ ...s, fieldName: undefined }));
+            get(dataViewId).then((newDataView) => {
+              setState((s) => ({ ...s, dataView: newDataView }));
+            });
           }}
           trigger={{
             label: state.dataView?.title ?? OptionsListStrings.editor.getNoDataViewTitle(),
