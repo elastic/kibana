@@ -62,7 +62,11 @@ export const doSearch = async (
     events.reverse();
   }
 
+  const total =
+    typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+
   return {
+    total,
     events,
   };
 };

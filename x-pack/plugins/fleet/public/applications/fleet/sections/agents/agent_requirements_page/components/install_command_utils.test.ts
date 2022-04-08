@@ -15,8 +15,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res.linux).toMatchInlineSnapshot(`
         "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-service-token=service-token-1"
       `);
     });
 
@@ -26,8 +25,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res.mac).toMatchInlineSnapshot(`
         "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-service-token=service-token-1"
       `);
     });
 
@@ -37,8 +35,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res.windows).toMatchInlineSnapshot(`
         ".\\\\elastic-agent.exe install  \`
           --fleet-server-es=http://elasticsearch:9200 \`
-          --fleet-server-service-token=service-token-1 \`
-          --fleet-server-insecure-http"
+          --fleet-server-service-token=service-token-1"
       `);
     });
 
@@ -48,8 +45,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res.rpm).toMatchInlineSnapshot(`
         "sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-service-token=service-token-1"
       `);
     });
 
@@ -59,8 +55,7 @@ describe('getInstallCommandForPlatform', () => {
       expect(res.deb).toMatchInlineSnapshot(`
         "sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-service-token=service-token-1"
       `);
     });
 
@@ -78,8 +73,7 @@ describe('getInstallCommandForPlatform', () => {
         "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-es-ca-trusted-fingerprint=fingerprint123456 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-es-ca-trusted-fingerprint=fingerprint123456"
       `);
     });
   });
@@ -96,8 +90,7 @@ describe('getInstallCommandForPlatform', () => {
         "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-policy=policy-1"
       `);
     });
 
@@ -112,8 +105,7 @@ describe('getInstallCommandForPlatform', () => {
         "sudo ./elastic-agent install  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-policy=policy-1"
       `);
     });
 
@@ -128,8 +120,7 @@ describe('getInstallCommandForPlatform', () => {
         ".\\\\elastic-agent.exe install  \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
-          --fleet-server-policy=policy-1 \`
-          --fleet-server-insecure-http"
+          --fleet-server-policy=policy-1"
       `);
     });
 
@@ -144,8 +135,7 @@ describe('getInstallCommandForPlatform', () => {
         "sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-policy=policy-1"
       `);
     });
 
@@ -160,8 +150,7 @@ describe('getInstallCommandForPlatform', () => {
         "sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1 \\\\
-          --fleet-server-insecure-http"
+          --fleet-server-policy=policy-1"
       `);
     });
   });
