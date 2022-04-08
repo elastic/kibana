@@ -2,11 +2,13 @@
 
 _part of [on-week 2022 - Patrick Mueller](./README.md)_
 
+_this was a dust-off-and-polish effort; the original code is here: https://github.com/pmuellr/kbn-sample-plugins/tree/master/plugins/v8_profiling; cleaned things up_
+
 HTTP endpoints in Kibana to run a CPU profile for specified duration, and
 obtain a heap snapshot. 
 
 _Note: at the time of this writing, there appears to be something broken with
-the heap snapshots.  They often finish, on the server side._
+the heap snapshots.  They often never finish, on the server side._
 
 The endpoints are:
 
@@ -20,8 +22,8 @@ Try them right now!
 
 When using curl, you can use the `-OJ` options, which:
 
-- `-O` `--remote-name`: use the server-specified name for this download
-- `-J` `--remote-header-name`: use the `Content-Disposition` as the name of
+- `-O --remote-name`: use the server-specified name for this download
+- `-J --remote-header-name`: use the `Content-Disposition` as the name of
   the download
 
 The files generated will be:
@@ -34,7 +36,7 @@ These filetypes are the ones expected by various V8 tools that can read these.
 You can use these URLs in your browser, and the files will be saved with the
 generated names.
 
-### profile / heap snapshot readers
+## profile / heap snapshot readers
 
 The traditional tools used to view these are part of Chrome Dev Tools (CDT).  
 
@@ -44,7 +46,7 @@ and then get the visualization of the profile.  If you downloaded the profile ri
 from the browser, using the URL in the URL bar, you can drop the download file from
 the download status button right into CDT.
 
-For heap snapshots, open the "Memory" tool instead, and note that it does not
+For heap snapshots, open the "Memory" tool instead - note that it does not
 appear to support drag and drop from a file.  You'll need to right click on
 "Profiles" in the left-top pane, to see the "Load..." menu, which will allow
 you to select a file via a file prompted.
@@ -68,3 +70,7 @@ drag-n-drop of CPU profile files.  Note that you can get more directories to
 show up as "packages", by bringing up CDT and running the following code:
 
     localStorage['fake-packages-dirs'] = "x-pack/plugins,packages,src/core"
+
+## relevant code
+
+https://github.com/pmuellr/kibana/tree/onweek/2022/x-pack/examples/ow22_pmuellr/server/lib/v8_profiling

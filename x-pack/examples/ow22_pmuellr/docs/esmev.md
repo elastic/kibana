@@ -77,3 +77,13 @@ esmev.ts: generating: x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objec
 
 # compare generated alerting SO mappings to currently mainted one: no diffs!
 > diff x-pack/examples/ow22_pmuellr/mappings/alerting_saved_objects_mappings.json x-pack/plugins/alerting/server/saved_objects/mappings.json
+
+## relevant code
+
+the `.yaml` files are the mapping source, all the other files are generated:
+
+https://github.com/pmuellr/kibana/tree/onweek/2022/x-pack/examples/ow22_pmuellr/mappings
+
+the typescript / deno code for the generators:
+
+https://github.com/pmuellr/kibana/tree/onweek/2022/x-pack/examples/ow22_pmuellr/scripts
