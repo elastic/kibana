@@ -211,25 +211,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     indexName: indices,
   };
 
-  const dsl = queryFactory.buildDsl(requestSessionLeaders);
-
-  const params = { ...dsl };
-
-  params.body.collapse = {
-    field: 'process.entity_id',
-    inner_hits: {
-      name: 'last_event',
-      size: 1,
-      sort: [{ '@timestamp': 'desc' }],
-    },
-  };
-  params.body.aggs = {
-    total: {
-      cardinality: {
-        field: 'process.entity_id',
-      },
-    },
-  };
+  const params = queryFactory.buildDsl(requestSessionLeaders);
 
   return es.search({ ...requestSessionLeaders, params }, options, deps).pipe(
     map((response) => {
