@@ -6,6 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getAllMigrations, LensDocShape } from './saved_object_migrations';
 import {
   SavedObjectMigrationContext,
@@ -21,8 +22,7 @@ import {
   VisState810,
   VisState820,
 } from './types';
-import { CustomPaletteParams, layerTypes } from '../../common';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import { layerTypes } from '../../common';
 import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
@@ -188,7 +188,7 @@ describe('Lens migrations', () => {
       attributes: {
         expression: `kibana
   | kibana_context query="{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"}" filters="[]"
-  | lens_merge_tables layerIds="bd09dc71-a7e2-42d0-83bd-85df8291f03c" 
+  | lens_merge_tables layerIds="bd09dc71-a7e2-42d0-83bd-85df8291f03c"
     tables={esaggs
       index="ff959d40-b880-11e8-a6d9-e546fe2bba5f"
       metricsAtAllLevels=false
@@ -203,7 +203,7 @@ describe('Lens migrations', () => {
   | xyVis
       xTitle="products.created_on"
       yTitle="Count of records"
-      legend={legendConfig isVisible=true position="right"} 
+      legend={legendConfig isVisible=true position="right"}
       layers={lens_xy_layer
         layerId="bd09dc71-a7e2-42d0-83bd-85df8291f03c"
         hide=false

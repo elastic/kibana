@@ -116,12 +116,6 @@ export const ERRORS = {
   INVALID_PATH: i18n.translate('xpack.securitySolution.blocklists.warnings.values.invalidPath', {
     defaultMessage: 'Path may be formed incorrectly; verify value',
   }),
-  WILDCARD_PRESENT: i18n.translate(
-    'xpack.securitySolution.blocklists.warnings.values.wildcardPresent',
-    {
-      defaultMessage: "A wildcard in the filename will affect the endpoint's performance",
-    }
-  ),
   DUPLICATE_VALUE: i18n.translate(
     'xpack.securitySolution.blocklists.warnings.values.duplicateValue',
     {
