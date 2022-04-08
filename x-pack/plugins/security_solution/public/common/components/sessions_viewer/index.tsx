@@ -12,7 +12,7 @@ import { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
 import { sessionsDefaultModel } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import { CellRenderer } from './cell_renderer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
@@ -95,7 +95,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         entityType={entityType}
         id={timelineId}
         leadingControlColumns={leadingControlColumns}
-        renderCellValue={DefaultCellRenderer}
+        renderCellValue={CellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
