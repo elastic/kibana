@@ -22,11 +22,10 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { SEVERITY_COLOR } from '../util';
+import { LastUpdatedAt, SEVERITY_COLOR } from '../util';
 import * as i18n from '../translations';
 import { useRuleAlertsItems, RuleAlertsItem } from './rule_alerts_items';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
-import { encodeRisonUrlState } from '../../../../common/components/url_state/helpers';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
@@ -70,48 +69,18 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
   {
     field: 'last_alert_at',
     name: i18n.RULE_ALERTS_COLUMN_LAST_ALERT,
-    render: (lastAlertAt: string) => (
-      <FormattedRelative
-        data-test-subj="severityRuleAlertsTable-lastAlertAt"
-        value={new Date(lastAlertAt)}
-      />
-    ),
+    'data-test-subj': 'severityRuleAlertsTable-lastAlertAt',
+    render: (lastAlertAt: string) => <FormattedRelative value={new Date(lastAlertAt)} />,
   },
   {
     field: 'alert_count',
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
-    render: (alertCount: number, { id }) => {
-      const queryParameter = encodeRisonUrlState({
-        language: 'kuery',
-        query: `kibana.alert.rule.uuid: ${id}`,
-      });
-      const url = getAppUrl({
-        deepLinkId: SecurityPageName.alerts,
-        path: `?query=${queryParameter}`,
-      });
-      return (
-        <EuiToolTip data-test-subj={`${id}-tooltip`} content={i18n.OPEN_RULE_ALERTS_TOOLTIP}>
-          <EuiLink
-            data-test-subj="severityRuleAlertsTable-alerts"
-            // Doing a hard redirect using href only, due to this bug https://github.com/elastic/kibana/issues/123838
-            // TODO: Uncomment the onClick function and change the parameter to "?filters=" when the bug is fixed.
-            href={url}
-            // onClick={(ev?: React.MouseEvent) => {
-            //   if (ev) {
-            //     ev.preventDefault();
-            //   }
-            //   navigateTo({ url });
-            // }}
-          >
-            {alertCount}
-          </EuiLink>
-        </EuiToolTip>
-      );
-    },
+    'data-test-subj': 'severityRuleAlertsTable-alertCount',
   },
   {
     field: 'severity',
     name: i18n.RULE_ALERTS_COLUMN_SEVERITY,
+    'data-test-subj': 'severityRuleAlertsTable-severity',
     render: (severity: Severity) => (
       <EuiHealth color={SEVERITY_COLOR[severity]}>{capitalize(severity)}</EuiHealth>
     ),
@@ -121,7 +90,7 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
 export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexName }) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID);
-  const { items, isLoading } = useRuleAlertsItems({
+  const { items, isLoading, updatedAt } = useRuleAlertsItems({
     signalIndexName,
     queryId: DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID,
     skip: !toggleStatus,
@@ -133,41 +102,37 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="ruleAlertsTablePanel">
+    <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
       <HeaderSection
         id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}
         title={i18n.RULE_ALERTS_SECTION_TITLE}
         titleSize="s"
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
-        hideSubtitle
+        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
       />
-      {toggleStatus &&
-        // (isLoading || items.length > 0 ? (
-          <>
-            <EuiBasicTable
-              data-test-subj="ruleAlertsTable"
-              columns={columns}
-              items={items}
-              loading={isLoading}
-              noItemsMessage={
-                <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-              }
-            />
-            <EuiSpacer size="m" />
-            <EuiButton
-              data-test-subj="ruleAlertsTable-openAlertsButton"
-              onClick={() => {
-                navigateTo({ deepLinkId: SecurityPageName.alerts });
-              }}
-            >
-              {i18n.OPEN_ALL_ALERTS_BUTTON}
-            </EuiButton>
-          </>
-        // ) : (
-        //   <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-        // ))
-        }
+      {toggleStatus && (
+        <>
+          <EuiBasicTable
+            data-test-subj="severityRuleAlertsTable"
+            columns={columns}
+            items={items}
+            loading={isLoading}
+            noItemsMessage={
+              <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+            }
+          />
+          <EuiSpacer size="m" />
+          <EuiButton
+            data-test-subj="severityRuleAlertsButton"
+            onClick={() => {
+              navigateTo({ deepLinkId: SecurityPageName.alerts });
+            }}
+          >
+            {i18n.OPEN_ALL_ALERTS_BUTTON}
+          </EuiButton>
+        </>
+      )}
     </EuiPanel>
   );
 });

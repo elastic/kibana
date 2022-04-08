@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
@@ -100,13 +100,15 @@ const getRuleAlertsItemsFromAggs = (
   });
 };
 
-export type UseRuleAlertsItems = (param: {
+export interface UseRuleAlertsItemsProps {
   queryId: string;
   signalIndexName: string | null;
   skip?: boolean;
-}) => {
+}
+export type UseRuleAlertsItems = (props: UseRuleAlertsItemsProps) => {
   items: RuleAlertsItem[];
   isLoading: boolean;
+  updatedAt: number;
 };
 
 export const useRuleAlertsItems: UseRuleAlertsItems = ({
@@ -114,6 +116,8 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
   signalIndexName,
   skip = false,
 }) => {
+  const [items, setItems] = useState<RuleAlertsItem[]>([]);
+  const [updatedAt, setUpdatedAt] = useState(Date.now());
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
   const {
@@ -132,13 +136,6 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
     skip,
   });
 
-  const items = useMemo(() => {
-    if (data == null) {
-      return [];
-    }
-    return getRuleAlertsItemsFromAggs(data.aggregations);
-  }, [data]);
-
   useEffect(() => {
     setAlertsQuery(
       getSeverityRuleAlertsQuery({
@@ -147,6 +144,15 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
       })
     );
   }, [setAlertsQuery, from, to]);
+
+  useEffect(() => {
+    if (data == null) {
+      setItems([]);
+    } else {
+      setItems(getRuleAlertsItemsFromAggs(data.aggregations));
+    }
+    setUpdatedAt(Date.now());
+  }, [data]);
 
   const refetch = useCallback(() => {
     if (!skip && refetchQuery) {
@@ -166,5 +172,5 @@ export const useRuleAlertsItems: UseRuleAlertsItems = ({
     loading: isLoading,
   });
 
-  return { items, isLoading };
+  return { items, isLoading, updatedAt };
 };

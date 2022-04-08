@@ -28,6 +28,7 @@ type UseRuleAlertsItemsReturn = ReturnType<UseRuleAlertsItems>;
 const defaultUseRuleAlertsItemsReturn: UseRuleAlertsItemsReturn = {
   items: [],
   isLoading: false,
+  updatedAt: Date.now(),
 };
 const mockUseRuleAlertsItems = jest.fn(() => defaultUseRuleAlertsItemsReturn);
 const mockUseRuleAlertsItemsReturn = (param: Partial<UseRuleAlertsItemsReturn>) => {
@@ -62,8 +63,9 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
+    expect(result.getByTestId('severityRuleAlertsPanel')).toBeInTheDocument();
     expect(result.getByText('No alerts to display')).toBeInTheDocument();
-    expect(result.queryByTestId('ruleAlertsTable-openAlertsButton')).not.toBeInTheDocument();
+    expect(result.getByTestId('severityRuleAlertsButton')).toBeInTheDocument();
   });
 
   it('should render a loading table', () => {
@@ -74,10 +76,20 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    const table = result.getByTestId('ruleAlertsTable');
-    expect(table).toBeInTheDocument();
-    expect(table).toHaveClass('euiBasicTable-loading');
-    expect(result.queryByTestId('ruleAlertsTable-openAlertsButton')).toBeInTheDocument();
+    expect(result.getByText('Updating...')).toBeInTheDocument();
+    expect(result.getByTestId('severityRuleAlertsButton')).toBeInTheDocument();
+    expect(result.getByTestId('severityRuleAlertsTable')).toHaveClass('euiBasicTable-loading');
+  });
+
+  it('should render the updated at subtitle', () => {
+    mockUseRuleAlertsItemsReturn({ isLoading: false });
+    const result = render(
+      <TestProviders>
+        <RuleAlertsTable {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(result.getByText('Updated now')).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
@@ -88,10 +100,11 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    expect(result.getAllByText('Rule name').at(0)).toBeInTheDocument();
-    expect(result.getAllByText('Last alert').at(0)).toBeInTheDocument();
-    expect(result.getAllByText('Alert count').at(0)).toBeInTheDocument();
-    expect(result.getAllByText('Severity').at(0)).toBeInTheDocument();
+    const columnHeaders = result.getAllByRole('columnheader');
+    expect(columnHeaders.at(0)).toHaveTextContent('Rule name');
+    expect(columnHeaders.at(1)).toHaveTextContent('Last alert');
+    expect(columnHeaders.at(2)).toHaveTextContent('Alert count');
+    expect(columnHeaders.at(3)).toHaveTextContent('Severity');
   });
 
   it('should render the table items', () => {
@@ -102,15 +115,20 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    expect(result.getByText('ruleName')).toBeInTheDocument();
-    expect(result.getByText('yesterday')).toBeInTheDocument();
-    expect(result.getByText('10')).toBeInTheDocument();
-    expect(result.getByText('High')).toBeInTheDocument();
+    expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveTextContent('ruleName');
+    expect(result.getByTestId('severityRuleAlertsTable-lastAlertAt')).toHaveTextContent(
+      'yesterday'
+    );
+    expect(result.getByTestId('severityRuleAlertsTable-alertCount')).toHaveTextContent('10');
+    expect(result.getByTestId('severityRuleAlertsTable-severity')).toHaveTextContent('High');
   });
 
   it('should generate the table items links', () => {
+    const linkUrl = '/fake/link';
+    mockGetAppUrl.mockReturnValue(linkUrl);
     mockUseRuleAlertsItemsReturn({ items });
-    render(
+
+    const result = render(
       <TestProviders>
         <RuleAlertsTable {...defaultProps} />
       </TestProviders>
@@ -121,9 +139,6 @@ describe('RuleAlertsTable', () => {
       path: `id/${items[0].id}`,
     });
 
-    expect(mockGetAppUrl).toBeCalledWith({
-      deepLinkId: SecurityPageName.alerts,
-      path: `?query=(language:kuery,query:'kibana.alert.rule.uuid: ${items[0].id}')`,
-    });
+    expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveAttribute('href', linkUrl);
   });
 });
