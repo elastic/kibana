@@ -10,7 +10,7 @@ import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import {  throwUnrecoverableError } from '../../../task_manager/server';
+import { throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
