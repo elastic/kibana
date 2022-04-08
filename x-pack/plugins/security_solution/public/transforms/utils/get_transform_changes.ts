@@ -9,6 +9,7 @@ import { getTransformChangesForHosts } from './get_transform_changes_for_hosts';
 import { getTransformChangesForKpi } from './get_transform_changes_for_kpi';
 import { getTransformChangesForMatrixHistogram } from './get_transform_changes_for_matrix_histogram';
 import { getTransformChangesForNetwork } from './get_transform_changes_for_network';
+import { getTransformChangesForUsers } from './get_transform_changes_for_users';
 import { GetTransformChanges } from './types';
 
 export const getTransformChanges: GetTransformChanges = ({
@@ -24,6 +25,11 @@ export const getTransformChanges: GetTransformChanges = ({
   const hostTransform = getTransformChangesForHosts({ factoryQueryType, settings });
   if (hostTransform != null) {
     return hostTransform;
+  }
+
+  const userTransform = getTransformChangesForUsers({ factoryQueryType, settings });
+  if (userTransform != null) {
+    return userTransform;
   }
 
   const networkTransform = getTransformChangesForNetwork({

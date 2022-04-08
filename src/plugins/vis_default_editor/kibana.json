@@ -3,7 +3,7 @@
   "version": "kibana",
   "ui": true,
   "optionalPlugins": ["visualizations"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "data", "fieldFormats", "discover", "esUiShared"],
+  "requiredBundles": ["unifiedSearch", "kibanaUtils", "kibanaReact", "data", "fieldFormats", "discover", "esUiShared"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

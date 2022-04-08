@@ -57,12 +57,14 @@ import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import { AnalyticsService } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly analytics: AnalyticsService;
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
@@ -103,6 +105,7 @@ export class Server {
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
+    this.analytics = new AnalyticsService(core);
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -132,6 +135,8 @@ export class Server {
   public async preboot() {
     this.log.debug('prebooting server');
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
+
+    const analyticsPreboot = this.analytics.preboot();
 
     const environmentPreboot = await this.environment.preboot();
 
@@ -164,6 +169,7 @@ export class Server {
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
     const corePreboot: InternalCorePreboot = {
+      analytics: analyticsPreboot,
       context: contextServicePreboot,
       elasticsearch: elasticsearchServicePreboot,
       http: httpPreboot,
@@ -188,6 +194,8 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
+
+    const analyticsSetup = this.analytics.setup();
 
     const environmentSetup = this.environment.setup();
 
@@ -265,6 +273,7 @@ export class Server {
     const loggingSetup = this.logging.setup();
 
     const coreSetup: InternalCoreSetup = {
+      analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       docLinks: docLinksSetup,
@@ -298,6 +307,7 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const analyticsStart = this.analytics.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
@@ -323,6 +333,7 @@ export class Server {
     this.status.start();
 
     this.coreStart = {
+      analytics: analyticsStart,
       capabilities: capabilitiesStart,
       docLinks: docLinkStart,
       elasticsearch: elasticsearchStart,
