@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -103,6 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should support range filter on version fields', async () => {
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await filterBar.addFilter('version', 'is between', '2.0.0', '3.0.0');
           expect(await filterBar.hasFilter('version', '2.0.0 to 3.0.0')).to.be(true);
           await retry.try(async function () {
