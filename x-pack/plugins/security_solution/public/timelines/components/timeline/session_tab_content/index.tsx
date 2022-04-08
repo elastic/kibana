@@ -9,7 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { useSessionView } from './use_session_view';
+import { useSessionViewNavigation, useSessionView } from './use_session_view';
 
 const FlexItemWithMargin = styled(EuiFlexItem)`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
@@ -43,7 +43,10 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
       setHeight(node.getBoundingClientRect().height);
     }
   }, []);
-  const { SessionView, shouldShowDetailsPanel, DetailsPanel, Navigation } = useSessionView({
+  const { Navigation } = useSessionViewNavigation({
+    timelineId,
+  });
+  const { SessionView, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
     timelineId,
     height,
   });
