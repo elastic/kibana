@@ -257,3 +257,10 @@ array, which meant I had to add support for `nested` types as well
 (arrays are typed as `nested`).  All worked fine, and now no arbitrary
 keyed objects!
 
+The generated documentation is quite sub-par, and to add insult to
+injury, Github is not showing the fenced code blocks with either `ts`
+or `typescript` language tags, even though I've seen in other places
+in Github!.  I must be holding it wrong.  On the plus side, there's
+almost no code in this generator because it just uses the typescript
+type generator to generate it's content.  A bit more work would have
+yielded something a little nicer.
