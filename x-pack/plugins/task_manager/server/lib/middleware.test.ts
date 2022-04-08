@@ -6,12 +6,8 @@
  */
 
 import moment from 'moment';
-import { ConcreteTaskInstance, RunContext, TaskInstance, TaskStatus } from '../task';
+import { ConcreteTaskInstance, RunContext, TaskStatus } from '../task';
 import { addMiddlewareToChain, AfterRunContextFunction, Middleware } from './middleware';
-
-interface BeforeSaveOpts {
-  taskInstance: TaskInstance;
-}
 
 const getMockTaskInstance = (): ConcreteTaskInstance => ({
   id: 'hy8o99o83',
