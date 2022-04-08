@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { omitBy } from 'lodash';
 import { buildRangeFilter } from '@kbn/es-query';
 import type { Moment } from 'moment';
