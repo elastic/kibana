@@ -37,6 +37,8 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { ConcreteRuleProvider } from './rule_provider';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -70,11 +72,11 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 describe('Task Runner Cancel', () => {
-  let mockedTaskInstance: ConcreteTaskInstance;
+  let mockedTaskInstance: ConcreteTaskInstance<RuleTaskState, RuleTaskParams>;
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
-    mockedTaskInstance = {
+    mockedTaskInstance = taskInstanceToAlertTaskInstance({
       id: '',
       attempts: 0,
       status: TaskStatus.Running,
@@ -92,7 +94,7 @@ describe('Task Runner Cancel', () => {
         consumer: 'bar',
       },
       ownerId: null,
-    };
+    });
   });
 
   afterAll(() => fakeTimer.restore());
@@ -227,6 +229,7 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -416,6 +419,7 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       {
         ...taskRunnerFactoryInitializerParams,
         cancelAlertsOnRuleTimeout: false,
@@ -458,6 +462,7 @@ describe('Task Runner Cancel', () => {
         cancelAlertsOnRuleTimeout: false,
       },
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
@@ -489,6 +494,7 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
+      new ConcreteRuleProvider(ruleType, mockedTaskInstance, taskRunnerFactoryInitializerParams),
       taskRunnerFactoryInitializerParams,
       inMemoryMetrics
     );
