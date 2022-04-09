@@ -31,6 +31,7 @@ interface UseProcessTreeDeps {
   alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  jumpToEntityId?: string;
 }
 
 export class ProcessImpl implements Process {
@@ -223,6 +224,7 @@ export const useProcessTree = ({
   alerts,
   searchQuery,
   updatedAlertsStatus,
+  jumpToEntityId,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
@@ -297,8 +299,8 @@ export const useProcessTree = ({
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
-    autoExpandProcessTree(processMap);
-  }, [searchQuery, processMap]);
+    autoExpandProcessTree(processMap, jumpToEntityId);
+  }, [searchQuery, processMap, jumpToEntityId]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];
