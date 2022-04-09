@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   CATEGORICAL_DATA_TYPES,
   FIELD_ORIGIN,
@@ -12,6 +13,7 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { IField } from '../../fields/field';
+import { getVectorStyleLabel } from './components/get_vector_style_label';
 
 export interface StyleField {
   label: string;
@@ -19,6 +21,8 @@ export interface StyleField {
   origin: FIELD_ORIGIN;
   type: string;
   supportsAutoDomain: boolean;
+  isUnsupported: boolean;
+  unsupportedMsg?: string;
 }
 
 export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFieldsHelper> {
@@ -29,6 +33,7 @@ export async function createStyleFieldsHelper(fields: IField[]): Promise<StyleFi
       origin: field.getOrigin(),
       type: await field.getDataType(),
       supportsAutoDomain: field.supportsFieldMetaFromLocalData() || field.supportsFieldMetaFromEs(),
+      isUnsupported: false,
     };
   });
   const styleFields = await Promise.all(promises);
@@ -71,11 +76,11 @@ export class StyleFieldsHelper {
   }
 
   hasFieldForStyle(field: IField, styleName: VECTOR_STYLES): boolean {
-    const fieldList = this.getFieldsForStyle(styleName);
+    const fieldList = this._getFieldsForStyle(styleName);
     return fieldList.some((styleField) => field.getName() === styleField.name);
   }
 
-  getFieldsForStyle(styleName: VECTOR_STYLES): StyleField[] {
+  _getFieldsForStyle(styleName: VECTOR_STYLES): StyleField[] {
     switch (styleName) {
       case VECTOR_STYLES.ICON_ORIENTATION:
         return this._numberFields;
@@ -94,6 +99,39 @@ export class StyleFieldsHelper {
       default:
         return [];
     }
+  }
+
+  getFieldsForStyle(
+    styleProperty: IStyleProperty<unknown>,
+    isLayerSourceMvt: boolean
+  ): StyleField[] {
+    const styleFields = this._getFieldsForStyle(styleProperty.getStyleName());
+    return styleProperty.isDynamic() && !(styleProperty as IDynamicStyleProperty<unknown>).supportsFeatureState()
+      ? styleFields.map((styleField) => {
+          // It is not possible to fallback to feature.properties for maplibre 'vector' source
+          // Join fields that do not support feature-state can not be supported.
+          if (
+            isLayerSourceMvt &&
+            styleField.origin === FIELD_ORIGIN.JOIN
+          ) {
+            return {
+              ...styleField,
+              isUnsupported: true,
+              unsupportedMsg: i18n.translate(
+                'xpack.maps.style.field.unsupportedWithVectorTileMsg',
+                {
+                  defaultMessage: `'{styleLabel}' does not support this field with vector tiles. To style '{styleLabel}' with this field, select 'Limit results' in 'Scaling'.`,
+                  values: {
+                    styleLabel: getVectorStyleLabel(styleProperty.getStyleName()),
+                  },
+                }
+              ),
+            };
+          }
+
+          return styleField;
+        })
+      : styleFields;
   }
 
   getStyleFields(): StyleField[] {

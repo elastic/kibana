@@ -378,6 +378,7 @@ function updateSourcePropWithoutSync(
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
+    await dispatch(updateStyleProperties(layerId, []));
   };
 }
 

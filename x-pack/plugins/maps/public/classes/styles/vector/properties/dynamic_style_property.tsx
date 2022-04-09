@@ -47,6 +47,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
   getCategoryFieldMeta(): Category[];
+
   /*
    * Returns hash that signals style meta needs to be re-fetched when value changes
    */
@@ -56,6 +57,38 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   isOrdinal(): boolean;
   getNumberOfCategories(): number;
   supportsFieldMeta(): boolean;
+
+  /*
+   * Maplibre layers have two sub-properties that determine how data is rendered: layout and paint.
+   *
+   * Layout properties are applied early in the rendering process and define how data for that layer is passed to the GPU.
+   * Changes to a layout property require an asynchronous "layout" step.
+   *
+   * Paint properties are applied later in the rendering process. Changes to a paint property are cheap and happen synchronously.
+   *
+   * Paint properties support feature-state. Layout properties do not support feature-state
+   *
+   * Returns true when the style only sets paints properties. Returns false when the style sets any layout properties.
+   */
+  supportsFeatureState(): boolean;
+
+  /*
+   * Maplibre stores vector properties in 2 locations: feature.properties and feature-state
+   * https://blog.mapbox.com/going-live-with-electoral-maps-a-guide-to-feature-state-b520e91a22d
+   *
+   * Feature-state is a set of runtime defined attributes that can be dynamically assigned to a feature and used to style features.
+   * Feature-state is paired to a feature by feature id or feature.properties[promoteId] (when 'source.promoteId' is set).
+   *
+   * Feature-state provides a significant boost in performance allowing for the update of individual styles
+   * without the map rendering engine having to re-parse the underlying geometry and feature properties.
+   *
+   * 'paint' properties may retrieve style data from feature-state or feature.properties.
+   * 'layout' properties may only retrieve style from feature.properties.
+   *
+   * Returns true when style data is stored in feature-state.  Returns false when style data is stored in feature.properties.
+   */
+  usesFeatureState(): boolean;
+
   getFieldMetaRequest(): Promise<unknown | null>;
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
@@ -281,14 +314,20 @@ export class DynamicStyleProperty<T>
     return null;
   }
 
-  supportsMbFeatureState() {
-    return !!this._field && !this._field.getSource().isMvt();
+  supportsFeatureState() {
+    return true;
+  }
+
+  usesFeatureState() {
+    if (!this._field) {
+      return false;
+    }
+
+    return this._field.getSource().isMvt() ? false : this.supportsFeatureState();
   }
 
   getMbLookupFunction(): MB_LOOKUP_FUNCTION {
-    return this.supportsMbFeatureState()
-      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
-      : MB_LOOKUP_FUNCTION.GET;
+    return this.usesFeatureState() ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
   }
 
   getFieldMetaOptions() {
@@ -404,7 +443,7 @@ export class DynamicStyleProperty<T>
     }
 
     let targetName;
-    if (this.supportsMbFeatureState()) {
+    if (this.usesFeatureState()) {
       // Base case for any properties that can support feature-state (e.g. color, size, ...)
       // They just re-use the original property-name
       targetName = this._field.getName();
@@ -422,10 +461,7 @@ export class DynamicStyleProperty<T>
   }
 
   getMbPropertyValue(rawValue: RawValue): RawValue {
-    // Maps only uses feature-state for numerical values.
-    // `supportsMbFeatureState` will only return true when the mb-style rule does a feature-state lookup on a numerical value
-    // Calling `isOrdinal` would be equivalent.
-    return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
+    return this.isOrdinal() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
   }
 
   enrichGeoJsonAndMbFeatureState(
@@ -433,7 +469,7 @@ export class DynamicStyleProperty<T>
     mbMap: MbMap,
     mbSourceId: string
   ): boolean {
-    const supportsFeatureState = this.supportsMbFeatureState();
+    const usesFeatureState = this.usesFeatureState();
     const featureIdentifier: FeatureIdentifier = {
       source: mbSourceId,
       id: undefined,
@@ -444,7 +480,7 @@ export class DynamicStyleProperty<T>
       const feature = featureCollection.features[i];
       const rawValue = feature.properties ? feature.properties[this.getFieldName()] : undefined;
       const targetMbValue = this.getMbPropertyValue(rawValue);
-      if (supportsFeatureState) {
+      if (usesFeatureState) {
         featureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
         featureIdentifier.id = feature.id;
         mbMap.setFeatureState(featureIdentifier, featureState);
@@ -454,7 +490,7 @@ export class DynamicStyleProperty<T>
         }
       }
     }
-    return supportsFeatureState;
+    return usesFeatureState;
   }
 }
 

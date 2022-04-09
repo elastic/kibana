@@ -309,7 +309,6 @@ export class VectorStyle implements IVectorStyle {
     });
 
     return this._deleteFieldsFromDescriptorAndUpdateStyling(
-      nextFields,
       updatedProperties,
       hasChanges,
       styleFieldsHelper,
@@ -318,13 +317,11 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async _deleteFieldsFromDescriptorAndUpdateStyling(
-    nextFields: IField[],
     originalProperties: VectorStylePropertiesDescriptor,
     hasChanges: boolean,
     styleFieldsHelper: StyleFieldsHelper,
     mapColors: string[]
   ) {
-    // const originalProperties = this.getRawProperties();
     const updatedProperties = {} as VectorStylePropertiesDescriptor;
 
     const dynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter((key) => {
@@ -333,9 +330,21 @@ export class VectorStyle implements IVectorStyle {
     });
 
     dynamicProperties.forEach((key: VECTOR_STYLES) => {
+      // TODO instead of looking up instance by key, update argument originalProperties to be instances instead of descriptors
+      const styleProperty = this.getAllStyleProperties().find((property) => {
+        return property.getStyleName() === key;
+      });
+      if (!styleProperty) {
+        return;
+      }
+      const nextStyleFields = styleFieldsHelper
+        .getFieldsForStyle(styleProperty, this._layer.getSource().isMvt())
+        .filter((styleField) => {
+          return !styleField.isUnsupported;
+        });
+
       // Convert dynamic styling to static stying when there are no style fields
-      const styleFields = styleFieldsHelper.getFieldsForStyle(key);
-      if (styleFields.length === 0) {
+      if (nextStyleFields.length === 0) {
         const staticProperties = getDefaultStaticProperties(mapColors);
         updatedProperties[key] = staticProperties[key] as any;
         return;
@@ -345,16 +354,16 @@ export class VectorStyle implements IVectorStyle {
       if (!dynamicProperty || !dynamicProperty.options) {
         return;
       }
-      const fieldName = (dynamicProperty.options as DynamicStylePropertyOptions).field!.name;
+      const fieldName = (dynamicProperty.options as DynamicStylePropertyOptions).field?.name;
       if (!fieldName) {
         return;
       }
 
-      const matchingOrdinalField = nextFields.find((ordinalField) => {
-        return fieldName === ordinalField.getName();
+      const fieldStillExists = nextStyleFields.some((nextStyleField) => {
+        return fieldName === nextStyleField.name;
       });
 
-      if (matchingOrdinalField) {
+      if (fieldStillExists) {
         return;
       }
 
@@ -422,7 +431,6 @@ export class VectorStyle implements IVectorStyle {
         )
       : // Deletions or additions
         await this._deleteFieldsFromDescriptorAndUpdateStyling(
-          nextFields,
           this.getRawProperties(),
           false,
           styleFieldsHelper,

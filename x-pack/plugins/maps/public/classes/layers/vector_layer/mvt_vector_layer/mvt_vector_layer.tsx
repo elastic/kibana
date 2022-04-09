@@ -438,10 +438,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   _getSourcePromoteId() {
     const { join } = this._getJoinResults();
     return join
-    ? {
-        [this._source.getTileSourceLayer()]: join.getLeftField().getName(),
-      }
-    : undefined;
+      ? {
+          [this._source.getTileSourceLayer()]: join.getLeftField().getName(),
+        }
+      : undefined;
   }
 
   // Maplibre does not expose API for updating source attributes.

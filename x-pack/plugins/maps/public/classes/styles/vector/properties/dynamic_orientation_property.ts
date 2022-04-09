@@ -6,9 +6,8 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { DynamicStyleProperty, getNumericalMbFeatureStateValue } from './dynamic_style_property';
+import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrientationDynamicOptions } from '../../../../../common/descriptor_types';
-import { RawValue } from '../../../../../common/constants';
 
 export class DynamicOrientationProperty extends DynamicStyleProperty<OrientationDynamicOptions> {
   syncIconRotationWithMb(symbolLayerId: string, mbMap: MbMap) {
@@ -28,11 +27,7 @@ export class DynamicOrientationProperty extends DynamicStyleProperty<Orientation
     return false;
   }
 
-  supportsMbFeatureState(): boolean {
+  supportsFeatureState(): boolean {
     return false;
-  }
-
-  getMbPropertyValue(rawValue: RawValue): RawValue {
-    return getNumericalMbFeatureStateValue(rawValue);
   }
 }
