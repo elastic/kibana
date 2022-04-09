@@ -147,6 +147,14 @@ export class ProcessImpl implements Process {
     return '';
   }
 
+  getEndTime() {
+    const endEvent = this.filterEventsByAction(this.events, EventAction.end);
+    if (endEvent.length === 0) {
+      return '';
+    }
+    return endEvent[endEvent.length - 1]['@timestamp'];
+  }
+
   // isUserEntered is a best guess at which processes were initiated by a real person
   // In most situations a user entered command in a shell such as bash, will cause bash
   // to fork, create a new process group, and exec the command (e.g ls). If the session
