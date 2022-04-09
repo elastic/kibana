@@ -9,6 +9,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from 'kibana/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { BasicConnector } from '../connectors/basic';
 import { CaseConnector } from '../connectors/case';
 import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { buildExecutor } from './executor';
@@ -17,8 +18,13 @@ import { buildValidators } from './validators';
 
 // TODO: Add basic connector
 const validateService = <Config, Secrets>(Service: IService<Config, Secrets>) => {
-  if (!(Service.prototype instanceof CaseConnector)) {
-    throw new Error('Service must be extend one of the abstract classes: CaseConnector');
+  if (
+    !(Service.prototype instanceof CaseConnector) &&
+    !(Service.prototype instanceof BasicConnector)
+  ) {
+    throw new Error(
+      'Service must be extend one of the abstract classes: BasicConnector or CaseConnector'
+    );
   }
 };
 
