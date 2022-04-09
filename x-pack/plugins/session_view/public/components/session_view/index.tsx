@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import {
@@ -33,6 +34,7 @@ import {
   useFetchSessionViewProcessEvents,
   useFetchSessionViewAlerts,
 } from './hooks';
+import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 
 /**
  * The main wrapper component for the session view.
@@ -56,10 +58,13 @@ export const SessionView = ({
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [displayOptions, setDisplayOptions] = useState<DisplayOptionsState>({
-    timestamp: true,
-    verboseMode: true,
-  });
+  const [displayOptions, setDisplayOptions] = useLocalStorage<DisplayOptionsState>(
+    LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
+    {
+      timestamp: true,
+      verboseMode: true,
+    }
+  );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
@@ -137,9 +142,12 @@ export const SessionView = ({
     [loadAlertDetails, handleOnAlertDetailsClosed]
   );
 
-  const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
-    setDisplayOptions(checkedOptions);
-  }, []);
+  const handleOptionChange = useCallback(
+    (checkedOptions: DisplayOptionsState) => {
+      setDisplayOptions(checkedOptions);
+    },
+    [setDisplayOptions]
+  );
 
   if (!isFetching && !hasData) {
     return (
@@ -184,7 +192,7 @@ export const SessionView = ({
 
             <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
               <SessionViewDisplayOptions
-                displayOptions={displayOptions}
+                displayOptions={displayOptions!}
                 onChange={handleOptionChange}
               />
             </EuiFlexItem>
@@ -265,8 +273,8 @@ export const SessionView = ({
                       setSearchResults={setSearchResults}
                       updatedAlertsStatus={updatedAlertsStatus}
                       onShowAlertDetails={onShowAlertDetails}
-                      timeStampOn={displayOptions.timestamp}
-                      verboseModeOn={displayOptions.verboseMode}
+                      timeStampOn={displayOptions?.timestamp}
+                      verboseModeOn={displayOptions?.verboseMode}
                     />
                   </div>
                 )}
