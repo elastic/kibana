@@ -39,7 +39,7 @@ export abstract class BasicConnector {
     return data;
   }
 
-  private normalizeData(data: unknown | undefined) {
+  private normalizeData(data: unknown | undefined | null) {
     if (data == null) {
       return {};
     }
@@ -67,6 +67,10 @@ export abstract class BasicConnector {
     }
   }
 
+  private getHeaders(headers: Record<string, string>) {
+    return { ...headers, 'Content-Type': 'application/json' };
+  }
+
   protected registerSubAction(subAction: SubAction) {
     this.subActions.set(subAction.name, subAction);
   }
@@ -81,6 +85,7 @@ export abstract class BasicConnector {
     data,
     method = 'get',
     responseSchema,
+    headers,
     ...config
   }: {
     url: string;
@@ -104,6 +109,7 @@ export abstract class BasicConnector {
     const res = await this.axiosInstance(normalizedURL, {
       ...config,
       method,
+      headers: this.getHeaders(headers),
       data: this.normalizeData(data),
       // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
       httpAgent,
