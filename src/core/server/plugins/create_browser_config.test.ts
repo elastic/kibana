@@ -67,7 +67,7 @@ describe('createBrowserConfig', () => {
         // notExposed4 is not present
       },
       exposedConfigKeys: {
-        exposed1: 'any', // 'any' is the Joi schema type for strings
+        exposed1: 'string',
         'nested.exposed2': 'boolean',
         'nested.exposed3': 'number',
         // notExposed4 is not present
@@ -108,7 +108,7 @@ describe('createBrowserConfig', () => {
         // notExposed3 and notExposed4 are not present
       },
       exposedConfigKeys: {
-        exposed1: 'any',
+        exposed1: 'string',
         'nested.exposed2': 'boolean',
         // notExposed3 and notExposed4 are not present
       },
@@ -180,10 +180,10 @@ describe('createBrowserConfig', () => {
         // notExposed5, notExposed6, notExposed7, and notExposed8 are not present
       },
       exposedConfigKeys: {
-        exposed1: 'any',
+        exposed1: 'string',
         'deeply.exposed2': 'boolean',
         'deeply.nested.exposed3': 'number',
-        'deeply.nested.structure.exposed4': 'any',
+        'deeply.nested.structure.exposed4': 'string',
         // notExposed5, notExposed6, notExposed7, and notExposed8 are not present
       },
     });
