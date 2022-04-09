@@ -6,14 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/logging';
-import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   ExternalServiceIncidentResponse,
   PushToServiceParams,
   PushToServiceResponse,
 } from './types';
 import { BasicConnector } from './basic';
+import { ServiceParams } from '../http_framework/types';
 
 export interface CaseConnectorInterface {
   addComment: ({
@@ -35,9 +34,12 @@ export interface CaseConnectorInterface {
   pushToService: (params: PushToServiceParams) => Promise<PushToServiceResponse>;
 }
 
-export abstract class CaseConnector extends BasicConnector implements CaseConnectorInterface {
-  constructor(public configurationUtilities: ActionsConfigurationUtilities, public logger: Logger) {
-    super(configurationUtilities, logger);
+export abstract class CaseConnector<Config, Secrets>
+  extends BasicConnector<Config, Secrets>
+  implements CaseConnectorInterface
+{
+  constructor(params: ServiceParams<Config, Secrets>) {
+    super(params);
 
     this.registerSubAction({
       name: 'pushToService',

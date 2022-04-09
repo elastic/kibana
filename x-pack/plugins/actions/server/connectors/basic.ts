@@ -12,17 +12,26 @@ import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { SubAction } from './types';
+import { ServiceParams } from '../http_framework/types';
 
 const isObject = (v: unknown): v is Record<string, unknown> => {
   return typeof v === 'object' && v !== null;
 };
 
-export abstract class BasicConnector {
+export abstract class BasicConnector<Config, Secrets> {
   private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http:', 'https:'];
   private subActions: Map<string, SubAction> = new Map();
+  private configurationUtilities: ActionsConfigurationUtilities;
+  protected logger: Logger;
+  protected config: Config;
+  protected secrets: Secrets;
 
-  constructor(public configurationUtilities: ActionsConfigurationUtilities, public logger: Logger) {
+  constructor(params: ServiceParams<Config, Secrets>) {
+    this.logger = params.logger;
+    this.config = params.config;
+    this.secrets = params.secrets;
+    this.configurationUtilities = params.configurationUtilities;
     this.axiosInstance = axios.create();
   }
 

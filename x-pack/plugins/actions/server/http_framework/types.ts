@@ -21,7 +21,7 @@ export interface ServiceParams<Config, Secrets> {
 
 export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
-) => BasicConnector;
+) => BasicConnector<Config, Secrets>;
 
 export interface HTTPConnectorType<Config, Secrets> {
   id: string;

@@ -34,7 +34,10 @@ import {
   ServiceNowTableAPIResponse,
 } from './schema';
 
-export class ServiceNow extends CaseConnector {
+export class ServiceNow extends CaseConnector<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType
+> {
   private urls: {
     basic: string;
     importSetTableUrl: string;
@@ -46,27 +49,22 @@ export class ServiceNow extends CaseConnector {
   private useTableApi: boolean;
   private appScope: string;
   private commentFieldKey: string;
-  private secrets: ServiceNowSecretConfigurationType;
 
-  constructor({
-    config,
-    configurationUtilities,
-    internalConfig,
-    logger,
-    secrets,
-  }: ServiceParams<ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType> & {
-    internalConfig: SNProductsConfigValue;
-  }) {
-    const { apiUrl: url, usesTableApi: usesTableApiConfigValue } = config;
-    const { username, password } = secrets;
+  constructor(
+    params: ServiceParams<ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType> & {
+      internalConfig: SNProductsConfigValue;
+    }
+  ) {
+    const { internalConfig } = params;
+    const { apiUrl: url, usesTableApi: usesTableApiConfigValue } = params.config;
+    const { username, password } = params.secrets;
 
     if (!url || !username || !password) {
       throw Error(`[Action]i18n.SERVICENOW: Wrong configuration.`);
     }
 
-    super(configurationUtilities, logger);
+    super(params);
 
-    this.secrets = secrets;
     this.urls = {
       basic: url,
       importSetTableUrl: `${url}/api/now/import/${internalConfig.importSetTable}`,
