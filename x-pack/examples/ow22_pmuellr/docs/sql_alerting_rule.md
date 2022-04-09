@@ -4,6 +4,8 @@ _part of [on-week 2022@1 - Patrick Mueller](./README.md)_
 
 _this was a dust-off-and-polish effort; the original code is here: https://github.com/pmuellr/kbn-sample-plugins/blob/master/plugins/alert_type_examples/server/alert_types/essql.ts; cleaned things up and added some (not great) UX_
 
+![sql rule](images/sql-rule.png)
+
 Adds a Kibana alerting rule that uses SQL, with the resulting SQL columns
 selecting both the alert id (AKA alert instance id, like a host name) and
 context variables.

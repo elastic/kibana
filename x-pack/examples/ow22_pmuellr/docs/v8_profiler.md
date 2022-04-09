@@ -16,10 +16,12 @@ The endpoints are:
     /_dev/heap_snapshot
 
 Try them right now, assuming you have a Kibana dev env running on https!
-_(but they might not work, thanks Chrome!)_
 
-- [`https://elastic:changeme@localhost:5601/_dev/cpu_profile?duration=15&interval=100`](/_dev/cpu_profile?duration=15&interval=100)
-- [`https://elastic:changeme@localhost:5601/_dev/heap_snapshot`](/_dev/heap_snapshot)
+- [`https://localhost:5601/_dev/cpu_profile?duration=5&interval=100`](https://localhost:5601/_dev/cpu_profile?duration=5&interval=100)
+- `https://localhost:5601/_dev/heap_snapshot` - **BEWARE** this one is not a link,
+  as it's locked up my Kibana every now and again while using it.  **BEWARE**
+  
+  
 
 When using curl, you can use the `-kOJ` options, which:
 

@@ -2,6 +2,8 @@
 
 _part of [on-week 2022@1 - Patrick Mueller](./README.md)_
 
+![webhook rule](images/webhook-rule.png)
+
 Kibana alerting rule that runs the rule via webhook URL supplied as a parameter.
 
 The idea is to see what happens if we break the existing in-process boundary of
