@@ -85,6 +85,12 @@ export interface IRenderOptions {
    * @internal
    */
   vars?: Record<string, any>;
+
+  /**
+   * @internal
+   * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
+   */
+  includeExposedConfigKeys?: boolean;
 }
 
 /** @internal */

@@ -1051,6 +1051,8 @@ export interface HttpResources {
 // @public
 export interface HttpResourcesRenderOptions {
     headers?: ResponseHeaders;
+    // @internal
+    includeExposedConfigKeys?: boolean;
 }
 
 // @public
@@ -1227,6 +1229,8 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
+    // @internal
+    includeExposedConfigKeys?: boolean;
     isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
