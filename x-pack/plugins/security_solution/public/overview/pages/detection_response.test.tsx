@@ -16,6 +16,10 @@ jest.mock('../components/detection_response/rule_alerts_table', () => ({
 }));
 // TODO: add all sections mocks
 
+jest.mock('../../common/components/search_bar', () => ({
+  SiemSearchBar: () => <div data-test-subj="mock_globalDatePicker" />,
+}));
+
 const defaultUseSourcererReturn = {
   indicesExist: true,
   loading: false,
@@ -64,7 +68,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('globalDatePicker')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalDatePicker')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).not.toBeInTheDocument();
     expect(result.getByText('Detection & Response')).toBeInTheDocument();
@@ -86,7 +90,7 @@ describe('DetectionResponse', () => {
 
     expect(result.getByTestId('siem-landing-page')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponsePage')).not.toBeInTheDocument();
-    expect(result.queryByTestId('globalDatePicker')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalDatePicker')).not.toBeInTheDocument();
   });
 
   it('should render loader if sourcerer is loading', () => {
@@ -104,7 +108,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('globalDatePicker')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalDatePicker')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).not.toBeInTheDocument();
   });
@@ -125,8 +129,8 @@ describe('DetectionResponse', () => {
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
-    // TODO: check other alert sections are not in the document
-    // TODO: check cases sections are in the document
+    // TODO: assert other alert sections are not in the document
+    // TODO: assert cases sections are in the document
   });
 
   it('should not render alerts data sections if user has not kibana read permission', () => {
@@ -145,8 +149,8 @@ describe('DetectionResponse', () => {
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
-    // TODO: check all alert sections are not in the document
-    // TODO: check all cases sections are in the document
+    // TODO: assert all alert sections are not in the document
+    // TODO: assert all cases sections are in the document
   });
 
   it('should not render cases data sections if user has not cases read permission', () => {
@@ -162,8 +166,8 @@ describe('DetectionResponse', () => {
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();
-    // TODO: check all alert sections are in the document
-    // TODO: check all cases sections are not in the document
+    // TODO: assert all alert sections are in the document
+    // TODO: assert all cases sections are not in the document
   });
 
   it('should render page permissions message if user has any read permission', () => {
