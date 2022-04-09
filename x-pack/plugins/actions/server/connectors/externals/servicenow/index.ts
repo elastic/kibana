@@ -46,6 +46,7 @@ export class ServiceNow extends CaseConnector {
   private useTableApi: boolean;
   private appScope: string;
   private commentFieldKey: string;
+  private secrets: ServiceNowSecretConfigurationType;
 
   constructor({
     config,
@@ -63,11 +64,9 @@ export class ServiceNow extends CaseConnector {
       throw Error(`[Action]i18n.SERVICENOW: Wrong configuration.`);
     }
 
-    super(configurationUtilities, logger, {
-      username: secrets.username,
-      password: secrets.password,
-    });
+    super(configurationUtilities, logger);
 
+    this.secrets = secrets;
     this.urls = {
       basic: url,
       importSetTableUrl: `${url}/api/now/import/${internalConfig.importSetTable}`,
@@ -96,6 +95,7 @@ export class ServiceNow extends CaseConnector {
   public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
     try {
       const res = await this.request({
+        auth: this.getBasicAuth(),
         url: `${this.urls.tableApiIncidentUrl}/${id}`,
         method: 'get',
         responseSchema: incidentSchema,
@@ -112,6 +112,13 @@ export class ServiceNow extends CaseConnector {
     }
   }
 
+  private getBasicAuth() {
+    return {
+      username: this.secrets.username,
+      password: this.secrets.password,
+    };
+  }
+
   private isTableAPIResponse = (res: ServiceNowResponse): res is ServiceNowTableAPIResponse =>
     this.useTableApi;
 
@@ -122,6 +129,7 @@ export class ServiceNow extends CaseConnector {
       await this.checkIfApplicationIsInstalled();
 
       const res = await this.request({
+        auth: this.getBasicAuth(),
         url: this.useTableApi ? this.urls.tableApiIncidentUrl : this.urls.importSetTableUrl,
         method: 'post',
         data: prepareIncident(this.useTableApi, incident),
@@ -151,6 +159,7 @@ export class ServiceNow extends CaseConnector {
       await this.checkIfApplicationIsInstalled();
 
       const res = await this.request({
+        auth: this.getBasicAuth(),
         url: this.useTableApi
           ? `${this.urls.tableApiIncidentUrl}/${incidentId}`
           : this.urls.importSetTableUrl,
@@ -195,6 +204,7 @@ export class ServiceNow extends CaseConnector {
     const versionUrl = `${this.urls.basic}/api/${appScope}/elastic_api/health`;
     try {
       const res = await this.request({
+        auth: this.getBasicAuth(),
         url: versionUrl,
         method: 'get',
         responseSchema: applicationInformationSchema,

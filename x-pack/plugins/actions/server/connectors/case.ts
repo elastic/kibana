@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import { AxiosBasicCredentials } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   ExternalServiceIncidentResponse,
@@ -37,12 +36,8 @@ export interface CaseConnectorInterface {
 }
 
 export abstract class CaseConnector extends BasicConnector implements CaseConnectorInterface {
-  constructor(
-    public configurationUtilities: ActionsConfigurationUtilities,
-    public logger: Logger,
-    auth: AxiosBasicCredentials
-  ) {
-    super(configurationUtilities, logger, auth);
+  constructor(public configurationUtilities: ActionsConfigurationUtilities, public logger: Logger) {
+    super(configurationUtilities, logger);
 
     this.registerSubAction({
       name: 'pushToService',

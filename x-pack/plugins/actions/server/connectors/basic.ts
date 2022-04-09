@@ -7,7 +7,7 @@
 
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
@@ -22,14 +22,8 @@ export abstract class BasicConnector {
   private validProtocols: string[] = ['http:', 'https:'];
   private subActions: Map<string, SubAction> = new Map();
 
-  constructor(
-    public configurationUtilities: ActionsConfigurationUtilities,
-    public logger: Logger,
-    auth: AxiosBasicCredentials
-  ) {
-    this.axiosInstance = axios.create({
-      auth,
-    });
+  constructor(public configurationUtilities: ActionsConfigurationUtilities, public logger: Logger) {
+    this.axiosInstance = axios.create();
   }
 
   private normalizeURL(url: string) {
@@ -82,17 +76,17 @@ export abstract class BasicConnector {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected async request<D = unknown, R = any>({
+  protected async request<R = any>({
     url,
     data,
     method = 'get',
     responseSchema,
+    ...config
   }: {
     url: string;
     responseSchema: Type<R>;
-    data?: D;
     method?: Method;
-  }): Promise<AxiosResponse<R>> {
+  } & AxiosRequestConfig): Promise<AxiosResponse<R>> {
     this.assertURL(url);
     this.ensureUriAllowed(url);
     const normalizedURL = this.normalizeURL(url);
@@ -108,6 +102,7 @@ export abstract class BasicConnector {
     this.logger.debug(`Request to external service. Method: ${method}. URL: ${normalizedURL}`);
 
     const res = await this.axiosInstance(normalizedURL, {
+      ...config,
       method,
       data: this.normalizeData(data),
       // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
