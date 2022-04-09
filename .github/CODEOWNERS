@@ -55,7 +55,7 @@
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
-/packages/elastic-datemath/ @elastic/kibana-app-services
+/packages/kbn-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
 /packages/kbn-es-query/ @elastic/kibana-app-services
