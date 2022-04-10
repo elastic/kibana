@@ -11,9 +11,8 @@ import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 import { getThreatList } from './get_threat_list';
 
 export const buildThreatEnrichment = ({
-  buildRuleMessage,
   exceptionItems,
-  logger,
+  buildRuleMessage,
   services,
   threatFilters,
   threatIndex,
@@ -22,6 +21,7 @@ export const buildThreatEnrichment = ({
   threatQuery,
   pitId,
   reassignPitId,
+  logger,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {
@@ -41,7 +41,6 @@ export const buildThreatEnrichment = ({
       language: threatLanguage,
       index: threatIndex,
       searchAfter: undefined,
-      logger,
       buildRuleMessage,
       perPage: undefined,
       threatListConfig: {
@@ -50,6 +49,7 @@ export const buildThreatEnrichment = ({
       },
       pitId,
       reassignPitId,
+      logger,
     });
 
     return threatResponse.hits.hits;

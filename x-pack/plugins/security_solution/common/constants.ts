@@ -436,6 +436,9 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
+export const ELASTICSEARCH_MAX_PER_PAGE = 10000;
+export const DETECTION_ENGINE_MAX_PER_PAGE = ELASTICSEARCH_MAX_PER_PAGE;
+
 /**
  * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
  *

@@ -152,7 +152,9 @@ export const extractNamedQueries = (
 ): ThreatMatchNamedQuery[] =>
   hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
 
-export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {
+export const buildExecutionIntervalValidator: (interval: string) => (funcName: string) => void = (
+  interval
+) => {
   const intervalDuration = parseInterval(interval);
 
   if (intervalDuration == null) {
@@ -162,9 +164,10 @@ export const buildExecutionIntervalValidator: (interval: string) => () => void =
   }
 
   const executionEnd = moment().add(intervalDuration);
-  return () => {
+
+  return (funcName) => {
     if (moment().isAfter(executionEnd)) {
-      const message = `Current rule execution has exceeded its allotted interval (${interval}) and has been stopped.`;
+      const message = `Current rule execution has exceeded its allotted interval (${interval}) and has been stopped at ${funcName}.`;
       throw new Error(message);
     }
   };

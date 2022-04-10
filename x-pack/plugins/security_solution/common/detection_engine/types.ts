@@ -36,6 +36,7 @@ export interface BaseHit<T> {
   _id: string;
   _source: T;
   fields?: Record<string, SearchTypes[]>;
+  query?: Record<string, unknown>;
 }
 
 export interface EqlSequence<T> {

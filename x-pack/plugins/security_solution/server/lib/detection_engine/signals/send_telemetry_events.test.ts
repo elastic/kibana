@@ -108,7 +108,7 @@ describe('sendAlertTelemetry', () => {
       ['bar', 'abcd'],
       ['baz', '4567'],
     ]);
-    const subsetEvents = selectEvents(filteredEvents);
+    const subsetEvents = selectEvents(filteredEvents.hits.hits);
     const sources = enrichEndpointAlertsSignalID(subsetEvents, joinMap);
     expect(sources).toStrictEqual([
       {

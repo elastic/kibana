@@ -85,6 +85,7 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
+  percolatorRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver
 ) => {
   const isRuleRegistryEnabled = ruleDataClient != null;
@@ -104,6 +105,7 @@ export const initRoutes = (
     ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
+    percolatorRuleDataClient,
     getStartServices
   );
 

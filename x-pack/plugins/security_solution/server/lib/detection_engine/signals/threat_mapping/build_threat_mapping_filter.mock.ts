@@ -9,7 +9,7 @@ import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { Filter } from '@kbn/es-query';
 
-import { ThreatListDoc, ThreatListItem } from './types';
+import { ThreatListDoc, IndicatorHit } from './types';
 
 export const getThreatMappingMock = (): ThreatMapping => {
   return [
@@ -78,7 +78,7 @@ export const getThreatListSearchResponseMock = (): estypes.SearchResponse<Threat
   },
 });
 
-export const getThreatListItemMock = (overrides: Partial<ThreatListItem> = {}): ThreatListItem => ({
+export const getThreatListItemMock = (overrides: Partial<IndicatorHit> = {}): IndicatorHit => ({
   _id: '123',
   _index: 'threat_index',
   _score: 0,

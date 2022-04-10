@@ -72,17 +72,20 @@ export const getEventCount = async ({
   timestampOverride,
 }: EventCountOptions): Promise<number> => {
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
-  const eventSearchQueryBodyQuery = buildEventsSearchQuery({
-    index,
-    from: tuple.from.toISOString(),
-    to: tuple.to.toISOString(),
-    filter,
-    size: 0,
-    timestampOverride,
-    searchAfterSortIds: undefined,
-  }).body.query;
+  let eventSearchQueryBodyQuery;
+  if (tuple) {
+    eventSearchQueryBodyQuery = buildEventsSearchQuery({
+      index,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      filter,
+      size: 0,
+      timestampOverride,
+      searchAfterSortIds: undefined,
+    }).body.query;
+  }
   const response = await esClient.count({
-    body: { query: eventSearchQueryBodyQuery },
+    body: { query: eventSearchQueryBodyQuery ?? filter },
     ignore_unavailable: true,
     index,
   });

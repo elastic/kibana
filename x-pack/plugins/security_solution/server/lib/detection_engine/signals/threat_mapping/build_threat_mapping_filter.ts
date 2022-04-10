@@ -53,13 +53,13 @@ export const buildThreatMappingFilter = ({
  */
 export const filterThreatMapping = ({
   threatMapping,
-  threatListItem,
+  indicator,
   entryKey,
 }: FilterThreatMappingOptions): ThreatMapping =>
   threatMapping
     .map((threatMap) => {
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
-        const itemValue = get(entry[entryKey], threatListItem.fields);
+        const itemValue = get(entry[entryKey], indicator.fields);
         return itemValue == null || itemValue.length !== 1;
       });
       if (atLeastOneItemMissingInThreatList) {
@@ -72,11 +72,11 @@ export const filterThreatMapping = ({
 
 export const createInnerAndClauses = ({
   threatMappingEntries,
-  threatListItem,
+  indicator,
   entryKey,
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
-    const value = get(threatMappingEntry[entryKey], threatListItem.fields);
+    const value = get(threatMappingEntry[entryKey], indicator.fields);
     if (value != null && value.length === 1) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
@@ -87,8 +87,8 @@ export const createInnerAndClauses = ({
                 [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
                   query: value[0],
                   _name: encodeThreatMatchNamedQuery({
-                    id: threatListItem._id,
-                    index: threatListItem._index,
+                    id: indicator._id,
+                    index: indicator._index,
                     field: threatMappingEntry.field,
                     value: threatMappingEntry.value,
                   }),
@@ -106,13 +106,13 @@ export const createInnerAndClauses = ({
 
 export const createAndOrClauses = ({
   threatMapping,
-  threatListItem,
+  indicator,
   entryKey,
 }: CreateAndOrClausesOptions): BooleanFilter => {
   const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
     const innerAndClauses = createInnerAndClauses({
       threatMappingEntries: threatMap.entries,
-      threatListItem,
+      indicator,
       entryKey,
     });
     if (innerAndClauses.length !== 0) {
@@ -135,12 +135,12 @@ export const buildEntriesMappingFilter = ({
   const combinedShould = threatList.reduce<BooleanFilter[]>((accum, threatListSearchItem) => {
     const filteredEntries = filterThreatMapping({
       threatMapping,
-      threatListItem: threatListSearchItem,
+      indicator: threatListSearchItem,
       entryKey,
     });
     const queryWithAndOrClause = createAndOrClauses({
       threatMapping: filteredEntries,
-      threatListItem: threatListSearchItem,
+      indicator: threatListSearchItem,
       entryKey,
     });
     if (queryWithAndOrClause.bool.should.length !== 0) {

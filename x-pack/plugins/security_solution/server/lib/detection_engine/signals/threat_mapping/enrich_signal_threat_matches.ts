@@ -12,15 +12,13 @@ import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
   GetMatchedThreats,
   ThreatEnrichment,
-  ThreatListItem,
+  IndicatorHit,
   ThreatMatchNamedQuery,
   SignalMatch,
 } from './types';
 import { extractNamedQueries } from './utils';
 
-export const getSignalMatchesFromThreatList = (
-  threatList: ThreatListItem[] = []
-): SignalMatch[] => {
+export const getSignalMatchesFromThreatList = (threatList: IndicatorHit[] = []): SignalMatch[] => {
   const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
 
   threatList.forEach((threatHit) =>
@@ -80,7 +78,7 @@ export const buildEnrichments = ({
   indicatorPath,
 }: {
   queries: ThreatMatchNamedQuery[];
-  threats: ThreatListItem[];
+  threats: IndicatorHit[];
   indicatorPath: string;
 }): ThreatEnrichment[] =>
   queries.map((query) => {

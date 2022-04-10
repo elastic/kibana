@@ -119,9 +119,7 @@ export const createThreatSignals = async ({
   };
 
   const threatEnrichment = buildThreatEnrichment({
-    buildRuleMessage,
     exceptionItems,
-    logger,
     services,
     threatFilters: allThreatFilters,
     threatIndex,
@@ -130,6 +128,8 @@ export const createThreatSignals = async ({
     threatQuery,
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
+    buildRuleMessage,
+    logger,
   });
 
   const createSignals = async ({
@@ -145,7 +145,7 @@ export const createThreatSignals = async ({
     let documentCount = totalDocumentCount;
 
     while (list.hits.hits.length !== 0) {
-      verifyExecutionCanProceed();
+      verifyExecutionCanProceed('create signals');
       const chunks = chunk(itemsPerSearch, list.hits.hits);
       logger.debug(
         buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`)

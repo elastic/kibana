@@ -18,6 +18,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ListClient } from '../../../../../../lists/server';
 import {
@@ -34,10 +35,30 @@ import {
   SearchAfterAndBulkCreateReturnType,
   SignalsEnrichment,
   WrapHits,
+  WithTimeout,
 } from '../types';
 import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
+
+export interface UpdatePercolatorIndexOptions {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  logDebugMessage: (message: string) => void;
+  percolatorRuleDataClient: IRuleDataClient;
+  perPage: number;
+  ruleId: string;
+  ruleVersion: number;
+  spaceId: string;
+  threatFilters: unknown[];
+  threatIndex: ThreatIndex;
+  threatIndicatorPath: string;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatMapping: ThreatMapping;
+  threatQuery: ThreatQuery;
+  withTimeout: WithTimeout;
+}
 
 export interface CreateThreatSignalsOptions {
   alertId: string;
@@ -75,7 +96,33 @@ export interface CreateThreatSignalOptions {
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
-  currentThreatList: ThreatListItem[];
+  currentThreatList: IndicatorHit[];
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
+  inputIndex: string[];
+  language: LanguageOrUndefined;
+  listClient: ListClient;
+  logger: Logger;
+  outputIndex: string;
+  query: string;
+  savedId: string | undefined;
+  searchAfterSize: number;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatEnrichment: SignalsEnrichment;
+  threatMapping: ThreatMapping;
+  tuple: RuleRangeTuple;
+  type: Type;
+  wrapHits: WrapHits;
+}
+
+export interface FetchSourceEventsOptions {
+  alertId: string;
+  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  completeRule: CompleteRule<ThreatRuleParams>;
+  currentResult: SearchAfterAndBulkCreateReturnType;
+  currentThreatList: IndicatorHit[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
@@ -132,34 +179,42 @@ export interface CreateEventSignalOptions {
 type EntryKey = 'field' | 'value';
 export interface BuildThreatMappingFilterOptions {
   chunkSize?: number;
-  threatList: ThreatListItem[];
+  threatList: IndicatorHit[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
 }
 
 export interface FilterThreatMappingOptions {
-  threatListItem: ThreatListItem;
+  indicator: IndicatorHit;
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
 }
 
 export interface CreateInnerAndClausesOptions {
-  threatListItem: ThreatListItem;
+  indicator: IndicatorHit;
   threatMappingEntries: ThreatMappingEntries;
   entryKey: EntryKey;
 }
 
 export interface CreateAndOrClausesOptions {
-  threatListItem: ThreatListItem;
+  indicator: IndicatorHit;
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
 }
 
 export interface BuildEntriesMappingFilterOptions {
   chunkSize: number;
-  threatList: ThreatListItem[];
+  threatList: IndicatorHit[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
+}
+
+export interface CreatePercolateQueriesOptions {
+  ruleId: string;
+  ruleVersion: number;
+  threatList: Array<estypes.SearchHit<ThreatListDoc>>;
+  threatMapping: ThreatMapping;
+  threatIndicatorPath: string;
 }
 
 export interface SplitShouldClausesOptions {
@@ -171,9 +226,45 @@ export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
 }
 
-interface ThreatListConfig {
+export interface ThreatListConfig {
   _source: string[] | boolean;
   fields: string[] | undefined;
+  sort?: estypes.Sort;
+}
+
+export interface PercolatorQuery {
+  bool: { must: unknown[]; should: unknown[]; minimum_should_match: number };
+  enrichments?: ThreatEnrichment[];
+  id?: string;
+}
+
+export interface GetNextPageOptions {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
+  index: string[];
+  language: LanguageOrUndefined;
+  logDebugMessage: (message: string) => void;
+  perPage?: number;
+  query: string;
+  searchAfter: SortResults | undefined;
+  threatListConfig: ThreatListConfig;
+}
+
+export interface CreatePercolatorQueriesOptions {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  logDebugMessage: (message: string) => void;
+  perPage?: number;
+  ruleId: string;
+  ruleVersion: number;
+  searchAfter: SortResults | undefined;
+  threatFilters: unknown[];
+  threatIndex: ThreatIndex;
+  threatIndicatorPath: string;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatMapping: ThreatMapping;
+  threatQuery: ThreatQuery;
 }
 
 export interface GetThreatListOptions {
@@ -201,19 +292,48 @@ export interface ThreatListCountOptions {
   threatFilters: unknown[];
 }
 
-export interface ThreatListDoc {
-  [key: string]: unknown;
+export interface FetchItemsOptions<T> {
+  esClient: ElasticsearchClient;
+  exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
+  index: ThreatIndex;
+  itemType: string;
+  language: ThreatLanguageOrUndefined;
+  logDebugMessage: (message: string) => void;
+  perPage?: number;
+  query: ThreatQuery;
+  searchAfter?: SortResults;
+  timestampOverride?: string;
+  transformHits: (hits: EventHit[]) => T[];
+  tuple?: RuleRangeTuple;
 }
+
+export interface EventDoc {
+  [key: string]: unknown;
+  fields?: Record<string, string[]>;
+}
+
+export interface ThreatListDoc extends EventDoc {
+  threat?: {
+    feed?: {
+      name?: string;
+    };
+    [key: string]: unknown;
+  };
+}
+
+export type SourceEventDoc = EventDoc;
 
 /**
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
+export type EventHit = estypes.SearchHit<EventDoc>;
+export type IndicatorHit = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
-  indicator: Record<string, unknown>;
+  indicator: unknown;
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
@@ -228,11 +348,11 @@ export interface ThreatMatchNamedQuery {
   value: string;
 }
 
-export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
+export type GetMatchedThreats = (ids: string[]) => Promise<IndicatorHit[]>;
 
 export interface BuildThreatEnrichmentOptions {
-  buildRuleMessage: BuildRuleMessage;
   exceptionItems: ExceptionListItemSchema[];
+  buildRuleMessage: BuildRuleMessage;
   logger: Logger;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
@@ -259,10 +379,6 @@ export interface EventsOptions {
   tuple: RuleRangeTuple;
 }
 
-export interface EventDoc {
-  [key: string]: unknown;
-}
-
 export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
@@ -271,7 +387,7 @@ export interface EventCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   filters: unknown[];
-  tuple: RuleRangeTuple;
+  tuple?: RuleRangeTuple;
   timestampOverride?: string;
 }
 
@@ -285,5 +401,11 @@ export type GetDocumentListInterface = (params: {
 }) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc>>;
 
 export type CreateSignalInterface = (
-  params: EventItem[] | ThreatListItem[]
+  params: EventItem[] | IndicatorHit[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
+
+/**
+ * This is an ECS document being returned, but the user could return or use non-ecs based
+ * documents potentially.
+ */
+export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;

@@ -79,6 +79,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         threatIndicatorPath: params.threat_indicator_path,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
+        percolate: params.percolate,
       };
     }
     case 'query': {
@@ -203,6 +204,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
+        percolate: params.percolate,
       };
     }
     case 'query': {

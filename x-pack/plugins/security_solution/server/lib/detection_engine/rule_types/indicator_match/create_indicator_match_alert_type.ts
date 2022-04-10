@@ -12,11 +12,14 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { percolateExecutor } from './percolator/percolate_executor';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const createIndicatorMatchAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & { percolatorRuleDataClient: IRuleDataClient }
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version, percolatorRuleDataClient } =
+    createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -53,18 +56,25 @@ export const createIndicatorMatchAlertType = (
         runOpts: {
           buildRuleMessage,
           bulkCreate,
+          completeRule,
           exceptionItems,
           listClient,
-          completeRule,
           searchAfterSize,
           tuple,
+          tupleIndex,
+          withTimeout,
           wrapHits,
         },
         services,
         state,
+        spaceId,
       } = execOptions;
 
-      const result = await threatMatchExecutor({
+      // const isPercolatorEnabled = completeRule.ruleParams.percolate;
+      const isPercolatorEnabled = true;
+      const indicatorMatchExecutor = isPercolatorEnabled ? percolateExecutor : threatMatchExecutor;
+
+      const result = await indicatorMatchExecutor({
         buildRuleMessage,
         bulkCreate,
         exceptionItems,
@@ -73,11 +83,15 @@ export const createIndicatorMatchAlertType = (
         listClient,
         logger,
         completeRule,
+        percolatorRuleDataClient,
         searchAfterSize,
         services,
         tuple,
         version,
         wrapHits,
+        tupleIndex,
+        withTimeout,
+        spaceId,
       });
       return { ...result, state };
     },

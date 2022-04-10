@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
-import { ITelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
+import { ThreatMatchExecutorOptions } from '../types';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
-import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 
@@ -37,21 +25,7 @@ export const threatMatchExecutor = async ({
   buildRuleMessage,
   bulkCreate,
   wrapHits,
-}: {
-  completeRule: CompleteRule<ThreatRuleParams>;
-  tuple: RuleRangeTuple;
-  listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  version: string;
-  searchAfterSize: number;
-  logger: Logger;
-  eventsTelemetry: ITelemetryEventsSender | undefined;
-  experimentalFeatures: ExperimentalFeatures;
-  buildRuleMessage: BuildRuleMessage;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-}) => {
+}: ThreatMatchExecutorOptions) => {
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('threatMatchExecutor', async () => {
@@ -61,6 +35,7 @@ export const threatMatchExecutor = async ({
       version,
       index: ruleParams.index,
     });
+
     return createThreatSignals({
       alertId: completeRule.alertId,
       buildRuleMessage,

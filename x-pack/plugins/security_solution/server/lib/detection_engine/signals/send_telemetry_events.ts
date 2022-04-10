@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
@@ -18,9 +19,9 @@ interface SearchResultSource {
 type CreatedSignalId = string;
 type AlertId = string;
 
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+export function selectEvents(eventHits: Array<estypes.SearchHit<SignalSource>>): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
+  const sources: TelemetryEvent[] = eventHits.map(function (
     obj: SearchResultSource
   ): TelemetryEvent {
     return obj._source;
@@ -46,7 +47,7 @@ export function enrichEndpointAlertsSignalID(
 export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: ITelemetryEventsSender | undefined,
-  filteredEvents: SignalSearchResponse,
+  filteredEvents: SignalSearchResponse | Array<estypes.SearchHit<SignalSource>>,
   createdEvents: SignalSource[],
   buildRuleMessage: BuildRuleMessage
 ) {
@@ -54,7 +55,9 @@ export function sendAlertTelemetryEvents(
     return;
   }
 
-  let selectedEvents = selectEvents(filteredEvents);
+  let selectedEvents = selectEvents(
+    Array.isArray(filteredEvents) ? filteredEvents : filteredEvents.hits.hits
+  );
   if (selectedEvents.length > 0) {
     // Create map of ancenstor_id -> alert_id
     let signalIdMap = new Map<CreatedSignalId, AlertId>();
