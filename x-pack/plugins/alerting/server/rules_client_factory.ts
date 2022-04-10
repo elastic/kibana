@@ -10,7 +10,11 @@ import {
   Logger,
   SavedObjectsServiceStart,
   PluginInitializerContext,
+  IBasePath,
+  ElasticsearchServiceStart,
+  UiSettingsServiceStart,
 } from 'src/core/server';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { RulesClient } from './rules_client';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
@@ -31,10 +35,15 @@ export interface RulesClientFactoryOpts {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
+  elasticsearch: ElasticsearchServiceStart;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  basePathService: IBasePath;
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
 }
 
 export class RulesClientFactory {
@@ -53,6 +62,11 @@ export class RulesClientFactory {
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
+  private basePathService!: IBasePath;
+  private elasticsearch!: ElasticsearchServiceStart;
+  private data!: DataPluginStart;
+  private savedObjects!: SavedObjectsServiceStart;
+  private uiSettings!: UiSettingsServiceStart;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -73,6 +87,11 @@ export class RulesClientFactory {
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
+    this.basePathService = options.basePathService;
+    this.elasticsearch = options.elasticsearch;
+    this.data = options.data;
+    this.savedObjects = options.savedObjects;
+    this.uiSettings = options.uiSettings;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -99,6 +118,11 @@ export class RulesClientFactory {
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      basePathService: this.basePathService,
+      elasticsearch: this.elasticsearch,
+      data: this.data,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
       async getUserName() {
         if (!securityPluginStart) {
           return null;

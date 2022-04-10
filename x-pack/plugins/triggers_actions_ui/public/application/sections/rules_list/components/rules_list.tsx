@@ -41,6 +41,7 @@ import {
   EuiTableComputedColumnType,
   EuiTableActionsColumnType,
   EuiCallOut,
+  EuiSwitch,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
@@ -72,6 +73,7 @@ import {
   snoozeRule,
   unsnoozeRule,
   deleteRules,
+  bulkDiagnoseRules,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -86,6 +88,7 @@ import {
   formatDuration,
   parseDuration,
   MONITORING_HISTORY_LIMIT,
+  DiagnoseOutput,
 } from '../../../../../../alerting/common';
 import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -100,6 +103,7 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RulePreviewFlyout } from '../../rule_form/rule_preview_flyout';
 
 const ENTER_KEY = 13;
 
@@ -158,13 +162,17 @@ export const RulesList: React.FunctionComponent = () => {
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [previewFlyoutVisible, setPreviewFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
+  const [currentRuleToDiagnose, setCurrentRuleToDiagnose] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState<boolean>(false);
+  const [ruleDiagnosisOutput, setRuleDiagnosisOutput] = useState<DiagnoseOutput[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -216,6 +224,11 @@ export const RulesList: React.FunctionComponent = () => {
     setCurrentRuleToEdit(ruleItem);
   };
 
+  const onRuleDiagnose = (ruleItem: RuleTableItem) => {
+    setPreviewFlyoutVisibility(true);
+    setCurrentRuleToDiagnose(ruleItem);
+  };
+
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
@@ -252,6 +265,19 @@ export const RulesList: React.FunctionComponent = () => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (rulesState.data && rulesState.data.length > 0) {
+        setRuleDiagnosisOutput(
+          await bulkDiagnoseRules({
+            http,
+            ids: rulesState.data.map((rule: Rule) => rule.id),
+          })
+        );
+      }
+    })();
+  }, [http, rulesState]);
 
   useEffect(() => {
     (async () => {
@@ -628,6 +654,61 @@ export const RulesList: React.FunctionComponent = () => {
               ))}
             </EuiPopover>
           ) : null;
+        },
+      },
+      {
+        name: '',
+        width: '80px',
+        render: (item: RuleTableItem) => {
+          if (showDiagnostics) {
+            return (
+              <EuiFlexGroup gutterSize="none">
+                {item.diagnosticErrors && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="crossInACircleFilled"
+                      color="danger"
+                      aria-label="errors"
+                      content={
+                        item.diagnosticWarnings
+                          ? `Rule has ${item.diagnosticErrors} errors and ${item.diagnosticWarnings} warnings`
+                          : `Rule has ${item.diagnosticErrors} errors`
+                      }
+                    />
+                  </EuiFlexItem>
+                )}
+                {!item.diagnosticErrors && item.diagnosticWarnings && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="alert"
+                      color="warning"
+                      aria-label="warnings"
+                      content={`Rule has ${item.diagnosticWarnings} warnings`}
+                    />
+                  </EuiFlexItem>
+                )}
+                {!item.diagnosticErrors && !item.diagnosticWarnings && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="checkInCircleFilled"
+                      color="primary"
+                      aria-label="allgood"
+                      content={`Rule looks good!`}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    color="primary"
+                    title="Diagnose"
+                    onClick={() => onRuleDiagnose(item)}
+                    iconType="magnifyWithPlus"
+                    aria-label="Diagnose"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
         },
       },
       {
@@ -1044,6 +1125,7 @@ export const RulesList: React.FunctionComponent = () => {
                   ruleTypeIndex: ruleTypesState.data,
                   canExecuteActions,
                   config,
+                  ruleDiagnosticOutputs: ruleDiagnosisOutput,
                 })}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
@@ -1105,7 +1187,14 @@ export const RulesList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label="Show diagnostics"
+                checked={showDiagnostics}
+                onChange={(e) => setShowDiagnostics(!showDiagnostics)}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
                 <FormattedMessage
@@ -1220,6 +1309,7 @@ export const RulesList: React.FunctionComponent = () => {
                 ruleTypeIndex: ruleTypesState.data,
                 canExecuteActions,
                 config,
+                ruleDiagnosticOutputs: ruleDiagnosisOutput,
               })
         }
         itemId="id"
@@ -1354,6 +1444,14 @@ export const RulesList: React.FunctionComponent = () => {
           onSave={loadRulesData}
         />
       )}
+      {previewFlyoutVisible && currentRuleToDiagnose && (
+        <RulePreviewFlyout
+          existingRule={currentRuleToDiagnose as Rule}
+          onClose={() => {
+            setPreviewFlyoutVisibility(false);
+          }}
+        />
+      )}
     </section>
   );
 };
@@ -1392,14 +1490,26 @@ interface ConvertRulesToTableItemsOpts {
   ruleTypeIndex: RuleTypeIndex;
   canExecuteActions: boolean;
   config: TriggersActionsUiConfig;
+  ruleDiagnosticOutputs: DiagnoseOutput[];
 }
 
 function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): RuleTableItem[] {
-  const { rules, ruleTypeIndex, canExecuteActions, config } = opts;
+  const { rules, ruleTypeIndex, canExecuteActions, config, ruleDiagnosticOutputs } = opts;
   const minimumDuration = config.minimumScheduleInterval
     ? parseDuration(config.minimumScheduleInterval.value)
     : 0;
   return rules.map((rule, index: number) => {
+    const diagnosticOutput = ruleDiagnosticOutputs.find(
+      (ruleDiagnosticOutput: DiagnoseOutput) => ruleDiagnosticOutput.id === rule.id
+    );
+    const warnings: number =
+      (diagnosticOutput?.errorsAndWarnings ?? []).filter(
+        (errorsAndWarnings) => errorsAndWarnings.type === 'warning'
+      ).length ?? 0;
+    const errors: number =
+      (diagnosticOutput?.errorsAndWarnings ?? []).filter(
+        (errorsAndWarnings) => errorsAndWarnings.type === 'error'
+      ).length ?? 0;
     return {
       ...rule,
       index,
@@ -1410,6 +1520,8 @@ function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): RuleTable
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+      ...(warnings > 0 ? { diagnosticWarnings: warnings } : {}),
+      ...(errors > 0 ? { diagnosticErrors: errors } : {}),
     };
   });
 }

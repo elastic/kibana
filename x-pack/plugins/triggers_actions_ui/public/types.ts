@@ -260,6 +260,8 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  diagnosticWarnings?: number;
+  diagnosticErrors?: number;
 }
 
 export interface RuleTypeParamsExpressionProps<

@@ -348,6 +348,7 @@ export class RuleTypeRegistry {
             ruleTaskTimeout,
             defaultScheduleInterval,
             doesSetRecoveryContext,
+            diagnostics,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,

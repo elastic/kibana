@@ -11,6 +11,7 @@ import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodas
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -19,8 +20,13 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
+  IBasePath,
+  ElasticsearchServiceStart,
+  SavedObjectsServiceStart,
+  UiSettingsServiceStart,
 } from '../../../../../src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
+import { RuleDiagnostic } from '../lib/diagnostics/rule_diagnostic';
 import {
   Rule,
   PartialRule,
@@ -89,7 +95,7 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogWithErrorsResult } from '../../common';
+import { DiagnoseOutput, IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
@@ -140,8 +146,13 @@ export interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertingAuthorization;
+  basePathService: IBasePath;
   actionsAuthorization: ActionsAuthorization;
   ruleTypeRegistry: RuleTypeRegistry;
+  elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
@@ -231,6 +242,13 @@ export interface CreateOptions<Params extends RuleTypeParams> {
   };
 }
 
+export interface DiagnoseOptions<Params extends RuleTypeParams> {
+  ruleTypeId: string;
+  params: Params;
+  consumer: string;
+  schedule: IntervalSchedule;
+}
+
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
@@ -303,11 +321,18 @@ export class RulesClient {
     'snoozeEndTime',
   ];
 
+  private ruleDiagnostics: RuleDiagnostic;
+
   constructor({
     ruleTypeRegistry,
     minimumScheduleInterval,
     unsecuredSavedObjectsClient,
     authorization,
+    basePathService,
+    elasticsearch,
+    data,
+    uiSettings,
+    savedObjects,
     taskManager,
     logger,
     spaceId,
@@ -340,6 +365,18 @@ export class RulesClient {
     this.kibanaVersion = kibanaVersion;
     this.auditLogger = auditLogger;
     this.eventLogger = eventLogger;
+
+    this.ruleDiagnostics = new RuleDiagnostic({
+      basePathService,
+      spaceId,
+      createAPIKey,
+      elasticsearch,
+      data,
+      uiSettings,
+      savedObjects,
+      encryptedSavedObjectsClient,
+      namespace,
+    });
   }
 
   public async create<Params extends RuleTypeParams = never>({
@@ -498,6 +535,130 @@ export class RulesClient {
       references,
       false,
       true
+    );
+  }
+
+  public async preview<Params extends RuleTypeParams = never>({
+    ruleTypeId,
+    params,
+    consumer,
+    schedule,
+  }: DiagnoseOptions<Params>): Promise<DiagnoseOutput> {
+    await this.authorization.ensureAuthorized({
+      ruleTypeId,
+      consumer,
+      operation: WriteOperations.Create,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleTypeId);
+
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
+    return await this.ruleDiagnostics.diagnose({
+      schedule,
+      params,
+      ruleType,
+      username: await this.getUserName(),
+      execute: true,
+    });
+  }
+
+  public async diagnose(id: string): Promise<DiagnoseOutput> {
+    let ruleSavedObject: SavedObject<RawRule>;
+    try {
+      ruleSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        'alert',
+        id,
+        {
+          namespace: this.namespace,
+        }
+      );
+    } catch (e) {
+      // Still attempt to load the attributes and version using SOC
+      ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    }
+
+    await this.authorization.ensureAuthorized({
+      ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+      consumer: ruleSavedObject.attributes.consumer,
+      operation: ReadOperations.Get,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleSavedObject.attributes.alertTypeId);
+
+    const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
+    return await this.ruleDiagnostics.diagnose({
+      rule: this.getPartialRuleFromRaw(
+        id,
+        ruleType,
+        ruleSavedObject.attributes,
+        ruleSavedObject.references,
+        false
+      ) as Rule,
+      apiKey: ruleSavedObject.attributes.apiKey,
+      schedule: ruleSavedObject.attributes.schedule as IntervalSchedule,
+      params: ruleSavedObject.attributes.params,
+      ruleType,
+      username: await this.getUserName(),
+      execute: true,
+    });
+  }
+
+  public async bulkDiagnose(ids: string[]): Promise<DiagnoseOutput[]> {
+    const ruleSavedObjects: Array<SavedObject<RawRule>> = await Promise.all(
+      ids.map(async (id: string) => {
+        let ruleSavedObject: SavedObject<RawRule>;
+        try {
+          ruleSavedObject =
+            await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+              'alert',
+              id,
+              {
+                namespace: this.namespace,
+              }
+            );
+        } catch (e) {
+          // Still attempt to load the attributes and version using SOC
+          ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+        }
+
+        await this.authorization.ensureAuthorized({
+          ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+          consumer: ruleSavedObject.attributes.consumer,
+          operation: ReadOperations.Get,
+          entity: AlertingAuthorizationEntity.Rule,
+        });
+
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleSavedObject.attributes.alertTypeId);
+
+        return ruleSavedObject;
+      })
+    );
+
+    return await Promise.all(
+      ruleSavedObjects.map(async (ruleSavedObject: SavedObject<RawRule>) => {
+        try {
+          const ruleType = this.ruleTypeRegistry.get(ruleSavedObject.attributes.alertTypeId);
+          const result = this.ruleDiagnostics.diagnose({
+            rule: this.getPartialRuleFromRaw(
+              ruleSavedObject.id,
+              ruleType,
+              ruleSavedObject.attributes,
+              ruleSavedObject.references,
+              false
+            ) as Rule,
+            apiKey: ruleSavedObject.attributes.apiKey,
+            schedule: ruleSavedObject.attributes.schedule as IntervalSchedule,
+            params: ruleSavedObject.attributes.params,
+            ruleType,
+            username: await this.getUserName(),
+            execute: false,
+          });
+          return result;
+        } catch (err) {
+          return { errorsAndWarnings: [], id: ruleSavedObject.id };
+        }
+      })
     );
   }
 

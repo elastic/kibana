@@ -31,6 +31,8 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { AlertSeverity } from '../../common/enums';
 import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
+import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
+import { getConfigCcs } from '../../common/ccs_utils';
 
 type ExecutedState =
   | {
@@ -101,6 +103,16 @@ export class BaseRule {
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
+      },
+      diagnostics: {
+        getIndices: () => {
+          return getNewIndexPatterns({
+            config: Globals.app.config,
+            moduleType: 'elasticsearch',
+            dataset: 'node_stats',
+            ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+          });
+        },
       },
     };
   }

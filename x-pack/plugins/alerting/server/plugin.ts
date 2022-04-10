@@ -386,8 +386,13 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request);
       },
+      basePathService: core.http.basePath,
+      data: plugins.data,
+      uiSettings: core.uiSettings,
+      savedObjects: core.savedObjects,
       actions: plugins.actions,
       eventLog: plugins.eventLog,
+      elasticsearch: core.elasticsearch,
       kibanaVersion: this.kibanaVersion,
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
