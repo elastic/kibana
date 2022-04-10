@@ -41,6 +41,7 @@ describe('Elasticsearch Errors', () => {
       client,
       indexName: 'existing_index_with_write_block',
       mappings: { properties: {} },
+      migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
     })();
     await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
   });

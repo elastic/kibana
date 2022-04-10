@@ -10,6 +10,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { docLinksServiceMock } from 'src/core/public/mocks';
 jest.mock('./catch_retryable_es_client_errors');
 
 describe('waitForIndexStatusYellow', () => {
@@ -28,11 +29,12 @@ describe('waitForIndexStatusYellow', () => {
   const client = elasticsearchClientMock.createInternalClient(
     elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
   );
-
+  const docLinks = docLinksServiceMock.createStartContract().links;
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
     const task = waitForIndexStatusYellow({
       client,
       index: 'my_index',
+      migrationDocLinks: docLinks.kibanaUpgradeSavedObjects,
     });
     try {
       await task();

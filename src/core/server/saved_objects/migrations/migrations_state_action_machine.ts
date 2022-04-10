@@ -15,7 +15,6 @@ import { Model, Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
 import { SavedObjectsRawDoc } from '../serialization';
-import { DocLinksServiceStart } from '../../doc_links';
 
 interface StateTransitionLogMeta extends LogMeta {
   kibana: {
