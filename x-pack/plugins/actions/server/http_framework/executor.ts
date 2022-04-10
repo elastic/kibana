@@ -10,6 +10,10 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 import { ExecutorType } from '../types';
 import { ExecutorParams, HTTPConnectorType } from './types';
 
+const isFunction = (v: unknown): v is Function => {
+  return typeof v === 'function';
+};
+
 export const buildExecutor = <Config, Secrets>({
   configurationUtilities,
   connector,
@@ -43,15 +47,23 @@ export const buildExecutor = <Config, Secrets>({
       throw new Error('Sub action not registered');
     }
 
-    const method = action?.method;
+    const method = action.method;
 
     if (!service[method]) {
       throw new Error('Not valid method for registered sub action');
     }
 
-    action.schema.validate(subActionParams);
+    const func = service[method];
 
-    const data = await service[method](subActionParams);
+    if (!isFunction(func)) {
+      throw new Error('Method must be a valid function');
+    }
+
+    if (action.schema) {
+      action.schema.validate(subActionParams);
+    }
+
+    const data = await func(subActionParams);
     return { status: 'ok', data, actionId };
   };
 };

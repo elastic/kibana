@@ -19,6 +19,7 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
 };
 
 export abstract class BasicConnector<Config, Secrets> {
+  [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http:', 'https:'];
   private subActions: Map<string, SubAction> = new Map();

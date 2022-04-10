@@ -10,7 +10,7 @@ import { Type } from '@kbn/config-schema';
 export interface SubAction {
   name: string;
   method: string;
-  schema: Type<unknown>;
+  schema: Type<unknown> | null;
 }
 
 export interface PushToServiceParams {
