@@ -82,7 +82,7 @@ export const SessionViewDisplayOptions = ({
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
         iconType="eye"
-        display={displayOptions.verboseMode ? 'fill' : 'empty'}
+        display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
         onClick={toggleOptionButton}
         size="m"
         aria-label="Session view display option"
