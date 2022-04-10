@@ -6,6 +6,8 @@ _this was a dust-off-and-polish effort; the original code is here: https://githu
 
 v8 profiler movie: [link](https://user-images.githubusercontent.com/25117/162596494-d13711c2-398e-4523-b94c-688129326520.mp4)
 
+https://user-images.githubusercontent.com/25117/162596494-d13711c2-398e-4523-b94c-688129326520.mp4
+
 HTTP endpoints in Kibana to run a CPU profile for specified duration, and
 obtain a heap snapshot. 
 
