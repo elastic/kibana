@@ -23,13 +23,44 @@ const StoriesResponseSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
-const BASE_URL = 'https://silent-snow-4890.tines.com/api/v1/';
-const STORIES_URL = `${BASE_URL}/stories`;
+const WebhookResponseSchema = schema.object(
+  {
+    agents: schema.arrayOf(
+      schema.object(
+        { id: schema.number(), type: schema.string(), story_id: schema.number() },
+        { unknowns: 'ignore' }
+      )
+    ),
+  },
+  { unknowns: 'ignore' }
+);
+
+const BASE_URL = '/api/v1';
 
 export class Tines extends BasicConnector<Config, Secrets> {
+  private urls: {
+    basic: string;
+    base: string;
+    stories: string;
+    agents: string;
+    getRunURL: (actionId: number) => string;
+  };
+
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
+    this.urls = {
+      basic: this.config.url,
+      base: `${this.config.url}${BASE_URL}`,
+      stories: `${this.config.url}${BASE_URL}/stories`,
+      agents: `${this.config.url}${BASE_URL}/agents`,
+      getRunURL: (actionId: number) => `${this.config.url}${BASE_URL}/agents/${actionId}/run`,
+    };
+
+    this.registerSubActions();
+  }
+
+  private registerSubActions() {
     this.registerSubAction({
       name: 'trigger',
       method: 'trigger',
@@ -41,21 +72,55 @@ export class Tines extends BasicConnector<Config, Secrets> {
       method: 'getStories',
       schema: null,
     });
+
+    this.registerSubAction({
+      name: 'webhooks',
+      method: 'getWebhooks',
+      schema: schema.object({ storyId: schema.number() }),
+    });
+
+    this.registerSubAction({
+      name: 'run',
+      method: 'runWebhook',
+      schema: schema.object({ actionId: schema.number() }),
+    });
   }
 
   private getAuthHeaders() {
     return { 'x-user-email': this.secrets.email, 'x-user-token': this.secrets.apiToken };
   }
 
-  public trigger() {}
+  public async runWebhook({ actionId }: { actionId: number }) {
+    const res = await this.request({
+      url: this.urls.getRunURL(actionId),
+      method: 'post',
+      headers: this.getAuthHeaders(),
+      responseSchema: WebhookResponseSchema,
+    });
+
+    return res.data;
+  }
+
+  public async getWebhooks({ storyId }: { storyId: number }) {
+    const res = await this.request({
+      url: this.urls.agents,
+      headers: this.getAuthHeaders(),
+      responseSchema: WebhookResponseSchema,
+    });
+
+    return res.data.agents.filter(
+      (agent) => agent.type === 'Agents::WebhookAgent' && agent.story_id === storyId
+    );
+  }
+
   public async getStories() {
     const res = await this.request({
-      url: STORIES_URL,
+      url: this.urls.stories,
       headers: this.getAuthHeaders(),
       responseSchema: StoriesResponseSchema,
     });
 
-    return res.data;
+    return res.data.stories;
   }
 }
 

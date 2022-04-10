@@ -63,7 +63,7 @@ export const buildExecutor = <Config, Secrets>({
       action.schema.validate(subActionParams);
     }
 
-    const data = await func(subActionParams);
-    return { status: 'ok', data, actionId };
+    const data = await func.call(service, subActionParams);
+    return { status: 'ok', data: data ?? {}, actionId };
   };
 };
