@@ -1,0 +1,14 @@
+{
+  "id": "canvasExpressions",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Expression language features that originated from Canvas",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "canvas_expressions"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["expressions", "canvas"]
+}

@@ -9,7 +9,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import { CanvasSetup } from '../public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 
@@ -20,6 +20,7 @@ import { renderFunctions, renderFunctionFactories } from './renderers';
 
 interface SetupDeps {
   canvas: CanvasSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface StartDeps {
