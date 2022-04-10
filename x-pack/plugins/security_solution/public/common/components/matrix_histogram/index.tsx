@@ -181,8 +181,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     useMatrixHistogramCombined(matrixHistogramRequest);
   const [{ pageName }] = useRouteSpy();
 
-  const onHostOrNetworkPage =
-    pageName === SecurityPageName.hosts || pageName === SecurityPageName.network;
+  const onHostOrNetworkOrUserPage =
+    pageName === SecurityPageName.hosts ||
+    pageName === SecurityPageName.network ||
+    pageName === SecurityPageName.users;
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -259,11 +261,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             toggleQuery={toggleQuery}
             subtitle={subtitleWithCounts}
             inspectMultiple
-            showInspectButton={showInspectButton || !onHostOrNetworkPage}
+            showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {onHostOrNetworkPage && (getLensAttributes || lensAttributes) && timerange && (
+              {onHostOrNetworkOrUserPage && (getLensAttributes || lensAttributes) && timerange && (
                 <EuiFlexItem grow={false}>
                   <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
                     <VisualizationActions
