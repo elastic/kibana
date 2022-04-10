@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
@@ -92,7 +91,7 @@ import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { createHTTPConnectorFramework } from './http_framework';
-import { ServiceNowItsm } from './connectors/externals/servicenow/itsm';
+import { TinesConnector } from './connectors/externals/tines';
 
 export interface PluginSetupContract {
   registerType<
@@ -308,16 +307,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionsConfigUtils,
     });
 
-    httpFramework.registerConnector({
-      id: '.test',
-      name: 'Test',
-      minimumLicenseRequired: 'basic',
-      schema: {
-        config: schema.object({ apiUrl: schema.string() }),
-        secrets: schema.object({ username: schema.string(), password: schema.string() }),
-      },
-      Service: ServiceNowItsm,
-    });
+    httpFramework.registerConnector(TinesConnector);
 
     // Routes
     defineRoutes(
