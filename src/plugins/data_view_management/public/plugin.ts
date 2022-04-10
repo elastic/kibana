@@ -17,6 +17,7 @@ import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/publi
 import { DataViewEditorStart } from '../../data_view_editor/public';
 import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -30,6 +31,7 @@ export interface IndexPatternManagementStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -37,6 +37,7 @@ import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
 import { YamlCodeEditorWithPlaceholder } from './yaml_code_editor_with_placeholder';
 import { useOutputForm } from './use_output_form';
+import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 
 export interface EditOutputFlyoutProps {
   output?: Output;
@@ -45,7 +46,7 @@ export interface EditOutputFlyoutProps {
 
 const OUTPUT_TYPE_OPTIONS = [
   { value: 'elasticsearch', text: 'Elasticsearch' },
-  { value: 'logstash', text: 'Logstash (BETA)' },
+  { value: 'logstash', text: 'Logstash (beta)' },
 ];
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
@@ -59,6 +60,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isLogstashOutput = inputs.typeInput.value === 'logstash';
   const isESOutput = inputs.typeInput.value === 'elasticsearch';
+
+  const showLogstashNeedEncryptedSavedObjectCallout =
+    isLogstashOutput && !form.hasEncryptedSavedObjectConfigured;
 
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
@@ -134,14 +138,15 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               isLogstashOutput && (
                 <FormattedMessage
                   id="xpack.fleet.editOutputFlyout.logstashTypeOutputBetaHelpText"
-                  defaultMessage="Logstash output is in BETA, Please help by reporting any bugs. {learnMoreLink}."
+                  defaultMessage="Logstash output is in beta. Click {sendFeedback} to report bugs and suggest improvements."
                   values={{
-                    learnMoreLink: (
-                      <EuiLink href={docLinks.links.fleet.guide} external>
-                        {i18n.translate('xpack.fleet.editOutputFlyout.learnMoreLink', {
-                          defaultMessage: 'Learn more',
-                        })}
-                      </EuiLink>
+                    sendFeedback: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.fleet.editOutputFlyout.sendFeedback"
+                          defaultMessage="Send feedback"
+                        />
+                      </strong>
                     ),
                   }}
                 />
@@ -160,6 +165,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               )}
             />
           </EuiFormRow>
+          {showLogstashNeedEncryptedSavedObjectCallout && (
+            <>
+              <EuiSpacer size="m" />
+              <EncryptionKeyRequiredCallout />
+            </>
+          )}
           {isLogstashOutput && (
             <>
               <EuiSpacer size="m" />
@@ -193,13 +204,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
-                  defaultMessage="Specify the URLs that your agents will use to connect to a Logstash. For more information, see the {guideLink}."
+                  defaultMessage="Specify the addresses that your agents will use to connect to Logstash. {guideLink}."
                   values={{
                     guideLink: (
-                      <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+                      <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
                         <FormattedMessage
-                          id="xpack.fleet.settings.fleetUserGuideLink"
-                          defaultMessage="Fleet User Guide"
+                          id="xpack.fleet.settings.fleetSettingsLink"
+                          defaultMessage="Learn more"
                         />
                       </EuiLink>
                     ),
