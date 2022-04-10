@@ -32,12 +32,20 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _storage = new Storage(localStorage);
   private _storeUnsubscribe: Unsubscribe | undefined;
 
+  private _hoverActions: HoverActionsConfig | undefined;
+
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: TimelinesStartPlugins): TimelinesUIStart {
     return {
+      /** `getHoverActions` returns a new reference to `getAddToTimelineButton` each time it is called, but that value is used in dependency arrays and so it should be as stable as possible. Therefore we lazily store the reference to it. Note: this reference is deleted when the store is changed. */
       getHoverActions: () => {
-        return getHoverActions(this._store);
+        if (this._hoverActions) {
+          return this._hoverActions;
+        } else {
+          this._hoverActions = getHoverActions(this._store);
+          return this._hoverActions;
+        }
       },
       getTGrid: (props: TGridProps) => {
         if (props.type === 'standalone' && this._store) {
@@ -125,6 +133,8 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
 
   private setStore(store: Store) {
     this._store = store;
+    // this is lazily calculated and that is dependent on the store
+    delete this._hoverActions;
   }
 
   public stop() {
