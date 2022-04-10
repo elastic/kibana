@@ -84,7 +84,7 @@ export function getServiceMapServiceNodeInfo({
       ...environmentQuery(environment),
     ];
 
-    const minutes = Math.abs((end - start) / (1000 * 60));
+    const minutes = (end - start) / 1000 / 60;
     const numBuckets = 20;
     const { intervalString, bucketSize } =
       getBucketSizeForAggregatedTransactions({
@@ -215,7 +215,11 @@ async function getTransactionStats({
     params
   );
 
-  const totalRequests = response.hits.total.value;
+  const throughputValue = response.aggregations?.timeseries.buckets
+    .map((bucket) => bucket.doc_count)
+    .reduce((prev, current) => {
+      return prev + current;
+    }, 0);
 
   return {
     latency: {
@@ -226,7 +230,7 @@ async function getTransactionStats({
       })),
     },
     throughput: {
-      value: totalRequests > 0 ? totalRequests / minutes : null,
+      value: throughputValue ? throughputValue / minutes : null,
       timeseries: response.aggregations?.timeseries.buckets.map((bucket) => {
         return {
           x: bucket.key + offsetInMs,
