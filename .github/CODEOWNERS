@@ -5,11 +5,6 @@
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-# Tech leads
-/dev_docs @elastic/kibana-tech-leads
-/src/dev/license_checker/config.ts @elastic/kibana-tech-leads
-/packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
-
 # Virtual teams
 /x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
 
@@ -60,7 +55,7 @@
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
-/packages/elastic-datemath/ @elastic/kibana-app-services
+/packages/kbn-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
 /packages/kbn-es-query/ @elastic/kibana-app-services
@@ -216,6 +211,8 @@
 /packages/kbn-mapbox-gl @elastic/kibana-gis
 
 # Operations
+/src/dev/license_checker/config.ts @elastic/kibana-operations
+/packages/kbn-docs-utils/ @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
@@ -327,6 +324,7 @@
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
+/test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
