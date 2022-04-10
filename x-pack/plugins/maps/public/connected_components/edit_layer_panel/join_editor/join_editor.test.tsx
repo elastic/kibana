@@ -21,6 +21,14 @@ class MockLayer {
   getJoinsDisabledReason() {
     return this._disableReason;
   }
+
+  getSource() {
+    return {
+      isMvt: () => {
+        return false;
+      },
+    };
+  }
 }
 
 const defaultProps = {

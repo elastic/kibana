@@ -106,14 +106,12 @@ export class StyleFieldsHelper {
     isLayerSourceMvt: boolean
   ): StyleField[] {
     const styleFields = this._getFieldsForStyle(styleProperty.getStyleName());
-    return styleProperty.isDynamic() && !(styleProperty as IDynamicStyleProperty<unknown>).supportsFeatureState()
+    return styleProperty.isDynamic() &&
+      !(styleProperty as IDynamicStyleProperty<unknown>).supportsFeatureState()
       ? styleFields.map((styleField) => {
           // It is not possible to fallback to feature.properties for maplibre 'vector' source
           // Join fields that do not support feature-state can not be supported.
-          if (
-            isLayerSourceMvt &&
-            styleField.origin === FIELD_ORIGIN.JOIN
-          ) {
+          if (isLayerSourceMvt && styleField.origin === FIELD_ORIGIN.JOIN) {
             return {
               ...styleField,
               isUnsupported: true,

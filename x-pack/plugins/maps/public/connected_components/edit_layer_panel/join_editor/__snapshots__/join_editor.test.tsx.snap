@@ -85,18 +85,11 @@ exports[`Should render join editor 1`] = `
   <EuiTextAlign
     textAlign="center"
   >
-    <EuiButtonEmpty
-      aria-label="Add join"
-      iconType="plusInCircleFilled"
-      onClick={[Function]}
-      size="xs"
-    >
-      <FormattedMessage
-        defaultMessage="Add join"
-        id="xpack.maps.layerPanel.joinEditor.addJoinButtonLabel"
-        values={Object {}}
-      />
-    </EuiButtonEmpty>
+    <AddJoinButton
+      addJoin={[Function]}
+      isLayerSourceMvt={false}
+      numJoins={1}
+    />
   </EuiTextAlign>
 </div>
 `;

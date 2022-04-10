@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should disable add button when layer source is MVT and there is one join 1`] = `
+<EuiToolTip
+  content="Vector tiles support one join. To add multiple joins, select 'Limit results' in 'Scaling'."
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiButtonEmpty
+    aria-label="Add join"
+    iconType="plusInCircleFilled"
+    isDisabled={true}
+    onClick={[Function]}
+    size="xs"
+  >
+    Add join
+  </EuiButtonEmpty>
+</EuiToolTip>
+`;
+
+exports[`Should enable add button when layer source is MVT and there is no join 1`] = `
+<EuiButtonEmpty
+  aria-label="Add join"
+  iconType="plusInCircleFilled"
+  isDisabled={false}
+  onClick={[Function]}
+  size="xs"
+>
+  Add join
+</EuiButtonEmpty>
+`;
+
+exports[`Should render add join button 1`] = `
+<EuiButtonEmpty
+  aria-label="Add join"
+  iconType="plusInCircleFilled"
+  isDisabled={false}
+  onClick={[Function]}
+  size="xs"
+>
+  Add join
+</EuiButtonEmpty>
+`;
