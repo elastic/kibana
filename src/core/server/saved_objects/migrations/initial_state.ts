@@ -68,7 +68,7 @@ export const createInitialState = ({
       .map((type) => [type.name, type.excludeOnUpgrade!])
   );
   // short key to access savedObjects entries directly from docLinks
-  const migrationDocLinks = docLinks.links.savedObjects;
+  const migrationDocLinks = docLinks.links.kibanaUpgradeSavedObjects;
 
   return {
     controlState: 'INIT',

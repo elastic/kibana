@@ -639,7 +639,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
     },
-    savedObjects: {
+    kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
     },
   });

@@ -508,7 +508,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'. Refer to resolveMigrationFailures for more information.",
             "type": "retryable_es_client_error",
           },
         }

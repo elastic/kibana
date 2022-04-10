@@ -50,7 +50,7 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { DocLinksServiceSetup, DocLinksServiceStart } from '../doc_links';
+import { DocLinksServiceStart } from '../doc_links';
 
 const kibanaIndex = '.kibana';
 
@@ -273,7 +273,6 @@ export interface SavedObjectsSetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   deprecations: InternalDeprecationsServiceSetup;
-  docLinks: DocLinksServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -315,7 +314,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreUsageData, deprecations, docLinks } = setupDeps;
+    const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')

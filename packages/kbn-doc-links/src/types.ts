@@ -395,7 +395,7 @@ export interface DocLinks {
   readonly legal: {
     readonly privacyStatement: string;
   };
-  readonly savedObjects: {
+  readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;
   };
 }
