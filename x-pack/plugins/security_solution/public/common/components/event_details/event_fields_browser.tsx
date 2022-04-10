@@ -279,6 +279,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         <StyledEuiInMemoryTable
           className={EVENT_FIELDS_TABLE_CLASS_NAME}
           items={items}
+          itemId={(item: TimelineEventsDetailsItem) => item.field}
           columns={columns}
           pagination={false}
           rowProps={onSetRowProps}
