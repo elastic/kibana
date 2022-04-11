@@ -327,7 +327,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           {
             id: SecurityPageName.usersRisk,
             title: i18n.translate('xpack.securitySolution.search.users.risk', {
-              defaultMessage: 'Risk',
+              defaultMessage: 'Users by risk',
             }),
             path: `${USERS_PATH}/userRisk`,
             experimentalKey: 'riskyUsersEnabled',
