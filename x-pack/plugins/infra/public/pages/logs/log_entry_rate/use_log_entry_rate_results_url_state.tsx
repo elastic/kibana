@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import moment from 'moment';
 import * as rt from 'io-ts';
 import { TimeRange as KibanaTimeRange } from '../../../../../../../src/plugins/data/public';

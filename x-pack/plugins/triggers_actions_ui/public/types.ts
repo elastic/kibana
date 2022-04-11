@@ -7,12 +7,13 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import type { ChartsPluginSetup } from 'src/plugins/charts/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
+import type { IconType } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
-  IconType,
   EuiDataGridColumn,
   EuiDataGridControlColumn,
   EuiDataGridCellValueElementProps,
@@ -28,19 +29,19 @@ import {
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
-  AlertActionParam,
-  SanitizedAlert,
+  RuleActionParam,
+  SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  AlertAction as RuleAction,
-  AlertAggregations,
+  RuleAction,
+  RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
 } from '../../alerting/common';
@@ -49,17 +50,17 @@ import { RuleRegistrySearchRequestPagination } from '../../rule_registry/common'
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
-  SanitizedAlert<Params>,
+  AlertingSanitizedRule<Params>,
   'alertTypeId'
 > & {
-  ruleTypeId: SanitizedAlert['alertTypeId'];
+  ruleTypeId: AlertingSanitizedRule['alertTypeId'];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
 };
-type RuleAggregations = Omit<AlertAggregations, 'alertExecutionStatus'> & {
-  ruleExecutionStatus: AlertAggregations['alertExecutionStatus'];
+type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
 };
 
 export type {
@@ -120,7 +121,7 @@ export enum RuleFlyoutCloseReason {
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
-  editAction: (key: string, value: AlertActionParam, index: number) => void;
+  editAction: (key: string, value: RuleActionParam, index: number) => void;
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
@@ -281,6 +282,7 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {

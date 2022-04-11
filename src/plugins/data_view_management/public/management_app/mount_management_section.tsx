@@ -40,7 +40,7 @@ export async function mountManagementSection(
 ) {
   const [
     { application, chrome, uiSettings, notifications, overlays, http, docLinks, theme },
-    { data, dataViewFieldEditor, dataViewEditor, dataViews, fieldFormats, spaces },
+    { data, dataViewFieldEditor, dataViewEditor, dataViews, fieldFormats, unifiedSearch, spaces },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = dataViews.getCanSaveSync();
@@ -55,6 +55,7 @@ export async function mountManagementSection(
     uiSettings,
     notifications,
     overlays,
+    unifiedSearch,
     http,
     docLinks,
     data,

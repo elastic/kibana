@@ -71,33 +71,7 @@ describe('AddSourceList', () => {
     wrapper.find(ConfigurationIntro).prop('advanceStep')();
 
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
-  });
-
-  it('renders default state correctly when there are multiple connector options, but all connectors have been configured', () => {
-    setMockValues({ ...mockValues, externalConfigured: true });
-    const sourceData = {
-      ...staticSourceData[0],
-      externalConnectorAvailable: true,
-      configured: true,
-    };
-    shallow(<AddSource sourceData={sourceData} />);
-    expect(initializeAddSource).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ connect: true })
-    );
-  });
-
-  it('renders default state correctly when there are not multiple connector options, and the connector has been configured', () => {
-    const sourceData = {
-      ...staticSourceData[0],
-      externalConnectorAvailable: false,
-      configured: true,
-    };
-    shallow(<AddSource sourceData={sourceData} />);
-    expect(initializeAddSource).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ connect: true })
-    );
+    expect(initializeAddSource).toHaveBeenCalled();
   });
 
   it('renders default state correctly when there are multiple connector options', () => {

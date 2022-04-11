@@ -116,12 +116,12 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 /**
  * This is a typical simple preview rule for testing that is easy for most basic testing
  * @param ruleId
- * @param enabled The number of times the rule will be run through the executors. Defaulted to 20,
+ * @param enabled The number of times the rule will be run through the executors. Defaulted to 12,
  * the execution time for the default interval time of 5m.
  */
 export const getSimplePreviewRule = (
   ruleId = 'preview-rule-1',
-  invocationCount = 20
+  invocationCount = 12
 ): PreviewRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
