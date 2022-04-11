@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Filter } from '@kbn/es-query';
 
-export const UI_SETTINGS = {
-  LEGACY_CHARTS_LIBRARY: 'timelion:legacyChartsLibrary',
-  ES_TIMEFIELD: 'timelion:es.timefield',
-  DEFAULT_INDEX: 'timelion:es.default_index',
-  TARGET_BUCKETS: 'timelion:target_buckets',
-  MAX_BUCKETS: 'timelion:max_buckets',
-  MIN_INTERVAL: 'timelion:min_interval',
-};
+/**
+ * Returns if true there's at least 1 active filter
+ */
+export function hasActiveFilter(filters: Filter[] | undefined) {
+  return filters && filters.filter((f) => !f.meta?.disabled).length > 0;
+}
