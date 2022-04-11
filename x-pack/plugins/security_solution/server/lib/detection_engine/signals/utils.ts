@@ -9,7 +9,7 @@ import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
