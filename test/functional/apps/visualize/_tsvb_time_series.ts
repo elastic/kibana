@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/129785
+  describe.skip('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',

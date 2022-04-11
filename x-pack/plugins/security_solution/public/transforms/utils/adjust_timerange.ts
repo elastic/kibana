@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment, { Duration } from 'moment';
 import type { TimerangeInput } from '../../../common/search_strategy';
 

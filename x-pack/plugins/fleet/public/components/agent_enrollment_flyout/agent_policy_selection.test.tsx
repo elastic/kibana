@@ -13,7 +13,7 @@ import { createFleetTestRendererMock } from '../../mock';
 
 import type { AgentPolicy } from '../../types';
 
-import { EnrollmentStepAgentPolicy } from '.';
+import { AgentPolicySelection } from '.';
 
 describe('step select agent policy', () => {
   let testRenderer: TestRenderer;
@@ -21,10 +21,11 @@ describe('step select agent policy', () => {
   let agentPolicies: AgentPolicy[] = [];
   const render = () =>
     (renderResult = testRenderer.render(
-      <EnrollmentStepAgentPolicy
+      <AgentPolicySelection
+        setSelectedPolicyId={jest.fn()}
+        selectedPolicy={agentPolicies[0]}
         agentPolicies={agentPolicies}
         withKeySelection={false}
-        onAgentPolicyChange={jest.fn()}
         excludeFleetServer={true}
         onClickCreatePolicy={jest.fn()}
         isFleetServerPolicy={false}
@@ -35,7 +36,7 @@ describe('step select agent policy', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  test('should not select agent policy by default if multiple exists', async () => {
+  test('should select first agent policy by default if multiple exists', async () => {
     agentPolicies = [
       { id: 'policy-1', name: 'Policy 1' } as AgentPolicy,
       { id: 'policy-2', name: 'Policy 2' } as AgentPolicy,
@@ -45,7 +46,7 @@ describe('step select agent policy', () => {
 
     await act(async () => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicyDropdown"]');
-      expect((select as any)?.value).toEqual('');
+      expect((select as any)?.value).toEqual('policy-1');
 
       expect(renderResult.getAllByRole('option').length).toBe(2);
     });

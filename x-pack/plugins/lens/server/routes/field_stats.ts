@@ -6,7 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import type { DataViewField } from 'src/plugins/data_views/common';
