@@ -241,6 +241,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'LEGACY_REINDEX',
       };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+        };
+      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
