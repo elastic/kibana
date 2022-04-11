@@ -7,7 +7,7 @@
  */
 
 import { CoreStart, HttpFetchError, HttpFetchQuery } from 'kibana/public';
-import { getRemoteRoutePaths } from '../common';
+import { getRoutePaths } from '../common';
 
 export interface Services {
   fetchTopN: (type: string, seconds: string) => Promise<any[] | HttpFetchError>;
@@ -17,8 +17,7 @@ export interface Services {
 }
 
 export function getServices(core: CoreStart): Services {
-  // To use local fixtures instead, use getLocalRoutePaths
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
 
   return {
     fetchTopN: async (type: string, seconds: string) => {

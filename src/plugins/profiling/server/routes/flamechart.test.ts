@@ -7,7 +7,7 @@
  */
 
 import { DownsampledEventsIndex, getSampledTraceEventsIndex } from './downsampling';
-import { extractFileIDFromFrameID, parallelMget } from './search_flamechart';
+import { extractFileIDFromFrameID, parallelMget } from './flamechart';
 import { ElasticsearchClient } from 'kibana/server';
 
 describe('Using down-sampled indexes', () => {

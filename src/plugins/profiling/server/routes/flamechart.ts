@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from 'kibana/server';
 import { chunk } from 'lodash';
 import type { DataRequestHandlerContext } from '../../../data/server';
-import { getRemoteRoutePaths } from '../../common';
+import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
 import {
   Executable,
@@ -375,7 +375,7 @@ export function registerFlameChartElasticSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   router.get(
     {
       path: paths.FlamechartElastic,
@@ -426,7 +426,7 @@ export function registerFlameChartPixiSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   router.get(
     {
       path: paths.FlamechartPixi,
