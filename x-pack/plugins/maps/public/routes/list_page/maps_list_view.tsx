@@ -12,14 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { goToSpecifiedPath } from '../../render_app';
-import {
-  APP_ID,
-  getEditPath,
-  MAP_PATH,
-  MAP_SAVED_OBJECT_TYPE,
-  SAVED_OBJECTS_LIMIT_SETTING,
-  SAVED_OBJECTS_PER_PAGE_SETTING,
-} from '../../../common/constants';
+import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getToasts,
@@ -34,6 +27,9 @@ import {
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 interface MapItem {
   id: string;

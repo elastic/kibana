@@ -31,8 +31,6 @@ export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const OPEN_LAYER_WIZARD = 'openLayerWizard';
-export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
-export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
