@@ -115,9 +115,7 @@ function getLensTopNavConfig(options: {
       label: getShowUnderlyingDataLabel(),
       run: () => {},
       testId: 'lnsApp_openInDiscover',
-      description: i18n.translate('xpack.lens.app.openInDiscoverAriaLabel', {
-        defaultMessage: 'Open underlying data in Discover',
-      }),
+      description: getShowUnderlyingDataLabel(),
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
       target: '_blank',
