@@ -22622,7 +22622,6 @@
     "xpack.securitySolution.authenticationsTable.rows": "{numRows} {numRows, plural, other {行}}",
     "xpack.securitySolution.authenticationsTable.successes": "成功",
     "xpack.securitySolution.authenticationsTable.uncommonProcessTable": "不常见进程",
-    "xpack.securitySolution.authenticationsTable.unit": "{totalCount, plural, other {个用户}}",
     "xpack.securitySolution.authenticationsTable.user": "用户",
     "xpack.securitySolution.authz.mlUnavailable": "Machine Learning 插件不可用。请尝试启用插件。",
     "xpack.securitySolution.authz.userIsNotMlAdminMessage": "当前用户不是 Machine Learning 管理员。",

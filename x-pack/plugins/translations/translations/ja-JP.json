@@ -22595,7 +22595,6 @@
     "xpack.securitySolution.authenticationsTable.rows": "{numRows} {numRows, plural, other  {行}}",
     "xpack.securitySolution.authenticationsTable.successes": "成功",
     "xpack.securitySolution.authenticationsTable.uncommonProcessTable": "非共通プロセス",
-    "xpack.securitySolution.authenticationsTable.unit": "{totalCount, plural, other  {ユーザー}}",
     "xpack.securitySolution.authenticationsTable.user": "ユーザー",
     "xpack.securitySolution.authz.mlUnavailable": "機械学習プラグインが使用できません。プラグインを有効にしてください。",
     "xpack.securitySolution.authz.userIsNotMlAdminMessage": "現在のユーザーは機械学習管理者ではありません。",
