@@ -37,7 +37,7 @@ Each data type may have one or more visualization configurations. The data type 
 
 Each visualization configuration is mapped to a single report type.
 
-Visualization configurations are used to define what the UI we display for each report type and data type combination in the series builder. 
+Visualization configurations are used to define the UI we display for each report type and data type combination in the series builder. 
 Visualization configuration define UI options and display, including available `metrics`, available `filters`, available `breakdown` options, definitions for human-readable `labels`, and more.
 The configuration also defines any custom base filters, which usually get pushed to a query, but are not displayed on the UI. You can also set more custom options on the configuration like colors which get used while rendering the chart.
 
