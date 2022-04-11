@@ -97,7 +97,6 @@ export const PreviewHistogram = ({
       dataProviders,
       defaultColumns,
       deletedEventIds,
-      graphEventId, // If truthy, the graph viewer (Resolver) is showing
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -211,7 +210,6 @@ export const PreviewHistogram = ({
               entityType: 'events',
               filters: [],
               globalFullScreen,
-              graphEventId,
               hasAlertsCrud: false,
               id: TimelineId.rulePreview,
               indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
