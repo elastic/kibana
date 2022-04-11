@@ -41,9 +41,7 @@ export interface UseExceptionListsProps {
   namespaceTypes: NamespaceType[];
   notifications: NotificationsStart;
   initialPagination?: Pagination;
-  showTrustedApps: boolean;
-  showEventFilters: boolean;
-  showHostIsolationExceptions: boolean;
+  hideLists?: readonly string[];
 }
 
 export interface UseExceptionListProps {

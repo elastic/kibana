@@ -12,7 +12,7 @@ import { expandFirstAlertActions } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { login, loginAndWaitForPage, waitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
@@ -23,14 +23,15 @@ const loadDetectionsPage = (role: ROLES) => {
   waitForAlertsToPopulate();
 };
 
-describe.skip('Alerts timeline', () => {
+describe('Alerts timeline', () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL, ROLES.platform_engineer);
+    login(ROLES.platform_engineer);
+    visit(ALERTS_URL);
     createCustomRuleEnabled(getNewRule());
     refreshPage();
-    waitForAlertsToPopulate(500);
+    waitForAlertsToPopulate();
 
     // Then we login as read-only user to test.
     login(ROLES.reader);

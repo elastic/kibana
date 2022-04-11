@@ -26,7 +26,7 @@ describe('find_by_ids', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/event_log/{type}/_find"`);
 
     const events = [fakeEvent(), fakeEvent()];
     const result = {

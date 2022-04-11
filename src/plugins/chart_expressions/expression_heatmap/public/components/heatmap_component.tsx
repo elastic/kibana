@@ -25,15 +25,17 @@ import {
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
-import type { DatatableColumn } from '../../../../expressions/public';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
-import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
+import { defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
 import './index.scss';
 
@@ -94,9 +96,11 @@ function computeColorRanges(
 ) {
   const paletteColors =
     paletteParams?.colors ||
-    applyPaletteParams(paletteService, { type: 'palette', name: DEFAULT_PALETTE_NAME }, minMax).map(
-      ({ color }) => color
-    );
+    applyPaletteParams(
+      paletteService,
+      { type: 'palette', name: defaultPaletteParams.name },
+      minMax
+    ).map(({ color }) => color);
   // Repeat the first color at the beginning to cover below and above the defined palette
   const colors = [paletteColors[0], ...paletteColors];
 
@@ -115,17 +119,6 @@ function computeColorRanges(
 
   return { colors, ranges };
 }
-
-const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  const accessor = value.accessor;
-  if (typeof accessor === 'number') {
-    return columns[accessor].id;
-  }
-  return accessor.id;
-};
 
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
@@ -177,7 +170,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const table = data;
     const valueAccessor = args.valueAccessor
-      ? getAccessor(args.valueAccessor, table.columns)
+      ? getAccessorByDimension(args.valueAccessor, table.columns)
       : undefined;
     const minMaxByColumnId = useMemo(
       () => findMinMaxByColumnId([valueAccessor!], table),
@@ -185,8 +178,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     );
 
     const paletteParams = args.palette?.params;
-    const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
-    const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
+    const xAccessor = args.xAccessor
+      ? getAccessorByDimension(args.xAccessor, table.columns)
+      : undefined;
+    const yAccessor = args.yAccessor
+      ? getAccessorByDimension(args.yAccessor, table.columns)
+      : undefined;
 
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
     const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
@@ -293,7 +290,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       return null;
     }
 
-    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    let chartData = table.rows.filter(
+      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
+    );
     if (!chartData || !chartData.length) {
       return <EmptyPlaceholder icon={HeatmapIcon} />;
     }
@@ -310,9 +309,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(
-      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-    );
+    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
       ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
       : undefined;
@@ -488,6 +485,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
+              legendSize={args.legend.legendSize}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}

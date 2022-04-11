@@ -14,7 +14,6 @@ import {
 } from 'kibana/server';
 import { Logger } from '../../../../../../src/core/server';
 import { TimeSeriesQueryParameters } from '../lib/time_series_query';
-import { createAbortableEsClientFactory } from '../../../../alerting/server';
 import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';
 export type { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
 
@@ -42,13 +41,9 @@ export function createTimeSeriesQueryRoute(
   ): Promise<IKibanaResponse> {
     logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
-    const abortableEsClusterClient = createAbortableEsClientFactory({
-      scopedClusterClient: ctx.core.elasticsearch.client,
-      abortController: new AbortController(),
-    });
     const result = await timeSeriesQuery({
       logger,
-      abortableEsClient: abortableEsClusterClient.asCurrentUser,
+      esClient: ctx.core.elasticsearch.client.asCurrentUser,
       query: req.body,
     });
 

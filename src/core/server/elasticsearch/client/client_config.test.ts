@@ -16,6 +16,7 @@ const createConfig = (
   return {
     customHeaders: {},
     compression: false,
+    maxSockets: Infinity,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
@@ -104,6 +105,18 @@ describe('parseClientOptions', () => {
       it('`keepAlive` is undefined', () => {
         const options = parseClientOptions(createConfig({}), false);
         expect(options.agent).toHaveProperty('keepAlive', true);
+      });
+    });
+
+    describe('`maxSockets` option', () => {
+      it('uses the specified config value', () => {
+        const options = parseClientOptions(createConfig({ maxSockets: 1024 }), false);
+        expect(options.agent).toHaveProperty('maxSockets', 1024);
+      });
+
+      it('defaults to `Infinity` if not specified by the config', () => {
+        const options = parseClientOptions(createConfig({}), false);
+        expect(options.agent).toHaveProperty('maxSockets', Infinity);
       });
     });
 
@@ -256,9 +269,9 @@ describe('parseClientOptions', () => {
           )
         ).toEqual(
           expect.objectContaining({
-            headers: expect.objectContaining({
-              authorization: `Bearer ABC123`,
-            }),
+            auth: {
+              bearer: `ABC123`,
+            },
           })
         );
       });

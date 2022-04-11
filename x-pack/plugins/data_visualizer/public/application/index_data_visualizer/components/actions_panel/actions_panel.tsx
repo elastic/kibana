@@ -10,21 +10,21 @@ import React, { FC, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../../src/plugins/data_views/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
 import { ResultLink } from '../../../common/components/results_links';
 
 interface Props {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
   additionalLinks: ResultLink[];
 }
 
 export const ActionsPanel: FC<Props> = ({
-  indexPattern,
+  dataView,
   searchString,
   searchQueryLanguage,
   additionalLinks,
@@ -45,7 +45,7 @@ export const ActionsPanel: FC<Props> = ({
   useEffect(() => {
     let unmounted = false;
 
-    const indexPatternId = indexPattern.id;
+    const indexPatternId = dataView.id;
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
@@ -90,7 +90,7 @@ export const ActionsPanel: FC<Props> = ({
       unmounted = true;
     };
   }, [
-    indexPattern,
+    dataView,
     searchString,
     searchQueryLanguage,
     globalState,

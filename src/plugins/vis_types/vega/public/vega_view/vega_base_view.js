@@ -8,7 +8,7 @@
 
 import $ from 'jquery';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 scheme('elastic', euiPaletteColorBlind());
@@ -156,11 +156,11 @@ export class VegaBaseView {
    * @returns {Promise<string>} index id
    */
   async findIndex(index) {
-    const { indexPatterns } = getData();
+    const dataViews = getDataViews();
     let idxObj;
 
     if (index) {
-      [idxObj] = await indexPatterns.find(index);
+      [idxObj] = await dataViews.find(index);
       if (!idxObj) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
@@ -175,7 +175,7 @@ export class VegaBaseView {
       );
 
       if (!idxObj) {
-        const defaultIdx = await indexPatterns.getDefault();
+        const defaultIdx = await dataViews.getDefault();
 
         if (defaultIdx) {
           idxObj = defaultIdx;

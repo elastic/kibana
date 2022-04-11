@@ -15,9 +15,17 @@ import { SourceIcon } from './';
 
 describe('SourceIcon', () => {
   it('renders', () => {
-    const wrapper = shallow(<SourceIcon name="foo" serviceType="custom" />);
+    const wrapper = shallow(<SourceIcon name="Jira" serviceType="custom" />);
 
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
     expect(wrapper.find('.user-group-source')).toHaveLength(0);
+  });
+
+  it('renders a png icon if one is provided', () => {
+    const wrapper = shallow(
+      <SourceIcon name="Jira" serviceType="custom" iconAsBase64="base64encodedstring" />
+    );
+
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual('data:image/png;base64,base64encodedstring');
   });
 });

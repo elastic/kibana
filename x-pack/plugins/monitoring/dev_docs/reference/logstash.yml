@@ -1,0 +1,7 @@
+api.http.host: 0.0.0.0
+
+# For internal collection, comment out the logstash section from metricbeat.yarn.yml and uncomment the following section.
+# monitoring.enabled: true
+# monitoring.elasticsearch.hosts: http://host.docker.internal:9200
+# monitoring.elasticsearch.username: elastic
+# monitoring.elasticsearch.password: changeme

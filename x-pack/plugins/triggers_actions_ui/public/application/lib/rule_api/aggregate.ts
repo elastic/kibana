@@ -14,12 +14,14 @@ const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
   rule_execution_status: ruleExecutionStatus,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
+  rule_snoozed_status: ruleSnoozedStatus,
   ...rest
 }: any) => ({
   ...rest,
   ruleExecutionStatus,
   ruleEnabledStatus,
   ruleMutedStatus,
+  ruleSnoozedStatus,
 });
 
 export async function loadRuleAggregations({

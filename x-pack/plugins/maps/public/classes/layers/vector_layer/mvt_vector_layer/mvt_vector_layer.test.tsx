@@ -58,7 +58,7 @@ function createLayer(
     sourceDescriptor,
   };
   const layerDescriptor = MvtVectorLayer.createDescriptor(defaultLayerOptions);
-  return new MvtVectorLayer({ layerDescriptor, source: mvtSource });
+  return new MvtVectorLayer({ layerDescriptor, source: mvtSource, customIcons: [] });
 }
 
 describe('visiblity', () => {

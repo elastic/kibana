@@ -1,0 +1,359 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`User Summary Component rendering it renders the default User Summary 1`] = `
+<UserOverview
+  anomaliesData={
+    Object {
+      "anomalies": Array [
+        Object {
+          "detectorIndex": 0,
+          "entityName": "process.name",
+          "entityValue": "du",
+          "influencers": Array [
+            Object {
+              "host.name": "zeek-iowa",
+            },
+            Object {
+              "process.name": "du",
+            },
+            Object {
+              "user.name": "root",
+            },
+          ],
+          "jobId": "job-1",
+          "rowId": "1561157194802_0",
+          "severity": 16.193669439507826,
+          "source": Object {
+            "actual": Array [
+              1,
+            ],
+            "bucket_span": 900,
+            "by_field_name": "process.name",
+            "by_field_value": "du",
+            "detector_index": 0,
+            "function": "rare",
+            "function_description": "rare",
+            "influencers": Array [
+              Object {
+                "influencer_field_name": "user.name",
+                "influencer_field_values": Array [
+                  "root",
+                ],
+              },
+              Object {
+                "influencer_field_name": "process.name",
+                "influencer_field_values": Array [
+                  "du",
+                ],
+              },
+              Object {
+                "influencer_field_name": "host.name",
+                "influencer_field_values": Array [
+                  "zeek-iowa",
+                ],
+              },
+            ],
+            "initial_record_score": 16.193669439507826,
+            "is_interim": false,
+            "job_id": "job-1",
+            "multi_bucket_impact": 0,
+            "partition_field_name": "host.name",
+            "partition_field_value": "zeek-iowa",
+            "probability": 0.024041164411288146,
+            "record_score": 16.193669439507826,
+            "result_type": "record",
+            "timestamp": 1560664800000,
+            "typical": Array [
+              0.024041164411288146,
+            ],
+          },
+          "time": 1560664800000,
+        },
+        Object {
+          "detectorIndex": 0,
+          "entityName": "process.name",
+          "entityValue": "ls",
+          "influencers": Array [
+            Object {
+              "host.name": "zeek-iowa",
+            },
+            Object {
+              "process.name": "ls",
+            },
+            Object {
+              "user.name": "root",
+            },
+          ],
+          "jobId": "job-2",
+          "rowId": "1561157194802_1",
+          "severity": 16.193669439507826,
+          "source": Object {
+            "actual": Array [
+              1,
+            ],
+            "bucket_span": 900,
+            "by_field_name": "process.name",
+            "by_field_value": "ls",
+            "detector_index": 0,
+            "function": "rare",
+            "function_description": "rare",
+            "influencers": Array [
+              Object {
+                "influencer_field_name": "user.name",
+                "influencer_field_values": Array [
+                  "root",
+                ],
+              },
+              Object {
+                "influencer_field_name": "process.name",
+                "influencer_field_values": Array [
+                  "ls",
+                ],
+              },
+              Object {
+                "influencer_field_name": "host.name",
+                "influencer_field_values": Array [
+                  "zeek-iowa",
+                ],
+              },
+            ],
+            "initial_record_score": 16.193669439507826,
+            "is_interim": false,
+            "job_id": "job-2",
+            "multi_bucket_impact": 0,
+            "partition_field_name": "host.name",
+            "partition_field_value": "zeek-iowa",
+            "probability": 0.024041164411288146,
+            "record_score": 16.193669439507826,
+            "result_type": "record",
+            "timestamp": 1560664800000,
+            "typical": Array [
+              0.024041164411288146,
+            ],
+          },
+          "time": 1560664800000,
+        },
+      ],
+      "interval": "day",
+    }
+  }
+  data={
+    Object {
+      "firstSeen": undefined,
+      "host": Object {
+        "ip": Array [
+          "10.142.0.7",
+          "fe80::4001:aff:fe8e:7",
+        ],
+        "os": Object {
+          "family": Array [
+            "debian",
+          ],
+          "name": Array [
+            "Debian GNU/Linux",
+          ],
+        },
+      },
+      "lastSeen": undefined,
+      "user": Object {
+        "domain": Array [
+          "domain",
+        ],
+        "id": Array [
+          "aa7ca589f1b8220002f2fc61c64cfbf1",
+        ],
+        "name": Array [
+          "username",
+        ],
+      },
+    }
+  }
+  endDate="2019-06-18T06:00:00.000Z"
+  id="userOverview"
+  isInDetailsSidePanel={false}
+  isLoadingAnomaliesData={false}
+  loading={false}
+  narrowDateRange={[MockFunction]}
+  startDate="2019-06-15T06:00:00.000Z"
+  userName="testUserName"
+/>
+`;
+
+exports[`User Summary Component rendering it renders the panel view User Summary 1`] = `
+<UserOverview
+  anomaliesData={
+    Object {
+      "anomalies": Array [
+        Object {
+          "detectorIndex": 0,
+          "entityName": "process.name",
+          "entityValue": "du",
+          "influencers": Array [
+            Object {
+              "host.name": "zeek-iowa",
+            },
+            Object {
+              "process.name": "du",
+            },
+            Object {
+              "user.name": "root",
+            },
+          ],
+          "jobId": "job-1",
+          "rowId": "1561157194802_0",
+          "severity": 16.193669439507826,
+          "source": Object {
+            "actual": Array [
+              1,
+            ],
+            "bucket_span": 900,
+            "by_field_name": "process.name",
+            "by_field_value": "du",
+            "detector_index": 0,
+            "function": "rare",
+            "function_description": "rare",
+            "influencers": Array [
+              Object {
+                "influencer_field_name": "user.name",
+                "influencer_field_values": Array [
+                  "root",
+                ],
+              },
+              Object {
+                "influencer_field_name": "process.name",
+                "influencer_field_values": Array [
+                  "du",
+                ],
+              },
+              Object {
+                "influencer_field_name": "host.name",
+                "influencer_field_values": Array [
+                  "zeek-iowa",
+                ],
+              },
+            ],
+            "initial_record_score": 16.193669439507826,
+            "is_interim": false,
+            "job_id": "job-1",
+            "multi_bucket_impact": 0,
+            "partition_field_name": "host.name",
+            "partition_field_value": "zeek-iowa",
+            "probability": 0.024041164411288146,
+            "record_score": 16.193669439507826,
+            "result_type": "record",
+            "timestamp": 1560664800000,
+            "typical": Array [
+              0.024041164411288146,
+            ],
+          },
+          "time": 1560664800000,
+        },
+        Object {
+          "detectorIndex": 0,
+          "entityName": "process.name",
+          "entityValue": "ls",
+          "influencers": Array [
+            Object {
+              "host.name": "zeek-iowa",
+            },
+            Object {
+              "process.name": "ls",
+            },
+            Object {
+              "user.name": "root",
+            },
+          ],
+          "jobId": "job-2",
+          "rowId": "1561157194802_1",
+          "severity": 16.193669439507826,
+          "source": Object {
+            "actual": Array [
+              1,
+            ],
+            "bucket_span": 900,
+            "by_field_name": "process.name",
+            "by_field_value": "ls",
+            "detector_index": 0,
+            "function": "rare",
+            "function_description": "rare",
+            "influencers": Array [
+              Object {
+                "influencer_field_name": "user.name",
+                "influencer_field_values": Array [
+                  "root",
+                ],
+              },
+              Object {
+                "influencer_field_name": "process.name",
+                "influencer_field_values": Array [
+                  "ls",
+                ],
+              },
+              Object {
+                "influencer_field_name": "host.name",
+                "influencer_field_values": Array [
+                  "zeek-iowa",
+                ],
+              },
+            ],
+            "initial_record_score": 16.193669439507826,
+            "is_interim": false,
+            "job_id": "job-2",
+            "multi_bucket_impact": 0,
+            "partition_field_name": "host.name",
+            "partition_field_value": "zeek-iowa",
+            "probability": 0.024041164411288146,
+            "record_score": 16.193669439507826,
+            "result_type": "record",
+            "timestamp": 1560664800000,
+            "typical": Array [
+              0.024041164411288146,
+            ],
+          },
+          "time": 1560664800000,
+        },
+      ],
+      "interval": "day",
+    }
+  }
+  data={
+    Object {
+      "firstSeen": undefined,
+      "host": Object {
+        "ip": Array [
+          "10.142.0.7",
+          "fe80::4001:aff:fe8e:7",
+        ],
+        "os": Object {
+          "family": Array [
+            "debian",
+          ],
+          "name": Array [
+            "Debian GNU/Linux",
+          ],
+        },
+      },
+      "lastSeen": undefined,
+      "user": Object {
+        "domain": Array [
+          "domain",
+        ],
+        "id": Array [
+          "aa7ca589f1b8220002f2fc61c64cfbf1",
+        ],
+        "name": Array [
+          "username",
+        ],
+      },
+    }
+  }
+  endDate="2019-06-18T06:00:00.000Z"
+  id="userOverview"
+  isInDetailsSidePanel={true}
+  isLoadingAnomaliesData={false}
+  loading={false}
+  narrowDateRange={[MockFunction]}
+  startDate="2019-06-15T06:00:00.000Z"
+  userName="testUserName"
+/>
+`;

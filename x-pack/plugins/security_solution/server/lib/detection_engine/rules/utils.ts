@@ -28,7 +28,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { AlertAction, AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
+import { RuleAction, RuleNotifyWhenType, SanitizedRule } from '../../../../../alerting/common';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
@@ -194,7 +194,7 @@ export const calculateName = ({
  */
 export const transformToNotifyWhen = (
   throttle: string | null | undefined
-): AlertNotifyWhenType | null => {
+): RuleNotifyWhenType | null => {
   if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
     return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
   } else if (throttle === NOTIFICATION_THROTTLE_RULE) {
@@ -232,7 +232,7 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
  * @returns The actions of the FullResponseSchema
  */
 export const transformActions = (
-  alertAction: AlertAction[] | undefined,
+  alertAction: RuleAction[] | undefined,
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): FullResponseSchema['actions'] => {
   if (alertAction != null && alertAction.length !== 0) {
@@ -254,7 +254,7 @@ export const transformActions = (
  * @returns The "security_solution" throttle
  */
 export const transformFromAlertThrottle = (
-  rule: SanitizedAlert<RuleParams>,
+  rule: SanitizedRule<RuleParams>,
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
@@ -288,9 +288,9 @@ export const maybeMute = async ({
   muteAll,
   throttle,
 }: {
-  id: SanitizedAlert['id'];
+  id: SanitizedRule['id'];
   rulesClient: RulesClient;
-  muteAll: SanitizedAlert<RuleParams>['muteAll'];
+  muteAll: SanitizedRule<RuleParams>['muteAll'];
   throttle: string | null | undefined;
 }): Promise<void> => {
   if (muteAll && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
@@ -310,7 +310,7 @@ export const legacyMigrate = async ({
   rulesClient,
   savedObjectsClient,
   rule,
-}: LegacyMigrateParams): Promise<SanitizedAlert<RuleParams> | null | undefined> => {
+}: LegacyMigrateParams): Promise<SanitizedRule<RuleParams> | null | undefined> => {
   if (rule == null || rule.id == null) {
     return rule;
   }

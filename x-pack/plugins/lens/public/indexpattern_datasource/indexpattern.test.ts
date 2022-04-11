@@ -12,6 +12,7 @@ import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } 
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -30,8 +31,8 @@ import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { TinymathAST } from 'packages/kbn-tinymath';
-import { SavedObjectReference } from 'kibana/server';
+import { TinymathAST } from '@kbn/tinymath';
+import { SavedObjectReference } from 'kibana/public';
 import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
@@ -186,6 +187,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
@@ -292,7 +294,6 @@ describe('IndexPattern Data Source', () => {
           },
         },
         savedObjectReferences: [
-          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -433,7 +434,7 @@ describe('IndexPattern Data Source', () => {
                             "1d",
                           ],
                           "min_doc_count": Array [
-                            0,
+                            1,
                           ],
                           "schema": Array [
                             "segment",
@@ -1446,8 +1447,11 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [[{ language: 'kuery', query: 'bytes > 1000' }]],
-          lucene: [[{ language: 'lucene', query: 'memory' }]],
+          enabled: {
+            kuery: [[{ language: 'kuery', query: 'bytes > 1000' }]],
+            lucene: [[{ language: 'lucene', query: 'memory' }]],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('should ignore empty filtered metrics', () => {
@@ -1474,7 +1478,10 @@ describe('IndexPattern Data Source', () => {
           },
           layerId: 'first',
         });
-        expect(publicAPI.getFilters()).toEqual({ kuery: [], lucene: [] });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [], lucene: [] },
+        });
       });
       it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
@@ -1517,14 +1524,17 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [
-            [{ language: 'kuery', query: 'geo.src: *' }],
-            [
-              { language: 'kuery', query: 'geo.dest: *' },
-              { language: 'kuery', query: 'myField: *' },
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'geo.src: *' }],
+              [
+                { language: 'kuery', query: 'geo.dest: *' },
+                { language: 'kuery', query: 'myField: *' },
+              ],
             ],
-          ],
-          lucene: [],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('shuold collect top values fields and terms as kuery filters if data is provided', () => {
@@ -1581,17 +1591,20 @@ describe('IndexPattern Data Source', () => {
           },
         };
         expect(publicAPI.getFilters(data)).toEqual({
-          kuery: [
-            [
-              { language: 'kuery', query: 'geo.src: "US"' },
-              { language: 'kuery', query: 'geo.src: "IN"' },
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'geo.src: "US"' },
+                { language: 'kuery', query: 'geo.src: "IN"' },
+              ],
+              [
+                { language: 'kuery', query: 'geo.dest: "IT" AND myField: "MyValue"' },
+                { language: 'kuery', query: 'geo.dest: "DE" AND myField: "MyOtherValue"' },
+              ],
             ],
-            [
-              { language: 'kuery', query: 'geo.dest: "IT" AND myField: "MyValue"' },
-              { language: 'kuery', query: 'geo.dest: "DE" AND myField: "MyOtherValue"' },
-            ],
-          ],
-          lucene: [],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('shuold collect top values fields and terms and carefully handle empty string values', () => {
@@ -1648,17 +1661,20 @@ describe('IndexPattern Data Source', () => {
           },
         };
         expect(publicAPI.getFilters(data)).toEqual({
-          kuery: [
-            [
-              { language: 'kuery', query: 'geo.src: "US"' },
-              { language: 'kuery', query: 'geo.src: "IN"' },
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'geo.src: "US"' },
+                { language: 'kuery', query: 'geo.src: "IN"' },
+              ],
+              [
+                { language: 'kuery', query: `geo.dest: "IT" AND myField: ""` },
+                { language: 'kuery', query: `geo.dest: "DE" AND myField: "MyOtherValue"` },
+              ],
             ],
-            [
-              { language: 'kuery', query: `geo.dest: "IT" AND myField: ""` },
-              { language: 'kuery', query: `geo.dest: "DE" AND myField: "MyOtherValue"` },
-            ],
-          ],
-          lucene: [],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('should ignore top values fields if other/missing option is enabled', () => {
@@ -1702,7 +1718,10 @@ describe('IndexPattern Data Source', () => {
           },
           layerId: 'first',
         });
-        expect(publicAPI.getFilters()).toEqual({ kuery: [], lucene: [] });
+        expect(publicAPI.getFilters()).toEqual({
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [], lucene: [] },
+        });
       });
       it('should collect custom ranges as kuery filters', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
@@ -1745,14 +1764,17 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [
-            [{ language: 'kuery', query: 'bytes >= 100 AND bytes <= 150' }],
-            [
-              { language: 'kuery', query: 'bytes >= 200 AND bytes <= 300' },
-              { language: 'kuery', query: 'bytes >= 300 AND bytes <= 400' },
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes >= 100 AND bytes <= 150' }],
+              [
+                { language: 'kuery', query: 'bytes >= 200 AND bytes <= 300' },
+                { language: 'kuery', query: 'bytes >= 300 AND bytes <= 400' },
+              ],
             ],
-          ],
-          lucene: [],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('should collect custom ranges as kuery filters as partial', () => {
@@ -1804,11 +1826,14 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [
-            [{ language: 'kuery', query: 'bytes >= 100' }],
-            [{ language: 'kuery', query: 'bytes <= 300' }],
-          ],
-          lucene: [],
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes >= 100' }],
+              [{ language: 'kuery', query: 'bytes <= 300' }],
+            ],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('should collect filters within filters operation grouped by language', () => {
@@ -1862,20 +1887,23 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [
-            [{ language: 'kuery', query: 'bytes > 1000' }],
-            [
-              { language: 'kuery', query: 'bytes > 5000' },
-              { language: 'kuery', query: 'memory > 500000' },
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes > 1000' }],
+              [
+                { language: 'kuery', query: 'bytes > 5000' },
+                { language: 'kuery', query: 'memory > 500000' },
+              ],
             ],
-          ],
-          lucene: [
-            [{ language: 'lucene', query: 'memory' }],
-            [
-              { language: 'lucene', query: 'phpmemory' },
-              { language: 'lucene', query: 'memory: 5000000' },
+            lucene: [
+              [{ language: 'lucene', query: 'memory' }],
+              [
+                { language: 'lucene', query: 'phpmemory' },
+                { language: 'lucene', query: 'memory: 5000000' },
+              ],
             ],
-          ],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
       it('should ignore filtered metrics if at least one metric is unfiltered', () => {
@@ -1911,8 +1939,8 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [],
-          lucene: [],
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [[{ language: 'kuery', query: 'bytes > 1000' }]], lucene: [] },
         });
       });
       it('should ignore filtered metrics if at least one metric is unfiltered in formula', () => {
@@ -1983,8 +2011,8 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [],
-          lucene: [],
+          enabled: { kuery: [], lucene: [] },
+          disabled: { kuery: [[{ language: 'kuery', query: 'memory > 5000' }]], lucene: [] },
         });
       });
       it('should support complete scenarios', () => {
@@ -2049,24 +2077,27 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [
-            [{ language: 'kuery', query: 'bytes > 1000' }],
-            [
-              { language: 'kuery', query: 'bytes > 5000' },
-              { language: 'kuery', query: 'memory > 500000' },
+          enabled: {
+            kuery: [
+              [{ language: 'kuery', query: 'bytes > 1000' }],
+              [
+                { language: 'kuery', query: 'bytes > 5000' },
+                { language: 'kuery', query: 'memory > 500000' },
+              ],
+              [
+                { language: 'kuery', query: 'geo.src: *' },
+                { language: 'kuery', query: 'myField: *' },
+              ],
             ],
-            [
-              { language: 'kuery', query: 'geo.src: *' },
-              { language: 'kuery', query: 'myField: *' },
+            lucene: [
+              [{ language: 'lucene', query: 'memory' }],
+              [
+                { language: 'lucene', query: 'phpmemory' },
+                { language: 'lucene', query: 'memory: 5000000' },
+              ],
             ],
-          ],
-          lucene: [
-            [{ language: 'lucene', query: 'memory' }],
-            [
-              { language: 'lucene', query: 'phpmemory' },
-              { language: 'lucene', query: 'memory: 5000000' },
-            ],
-          ],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
 
@@ -2140,13 +2171,16 @@ describe('IndexPattern Data Source', () => {
           layerId: 'first',
         });
         expect(publicAPI.getFilters()).toEqual({
-          kuery: [
-            [
-              { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
-              { language: 'kuery', query: 'bytes > 4000' },
+          enabled: {
+            kuery: [
+              [
+                { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
+                { language: 'kuery', query: 'bytes > 4000' },
+              ],
             ],
-          ],
-          lucene: [],
+            lucene: [],
+          },
+          disabled: { kuery: [], lucene: [] },
         });
       });
     });
@@ -2433,7 +2467,7 @@ describe('IndexPattern Data Source', () => {
   });
   describe('#isTimeBased', () => {
     it('should return true if date histogram exists in any layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2486,10 +2520,17 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
     it('should return false if date histogram exists but is detached from global time range in every layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2543,9 +2584,44 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
     });
     it('should return false if date histogram does not exist in any layer', () => {
+      let state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
+    it('should return true if the index pattern is time based even if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
@@ -2564,7 +2640,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
   });
 
@@ -2591,9 +2667,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
         })
       ).toBe(state);
     });
@@ -2620,9 +2694,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
           staticValue: 0, // use a falsy value to check also this corner case
         })
       ).toEqual({
@@ -2674,14 +2746,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const currentIndexPatternReference = {
-      id: 'some-id',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    };
-
     const references1: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -2690,7 +2755,6 @@ describe('IndexPattern Data Source', () => {
     ];
 
     const references2: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

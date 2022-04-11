@@ -151,7 +151,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ", { data }: ",
+              ", { unifiedSearch }: ",
               "NavigationPluginStartDependencies",
               ") => ",
               {
@@ -190,7 +190,7 @@
                 "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ data }",
+                "label": "{ unifiedSearch }",
                 "description": [],
                 "signature": [
                   "NavigationPluginStartDependencies"
@@ -611,6 +611,32 @@
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.target",
+            "type": "string",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -629,13 +655,13 @@
           "SearchBarOwnProps",
           " & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; } & Omit<",
           {
-            "pluginId": "data",
+            "pluginId": "unifiedSearch",
             "scope": "public",
-            "docId": "kibDataUiPluginApi",
+            "docId": "kibUnifiedSearchPluginApi",
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"intl\" | \"kibana\" | \"timeHistory\"> & { config?: ",
+          ", \"kibana\" | \"intl\" | \"timeHistory\"> & { config?: ",
           {
             "pluginId": "navigation",
             "scope": "public",
@@ -645,13 +671,13 @@
           },
           "[] | undefined; badges?: (",
           "EuiBadgeProps",
-          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; data?: ",
+          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
-            "pluginId": "data",
+            "pluginId": "unifiedSearch",
             "scope": "public",
-            "docId": "kibDataPluginApi",
-            "section": "def-public.DataPublicPluginStart",
-            "text": "DataPublicPluginStart"
+            "docId": "kibUnifiedSearchPluginApi",
+            "section": "def-public.UnifiedSearchPublicPluginStart",
+            "text": "UnifiedSearchPublicPluginStart"
           },
           " | undefined; className?: string | undefined; setMenuMountPoint?: ((menuMount: ",
           {

@@ -138,6 +138,7 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
     )
   ),
   version: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
 });
 
 export const UpdatePackagePolicySchema = schema.object({

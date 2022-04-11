@@ -30,7 +30,7 @@ describe('Agents CRUD test', () => {
     function getEsResponse(ids: string[], total: number) {
       return {
         hits: {
-          total: { value: total },
+          total,
           hits: ids.map((id: string) => ({
             _id: id,
             _source: {},

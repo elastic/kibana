@@ -12,24 +12,25 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import {
-  EuiBadge,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiButtonEmpty,
-  EuiText,
-  EuiPageHeaderProps,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
-  AlertExecutionStatusErrorReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
+export const DATE_9999 = '9999-12-31T12:34:56.789Z';
+
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+}));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
@@ -58,6 +59,8 @@ const mockRuleApis = {
   disableRule: jest.fn(),
   requestRefresh: jest.fn(),
   refreshToken: Date.now(),
+  snoozeRule: jest.fn(),
+  unsnoozeRule: jest.fn(),
 };
 
 const authorizedConsumers = {
@@ -97,26 +100,62 @@ describe('rule_details', () => {
     ).toBeTruthy();
   });
 
-  it('renders the rule error banner with error message, when rule status is an error', () => {
+  it('renders the rule error banner with error message, when rule has a license error', () => {
     const rule = mockRule({
+      enabled: true,
       executionStatus: {
         status: 'error',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.License,
           message: 'test',
         },
       },
     });
+    const wrapper = shallow(
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+    );
+    expect(wrapper.find('[data-test-subj="ruleErrorBanner"]').first().text()).toMatchInlineSnapshot(
+      `"<EuiIcon /> Cannot run rule, test <FormattedMessage />"`
+    );
+  });
+
+  it('renders the rule warning banner with warning message, when rule status is a warning', () => {
+    const rule = mockRule({
+      enabled: true,
+      executionStatus: {
+        status: 'warning',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        warning: {
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          message: 'warning message',
+        },
+      },
+    });
+    const wrapper = shallow(
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+    );
     expect(
-      shallow(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      ).containsMatchingElement(
-        <EuiText size="s" color="danger" data-test-subj="ruleErrorMessageText">
-          {'test'}
-        </EuiText>
-      )
-    ).toBeTruthy();
+      wrapper.find('[data-test-subj="ruleWarningBanner"]').first().text()
+    ).toMatchInlineSnapshot(`"<EuiIcon /> Action limit exceeded warning message"`);
+  });
+
+  it('displays a toast message when interval is less than configured minimum', async () => {
+    const rule = mockRule({
+      schedule: {
+        interval: '1s',
+      },
+    });
+    const wrapper = mountWithIntl(
+      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
   });
 
   describe('actions', () => {
@@ -144,7 +183,7 @@ describe('rule_details', () => {
       ];
 
       expect(
-        shallow(
+        mountWithIntl(
           <RuleDetails
             rule={rule}
             ruleType={ruleType}
@@ -195,7 +234,7 @@ describe('rule_details', () => {
         },
       ];
 
-      const details = shallow(
+      const details = mountWithIntl(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
 
@@ -256,63 +295,37 @@ describe('rule_details', () => {
   });
 });
 
-describe('disable button', () => {
-  it('should render a disable button when rule is enabled', () => {
+describe('disable/enable functionality', () => {
+  it('should show that the rule is enabled', () => {
     const rule = mockRule({
       enabled: true,
     });
-    const enableButton = shallow(
+    const wrapper = mountWithIntl(
       <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-    )
-      .find(EuiSwitch)
-      .find('[name="enable"]')
-      .first();
+    );
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
 
-    expect(enableButton.props()).toMatchObject({
-      checked: true,
-      disabled: false,
-    });
+    expect(actionsElem.text()).toEqual('Enabled');
   });
 
-  it('should render a enable button and empty state when rule is disabled', async () => {
+  it('should show that the rule is disabled', async () => {
     const rule = mockRule({
       enabled: false,
     });
     const wrapper = mountWithIntl(
       <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
     );
+    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    const enableButton = wrapper.find(EuiSwitch).find('[name="enable"]').first();
-    const disabledEmptyPrompt = wrapper.find('[data-test-subj="disabledEmptyPrompt"]');
-    const disabledEmptyPromptAction = wrapper.find('[data-test-subj="disabledEmptyPromptAction"]');
-
-    expect(enableButton.props()).toMatchObject({
-      checked: false,
-      disabled: false,
-    });
-    expect(disabledEmptyPrompt.exists()).toBeTruthy();
-    expect(disabledEmptyPromptAction.exists()).toBeTruthy();
-
-    disabledEmptyPromptAction.first().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
+    expect(actionsElem.text()).toEqual('Disabled');
   });
 
-  it('should disable the rule when rule is enabled and button is clicked', () => {
+  it('should disable the rule when picking disable in the dropdown', async () => {
     const rule = mockRule({
       enabled: true,
     });
     const disableRule = jest.fn();
-    const enableButton = shallow(
+    const wrapper = mountWithIntl(
       <RuleDetails
         rule={rule}
         ruleType={ruleType}
@@ -320,60 +333,32 @@ describe('disable button', () => {
         {...mockRuleApis}
         disableRule={disableRule}
       />
-    )
-      .find(EuiSwitch)
-      .find('[name="enable"]')
+    );
+    const actionsElem = wrapper
+      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
       .first();
+    actionsElem.simulate('click');
 
-    enableButton.simulate('click');
-    const handler = enableButton.prop('onChange');
-    expect(typeof handler).toEqual('function');
-    expect(disableRule).toHaveBeenCalledTimes(0);
-    handler!({} as React.FormEvent);
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    await act(async () => {
+      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
+      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      actionsMenuItemElem.at(1).simulate('click');
+      await nextTick();
+    });
+
     expect(disableRule).toHaveBeenCalledTimes(1);
   });
 
-  it('should enable the rule when rule is disabled and button is clicked', () => {
+  it('if rule is already disable should do nothing when picking disable in the dropdown', async () => {
     const rule = mockRule({
       enabled: false,
     });
-    const enableRule = jest.fn();
-    const enableButton = shallow(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={[]}
-        {...mockRuleApis}
-        enableRule={enableRule}
-      />
-    )
-      .find(EuiSwitch)
-      .find('[name="enable"]')
-      .first();
-
-    enableButton.simulate('click');
-    const handler = enableButton.prop('onChange');
-    expect(typeof handler).toEqual('function');
-    expect(enableRule).toHaveBeenCalledTimes(0);
-    handler!({} as React.FormEvent);
-    expect(enableRule).toHaveBeenCalledTimes(1);
-  });
-
-  it('should reset error banner dismissal after re-enabling the rule', async () => {
-    const rule = mockRule({
-      enabled: true,
-      executionStatus: {
-        status: 'error',
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: {
-          reason: AlertExecutionStatusErrorReasons.Execute,
-          message: 'Fail',
-        },
-      },
-    });
-
     const disableRule = jest.fn();
-    const enableRule = jest.fn();
     const wrapper = mountWithIntl(
       <RuleDetails
         rule={rule}
@@ -381,55 +366,99 @@ describe('disable button', () => {
         actionTypes={[]}
         {...mockRuleApis}
         disableRule={disableRule}
+      />
+    );
+    const actionsElem = wrapper
+      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
+      .first();
+    actionsElem.simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    await act(async () => {
+      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
+      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      actionsMenuItemElem.at(1).simulate('click');
+      await nextTick();
+    });
+
+    expect(disableRule).toHaveBeenCalledTimes(0);
+  });
+
+  it('should enable the rule when picking enable in the dropdown', async () => {
+    const rule = mockRule({
+      enabled: false,
+    });
+    const enableRule = jest.fn();
+    const wrapper = mountWithIntl(
+      <RuleDetails
+        rule={rule}
+        ruleType={ruleType}
+        actionTypes={[]}
+        {...mockRuleApis}
         enableRule={enableRule}
       />
     );
+    const actionsElem = wrapper
+      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
+      .first();
+    actionsElem.simulate('click');
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
 
-    // Dismiss the error banner
     await act(async () => {
-      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
+      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
 
-    // Disable the rule
-    await act(async () => {
-      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
-      await nextTick();
+    expect(enableRule).toHaveBeenCalledTimes(1);
+  });
+
+  it('if rule is already enable should do nothing when picking enable in the dropdown', async () => {
+    const rule = mockRule({
+      enabled: true,
     });
-    expect(disableRule).toHaveBeenCalled();
+    const enableRule = jest.fn();
+    const wrapper = mountWithIntl(
+      <RuleDetails
+        rule={rule}
+        ruleType={ruleType}
+        actionTypes={[]}
+        {...mockRuleApis}
+        enableRule={enableRule}
+      />
+    );
+    const actionsElem = wrapper
+      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
+      .first();
+    actionsElem.simulate('click');
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
 
-    // Enable the rule
     await act(async () => {
-      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
+      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
+      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
-    expect(enableRule).toHaveBeenCalled();
 
-    // Ensure error banner is back
-    expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
+    expect(enableRule).toHaveBeenCalledTimes(0);
   });
 
   it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
     const rule = mockRule({
       enabled: true,
-      executionStatus: {
-        status: 'error',
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: {
-          reason: AlertExecutionStatusErrorReasons.Execute,
-          message: 'Fail',
-        },
-      },
     });
 
     const disableRule = jest.fn(async () => {
@@ -447,139 +476,53 @@ describe('disable button', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    // Dismiss the error banner
-    await act(async () => {
-      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
-      await nextTick();
-    });
-
-    // Disable the rule
-    await act(async () => {
-      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
-      await nextTick();
-    });
-    expect(disableRule).toHaveBeenCalled();
+    const actionsElem = wrapper
+      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
+      .first();
+    actionsElem.simulate('click');
 
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
 
-    // Enable the rule
     await act(async () => {
-      expect(wrapper.find('[data-test-subj="enableSpinner"]').length).toBeGreaterThan(0);
+      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
+      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      actionsMenuItemElem.at(1).simulate('click');
+    });
+
+    await act(async () => {
       await nextTick();
+      wrapper.update();
+    });
+
+    await act(async () => {
+      expect(disableRule).toHaveBeenCalled();
+      expect(
+        wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton .euiLoadingSpinner')
+          .length
+      ).toBeGreaterThan(0);
     });
   });
 });
 
-describe('mute button', () => {
-  it('should render an mute button when rule is enabled', () => {
-    const rule = mockRule({
-      enabled: true,
-      muteAll: false,
-    });
-    const enableButton = shallow(
-      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-    )
-      .find(EuiSwitch)
-      .find('[name="mute"]')
-      .first();
-    expect(enableButton.props()).toMatchObject({
-      checked: false,
-      disabled: false,
-    });
-  });
-
-  it('should render an muted button when rule is muted', () => {
+describe('snooze functionality', () => {
+  it('should render "Snooze Indefinitely" when rule is enabled and mute all', () => {
     const rule = mockRule({
       enabled: true,
       muteAll: true,
     });
-    const enableButton = shallow(
+    const wrapper = mountWithIntl(
       <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-    )
-      .find(EuiSwitch)
-      .find('[name="mute"]')
+    );
+    const actionsElem = wrapper
+      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
       .first();
-    expect(enableButton.props()).toMatchObject({
-      checked: true,
-      disabled: false,
-    });
-  });
-
-  it('should mute the rule when rule is unmuted and button is clicked', () => {
-    const rule = mockRule({
-      enabled: true,
-      muteAll: false,
-    });
-    const muteRule = jest.fn();
-    const enableButton = shallow(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={[]}
-        {...mockRuleApis}
-        muteRule={muteRule}
-      />
-    )
-      .find(EuiSwitch)
-      .find('[name="mute"]')
-      .first();
-    enableButton.simulate('click');
-    const handler = enableButton.prop('onChange');
-    expect(typeof handler).toEqual('function');
-    expect(muteRule).toHaveBeenCalledTimes(0);
-    handler!({} as React.FormEvent);
-    expect(muteRule).toHaveBeenCalledTimes(1);
-  });
-
-  it('should unmute the rule when rule is muted and button is clicked', () => {
-    const rule = mockRule({
-      enabled: true,
-      muteAll: true,
-    });
-    const unmuteRule = jest.fn();
-    const enableButton = shallow(
-      <RuleDetails
-        rule={rule}
-        ruleType={ruleType}
-        actionTypes={[]}
-        {...mockRuleApis}
-        unmuteRule={unmuteRule}
-      />
-    )
-      .find(EuiSwitch)
-      .find('[name="mute"]')
-      .first();
-    enableButton.simulate('click');
-    const handler = enableButton.prop('onChange');
-    expect(typeof handler).toEqual('function');
-    expect(unmuteRule).toHaveBeenCalledTimes(0);
-    handler!({} as React.FormEvent);
-    expect(unmuteRule).toHaveBeenCalledTimes(1);
-  });
-
-  it('should disabled mute button when rule is disabled', () => {
-    const rule = mockRule({
-      enabled: false,
-      muteAll: false,
-    });
-    const enableButton = shallow(
-      <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-    )
-      .find(EuiSwitch)
-      .find('[name="mute"]')
-      .first();
-    expect(enableButton.props()).toMatchObject({
-      checked: false,
-      disabled: true,
-    });
+    expect(actionsElem.text()).toEqual('Snoozed');
+    expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toEqual(
+      'Indefinitely'
+    );
   });
 });
 

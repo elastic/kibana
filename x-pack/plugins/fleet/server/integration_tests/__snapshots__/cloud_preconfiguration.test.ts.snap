@@ -15,7 +15,7 @@ Object {
       "data_stream": Object {
         "namespace": "default",
       },
-      "id": "elastic-cloud-fleet-server",
+      "id": "fleet-server-fleet_server-elastic-cloud-fleet-server",
       "meta": Object {
         "package": Object {
           "name": "fleet_server",
@@ -115,7 +115,7 @@ Object {
       "meta": Object {
         "package": Object {
           "name": "apm",
-          "version": "8.2.0-dev3",
+          "version": "8.3.0-dev1",
         },
       },
       "name": "Elastic APM",

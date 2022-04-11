@@ -7,6 +7,7 @@
  */
 
 import { Subscription } from 'rxjs';
+import { onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -18,22 +19,10 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import {
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  FilterManager,
-  generateFilters,
-} from '../../../data/public';
+import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '../../../data/public';
 import { DiscoverServices } from '../build_services';
-import {
-  Filter,
-  DataView,
-  DataViewField,
-  ISearchSource,
-  Query,
-  TimeRange,
-  FilterStateStore,
-} from '../../../data/common';
+import { ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
+import { DataView, DataViewField } from '../../../data_views/public';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import {
@@ -224,6 +213,12 @@ export class SavedSearchEmbeddable
     }
   };
 
+  private getDefaultSort(dataView?: DataView) {
+    const defaultSortOrder = this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
+    const hidingTimeColumn = this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
+    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+  }
+
   private initializeSearchEmbeddableProps() {
     const { searchSource } = this.savedSearch;
 
@@ -234,20 +229,14 @@ export class SavedSearchEmbeddable
     }
 
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
-      this.savedSearch.sort = getDefaultSort(
-        indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-      );
+      this.savedSearch.sort = this.getDefaultSort(indexPattern);
     }
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
       indexPattern,
       isLoading: false,
-      sort: getDefaultSort(
-        indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-      ),
+      sort: this.getDefaultSort(indexPattern),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -339,7 +328,7 @@ export class SavedSearchEmbeddable
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
   ) {
     const isFetchRequired =
-      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||
       !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||
@@ -355,10 +344,7 @@ export class SavedSearchEmbeddable
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
-        : getDefaultSort(
-            this.searchProps?.indexPattern,
-            this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
-          );
+        : this.getDefaultSort(this.searchProps?.indexPattern);
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;

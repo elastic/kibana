@@ -14,7 +14,7 @@ import {
   getFakeListDefinition,
   getFakeHttpService,
   renderQuery,
-} from './test_utils';
+} from '../test_utils';
 
 describe('List artifact hook', () => {
   let result: ReturnType<typeof useListArtifact>;
@@ -25,6 +25,8 @@ describe('List artifact hook', () => {
         page: number;
         perPage: number;
         policies: string[];
+        sortField?: string;
+        sortOrder?: string;
       }
     | undefined;
 
@@ -56,7 +58,7 @@ describe('List artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useListArtifact(instance, searchableFields, options, {
+        useListArtifact(instance, options, searchableFields, {
           onSuccess: onSuccessMock,
           retry: false,
         }),
@@ -73,8 +75,8 @@ describe('List artifact hook', () => {
         namespace_type: ['agnostic'],
         page: 2,
         per_page: 20,
-        sort_field: undefined,
-        sort_order: undefined,
+        sort_field: 'created_at',
+        sort_order: 'desc',
       },
     });
     expect(onSuccessMock).toHaveBeenCalledTimes(1);
@@ -92,7 +94,7 @@ describe('List artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useListArtifact(instance, searchableFields, options, {
+        useListArtifact(instance, options, searchableFields, {
           onError: onErrorMock,
           retry: false,
         }),

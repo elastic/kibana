@@ -28,6 +28,7 @@ import {
   overallMinOperation,
   overallMaxOperation,
   overallAverageOperation,
+  timeScaleOperation,
 } from './calculations';
 import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
@@ -75,6 +76,7 @@ export type {
   OverallMinIndexPatternColumn,
   OverallMaxIndexPatternColumn,
   OverallAverageIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './calculations';
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
@@ -110,6 +112,7 @@ const internalOperationDefinitions = [
   overallMaxOperation,
   overallAverageOperation,
   staticValueOperation,
+  timeScaleOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -129,6 +132,7 @@ export {
   overallAverageOperation,
   overallMaxOperation,
   overallMinOperation,
+  timeScaleOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 export { staticValueOperation } from './static_value';
@@ -191,6 +195,16 @@ export interface HelpProps<C> {
 
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
+export interface AdvancedOption {
+  title: string;
+  optionElement?: React.ReactElement;
+  dataTestSubj: string;
+  onClick: () => void;
+  showInPopover: boolean;
+  inlineElement: React.ReactElement | null;
+  helpPopup?: string | null;
+}
+
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
   type: C['operationType'];
   /**
@@ -227,6 +241,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
+  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -416,6 +431,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       kql?: string;
       lucene?: string;
       shift?: string;
+      usedInMath?: boolean;
     }
   ) => C;
   /**

@@ -39,7 +39,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const supertest = getService('supertest');
 
   const spacePrefix = getUrlPrefix(spaceId);
-  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000${
+  const url = `${spacePrefix}/internal/event_log/${type}/${id}/_find?per_page=5000${
     params.filter ? `&filter=${params.filter}` : ''
   }`;
 

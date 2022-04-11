@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { PaletteOutput } from '@kbn/coloring';
 import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { PaletteOutput } from '../../../charts/common';
 import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
@@ -65,6 +65,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     nestedLegend: vis.params?.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
+    legendSize: vis.params.legendSize,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,

@@ -13,7 +13,7 @@ import { RoleTypes, AbilityTypes, Role } from './types';
  * Transforms the `role` data we receive from the Enterprise Search
  * server into a more convenient format for front-end use
  */
-export const getRoleAbilities = (role: Account['role'], hasPlatinumLicense = false): Role => {
+export const getRoleAbilities = (role: Account['role']): Role => {
   // Role ability function helpers
   const myRole = {
     can: (action: AbilityTypes, subject: string): boolean => {

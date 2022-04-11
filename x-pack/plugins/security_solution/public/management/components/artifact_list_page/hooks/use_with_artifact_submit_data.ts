@@ -7,8 +7,7 @@
 
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactFormComponentProps } from '../types';
-import { useUpdateArtifact } from './use_artifact_update_item';
-import { useCreateArtifact } from './use_artifact_create_item';
+import { useCreateArtifact, useUpdateArtifact } from '../../../hooks/artifacts';
 
 export const useWithArtifactSubmitData = (
   apiClient: ExceptionsListApiClient,

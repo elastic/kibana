@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 import { Query } from '../../../../../../src/plugins/data/common';
 
-export interface GeoContainmentAlertParams extends AlertTypeParams {
+export interface GeoContainmentAlertParams extends RuleTypeParams {
   index: string;
   indexId: string;
   geoField: string;

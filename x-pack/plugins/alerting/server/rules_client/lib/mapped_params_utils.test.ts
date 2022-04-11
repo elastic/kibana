@@ -128,4 +128,23 @@ describe('modifyFilterKueryNode', () => {
       value: '40-medium',
     });
   });
+
+  it('do NOT modify the resulting kuery node AST filter for alert params when they are not part of mapped params', () => {
+    // Make sure it works for both camel and snake case params
+    const astFilter = fromKueryExpression(
+      'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.params.threat.tactic.name: Exfiltration'
+    );
+
+    modifyFilterKueryNode({ astFilter });
+
+    expect(astFilter.arguments[2].arguments[0]).toEqual({
+      type: 'literal',
+      value: 'alert.attributes.params.threat.tactic.name',
+    });
+
+    expect(astFilter.arguments[2].arguments[1]).toEqual({
+      type: 'literal',
+      value: 'Exfiltration',
+    });
+  });
 });

@@ -19,19 +19,20 @@ import {
   EuiFlexGroup,
   EuiButtonGroup,
 } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   BasicOptions,
   SwitchOption,
   SelectOption,
   PalettePicker,
   LongLegendOptions,
+  LegendSizeSettings,
 } from '../../../../../vis_default_editor/public';
 import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
-import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
 import { PieTypeProps } from '../../types';
 import {
@@ -120,6 +121,8 @@ const PieOptions = (props: PieOptionsProps) => {
     },
     [setValue]
   );
+
+  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
 
   const handleLegendDisplayChange = useCallback(
     (name: keyof PartitionVisParams, show: boolean) => {
@@ -229,6 +232,14 @@ const PieOptions = (props: PieOptionsProps) => {
               truncateLegend={stateParams.truncateLegend ?? true}
               maxLegendLines={stateParams.maxLegendLines ?? 1}
               setValue={setValue}
+            />
+            <LegendSizeSettings
+              legendSize={stateParams.legendSize}
+              onLegendSizeChange={handleLegendSizeChange}
+              isVerticalLegend={
+                stateParams.legendPosition === Position.Left ||
+                stateParams.legendPosition === Position.Right
+              }
             />
           </>
         )}

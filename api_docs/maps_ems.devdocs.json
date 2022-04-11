@@ -953,7 +953,7 @@
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
         "description": [],
         "signature": [
-          "\"https://maps.elastic.co/v8.0\""
+          "\"https://maps.elastic.co/v8.2\""
         ],
         "path": "src/plugins/maps_ems/common/ems_defaults.ts",
         "deprecated": false,

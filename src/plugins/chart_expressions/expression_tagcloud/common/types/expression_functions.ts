@@ -7,7 +7,7 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import { PaletteOutput } from '../../../../charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
@@ -26,14 +26,14 @@ interface TagCloudCommonParams {
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {
-  metric: ExpressionValueVisDimension;
-  bucket?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  bucket?: ExpressionValueVisDimension | string;
 }
 
 export interface TagCloudRendererParams extends TagCloudCommonParams {
   palette: PaletteOutput;
-  metric: ExpressionValueVisDimension;
-  bucket?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  bucket?: ExpressionValueVisDimension | string;
 }
 
 export interface TagcloudRendererConfig {

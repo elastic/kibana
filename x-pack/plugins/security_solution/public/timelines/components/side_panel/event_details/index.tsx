@@ -67,6 +67,7 @@ interface EventDetailsPanelProps {
   runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
@@ -80,15 +81,18 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   runtimeMappings,
   tabType,
   timelineId,
+  isReadOnly,
 }) => {
-  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
-    docValueFields,
-    entityType,
-    indexName: expandedEvent.indexName ?? '',
-    eventId: expandedEvent.eventId ?? '',
-    runtimeMappings,
-    skip: !expandedEvent.eventId,
-  });
+  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
+    {
+      docValueFields,
+      entityType,
+      indexName: expandedEvent.indexName ?? '',
+      eventId: expandedEvent.eventId ?? '',
+      runtimeMappings,
+      skip: !expandedEvent.eventId,
+    }
+  );
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
@@ -100,7 +104,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     services: { cases },
   } = useKibana();
 
-  const CasesContext = cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const casesPermissions = useGetUserCasesPermissions();
 
   const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
@@ -191,7 +195,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }
 
   return isFlyoutView ? (
-    <>
+    <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
@@ -232,21 +236,25 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             timelineTabType="flyout"
             hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
+            isReadOnly={isReadOnly}
           />
         )}
       </StyledEuiFlyoutBody>
 
-      <EventDetailsFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        timelineId={timelineId}
-      />
-    </>
+      {!isReadOnly && (
+        <EventDetailsFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          expandedEvent={expandedEvent}
+          refetchFlyoutData={refetchFlyoutData}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          timelineId={timelineId}
+        />
+      )}
+    </CasesContext>
   ) : (
     <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
       <ExpandableEventTitle
@@ -269,16 +277,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         hostRisk={hostRisk}
         handleOnEventClosed={handleOnEventClosed}
       />
-      <EventDetailsFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        timelineId={timelineId}
-      />
+      {!isReadOnly && (
+        <EventDetailsFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          expandedEvent={expandedEvent}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          refetchFlyoutData={refetchFlyoutData}
+          timelineId={timelineId}
+        />
+      )}
     </CasesContext>
   );
 };

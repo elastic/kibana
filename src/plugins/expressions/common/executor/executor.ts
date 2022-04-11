@@ -20,7 +20,7 @@ import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
-import { getByAlias } from '../util';
+import { ALL_NAMESPACES, getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
 import {
   MigrateFunctionsObject,
@@ -146,15 +146,17 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.container.transitions.addFunction(fn);
   }
 
-  public getFunction(name: string): ExpressionFunction | undefined {
-    return this.container.get().functions[name] ?? this.parent?.getFunction(name);
+  public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
+    const fn = this.container.get().functions[name];
+    if (!fn?.namespace || fn.namespace === namespace) return fn;
   }
 
-  public getFunctions(): Record<string, ExpressionFunction> {
-    return {
-      ...(this.parent?.getFunctions() ?? {}),
-      ...this.container.get().functions,
-    };
+  public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
+    const fns = Object.entries(this.container.get().functions);
+    const filtered = fns.filter(
+      ([key, value]) => !value.namespace || value.namespace === namespace
+    );
+    return Object.fromEntries(filtered);
   }
 
   public registerType(
@@ -222,9 +224,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: ExpressionAstExpression,
     action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
   ) {
+    const functions = this.container.get().functions;
     for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
-      const fn = getByAlias(this.getFunctions(), fnName);
+      const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
 
       if (fn) {
         // if any of arguments are expressions we should migrate those first
@@ -249,12 +252,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ) => ExpressionAstFunction | ExpressionAstExpression
   ): ExpressionAstExpression {
     let additionalFunctions = 0;
+    const functions = this.container.get().functions;
     return (
       ast.chain.reduce<ExpressionAstExpression>(
         (newAst: ExpressionAstExpression, funcAst: ExpressionAstFunction, index: number) => {
           const realIndex = index + additionalFunctions;
           const { function: fnName, arguments: fnArgs } = funcAst;
-          const fn = getByAlias(this.getFunctions(), fnName);
+          const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
           if (!fn) {
             return newAst;
           }
@@ -331,7 +335,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   public getAllMigrations() {
     const uniqueVersions = new Set(
-      Object.values(this.getFunctions())
+      Object.values(this.container.get().functions)
         .map((fn) => Object.keys(fn.migrations))
         .flat(1)
     );

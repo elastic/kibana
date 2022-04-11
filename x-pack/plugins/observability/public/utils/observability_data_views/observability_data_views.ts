@@ -49,7 +49,7 @@ const appToPatternMap: Record<AppDataType, string> = {
   synthetics: '(synthetics-data-view)*',
   apm: 'apm-*',
   ux: '(rum-data-view)*',
-  infra_logs: '',
+  infra_logs: '(infra-logs-data-view)*',
   infra_metrics: '(infra-metrics-data-view)*',
   mobile: '(mobile-data-view)*',
 };
@@ -176,3 +176,6 @@ export class ObservabilityDataViews {
     }
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ObservabilityDataViews;

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { useMemo } from 'react';
 import { HttpFetchQuery } from 'kibana/public';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
-import {
+import type {
   TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
@@ -61,13 +63,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getTrainedModels(modelId?: string | string[], params?: InferenceQueryParams) {
-      let model = modelId ?? '';
-      if (Array.isArray(modelId)) {
-        model = modelId.join(',');
-      }
+      const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<TrainedModelConfigResponse[]>({
-        path: `${apiBasePath}/trained_models${model && `/${model}`}`,
+        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
       });
@@ -81,10 +80,10 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getTrainedModelStats(modelId?: string | string[], params?: InferenceStatsQueryParams) {
-      const model = (Array.isArray(modelId) ? modelId.join(',') : modelId) || '_all';
+      const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
       return httpService.http<InferenceStatsResponse>({
-        path: `${apiBasePath}/trained_models/${model}/_stats`,
+        path: `${apiBasePath}/trained_models${model ? `/${model}` : ''}/_stats`,
         method: 'GET',
       });
     },
@@ -139,6 +138,25 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
         method: 'POST',
         query: { force },
+      });
+    },
+
+    inferTrainedModel(modelId: string, payload: any, timeout?: string) {
+      const body = JSON.stringify(payload);
+      return httpService.http<estypes.MlInferTrainedModelDeploymentResponse>({
+        path: `${apiBasePath}/trained_models/infer/${modelId}`,
+        method: 'POST',
+        body,
+        ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
+      });
+    },
+
+    ingestPipelineSimulate(payload: estypes.IngestSimulateRequest['body']) {
+      const body = JSON.stringify(payload);
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${apiBasePath}/trained_models/ingest_pipeline_simulate`,
+        method: 'POST',
+        body,
       });
     },
   };

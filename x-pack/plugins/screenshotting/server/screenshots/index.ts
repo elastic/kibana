@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import ipaddr from 'ipaddr.js';
+import { sum } from 'lodash';
 import apm from 'elastic-apm-node';
+import type { Transaction } from 'elastic-apm-node';
 import { from, of, Observable } from 'rxjs';
+import type { Optional } from '@kbn/utility-types';
 import {
   catchError,
   concatMap,
@@ -18,17 +22,47 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { KibanaRequest, Logger } from 'src/core/server';
-import { LayoutParams } from '../../common';
+import type { HttpServiceSetup, KibanaRequest, Logger } from 'src/core/server';
+import type { ExpressionAstExpression } from 'src/plugins/expressions/common';
+import {
+  LayoutParams,
+  SCREENSHOTTING_APP_ID,
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+} from '../../common';
 import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { createLayout } from '../layouts';
 import type { Layout } from '../layouts';
-import { ScreenshotObservableHandler } from './observable';
+import {
+  PdfScreenshotOptions,
+  PdfScreenshotResult,
+  PngScreenshotOptions,
+  PngScreenshotResult,
+  toPdf,
+  toPng,
+} from '../formats';
+import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { Semaphore } from './semaphore';
 
-export interface ScreenshotOptions extends ScreenshotObservableOptions {
+export type { UrlOrUrlWithContext } from './observable';
+export type { ScreenshotObservableResult } from './observable';
+
+export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'urls'> {
+  /**
+   * Expression to render. Mutually exclusive with `urls`.
+   */
+  expression?: string | ExpressionAstExpression;
+
+  /**
+   * Expression input.
+   */
+  input?: unknown;
+
+  /**
+   * Layout parameters.
+   */
   layout: LayoutParams;
 
   /**
@@ -37,22 +71,22 @@ export interface ScreenshotOptions extends ScreenshotObservableOptions {
   request?: KibanaRequest;
 }
 
-export interface ScreenshotResult {
-  /**
-   * Used layout instance constructed from the given options.
-   */
-  layout: Layout;
+export type CaptureMetrics = PerformanceMetrics;
 
+export interface CaptureResult {
   /**
    * Collected performance metrics during the screenshotting session.
    */
-  metrics?: PerformanceMetrics;
+  metrics?: CaptureMetrics;
 
   /**
    * Screenshotting results.
    */
   results: ScreenshotObservableResult[];
 }
+
+export type ScreenshotOptions = PdfScreenshotOptions | PngScreenshotOptions;
+export type ScreenshotResult = PdfScreenshotResult | PngScreenshotResult;
 
 const DEFAULT_SETUP_RESULT = {
   elementsPositionAndAttributes: null,
@@ -65,24 +99,31 @@ export class Screenshots {
   constructor(
     private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
     private readonly logger: Logger,
+    private readonly http: HttpServiceSetup,
     { poolSize }: ConfigType
   ) {
     this.semaphore = new Semaphore(poolSize);
   }
 
-  getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
-    const apmTrans = apm.startTransaction('screenshot-pipeline', 'screenshotting');
-    const apmCreateLayout = apmTrans?.startSpan('create-layout', 'setup');
+  private createLayout(transaction: Transaction | null, options: CaptureOptions): Layout {
+    const apmCreateLayout = transaction?.startSpan('create-layout', 'setup');
     const layout = createLayout(options.layout);
     this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
     apmCreateLayout?.end();
 
-    const apmCreatePage = apmTrans?.startSpan('create-page', 'wait');
+    return layout;
+  }
+
+  private captureScreenshots(
+    layout: Layout,
+    transaction: Transaction | null,
+    options: ScreenshotObservableOptions
+  ): Observable<CaptureResult> {
+    const apmCreatePage = transaction?.startSpan('create-page', 'wait');
     const {
       browserTimezone,
       timeouts: { openUrl: openUrlTimeout },
     } = options;
-    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
 
     return this.browserDriverFactory
       .createPage(
@@ -97,16 +138,13 @@ export class Screenshots {
         this.semaphore.acquire(),
         mergeMap(({ driver, unexpectedExit$, close }) => {
           apmCreatePage?.end();
-          unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
+          unexpectedExit$.subscribe({ error: () => transaction?.end() });
 
-          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, {
-            ...options,
-            headers,
-          });
+          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, options);
 
           return from(options.urls).pipe(
             concatMap((url, index) =>
-              screen.setupPage(index, url, apmTrans).pipe(
+              screen.setupPage(index, url, transaction).pipe(
                 catchError((error) => {
                   screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
@@ -124,16 +162,63 @@ export class Screenshots {
               close().pipe(
                 tap(({ metrics }) => {
                   if (metrics) {
-                    apmTrans?.setLabel('cpu', metrics.cpu, false);
-                    apmTrans?.setLabel('memory', metrics.memory, false);
+                    transaction?.setLabel('cpu', metrics.cpu, false);
+                    transaction?.setLabel('memory', metrics.memory, false);
                   }
                 }),
-                map(({ metrics }) => ({ layout, metrics, results }))
+                map(({ metrics }) => ({ metrics, results }))
               )
             )
           );
         }),
         first()
       );
+  }
+
+  private getScreenshottingAppUrl() {
+    const info = this.http.getServerInfo();
+    const { protocol, port } = info;
+    let { hostname } = info;
+
+    if (ipaddr.isValid(hostname) && !sum(ipaddr.parse(hostname).toByteArray())) {
+      hostname = 'localhost';
+    }
+
+    return `${protocol}://${hostname}:${port}${this.http.basePath.serverBasePath}/app/${SCREENSHOTTING_APP_ID}`;
+  }
+
+  getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult>;
+  getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
+  getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
+  getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    const transaction = apm.startTransaction('screenshot-pipeline', 'screenshotting');
+    const layout = this.createLayout(transaction, options);
+    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
+    const urls = options.expression
+      ? [
+          [
+            this.getScreenshottingAppUrl(),
+            {
+              [SCREENSHOTTING_EXPRESSION]: options.expression,
+              [SCREENSHOTTING_EXPRESSION_INPUT]: options.input,
+            },
+          ] as UrlOrUrlWithContext,
+        ]
+      : options.urls ?? [];
+
+    return this.captureScreenshots(layout, transaction, {
+      ...options,
+      headers,
+      urls,
+    }).pipe(
+      mergeMap((result) => {
+        switch (options.format) {
+          case 'pdf':
+            return toPdf(this.logger, layout, options, result);
+          default:
+            return toPng(result);
+        }
+      })
+    );
   }
 }

@@ -18,8 +18,7 @@ import { CLOUD_KIBANA_CONFIG } from './fixtures/cloud_kibana_config';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-// FAILING: https://github.com/elastic/kibana/issues/127076
-describe.skip('Fleet preconfiguration reset', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
 
@@ -40,8 +39,13 @@ describe.skip('Fleet preconfiguration reset', () => {
     const startKibana = async () => {
       const root = kbnTestServer.createRootWithCorePlugins(
         {
-          ...CLOUD_KIBANA_CONFIG,
-          'xpack.fleet.registryUrl': registryUrl,
+          xpack: {
+            ...CLOUD_KIBANA_CONFIG.xpack,
+            fleet: {
+              ...CLOUD_KIBANA_CONFIG.xpack.fleet,
+              registryUrl,
+            },
+          },
           logging: {
             appenders: {
               file: {

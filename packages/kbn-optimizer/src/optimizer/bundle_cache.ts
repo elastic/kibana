@@ -9,11 +9,10 @@
 import * as Rx from 'rxjs';
 import { mergeAll } from 'rxjs/operators';
 
-import { Bundle, BundleRefs } from '../common';
+import { Bundle, BundleRefs, Hashes } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
-import { getMtimes } from './get_mtimes';
-import { diffCacheKey } from './cache_keys';
+import { diffCacheKey } from './diff_cache_key';
 
 export type BundleCacheEvent = BundleNotCachedEvent | BundleCachedEvent;
 
@@ -114,20 +113,12 @@ export function getBundleCacheEvent$(
       eligibleBundles.push(bundle);
     }
 
-    const mtimes = await getMtimes(
-      new Set<string>(
-        eligibleBundles.reduce(
-          (acc: string[], bundle) => [...acc, ...(bundle.cache.getReferencedFiles() || [])],
-          []
-        )
-      )
-    );
-
+    const hashes = new Hashes();
     for (const bundle of eligibleBundles) {
-      const diff = diffCacheKey(
-        bundle.cache.getCacheKey(),
-        bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
-      );
+      const paths = bundle.cache.getReferencedPaths() ?? [];
+      await hashes.populate(paths);
+
+      const diff = diffCacheKey(bundle.cache.getCacheKey(), bundle.createCacheKey(paths, hashes));
 
       if (diff) {
         events.push({
