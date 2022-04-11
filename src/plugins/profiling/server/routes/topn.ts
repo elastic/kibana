@@ -13,7 +13,7 @@ import {
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DataRequestHandlerContext } from '../../../data/server';
-import { getRemoteRoutePaths } from '../../common';
+import { getRoutePaths } from '../../common';
 import { StackTraceID } from '../../common/profiling';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
@@ -150,7 +150,7 @@ export function registerTraceEventsTopNContainersSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   return queryTopNCommon(router, logger, paths.TopNContainers, 'ContainerName');
 }
 
@@ -158,7 +158,7 @@ export function registerTraceEventsTopNDeploymentsSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   return queryTopNCommon(router, logger, paths.TopNDeployments, 'PodName');
 }
 
@@ -166,7 +166,7 @@ export function registerTraceEventsTopNHostsSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   return queryTopNCommon(router, logger, paths.TopNHosts, 'HostID');
 }
 
@@ -174,7 +174,7 @@ export function registerTraceEventsTopNStackTracesSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   return queryTopNCommon(router, logger, paths.TopNTraces, 'StackTraceID');
 }
 
@@ -182,6 +182,6 @@ export function registerTraceEventsTopNThreadsSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
-  const paths = getRemoteRoutePaths();
+  const paths = getRoutePaths();
   return queryTopNCommon(router, logger, paths.TopNThreads, 'ThreadName');
 }

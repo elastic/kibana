@@ -9,34 +9,18 @@
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
-const BASE_ROUTE_PATH = '/api/prodfiler';
+const BASE_ROUTE_PATH = '/api/prodfiler/v2';
 
-const BASE_LOCAL_ROUTE_PATH = `${BASE_ROUTE_PATH}/v1`;
-const BASE_REMOTE_ROUTE_PATH = `${BASE_ROUTE_PATH}/v2`;
-
-export function getLocalRoutePaths() {
+export function getRoutePaths() {
   return {
-    TopN: `${BASE_LOCAL_ROUTE_PATH}/topn`,
-    TopNContainers: `${BASE_LOCAL_ROUTE_PATH}/topn/containers`,
-    TopNDeployments: `${BASE_LOCAL_ROUTE_PATH}/topn/deployments`,
-    TopNHosts: `${BASE_LOCAL_ROUTE_PATH}/topn/hosts`,
-    TopNThreads: `${BASE_LOCAL_ROUTE_PATH}/topn/threads`,
-    TopNTraces: `${BASE_LOCAL_ROUTE_PATH}/topn/traces`,
-    FlamechartElastic: `${BASE_LOCAL_ROUTE_PATH}/flamechart/elastic`,
-    FlamechartPixi: `${BASE_LOCAL_ROUTE_PATH}/flamechart/pixi`,
-  };
-}
-
-export function getRemoteRoutePaths() {
-  return {
-    TopN: `${BASE_REMOTE_ROUTE_PATH}/topn`,
-    TopNContainers: `${BASE_REMOTE_ROUTE_PATH}/topn/containers`,
-    TopNDeployments: `${BASE_REMOTE_ROUTE_PATH}/topn/deployments`,
-    TopNHosts: `${BASE_REMOTE_ROUTE_PATH}/topn/hosts`,
-    TopNThreads: `${BASE_REMOTE_ROUTE_PATH}/topn/threads`,
-    TopNTraces: `${BASE_REMOTE_ROUTE_PATH}/topn/traces`,
-    FlamechartElastic: `${BASE_REMOTE_ROUTE_PATH}/flamechart/elastic`,
-    FlamechartPixi: `${BASE_REMOTE_ROUTE_PATH}/flamechart/pixi`,
+    TopN: `${BASE_ROUTE_PATH}/topn`,
+    TopNContainers: `${BASE_ROUTE_PATH}/topn/containers`,
+    TopNDeployments: `${BASE_ROUTE_PATH}/topn/deployments`,
+    TopNHosts: `${BASE_ROUTE_PATH}/topn/hosts`,
+    TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
+    TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
+    FlamechartElastic: `${BASE_ROUTE_PATH}/flamechart/elastic`,
+    FlamechartPixi: `${BASE_ROUTE_PATH}/flamechart/pixi`,
   };
 }
 
