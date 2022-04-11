@@ -30,9 +30,6 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
 export const usePollingAgentCount = (policyId: string) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
 
-  // Use useRef to guarantee we get the same date on each render
-  const mountedAt = useRef(Date.now());
-
   const timeout = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -40,9 +37,8 @@ export const usePollingAgentCount = (policyId: string) => {
 
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const secSinceMounted = Math.ceil((Date.now() - mountedAt.current) / 1000);
         const request = await sendGetAgents({
-          kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}" and ${AGENTS_PREFIX}.enrolled_at >= "now-${secSinceMounted}s"`,
+          kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}" and ${AGENTS_PREFIX}.enrolled_at >= now-10m`,
           showInactive: false,
         });
 
