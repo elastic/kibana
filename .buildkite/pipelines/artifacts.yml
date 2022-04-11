@@ -34,7 +34,7 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/artifacts/publish.sh
-    label: 'Publish Artifacts'
+    label: 'Publish Kibana Artifacts'
     agents:
       queue: n2-2
     timeout_in_minutes: 30
