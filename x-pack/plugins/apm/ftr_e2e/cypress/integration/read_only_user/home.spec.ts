@@ -23,7 +23,7 @@ const serviceInventoryHref = url.format({
   },
 });
 
-describe('Home page', () => {
+describe.skip('Home page', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
