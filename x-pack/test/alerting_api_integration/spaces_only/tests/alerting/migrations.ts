@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { RawRule, RawAlertAction } from '../../../../../plugins/alerting/server/types';
+import type { RawRule, RawRuleAction } from '../../../../../plugins/alerting/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '../../../../../plugins/alerting/server/saved_objects/migrations';
 
 // eslint-disable-next-line import/no-default-export
@@ -243,7 +243,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).actions! as RawAlertAction[]).to.eql([
+      expect((hit!._source!.alert! as RawRule).actions! as RawRuleAction[]).to.eql([
         {
           actionRef: 'action_0',
           actionTypeId: 'test.noop',

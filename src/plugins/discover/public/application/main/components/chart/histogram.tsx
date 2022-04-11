@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   Axis,
   BrushEndListener,
