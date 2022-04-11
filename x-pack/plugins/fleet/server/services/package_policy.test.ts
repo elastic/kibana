@@ -1360,7 +1360,55 @@ describe('Package policy service', () => {
   describe('runPostPackagePolicyPostCreateCallback', () => {
     let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
     let request: KibanaRequest;
-    const packagePolicy = createPackagePolicyMock();
+    const packagePolicy = {
+      id: '93ac25fe-0467-4fcc-a3c5-57a26a8496e2',
+      version: 'WzYyMzcsMV0=',
+      name: 'cis_kubernetes_benchmark-2',
+      namespace: 'default',
+      description: '',
+      package: {
+        name: 'cis_kubernetes_benchmark',
+        title: 'CIS Kubernetes Benchmark',
+        version: '0.0.3',
+      },
+      enabled: true,
+      policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
+      output_id: '',
+      inputs: [
+        {
+          type: 'cloudbeat',
+          policy_template: 'findings',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'cis_kubernetes_benchmark.findings',
+              },
+              id: 'cloudbeat-cis_kubernetes_benchmark.findings-66b402b3-f24a-4018-b3d0-b88582a836ab',
+              compiled_stream: {
+                processors: [
+                  {
+                    add_cluster_id: null,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+      vars: {
+        dataYaml: {
+          type: 'yaml',
+        },
+      },
+      revision: 1,
+      created_at: '2022-04-11T12:44:43.385Z',
+      created_by: 'elastic',
+      updated_at: '2022-04-11T12:44:43.385Z',
+      updated_by: 'elastic',
+    };
     const callbackCallingOrder: string[] = [];
 
     beforeEach(() => {
