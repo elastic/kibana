@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
