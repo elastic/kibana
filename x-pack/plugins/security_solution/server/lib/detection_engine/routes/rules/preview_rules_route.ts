@@ -21,7 +21,10 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import {
+  DEFAULT_PREVIEW_INDEX,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../common/constants';
 import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import {
   previewRulesSchema,
@@ -81,7 +84,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const [, { data }] = await getStartServices();
+        const [, { data, security: securityService }] = await getStartServices();
         const searchSourceClient = data.search.searchSource.asScoped(request);
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
@@ -120,6 +123,28 @@ export const previewRulesRoute = async (
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
         let isAborted = false;
+
+        const { privileges } = await securityService.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            elasticsearch: { index: { [DEFAULT_PREVIEW_INDEX]: ['read'] }, cluster: [] },
+          });
+
+        if (!privileges.elasticsearch.index[DEFAULT_PREVIEW_INDEX][0].authorized) {
+          return response.ok({
+            body: {
+              logs: [
+                {
+                  errors: [
+                    'Missing "read" privileges for the ".preview.alerts-security.alerts" index. Without that privilege you cannot use the Rule Preview feature.',
+                  ],
+                  warnings: [],
+                  duration: 0,
+                },
+              ],
+            },
+          });
+        }
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
