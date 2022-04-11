@@ -16,8 +16,10 @@ const cspRuleTemplateSchema = rt.object({
   benchmark: rt.object({ name: rt.string(), version: rt.string() }),
   severity: rt.string(),
   benchmark_rule_id: rt.string(),
-  rego_rule_id: rt.string(),
+  // rego_rule_id: rt.string(),
   tags: rt.arrayOf(rt.string()),
+  enabled: rt.boolean(),
+  muted: rt.boolean(),
 });
 export const cloudSecurityPostureRuleTemplateSavedObjectType = 'csp-rule-template';
 export type CloudSecurityPostureRuleTemplateSchema = TypeOf<typeof cspRuleTemplateSchema>;

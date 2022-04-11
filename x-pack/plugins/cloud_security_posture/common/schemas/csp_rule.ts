@@ -21,6 +21,7 @@ export const cspRuleSchema = rt.object({
   tags: rt.arrayOf(rt.string()),
   enabled: rt.boolean(),
   muted: rt.boolean(),
+  package_policy_id: rt.string(),
 });
 
 export type CspRuleSchema = TypeOf<typeof cspRuleSchema>;
