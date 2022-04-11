@@ -91,32 +91,32 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   id="xpack.maps.scalingDocs.limitUseCase"
                   defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
                 />
-                  <ul>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.maps.scalingDocs.limitUseCase"
-                        defaultMessage="Formatted labels"
-                      />
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.maps.scalingDocs.limitUseCase"
-                        defaultMessage="Multiple term joins"
-                      />
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.maps.scalingDocs.limitUseCase"
-                        defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
-                      />
-                    </li>
-                    <li>
-                      <FormattedMessage
-                        id="xpack.maps.scalingDocs.limitUseCase"
-                        defaultMessage="Data driven styling from scripted fields"
-                      />
-                    </li>
-                  </ul>
+                <ul>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase"
+                      defaultMessage="Formatted labels"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase"
+                      defaultMessage="Multiple term joins"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase"
+                      defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase"
+                      defaultMessage="Data driven styling from scripted fields"
+                    />
+                  </li>
+                </ul>
               </p>
             </dd>
           </dl>
