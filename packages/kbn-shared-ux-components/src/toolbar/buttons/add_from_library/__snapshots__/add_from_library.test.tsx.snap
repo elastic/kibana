@@ -9,6 +9,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
     <EuiButton
       color="primary"
       fill={true}
+      iconSide="left"
       iconType="folderOpen"
       size="m"
     >
@@ -18,6 +19,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
         disabled={false}
         element="button"
         fill={true}
+        iconSide="left"
         iconType="folderOpen"
         isDisabled={false}
         size="m"

@@ -42,8 +42,6 @@ export function getInstallCommandForPlatform(
     }
     commandArguments.push(['fleet-server-cert', '<PATH_TO_FLEET_SERVER_CERT>']);
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
-  } else {
-    commandArguments.push(['fleet-server-insecure-http']);
   }
 
   const commandArgumentsStr = (platform?: string) => {
