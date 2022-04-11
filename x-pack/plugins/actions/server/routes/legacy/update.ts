@@ -41,7 +41,7 @@ export const updateActionRoute = (
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
-      const actionsClient = context.actions.getActionsClient();
+      const actionsClient = (await context.actions).getActionsClient();
       const { id } = req.params;
       const { name, config, secrets } = req.body;
       trackLegacyRouteUsage('update', usageCounter);

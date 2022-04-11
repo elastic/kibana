@@ -15,12 +15,13 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   ElasticsearchClient,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectReference,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+
 export type { ActionTypeExecutorResult } from '../common';
 export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
@@ -46,9 +47,9 @@ export interface ActionsApiRequestHandlerContext {
   listTypes: ActionTypeRegistry['list'];
 }
 
-export interface ActionsRequestHandlerContext extends RequestHandlerContext {
+export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
   actions: ActionsApiRequestHandlerContext;
-}
+}>;
 
 export interface ActionsPlugin {
   setup: PluginSetupContract;
@@ -97,6 +98,7 @@ interface ValidatorType<Type> {
 
 export interface ActionValidationService {
   isHostnameAllowed(hostname: string): boolean;
+
   isUriAllowed(uri: string): boolean;
 }
 
@@ -116,11 +118,13 @@ export interface ActionType<
     secrets?: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
+
   renderParameterTemplates?(
     params: Params,
     variables: Record<string, unknown>,
     actionId?: string
   ): Params;
+
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
@@ -146,6 +150,7 @@ interface PersistedActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
 }
+
 interface EphemeralActionTaskExecutorParams {
   spaceId: string;
   taskParams: ActionTaskParams;

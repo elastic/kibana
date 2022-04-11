@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, RequestHandlerContext } from 'kibana/server';
+import { Plugin, CoreSetup, CustomRequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { PluginAApiRequestContext } from '../../core_plugin_a/server';
 
-interface PluginBContext extends RequestHandlerContext {
+type PluginBContext = CustomRequestHandlerContext<{
   pluginA: PluginAApiRequestContext;
-}
+}>;
 
 export class CorePluginBPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     const router = core.http.createRouter<PluginBContext>();
     router.get({ path: '/core_plugin_b', validate: false }, async (context, req, res) => {
-      if (!context.pluginA) throw new Error('pluginA is disabled');
-      const response = await context.pluginA.ping();
+      const pluginAContext = await context.pluginA;
+      if (!pluginAContext) throw new Error('pluginA is disabled');
+      const response = await pluginAContext.ping();
       return res.ok({ body: `Pong via plugin A: ${response}` });
     });
 
@@ -54,5 +55,6 @@ export class CorePluginBPlugin implements Plugin {
   }
 
   public start() {}
+
   public stop() {}
 }

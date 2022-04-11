@@ -35,7 +35,7 @@ export const createActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const action = req.body;
         trackLegacyRouteUsage('create', usageCounter);
         return res.ok({

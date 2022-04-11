@@ -88,6 +88,7 @@ import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
 } from './analytics';
+import { TypeOf } from '../../../packages/kbn-config-schema/src';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
@@ -503,6 +504,11 @@ export interface CoreRequestHandlerContext {
     client: DeprecationsClient;
   };
 }
+
+/** @public */
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.

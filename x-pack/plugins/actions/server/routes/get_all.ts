@@ -34,7 +34,7 @@ export const getAllActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
         return res.ok({
           body: rewriteBodyRes(result),

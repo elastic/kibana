@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import type { CustomRequestHandlerContext, KibanaRequest } from 'src/core/server';
 
 export interface ScreenshotModePluginStart {
   /**
@@ -32,8 +32,8 @@ export interface ScreenshotModePluginSetup extends ScreenshotModePluginStart {
   setScreenshotModeEnabled(): void;
 }
 
-export interface ScreenshotModeRequestHandlerContext extends RequestHandlerContext {
+export type ScreenshotModeRequestHandlerContext = CustomRequestHandlerContext<{
   screenshotMode: {
     isScreenshot: boolean;
   };
-}
+}>;

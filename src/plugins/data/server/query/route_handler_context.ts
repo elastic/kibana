@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext, SavedObject } from 'kibana/server';
+import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from 'kibana/server';
 import { isFilters } from '@kbn/es-query';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/persistable_state';
@@ -66,11 +66,12 @@ function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) 
   }
 }
 
-export function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
+export async function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
+  const soClient = (await context.core).savedObjects.client;
+
   const createSavedQuery = async (attrs: SavedQueryAttributes) => {
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
-    const soClient = (await context.core).savedObjects.client;
 
     const savedObject = await soClient.create<SavedQueryAttributes>('query', attributes, {
       references,
@@ -85,7 +86,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   const updateSavedQuery = async (id: string, attrs: SavedQueryAttributes) => {
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
-    const soClient = (await context.core).savedObjects.client;
 
     const savedObject = await soClient.update<SavedQueryAttributes>('query', id, attributes, {
       references,
@@ -98,7 +98,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQuery = async (id: string) => {
-    const soClient = (await context.core).savedObjects.client;
     const { saved_object: savedObject, outcome } = await soClient.resolve<SavedQueryAttributes>(
       'query',
       id
@@ -112,7 +111,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQueriesCount = async () => {
-    const soClient = (await context.core).savedObjects.client;
     const { total } = await soClient.find<SavedQueryAttributes>({
       type: 'query',
     });
@@ -120,7 +118,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}) => {
-    const soClient = (await context.core).savedObjects.client;
     const { total, saved_objects: savedObjects } = await soClient.find<SavedQueryAttributes>({
       type: 'query',
       page,
@@ -134,7 +131,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getAllSavedQueries = async () => {
-    const soClient = (await context.core).savedObjects.client;
     const finder = soClient.createPointInTimeFinder<SavedQueryAttributes>({
       type: 'query',
       perPage: 100,
@@ -151,7 +147,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const deleteSavedQuery = async (id: string) => {
-    const soClient = (await context.core).savedObjects.client;
     return await soClient.delete('query', id);
   };
 
@@ -166,6 +161,6 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 }
 
-export interface SavedQueryRouteHandlerContext extends RequestHandlerContext {
-  savedQuery: ReturnType<typeof registerSavedQueryRouteHandlerContext>;
-}
+export type SavedQueryRouteHandlerContext = CustomRequestHandlerContext<{
+  savedQuery: Promise<ReturnType<typeof registerSavedQueryRouteHandlerContext>>;
+}>;

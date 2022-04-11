@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, RequestHandlerContext } from 'kibana/server';
+import type { Plugin, CoreSetup, CustomRequestHandlerContext } from 'kibana/server';
 
 export interface PluginAApiRequestContext {
   ping: () => Promise<string>;
 }
 
-interface PluginARequstHandlerContext extends RequestHandlerContext {
+type PluginARequstHandlerContext = CustomRequestHandlerContext<{
   pluginA: PluginAApiRequestContext;
-}
+}>;
 
 export class CorePluginAPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
@@ -33,5 +33,6 @@ export class CorePluginAPlugin implements Plugin {
   }
 
   public start() {}
+
   public stop() {}
 }
