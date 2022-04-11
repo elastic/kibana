@@ -90,7 +90,7 @@ export const PolicyList = memo(() => {
     const map = new Map<AgentPolicy['package_policies'][number], number>();
     for (const policy of endpointCount?.items) {
       for (const packagePolicyId of policy.package_policies) {
-        if (policyIds.includes(packagePolicyId)) {
+        if (policyIds.includes(packagePolicyId as string)) {
           map.set(packagePolicyId, policy.agents ?? 0);
         }
       }
