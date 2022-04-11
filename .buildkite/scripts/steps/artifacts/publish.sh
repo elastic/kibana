@@ -71,7 +71,7 @@ docker run --rm \
       --artifact-set main
 
 ARTIFACTS_SUBDOMAIN="artifacts-$WORKFLOW"
-ARTIFACTS_SUMMARY=$(curl -s "https://$ARTIFACTS_SUBDOMAIN.elastic.co/kibana/latest/$FULL_VERSION.json" | jq -re '.summary_url'
+ARTIFACTS_SUMMARY=$(curl -s "https://$ARTIFACTS_SUBDOMAIN.elastic.co/kibana/latest/$BASE_VERSION.json" | jq -re '.summary_url')
 
 cat << EOF | buildkite-agent annotate --style "info" --context artifacts-summary
   ### Artifacts Summary
