@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ESFilter } from '@kbn/core/types/elasticsearch';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { sumBy } from 'lodash';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { rangeQuery } from '../../../../observability/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -215,11 +215,10 @@ async function getTransactionStats({
     params
   );
 
-  const throughputValue = response.aggregations?.timeseries.buckets
-    .map((bucket) => bucket.doc_count)
-    .reduce((prev, current) => {
-      return prev + current;
-    }, 0);
+  const throughputValue = sumBy(
+    response.aggregations?.timeseries.buckets,
+    'doc_count'
+  );
 
   return {
     latency: {

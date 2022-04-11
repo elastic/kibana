@@ -6,7 +6,6 @@
  */
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -46,10 +45,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     const serviceInventoryThroughput = serviceInventoryAPIResponse.body.items[0].throughput;
 
-    const serviceMapsNodeDetailsThroughput = meanBy(
-      serviceMapsNodeDetails.body.currentPeriod.transactionStats?.throughput?.timeseries,
-      'y'
-    );
+    const serviceMapsNodeDetailsThroughput =
+      serviceMapsNodeDetails.body.currentPeriod.transactionStats?.throughput?.value;
 
     return {
       serviceInventoryThroughput,
@@ -81,7 +78,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .rate(GO_PROD_RATE)
               .generator((timestamp) =>
                 serviceGoProdInstance
-                  .transaction('GET /api/product/list', 'Worker')
+                  .transaction('GET /apple 🍎 ', 'Worker')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(GO_PROD_RATE)
+              .spans((timestamp) =>
+                serviceGoProdInstance
+                  .transaction('GET /banana 🍌', 'Worker')
+                  .duration(1000)
+                  .timestamp(timestamp)
+                  .serialize()
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(GO_DEV_RATE)
+              .spans((timestamp) =>
+                serviceGoDevInstance
+                  .transaction('GET /apple 🍎 ')
                   .duration(1000)
                   .timestamp(timestamp)
               ),
@@ -90,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .rate(GO_DEV_RATE)
               .generator((timestamp) =>
                 serviceGoDevInstance
-                  .transaction('GET /api/product/:id')
+                  .transaction('GET /banana 🍌')
                   .duration(1000)
                   .timestamp(timestamp)
               ),
