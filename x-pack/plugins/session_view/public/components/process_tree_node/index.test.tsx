@@ -64,7 +64,7 @@ describe('ProcessTreeNode component', () => {
     //   expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
     // });
 
-    it('renders Exec icon and exit code for executed process', async () => {
+    it('renders Exec icon', async () => {
       const executedProcessMock: typeof processMock = {
         ...processMock,
         hasExec: () => true,
@@ -75,26 +75,6 @@ describe('ProcessTreeNode component', () => {
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeTruthy();
-    });
-
-    it('does not render exit code if it does not exist', async () => {
-      const processWithoutExitCode: typeof processMock = {
-        ...processMock,
-        hasExec: () => true,
-        getDetails: () => ({
-          ...processMock.getDetails(),
-          process: {
-            ...processMock.getDetails().process,
-            exit_code: undefined,
-          },
-        }),
-      };
-
-      renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} process={processWithoutExitCode} />
-      );
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeFalsy();
     });
 
     it('calls onChangeJumpToEventVisibility with isVisible false if jumpToEvent is not visible', async () => {
