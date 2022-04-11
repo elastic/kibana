@@ -22,7 +22,7 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { HttpServiceSetup, KibanaRequest, Logger } from 'src/core/server';
+import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from 'src/core/server';
 import type { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import {
   LayoutParams,
@@ -99,6 +99,7 @@ export class Screenshots {
   constructor(
     private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
     private readonly logger: Logger,
+    private readonly packageInfo: PackageInfo,
     private readonly http: HttpServiceSetup,
     { poolSize }: ConfigType
   ) {
@@ -214,7 +215,7 @@ export class Screenshots {
       mergeMap((result) => {
         switch (options.format) {
           case 'pdf':
-            return toPdf(this.logger, layout, options, result);
+            return toPdf(this.logger, this.packageInfo, layout, options, result);
           default:
             return toPng(result);
         }
