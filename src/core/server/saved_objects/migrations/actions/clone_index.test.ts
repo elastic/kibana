@@ -40,6 +40,7 @@ describe('cloneIndex', () => {
       client,
       source: 'my_source_index',
       target: 'my_target_index',
+      migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
     });
     try {
       await task();

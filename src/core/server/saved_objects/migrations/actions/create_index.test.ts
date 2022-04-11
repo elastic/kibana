@@ -39,6 +39,7 @@ describe('createIndex', () => {
       client,
       indexName: 'new_index',
       mappings: { properties: {} },
+      migrationDocLinks: { resolveMigrationFailures: 'resolveMigrationFailures' },
     });
     try {
       await task();
