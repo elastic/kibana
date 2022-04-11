@@ -19,14 +19,14 @@ const ClassNameInput: FC<{
 }> = ({ disabled, inputText, setInputText }) => {
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
-        defaultMessage: 'Possible class names (comma-separated)',
-      })}
+      label={i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.textClassification.classNamesInput',
+        {
+          defaultMessage: 'Possible class names (comma-separated)',
+        }
+      )}
     >
       <EuiFieldText
-        // placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
-        //   defaultMessage: 'Input text',
-        // })}
         value={inputText}
         disabled={disabled === true}
         fullWidth
