@@ -74,7 +74,6 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
 
   /*
    * Maplibre stores vector properties in 2 locations: feature.properties and feature-state
-   * https://blog.mapbox.com/going-live-with-electoral-maps-a-guide-to-feature-state-b520e91a22d
    *
    * Feature-state is a set of runtime defined attributes that can be dynamically assigned to a feature and used to style features.
    * Feature-state is paired to a feature by feature id or feature.properties[promoteId] (when 'source.promoteId' is set).

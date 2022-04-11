@@ -21,6 +21,7 @@ import {
   CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { GeoJsonVectorLayer } from '../../vector_layer';
@@ -37,12 +38,14 @@ function createChoroplethLayerDescriptor({
   rightIndexPatternId,
   rightIndexPatternTitle,
   rightTermField,
+  setLabelStyle,
 }: {
   sourceDescriptor: EMSFileSourceDescriptor | ESSearchSourceDescriptor;
   leftField: string;
   rightIndexPatternId: string;
   rightIndexPatternTitle: string;
   rightTermField: string;
+  setLabelStyle: boolean;
 }) {
   const metricsDescriptor: CountAggDescriptor = { type: AGG_TYPE.COUNT };
   const joinId = uuid();
@@ -51,6 +54,40 @@ function createChoroplethLayerDescriptor({
     aggFieldName: '',
     rightSourceId: joinId,
   });
+
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
+    [VECTOR_STYLES.FILL_COLOR]: {
+      type: STYLE_TYPE.DYNAMIC,
+      options: {
+        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
+        field: {
+          name: joinKey,
+          origin: FIELD_ORIGIN.JOIN,
+        },
+        color: 'Yellow to Red',
+        type: COLOR_MAP_TYPE.ORDINAL,
+      },
+    },
+    [VECTOR_STYLES.LINE_COLOR]: {
+      type: STYLE_TYPE.STATIC,
+      options: {
+        color: '#3d3d3d',
+      },
+    },
+  };
+  if (setLabelStyle) {
+    properties[VECTOR_STYLES.LABEL_TEXT] = {
+      type: STYLE_TYPE.DYNAMIC,
+      options: {
+        ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+        field: {
+          name: joinKey,
+          origin: FIELD_ORIGIN.JOIN,
+        },
+      },
+    };
+  }
+
   return GeoJsonVectorLayer.createDescriptor({
     joins: [
       {
@@ -69,36 +106,7 @@ function createChoroplethLayerDescriptor({
       },
     ],
     sourceDescriptor,
-    style: VectorStyle.createDescriptor({
-      [VECTOR_STYLES.FILL_COLOR]: {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
-          field: {
-            name: joinKey,
-            origin: FIELD_ORIGIN.JOIN,
-          },
-          color: 'Yellow to Red',
-          type: COLOR_MAP_TYPE.ORDINAL,
-        },
-      },
-      [VECTOR_STYLES.LINE_COLOR]: {
-        type: STYLE_TYPE.STATIC,
-        options: {
-          color: '#3d3d3d',
-        },
-      },
-      [VECTOR_STYLES.LABEL_TEXT]: {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
-          field: {
-            name: joinKey,
-            origin: FIELD_ORIGIN.JOIN,
-          },
-        },
-      },
-    }),
+    style: VectorStyle.createDescriptor(styleProperties),
   });
 }
 
@@ -124,6 +132,7 @@ export function createEmsChoroplethLayerDescriptor({
     rightIndexPatternId,
     rightIndexPatternTitle,
     rightTermField,
+    setLabelStyle: true,
   });
 }
 
@@ -146,7 +155,7 @@ export function createEsChoroplethLayerDescriptor({
     sourceDescriptor: ESSearchSource.createDescriptor({
       indexPatternId: leftIndexPatternId,
       geoField: leftGeoField,
-      scalingType: SCALING_TYPES.LIMIT,
+      scalingType: SCALING_TYPES.MVT,
       tooltipProperties: [leftJoinField],
       applyGlobalQuery: false,
       applyGlobalTime: false,
@@ -156,5 +165,6 @@ export function createEsChoroplethLayerDescriptor({
     rightIndexPatternId,
     rightIndexPatternTitle,
     rightTermField,
+    setLabelStyle: false,  // Styling label by join metric with MVT is not supported
   });
 }
