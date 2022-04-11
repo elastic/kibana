@@ -37,7 +37,12 @@ export const getClickFilterData = (
     const index = table.rows.findIndex((row) => {
       const condition =
         geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
-      return splitLabel ? condition && row[X_ACCESSOR_INDEX + 2].toString() === label : condition;
+      if (splitLabel) {
+        const value =
+          row[X_ACCESSOR_INDEX + 2].keys?.join() ?? row[X_ACCESSOR_INDEX + 2].toString();
+        return condition && value === label;
+      }
+      return condition;
     });
     if (index < 0) return;
 

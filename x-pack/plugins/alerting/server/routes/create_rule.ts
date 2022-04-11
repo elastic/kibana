@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, AlertTypeDisabledError } from '../lib';
+import { validateDurationSchema, RuleTypeDisabledError } from '../lib';
 import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
@@ -16,11 +16,11 @@ import {
   countUsageOfPredefinedIds,
 } from './lib';
 import {
-  SanitizedAlert,
+  SanitizedRule,
   validateNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   BASE_ALERTING_API_PATH,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
 } from '../types';
 import { RouteOptions } from '.';
 
@@ -46,7 +46,7 @@ export const bodySchema = schema.object({
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
+const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
   ...rest
@@ -55,7 +55,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']>
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -121,11 +121,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: SanitizedAlert<AlertTypeParams> =
-              await rulesClient.create<AlertTypeParams>({
+            const createdRule: SanitizedRule<RuleTypeParams> =
+              await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
-                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                  notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id: params?.id },
               });
@@ -133,7 +133,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               body: rewriteBodyRes(createdRule),
             });
           } catch (e) {
-            if (e instanceof AlertTypeDisabledError) {
+            if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);
             }
             throw e;

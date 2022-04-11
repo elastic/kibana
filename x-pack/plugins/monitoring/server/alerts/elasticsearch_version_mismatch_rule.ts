@@ -21,12 +21,12 @@ import { Alert } from '../../../alerting/server';
 import { RULE_ELASTICSEARCH_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
 export class ElasticsearchVersionMismatchRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_ELASTICSEARCH_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_ELASTICSEARCH_VERSION_MISMATCH].label,

@@ -8534,16 +8534,16 @@
                 "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -18904,7 +18904,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"concat\" | \"max\" | \"min\" | \"sum\" | \"average\""
+              "\"concat\" | \"sum\" | \"max\" | \"min\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
@@ -24065,7 +24065,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"max\" | \"min\" | \"sum\" | \"avg\" | \"median\" | undefined"
+              "\"sum\" | \"avg\" | \"max\" | \"min\" | \"median\" | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false

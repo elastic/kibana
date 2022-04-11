@@ -10,7 +10,7 @@ The method resolves pathnames the same way browsers do when resolving a `<a href
 
 If all these criteria are true for the given URL: - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space) - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
-Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`<!-- -->.
 
 <b>Signature:</b>
 
@@ -23,7 +23,7 @@ navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  url | string | an absolute URL, an absolute path or a relative path, to navigate to. |
-|  options | NavigateToUrlOptions |  |
+|  options | NavigateToUrlOptions | navigation options |
 
 <b>Returns:</b>
 

@@ -9,7 +9,7 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
 import {
   ScheduleUnit,
-  ServiceLocations,
+  MonitorServiceLocations,
   ThrottlingOptions,
   DEFAULT_THROTTLING,
 } from '../../../../common/runtime_types';
@@ -18,7 +18,7 @@ import { DataStream } from '../types';
 interface IPolicyConfigContext {
   setMonitorType: React.Dispatch<React.SetStateAction<DataStream>>;
   setName: React.Dispatch<React.SetStateAction<string>>;
-  setLocations: React.Dispatch<React.SetStateAction<ServiceLocations>>;
+  setLocations: React.Dispatch<React.SetStateAction<MonitorServiceLocations>>;
   setIsTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setIsZipUrlTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setNamespace: React.Dispatch<React.SetStateAction<string>>;
@@ -33,8 +33,8 @@ interface IPolicyConfigContext {
   isEditable?: boolean;
   defaultName?: string;
   name?: string;
-  defaultLocations?: ServiceLocations;
-  locations?: ServiceLocations;
+  defaultLocations?: MonitorServiceLocations;
+  locations?: MonitorServiceLocations;
   allowedScheduleUnits?: ScheduleUnit[];
   defaultNamespace?: string;
   namespace?: string;
@@ -48,7 +48,7 @@ export interface IPolicyConfigContextProvider {
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
   defaultName?: string;
-  defaultLocations?: ServiceLocations;
+  defaultLocations?: MonitorServiceLocations;
   defaultNamespace?: string;
   isEditable?: boolean;
   isZipUrlSourceEnabled?: boolean;
@@ -65,7 +65,7 @@ export const defaultContext: IPolicyConfigContext = {
   setName: (_name: React.SetStateAction<string>) => {
     throw new Error('setName was not initialized, set it when you invoke the context');
   },
-  setLocations: (_locations: React.SetStateAction<ServiceLocations>) => {
+  setLocations: (_locations: React.SetStateAction<MonitorServiceLocations>) => {
     throw new Error('setLocations was not initialized, set it when you invoke the context');
   },
   setIsTLSEnabled: (_isTLSEnabled: React.SetStateAction<boolean>) => {
@@ -111,7 +111,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
 }: IPolicyConfigContextProvider) {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [name, setName] = useState<string>(defaultName);
-  const [locations, setLocations] = useState<ServiceLocations>(defaultLocations);
+  const [locations, setLocations] = useState<MonitorServiceLocations>(defaultLocations);
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
   const [namespace, setNamespace] = useState<string>(defaultNamespace);
