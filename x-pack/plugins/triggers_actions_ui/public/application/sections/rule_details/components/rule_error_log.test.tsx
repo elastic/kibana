@@ -12,6 +12,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { Rule } from '../../../../types';
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { RuleErrorLog } from './rule_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -308,5 +309,44 @@ describe('rule_error_log', () => {
     );
 
     nowMock.mockRestore();
+  });
+
+  it('does not show the refine search prompt normally', async () => {
+    const wrapper = mountWithIntl(
+      <RuleErrorLog
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RefineSearchPrompt).text()).toBeFalsy();
+  });
+
+  it('shows the refine search prompt when our queries return too much data', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      totalErrors: 1000,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleErrorLog
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
+      'These are the first 1000 matching your search, refine your search to see others. Back to top.'
+    );
   });
 });

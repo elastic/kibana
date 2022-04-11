@@ -3780,6 +3780,14 @@
             "path": "src/plugins/data/server/index.ts"
           },
           {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
             "plugin": "ux",
             "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
@@ -7082,22 +7090,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/search/aggs/aggs_service.ts"
           },
           {
@@ -7106,19 +7098,35 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/search/search_service.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/search_service.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
           },
           {
             "plugin": "maps",
@@ -9064,7 +9072,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "CreateResponse",
+                "WriteResponseBase",
                 ">; <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
                 "<TDocument> | ",
@@ -9074,7 +9082,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "CreateResponse",
+                "WriteResponseBase",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
                 "<TDocument> | ",
@@ -9082,7 +9090,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "CreateResponse",
+                "WriteResponseBase",
                 ">; }; monitoring: ",
                 "default",
                 "; security: ",
@@ -9094,7 +9102,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "IndexResponse",
+                "WriteResponseBase",
                 ">; <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
                 "<TDocument> | ",
@@ -9104,7 +9112,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "IndexResponse",
+                "WriteResponseBase",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
                 "<TDocument> | ",
@@ -9112,7 +9120,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "IndexResponse",
+                "WriteResponseBase",
                 ">; }; delete: { (this: That, params: ",
                 "DeleteRequest",
                 " | ",
@@ -9120,7 +9128,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "DeleteResponse",
+                "WriteResponseBase",
                 ">; (this: That, params: ",
                 "DeleteRequest",
                 " | ",
@@ -9130,7 +9138,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "DeleteResponse",
+                "WriteResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "DeleteRequest",
                 " | ",
@@ -9138,7 +9146,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "DeleteResponse",
+                "WriteResponseBase",
                 ">; }; get: { <TDocument = unknown>(this: That, params: ",
                 "GetRequest",
                 " | ",
@@ -9217,9 +9225,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ClosePointInTimeResponse",
-                ">; }; transform: ",
-                "default",
-                "; helpers: ",
+                ">; }; helpers: ",
                 "default",
                 "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
@@ -9352,7 +9358,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "DeleteByQueryRethrottleResponse",
+                "TasksTaskListResponseBase",
                 ">; (this: That, params: ",
                 "DeleteByQueryRethrottleRequest",
                 " | ",
@@ -9362,7 +9368,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "DeleteByQueryRethrottleResponse",
+                "TasksTaskListResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "DeleteByQueryRethrottleRequest",
                 " | ",
@@ -9370,7 +9376,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "DeleteByQueryRethrottleResponse",
+                "TasksTaskListResponseBase",
                 ">; }; deleteScript: { (this: That, params: ",
                 "DeleteScriptRequest",
                 " | ",
@@ -9378,7 +9384,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "DeleteScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; (this: That, params: ",
                 "DeleteScriptRequest",
                 " | ",
@@ -9388,7 +9394,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "DeleteScriptResponse",
+                "AcknowledgedResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "DeleteScriptRequest",
                 " | ",
@@ -9396,7 +9402,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "DeleteScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; }; enrich: ",
                 "default",
                 "; exists: { (this: That, params: ",
@@ -9467,29 +9473,29 @@
                 "ExplainResponse",
                 "<TDocument>>; }; features: ",
                 "default",
-                "; fieldCaps: { (this: That, params?: ",
+                "; fieldCaps: { (this: That, params: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
-                ">; (this: That, params?: ",
+                ">; (this: That, params: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
                 "FieldCapsResponse",
-                ", unknown>>; (this: That, params?: ",
+                ", unknown>>; (this: That, params: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
@@ -9832,7 +9838,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "PutScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; (this: That, params: ",
                 "PutScriptRequest",
                 " | ",
@@ -9842,7 +9848,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "PutScriptResponse",
+                "AcknowledgedResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "PutScriptRequest",
                 " | ",
@@ -9850,7 +9856,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "PutScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; }; rankEval: { (this: That, params: ",
                 "RankEvalRequest",
                 " | ",
@@ -9877,29 +9883,29 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "RankEvalResponse",
-                ">; }; reindex: { (this: That, params?: ",
+                ">; }; reindex: { (this: That, params: ",
                 "ReindexRequest",
                 " | ",
                 "ReindexRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ReindexResponse",
-                ">; (this: That, params?: ",
+                ">; (this: That, params: ",
                 "ReindexRequest",
                 " | ",
                 "ReindexRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
                 "ReindexResponse",
-                ", unknown>>; (this: That, params?: ",
+                ", unknown>>; (this: That, params: ",
                 "ReindexRequest",
                 " | ",
                 "ReindexRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ReindexResponse",
@@ -10155,6 +10161,8 @@
                 "TermvectorsResponse",
                 ">; }; textStructure: ",
                 "default",
+                "; transform: ",
+                "default",
                 "; updateByQuery: { (this: That, params: ",
                 "UpdateByQueryRequest",
                 " | ",
@@ -10313,14 +10321,6 @@
             {
               "plugin": "infra",
               "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/server/services/log_entries/log_entries_search_strategy.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/server/services/log_entries/log_entry_search_strategy.ts"
             },
             {
               "plugin": "maps",
@@ -10719,7 +10719,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "CreateResponse",
+                "WriteResponseBase",
                 ">; <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
                 "<TDocument> | ",
@@ -10729,7 +10729,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "CreateResponse",
+                "WriteResponseBase",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
                 "<TDocument> | ",
@@ -10737,7 +10737,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "CreateResponse",
+                "WriteResponseBase",
                 ">; }; monitoring: ",
                 "default",
                 "; security: ",
@@ -10749,7 +10749,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "IndexResponse",
+                "WriteResponseBase",
                 ">; <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
                 "<TDocument> | ",
@@ -10759,7 +10759,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "IndexResponse",
+                "WriteResponseBase",
                 ", unknown>>; <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
                 "<TDocument> | ",
@@ -10767,7 +10767,7 @@
                 "<TDocument>, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "IndexResponse",
+                "WriteResponseBase",
                 ">; }; delete: { (this: That, params: ",
                 "DeleteRequest",
                 " | ",
@@ -10775,7 +10775,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "DeleteResponse",
+                "WriteResponseBase",
                 ">; (this: That, params: ",
                 "DeleteRequest",
                 " | ",
@@ -10785,7 +10785,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "DeleteResponse",
+                "WriteResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "DeleteRequest",
                 " | ",
@@ -10793,7 +10793,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "DeleteResponse",
+                "WriteResponseBase",
                 ">; }; get: { <TDocument = unknown>(this: That, params: ",
                 "GetRequest",
                 " | ",
@@ -10872,9 +10872,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ClosePointInTimeResponse",
-                ">; }; transform: ",
-                "default",
-                "; helpers: ",
+                ">; }; helpers: ",
                 "default",
                 "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
@@ -11007,7 +11005,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "DeleteByQueryRethrottleResponse",
+                "TasksTaskListResponseBase",
                 ">; (this: That, params: ",
                 "DeleteByQueryRethrottleRequest",
                 " | ",
@@ -11017,7 +11015,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "DeleteByQueryRethrottleResponse",
+                "TasksTaskListResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "DeleteByQueryRethrottleRequest",
                 " | ",
@@ -11025,7 +11023,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "DeleteByQueryRethrottleResponse",
+                "TasksTaskListResponseBase",
                 ">; }; deleteScript: { (this: That, params: ",
                 "DeleteScriptRequest",
                 " | ",
@@ -11033,7 +11031,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "DeleteScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; (this: That, params: ",
                 "DeleteScriptRequest",
                 " | ",
@@ -11043,7 +11041,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "DeleteScriptResponse",
+                "AcknowledgedResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "DeleteScriptRequest",
                 " | ",
@@ -11051,7 +11049,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "DeleteScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; }; enrich: ",
                 "default",
                 "; exists: { (this: That, params: ",
@@ -11122,29 +11120,29 @@
                 "ExplainResponse",
                 "<TDocument>>; }; features: ",
                 "default",
-                "; fieldCaps: { (this: That, params?: ",
+                "; fieldCaps: { (this: That, params: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
-                ">; (this: That, params?: ",
+                ">; (this: That, params: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
                 "FieldCapsResponse",
-                ", unknown>>; (this: That, params?: ",
+                ", unknown>>; (this: That, params: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
@@ -11487,7 +11485,7 @@
                 ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "PutScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; (this: That, params: ",
                 "PutScriptRequest",
                 " | ",
@@ -11497,7 +11495,7 @@
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "PutScriptResponse",
+                "AcknowledgedResponseBase",
                 ", unknown>>; (this: That, params: ",
                 "PutScriptRequest",
                 " | ",
@@ -11505,7 +11503,7 @@
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "PutScriptResponse",
+                "AcknowledgedResponseBase",
                 ">; }; rankEval: { (this: That, params: ",
                 "RankEvalRequest",
                 " | ",
@@ -11532,29 +11530,29 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "RankEvalResponse",
-                ">; }; reindex: { (this: That, params?: ",
+                ">; }; reindex: { (this: That, params: ",
                 "ReindexRequest",
                 " | ",
                 "ReindexRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "ReindexResponse",
-                ">; (this: That, params?: ",
+                ">; (this: That, params: ",
                 "ReindexRequest",
                 " | ",
                 "ReindexRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
                 "ReindexResponse",
-                ", unknown>>; (this: That, params?: ",
+                ", unknown>>; (this: That, params: ",
                 "ReindexRequest",
                 " | ",
                 "ReindexRequest",
-                " | undefined, options?: ",
+                ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "ReindexResponse",
@@ -11809,6 +11807,8 @@
                 " | undefined): Promise<",
                 "TermvectorsResponse",
                 ">; }; textStructure: ",
+                "default",
+                "; transform: ",
                 "default",
                 "; updateByQuery: { (this: That, params: ",
                 "UpdateByQueryRequest",
@@ -15444,6 +15444,14 @@
             "path": "src/plugins/data/server/index.ts"
           },
           {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/view_alert/view_alert_route.tsx"
+          },
+          {
             "plugin": "ux",
             "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/selected_filters.tsx"
           },
@@ -18973,22 +18981,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
           },
           {
@@ -19033,22 +19025,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/range_value_input.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/range_value_input.tsx"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/field.tsx"
           },
           {
@@ -19074,22 +19050,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/actions/filters/create_filters_from_range_select.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
           },
           {
             "plugin": "data",
@@ -19120,6 +19080,54 @@
             "path": "src/plugins/data/server/index.ts"
           },
           {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.test.ts"
           },
@@ -19144,28 +19152,28 @@
             "path": "src/plugins/data/public/query/filter_manager/lib/mappers/map_exists.test.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_operators.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/value_input_type.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/value_input_type.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
           }
         ],
         "children": [
@@ -19493,22 +19501,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
           },
           {
@@ -19574,14 +19566,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/search_bar/search_bar.tsx"
           },
           {
             "plugin": "data",
@@ -19589,14 +19573,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
@@ -19604,84 +19580,32 @@
             "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/apply_filters/apply_filter_popover_content.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/apply_filters/apply_filter_popover_content.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/apply_filters/apply_filters_popover.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/apply_filters/apply_filters_popover.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_item.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_item.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_string_input.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_bar_top_row.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/query_bar_top_row.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_bar.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/filter_bar/filter_bar.tsx"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
           },
           {
             "plugin": "monitoring",
@@ -19714,6 +19638,98 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
           },
           {
             "plugin": "data",
@@ -21716,28 +21732,6 @@
       },
       {
         "parentPluginId": "dataViews",
-        "id": "def-common.INDEX_PATTERN_SAVED_OBJECT_TYPE",
-        "type": "string",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "INDEX_PATTERN_SAVED_OBJECT_TYPE",
-        "description": [],
-        "signature": [
-          "\"index-pattern\""
-        ],
-        "path": "src/plugins/data_views/common/constants.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/index.ts"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
         "id": "def-common.IndexPatternAttributes",
         "type": "Type",
         "tags": [
@@ -22124,22 +22118,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/search/aggs/aggs_service.ts"
           },
           {
@@ -22148,19 +22126,35 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/ui/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/search/search_service.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/search_service.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
           },
           {
             "plugin": "maps",
@@ -22292,7 +22286,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",

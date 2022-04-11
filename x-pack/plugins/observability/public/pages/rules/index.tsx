@@ -47,7 +47,7 @@ import {
   useLoadRuleTypes,
   unmuteRule,
 } from '../../../../triggers_actions_ui/public';
-import { AlertExecutionStatus, ALERTS_FEATURE_ID } from '../../../../alerting/common';
+import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 import { Pagination } from './types';
 import {
   DEFAULT_SEARCH_PAGE_SIZE,
@@ -205,7 +205,7 @@ export function RulesPage() {
         truncateText: false,
         width: '120px',
         'data-test-subj': 'rulesTableCell-status',
-        render: (_executionStatus: AlertExecutionStatus, item: RuleTableItem) => (
+        render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => (
           <ExecutionStatus executionStatus={item.executionStatus} />
         ),
       },
