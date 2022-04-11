@@ -42,15 +42,17 @@ exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
       </UtilityBarGroup>
     </UtilityBarSection>
     <UtilityBarSection>
-      <UtilityBarText
-        dataTestSubj="executionsShowing"
-      />
-      <Styled(EuiSwitch)
-        checked={false}
-        compressed={true}
-        label="Show metrics columns"
-        onChange={[Function]}
-      />
+      <UtilityBarGroup>
+        <UtilityBarText
+          dataTestSubj="executionsShowing"
+        />
+        <Styled(EuiSwitch)
+          checked={false}
+          compressed={true}
+          label="Show metrics columns"
+          onChange={[Function]}
+        />
+      </UtilityBarGroup>
     </UtilityBarSection>
   </UtilityBar>
   <EuiBasicTable
