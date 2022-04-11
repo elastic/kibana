@@ -64,6 +64,7 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
+const ALERTS_PER_PAGE = 10;
 
 export function OverviewPage({ routeParams }: Props) {
   const trackMetric = useUiTracker({ app: 'observability-overview' });
@@ -199,7 +200,7 @@ export function OverviewPage({ routeParams }: Props) {
                     rangeFrom={relativeStart}
                     rangeTo={relativeEnd}
                     indexNames={indexNames}
-                    itemsPerPage={10}
+                    itemsPerPage={ALERTS_PER_PAGE}
                     stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
                     storage={new Storage(window.localStorage)}
                   />
