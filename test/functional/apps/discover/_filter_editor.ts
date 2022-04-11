@@ -113,5 +113,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
   });
 }
