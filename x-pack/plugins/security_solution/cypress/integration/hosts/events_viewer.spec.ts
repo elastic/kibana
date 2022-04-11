@@ -24,7 +24,7 @@ import {
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../tasks/fields_browser';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openEvents } from '../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -37,7 +37,7 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
-import { cleanKibana } from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -50,10 +50,18 @@ const defaultHeadersInDefaultEcsCategory = [
 ];
 
 describe('Events Viewer', () => {
+  before(() => {
+    esArchiverLoad('auditbeat_big');
+    login();
+  });
+
+  after(() => {
+    esArchiverUnload('auditbeat_big');
+  });
+
   context('Fields rendering', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -85,8 +93,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -99,8 +106,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -130,8 +136,7 @@ describe('Events Viewer', () => {
 
   context('Events behavior', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });

@@ -67,6 +67,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
+      fieldTypeHelp: `${ELASTICSEARCH_DOCS}mapping-types.html`,
+      dateFieldTypeDocs: `${ELASTICSEARCH_DOCS}date.html`,
+      dateFormatsDocs: `${ELASTICSEARCH_DOCS}mapping-date-format.html`,
       documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
     },
     filebeat: {
@@ -159,6 +162,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     logstash: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
+      inputElasticAgent: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/plugins-inputs-elastic_agent.html`,
     },
     functionbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
@@ -579,7 +583,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${FLEET_DOCS}index.html`,
       fleetServer: `${FLEET_DOCS}fleet-server.html`,
       fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
-      settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+      settings: `${FLEET_DOCS}fleet-settings.html`,
       settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
       settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
       troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,

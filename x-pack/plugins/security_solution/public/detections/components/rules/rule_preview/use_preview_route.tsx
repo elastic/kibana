@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldValueQueryBar } from '../query_bar';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
