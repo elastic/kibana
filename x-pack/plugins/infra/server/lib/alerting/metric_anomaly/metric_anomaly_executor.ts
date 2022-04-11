@@ -14,7 +14,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
+import { RuleExecutorOptions } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';

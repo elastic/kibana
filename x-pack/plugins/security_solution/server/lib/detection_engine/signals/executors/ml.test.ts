@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
 import { mlExecutor } from './ml';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCompleteRuleMock, getMlRuleParams } from '../../schemas/rule_schemas.mock';
@@ -26,7 +26,7 @@ describe('ml_executor', () => {
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
   const exceptionItems = [getExceptionListItemSchemaMock()];
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
+  let alertServices: RuleExecutorServicesMock;
   const params = getMlRuleParams();
   const mlCompleteRule = getCompleteRuleMock<MachineLearningRuleParams>(params);
 
@@ -44,7 +44,7 @@ describe('ml_executor', () => {
 
   beforeEach(() => {
     jobsSummaryMock = jest.fn();
-    alertServices = alertsMock.createAlertServices();
+    alertServices = alertsMock.createRuleExecutorServices();
     logger = loggingSystemMock.createLogger();
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
