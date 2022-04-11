@@ -108,8 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.eql('');
 
         await PageObjects.discover.selectIndexPattern('logstash-*');
-        const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-        expect(currentDataView).to.be('logstash-*');
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be('4,731');
