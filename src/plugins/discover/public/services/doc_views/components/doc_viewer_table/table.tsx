@@ -158,7 +158,6 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      // const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
       const fieldType = isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
