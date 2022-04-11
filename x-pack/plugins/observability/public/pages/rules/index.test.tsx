@@ -32,6 +32,10 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: jest.fn(),
 }));
 
+jest.mock('../../../../triggers_actions_ui/public', () => ({
+  useLoadRuleTypes: jest.fn(),
+}));
+
 // const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
 
 describe('empty RulesPage', () => {
@@ -51,6 +55,7 @@ describe('empty RulesPage', () => {
     const wrapper = shallow(<RulesPage />);
 
     expect(wrapper.find(RulesTable)).toHaveLength(0);
+    expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
   });
 });
 
