@@ -20,9 +20,9 @@ Warsaw OR Venice OR Clear
 . If you don't see any results, expand the <<set-time-filter,time range>>, for example to *Last 7 days*.
 . From the list of *Available fields*, add `_score` and any other fields you want to the document table.
 +
-At this point, you're sorting by `Time`.
-. To turn off sorting for the `Time` field, click the *field sorted* option and then click *Clear sorting.*
-. To sort the _score column in descending order, click _score from the dropdown menu, and then select *High-Low*.
+At this point, you're sorting by the`timestamp` field.
+. To turn off sorting for the `timestamp` field, click the *field sorted* option, and then click *Clear sorting.*
+. To turn on sorting by the `_score` field in descending order, open the dropdown menu and click *_score*, and then select *High-Low*.
 +
 [role="screenshot"]
 image::images/sort-by-relevance.png["Field sorting popover", width=75%]
