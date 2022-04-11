@@ -31,7 +31,6 @@ import {
   policyDetailsForUpdate,
 } from '../../store/policy_details/selectors';
 
-import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
 import { BlocklistsApiClient } from '../../../blocklist/services';
@@ -137,10 +136,10 @@ export const TRUSTED_APPS_LABELS = {
 export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy, onChange }) => {
     return (
-      <ReactQueryClientProvider>
+      <>
         <EuiSpacer size="m" />
         <WrappedPolicyDetailsForm policyId={policy.id} onChange={onChange} />
-      </ReactQueryClientProvider>
+      </>
     );
   }
 );

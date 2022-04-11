@@ -200,14 +200,16 @@ describe('convert series to datatables', () => {
       expect(Object.keys(tables).sort()).toEqual([model.series[0].id].sort());
 
       expect(tables.series1.rows.length).toEqual(8);
-      const expected1 = series[0].data.map((d) => {
-        d.push(parseInt([series[0].label].flat()[0], 10));
-        return d;
-      });
-      const expected2 = series[1].data.map((d) => {
-        d.push(parseInt([series[1].label].flat()[0], 10));
-        return d;
-      });
+      const expected1 = series[0].data.map((d) => ({
+        '0': d[0],
+        '1': d[1],
+        '2': parseInt([series[0].label].flat()[0], 10),
+      }));
+      const expected2 = series[1].data.map((d) => ({
+        '0': d[0],
+        '1': d[1],
+        '2': parseInt([series[1].label].flat()[0], 10),
+      }));
       expect(tables.series1.rows).toEqual([...expected1, ...expected2]);
     });
 
