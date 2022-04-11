@@ -63,6 +63,7 @@ describe('SyntheticsService', () => {
         id: 'localhost',
         label: 'Local Synthetics Service',
         url: 'http://localhost',
+        isServiceManaged: true,
       },
     ]);
   });
