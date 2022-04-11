@@ -243,9 +243,9 @@ describe('parseClientOptions', () => {
           )
         ).toEqual(
           expect.objectContaining({
-            headers: expect.objectContaining({
-              authorization: `Bearer ABC123`,
-            }),
+            auth: {
+              bearer: `ABC123`,
+            },
           })
         );
       });

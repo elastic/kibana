@@ -8,7 +8,6 @@
 
 import { Observable, Subject } from 'rxjs';
 import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
-import { merge } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -29,6 +28,7 @@ import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
 import { getElasticsearchDeprecationsProvider } from './deprecations';
+import { mergeConfig } from './merge_config';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -143,10 +143,10 @@ export class ElasticsearchService
 
   private createClusterClient(
     type: string,
-    baseConfig: ElasticsearchConfig,
-    clientConfig?: Partial<ElasticsearchClientConfig>
+    baseConfig: ElasticsearchClientConfig,
+    clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
-    const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
+    const config = mergeConfig(baseConfig, clientConfig);
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch'),
