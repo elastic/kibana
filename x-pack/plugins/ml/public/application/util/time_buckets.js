@@ -7,7 +7,7 @@
 
 import { isPlainObject, isString, ary, sortBy, assign } from 'lodash';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
