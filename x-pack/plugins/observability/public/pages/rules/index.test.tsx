@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { RulesPage } from './index';
 import { RulesTable } from './components/rules_table';
 import { RuleState } from './types';
@@ -54,8 +55,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],
 }));
-
-// const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
 
 describe('empty RulesPage', () => {
   async function setup() {
@@ -1492,6 +1491,10 @@ describe('empty RulesPage', () => {
     await setup();
 
     const wrapper = mountWithIntl(<RulesPage />);
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     expect(wrapper.find(RulesTable)).toHaveLength(0);
     expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
   });
