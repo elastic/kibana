@@ -27,6 +27,7 @@ export const configSchema = schema.object({
       { defaultValue: 'full' }
     ),
   }),
+  customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;

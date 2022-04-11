@@ -4,7 +4,7 @@
 
 ## NavigateToUrlOptions.forceRedirect property
 
-if true, will redirect directly to the url
+if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`<!-- -->)
 
 <b>Signature:</b>
 

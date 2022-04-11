@@ -9,6 +9,7 @@
 import { flow, mapValues } from 'lodash';
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 import {
   mergeMigrationFunctionMaps,

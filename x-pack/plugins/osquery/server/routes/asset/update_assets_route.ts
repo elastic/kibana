@@ -27,7 +27,7 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;

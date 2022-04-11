@@ -25,12 +25,14 @@ interface JsonCodeEditorCommonProps {
   jsonValue: string;
   onEditorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   width?: string | number;
+  height?: string | number;
   hasLineNumbers?: boolean;
 }
 
 export const JsonCodeEditorCommon = ({
   jsonValue,
   width,
+  height,
   hasLineNumbers,
   onEditorDidMount,
 }: JsonCodeEditorCommonProps) => {
@@ -55,6 +57,7 @@ export const JsonCodeEditorCommon = ({
         <CodeEditor
           languageId={XJsonLang.ID}
           width={width}
+          height={height}
           value={jsonValue || ''}
           editorDidMount={onEditorDidMount}
           aria-label={codeEditorAriaLabel}
