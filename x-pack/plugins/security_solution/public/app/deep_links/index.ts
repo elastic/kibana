@@ -169,6 +169,14 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/uncommonProcesses`,
           },
           {
+            id: SecurityPageName.hostsAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${HOSTS_PATH}/anomalies`,
+            isPremium: true,
+          },
+          {
             id: SecurityPageName.events,
             title: i18n.translate('xpack.securitySolution.search.hosts.events', {
               defaultMessage: 'Events',
@@ -183,12 +191,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/externalAlerts`,
           },
           {
-            id: SecurityPageName.hostsAnomalies,
-            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
-              defaultMessage: 'Anomalies',
+            id: SecurityPageName.hostsRisk,
+            title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
+              defaultMessage: 'Hosts by risk',
             }),
-            path: `${HOSTS_PATH}/anomalies`,
-            isPremium: true,
+            path: `${HOSTS_PATH}/hostRisk`,
+            experimentalKey: 'riskyHostsEnabled',
           },
         ],
       },
