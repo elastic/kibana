@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiText,
   EuiButton,
@@ -22,21 +22,19 @@ import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 import semverPatch from 'semver/functions/patch';
 
-import type { AgentPolicy } from '../../types';
-import { useGetSettings, useKibanaVersion, useStartServices } from '../../hooks';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import { agentPolicyRouteService } from '../../../common';
+import { useGetSettings, useKibanaVersion, useStartServices } from '../../../hooks';
 
-import { sendGetK8sManifest } from '../../hooks/use_request/k8s';
+import { agentPolicyRouteService } from '../../../../common';
 
-import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
-import { SelectCreateAgentPolicy } from './agent_policy_select_create';
+import { sendGetK8sManifest } from '../../../hooks/use_request/k8s';
 
 export const DownloadStep = (
   hasFleetServer: boolean,
   isK8s?: string,
   enrollmentAPIKey?: string
-) => {
+): EuiContainedStepProps => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
   const settings = useGetSettings();
@@ -49,6 +47,7 @@ export const DownloadStep = (
 
   const [yaml, setYaml] = useState<any | undefined>();
   const [fleetServer, setFleetServer] = useState<string | ''>();
+
   useEffect(() => {
     async function fetchK8sManifest() {
       try {
@@ -132,6 +131,7 @@ export const DownloadStep = (
     ) : (
       ''
     );
+
   const k8sCopyYaml =
     isK8s === 'IS_KUBERNETES' ? (
       <EuiCopy textToCopy={yaml}>
@@ -147,6 +147,7 @@ export const DownloadStep = (
     ) : (
       ''
     );
+
   const k8sYaml =
     isK8s === 'IS_KUBERNETES' ? (
       <EuiCodeBlock language="yaml" style={{ maxHeight: 300 }} fontSize="m">
@@ -198,99 +199,6 @@ export const DownloadStep = (
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <>{k8sYaml}</>
-      </>
-    ),
-  };
-};
-
-export const AgentPolicySelectionStep = ({
-  agentPolicies,
-  setSelectedPolicyId,
-  selectedApiKeyId,
-  setSelectedAPIKeyId,
-  excludeFleetServer,
-  refreshAgentPolicies,
-}: {
-  agentPolicies: AgentPolicy[];
-  setSelectedPolicyId?: (policyId?: string) => void;
-  selectedApiKeyId?: string;
-  setSelectedAPIKeyId?: (key?: string) => void;
-  excludeFleetServer?: boolean;
-  refreshAgentPolicies: () => void;
-}) => {
-  // storing the created agent policy id as the child component is being recreated
-  const [policyId, setPolicyId] = useState<string | undefined>(undefined);
-  const regularAgentPolicies = useMemo(() => {
-    return agentPolicies.filter(
-      (policy) =>
-        policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
-    );
-  }, [agentPolicies, excludeFleetServer]);
-
-  const onAgentPolicyChange = useCallback(
-    async (key?: string, policy?: AgentPolicy) => {
-      if (policy) {
-        refreshAgentPolicies();
-      }
-      if (setSelectedPolicyId) {
-        setSelectedPolicyId(key);
-        setPolicyId(key);
-      }
-    },
-    [setSelectedPolicyId, refreshAgentPolicies]
-  );
-
-  return {
-    title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
-      defaultMessage: 'What type of host are you adding?',
-    }),
-    children: (
-      <>
-        <SelectCreateAgentPolicy
-          agentPolicies={regularAgentPolicies}
-          withKeySelection={setSelectedAPIKeyId ? true : false}
-          selectedApiKeyId={selectedApiKeyId}
-          onKeyChange={setSelectedAPIKeyId}
-          onAgentPolicyChange={onAgentPolicyChange}
-          excludeFleetServer={excludeFleetServer}
-          policyId={policyId}
-        />
-      </>
-    ),
-  };
-};
-
-export const AgentEnrollmentKeySelectionStep = ({
-  agentPolicy,
-  selectedApiKeyId,
-  setSelectedAPIKeyId,
-}: {
-  agentPolicy: AgentPolicy;
-  selectedApiKeyId?: string;
-  setSelectedAPIKeyId: (key?: string) => void;
-}) => {
-  return {
-    title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigurePolicyAuthenticationTitle', {
-      defaultMessage: 'Select enrollment token',
-    }),
-    children: (
-      <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.agentAuthenticationSettings"
-            defaultMessage="{agentPolicyName} has been selected. Select which enrollment token to use when enrolling agents."
-            values={{
-              agentPolicyName: <strong>{agentPolicy.name}</strong>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        <AdvancedAgentAuthenticationSettings
-          agentPolicyId={agentPolicy.id}
-          selectedApiKeyId={selectedApiKeyId}
-          initialAuthenticationSettingsOpen
-          onKeyChange={setSelectedAPIKeyId}
-        />
       </>
     ),
   };
