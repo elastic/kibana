@@ -73,18 +73,16 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       '&:hover:before': {
         backgroundColor: hoverColor,
         transform: `translateY(-${size.xs})`,
-        marginLeft: '-50%',
-        width: '150%',
       },
       '&:before': {
         position: 'absolute',
         height: '100%',
         pointerEvents: 'none',
         content: `''`,
-        marginLeft: `calc(-${depth} * ${TREE_INDENT})`,
+        marginLeft: `calc(-${depth} * ${TREE_INDENT} - ${size.s})`,
         borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
-        width: `calc(100% + ${depth} * ${TREE_INDENT})`,
+        width: `calc(100% + ${depth} * ${TREE_INDENT} + ${size.s})`,
         transform: `translateY(-${size.xs})`,
       },
     };

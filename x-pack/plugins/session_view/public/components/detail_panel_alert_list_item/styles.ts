@@ -68,6 +68,10 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       minWidth: 0,
     };
 
+    const alertCountArrowPad: CSSObject = {
+      marginRight: size.xs,
+    };
+
     const processPanel: CSSObject = {
       border: `${borderThickness} solid ${colors.lightShade}`,
       fontFamily: font.familyCode,
@@ -101,6 +105,7 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       alertTitle,
       alertIcon,
       alertAccordionButton,
+      alertCountArrowPad,
       processPanel,
       investigatedLabel,
       minimalContextMenu,

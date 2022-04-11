@@ -62,6 +62,7 @@ export const DetailPanelAlertGroupItem = ({
           data-test-subj={ALERT_GROUP_ITEM_COUNT_TEST_ID}
           className="eui-alignCenter"
           size="m"
+          css={styles.alertCountArrowPad}
         >
           {alertsCount}
         </EuiNotificationBadge>

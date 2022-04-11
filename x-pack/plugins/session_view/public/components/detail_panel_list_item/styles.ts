@@ -20,11 +20,11 @@ export const useStyles = ({ display }: StylesDeps) => {
     const item: CSSObject = {
       display,
       alignItems: 'center',
-      padding: `0px ${euiTheme.size.s} `,
+      padding: `${euiTheme.size.xs} ${euiTheme.size.s} `,
       width: '100%',
       fontWeight: 'inherit',
-      height: euiTheme.size.xl,
-      lineHeight: euiTheme.size.l,
+      height: 'max-content',
+      minHeight: euiTheme.size.l,
       letterSpacing: '0px',
       textAlign: 'left',
     };
@@ -36,7 +36,7 @@ export const useStyles = ({ display }: StylesDeps) => {
       '&:hover': {
         background: transparentize(euiTheme.colors.primary, 0.1),
       },
-      height: '100%',
+      height: 'fit-content',
     };
 
     return {

@@ -30,6 +30,7 @@ export const useStyles = () => {
     const viewMode: CSSObject = {
       margin: size.base,
       marginBottom: 0,
+      paddingBottom: size.m,
     };
 
     return {
