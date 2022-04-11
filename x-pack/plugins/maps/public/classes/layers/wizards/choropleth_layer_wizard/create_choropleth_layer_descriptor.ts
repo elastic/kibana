@@ -165,6 +165,6 @@ export function createEsChoroplethLayerDescriptor({
     rightIndexPatternId,
     rightIndexPatternTitle,
     rightTermField,
-    setLabelStyle: false,  // Styling label by join metric with MVT is not supported
+    setLabelStyle: false, // Styling label by join metric with MVT is not supported
   });
 }
