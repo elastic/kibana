@@ -124,19 +124,25 @@ export const previewRulesRoute = async (
         const logs: RulePreviewLogs[] = [];
         let isAborted = false;
 
-        const { privileges } = await securityService.authz
+        const { hasAllRequested } = await securityService.authz
           .checkPrivilegesWithRequest(request)
           .atSpace(spaceId, {
-            elasticsearch: { index: { [DEFAULT_PREVIEW_INDEX]: ['read'] }, cluster: [] },
+            elasticsearch: {
+              index: {
+                [DEFAULT_PREVIEW_INDEX]: ['read'],
+                [`internal.${DEFAULT_PREVIEW_INDEX}`]: ['read'],
+              },
+              cluster: [],
+            },
           });
 
-        if (!privileges.elasticsearch.index[DEFAULT_PREVIEW_INDEX][0].authorized) {
+        if (!hasAllRequested) {
           return response.ok({
             body: {
               logs: [
                 {
                   errors: [
-                    'Missing "read" privileges for the ".preview.alerts-security.alerts" index. Without that privilege you cannot use the Rule Preview feature.',
+                    'Missing "read" privileges for the ".preview.alerts-security.alerts" and "internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
                   ],
                   warnings: [],
                   duration: 0,
