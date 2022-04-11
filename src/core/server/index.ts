@@ -481,23 +481,26 @@ export { TelemetryCounterType } from './analytics';
  * @public
  */
 export interface RequestHandlerContext {
-  core: {
-    savedObjects: {
-      client: SavedObjectsClientContract;
-      typeRegistry: ISavedObjectTypeRegistry;
-      getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-      getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-      getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-    };
-    elasticsearch: {
-      client: IScopedClusterClient;
-    };
-    uiSettings: {
-      client: IUiSettingsClient;
-    };
-    deprecations: {
-      client: DeprecationsClient;
-    };
+  core: Promise<CoreRequestHandlerContext>;
+}
+
+/** @public */
+export interface CoreRequestHandlerContext {
+  savedObjects: {
+    client: SavedObjectsClientContract;
+    typeRegistry: ISavedObjectTypeRegistry;
+    getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+    getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+    getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+  };
+  elasticsearch: {
+    client: IScopedClusterClient;
+  };
+  uiSettings: {
+    client: IUiSettingsClient;
+  };
+  deprecations: {
+    client: DeprecationsClient;
   };
 }
 

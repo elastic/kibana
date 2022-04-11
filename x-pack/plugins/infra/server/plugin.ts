@@ -190,12 +190,10 @@ export class InfraServerPlugin
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
-      (context, request) => {
-        const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
-          request,
-          context.core.savedObjects.client
-        );
+      async (context, request) => {
+        const soClient = (await context.core).savedObjects.client;
+        const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {
@@ -240,5 +238,6 @@ export class InfraServerPlugin
       logViews,
     };
   }
+
   stop() {}
 }

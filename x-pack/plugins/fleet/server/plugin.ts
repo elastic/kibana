@@ -320,12 +320,11 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
+        const esClient = (await context.core).elasticsearch.client;
 
         return {
           get agentClient() {
-            const agentService = plugin.setupAgentService(
-              context.core.elasticsearch.client.asInternalUser
-            );
+            const agentService = plugin.setupAgentService(esClient.asInternalUser);
 
             return {
               asCurrentUser: agentService.asScoped(request),
@@ -383,6 +382,7 @@ export class FleetPlugin
 
     this.telemetryEventsSender.setup(deps.telemetry);
   }
+
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     appContextService.start({
       elasticsearch: core.elasticsearch,

@@ -143,7 +143,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
-      async (context, request) => {
+      (context, request) => {
         return this.asScoped(request);
       }
     );

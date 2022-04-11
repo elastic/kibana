@@ -15,7 +15,7 @@ export const registerGetRoute = (router: IRouter) => {
       validate: false,
     },
     async (context, req, res) => {
-      const deprecationsClient = context.core.deprecations.client;
+      const deprecationsClient = (await context.core).deprecations.client;
 
       const body: DeprecationsGetResponse = {
         deprecations: await deprecationsClient.getAllDeprecations(),

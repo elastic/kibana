@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, RequestHandlerContext, CoreRequestHandlerContext } from 'src/core/server';
 import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 import type { FleetRequestHandlerContext } from '../../fleet/server';
@@ -21,7 +21,9 @@ import { EndpointAuthz } from '../common/endpoint/types/authz';
 
 export { AppClient };
 
-export interface SecuritySolutionApiRequestHandlerContext extends RequestHandlerContext {
+export interface SecuritySolutionApiRequestHandlerContext {
+  // why is this here?
+  core: CoreRequestHandlerContext;
   endpointAuthz: EndpointAuthz;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;

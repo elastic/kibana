@@ -71,12 +71,10 @@ export class MetricsEntitiesPlugin
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context): ContextProviderReturn => {
       const {
-        core: {
-          elasticsearch: {
-            client: { asCurrentUser: esClient },
-          },
+        elasticsearch: {
+          client: { asCurrentUser: esClient },
         },
-      } = context;
+      } = await context.core;
       return {
         getMetricsEntitiesClient: (): MetricsEntitiesClient =>
           new MetricsEntitiesClient({

@@ -99,13 +99,11 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     return async (context, request): ContextProviderReturn => {
       const { spaces, config, security, extensionPoints } = this;
       const {
-        core: {
-          savedObjects: { client: savedObjectsClient },
-          elasticsearch: {
-            client: { asCurrentUser: esClient },
-          },
+        savedObjects: { client: savedObjectsClient },
+        elasticsearch: {
+          client: { asCurrentUser: esClient },
         },
-      } = context;
+      } = await context.core;
       if (config == null) {
         throw new TypeError('Configuration is required for this plugin to operate');
       } else {

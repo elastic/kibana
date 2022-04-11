@@ -70,14 +70,11 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   const createSavedQuery = async (attrs: SavedQueryAttributes) => {
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
+    const soClient = (await context.core).savedObjects.client;
 
-    const savedObject = await context.core.savedObjects.client.create<SavedQueryAttributes>(
-      'query',
-      attributes,
-      {
-        references,
-      }
-    );
+    const savedObject = await soClient.create<SavedQueryAttributes>('query', attributes, {
+      references,
+    });
 
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
@@ -88,15 +85,11 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   const updateSavedQuery = async (id: string, attrs: SavedQueryAttributes) => {
     verifySavedQuery(attrs);
     const { attributes, references } = extractReferences(attrs);
+    const soClient = (await context.core).savedObjects.client;
 
-    const savedObject = await context.core.savedObjects.client.update<SavedQueryAttributes>(
-      'query',
-      id,
-      attributes,
-      {
-        references,
-      }
-    );
+    const savedObject = await soClient.update<SavedQueryAttributes>('query', id, attributes, {
+      references,
+    });
 
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
@@ -105,8 +98,11 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQuery = async (id: string) => {
-    const { saved_object: savedObject, outcome } =
-      await context.core.savedObjects.client.resolve<SavedQueryAttributes>('query', id);
+    const soClient = (await context.core).savedObjects.client;
+    const { saved_object: savedObject, outcome } = await soClient.resolve<SavedQueryAttributes>(
+      'query',
+      id
+    );
     if (outcome === 'conflict') {
       throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
     } else if (savedObject.error) {
@@ -116,20 +112,21 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getSavedQueriesCount = async () => {
-    const { total } = await context.core.savedObjects.client.find<SavedQueryAttributes>({
+    const soClient = (await context.core).savedObjects.client;
+    const { total } = await soClient.find<SavedQueryAttributes>({
       type: 'query',
     });
     return total;
   };
 
   const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}) => {
-    const { total, saved_objects: savedObjects } =
-      await context.core.savedObjects.client.find<SavedQueryAttributes>({
-        type: 'query',
-        page,
-        perPage,
-        search,
-      });
+    const soClient = (await context.core).savedObjects.client;
+    const { total, saved_objects: savedObjects } = await soClient.find<SavedQueryAttributes>({
+      type: 'query',
+      page,
+      perPage,
+      search,
+    });
 
     const savedQueries = savedObjects.map(injectReferences);
 
@@ -137,7 +134,8 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
   };
 
   const getAllSavedQueries = async () => {
-    const finder = context.core.savedObjects.client.createPointInTimeFinder<SavedQueryAttributes>({
+    const soClient = (await context.core).savedObjects.client;
+    const finder = soClient.createPointInTimeFinder<SavedQueryAttributes>({
       type: 'query',
       perPage: 100,
     });
@@ -152,8 +150,9 @@ export function registerSavedQueryRouteHandlerContext(context: RequestHandlerCon
     return { total: savedQueries.length, savedQueries };
   };
 
-  const deleteSavedQuery = (id: string) => {
-    return context.core.savedObjects.client.delete('query', id);
+  const deleteSavedQuery = async (id: string) => {
+    const soClient = (await context.core).savedObjects.client;
+    return await soClient.delete('query', id);
   };
 
   return {

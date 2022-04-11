@@ -237,23 +237,30 @@ export class ContextContainer implements IContextContainer {
   ): Promise<HandlerContextType<RequestHandler>> {
     const contextsToBuild = new Set(this.getContextNamesForSource(source));
 
+    const builtContextes: Partial<HandlerContextType<RequestHandler>> = {};
+
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
-      .reduce(async (contextPromise, [contextName, { provider, source: providerSource }]) => {
-        const resolvedContext = await contextPromise;
-
+      .reduce((alreadyBuildContextParts, [contextName, { provider, source: providerSource }]) => {
         // For the next provider, only expose the context available based on the dependencies of the plugin that
         // registered that provider.
-        const exposedContext = pick(resolvedContext, [
+        const exposedContext = pick(alreadyBuildContextParts, [
           ...this.getContextNamesForSource(providerSource),
         ]);
 
-        return {
-          ...resolvedContext,
-          [contextName]: await provider(exposedContext, ...contextArgs),
-        };
-      }, Promise.resolve({}) as Promise<HandlerContextType<RequestHandler>>);
+        Object.defineProperty(alreadyBuildContextParts, contextName, {
+          get: async () => {
+            const contextKey = contextName as keyof HandlerContextType<RequestHandler>;
+            if (!builtContextes[contextKey]) {
+              builtContextes[contextKey] = await provider(exposedContext, ...contextArgs);
+            }
+            return builtContextes[contextKey]!;
+          },
+        });
+
+        return alreadyBuildContextParts;
+      }, {} as HandlerContextType<RequestHandler>);
   }
 
   private getContextNamesForSource(source: symbol): ReadonlySet<string> {
