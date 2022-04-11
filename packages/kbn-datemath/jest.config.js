@@ -20,6 +20,6 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/elastic-datemath'],
+  roots: ['<rootDir>/packages/kbn-datemath'],
   testEnvironment: 'jsdom',
 };

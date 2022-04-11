@@ -8,22 +8,21 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 
 interface StylesDeps {
-  height?: string;
+  height?: number;
   isFullScreen?: boolean;
 }
 
-export const useStyles = ({ height = '500px', isFullScreen }: StylesDeps) => {
+export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border } = euiTheme;
+    const { border, colors } = euiTheme;
 
     // 118px = Session View Toolbar height + Close Session button height + spacing margin at the bottom
     const sessionView: CSSObject = {
-      height: `${isFullScreen ? 'calc(100vh - 118px)' : height}`,
+      height: `${isFullScreen ? 'calc(100vh - 118px)' : height + 'px'}`,
     };
 
     const processTree: CSSObject = {
@@ -47,11 +46,11 @@ export const useStyles = ({ height = '500px', isFullScreen }: StylesDeps) => {
     };
     const searchBar: CSSObject = {
       position: 'relative',
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs}`,
     };
 
     const buttonsEyeDetail: CSSObject = {
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+      margin: `${euiTheme.size.m} ${euiTheme.size.xs}`,
     };
 
     const sessionViewerComponent: CSSObject = {
@@ -60,7 +59,7 @@ export const useStyles = ({ height = '500px', isFullScreen }: StylesDeps) => {
     };
 
     const toolBar: CSSObject = {
-      backgroundColor: `${theme.euiFormBackgroundDisabledColor} !important`,
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
