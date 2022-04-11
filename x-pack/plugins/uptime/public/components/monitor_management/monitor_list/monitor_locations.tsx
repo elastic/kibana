@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { ServiceLocations, ServiceLocation } from '../../../../common/runtime_types';
 import { EXPAND_LOCATIONS_LABEL } from '../../overview/monitor_list/columns/translations';
+import { useLocations } from '../hooks/use_locations';
 
 interface Props {
   locations: ServiceLocations;
@@ -17,6 +18,7 @@ interface Props {
 const INITIAL_LIMIT = 3;
 
 export const MonitorLocations = ({ locations }: Props) => {
+  const { locations: allLocations } = useLocations();
   const [toDisplay, setToDisplay] = useState(INITIAL_LIMIT);
 
   const locationsToDisplay = locations.slice(0, toDisplay);
@@ -30,7 +32,7 @@ export const MonitorLocations = ({ locations }: Props) => {
           className="eui-textTruncate"
           css={{ display: 'flex', maxWidth: 120 }}
         >
-          {location.label}
+          {`${allLocations.find((loc) => loc.id === location.id)?.label}`}
         </EuiBadge>
       ))}
       {locations.length > toDisplay && (
