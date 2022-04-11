@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelectable,
-  EuiSpacer,
-  EuiSelectableOption,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../types';
 import { Stories, TinesParams } from './types';
