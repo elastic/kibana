@@ -21,15 +21,18 @@ import {
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
   AlertsTableProps,
+  AlertsTableRegistry,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+  const alertsTableTypeRegistry = new TypeRegistry<AlertsTableRegistry>();
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
+    alertsTableTypeRegistry,
     getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry });
     },
