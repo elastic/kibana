@@ -24,13 +24,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
     'watcher',
   ];
 
-  const uiCapabilitiesExceptions = [
-    // enterprise_search plugin is loaded but disabled because security isn't enabled in ES. That means the following 3 capabilities are disabled
-    'enterpriseSearch',
-    'appSearch',
-    'workplaceSearch',
-  ];
-
   describe('catalogue', () => {
     SpaceScenarios.forEach((scenario) => {
       it(`${scenario.name}`, async () => {
@@ -40,10 +33,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
             // everything is enabled
-            const expected = mapValues(
-              uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => !uiCapabilitiesExceptions.includes(catalogueId)
-            );
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
@@ -65,8 +55,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             // only foo is disabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) =>
-                !uiCapabilitiesExceptions.includes(catalogueId) && catalogueId !== 'foo'
+              (enabled, catalogueId) => catalogueId !== 'foo'
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
