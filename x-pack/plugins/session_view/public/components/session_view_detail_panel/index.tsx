@@ -105,7 +105,7 @@ export const SessionViewDetailPanel = ({
   const styles = useStyles();
 
   return (
-    <div css={styles.detailsPanelLeftBorder}>
+    <div css={styles.detailsPanel}>
       <EuiTabs size="l" expand>
         {tabs.map((tab, index) => (
           <EuiTab
