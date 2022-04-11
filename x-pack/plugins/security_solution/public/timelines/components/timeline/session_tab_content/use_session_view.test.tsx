@@ -17,7 +17,7 @@ import {
   useTimelineFullScreen,
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
-import { useSessionView } from './use_session_view';
+import { useSessionView, useSessionViewNavigation } from './use_session_view';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/hooks/use_selector');
@@ -72,10 +72,12 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
+const mockDetails = () => {};
+
 jest.mock('../../side_panel/hooks/use_detail_panel', () => {
   return {
     useDetailPanel: () => ({
-      openDetailsPanel: () => {},
+      openDetailsPanel: mockDetails,
       handleOnDetailsPanelClosed: () => {},
       DetailsPanel: () => <div />,
       shouldShowDetailsPanel: false,
@@ -137,13 +139,31 @@ describe('useSessionView with active timeline and a session id and graph event i
         const testProps = {
           timelineId: TimelineId.active,
         };
-        return useSessionView(testProps);
+        return useSessionViewNavigation(testProps);
       },
       { wrapper: Wrapper }
     );
     const navigation = result.current.Navigation;
     const renderResult = render(<TestProviders>{navigation}</TestProviders>);
     expect(renderResult.getByText('Close session')).toBeTruthy();
+  });
+
+  it('uses an optional height when passed', () => {
+    renderHook(
+      () => {
+        const testProps = {
+          timelineId: TimelineId.test,
+          height: 1118,
+        };
+        return useSessionView(testProps);
+      },
+      { wrapper: Wrapper }
+    );
+    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalledWith({
+      height: 1000,
+      sessionEntityId: 'test',
+      loadAlertDetails: mockDetails,
+    });
   });
 
   describe('useSessionView with non active timeline and graph event id set', () => {
@@ -174,13 +194,79 @@ describe('useSessionView with active timeline and a session id and graph event i
           const testProps = {
             timelineId: TimelineId.hostsPageEvents,
           };
-          return useSessionView(testProps);
+          return useSessionViewNavigation(testProps);
         },
         { wrapper: Wrapper }
       );
       const navigation = result.current.Navigation;
       const renderResult = render(<TestProviders>{navigation}</TestProviders>);
       expect(renderResult.getByText('Close analyzer')).toBeTruthy();
+    });
+  });
+
+  describe('useSessionView and useSessionViewNavigation should handle separate parts', () => {
+    beforeEach(() => {
+      setTimelineFullScreen = jest.fn();
+      setGlobalFullScreen = jest.fn();
+      (useTimelineFullScreen as jest.Mock).mockImplementation(() => ({
+        setTimelineFullScreen,
+      }));
+      (useGlobalFullScreen as jest.Mock).mockImplementation(() => ({
+        setGlobalFullScreen,
+      }));
+      (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
+        return {
+          ...mockTimelineModel,
+          activeTab: TimelineTabs.session,
+          graphEventId: 'current-graph-event-id',
+          sessionViewConfig: {
+            sessionEntityId: 'test',
+          },
+          show: true,
+        };
+      });
+    });
+    afterEach(() => {
+      (useDeepEqualSelector as jest.Mock).mockClear();
+    });
+    it('useSessionView should handle session view and details panel', () => {
+      const { result } = renderHook(
+        () => {
+          const testProps = {
+            timelineId: TimelineId.active,
+          };
+          return useSessionView(testProps);
+        },
+        { wrapper: Wrapper }
+      );
+      expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
+
+      expect(result.current).toHaveProperty('openDetailsPanel');
+      expect(result.current).toHaveProperty('shouldShowDetailsPanel');
+      expect(result.current).toHaveProperty('SessionView');
+      expect(result.current).toHaveProperty('DetailsPanel');
+
+      expect(result.current).not.toHaveProperty('Navigation');
+      expect(result.current).not.toHaveProperty('onCloseOverlay');
+    });
+
+    it('useSessionViewNavigation should handle Navigation component and on close callback', () => {
+      const { result } = renderHook(
+        () => {
+          const testProps = {
+            timelineId: TimelineId.hostsPageEvents,
+          };
+          return useSessionViewNavigation(testProps);
+        },
+        { wrapper: Wrapper }
+      );
+      expect(result.current).toHaveProperty('Navigation');
+      expect(result.current).toHaveProperty('onCloseOverlay');
+
+      expect(result.current).not.toHaveProperty('openDetailsPanel');
+      expect(result.current).not.toHaveProperty('shouldShowDetailsPanel');
+      expect(result.current).not.toHaveProperty('SessionView');
+      expect(result.current).not.toHaveProperty('DetailsPanel');
     });
   });
 });
