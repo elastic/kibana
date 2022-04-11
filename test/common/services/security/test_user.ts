@@ -71,13 +71,12 @@ export class TestUser extends FtrService {
 export async function createTestUserService(ctx: FtrProviderContext, role: Role, user: User) {
   const log = ctx.getService('log');
   const config = ctx.getService('config');
-  const kibanaServer = ctx.getService('kibanaServer');
 
-  const enabledPlugins = config.get('security.disableTestUser')
-    ? []
-    : await kibanaServer.plugins.getEnabledIds();
-
-  const enabled = enabledPlugins.includes('security') && !config.get('security.disableTestUser');
+  const enabled =
+    !config
+      .get('esTestCluster.serverArgs')
+      .some((arg: string) => arg === 'xpack.security.enabled=false') &&
+    !config.get('security.disableTestUser');
 
   if (enabled) {
     log.debug('===============creating roles and users===============');
