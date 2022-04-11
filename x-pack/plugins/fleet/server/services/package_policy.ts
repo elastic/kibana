@@ -53,7 +53,13 @@ import {
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
 } from '../errors';
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import {
+  NewPackagePolicySchema,
+  PackagePolicySchema,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
+  UpdatePackagePolicySchema,
+} from '../types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
@@ -896,11 +902,26 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (externalCallbacks && externalCallbacks.size > 0) {
           let updatedNewData = newData;
           for (const callback of externalCallbacks) {
-            const result = await callback(updatedNewData, context, request);
+            let result;
+            if (externalCallbackType === 'packagePolicyPostCreate') {
+              result = await (callback as PostPackagePolicyPostCreateCallback)(
+                updatedNewData as PackagePolicy,
+                context,
+                request
+              );
+            } else {
+              result = await (callback as PostPackagePolicyCreateCallback)(
+                updatedNewData as NewPackagePolicy,
+                context,
+                request
+              );
+            }
             if (externalCallbackType === 'packagePolicyCreate') {
               updatedNewData = NewPackagePolicySchema.validate(result);
             } else if (externalCallbackType === 'packagePolicyUpdate') {
               updatedNewData = UpdatePackagePolicySchema.validate(result);
+            } else if (externalCallbackType === 'packagePolicyPostCreate') {
+              updatedNewData = PackagePolicySchema.validate(result);
             }
           }
 
