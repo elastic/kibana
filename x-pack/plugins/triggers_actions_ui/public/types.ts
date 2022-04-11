@@ -402,3 +402,8 @@ export interface AlertsTableProps {
   useFetchAlertsData: () => FetchAlertData;
   'data-test-subj': string;
 }
+
+export interface AlertsTableRegistry {
+  id: string;
+  columns: EuiDataGridColumn[];
+}

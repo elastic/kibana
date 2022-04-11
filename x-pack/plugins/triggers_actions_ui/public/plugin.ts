@@ -47,6 +47,7 @@ import type {
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
   AlertsTableProps,
+  AlertsTableRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
@@ -54,11 +55,13 @@ import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/uni
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;
@@ -101,12 +104,14 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
+  private alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
   private config: TriggersActionsUiConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    this.alertsTableTypeRegistry = new TypeRegistry<AlertsTableRegistry>();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
@@ -189,6 +194,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      alertsTableTypeRegistry: this.alertsTableTypeRegistry,
     };
   }
 
@@ -196,6 +202,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      alertsTableTypeRegistry: this.alertsTableTypeRegistry,
       getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },
