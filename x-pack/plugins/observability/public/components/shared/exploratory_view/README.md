@@ -120,7 +120,7 @@ A simple usage of lens embeddable example and playground options
 The primary purpose of the exploratory view is to embed it in observability solutions like uptime to replace
 existing static visualizations,
 
-For that purpose, all the configuration options we define in exploratory view, they can be used as an embeddable
+For that purpose, all the configuration options we define in the exploratory view can be used as an embeddable
 via a component that is exposed using observability plugin contract,
 usage looks like this
 
