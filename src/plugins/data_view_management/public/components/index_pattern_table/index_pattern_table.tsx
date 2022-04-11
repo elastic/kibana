@@ -95,7 +95,10 @@ export const IndexPatternTable = ({
       dataViews,
       overlays,
       uiSettings,
-      onDelete: () => loadDataViews(),
+      onDelete: () => {
+        setSelectedItems([]);
+        loadDataViews();
+      },
     });
     if (selectedItems.length === 0) {
       return;

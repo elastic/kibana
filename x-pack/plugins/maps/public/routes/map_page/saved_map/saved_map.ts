@@ -11,6 +11,7 @@ import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
+import { MapSettings } from '../../../reducers/map';
 import {
   getTimeFilters,
   getMapZoom,
@@ -49,6 +50,19 @@ import { createBasemapLayerDescriptor } from '../../../classes/layers/create_bas
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
+
+function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
+  const decodedCustomIcons = settings.customIcons
+    ? // base64 decode svg string
+      settings.customIcons.map((icon) => {
+        return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
+      })
+    : [];
+  return setMapSettings({
+    ...settings,
+    customIcons: decodedCustomIcons,
+  });
+}
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
@@ -123,12 +137,12 @@ export class SavedMap {
     }
 
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettings(this._mapEmbeddableInput.mapSettings));
+      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
     } else if (this._attributes?.mapStateJSON) {
       try {
         const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
         if (mapState.settings) {
-          this._store.dispatch(setMapSettings(mapState.settings));
+          this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
         }
       } catch (e) {
         // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
@@ -439,6 +453,8 @@ export class SavedMap {
     const layerListConfigOnly = copyPersistentState(layerList);
     this._attributes!.layerListJSON = JSON.stringify(layerListConfigOnly);
 
+    const mapSettings = getMapSettings(state);
+
     this._attributes!.mapStateJSON = JSON.stringify({
       zoom: getMapZoom(state),
       center: getMapCenter(state),
@@ -449,7 +465,13 @@ export class SavedMap {
       },
       query: getQuery(state),
       filters: getFilters(state),
-      settings: getMapSettings(state),
+      settings: {
+        ...mapSettings,
+        // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
+        customIcons: mapSettings.customIcons.map((icon) => {
+          return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
+        }),
+      },
     } as SerializedMapState);
 
     this._attributes!.uiStateJSON = JSON.stringify({

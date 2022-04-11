@@ -7,19 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from 'kibana/server';
 
 import { UI_SETTINGS } from '../common/constants';
-import { configSchema } from '../config';
 
-const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
-  defaultMessage: 'technical preview',
-});
-
-export function getUiSettings(
-  config: TypeOf<typeof configSchema>
-): Record<string, UiSettingsParams<unknown>> {
+export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.LEGACY_CHARTS_LIBRARY]: {
       name: i18n.translate('timelion.uiSettings.legacyChartsLibraryLabel', {
@@ -94,36 +87,6 @@ export function getUiSettings(
         defaultMessage: 'The smallest interval that will be calculated when using "auto"',
         description: '"auto" is a technical value in that context, that should not be translated.',
       }),
-      category: ['timelion'],
-      schema: schema.string(),
-    },
-    [UI_SETTINGS.GRAPHITE_URL]: {
-      name: i18n.translate('timelion.uiSettings.graphiteURLLabel', {
-        defaultMessage: 'Graphite URL',
-        description:
-          'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
-      }),
-      value: config.graphiteUrls && config.graphiteUrls.length ? config.graphiteUrls[0] : null,
-      description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
-        defaultMessage:
-          '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
-        values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
-      }),
-      type: 'select',
-      options: config.graphiteUrls || [],
-      category: ['timelion'],
-      schema: schema.nullable(schema.string()),
-    },
-    [UI_SETTINGS.QUANDL_KEY]: {
-      name: i18n.translate('timelion.uiSettings.quandlKeyLabel', {
-        defaultMessage: 'Quandl key',
-      }),
-      value: 'someKeyHere',
-      description: i18n.translate('timelion.uiSettings.quandlKeyDescription', {
-        defaultMessage: '{experimentalLabel} Your API key from www.quandl.com',
-        values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
-      }),
-      sensitive: true,
       category: ['timelion'],
       schema: schema.string(),
     },

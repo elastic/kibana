@@ -39,7 +39,7 @@ describe('ProcessTreeAlerts component', () => {
         if (!alert.kibana) {
           return;
         }
-        const { uuid } = alert.kibana.alert;
+        const { uuid } = alert.kibana!.alert!;
 
         expect(
           renderResult.queryByTestId(`sessionView:sessionViewAlertDetail-${uuid}`)
@@ -56,7 +56,7 @@ describe('ProcessTreeAlerts component', () => {
       expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
 
       const testAlertRow = renderResult.queryByTestId(
-        `sessionView:sessionViewAlertDetail-${mockAlerts[0].kibana?.alert.uuid}`
+        `sessionView:sessionViewAlertDetail-${mockAlerts[0].kibana!.alert!.uuid}`
       );
       expect(testAlertRow).toBeTruthy();
       testAlertRow?.click();

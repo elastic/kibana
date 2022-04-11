@@ -12,7 +12,7 @@ import { Logger } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
@@ -25,7 +25,7 @@ import { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/al
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
   completeRule: CompleteRule<MachineLearningRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
