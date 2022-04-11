@@ -112,8 +112,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 query: {
                   start: new Date(end - fiveMinutes).toISOString(),
                   end: new Date(end).toISOString(),
-                  comparisonStart: new Date(start).toISOString(),
-                  comparisonEnd: new Date(start + fiveMinutes).toISOString(),
+                  offset: '5m',
                 },
               });
               errorsDistribution = response.body;
@@ -157,8 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 query: {
                   start: '2021-01-03T00:00:00.000Z',
                   end: '2021-01-03T00:15:00.000Z',
-                  comparisonStart: '2021-01-02T00:00:00.000Z',
-                  comparisonEnd: '2021-01-02T00:15:00.000Z',
+                  offset: '1d',
                 },
               });
               errorsDistribution = response.body;

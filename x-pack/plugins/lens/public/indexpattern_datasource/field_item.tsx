@@ -491,15 +491,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)
   ) {
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
     return (
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
         <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-            defaultMessage:
-              'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
-          })}
+          {isUsingSampling
+            ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+              })
+            : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+              })}
         </EuiText>
       </>
     );

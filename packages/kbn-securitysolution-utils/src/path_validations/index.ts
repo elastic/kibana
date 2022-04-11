@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const FILENAME_WILDCARD_WARNING = i18n.translate('utils.filename.wildcardWarning', {
-  defaultMessage: `A wildcard in the filename will affect the endpoint's performance`,
+  defaultMessage: `Using wildcards in file paths can impact Endpoint performance`,
 });
 
 export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {
@@ -22,6 +22,23 @@ export const enum ConditionEntryField {
   SIGNER = 'process.Ext.code_signature',
 }
 
+export const enum EntryFieldType {
+  HASH = '.hash.',
+  EXECUTABLE = '.executable.caseless',
+  PATH = '.path',
+  SIGNER = '.Ext.code_signature',
+}
+
+export type TrustedAppConditionEntryField =
+  | 'process.hash.*'
+  | 'process.executable.caseless'
+  | 'process.Ext.code_signature';
+export type BlocklistConditionEntryField = 'file.hash.*' | 'file.path' | 'file.Ext.code_signature';
+export type AllConditionEntryFields =
+  | TrustedAppConditionEntryField
+  | BlocklistConditionEntryField
+  | 'file.path.text';
+
 export const enum OperatingSystem {
   LINUX = 'linux',
   MAC = 'macos',
@@ -30,20 +47,6 @@ export const enum OperatingSystem {
 
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
-
-/*
- * regex to match executable names
- * starts matching from the eol of the path
- * file names with a single or multiple spaces (for spaced names)
- * and hyphens and combinations of these that produce complex names
- * such as:
- * c:\home\lib\dmp.dmp
- * c:\home\lib\my-binary-app-+/ some/  x/ dmp.dmp
- * /home/lib/dmp.dmp
- * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
- */
-export const WIN_EXEC_PATH = /(\\[-\w]+|\\[-\w]+[\.]+[\w]+)$/i;
-export const UNIX_EXEC_PATH = /(\/[-\w]+|\/[-\w]+[\.]+[\w]+)$/i;
 
 export const validateFilePathInput = ({
   os,
@@ -70,7 +73,7 @@ export const validateFilePathInput = ({
   }
 
   if (isValidFilePath) {
-    if (!hasSimpleFileName) {
+    if (hasSimpleFileName !== undefined && !hasSimpleFileName) {
       return FILENAME_WILDCARD_WARNING;
     }
   } else {
@@ -86,9 +89,14 @@ export const hasSimpleExecutableName = ({
   os: OperatingSystem;
   type: EntryTypes;
   value: string;
-}): boolean => {
+}): boolean | undefined => {
+  const separator = os === OperatingSystem.WINDOWS ? '\\' : '/';
+  const lastString = value.split(separator).pop();
+  if (!lastString) {
+    return;
+  }
   if (type === 'wildcard') {
-    return os === OperatingSystem.WINDOWS ? WIN_EXEC_PATH.test(value) : UNIX_EXEC_PATH.test(value);
+    return (lastString.split('*').length || lastString.split('?').length) === 1;
   }
   return true;
 };
@@ -100,11 +108,16 @@ export const isPathValid = ({
   value,
 }: {
   os: OperatingSystem;
-  field: ConditionEntryField | 'file.path.text';
+  field: AllConditionEntryFields;
   type: EntryTypes;
   value: string;
 }): boolean => {
-  if (field === ConditionEntryField.PATH || field === 'file.path.text') {
+  const pathFields: AllConditionEntryFields[] = [
+    'process.executable.caseless',
+    'file.path',
+    'file.path.text',
+  ];
+  if (pathFields.includes(field)) {
     if (type === 'wildcard') {
       return os === OperatingSystem.WINDOWS
         ? isWindowsWildcardPathValid(value)

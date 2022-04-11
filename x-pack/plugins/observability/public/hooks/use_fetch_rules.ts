@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
+import { isEmpty } from 'lodash';
 import { loadRules, Rule } from '../../../triggers_actions_ui/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps } from '../pages/rules/types';
@@ -19,7 +20,14 @@ interface RuleState {
   totalItemCount: number;
 }
 
-export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRulesProps) {
+export function useFetchRules({
+  searchText,
+  ruleLastResponseFilter,
+  typesFilter,
+  setPage,
+  page,
+  sort,
+}: FetchRulesProps) {
   const { http } = useKibana().services;
 
   const [rulesState, setRulesState] = useState<RuleState>({
@@ -29,6 +37,9 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
     totalItemCount: 0,
   });
 
+  const [noData, setNoData] = useState<boolean>(true);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
 
@@ -36,7 +47,8 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
       const response = await loadRules({
         http,
         page,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        searchText,
+        typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
         ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
@@ -46,10 +58,22 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
         data: response.data,
         totalItemCount: response.total,
       }));
+
+      if (!response.data?.length && page.index > 0) {
+        setPage({ ...page, index: 0 });
+      }
+      const isFilterApplied = !(
+        isEmpty(searchText) &&
+        isEmpty(ruleLastResponseFilter) &&
+        isEmpty(typesFilter)
+      );
+
+      setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
-  }, [http, page, ruleLastResponseFilter, sort]);
+    setInitialLoad(false);
+  }, [http, page, setPage, searchText, ruleLastResponseFilter, typesFilter, sort]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);
@@ -58,5 +82,7 @@ export function useFetchRules({ ruleLastResponseFilter, page, sort }: FetchRules
     rulesState,
     reload: fetchRules,
     setRulesState,
+    noData,
+    initialLoad,
   };
 }

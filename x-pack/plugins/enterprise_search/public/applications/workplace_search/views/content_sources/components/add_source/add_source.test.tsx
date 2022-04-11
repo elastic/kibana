@@ -52,6 +52,7 @@ describe('AddSourceList', () => {
     dataLoading: false,
     newCustomSource: {},
     isOrganization: true,
+    externalConfigured: false,
   };
 
   beforeEach(() => {
@@ -70,6 +71,33 @@ describe('AddSourceList', () => {
     wrapper.find(ConfigurationIntro).prop('advanceStep')();
 
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
+  });
+
+  it('renders default state correctly when there are multiple connector options, but all connectors have been configured', () => {
+    setMockValues({ ...mockValues, externalConfigured: true });
+    const sourceData = {
+      ...staticSourceData[0],
+      externalConnectorAvailable: true,
+      configured: true,
+    };
+    shallow(<AddSource sourceData={sourceData} />);
+    expect(initializeAddSource).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ connect: true })
+    );
+  });
+
+  it('renders default state correctly when there are not multiple connector options, and the connector has been configured', () => {
+    const sourceData = {
+      ...staticSourceData[0],
+      externalConnectorAvailable: false,
+      configured: true,
+    };
+    shallow(<AddSource sourceData={sourceData} />);
+    expect(initializeAddSource).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ connect: true })
+    );
   });
 
   it('renders default state correctly when there are multiple connector options', () => {
@@ -134,7 +162,23 @@ describe('AddSourceList', () => {
       addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
     });
     const wrapper = shallow(<AddSource sourceData={staticSourceData[1]} />);
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(false);
     wrapper.find(ConfigCompleted).prop('advanceStep')();
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
+  });
+
+  it('renders Config Completed step with feedback for external connectors', () => {
+    setMockValues({
+      ...mockValues,
+      sourceConfigData: { ...sourceConfigData, serviceType: 'external' },
+      addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
+    });
+    const wrapper = shallow(
+      <AddSource sourceData={{ ...staticSourceData[1], serviceType: 'external' }} />
+    );
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(true);
 
     expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);

@@ -20,7 +20,7 @@ D80-.->|publish|Emonitoring
 
 Each monitored deployment can use a different [data collection mode](../reference/data_collection_modes.md) or potentially even multiple different modes within a given deployment.
 
-Additionally, the monitoring deployment can contain [rules](../reference/rules_alerts.md) the alert operators of exceptional conditions in the production (monitored) deployments.
+Additionally, the monitoring deployment can contain [rules](../reference/rules_alerts.md) that alert operators of exceptional conditions in the (monitored) production deployments.
 
 The root stack monitoring page will display a list of clusters if data is found for more than one cluster.
 

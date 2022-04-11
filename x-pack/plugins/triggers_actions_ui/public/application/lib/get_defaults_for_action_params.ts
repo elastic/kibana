@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertActionParam } from '../../../../alerting/common';
+import { RuleActionParam } from '../../../../alerting/common';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 
-export type DefaultActionParams = Record<string, AlertActionParam> | undefined;
+export type DefaultActionParams = Record<string, RuleActionParam> | undefined;
 export type DefaultActionParamsGetter = (
   actionTypeId: string,
   actionGroupId: string

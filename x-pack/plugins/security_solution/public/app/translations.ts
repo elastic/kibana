@@ -11,8 +11,19 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overvi
   defaultMessage: 'Overview',
 });
 
+export const DETECTION_RESPONSE = i18n.translate(
+  'xpack.securitySolution.navigation.detectionResponse',
+  {
+    defaultMessage: 'Detection & Response',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
+});
+
+export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation.gettingStarted', {
+  defaultMessage: 'Getting started',
 });
 
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {

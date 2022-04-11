@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useStore } from 'react-redux';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
   LensAppServices,
@@ -18,8 +19,10 @@ import {
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
+import { exporters } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
   useLensSelector,
@@ -46,6 +49,7 @@ function getLensTopNavConfig(options: {
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
+  isSaveable: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -58,6 +62,7 @@ function getLensTopNavConfig(options: {
     savingToDashboardPermitted,
     tooltips,
     contextOriginatingApp,
+    isSaveable,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -137,6 +142,17 @@ function getLensTopNavConfig(options: {
     tooltip: tooltips.showExportWarning,
   });
 
+  topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.settings', {
+      defaultMessage: 'Settings',
+    }),
+    run: actions.openSettings,
+    testId: 'lnsApp_settingsButton',
+    description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
+      defaultMessage: 'Open the Lens settings menu',
+    }),
+  });
+
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
@@ -171,7 +187,7 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -197,6 +213,7 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
+  theme$,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -207,6 +224,7 @@ export const LensTopNavMenu = ({
     attributeService,
     discover,
     dashboardFeatureFlag,
+    dataViews,
   } = useKibana<LensAppServices>().services;
 
   const dispatch = useLensDispatch();
@@ -215,7 +233,7 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
 
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const {
@@ -229,6 +247,7 @@ export const LensTopNavMenu = ({
     visualization,
     filters,
   } = useLensSelector((state) => state.lens);
+
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
@@ -260,7 +279,7 @@ export const LensTopNavMenu = ({
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
-      getIndexPatternsObjects(indexPatternIds, data.indexPatterns).then(
+      getIndexPatternsObjects(indexPatternIds, dataViews).then(
         ({ indexPatterns: indexPatternObjects, rejectedIds }) => {
           setIndexPatterns(indexPatternObjects);
           setRejectedIndexPatterns(rejectedIds);
@@ -273,7 +292,7 @@ export const LensTopNavMenu = ({
     rejectedIndexPatterns,
     datasourceMap,
     indexPatterns,
-    data.indexPatterns,
+    dataViews,
   ]);
 
   const { TopNavMenu } = navigation.ui;
@@ -333,6 +352,8 @@ export const LensTopNavMenu = ({
     application.capabilities,
   ]);
 
+  const lensStore = useStore();
+
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
@@ -348,6 +369,7 @@ export const LensTopNavMenu = ({
       showCancel: Boolean(isLinkedToOriginatingApp),
       savingToLibraryPermitted,
       savingToDashboardPermitted,
+      isSaveable,
       contextOriginatingApp,
       tooltips: {
         showExportWarning: () => {
@@ -401,7 +423,7 @@ export const LensTopNavMenu = ({
           }
         },
         saveAndReturn: () => {
-          if (savingToDashboardPermitted) {
+          if (isSaveable) {
             // disabling the validation on app leave because the document has been saved.
             onAppLeave((actions) => {
               return actions.default();
@@ -460,6 +482,12 @@ export const LensTopNavMenu = ({
             columns: meta.columns,
           });
         },
+        openSettings: (anchorElement: HTMLElement) =>
+          toggleSettingsMenuOpen({
+            lensStore,
+            anchorElement,
+            theme$,
+          }),
       },
     });
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
@@ -492,6 +520,8 @@ export const LensTopNavMenu = ({
     filters,
     indexPatterns,
     data.query.timefilter.timefilter,
+    lensStore,
+    theme$,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

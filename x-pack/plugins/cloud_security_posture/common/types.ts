@@ -35,7 +35,7 @@ export interface Cluster {
   resourcesTypes: ResourceType[];
 }
 
-export interface CloudPostureStats {
+export interface ComplianceDashboardData {
   stats: Stats;
   resourcesTypes: ResourceType[];
   clusters: Cluster[];

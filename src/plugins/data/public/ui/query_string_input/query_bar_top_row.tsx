@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiFieldText,
-  prettyDuration,
+  usePrettyDuration,
   EuiIconProps,
   EuiSuperUpdateButton,
   OnRefreshProps,
@@ -92,12 +92,12 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
     return valueAsMoment.toISOString();
   }
 
-  const dateRangePretty = prettyDuration(
-    toAbsoluteString(from),
-    toAbsoluteString(to),
-    [],
-    dateFormat
-  );
+  const dateRangePretty = usePrettyDuration({
+    timeFrom: toAbsoluteString(from),
+    timeTo: toAbsoluteString(to),
+    quickRanges: [],
+    dateFormat,
+  });
 
   return (
     <div

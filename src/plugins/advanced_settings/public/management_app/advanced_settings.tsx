@@ -41,7 +41,7 @@ interface AdvancedSettingsProps {
   history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
   componentRegistry: ComponentRegistry['start'];
@@ -198,6 +198,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
         });
       })
       .filter((c) => !c.readOnly)
+      .filter((c) => !c.isCustom) // hide any settings that aren't explicitly registered by enabled plugins.
       .sort(fieldSorter);
   }
 
@@ -270,7 +271,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
             save={this.saveConfig}
             showNoResultsMessage={!footerQueryMatched}
             enableSaving={this.props.enableSaving}
-            dockLinks={this.props.dockLinks}
+            docLinks={this.props.docLinks}
             toasts={this.props.toasts}
             trackUiMetric={this.props.trackUiMetric}
             queryText={query.text}

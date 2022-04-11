@@ -15,6 +15,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 
+import { ElasticsearchCard } from '../elasticsearch_card';
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
@@ -35,6 +36,7 @@ describe('ProductSelector', () => {
     expect(wrapper.find(ProductCard)).toHaveLength(2);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
     expect(wrapper.find(LicenseCallout)).toHaveLength(0);
+    expect(wrapper.find(ElasticsearchCard)).toHaveLength(1);
   });
 
   it('renders the trial callout', () => {
@@ -91,12 +93,13 @@ describe('ProductSelector', () => {
       expect(wrapper.find(ProductCard).prop('product').ID).toEqual('appSearch');
     });
 
-    it('renders empty prompts and no cards or license callout if the user does not have access', () => {
+    it('renders empty prompt and no cards or license callout if the user does not have access', () => {
       const wrapper = shallow(<ProductSelector {...props} />);
 
-      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(2);
+      expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
       expect(wrapper.find(ProductCard)).toHaveLength(0);
       expect(wrapper.find(LicenseCallout)).toHaveLength(0);
+      expect(wrapper.find(ElasticsearchCard)).toHaveLength(0);
     });
   });
 });

@@ -7,6 +7,7 @@
  */
 
 import { Subscription } from 'rxjs';
+import { onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -18,14 +19,9 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import {
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  FilterManager,
-  generateFilters,
-} from '../../../data/public';
+import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '../../../data/public';
 import { DiscoverServices } from '../build_services';
-import { Filter, ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
+import { ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
 import { DataView, DataViewField } from '../../../data_views/public';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
@@ -332,7 +328,7 @@ export class SavedSearchEmbeddable
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
   ) {
     const isFetchRequired =
-      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.input.timeRange) ||
       !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort) ||

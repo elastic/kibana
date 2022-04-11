@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { mockLogger } from '../__mocks__/es_results';
 import { buildRuleMessageFactory } from '../rule_messages';
@@ -24,12 +24,12 @@ const mockSingleSearchAfter = jest.fn();
 
 // Failing with rule registry enabled
 describe('findThresholdSignals', () => {
-  let mockService: AlertServicesMock;
+  let mockService: RuleExecutorServicesMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
-    mockService = alertsMock.createAlertServices();
+    mockService = alertsMock.createRuleExecutorServices();
   });
 
   it('should generate a threshold signal query when only a value is provided', async () => {

@@ -92,7 +92,6 @@ export function ActionBar({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj={`${type}LoadMoreButton`}
-            iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
             isDisabled={isDisabled}
             isLoading={isLoading}
             onClick={() => {

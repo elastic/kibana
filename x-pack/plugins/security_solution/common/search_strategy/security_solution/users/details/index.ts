@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
-import { UserItem, UsersFields } from '../common';
-import { RequestOptionsPaginated } from '../..';
+import { UserItem } from '../common';
+import { RequestBasicOptions } from '../..';
 
 export interface UserDetailsStrategyResponse extends IEsSearchResponse {
   userDetails: UserItem;
   inspect?: Maybe<Inspect>;
 }
 
-export interface UserDetailsRequestOptions extends Partial<RequestOptionsPaginated<UsersFields>> {
+export interface UserDetailsRequestOptions extends Partial<RequestBasicOptions> {
   userName: string;
   skip?: boolean;
   timerange: TimerangeInput;
   inspect?: Maybe<Inspect>;
-}
-
-export interface AggregationRequest {
-  [aggField: string]: estypes.AggregationsAggregationContainer;
 }
