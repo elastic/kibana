@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_POLICIES } from './services/ingest';
+import {
+  INGEST_API_EPM_PACKAGES,
+  INGEST_API_PACKAGE_POLICIES,
+} from '../../../services/policies/ingest';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../types';
 import { GetPackagesResponse } from '../../../../../../fleet/common';

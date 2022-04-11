@@ -53,6 +53,8 @@ export enum RuleExecutionStatus {
 
 export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
 
+export type RuleExecutionStatusType = t.TypeOf<typeof ruleExecutionStatus>;
+
 export const ruleExecutionStatusOrder = PositiveInteger;
 export type RuleExecutionStatusOrder = t.TypeOf<typeof ruleExecutionStatusOrder>;
 
@@ -134,3 +136,14 @@ export const aggregateRuleExecutionEvent = t.type({
 });
 
 export type AggregateRuleExecutionEvent = t.TypeOf<typeof aggregateRuleExecutionEvent>;
+
+export const executionLogTableSortColumns = t.keyof({
+  timestamp: IsoDateString,
+  duration_ms: t.number,
+  gap_duration_ms: t.number,
+  indexing_duration_ms: t.number,
+  search_duration_ms: t.number,
+  schedule_delay_ms: t.number,
+});
+
+export type ExecutionLogTableSortColumns = t.TypeOf<typeof executionLogTableSortColumns>;

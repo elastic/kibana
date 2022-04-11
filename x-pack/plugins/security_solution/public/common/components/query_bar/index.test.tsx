@@ -11,7 +11,8 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { SearchBar } from '../../../../../../../src/plugins/unified_search/public';
 import { QueryBar, QueryBarComponentProps } from '.';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;

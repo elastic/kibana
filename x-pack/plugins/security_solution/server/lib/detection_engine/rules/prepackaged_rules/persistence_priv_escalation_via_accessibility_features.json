@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Modification of Accessibility Binaries",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.parent.name : (\"Utilman.exe\", \"winlogon.exe\") and user.name == \"SYSTEM\" and\n process.args :\n    (\n    \"C:\\\\Windows\\\\System32\\\\osk.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Magnify.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Narrator.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Sethc.exe\",\n    \"utilman.exe\",\n    \"ATBroker.exe\",\n    \"DisplaySwitch.exe\",\n    \"sethc.exe\"\n    )\n and not process.pe.original_file_name in\n    (\n    \"osk.exe\",\n    \"sethc.exe\",\n    \"utilman2.exe\",\n    \"DisplaySwitch.exe\",\n    \"ATBroker.exe\",\n    \"ScreenMagnifier.exe\",\n    \"SR.exe\",\n    \"Narrator.exe\",\n    \"magnify.exe\",\n    \"MAGNIFY.EXE\"\n    )\n\n/* uncomment once in winlogbeat to avoid bypass with rogue process with matching pe original file name */\n/* and process.code_signature.subject_name == \"Microsoft Windows\" and process.code_signature.status == \"trusted\" */\n",
   "references": [
     "https://www.elastic.co/blog/practical-security-engineering-stateful-detection"
@@ -74,5 +75,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 8
 }

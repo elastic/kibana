@@ -9,20 +9,17 @@ import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
 import { INSPECT_MODAL } from '../../screens/inspect';
 import { ALL_USERS_TABLE } from '../../screens/users/all_users';
 import { AUTHENTICATIONS_TAB } from '../../screens/users/user_authentications';
-import { cleanKibana } from '../../tasks/common';
 
 import { clickInspectButton, closesModal } from '../../tasks/inspect';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Inspect', () => {
-  before(() => {
-    cleanKibana();
-  });
   context('Users stats and tables', () => {
     before(() => {
-      loginAndWaitForPage(USERS_URL);
+      login();
+      visit(USERS_URL);
     });
     afterEach(() => {
       closesModal();

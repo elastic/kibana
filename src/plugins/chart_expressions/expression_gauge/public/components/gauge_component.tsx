@@ -8,8 +8,9 @@
 import React, { FC, memo, useCallback } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '../../../../field_formats/common';
-import type { CustomPaletteState, PaletteOutput } from '../../../../charts/public';
+import type { CustomPaletteState } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
 import { isVisDimension } from '../../../../visualizations/common/utils';
 import {
@@ -303,8 +304,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
-    const min = getMinValue(row, accessors);
-    const max = getMaxValue(row, accessors);
+    const min = getMinValue(row, accessors, palette?.params, args.respectRanges);
+    const max = getMaxValue(row, accessors, palette?.params, args.respectRanges);
 
     if (min === max) {
       return (

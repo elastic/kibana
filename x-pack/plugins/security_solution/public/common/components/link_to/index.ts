@@ -14,7 +14,6 @@ import { SecurityNavKey } from '../navigation/types';
 import { SecurityPageName } from '../../../app/types';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
-export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
 export { getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';

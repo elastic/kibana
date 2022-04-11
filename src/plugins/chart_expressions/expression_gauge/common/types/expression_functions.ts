@@ -7,13 +7,14 @@
  */
 
 import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
+import { CustomPaletteState } from '../../../../charts/common';
 import {
   EXPRESSION_GAUGE_NAME,
   GAUGE_FUNCTION_RENDERER_NAME,
@@ -23,7 +24,6 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
 } from '../constants';
-import { CustomPaletteParams } from '.';
 
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;
@@ -47,6 +47,7 @@ export interface GaugeState {
   shape: GaugeShape;
   /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
   percentageMode?: boolean;
+  respectRanges?: boolean;
   commonLabel?: string;
 }
 
