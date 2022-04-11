@@ -75,8 +75,8 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(2000, async () => {
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+      await retry.tryForTime(3000, async () => {
+        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
         expect(rows.length).equal(nrRows);
       });
     },

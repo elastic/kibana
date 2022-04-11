@@ -81,13 +81,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('filtering', () => {
-      const id = uuid.v4();
-      const caseTitle = 'matchme-' + id;
+      const caseTitle = 'matchme';
 
       before(async () => {
-        await cases.api.createNthRandomCases(2);
         await cases.api.createCase({ title: caseTitle, tags: ['one'] });
-        await cases.api.createCase({ tags: ['two'] });
+        await cases.api.createCase({ title: 'test2', tags: ['two'] });
+        await cases.api.createCase({ title: 'test3' });
+        await cases.api.createCase({ title: 'test4' });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
