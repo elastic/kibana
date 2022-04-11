@@ -1,7 +1,7 @@
 # Sourcerer Container
 
 ### `useInitSourcerer`
- - called at the top of the app in HomePageComponent to initialize the sourcerer state! 
+ - called at the top of the app in HomePageComponent to initialize the sourcerer state!
  - Calls `useSourcererDataView` (see below) for the active scope (ex: `SourcererScopeName.default | SourcererScopeName.detections`)
  - If there is an error with the data view, thrown here
  - Run index field search for the active data view id, and when the active data view id updates 
@@ -42,3 +42,8 @@ interface SelectedDataView {
  - called on from detections and timelines scopes
  - `signalIndexNeedsInit` - when defined, signal index has been initiated but does not exist
  - `pollForSignalIndex` - when false, signal index has been initiated
+
+
+### Adding sourcerer to a new page
+- In order for the sourcerer to show up on a page, it needs to be added to the array `sourcererPaths`
+- The scope of a sourcerer component will be default unless the path is added to the `detectionsPaths` array, in which case the scope can be detections
