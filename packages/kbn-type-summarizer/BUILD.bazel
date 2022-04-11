@@ -1,8 +1,7 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("@rules_nodejs//nodejs:directory_file_path.bzl", "directory_file_path")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "nodejs_binary")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
-load("@build_bazel_rules_nodejs//internal/node:node.bzl", "nodejs_binary")
-load("@build_bazel_rules_nodejs//:index.bzl", "directory_file_path")
 
 PKG_BASE_NAME = "kbn-type-summarizer"
 PKG_REQUIRE_NAME = "@kbn/type-summarizer"
