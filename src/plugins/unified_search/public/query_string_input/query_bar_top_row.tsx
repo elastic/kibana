@@ -39,7 +39,7 @@ import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../data/common';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
-import { AddFilterPopover } from './add_filter';
+import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 
 const SuperDatePicker = React.memo(

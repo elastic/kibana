@@ -17,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
-import type { TimeRange, SavedQueryService, SavedQuery } from '../../../data/public';
+import type { TimeRange, SavedQueryService, SavedQuery, IIndexPattern } from '../../../data/public';
 import { QueryBarMenuPanels } from './query_bar_menu_panels';
+import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 export interface QueryBarMenuProps {
   language: string;
@@ -41,6 +42,8 @@ export interface QueryBarMenuProps {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
+  timeRangeForSuggestionsOverride?: boolean;
+  indexPatterns?: Array<IIndexPattern | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
 }
 
@@ -65,6 +68,8 @@ export function QueryBarMenu({
   showQueryInput,
   showFilterBar,
   showSaveQuery,
+  indexPatterns,
+  timeRangeForSuggestionsOverride,
   buttonProps,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
@@ -140,6 +145,22 @@ export function QueryBarMenu({
         return (
           <EuiContextMenuPanel
             items={[<div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>]}
+          />
+        );
+      case 'addFilter':
+        return (
+          <EuiContextMenuPanel
+            items={[
+              <div style={{ padding: 16 }}>
+                <FilterEditorWrapper
+                  indexPatterns={indexPatterns}
+                  filters={filters!}
+                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                  onFiltersUpdated={onFiltersUpdated}
+                  closePopover={closePopover}
+                />
+              </div>,
+            ]}
           />
         );
     }

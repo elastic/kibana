@@ -390,6 +390,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
+        indexPatterns={this.props.indexPatterns}
+        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(
