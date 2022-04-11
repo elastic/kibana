@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';

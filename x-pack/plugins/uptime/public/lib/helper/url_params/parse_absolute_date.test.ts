@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import moment from 'moment';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
