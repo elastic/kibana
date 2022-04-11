@@ -173,6 +173,7 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
+  isVerbose(): boolean;
 }
 
 export type ProcessMap = {

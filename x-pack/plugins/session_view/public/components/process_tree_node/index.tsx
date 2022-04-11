@@ -42,8 +42,8 @@ export interface ProcessDeps {
   jumpToEntityId?: string;
   investigatedAlertId?: string;
   selectedProcessId?: string;
-  timeStampOn?: boolean;
-  verboseModeOn?: boolean;
+  showTimestamp: boolean;
+  verboseMode: boolean;
   searchResults?: Process[];
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
@@ -63,8 +63,8 @@ export function ProcessTreeNode({
   jumpToEntityId,
   investigatedAlertId,
   selectedProcessId,
-  timeStampOn = true,
-  verboseModeOn = true,
+  showTimestamp,
+  verboseMode,
   searchResults,
   scrollerRef,
   onChangeJumpToEventVisibility,
@@ -74,13 +74,9 @@ export function ProcessTreeNode({
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
-  const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
+  const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
-
-  useEffect(() => {
-    setChildrenExpanded(isSessionLeader || process.autoExpand);
-  }, [isSessionLeader, process.autoExpand]);
 
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
@@ -194,8 +190,8 @@ export function ProcessTreeNode({
       // hidden processes.
     }
 
-    return process.getChildren(verboseModeOn);
-  }, [process, verboseModeOn, searchResults]);
+    return process.getChildren(verboseMode);
+  }, [process, verboseMode, searchResults]);
 
   if (!processDetails?.process) {
     return null;
@@ -213,7 +209,7 @@ export function ProcessTreeNode({
     start,
   } = processDetails.process;
 
-  const shouldRenderChildren = childrenExpanded && children?.length > 0;
+  const shouldRenderChildren = (process.autoExpand || childrenExpanded) && children?.length > 0;
   const childrenTreeDepth = depth + 1;
 
   const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
@@ -263,7 +259,7 @@ export function ProcessTreeNode({
                   </small>
                 )}
               </span>
-              {timeStampOn && (
+              {showTimestamp && (
                 <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
                   {timeStampsNormal}
                 </span>
@@ -284,7 +280,11 @@ export function ProcessTreeNode({
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (
-            <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
+            <ChildrenProcessesButton
+              disabled={process.autoExpand}
+              isExpanded={process.autoExpand || childrenExpanded}
+              onToggle={onChildrenToggle}
+            />
           )}
           {alerts.length > 0 && (
             <AlertButton
@@ -319,8 +319,8 @@ export function ProcessTreeNode({
                 jumpToEntityId={jumpToEntityId}
                 investigatedAlertId={investigatedAlertId}
                 selectedProcessId={selectedProcessId}
-                timeStampOn={timeStampOn}
-                verboseModeOn={verboseModeOn}
+                showTimestamp={showTimestamp}
+                verboseMode={verboseMode}
                 searchResults={searchResults}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}

@@ -61,7 +61,7 @@ describe('process tree hook helpers tests', () => {
   });
 
   it('searchProcessTree works', () => {
-    const searchResults = searchProcessTree(mockProcessMap, SEARCH_QUERY);
+    const searchResults = searchProcessTree(mockProcessMap, SEARCH_QUERY, true);
 
     // search returns the process with search query in its event args
     expect(searchResults[0].id).toBe(SEARCH_RESULT_PROCESS_ID);

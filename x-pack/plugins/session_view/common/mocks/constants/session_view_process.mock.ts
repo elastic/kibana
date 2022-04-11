@@ -1264,6 +1264,7 @@ export const childProcessMock: Process = {
   getAlerts: () => [],
   updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
+  isVerbose: () => true,
   getOutput: () => '',
   getDetails: () =>
     ({
@@ -1345,6 +1346,7 @@ export const processMock: Process = {
   getAlerts: () => [],
   updateAlertsStatus: (_) => undefined,
   hasExec: () => false,
+  isVerbose: () => true,
   getOutput: () => '',
   getDetails: () =>
     ({
@@ -1540,6 +1542,7 @@ export const mockProcessMap = mockEvents.reduce(
       getDetails: () => event,
       isUserEntered: () => false,
       getMaxAlertLevel: () => null,
+      isVerbose: () => true,
     };
     return processMap;
   },

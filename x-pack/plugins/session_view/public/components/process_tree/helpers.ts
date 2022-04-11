@@ -137,13 +137,25 @@ export const buildProcessTree = (
 // this funtion also returns a list of process results which is used by session_view_search_bar to drive
 // result navigation UX
 // FYI: this function mutates properties of models contained in processMap
-export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | undefined) => {
+export const searchProcessTree = (
+  processMap: ProcessMap,
+  searchQuery: string | undefined,
+  verboseMode: boolean
+) => {
   const results = [];
 
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
     if (searchQuery) {
+      const details = process.getDetails();
+      const entryLeader = details?.process?.entry_leader;
+
+      // if this is the entry leader process OR verbose mode is OFF and is a verbose process, don't match.
+      if (entryLeader?.entity_id === process.id || (!verboseMode && process.isVerbose())) {
+        continue;
+      }
+
       const event = process.getDetails();
       const { working_directory: workingDirectory, args } = event.process || {};
 

@@ -31,6 +31,7 @@ interface UseProcessTreeDeps {
   alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  verboseMode: boolean;
 }
 
 export class ProcessImpl implements Process {
@@ -83,18 +84,12 @@ export class ProcessImpl implements Process {
           return false;
         }
 
-        const { group_leader: groupLeader, session_leader: sessionLeader } =
-          child.getDetails().process ?? {};
-
-        // search matches or processes with alerts will never be filtered out
-        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
+        // processes with alerts will never be filtered out
+        if (child.autoExpand || child.hasAlerts()) {
           return true;
         }
 
-        // Hide processes that have their session leader as their process group leader.
-        // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
-        // other shell startup activities (e.g bashrc .profile etc)
-        if (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid) {
+        if (child.isVerbose()) {
           return false;
         }
 
@@ -103,6 +98,26 @@ export class ProcessImpl implements Process {
     }
 
     return children;
+  }
+
+  isVerbose() {
+    const {
+      group_leader: groupLeader,
+      session_leader: sessionLeader,
+      entry_leader: entryLeader,
+    } = this.getDetails().process ?? {};
+
+    // Processes that have their session leader as their process group leader are considered "verbose"
+    // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
+    // other shell startup activities (e.g bashrc .profile etc)
+    if (
+      this.id !== entryLeader?.entity_id &&
+      (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   hasOutput() {
@@ -231,6 +246,7 @@ export const useProcessTree = ({
   alerts,
   searchQuery,
   updatedAlertsStatus,
+  verboseMode,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
@@ -304,9 +320,9 @@ export const useProcessTree = ({
   }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
-    setSearchResults(searchProcessTree(processMap, searchQuery));
+    setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
     autoExpandProcessTree(processMap);
-  }, [searchQuery, processMap]);
+  }, [searchQuery, processMap, verboseMode]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

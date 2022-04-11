@@ -62,8 +62,8 @@ export interface ProcessTreeDeps {
   // a map for alerts with updated status and process.entity_id
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   onShowAlertDetails: (alertUuid: string) => void;
-  timeStampOn?: boolean;
-  verboseModeOn?: boolean;
+  showTimestamp?: boolean;
+  verboseMode?: boolean;
 }
 
 export const ProcessTree = ({
@@ -83,8 +83,8 @@ export const ProcessTree = ({
   setSearchResults,
   updatedAlertsStatus,
   onShowAlertDetails,
-  timeStampOn,
-  verboseModeOn,
+  showTimestamp = true,
+  verboseMode = false,
 }: ProcessTreeDeps) => {
   const [isInvestigatedEventVisible, setIsInvestigatedEventVisible] = useState<boolean>(true);
   const [isInvestigatedEventAbove, setIsInvestigatedEventAbove] = useState<boolean>(false);
@@ -96,6 +96,7 @@ export const ProcessTree = ({
     alerts,
     searchQuery,
     updatedAlertsStatus,
+    verboseMode,
   });
 
   const eventsRemaining = useMemo(() => {
@@ -232,8 +233,8 @@ export const ProcessTree = ({
             scrollerRef={scrollerRef}
             onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
             onShowAlertDetails={onShowAlertDetails}
-            timeStampOn={timeStampOn}
-            verboseModeOn={verboseModeOn}
+            showTimestamp={showTimestamp}
+            verboseMode={verboseMode}
             searchResults={searchResults}
             loadPreviousButton={
               hasPreviousPage ? (

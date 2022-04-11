@@ -104,7 +104,7 @@ describe('ProcessTree component', () => {
     });
 
     it('When Verbose mode is OFF, it should not show all childrens', () => {
-      renderResult = mockedContext.render(<ProcessTree {...props} verboseModeOn={false} />);
+      renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={false} />);
       expect(renderResult.queryByText('cat')).toBeFalsy();
 
       const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
@@ -115,7 +115,7 @@ describe('ProcessTree component', () => {
     });
 
     it('When Verbose mode is ON, it should show all childrens', () => {
-      renderResult = mockedContext.render(<ProcessTree {...props} verboseModeOn={true} />);
+      renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={true} />);
       expect(renderResult.queryByText('cat')).toBeTruthy();
 
       const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');

@@ -12,9 +12,11 @@ import { useButtonStyles } from './use_button_styles';
 export const ChildrenProcessesButton = ({
   onToggle,
   isExpanded,
+  disabled,
 }: {
   onToggle: () => void;
   isExpanded: boolean;
+  disabled: boolean;
 }) => {
   const { button, buttonArrow, expandedIcon } = useButtonStyles({ isExpanded });
 
@@ -24,6 +26,7 @@ export const ChildrenProcessesButton = ({
       css={button}
       onClick={onToggle}
       data-test-subj="sessionView:processTreeNodeChildProcessesButton"
+      disabled={disabled}
     >
       <FormattedMessage id="xpack.sessionView.childProcesses" defaultMessage="Child processes" />
       <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
