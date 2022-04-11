@@ -372,6 +372,7 @@ describe('EditConnector ', () => {
 
     const result = appMockRender.render(<EditConnector {...props} />);
     await waitFor(() => {
+      expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
       expect(result.queryByTestId('connector-edit')).toBe(null);
     });
   });
