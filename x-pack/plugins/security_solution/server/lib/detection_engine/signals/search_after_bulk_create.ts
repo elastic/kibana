@@ -21,7 +21,7 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { DataViewAttributes } from '../../../../../../../src/plugins/data_views/common/data_views';
+import { DataViewAttributes } from '../../../../../../../src/plugins/data_views/common';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -63,6 +63,7 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
+
     const kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
       'index-pattern',
       dataViewId
@@ -82,7 +83,11 @@ export const searchAfterAndBulkCreate = async ({
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortIds: sortIds,
-            index: inputIndexPattern,
+            // TODO: use a kibana config key for determining whether to default to dataview or inputIndexPattern
+            index:
+              dataViewId != null // default to data view id if present on rule definition.
+                ? kibanaIndexPattern.attributes.title.split(',')
+                : inputIndexPattern,
             runtimeMappings,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),

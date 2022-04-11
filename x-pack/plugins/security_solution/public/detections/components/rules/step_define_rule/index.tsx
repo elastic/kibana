@@ -265,7 +265,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       setIndexPattern(dataViewIndexPattern);
     } else {
       // elasticsearch index patterns
-      // ts-expect-error Type 'DataViewFieldBase' is missing the following properties from type 'FieldSpec': searchable, aggregatablets(2345)
+      // @ts-expect-error Type 'DataViewFieldBase' is missing the following properties from type 'FieldSpec': searchable, aggregatablets(2345)
       setIndexPattern(indexIndexPatterns);
     }
   }, [indexIndexPatterns, dataViewIndexPattern, radioIdSelected]);
@@ -407,6 +407,47 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatIndexPatternsLoading,
     ]
   );
+  const DataSource = useMemo(() => {
+    if (radioIdSelected === 'dataView') {
+      return (
+        <UseField
+          path="dataViewId"
+          component={DataViewSelector}
+          componentProps={{
+            kibanaDataViews,
+          }}
+        />
+      );
+    } else {
+      return (
+        <EuiAccordion
+          data-test-subj="indexPatternsAccordion"
+          id="indexPatternsAccoridion"
+          buttonContent={i18n.INDEX_PATTERNS}
+        >
+          <CommonUseField
+            path="index"
+            config={{
+              ...schema.index,
+              labelAppend: indexModified ? (
+                <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                  {i18n.RESET_DEFAULT_INDEX}
+                </MyLabelButton>
+              ) : null,
+            }}
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRuleIndices',
+              'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+              euiFieldProps: {
+                fullWidth: true,
+                placeholder: '',
+              },
+            }}
+          />
+        </EuiAccordion>
+      );
+    }
+  }, [handleResetIndices, indexModified, kibanaDataViews, radioIdSelected]);
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -437,22 +478,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <>
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
+                  {/* <UseField
+                    path="dataViewId"
+                    component={DataViewSelector}
+                    componentProps={{
+                      kibanaDataViews,
+                    }}
+                  /> */}
                   <EuiRadioGroup
                     options={[
                       {
                         id: 'dataView',
-                        label: (
-                          <UseField
-                            path="dataViewId"
-                            component={DataViewSelector}
-                            componentProps={{
-                              kibanaDataViews,
-                            }}
-                          />
-                        ),
-                        labelProps: {
-                          style: { display: 'flex !important', width: '100%' },
-                        },
+                        label: 'Data View',
+                        // labelProps: {
+                        //   style: { display: 'flex !important', width: '400px' },
+                        // },
                       },
                     ]}
                     idSelected={radioIdSelected}
@@ -466,33 +506,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     options={[
                       {
                         id: 'indexPatterns',
-                        label: (
-                          <EuiAccordion
-                            data-test-subj="indexPatternsAccordion"
-                            id="indexPatternsAccoridion"
-                            buttonContent={i18n.INDEX_PATTERNS}
-                          >
-                            <CommonUseField
-                              path="index"
-                              config={{
-                                ...schema.index,
-                                labelAppend: indexModified ? (
-                                  <MyLabelButton onClick={handleResetIndices} iconType="refresh">
-                                    {i18n.RESET_DEFAULT_INDEX}
-                                  </MyLabelButton>
-                                ) : null,
-                              }}
-                              componentProps={{
-                                idAria: 'detectionEngineStepDefineRuleIndices',
-                                'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-                                euiFieldProps: {
-                                  fullWidth: true,
-                                  placeholder: '',
-                                },
-                              }}
-                            />
-                          </EuiAccordion>
-                        ),
+                        label: 'Index Patterns',
                       },
                     ]}
                     idSelected={radioIdSelected}
@@ -501,7 +515,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-
+              <EuiSpacer size="s" />
+              {DataSource}
+              <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField
                   key="EqlQueryBar"

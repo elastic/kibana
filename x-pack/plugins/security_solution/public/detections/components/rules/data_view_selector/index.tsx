@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,39 +33,28 @@ export const DataViewSelector = ({ kibanaDataViews = [], field }: DataViewSelect
   const onChangeIndexPatterns = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>) => {
       const dataView = options;
-      if (dataView.length > 0) {
-        setSelectedOptions(options);
-        field.setValue(dataView[0].label);
-      }
+
+      setSelectedOptions(options);
+      field.setValue(dataView[0].label);
     },
     [field]
   );
 
+  // const onChangeIndexPatterns = (options: Array<EuiComboBoxOptionOption<string>>) => {
+  //   setSelectedOptions(options);
+  // };
+
+  /* kibanaDataViews.map((dataView) => ({ label: dataView.id }))} */
+
   return (
-    <>
-      {/* <EuiFormRow
-      style={{ width: 'flex' }}
-      label={field.label}
-      data-test-subj="createRuleDataViewSelector"
-    > */}
-      <EuiComboBox
-        style={{ display: 'flex !important' }}
-        singleSelection={{ asPlainText: true }}
-        onChange={onChangeIndexPatterns}
-        options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
-        selectedOptions={selectedOptions}
-        placeholder={i18n.PICK_INDEX_PATTERNS}
-      />
-      {/* <EuiCom
-            value={threshold}
-            onChange={onThresholdChange}
-            fullWidth
-            showInput
-            showRange
-            showTicks
-            tickInterval={25}
-          /> */}
-      {/* </EuiFormRow> */}
-    </>
+    <EuiComboBox
+      isClearable
+      singleSelection={{ asPlainText: true }}
+      onChange={onChangeIndexPatterns}
+      options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
+      selectedOptions={selectedOptions}
+      aria-label={i18n.PICK_INDEX_PATTERNS}
+      placeholder={i18n.PICK_INDEX_PATTERNS}
+    />
   );
 };
