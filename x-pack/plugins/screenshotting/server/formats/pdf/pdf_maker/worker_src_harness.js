@@ -5,5 +5,10 @@
  * 2.0.
  */
 
+/**
+ * This file is the harness for importing worker.ts with Kibana running in dev mode.
+ * The TS file needs to be compiled on the fly, unlike when Kibana is running as a dist.
+ */
+
 require('../../../../../../../src/setup_node_env');
 require('./worker.ts');
