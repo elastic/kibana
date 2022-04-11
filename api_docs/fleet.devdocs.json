@@ -20773,7 +20773,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; name: string; version: string; path: string; internal?: boolean | undefined; data_streams?: ",
+          " | undefined)[] | undefined; name: string; version: string; internal?: boolean | undefined; path: string; data_streams?: ",
           {
             "pluginId": "fleet",
             "scope": "common",

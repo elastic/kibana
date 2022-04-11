@@ -43,6 +43,7 @@ describe('<ThrottlingFields />', () => {
     label: 'Test',
     geo: { lat: 1, lon: 2 },
     url: 'https://example.com',
+    isServiceManaged: true,
   };
 
   const WrappedComponent = ({

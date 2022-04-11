@@ -27,7 +27,7 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter } from '../../types';
 import { BulkError, createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialAlert } from '../../../../../../alerting/server';
+import { PartialRule } from '../../../../../../alerting/server';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
@@ -383,7 +383,7 @@ describe.each([
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
       const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
       expect(output).toBeNull();
     });

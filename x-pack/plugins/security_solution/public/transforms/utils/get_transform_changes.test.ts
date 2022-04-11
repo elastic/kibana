@@ -15,6 +15,7 @@ import {
   MatrixHistogramType,
   NetworkKpiQueries,
   NetworkQueries,
+  UsersQueries,
 } from '../../../common/search_strategy';
 
 /** Get the return type of createIndicesFromPrefix for TypeScript checks against expected */
@@ -75,11 +76,11 @@ describe('get_transform_changes', () => {
     test('it gets a transform change for authentications', () => {
       expect(
         getTransformChanges({
-          factoryQueryType: HostsQueries.authentications,
+          factoryQueryType: UsersQueries.authentications,
           settings: getTransformConfigSchemaMock().settings[0],
         })
       ).toEqual<ReturnTypeGetTransformChanges>({
-        factoryQueryType: HostsQueries.authenticationsEntities,
+        factoryQueryType: UsersQueries.authenticationsEntities,
         indices: ['.estc_all_user_ent*'],
       });
     });

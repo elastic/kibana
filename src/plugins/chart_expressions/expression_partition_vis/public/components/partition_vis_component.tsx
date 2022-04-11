@@ -20,7 +20,8 @@ import {
   SeriesIdentifier,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendToggle, ChartsPluginSetup } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { getColumnByAccessor } from '../../../../visualizations/common/utils';
 import {
@@ -126,9 +127,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   useEffect(() => {
     const legendShow = showLegendDefault();
-    setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+    const showLegendDef = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+    if (showLegendDef !== legendShow) {
+      setShowLegend(legendShow);
+      props.uiState?.set('vis.legendOpen', legendShow);
+    }
+  }, [showLegendDefault, props.uiState, visParams.legendDisplay, visType, bucketColumns]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {

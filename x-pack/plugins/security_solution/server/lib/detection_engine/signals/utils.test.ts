@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -18,7 +18,6 @@ import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
-// @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
 moment.suppressDeprecationWarnings = true;
 
 import {
@@ -426,10 +425,10 @@ describe('utils', () => {
   });
 
   describe('#getListsClient', () => {
-    let alertServices: AlertServicesMock;
+    let alertServices: RuleExecutorServicesMock;
 
     beforeEach(() => {
-      alertServices = alertsMock.createAlertServices();
+      alertServices = alertsMock.createRuleExecutorServices();
     });
 
     test('it successfully returns list and exceptions list client', async () => {

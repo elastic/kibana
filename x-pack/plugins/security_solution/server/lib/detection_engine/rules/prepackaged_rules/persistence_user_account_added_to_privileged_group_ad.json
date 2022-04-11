@@ -7,11 +7,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-windows.*"
+    "logs-windows.*",
+    "logs-system.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
   "name": "User Added to Privileged Group in Active Directory",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "iam where event.action == \"added-member-to-group\" and\n  group.name : (\"Admin*\",\n                \"Local Administrators\",\n                \"Domain Admins\",\n                \"Enterprise Admins\",\n                \"Backup Admins\",\n                \"Schema Admins\",\n                \"DnsAdmins\",\n                \"Exchange Organization Administrators\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-b--privileged-accounts-and-groups-in-active-directory"
@@ -45,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

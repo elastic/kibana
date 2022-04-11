@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { isEqual } from 'lodash';
