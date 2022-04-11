@@ -82,10 +82,10 @@ export interface RenderingSetupDeps {
 /** @public */
 export interface IRenderOptions {
   /**
-   * Set whether to output user settings in the page metadata.
-   * `true` by default.
+   * Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.
+   * `false` by default.
    */
-  includeUserSettings?: boolean;
+  isAnonymousPage?: boolean;
 
   /**
    * Inject custom vars into the page metadata.
@@ -93,6 +93,12 @@ export interface IRenderOptions {
    * @internal
    */
   vars?: Record<string, any>;
+
+  /**
+   * @internal
+   * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
+   */
+  includeExposedConfigKeys?: boolean;
 }
 
 /** @internal */

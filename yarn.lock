@@ -1228,15 +1228,23 @@
   resolved "https://registry.yarnpkg.com/@bazel/ibazel/-/ibazel-0.16.2.tgz#05dd7f06659759fda30f87b15534f1e42f1201bb"
   integrity sha512-KgqAWMH0emL6f3xH6nqyTryoBMqlJ627LBIe9PT1PRRQPz2FtHib3FIHJPukp1slzF3hJYZvdiVwgPnHbaSOOA==
 
-"@bazel/typescript@4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-4.0.0.tgz#71a6f0f5e340c6b8516b21fbc0f0853e74055d0c"
-  integrity sha512-+Le9q+5IR9gEnSH8sXyxDB5dD6NJx2kbm6AL+cijYVat2MczpGV4sI1mu0mdLzYsEX5Tjt5iHkaNb7sFESjnYA==
+"@bazel/typescript@5.3.1":
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-5.3.1.tgz#f996abebfa57a29a170a83d0c84780286f06cb72"
+  integrity sha512-fP0fGzLbsOVdbAn6mlrX1LBAT0TJ+S0VVOap9SSSXCb2PknnKEHZupUww/raVSczy+cqcd/Vfpllzm/AcdOmyw==
   dependencies:
+    "@bazel/worker" "5.3.1"
     protobufjs "6.8.8"
     semver "5.6.0"
     source-map-support "0.5.9"
-    tsutils "2.27.2"
+    tsutils "3.21.0"
+
+"@bazel/worker@5.3.1":
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/@bazel/worker/-/worker-5.3.1.tgz#87d850fdfc22cde24f380961f66daa5cbfd4acf7"
+  integrity sha512-KB+Xs198NLhN01zhlOPr/VEmz/tzwGq/pI1gdnCTLDMTCspV6LnJaIeGgicXuKrzz0V1LhvlvsI5lqJt9yuGYw==
+  dependencies:
+    google-protobuf "^3.6.1"
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
@@ -1471,9 +1479,12 @@
     utility-types "^3.10.0"
     uuid "^3.3.2"
 
-"@elastic/datemath@link:bazel-bin/packages/elastic-datemath":
-  version "0.0.0"
-  uid ""
+"@elastic/datemath@5.0.3":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-5.0.3.tgz#7baccdab672b9a3ecb7fe8387580670936b58573"
+  integrity sha512-8Hbr1Uyjm5OcYBfEB60K7sCP6U3IXuWDaLaQmYv3UxgI4jqBWbakoemwWvsqPVUvnwEjuX6z7ghPZbefs8xiaA==
+  dependencies:
+    tslib "^1.9.3"
 
 "@elastic/ecs-helpers@^1.1.0":
   version "1.1.0"
@@ -2977,6 +2988,10 @@
   uid ""
 
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
+  version "0.0.0"
+  uid ""
+
+"@kbn/datemath@link:bazel-bin/packages/kbn-datemath":
   version "0.0.0"
   uid ""
 
@@ -5557,10 +5572,6 @@
   version "0.0.0"
   uid ""
 
-"@types/elastic__datemath@link:bazel-bin/packages/elastic-datemath/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/enzyme@^3.10.8":
   version "3.10.8"
   resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.8.tgz#ad7ac9d3af3de6fd0673773123fafbc63db50d42"
@@ -6004,6 +6015,10 @@
   uid ""
 
 "@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__datemath@link:bazel-bin/packages/kbn-datemath/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8419,12 +8434,7 @@ async@^2.1.4, async@^2.6.2:
   dependencies:
     lodash "^4.17.14"
 
-async@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.2.0.tgz#b3a2685c5ebb641d3de02d161002c60fc9f85720"
-  integrity sha512-TR2mEZFVOj2pLStYxLht7TyfuRzaydfpxr3k9RpHIzMgw7A64dzsdqCxH1WJyQdoe8T10nDXd9wnEigmiuHIZw==
-
-async@^3.2.3:
+async@^3.2.0, async@^3.2.3:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.3.tgz#ac53dafd3f4720ee9e8a160628f18ea91df196c9"
   integrity sha512-spZRyzKL5l5BZQrr/6m/SqFdBN0q3OCI0f9rjfBzCMBIP4p75P620rR3gTmaksNOhmzgdxcaxdNfMy6anrbM0g==
@@ -15452,6 +15462,11 @@ gonzales-pe@^4.3.0:
   dependencies:
     minimist "^1.2.5"
 
+google-protobuf@^3.6.1:
+  version "3.19.4"
+  resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.19.4.tgz#8d32c3e34be9250956f28c0fb90955d13f311888"
+  integrity sha512-OIPNCxsG2lkIvf+P5FNfJ/Km95CsXOBecS9ZcAU6m2Rq3svc0Apl9nB3GMDNKfQ9asNv4KjyAqGwPQFrVle3Yg==
+
 got@11.8.2, got@^11.8.2:
   version "11.8.2"
   resolved "https://registry.yarnpkg.com/got/-/got-11.8.2.tgz#7abb3959ea28c31f3576f1576c1effce23f33599"
@@ -20399,10 +20414,10 @@ moment-timezone@^0.5.27:
   dependencies:
     moment ">= 2.9.0"
 
-"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.24.0:
-  version "2.28.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.28.0.tgz#cdfe73ce01327cee6537b0fafac2e0f21a237d75"
-  integrity sha512-Z5KOjYmnHyd/ukynmFd/WwyXHd7L4J9vTI/nn5Ap9AVUgaAE15VvQ9MOGmJJygEUklupqIrFnor/tjTwRU+tQw==
+"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.2:
+  version "2.29.2"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
+  integrity sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==
 
 monaco-editor@*, monaco-editor@^0.22.3:
   version "0.22.3"
@@ -28154,14 +28169,7 @@ tslib@~2.1.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
   integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
-tsutils@2.27.2:
-  version "2.27.2"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.27.2.tgz#60ba88a23d6f785ec4b89c6e8179cac9b431f1c7"
-  integrity sha512-qf6rmT84TFMuxAKez2pIfR8UCai49iQsfB7YWVjV1bKpy/d0PWT5rEOSM6La9PiHZ0k1RRZQiwVdVJfQ3BPHgg==
-  dependencies:
-    tslib "^1.8.1"
-
-tsutils@^3.21.0:
+tsutils@3.21.0, tsutils@^3.21.0:
   version "3.21.0"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.21.0.tgz#b48717d394cea6c1e096983eed58e9d61715b623"
   integrity sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==
