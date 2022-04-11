@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { getByText, render } from '@testing-library/react';
-import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { compactNotationParts, FormattedCount } from '.';
+import { compactNotationParts } from '.';
 
 describe('compactNotationParts', () => {
   describe('When given a small number under 1000', () => {
@@ -54,59 +51,5 @@ describe('compactNotationParts', () => {
       expect(compactNotationParts(999999999999999)).toEqual([999, 'T', '+']);
       expect(compactNotationParts(9999999999999990)).toEqual([9999, 'T', '+']);
     });
-  });
-});
-
-describe('FormattedCount', () => {
-  test('return null if count is null', () => {
-    const { container } = render(
-      <IntlProvider locale={'en'}>
-        <FormattedCount count={null} />
-      </IntlProvider>
-    );
-
-    expect(container.firstChild).toBeNull();
-  });
-
-  test('return count in bold if 0 <= count < 1000, count = 0 ', () => {
-    const { container } = render(
-      <IntlProvider locale={'en'}>
-        <FormattedCount count={0} />
-      </IntlProvider>
-    );
-
-    expect(getByText(container, '0')).toBeInTheDocument();
-  });
-
-  test('return count in bold if 0 <= count < 1000, count = 999', () => {
-    const { container } = render(
-      <IntlProvider locale={'en'}>
-        <FormattedCount count={999} />
-      </IntlProvider>
-    );
-
-    expect(getByText(container, '999')).toBeInTheDocument();
-  });
-
-  test('return formatted count, count > 1000', () => {
-    const { container } = render(
-      <IntlProvider locale={'en'}>
-        <FormattedCount count={3650} />
-      </IntlProvider>
-    );
-
-    expect(getByText(container, '3.65')).toBeInTheDocument();
-    expect(getByText(container, 'K')).toBeInTheDocument();
-  });
-
-  test('return formatted count - count is a great number', () => {
-    const { container } = render(
-      <IntlProvider locale={'en'}>
-        <FormattedCount count={3650000} />
-      </IntlProvider>
-    );
-
-    expect(getByText(container, '3,650')).toBeInTheDocument();
-    expect(getByText(container, 'K')).toBeInTheDocument();
   });
 });
