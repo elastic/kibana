@@ -8,7 +8,7 @@
 import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
 
 jest.mock('./dependency_cache', () => {
-  const dateMath = require('@elastic/datemath');
+  const dateMath = require('@kbn/datemath');
   let _time = undefined;
   const timefilter = {
     setTime: (time) => {

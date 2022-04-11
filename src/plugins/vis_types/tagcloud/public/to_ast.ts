@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,

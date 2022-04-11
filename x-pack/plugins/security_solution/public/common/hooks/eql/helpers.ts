@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { inputsModel } from '../../../common/store';
 
 import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';

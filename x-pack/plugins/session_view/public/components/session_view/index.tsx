@@ -62,7 +62,7 @@ export const SessionView = ({
     LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
     {
       timestamp: true,
-      verboseMode: true,
+      verboseMode: false,
     }
   );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
