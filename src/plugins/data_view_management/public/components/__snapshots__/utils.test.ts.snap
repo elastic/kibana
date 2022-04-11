@@ -4,8 +4,9 @@ exports[`getting index patterns 1`] = `
 Array [
   Object {
     "default": true,
+    "getName": [Function],
     "id": "test",
-    "info": undefined,
+    "name": undefined,
     "namespaces": undefined,
     "sort": "0test name",
     "tags": Array [
@@ -18,9 +19,13 @@ Array [
   },
   Object {
     "default": false,
+    "getName": [Function],
     "id": "test1",
-    "info": "test name 1 description",
+    "name": "Test Name 1",
+    "namespaces": undefined,
+    "sort": "1test name 1",
     "tags": Array [],
+    "title": "test name 1",
   },
 ]
 `;

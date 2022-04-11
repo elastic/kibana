@@ -24,7 +24,7 @@ function getProps() {
     ],
     onChangeIndexPattern: jest.fn(),
     trigger: {
-      label: indexPatternMock.title,
+      label: indexPatternMock.getName(),
       title: indexPatternMock.title,
       'data-test-subj': 'indexPattern-switch-link',
     },
@@ -55,7 +55,7 @@ describe('ChangeIndexPattern', () => {
     const props = getProps();
     const comp = shallowWithIntl(<ChangeIndexPattern {...props} />);
     await act(async () => {
-      selectIndexPatternPickerOption(comp, indexPatternMock.title);
+      selectIndexPatternPickerOption(comp, indexPatternMock.getName());
     });
     expect(props.onChangeIndexPattern).toHaveBeenCalledTimes(0);
   });
@@ -63,7 +63,7 @@ describe('ChangeIndexPattern', () => {
     const props = getProps();
     const comp = shallowWithIntl(<ChangeIndexPattern {...props} />);
     await act(async () => {
-      selectIndexPatternPickerOption(comp, indexPatternWithTimefieldMock.title);
+      selectIndexPatternPickerOption(comp, indexPatternWithTimefieldMock.getName());
     });
     expect(props.onChangeIndexPattern).toHaveBeenCalledTimes(1);
     expect(props.onChangeIndexPattern).toHaveBeenCalledWith(indexPatternWithTimefieldMock.id);

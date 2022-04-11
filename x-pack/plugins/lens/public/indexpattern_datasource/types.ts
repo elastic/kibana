@@ -52,7 +52,7 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   getFieldByName(name: string): IndexPatternField | undefined;
   title: string;
-  name: string;
+  name?: string;
   timeFieldName?: string;
   fieldFormatMap?: Record<
     string,

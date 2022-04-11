@@ -75,8 +75,10 @@ fields.getAll = () => {
 const indexPattern = {
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
+  name: 'The Index Pattern Name',
   metaFields: ['_index', '_score'],
   fields,
+  getName: () => 'The Index Pattern Name',
   getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
   getFieldByName: jest.fn(() => ({})),

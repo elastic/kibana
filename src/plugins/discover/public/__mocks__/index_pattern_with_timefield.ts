@@ -61,8 +61,10 @@ fields.getAll = () => {
 const indexPattern = {
   id: 'index-pattern-with-timefield-id',
   title: 'index-pattern-with-timefield',
+  name: 'The Index Pattern With Timefield',
   metaFields: ['_index', '_score'],
   fields,
+  getName: () => 'The Index Pattern With Timefield',
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: (name: string) => fields.getByName(name),

@@ -43,7 +43,7 @@ describe('DiscoverMainApp', () => {
     );
 
     expect(findTestSubject(component, 'indexPattern-switch-link').text()).toBe(
-      indexPatternMock.title
+      indexPatternMock.name
     );
   });
 });
