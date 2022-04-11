@@ -8,6 +8,7 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import { RulesPage } from './index';
 import { RulesTable } from './components/rules_table';
 import { RuleState } from './types';
