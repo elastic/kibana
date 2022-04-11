@@ -33,7 +33,6 @@ describe('Field editor Preview panel', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   let testBed: FieldEditorFlyoutContentTestBed;
@@ -340,26 +339,21 @@ describe('Field editor Preview panel', () => {
 
     test('should set the value returned by the painless _execute API', async () => {
       const scriptEmitResponse = 'Field emit() response';
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
 
       const {
-        actions: {
-          toggleFormRow,
-          fields,
-          waitForDocumentsAndPreviewUpdate,
-          getLatestPreviewHttpRequest,
-          getRenderedFieldsPreview,
-        },
+        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
-      await waitForDocumentsAndPreviewUpdate();
-      const request = getLatestPreviewHttpRequest(server);
+      await waitForUpdates(); // Run validations
 
       // Make sure the payload sent is correct
-      expect(request.requestBody).toEqual({
+      const firstCall = server.post.mock.calls[0] as Array<{ body: any }>;
+      const payload = JSON.parse(firstCall[1]?.body);
+      expect(payload).toEqual({
         context: 'keyword_field',
         document: {
           description: 'First doc - description',
