@@ -19,9 +19,8 @@ import type {
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, from, of, Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { exhaustMap, filter, map } from 'rxjs/operators';
 import { compact } from 'lodash';
-import { sha256 } from 'js-sha256';
 
 import type {
   AuthenticatedUser,
@@ -305,13 +304,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     if (security) {
       analytics.registerContextProvider({
         name: 'cloud_user_id',
-        // Join the cloud org id and the user to create a truly unique user id.
-        // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
         context$: from(loadUserId({ getCurrentUser: security.authc.getCurrentUser })).pipe(
           filter((userId): userId is string => Boolean(userId)),
-          map((userId) => ({
-            userId: sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`),
-          }))
+          exhaustMap(async (userId) => {
+            const { sha256 } = await import('js-sha256');
+            // Join the cloud org id and the user to create a truly unique user id.
+            // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+            return { userId: sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`) };
+          })
         ),
         schema: {
           userId: {
