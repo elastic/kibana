@@ -327,9 +327,9 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
-      if (text !== 'Hits') {
+      if (text !== 'Rule Preview') {
         cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
-        cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+        cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Rule Preview');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
