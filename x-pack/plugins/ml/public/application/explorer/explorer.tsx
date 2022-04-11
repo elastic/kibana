@@ -24,6 +24,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiResizableContainer,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -149,6 +150,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   explorerState,
   overallSwimlaneData,
 }) => {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
   const { anomalyTimelineStateService, anomalyExplorerCommonStateService, chartsStateService } =
     useAnomalyExplorerContext();
@@ -343,7 +346,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
       queryString={queryString}
       updateLanguage={updateLanguage}
     >
-      <EuiResizableContainer>
+      <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
             <EuiResizablePanel
@@ -357,7 +360,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
               ]}
               initialSize={20}
               minSize="10%"
-              paddingSize={'s'}
+              paddingSize={'none'}
             >
               {noInfluencersConfigured ? (
                 <div className="no-influencers-warning">
@@ -399,9 +402,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
               )}
             </EuiResizablePanel>
 
-            <EuiResizableButton />
+            <EuiResizableButton style={{ margin: '0 8px' }} />
 
-            <EuiResizablePanel mode="main" initialSize={80} minSize="50px" paddingSize={'s'}>
+            <EuiResizablePanel mode="main" initialSize={80} minSize="50px" paddingSize={'none'}>
               <div>
                 <EuiSpacer size="m" />
                 {stoppedPartitions && (
