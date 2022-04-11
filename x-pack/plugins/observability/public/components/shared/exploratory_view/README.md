@@ -13,7 +13,7 @@ Basic workflow for how exploratory view works, it looks like this
 
 ## Report Type
 
-The exploratory view report type controls how the data is visualized in the lens embeddable. The report type defines a set of constraits over the x and y axis. For example, the `kpi-over-time` report type is a time series chart type that plots key performance indicators over time, while the `data-distrubtion` chart plots the percentage of documents over key performance indicators. Current available data types can be found at `exploratory_view/configurations/constants`.
+The exploratory view report type controls how the data is visualized in the lens embeddable. The report type defines a set of constraints over the x and y axis. For example, the `kpi-over-time` report type is a time series chart type that plots key performance indicators over time, while the `data-distribution` chart plots the percentage of documents over key performance indicators. Current available data types can be found at `exploratory_view/configurations/constants`.
 
 Each report type has one or more available visualizations to plot data from one or more data types. 
 
