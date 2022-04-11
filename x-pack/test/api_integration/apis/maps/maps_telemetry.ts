@@ -55,6 +55,11 @@ export default function ({ getService }: FtrProviderContext) {
           mvt: { min: 1, max: 1, total: 2, avg: 0.08 },
         },
         attributesPerMap: {
+          customIconsCount: {
+            avg: 0,
+            max: 0,
+            min: 0,
+          },
           dataSourcesCount: {
             avg: 1.16,
             max: 5,
