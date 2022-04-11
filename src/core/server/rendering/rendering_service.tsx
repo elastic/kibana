@@ -79,7 +79,7 @@ export class RenderingService {
     { http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { isAnonymousPage = false, vars }: IRenderOptions = {}
+    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -130,11 +130,15 @@ export class RenderingService {
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          filteredPlugins.map(async ([id, plugin]) => ({
-            id,
-            plugin,
-            config: await getUiConfig(uiPlugins, id),
-          }))
+          filteredPlugins.map(async ([id, plugin]) => {
+            const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
+            return {
+              id,
+              plugin,
+              config: browserConfig,
+              ...(includeExposedConfigKeys && { exposedConfigKeys }),
+            };
+          })
         ),
         legacyMetadata: {
           uiSettings: settings,
@@ -150,5 +154,8 @@ export class RenderingService {
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
-  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {
+    browserConfig: {},
+    exposedConfigKeys: {},
+  }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
 };

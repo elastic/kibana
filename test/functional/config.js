@@ -46,10 +46,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.maps.showMapVisualizationTypes=true',
 
         // to be re-enabled once kibana/issues/102552 is completed
-        '--xpack.security.enabled=false',
-        '--monitoring.enabled=false',
         '--xpack.reporting.enabled=false',
-        '--enterpriseSearch.enabled=false',
       ],
     },
 
