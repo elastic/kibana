@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { Position } from '@elastic/charts';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
@@ -13,7 +14,7 @@ import {
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 
-import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
+import { CustomPaletteState } from '../../../../charts/common';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
