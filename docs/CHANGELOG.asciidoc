@@ -136,9 +136,7 @@ Review the following information about the 7.17.1 release.
 === Known issue
 
 Lens & visualizations::
-A change in the Markdown library that *TSVB* *Markdown* visualizations and *Text* dashboard panels use renders some tables differently.
-
-This known issue affects only 7.17.1. All other versions of {kib} render that Markdown in tables as expected.
+A change in the Markdown library that {kib} uses to create *TSVB* *Markdown* visualizations and *Text* dashboard panels renders some tables differently. For more information, check out link:https://github.com/markdown-it/markdown-it/pull/767[#767]. 
 
 [float]
 [[breaking-changes-v7.17.1]]
