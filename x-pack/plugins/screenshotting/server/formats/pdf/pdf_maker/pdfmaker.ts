@@ -72,12 +72,8 @@ export class PdfMaker {
     this.content = [];
 
     // running in dist: `worker.ts` becomes `worker.js`
-    // running in source: `worker.ts` needs to be wrapped in JS and have a ts-node environment initialized.
-    if (dist) {
-      this.workerModulePath = path.resolve(__dirname, './worker.js');
-    } else {
-      this.workerModulePath = path.resolve(__dirname, './worker_src_harness.js');
-    }
+    // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
+    this.workerModulePath = path.resolve(__dirname, dist ? './worker.js' : './worker_src_harness.js');
   }
 
   _addContents(contents: Content[]) {
