@@ -40,7 +40,7 @@ export const getCustomIntegrationsContextDecorator =
  */
 export const getCustomIntegrationsContextProvider = () => {
   const services = servicesFactory({});
-  return ({ children }: { children: React.ReactNode }) => (
+  return ({ children }: { children?: React.ReactNode }) => (
     <CustomIntegrationsServicesProvider {...services}>
       {children}
     </CustomIntegrationsServicesProvider>
