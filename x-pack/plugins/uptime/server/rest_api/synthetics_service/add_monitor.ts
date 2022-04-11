@@ -45,16 +45,14 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
     const { syntheticsService } = server;
 
-    const errors = await syntheticsService.pushConfigs([
-      {
-        ...monitor,
-        id: newMonitor.id,
-        fields: {
-          config_id: newMonitor.id,
-        },
-        fields_under_root: true,
+    const errors = await syntheticsService.addConfig({
+      ...monitor,
+      id: newMonitor.id,
+      fields: {
+        config_id: newMonitor.id,
       },
-    ]);
+      fields_under_root: true,
+    });
 
     sendTelemetryEvents(
       server.logger,

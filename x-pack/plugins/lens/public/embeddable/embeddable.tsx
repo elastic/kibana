@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { DataViewBase, Filter } from '@kbn/es-query';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   ExecutionContextSearch,
   Query,
@@ -17,7 +18,6 @@ import {
   TimeRange,
   FilterManager,
 } from 'src/plugins/data/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
@@ -752,7 +752,7 @@ export class Embeddable
       this.logError('validation');
     }
 
-    const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
+    const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       ...this.getOutput(),

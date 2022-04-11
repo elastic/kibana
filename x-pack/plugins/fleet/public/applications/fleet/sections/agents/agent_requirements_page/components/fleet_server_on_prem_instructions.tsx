@@ -51,7 +51,7 @@ import { PlatformSelector } from '../../../../../../components/enrollment_instru
 import type { CommandsByPlatform } from './install_command_utils';
 import { getInstallCommandForPlatform } from './install_command_utils';
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 const REFRESH_INTERVAL = 10000;
 
 type DeploymentMode = 'production' | 'quickstart';
@@ -379,7 +379,7 @@ export const AddFleetServerHostStepContent = ({
       } else {
         setError(
           i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostInvalidUrlError', {
-            defaultMessage: 'Invalid URL',
+            defaultMessage: 'Valid https URL required.',
           })
         );
         return false;
