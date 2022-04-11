@@ -93,3 +93,17 @@ export const ROWS_10 = i18n.translate('xpack.securitySolution.authenticationsTab
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });
+
+export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.authenticationsTitle',
+  {
+    defaultMessage: 'Authentications',
+  }
+);
+
+export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
+  {
+    defaultMessage: 'Failed to query authentications data',
+  }
+);
