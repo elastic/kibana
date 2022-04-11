@@ -7300,12 +7300,6 @@
     },
     "stack_management": {
       "properties": {
-        "timelion:quandl.key": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting was changed."
-          }
-        },
         "securitySolution:defaultIndex": {
           "type": "keyword",
           "_meta": {
@@ -7334,12 +7328,6 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
-          }
-        },
-        "timelion:graphite.url": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting changed."
           }
         },
         "xpackDashboardMode:roles": {
