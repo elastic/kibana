@@ -17,6 +17,7 @@ import { SortDirection } from '../../../../../../src/plugins/data/common';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 import { useFindings, type CspFindingsRequest } from './use_findings';
 import { FindingsGroupBySelector } from './findings_group_by_selector';
+import { INTERNAL_FEATURE_FLAGS } from '../../../common/constants';
 
 export type GroupBy = 'none' | 'resourceType';
 
@@ -70,11 +71,13 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
       >
         <PageTitle />
         <EuiSpacer />
-        <FindingsGroupBySelector
-          type={groupBy}
-          onChange={(type) => setUrlQuery({ groupBy: type })}
-          options={groupByOptions}
-        />
+        {INTERNAL_FEATURE_FLAGS.showFindingsGroupBy && (
+          <FindingsGroupBySelector
+            type={groupBy}
+            onChange={(type) => setUrlQuery({ groupBy: type })}
+            options={groupByOptions}
+          />
+        )}
         <EuiSpacer />
         {groupBy === 'none' && (
           <FindingsTable setQuery={setUrlQuery} {...findingsQuery} {...findingsResult} />
