@@ -8,7 +8,6 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
-  EuiLink,
   EuiText,
   EuiTextColor,
   EuiSpacer,
@@ -16,7 +15,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiToolTip,
-  EuiIcon,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import * as i18n from './translations';
@@ -31,7 +29,6 @@ import {
   CurrentPatternsMessage,
   DeprecatedMessage,
   MissingPatternsMessage,
-  NoMatchDataMessage,
 } from './utils';
 
 interface Props {
@@ -125,43 +122,19 @@ export const TemporarySourcererComp = React.memo<Props>(
               {activePatterns && activePatterns.length > 0 ? (
                 <CurrentPatternsMessage
                   timelineType={timelineType}
-                  values={{
-                    tooltip:
-                      deadPatterns.length > 0 ? (
-                        <EuiToolTip
-                          content={
-                            <NoMatchDataMessage
-                              timelineType={timelineType}
-                              values={{
-                                aliases: selectedPatterns
-                                  .filter((p) => !activePatterns.includes(p))
-                                  .join(', '),
-                              }}
-                            />
-                          }
-                        >
-                          <EuiIcon type="questionInCircle" title={i18n.INACTIVE_PATTERNS} />
-                        </EuiToolTip>
-                      ) : null,
-                    callout: <Blockquote>{activePatterns.join(', ')}</Blockquote>,
-                  }}
+                  activePatterns={activePatterns}
+                  deadPatterns={deadPatterns}
+                  selectedPatterns={selectedPatterns}
                 />
               ) : (
                 <BadCurrentPatternsMessage
                   timelineType={timelineType}
-                  values={{
-                    callout: <Blockquote>{selectedPatterns.join(', ')}</Blockquote>,
-                  }}
+                  selectedPatterns={selectedPatterns}
                 />
               )}
 
               {isModified === 'deprecated' && (
-                <DeprecatedMessage
-                  timelineType={timelineType}
-                  values={{
-                    link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
-                  }}
-                />
+                <DeprecatedMessage timelineType={timelineType} onReset={onReset} />
               )}
               {isModified === 'missingPatterns' && (
                 <>
@@ -173,12 +146,7 @@ export const TemporarySourcererComp = React.memo<Props>(
                       callout: <Blockquote>{missingPatterns.join(', ')}</Blockquote>,
                     }}
                   />
-                  <MissingPatternsMessage
-                    timelineType={timelineType}
-                    values={{
-                      link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
-                    }}
-                  />
+                  <MissingPatternsMessage timelineType={timelineType} onReset={onReset} />
                 </>
               )}
             </p>
