@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import React, { useMemo } from 'react';
