@@ -18,33 +18,33 @@ describe('mergeConfig', () => {
   it('merges the base config and the overrides', () => {
     const base = partialToConfig({
       hosts: ['localhost'],
-      compression: true,
+      sniffOnStart: true,
     });
     const overrides: Partial<ElasticsearchClientConfig> = {
-      maxSockets: 42,
+      requestTimeout: 42,
     };
 
     expect(mergeConfig(base, overrides)).toEqual({
       hosts: ['localhost'],
-      compression: true,
-      maxSockets: 42,
+      sniffOnStart: true,
+      requestTimeout: 42,
     });
   });
 
   it('properly override values that are present in both the base config and the overrides', () => {
     const base = partialToConfig({
       hosts: ['localhost'],
-      compression: true,
+      sniffOnStart: true,
     });
     const overrides: Partial<ElasticsearchClientConfig> = {
-      compression: false,
-      maxSockets: 42,
+      sniffOnStart: false,
+      requestTimeout: 42,
     };
 
     expect(mergeConfig(base, overrides)).toEqual({
       hosts: ['localhost'],
-      compression: false,
-      maxSockets: 42,
+      sniffOnStart: false,
+      requestTimeout: 42,
     });
   });
 
@@ -99,19 +99,19 @@ describe('mergeConfig', () => {
   it('does not mutate the base config', () => {
     const base = partialToConfig({
       hosts: ['localhost'],
-      maxSockets: 42,
+      requestTimeout: 42,
     });
     const overrides: Partial<ElasticsearchClientConfig> = {
       hosts: ['another-host'],
-      maxSockets: 9000,
-      compression: true,
+      requestTimeout: 9000,
+      sniffOnStart: true,
     };
 
     mergeConfig(base, overrides);
 
     expect(base).toEqual({
       hosts: ['localhost'],
-      maxSockets: 42,
+      requestTimeout: 42,
     });
   });
 
