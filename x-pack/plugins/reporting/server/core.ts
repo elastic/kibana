@@ -24,12 +24,11 @@ import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
-import type {
-  ScreenshottingStart,
-  PngScreenshotOptions as BasePngScreenshotOptions,
-  PngScreenshotResult,
+import {
   PdfScreenshotResult,
-  UrlOrUrlWithContext,
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
 } from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
@@ -386,8 +385,8 @@ export class ReportingCore {
             typeof url === 'string'
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ) as UrlOrUrlWithContext[],
-        } as BasePngScreenshotOptions);
+          ),
+        } as ScreenshotOptions);
       })
     );
   }

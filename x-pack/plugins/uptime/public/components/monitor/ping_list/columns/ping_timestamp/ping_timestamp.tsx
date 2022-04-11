@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
+  ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../common/runtime_types';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
@@ -35,10 +36,11 @@ const StepDiv = styled.div`
 interface Props {
   checkGroup?: string;
   label?: string;
+  stepStatus?: string;
   initialStepNo?: number;
 }
 
-export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -57,6 +59,12 @@ export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) =
   });
 
   const { data, status } = useFetcher(() => {
+    if (stepStatus === 'skipped') {
+      return new Promise<ScreenshotImageBlob | ScreenshotRefImageData | null>((resolve) =>
+        resolve(null)
+      );
+    }
+
     if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNumber - 1])
       return getJourneyScreenshot(imgPath);
   }, [intersection?.intersectionRatio, stepNumber, imgPath]);

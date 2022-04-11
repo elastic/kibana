@@ -6,6 +6,7 @@
  */
 import { ActionCreator } from 'typescript-fsa';
 
+import { Filter } from '@kbn/es-query';
 import { GlobalTimeArgs } from '../../common/containers/use_global_time';
 
 import { usersModel } from '../../users/store';
@@ -15,6 +16,7 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 export type UsersTabsProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];
   filterQuery: string;
+  pageFilters?: Filter[];
   indexNames: string[];
   type: usersModel.UsersType;
   setAbsoluteRangeDatePicker: ActionCreator<{
