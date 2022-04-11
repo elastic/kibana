@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Action, Reducer } from 'redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render as reactRender } from '@testing-library/react';
+import { render as reactRender, RenderOptions } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   AppContextTestRender,
@@ -84,7 +84,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const Wrapper: FC = ({ children }) => {
+  const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
     const services = useMemo(() => {
       const { http, notifications, application } = mockedContext.coreStart;
 
@@ -121,7 +121,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
 
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
-      wrapper: Wrapper as React.ComponentType,
+      wrapper: Wrapper,
       ...options,
     });
   };
