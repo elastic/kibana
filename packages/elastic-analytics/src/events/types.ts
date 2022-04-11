@@ -8,7 +8,42 @@
 
 import type { ShipperName } from '../analytics_client';
 
+/**
+ * Definition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}.
+ */
 export interface EventContext {
+  /**
+   * The unique user ID.
+   */
+  userId?: string;
+  /**
+   * The user's organization ID.
+   */
+  esOrgId?: string;
+  /**
+   * The product's version.
+   */
+  version?: string;
+  /**
+   * The name of the current page.
+   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
+   */
+  pageName?: string;
+  /**
+   * The current page.
+   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
+   */
+  page?: string;
+  /**
+   * The current application ID.
+   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
+   */
+  app_id?: string;
+  /**
+   * The current entity ID.
+   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
+   */
+  ent_id?: string;
   // TODO: Extend with known keys
   [key: string]: unknown;
 }

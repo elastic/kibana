@@ -528,6 +528,44 @@ describe('AnalyticsClient', () => {
       ]);
     });
 
+    test('The undefined values are not forwarded to the global context', async () => {
+      const context$ = new Subject<{ a_field?: boolean; b_field: number }>();
+      analyticsClient.registerContextProvider({
+        name: 'contextProviderA',
+        schema: {
+          a_field: {
+            type: 'boolean',
+            _meta: {
+              description: 'a_field description',
+              optional: true,
+            },
+          },
+          b_field: {
+            type: 'long',
+            _meta: {
+              description: 'b_field description',
+            },
+          },
+        },
+        context$,
+      });
+
+      const globalContextPromise = globalContext$.pipe(take(6), toArray()).toPromise();
+      context$.next({ b_field: 1 });
+      context$.next({ a_field: false, b_field: 1 });
+      context$.next({ a_field: true, b_field: 1 });
+      context$.next({ b_field: 1 });
+      context$.next({ a_field: undefined, b_field: 2 });
+      await expect(globalContextPromise).resolves.toEqual([
+        {}, // Original empty state
+        { b_field: 1 },
+        { a_field: false, b_field: 1 },
+        { a_field: true, b_field: 1 },
+        { b_field: 1 }, // a_field is removed because the context provider removed it.
+        { b_field: 2 }, // a_field is not forwarded because it is `undefined`
+      ]);
+    });
+
     test('Fails to register 2 context providers with the same name', () => {
       analyticsClient.registerContextProvider({
         name: 'contextProviderA',
