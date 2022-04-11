@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CaseStatuses } from '../../../../plugins/cases/common';
 
