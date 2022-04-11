@@ -53,19 +53,15 @@ import {
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
 } from '../errors';
-import {
-  NewPackagePolicySchema,
-  PackagePolicySchema,
-  PostPackagePolicyCreateCallback,
-  PostPackagePolicyPostCreateCallback,
-  UpdatePackagePolicySchema,
-} from '../types';
+import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -921,6 +917,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
             } else if (externalCallbackType === 'packagePolicyUpdate') {
               updatedNewData = UpdatePackagePolicySchema.validate(result);
             } else if (externalCallbackType === 'packagePolicyPostCreate') {
+              console.log({ result });
               updatedNewData = PackagePolicySchema.validate(result);
             }
           }
