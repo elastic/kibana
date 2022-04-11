@@ -25,7 +25,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-datemath",
+  "//packages/kbn-datemath",
   "@npm//@elastic/elasticsearch",
   "@npm//lodash",
   "@npm//moment",
@@ -36,7 +36,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath:npm_module_types",
+  "//packages/kbn-datemath:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@types/jest",
   "@npm//@types/lodash",
