@@ -164,6 +164,10 @@ for use in their own application.
 |Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
+|Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
+
+
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
@@ -285,6 +289,10 @@ In general this plugin provides:
 - Emitting trigger events.
 - Executing actions attached to a given trigger.
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+
+
+|{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
+|Contains all the components of Kibana's unified search experience. Specifically:
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]

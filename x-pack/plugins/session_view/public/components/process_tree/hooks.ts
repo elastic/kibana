@@ -31,6 +31,7 @@ interface UseProcessTreeDeps {
   alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  jumpToEntityId?: string;
 }
 
 export class ProcessImpl implements Process {
@@ -79,23 +80,22 @@ export class ProcessImpl implements Process {
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
       return children.filter((child) => {
+        if (child.events.length === 0) {
+          return false;
+        }
+
         const { group_leader: groupLeader, session_leader: sessionLeader } =
-          child.getDetails().process;
+          child.getDetails().process ?? {};
 
         // search matches or processes with alerts will never be filtered out
-        if (child.searchMatched || child.hasAlerts()) {
+        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
           return true;
         }
 
         // Hide processes that have their session leader as their process group leader.
         // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
         // other shell startup activities (e.g bashrc .profile etc)
-        if (groupLeader.pid === sessionLeader.pid) {
-          return false;
-        }
-
-        // If the process has no children and has not exec'd (fork only), we hide it.
-        if (child.children.length === 0 && !child.hasExec()) {
+        if (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid) {
           return false;
         }
 
@@ -112,6 +112,14 @@ export class ProcessImpl implements Process {
 
   hasAlerts() {
     return !!this.alerts.length;
+  }
+
+  hasAlert(alertUuid: string | undefined) {
+    if (!alertUuid) {
+      return false;
+    }
+
+    return !!this.alerts.find((event) => event.kibana?.alert?.uuid === alertUuid);
   }
 
   getAlerts() {
@@ -139,6 +147,11 @@ export class ProcessImpl implements Process {
     return '';
   }
 
+  getEndTime() {
+    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    return endEvent?.['@timestamp'] || '';
+  }
+
   // isUserEntered is a best guess at which processes were initiated by a real person
   // In most situations a user entered command in a shell such as bash, will cause bash
   // to fork, create a new process group, and exec the command (e.g ls). If the session
@@ -149,19 +162,23 @@ export class ProcessImpl implements Process {
   isUserEntered() {
     const event = this.getDetails();
 
+    if (!event) {
+      return false;
+    }
+
     const {
       pid,
       tty,
       parent,
       session_leader: sessionLeader,
       group_leader: groupLeader,
-    } = event.process;
+    } = event.process ?? {};
 
-    const parentIsASessionLeader = parent.pid === sessionLeader.pid; // possibly bash, zsh or some other shell
-    const processIsAGroupLeader = pid === groupLeader.pid;
+    const parentIsASessionLeader = parent && sessionLeader && parent.pid === sessionLeader.pid;
+    const processIsAGroupLeader = groupLeader && pid === groupLeader.pid;
     const sessionIsInteractive = !!tty;
 
-    return sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader;
+    return !!(sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader);
   }
 
   getMaxAlertLevel() {
@@ -170,34 +187,39 @@ export class ProcessImpl implements Process {
   }
 
   findEventByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.find(({ event }) => event.action === action);
+    return events.find(({ event }) => event?.action === action);
   });
 
   findEventByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
-    return events.find(({ event }) => event.kind === kind);
+    return events.find(({ event }) => event?.kind === kind);
   });
 
   filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.filter(({ event }) => event.action === action);
+    return events.filter(({ event }) => event?.action === action);
   });
 
   filterEventsByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
-    return events.filter(({ event }) => event.kind === kind);
+    return events.filter(({ event }) => event?.kind === kind);
   });
 
   // returns the most recent fork, exec, or end event
   // to be used as a source for the most up to date details
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
-    const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
+    // TODO: add these to generator
+    const actionsToFind: Array<EventAction | undefined> = [
+      EventAction.fork,
+      EventAction.exec,
+      EventAction.end,
+    ];
     const filtered = events.filter((processEvent) => {
-      return actionsToFind.includes(processEvent.event.action);
+      return actionsToFind.includes(processEvent.event?.action);
     });
 
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1] || ({} as ProcessEvent);
+    return filtered[filtered.length - 1] ?? {};
   });
 }
 
@@ -207,19 +229,22 @@ export const useProcessTree = ({
   alerts,
   searchQuery,
   updatedAlertsStatus,
+  jumpToEntityId,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
   // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = data[0].events.find((event) => event.event.kind === EventKind.event);
+  const fakeLeaderEvent = data[0].events?.find?.((event) => event.event?.kind === EventKind.event);
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
+    fakeLeaderEvent.user = fakeLeaderEvent?.process?.entry_leader?.user;
+    fakeLeaderEvent.group = fakeLeaderEvent?.process?.entry_leader?.group;
     fakeLeaderEvent.process = {
       ...fakeLeaderEvent.process,
-      ...fakeLeaderEvent.process.entry_leader,
-      parent: fakeLeaderEvent.process.parent,
+      ...fakeLeaderEvent.process?.entry_leader,
+      parent: fakeLeaderEvent.process?.parent,
     };
     sessionLeaderProcess.events.push(fakeLeaderEvent);
   }
@@ -271,15 +296,16 @@ export const useProcessTree = ({
     // currently we are loading a single page of alerts, with no pagination
     // so we only need to add these alert events to processMap once.
     if (!alertsProcessed) {
-      updateProcessMap(processMap, alerts);
+      const updatedProcessMap = updateProcessMap(processMap, alerts);
+      setProcessMap({ ...updatedProcessMap });
       setAlertsProcessed(true);
     }
   }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery));
-    autoExpandProcessTree(processMap);
-  }, [searchQuery, processMap]);
+    autoExpandProcessTree(processMap, jumpToEntityId);
+  }, [searchQuery, processMap, jumpToEntityId]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

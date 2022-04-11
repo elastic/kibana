@@ -11,7 +11,13 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState } from './xy_visualization/types';
+export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+} from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -21,15 +27,6 @@ export type {
   Visualization,
   VisualizationSuggestion,
 } from './types';
-export type {
-  AxesSettingsConfig,
-  XYLayerConfig,
-  LegendConfig,
-  SeriesType,
-  YAxisMode,
-  XYCurveType,
-  YConfig,
-} from '../common/expressions';
 export type {
   ValueLabelConfig,
   PieVisualizationState,
@@ -69,7 +66,44 @@ export type {
   OverallSumIndexPatternColumn,
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './indexpattern_datasource/types';
+export type {
+  XYArgs,
+  YConfig,
+  XYRender,
+  LayerType,
+  YAxisMode,
+  LineStyle,
+  FillStyle,
+  SeriesType,
+  YScaleType,
+  XScaleType,
+  AxisConfig,
+  ValidLayer,
+  XYCurveType,
+  XYChartProps,
+  LegendConfig,
+  IconPosition,
+  YConfigResult,
+  DataLayerArgs,
+  LensMultiTable,
+  ValueLabelMode,
+  AxisExtentMode,
+  FittingFunction,
+  AxisExtentConfig,
+  LegendConfigResult,
+  AxesSettingsConfig,
+  GridlinesConfigResult,
+  DataLayerConfigResult,
+  TickLabelsConfigResult,
+  AxisExtentConfigResult,
+  ReferenceLineLayerArgs,
+  LabelsOrientationConfig,
+  LabelsOrientationConfigResult,
+  ReferenceLineLayerConfigResult,
+  AxisTitlesVisibilityConfigResult,
+} from '../../../../src/plugins/chart_expressions/expression_xy/common';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';
 

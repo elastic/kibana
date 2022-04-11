@@ -88,6 +88,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -109,6 +110,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -319,6 +321,7 @@ export const mockGlobalState: State = {
           end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: false,
         showCheckboxes: false,
         pinnedEventIds: {},

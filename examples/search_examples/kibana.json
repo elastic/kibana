@@ -9,7 +9,7 @@
   "description": "Example plugin of how to use data plugin search services",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "developerExamples", "kibanaUtils", "share"],
+  "requiredPlugins": ["navigation", "data", "developerExamples", "kibanaUtils", "share", "unifiedSearch"],
   "optionalPlugins": [],
   "requiredBundles": ["kibanaReact"],
   "owner": {

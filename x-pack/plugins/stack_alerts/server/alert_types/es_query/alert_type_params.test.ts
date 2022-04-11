@@ -7,6 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
+import { Comparator } from '../../../common/comparator_types';
 import {
   EsQueryAlertParamsSchema,
   EsQueryAlertParams,
@@ -20,7 +21,7 @@ const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   size: 100,
   timeWindowSize: 5,
   timeWindowUnit: 'm',
-  thresholdComparator: '>',
+  thresholdComparator: Comparator.GT,
   threshold: [0],
 };
 
@@ -189,9 +190,15 @@ describe('alertType Params validate()', () => {
 
   it('fails for invalid thresholdComparator', async () => {
     params.thresholdComparator = '[invalid-comparator]';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[thresholdComparator]: invalid thresholdComparator specified: [invalid-comparator]"`
-    );
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+      "[thresholdComparator]: types that failed validation:
+      - [thresholdComparator.0]: expected value to equal [>]
+      - [thresholdComparator.1]: expected value to equal [<]
+      - [thresholdComparator.2]: expected value to equal [>=]
+      - [thresholdComparator.3]: expected value to equal [<=]
+      - [thresholdComparator.4]: expected value to equal [between]
+      - [thresholdComparator.5]: expected value to equal [notBetween]"
+    `);
   });
 
   it('fails for invalid threshold length', async () => {

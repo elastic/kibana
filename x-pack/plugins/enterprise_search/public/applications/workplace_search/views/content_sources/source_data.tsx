@@ -260,6 +260,7 @@ export const staticSourceData: SourceDataItem[] = [
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
     },
     accountContextOnly: true,
+    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
@@ -633,4 +634,11 @@ export const staticCustomSourceData: SourceDataItem = {
   },
   accountContextOnly: false,
   customConnectorAvailable: true,
+};
+
+export const getSourceData = (serviceType: string): SourceDataItem => {
+  return (
+    staticSourceData.find((staticSource) => staticSource.serviceType === serviceType) ||
+    staticCustomSourceData
+  );
 };

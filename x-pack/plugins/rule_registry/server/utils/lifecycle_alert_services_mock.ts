@@ -18,7 +18,7 @@ class AlertsMockWrapper<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
   createAlertServices() {
-    return alertsMock.createAlertServices<InstanceState, InstanceContext>();
+    return alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>();
   }
 }
 

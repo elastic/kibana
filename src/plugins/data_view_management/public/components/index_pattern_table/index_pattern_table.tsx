@@ -70,6 +70,7 @@ export const IndexPatternTable = ({
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
+    application,
     chrome,
     dataViews,
     IndexPatternEditor,
@@ -93,7 +94,10 @@ export const IndexPatternTable = ({
       dataViews,
       overlays,
       uiSettings,
-      onDelete: () => loadDataViews(),
+      onDelete: () => {
+        setSelectedItems([]);
+        loadDataViews();
+      },
     });
     if (selectedItems.length === 0) {
       return;
@@ -231,6 +235,7 @@ export const IndexPatternTable = ({
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
+            capabilities={application?.capabilities}
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
             title={dataView.title}

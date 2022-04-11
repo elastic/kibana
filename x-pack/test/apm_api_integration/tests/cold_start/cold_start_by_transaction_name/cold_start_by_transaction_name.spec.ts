@@ -143,8 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start: startDate.toISOString(),
               end: endDate.subtract(1, 'seconds').toISOString(),
-              comparisonStart: comparisonStartDate.toISOString(),
-              comparisonEnd: comparisonEndDate.subtract(1, 'seconds').toISOString(),
+              offset: '6m',
             },
           });
           body = response.body;

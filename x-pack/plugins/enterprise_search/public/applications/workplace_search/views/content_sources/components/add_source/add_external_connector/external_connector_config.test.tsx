@@ -30,7 +30,6 @@ describe('ExternalConnectorConfig', () => {
   const setExternalConnectorApiKey = jest.fn();
   const setExternalConnectorUrl = jest.fn();
   const saveExternalConnectorConfig = jest.fn();
-  const fetchExternalSource = jest.fn();
 
   const props = {
     sourceData: staticSourceData[0],
@@ -53,7 +52,6 @@ describe('ExternalConnectorConfig', () => {
       setExternalConnectorApiKey,
       setExternalConnectorUrl,
       saveExternalConnectorConfig,
-      fetchExternalSource,
     });
     setMockValues({ ...values });
   });

@@ -931,7 +931,7 @@
             "label": "indent",
             "description": [],
             "signature": [
-              "{ (delta: number): undefined; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
+              "{ (delta: number): void; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log.ts",
             "deprecated": false,
@@ -2432,44 +2432,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.parseKibanaPlatformPlugin",
-        "type": "Function",
-        "tags": [],
-        "label": "parseKibanaPlatformPlugin",
-        "description": [],
-        "signature": [
-          "(manifestPath: string) => ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.KibanaPlatformPlugin",
-            "text": "KibanaPlatformPlugin"
-          }
-        ],
-        "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.parseKibanaPlatformPlugin.$1",
-            "type": "string",
-            "tags": [],
-            "label": "manifestPath",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.parseLogLevel",
         "type": "Function",
         "tags": [],
@@ -2673,61 +2635,6 @@
         "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ship_ci_stats_cli.ts",
         "deprecated": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.simpleKibanaPlatformPluginDiscovery",
-        "type": "Function",
-        "tags": [],
-        "label": "simpleKibanaPlatformPluginDiscovery",
-        "description": [
-          "\nHelper to find the new platform plugins."
-        ],
-        "signature": [
-          "(scanDirs: string[], pluginPaths: string[]) => ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.KibanaPlatformPlugin",
-            "text": "KibanaPlatformPlugin"
-          },
-          "[]"
-        ],
-        "path": "packages/kbn-dev-utils/src/plugins/simple_kibana_platform_plugin_discovery.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.simpleKibanaPlatformPluginDiscovery.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "scanDirs",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/simple_kibana_platform_plugin_discovery.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.simpleKibanaPlatformPluginDiscovery.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "pluginPaths",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/simple_kibana_platform_plugin_discovery.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3821,52 +3728,6 @@
               "[key: string]:  string | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/flags.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.KibanaPlatformPlugin",
-        "type": "Interface",
-        "tags": [],
-        "label": "KibanaPlatformPlugin",
-        "description": [],
-        "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.KibanaPlatformPlugin.directory",
-            "type": "string",
-            "tags": [],
-            "label": "directory",
-            "description": [],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.KibanaPlatformPlugin.manifestPath",
-            "type": "string",
-            "tags": [],
-            "label": "manifestPath",
-            "description": [],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.KibanaPlatformPlugin.manifest",
-            "type": "Object",
-            "tags": [],
-            "label": "manifest",
-            "description": [],
-            "signature": [
-              "Manifest"
-            ],
-            "path": "packages/kbn-dev-utils/src/plugins/parse_kibana_platform_plugin.ts",
             "deprecated": false
           }
         ],

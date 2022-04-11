@@ -63,10 +63,6 @@ const createStartContract = (): Start => {
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
-    ui: {
-      IndexPatternSelect: jest.fn(),
-      SearchBar: jest.fn().mockReturnValue(null),
-    },
     dataViews,
     /**
      * @deprecated Use dataViews service instead. All index pattern interfaces were renamed.

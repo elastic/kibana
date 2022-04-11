@@ -8,15 +8,16 @@
 import { act } from 'react-dom/test-utils';
 
 import { getExecuteDetails } from '../../__fixtures__';
+import { API_BASE_PATH } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
-import { setupEnvironment, pageHelpers, wrapBodyResponse } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJson;
 
 describe('<JsonWatchEdit /> create route', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 
   beforeAll(() => {
@@ -25,12 +26,11 @@ describe('<JsonWatchEdit /> create route', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       testBed.component.update();
     });
 
@@ -94,31 +94,32 @@ describe('<JsonWatchEdit /> create route', () => {
             actions.clickSubmitButton();
           });
 
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const DEFAULT_LOGGING_ACTION_ID = 'logging_1';
           const DEFAULT_LOGGING_ACTION_TYPE = 'logging';
           const DEFAULT_LOGGING_ACTION_TEXT =
             'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              id: watch.id,
-              name: watch.name,
-              type: watch.type,
-              isNew: true,
-              isActive: true,
-              actions: [
-                {
-                  id: DEFAULT_LOGGING_ACTION_ID,
-                  type: DEFAULT_LOGGING_ACTION_TYPE,
-                  text: DEFAULT_LOGGING_ACTION_TEXT,
-                  [DEFAULT_LOGGING_ACTION_TYPE]: {
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/${watch.id}`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                id: watch.id,
+                name: watch.name,
+                type: watch.type,
+                isNew: true,
+                isActive: true,
+                actions: [
+                  {
+                    id: DEFAULT_LOGGING_ACTION_ID,
+                    type: DEFAULT_LOGGING_ACTION_TYPE,
                     text: DEFAULT_LOGGING_ACTION_TEXT,
+                    [DEFAULT_LOGGING_ACTION_TYPE]: {
+                      text: DEFAULT_LOGGING_ACTION_TEXT,
+                    },
                   },
-                },
-              ],
-              watch: defaultWatch,
+                ],
+                watch: defaultWatch,
+              }),
             })
           );
         });
@@ -131,12 +132,13 @@ describe('<JsonWatchEdit /> create route', () => {
           form.setInputValue('idInput', watch.id);
 
           const error = {
-            status: 400,
+            statusCode: 400,
             error: 'Bad request',
             message: 'Watch payload is invalid',
+            response: {},
           };
 
-          httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, { body: error });
+          httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, error);
 
           await act(async () => {
             actions.clickSubmitButton();
@@ -169,8 +171,6 @@ describe('<JsonWatchEdit /> create route', () => {
             actions.clickSimulateButton();
           });
 
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
               actionAccum[action] = 'simulate';
@@ -188,12 +188,15 @@ describe('<JsonWatchEdit /> create route', () => {
             watch: defaultWatch,
           };
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                actionModes,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  actionModes,
+                }),
+                watch: executedWatch,
               }),
-              watch: executedWatch,
             })
           );
         });
@@ -230,8 +233,6 @@ describe('<JsonWatchEdit /> create route', () => {
           });
           component.update();
 
-          const latestRequest = server.requests[server.requests.length - 1];
-
           const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
               actionAccum[action] = ACTION_MODE;
@@ -252,19 +253,23 @@ describe('<JsonWatchEdit /> create route', () => {
           const triggeredTime = `now+${TRIGGERED_TIME}s`;
           const scheduledTime = `now+${SCHEDULED_TIME}s`;
 
-          expect(latestRequest.requestBody).toEqual(
-            wrapBodyResponse({
-              executeDetails: getExecuteDetails({
-                triggerData: {
-                  triggeredTime,
-                  scheduledTime,
-                },
-                ignoreCondition: IGNORE_CONDITION,
-                actionModes,
+          expect(httpSetup.put).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}/watch/execute`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                executeDetails: getExecuteDetails({
+                  triggerData: {
+                    triggeredTime,
+                    scheduledTime,
+                  },
+                  ignoreCondition: IGNORE_CONDITION,
+                  actionModes,
+                }),
+                watch: executedWatch,
               }),
-              watch: executedWatch,
             })
           );
+
           expect(exists('simulateResultsFlyout')).toBe(true);
           expect(find('simulateResultsFlyoutTitle').text()).toEqual('Simulation results');
         });

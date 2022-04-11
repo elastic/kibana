@@ -10,10 +10,12 @@
 import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+
 import {
   ALERT_RULE_FROM,
   ALERT_RULE_TYPE,
@@ -21,7 +23,9 @@ import {
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
+
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -154,16 +158,6 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   return { to, from };
 };
 
-const getFiltersFromRule = (filters: string[]): Filter[] =>
-  filters.reduce((acc, filterString) => {
-    try {
-      const objFilter: Filter = JSON.parse(filterString);
-      return [...acc, objFilter];
-    } catch (e) {
-      return acc;
-    }
-  }, [] as Filter[]);
-
 const calculateFromTimeFallback = (thresholdData: Ecs, originalTime: moment.Moment) => {
   // relative time that the rule's time range starts at (e.g. now-1h)
 
@@ -265,14 +259,14 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
   );
 };
 
-export const isEqlRuleWithGroupId = (ecsData: Ecs): boolean => {
+export const isEqlAlertWithGroupId = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   const groupId = getField(ecsData, ALERT_GROUP_ID);
   const isEql = ruleType === 'eql' || (Array.isArray(ruleType) && ruleType[0] === 'eql');
   return isEql && groupId?.length > 0;
 };
 
-export const isThresholdRule = (ecsData: Ecs): boolean => {
+export const isThresholdAlert = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   return (
     ruleType === 'threshold' ||
@@ -396,7 +390,8 @@ const createThresholdTimeline = async (
   ecsData: Ecs,
   createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
   noteContent: string,
-  templateValues: { filters?: Filter[]; query?: string; dataProviders?: DataProvider[] }
+  templateValues: { filters?: Filter[]; query?: string; dataProviders?: DataProvider[] },
+  getExceptions: (ecs: Ecs) => Promise<ExceptionListItemSchema[]>
 ) => {
   try {
     const alertResponse = await KibanaServices.get().http.fetch<
@@ -417,21 +412,37 @@ const createThresholdTimeline = async (
           },
         ];
       }, []) ?? [];
+
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
-    const filters = getFiltersFromRule(params.filters ?? alertDoc.signal?.rule?.filters) ?? [];
+    const filters: Filter[] = params.filters ?? alertDoc.signal?.rule?.filters;
+    // https://github.com/elastic/kibana/issues/126574 - if the provided filter has no `meta` field
+    // we expect an empty object to be inserted before calling `createTimeline`
+    const augmentedFilters = filters.map((filter) => {
+      return filter.meta != null ? filter : { ...filter, meta: {} };
+    });
     const language = params.language ?? alertDoc.signal?.rule?.language ?? 'kuery';
     const query = params.query ?? alertDoc.signal?.rule?.query ?? '';
     const indexNames = params.index ?? alertDoc.signal?.rule?.index ?? [];
 
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(alertDoc);
+    const exceptions = await getExceptions(ecsData);
+    const exceptionsFilter =
+      buildExceptionFilter({
+        lists: exceptions,
+        excludeExceptions: true,
+        chunkSize: 10000,
+        alias: 'Exceptions',
+      }) ?? [];
+    const allFilters = (templateValues.filters ?? augmentedFilters).concat(exceptionsFilter);
+
     return createTimeline({
       from: thresholdFrom,
       notes: null,
       timeline: {
         ...timelineDefaults,
         description: `_id: ${alertDoc._id}`,
-        filters: templateValues.filters ?? filters,
+        filters: allFilters,
         dataProviders: templateValues.dataProviders ?? dataProviders,
         id: TimelineId.active,
         indexNames,
@@ -495,6 +506,7 @@ export const sendAlertToTimelineAction = async ({
   ecsData: ecs,
   updateTimelineIsLoading,
   searchStrategyClient,
+  getExceptions,
 }: SendAlertToTimelineActionProps) => {
   /* FUTURE DEVELOPER
    * We are making an assumption here that if you have an array of ecs data they are all coming from the same rule
@@ -554,12 +566,18 @@ export const sendAlertToTimelineAction = async ({
           timeline.timelineType
         );
         // threshold with template
-        if (isThresholdRule(ecsData)) {
-          return createThresholdTimeline(ecsData, createTimeline, noteContent, {
-            filters,
-            query,
-            dataProviders,
-          });
+        if (isThresholdAlert(ecsData)) {
+          return createThresholdTimeline(
+            ecsData,
+            createTimeline,
+            noteContent,
+            {
+              filters,
+              query,
+              dataProviders,
+            },
+            getExceptions
+          );
         } else {
           return createTimeline({
             from,
@@ -612,11 +630,11 @@ export const sendAlertToTimelineAction = async ({
         to,
       });
     }
-  } else if (isThresholdRule(ecsData)) {
-    return createThresholdTimeline(ecsData, createTimeline, noteContent, {});
+  } else if (isThresholdAlert(ecsData)) {
+    return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptions);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
-    if (isEqlRuleWithGroupId(ecsData)) {
+    if (isEqlAlertWithGroupId(ecsData)) {
       const tempEql = buildEqlDataProviderOrFilter(alertIds ?? [], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;

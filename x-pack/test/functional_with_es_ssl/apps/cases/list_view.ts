@@ -5,118 +5,187 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { CaseStatuses } from '../../../../plugins/cases/common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
-  const common = getPageObject('common');
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const retry = getService('retry');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/128468
-  describe.skip('cases list', () => {
+  describe('cases list', () => {
     before(async () => {
-      await common.navigateToApp('cases');
-      await cases.api.deleteAllCases();
+      await cases.navigation.navigateToApp();
     });
 
     after(async () => {
       await cases.api.deleteAllCases();
+      await cases.casesTable.waitForCasesToBeDeleted();
     });
 
-    beforeEach(async () => {
-      await common.navigateToApp('cases');
-    });
-
-    it('displays an empty list with an add button correctly', async () => {
-      await testSubjects.existOrFail('cases-table-add-case');
-    });
-
-    it('lists cases correctly', async () => {
-      const NUMBER_CASES = 2;
-      await cases.api.createNthRandomCases(NUMBER_CASES);
-      await common.navigateToApp('cases');
-      await cases.common.validateCasesTableHasNthRows(NUMBER_CASES);
-    });
-
-    it('deletes a case correctly from the list', async () => {
-      await cases.api.createNthRandomCases(1);
-      await common.navigateToApp('cases');
-      await testSubjects.click('action-delete');
-      await testSubjects.click('confirmModalConfirmButton');
-      await testSubjects.existOrFail('euiToastHeader');
-    });
-
-    it('filters cases from the list with partial match', async () => {
-      await cases.api.deleteAllCases();
-      await cases.api.createNthRandomCases(5);
-      const id = uuid.v4();
-      const caseTitle = 'matchme-' + id;
-      await cases.api.createCaseWithData({ title: caseTitle });
-      await common.navigateToApp('cases');
-      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
-
-      // search
-      const input = await testSubjects.find('search-cases');
-      await input.type(caseTitle);
-      await input.pressKeys(browser.keys.ENTER);
-
-      await retry.tryForTime(20000, async () => {
-        await cases.common.validateCasesTableHasNthRows(1);
+    describe('empty state', () => {
+      it('displays an empty list with an add button correctly', async () => {
+        await testSubjects.existOrFail('cases-table-add-case');
       });
     });
 
-    it('paginates cases correctly', async () => {
-      await cases.api.deleteAllCases();
-      await cases.api.createNthRandomCases(8);
-      await common.navigateToApp('cases');
-      await testSubjects.click('tablePaginationPopoverButton');
-      await testSubjects.click('tablePagination-5-rows');
-      await testSubjects.isEnabled('pagination-button-1');
-      await testSubjects.click('pagination-button-1');
-      await testSubjects.isEnabled('pagination-button-0');
+    describe('listing', () => {
+      before(async () => {
+        await cases.api.createNthRandomCases(2);
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+      });
+
+      it('lists cases correctly', async () => {
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+      });
     });
 
-    it('bulk delete cases from the list', async () => {
-      // deletes them from the API
-      await cases.api.deleteAllCases();
-      await cases.api.createNthRandomCases(8);
-      await common.navigateToApp('cases');
-      // deletes them from the UI
-      await cases.common.selectAndDeleteAllCases();
-      await cases.common.validateCasesTableHasNthRows(0);
+    describe('deleting', () => {
+      before(async () => {
+        await cases.api.createNthRandomCases(8);
+        await cases.api.createCase({ title: 'delete me', tags: ['one'] });
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+      });
+
+      it('deletes a case correctly from the list', async () => {
+        await cases.casesTable.deleteFirstListedCase();
+        await cases.casesTable.waitForTableToFinishLoading();
+
+        await retry.tryForTime(2000, async () => {
+          const firstRow = await testSubjects.find('case-details-link');
+          expect(await firstRow.getVisibleText()).not.to.be('delete me');
+        });
+      });
+
+      it('bulk delete cases from the list', async () => {
+        await cases.casesTable.selectAndDeleteAllCases();
+        await cases.casesTable.waitForTableToFinishLoading();
+        await cases.casesTable.validateCasesTableHasNthRows(0);
+      });
+    });
+
+    describe('filtering', () => {
+      const caseTitle = 'matchme';
+
+      before(async () => {
+        await cases.api.createCase({ title: caseTitle, tags: ['one'] });
+        await cases.api.createCase({ title: 'test2', tags: ['two'] });
+        await cases.api.createCase({ title: 'test3' });
+        await cases.api.createCase({ title: 'test4' });
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      beforeEach(async () => {
+        /**
+         * There is no easy way to clear the filtering.
+         * Refreshing the page seems to be easier.
+         */
+        await cases.navigation.navigateToApp();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+      });
+
+      it('filters cases from the list with partial match', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        // search
+        const input = await testSubjects.find('search-cases');
+        await input.type(caseTitle);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('filters cases by tags', async () => {
+        await cases.casesTable.filterByTag('one');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseFromTable(0);
+        const tags = await row.findByCssSelector('[data-test-subj="case-table-column-tags-one"]');
+        expect(await tags.getVisibleText()).to.be('one');
+      });
+
+      it('filters cases by status', async () => {
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+      });
+
+      /**
+       * TODO: Improve the test by creating a case from a
+       * different user and filter by the new user
+       * and not the default one
+       */
+      it('filters cases by reporter', async () => {
+        await cases.casesTable.filterByReporter('elastic');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+    });
+
+    describe('pagination', () => {
+      before(async () => {
+        await cases.api.createNthRandomCases(8);
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+      });
+
+      it('paginates cases correctly', async () => {
+        await testSubjects.click('tablePaginationPopoverButton');
+        await testSubjects.click('tablePagination-5-rows');
+        await testSubjects.isEnabled('pagination-button-1');
+        await testSubjects.click('pagination-button-1');
+        await testSubjects.isEnabled('pagination-button-0');
+      });
     });
 
     describe('changes status from the list', () => {
       before(async () => {
-        await common.navigateToApp('cases');
-        await cases.api.deleteAllCases();
         await cases.api.createNthRandomCases(1);
-        await common.navigateToApp('cases');
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       it('to in progress', async () => {
-        await cases.common.openCaseSetStatusDropdown();
-        await testSubjects.click('case-view-status-dropdown-in-progress');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('status-badge-in-progress');
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
       });
 
       it('to closed', async () => {
-        await cases.common.openCaseSetStatusDropdown();
-        await testSubjects.click('case-view-status-dropdown-closed');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('status-badge-closed');
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
       });
 
       it('to open', async () => {
-        await cases.common.openCaseSetStatusDropdown();
-        await testSubjects.click('case-view-status-dropdown-open');
-        await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('status-badge-open');
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
       });
     });
   });
