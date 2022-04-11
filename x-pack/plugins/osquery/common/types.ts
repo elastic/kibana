@@ -9,6 +9,7 @@ import { PackagePolicy, PackagePolicyInput, PackagePolicyInputStream } from '../
 
 export const savedQuerySavedObjectType = 'osquery-saved-query';
 export const packSavedObjectType = 'osquery-pack';
+export const packAssetSavedObjectType = 'osquery-pack-asset';
 export const usageMetricSavedObjectType = 'osquery-manager-usage-metric';
 export type SavedObjectType =
   | 'osquery-saved-query'
@@ -68,4 +69,5 @@ export interface OsqueryManagerPackagePolicyInput extends Omit<PackagePolicyInpu
 
 export interface OsqueryManagerPackagePolicy extends Omit<PackagePolicy, 'inputs'> {
   inputs: OsqueryManagerPackagePolicyInput[];
+  read_only?: boolean;
 }

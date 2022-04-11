@@ -9,6 +9,7 @@ import { ParamsSchema, Params } from './alert_type_params';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { CoreQueryParams, MAX_GROUPS } from '../../../../triggers_actions_ui/server';
+import { Comparator } from '../../../common/comparator_types';
 
 const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',
@@ -17,7 +18,7 @@ const DefaultParams: Writable<Partial<Params>> = {
   groupBy: 'all',
   timeWindowSize: 5,
   timeWindowUnit: 'm',
-  thresholdComparator: '>',
+  thresholdComparator: Comparator.GT,
   threshold: [0],
 };
 
@@ -45,9 +46,15 @@ describe('alertType Params validate()', () => {
 
   it('fails for invalid comparator', async () => {
     params.thresholdComparator = '[invalid-comparator]';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[thresholdComparator]: invalid thresholdComparator specified: [invalid-comparator]"`
-    );
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+      "[thresholdComparator]: types that failed validation:
+      - [thresholdComparator.0]: expected value to equal [>]
+      - [thresholdComparator.1]: expected value to equal [<]
+      - [thresholdComparator.2]: expected value to equal [>=]
+      - [thresholdComparator.3]: expected value to equal [<=]
+      - [thresholdComparator.4]: expected value to equal [between]
+      - [thresholdComparator.5]: expected value to equal [notBetween]"
+    `);
   });
 
   it('fails for invalid threshold length', async () => {
@@ -120,24 +127,24 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
 
       params.index = 42;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
-"[index]: types that failed validation:
-- [index.0]: expected value of type [string] but got [number]
-- [index.1]: expected value of type [array] but got [number]"
-`);
+        "[index]: types that failed validation:
+        - [index.0]: expected value of type [string] but got [number]
+        - [index.1]: expected value of type [array] but got [number]"
+      `);
 
       params.index = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
-"[index]: types that failed validation:
-- [index.0]: value has length [0] but it must have a minimum length of [1].
-- [index.1]: could not parse array value from json input"
-`);
+        "[index]: types that failed validation:
+        - [index.0]: value has length [0] but it must have a minimum length of [1].
+        - [index.1]: could not parse array value from json input"
+      `);
 
       params.index = ['', 'a'];
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
-"[index]: types that failed validation:
-- [index.0]: expected value of type [string] but got [Array]
-- [index.1.0]: value has length [0] but it must have a minimum length of [1]."
-`);
+        "[index]: types that failed validation:
+        - [index.0]: expected value of type [string] but got [Array]
+        - [index.1.0]: value has length [0] but it must have a minimum length of [1]."
+      `);
     });
 
     it('fails for invalid timeField', async () => {

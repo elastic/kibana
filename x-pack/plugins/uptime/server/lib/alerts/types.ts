@@ -7,7 +7,7 @@
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
 import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
-import { AlertInstanceContext, AlertTypeState } from '../../../../alerting/common';
+import { AlertInstanceContext, RuleTypeState } from '../../../../alerting/common';
 import { LifecycleAlertService } from '../../../../rule_registry/server';
 
 /**
@@ -21,11 +21,8 @@ export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTy
   Record<string, any>,
   AlertInstanceContext,
   {
-    alertWithLifecycle: LifecycleAlertService<
-      AlertTypeState,
-      AlertInstanceContext,
-      TActionGroupIds
-    >;
+    alertWithLifecycle: LifecycleAlertService<RuleTypeState, AlertInstanceContext, TActionGroupIds>;
+    getAlertStartedDate: (alertId: string) => string | null;
   }
 >;
 

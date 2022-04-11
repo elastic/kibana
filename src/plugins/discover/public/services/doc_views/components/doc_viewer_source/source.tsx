@@ -14,10 +14,11 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
 import { DataView } from '../../../../../../data_views/public';
 import { ElasticRequestState } from '../../../../application/doc/types';
+import { getHeight } from './get_height';
 
 interface SourceViewerProps {
   id: string;
@@ -27,6 +28,12 @@ interface SourceViewerProps {
   width?: number;
 }
 
+// Ihe number of lines displayed without scrolling used for classic table, which renders the component
+// inline limitation was necessary to enable virtualized scrolling, which improves performance
+export const MAX_LINES_CLASSIC_TABLE = 500;
+// Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
+export const MARGIN_BOTTOM = 25;
+
 export const DocViewerSource = ({
   id,
   index,
@@ -35,9 +42,11 @@ export const DocViewerSource = ({
   hasLineNumbers,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
+  const [editorHeight, setEditorHeight] = useState<number>();
   const [jsonValue, setJsonValue] = useState<string>('');
   const { uiSettings } = useDiscoverServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const useDocExplorer = !uiSettings.get(DOC_TABLE_LEGACY);
   const [reqState, hit, requestData] = useEsDocSearch({
     id,
     index,
@@ -51,7 +60,9 @@ export const DocViewerSource = ({
     }
   }, [reqState, hit]);
 
-  // setting editor height based on lines height and count to stretch and fit its content
+  // setting editor height
+  // - classic view: based on lines height and count to stretch and fit its content
+  // - explorer: to fill the available space of the document flyout
   useEffect(() => {
     if (!editor) {
       return;
@@ -62,16 +73,17 @@ export const DocViewerSource = ({
       return;
     }
 
-    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-    const lineCount = editor.getModel()?.getLineCount() || 1;
-    const height = editor.getTopForLineNumber(lineCount + 1) + lineHeight;
-    if (!jsonValue || jsonValue === '') {
-      editorElement.style.height = '0px';
-    } else {
-      editorElement.style.height = `${height}px`;
+    const height = getHeight(editor, useDocExplorer);
+    if (height === 0) {
+      return;
     }
-    editor.layout();
-  }, [editor, jsonValue]);
+
+    if (!jsonValue || jsonValue === '') {
+      setEditorHeight(0);
+    } else {
+      setEditorHeight(height);
+    }
+  }, [editor, jsonValue, useDocExplorer, setEditorHeight]);
 
   const loadingState = (
     <div className="sourceViewer__loading">
@@ -118,6 +130,7 @@ export const DocViewerSource = ({
     <JSONCodeEditorCommonMemoized
       jsonValue={jsonValue}
       width={width}
+      height={editorHeight}
       hasLineNumbers={hasLineNumbers}
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />

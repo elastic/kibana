@@ -14,10 +14,10 @@ import {
 
 describe('Output form validation', () => {
   describe('validateESHosts', () => {
-    it('should work without any urls', () => {
+    it('should not work without any urls', () => {
       const res = validateESHosts([]);
 
-      expect(res).toBeUndefined();
+      expect(res).toEqual([{ message: 'URL is required' }]);
     });
 
     it('should work with valid url', () => {
@@ -57,6 +57,12 @@ describe('Output form validation', () => {
   });
 
   describe('validateLogstashHosts', () => {
+    it('should not work without any urls', () => {
+      const res = validateLogstashHosts([]);
+
+      expect(res).toEqual([{ message: 'Host is required' }]);
+    });
+
     it('should work for valid hosts', () => {
       const res = validateLogstashHosts(['test.fr:5044']);
 
@@ -66,7 +72,7 @@ describe('Output form validation', () => {
       const res = validateLogstashHosts(['https://test.fr:5044']);
 
       expect(res).toEqual([
-        { index: 0, message: 'Invalid logstash host should not start with http(s)' },
+        { index: 0, message: 'Host address must begin with a domain name or IP address' },
       ]);
     });
 

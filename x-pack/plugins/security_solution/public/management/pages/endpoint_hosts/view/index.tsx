@@ -68,6 +68,8 @@ import {
   BackToExternalAppButton,
   BackToExternalAppButtonProps,
 } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { DevConsole } from './dev_console';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -131,6 +133,7 @@ export const EndpointList = () => {
     metadataTransformStats,
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
+  const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
@@ -149,6 +152,7 @@ export const EndpointList = () => {
       };
     }
 
+    // default back button is to the policy list
     const policyListPath = getPoliciesPath();
 
     return {
@@ -239,6 +243,23 @@ export const EndpointList = () => {
       },
     }
   );
+
+  const backToEndpointList: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    const endpointListPath = getEndpointListPath({ name: 'endpointList' }, searchParams);
+
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: endpointListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+        defaultMessage: 'View all endpoints',
+      }),
+      href: getAppUrl({ path: endpointListPath }),
+    };
+  }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
     dispatch({
@@ -361,6 +382,7 @@ export const EndpointList = () => {
                   policyId={policy.id}
                   className="eui-textTruncate"
                   data-test-subj="policyNameCellLink"
+                  backLink={backToEndpointList}
                 >
                   {policy.name}
                 </EndpointPolicyLink>
@@ -503,7 +525,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -530,7 +552,9 @@ export const EndpointList = () => {
       );
     } else {
       return (
-        <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        </ManagementEmptyStateWrapper>
       );
     }
   }, [
@@ -650,6 +674,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
+      hideHeader={!(endpointsExist || areEndpointsEnrolling)}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -664,6 +689,9 @@ export const EndpointList = () => {
       }
       headerBackComponent={routeState.backLink && backToPolicyList}
     >
+      {/* FIXME: Remove once Console is implemented via ConsoleManagementProvider */}
+      <DevConsole />
+
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (

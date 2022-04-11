@@ -18,7 +18,10 @@ import { SearchBar } from '../../shared/search_bar';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import { orderServiceItems } from './service_list/order_service_items';
 
 const initialData = {
   requestId: '',
@@ -35,19 +38,12 @@ function useServicesFetcher() {
       environment,
       kuery,
       serviceGroup,
+      offset,
       comparisonEnabled,
-      comparisonType,
     },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const sortedAndFilteredServicesFetch = useFetcher(
     (callApmApi) => {
@@ -108,7 +104,7 @@ function useServicesFetcher() {
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
-              offset,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         });
@@ -116,7 +112,7 @@ function useServicesFetcher() {
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, offset],
+    [mainStatisticsData.requestId, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -165,10 +161,36 @@ export function ServiceInventory() {
     />
   );
 
+  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
+  const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
+
+  const displayHealthStatus = [
+    ...mainStatisticsItems,
+    ...preloadedServices,
+  ].some((item) => 'healthStatus' in item);
+
+  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
+    apmServiceInventoryOptimizedSorting
+  )
+    ? ServiceInventoryFieldName.ServiceName
+    : ServiceInventoryFieldName.Throughput;
+
+  const initialSortField = displayHealthStatus
+    ? ServiceInventoryFieldName.HealthStatus
+    : tiebreakerField;
+
+  const initialSortDirection =
+    initialSortField === ServiceInventoryFieldName.ServiceName ? 'asc' : 'desc';
+
   const items = joinByKey(
     [
-      ...(sortedAndFilteredServicesFetch.data?.services ?? []),
-      ...(mainStatisticsFetch.data?.items ?? []),
+      // only use preloaded services if tiebreaker field is service.name,
+      // otherwise ignore them to prevent re-sorting of the table
+      // once the tiebreaking metric comes in
+      ...(tiebreakerField === ServiceInventoryFieldName.ServiceName
+        ? preloadedServices
+        : []),
+      ...mainStatisticsItems,
     ],
     'serviceName'
   );
@@ -191,6 +213,21 @@ export function ServiceInventory() {
             isLoading={isLoading}
             isFailure={isFailure}
             items={items}
+            comparisonDataLoading={
+              comparisonFetch.status === FETCH_STATUS.LOADING ||
+              comparisonFetch.status === FETCH_STATUS.NOT_INITIATED
+            }
+            displayHealthStatus={displayHealthStatus}
+            initialSortField={initialSortField}
+            initialSortDirection={initialSortDirection}
+            sortFn={(itemsToSort, sortField, sortDirection) => {
+              return orderServiceItems({
+                items: itemsToSort,
+                primarySortField: sortField,
+                sortDirection,
+                tiebreakerField,
+              });
+            }}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
           />

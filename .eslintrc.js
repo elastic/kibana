@@ -274,12 +274,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: [
-        '**/*.{js,mjs,ts,tsx}',
-        '!plugins/**/*',
-        '!packages/elastic-datemath/**/*',
-        '!packages/elastic-eslint-config-kibana/**/*',
-      ],
+      files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -309,8 +304,8 @@ module.exports = {
      */
     {
       files: [
-        'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
         'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
@@ -585,30 +580,6 @@ module.exports = {
     },
 
     /**
-     * Files that are allowed to import webpack-specific stuff
-     */
-    {
-      files: [
-        '**/public/**/*.js',
-        'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
-      ],
-      settings: {
-        // instructs import/no-extraneous-dependencies to treat certain modules
-        // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins'],
-
-        'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
-            forceNode: false,
-            rootPackageName: 'kibana',
-            kibanaPath: '.',
-            pluginMap: {},
-          },
-        },
-      },
-    },
-
-    /**
      * Single package.json rules, it tells eslint to ignore the child package.json files
      * and look for dependencies declarations in the single and root level package.json
      */
@@ -695,7 +666,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
@@ -1572,14 +1542,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
-      rules: {
-        'import/no-unresolved': [
-          'error',
-          {
-            ignore: ['!!raw-loader.+.svg$'],
-          },
-        ],
-      },
     },
     {
       files: ['x-pack/plugins/canvas/public/**/*.js'],

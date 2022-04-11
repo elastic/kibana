@@ -224,28 +224,28 @@ This example rule type receives server and threshold as parameters. It will read
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { RuleType, AlertExecutorOptions } from '../../../alerting/server';
+import { RuleType, RuleExecutorOptions } from '../../../alerting/server';
 // These type names will eventually be updated to reflect the new terminology
 import {
-	AlertTypeParams,
-	AlertTypeState,
+	RuleTypeParams,
+	RuleTypeState,
 	AlertInstanceState,
 	AlertInstanceContext,
 } from '../../../alerting/common';
 ...
-interface MyRuleTypeParams extends AlertTypeParams {
+interface MyRuleTypeParams extends RuleTypeParams {
 	server: string;
 	threshold: number;
 	testSavedObjectId: string;
 }
 
-interface MyRuleTypeExtractedParams extends AlertTypeParams {
+interface MyRuleTypeExtractedParams extends RuleTypeParams {
 	server: string;
 	threshold: number;
 	testSavedObjectRef: string;
 }
 
-interface MyRuleTypeState extends AlertTypeState {
+interface MyRuleTypeState extends RuleTypeState {
 	lastChecked: Date;
 }
 
@@ -306,7 +306,7 @@ const myRuleType: RuleType<
 		params,
 		state,
 		rule,
-	}: AlertExecutorOptions<
+	}: RuleExecutorOptions<
 		MyRuleTypeParams,
 		MyRuleTypeExtractedParams,
 		MyRuleTypeState,
@@ -643,6 +643,7 @@ When a user is granted the `read` role in the Alerting Framework, they will be a
 - `get`
 - `getRuleState`
 - `getAlertSummary`
+- `getExecutionLog`
 - `find`
 
 When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
@@ -676,8 +677,8 @@ The signature of such a handler is:
 
 ```typescript
 type AlertNavigationHandler = (
-  alert: SanitizedAlert,
-  alertType: RuleType
+  rule: SanitizedRule,
+  ruleType: RuleType
 ) => string;
 ```
 
@@ -691,7 +692,7 @@ The _registerNavigation_ api allows you to register a handler for a specific ale
 alerting.registerNavigation(
 	'my-application-id',
 	'my-application-id.my-rule-type',
-	(alert: SanitizedAlert) => `/my-unique-rule/${rule.id}`
+	(rule: SanitizedRule) => `/my-unique-rule/${rule.id}`
 );
 ```
 
@@ -707,7 +708,7 @@ The _registerDefaultNavigation_ API allows you to register a handler for any rul
 ```
 alerting.registerDefaultNavigation(
 	'my-application-id',
-	(alert: SanitizedAlert) => `/my-other-rules/${rule.id}`
+	(rule: SanitizedRule) => `/my-other-rules/${rule.id}`
 );
 ```
 

@@ -8,6 +8,7 @@
 import React, { RefObject } from 'react';
 import userEvent from '@testing-library/user-event';
 import {
+  mockAlerts,
   processMock,
   childProcessMock,
   sessionViewAlertProcessMock,
@@ -23,6 +24,7 @@ describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+
   const props: ProcessDeps = {
     process: processMock,
     scrollerRef: {
@@ -36,6 +38,7 @@ describe('ProcessTreeNode component', () => {
       },
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
@@ -61,7 +64,7 @@ describe('ProcessTreeNode component', () => {
     //   expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
     // });
 
-    it('renders Exec icon and exit code for executed process', async () => {
+    it('renders Exec icon', async () => {
       const executedProcessMock: typeof processMock = {
         ...processMock,
         hasExec: () => true,
@@ -72,29 +75,16 @@ describe('ProcessTreeNode component', () => {
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeTruthy();
-    });
-
-    it('does not render exit code if it does not exist', async () => {
-      const processWithoutExitCode: typeof processMock = {
-        ...processMock,
-        hasExec: () => true,
-        getDetails: () => ({
-          ...processMock.getDetails(),
-          process: {
-            ...processMock.getDetails().process,
-            exit_code: undefined,
-          },
-        }),
-      };
-
-      renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} process={processWithoutExitCode} />
-      );
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeFalsy();
     });
 
     it('calls onChangeJumpToEventVisibility with isVisible false if jumpToEvent is not visible', async () => {
+      const processWithAlerts: typeof processMock = {
+        ...processMock,
+        getAlerts: () => {
+          return mockAlerts;
+        },
+      };
+
       const onChangeJumpToEventVisibility = jest.fn();
       const scrollerRef = {
         current: {
@@ -110,13 +100,15 @@ describe('ProcessTreeNode component', () => {
       renderResult = mockedContext.render(
         <ProcessTreeNode
           {...props}
-          jumpToEventID={processMock.id}
+          process={processWithAlerts}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
           scrollerRef={scrollerRef}
           onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
         />
       );
 
       jest.advanceTimersByTime(DEBOUNCE_TIMEOUT);
+
       expect(onChangeJumpToEventVisibility).toHaveBeenCalled();
     });
 
@@ -132,7 +124,7 @@ describe('ProcessTreeNode component', () => {
           process: {
             ...processMock.getDetails().process,
             parent: {
-              ...processMock.getDetails().process.parent,
+              ...processMock.getDetails().process!.parent,
               user: {
                 name: 'test',
                 id: '1000',
@@ -202,10 +194,6 @@ describe('ProcessTreeNode component', () => {
       it('renders Alert button when process has one alert', async () => {
         const processMockWithOneAlert = {
           ...sessionViewAlertProcessMock,
-          events: sessionViewAlertProcessMock.events.slice(
-            0,
-            sessionViewAlertProcessMock.events.length - 1
-          ),
           getAlerts: () => [sessionViewAlertProcessMock.getAlerts()[0]],
         };
         renderResult = mockedContext.render(

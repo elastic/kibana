@@ -14,6 +14,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
@@ -42,6 +43,7 @@ import {
   fixLensTopValuesCustomFormatting,
   commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
+  commonSetIncludeEmptyRowsDateHistogram,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -477,6 +479,12 @@ const enhanceTableRowHeight: SavedObjectMigrationFn<LensDocShape810, LensDocShap
   return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
 };
 
+const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => {
+  return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
+};
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -491,7 +499,11 @@ const lensMigrations: SavedObjectMigrationMap = {
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
   '8.1.0': flow(renameFilterReferences, renameRecordsField, addParentFormatter),
-  '8.2.0': flow(setLastValueShowArrayValues, enhanceTableRowHeight),
+  '8.2.0': flow(
+    setLastValueShowArrayValues,
+    setIncludeEmptyRowsDateHistogram,
+    enhanceTableRowHeight
+  ),
 };
 
 export const getAllMigrations = (

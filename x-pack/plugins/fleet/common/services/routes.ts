@@ -18,6 +18,7 @@ import {
   OUTPUT_API_ROUTES,
   SETTINGS_API_ROUTES,
   APP_API_ROUTES,
+  K8S_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -140,6 +141,14 @@ export const agentPolicyRouteService = {
       '{agentPolicyId}',
       agentPolicyId
     );
+  },
+
+  getK8sInfoPath: () => {
+    return K8S_API_ROUTES.K8S_INFO_PATTERN;
+  },
+
+  getK8sFullDownloadPath: () => {
+    return K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN;
   },
 };
 

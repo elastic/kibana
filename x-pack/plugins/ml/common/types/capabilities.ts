@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
 import {
