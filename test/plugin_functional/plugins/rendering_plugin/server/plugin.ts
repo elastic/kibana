@@ -31,9 +31,9 @@ export class RenderingPlugin implements Plugin {
         const { isAnonymousPage } = req.query;
 
         if (isAnonymousPage) {
-          return res.renderAnonymousCoreApp();
+          return res.renderAnonymousCoreApp({ includeExposedConfigKeys: true });
         }
-        return res.renderCoreApp();
+        return res.renderCoreApp({ includeExposedConfigKeys: true });
       }
     );
   }
