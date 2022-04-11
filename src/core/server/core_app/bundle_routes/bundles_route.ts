@@ -6,29 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
-import { createDynamicAssetHandler } from './dynamic_asset_response';
-import { FileHashCache } from './file_hash_cache';
+// import { schema } from '@kbn/config-schema';
+import {
+  InternalHttpServiceSetup,
+  InternalHttpServicePreboot,
+  RegisterStaticDirCacheOptions,
+} from '../../http';
+// import { createDynamicAssetHandler } from './dynamic_asset_response';
+// import { FileHashCache } from './file_hash_cache';
+
+const SEC = 1000;
+const MINUTE = 60 * SEC;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 
 export function registerRouteForBundle(
-  router: IRouter,
+  http: InternalHttpServiceSetup | InternalHttpServicePreboot,
   {
-    publicPath,
+    // publicPath,
     routePath,
     bundlesPath,
-    fileHashCache,
+    // fileHashCache,
     isDist,
   }: {
-    publicPath: string;
+    // publicPath: string;
     routePath: string;
     bundlesPath: string;
-    fileHashCache: FileHashCache;
+    // fileHashCache: FileHashCache;
     isDist: boolean;
   }
 ) {
-  router.get(
-    {
+  const cache: RegisterStaticDirCacheOptions = isDist
+    ? { expiresIn: 365 * DAY, otherwise: 'immutable', privacy: 'public' }
+    : { otherwise: 'must-revalidate', privacy: 'public' };
+
+  http.registerStaticDir(`${routePath}{path*}`, bundlesPath, {
+    cache,
+    etagMethod: isDist ? false : 'hash',
+  });
+
+  /**
+   router.get(
+   {
       path: `${routePath}{path*}`,
       options: {
         authRequired: false,
@@ -39,11 +58,12 @@ export function registerRouteForBundle(
         }),
       },
     },
-    createDynamicAssetHandler({
+   createDynamicAssetHandler({
       publicPath,
       bundlesPath,
       isDist,
       fileHashCache,
     })
-  );
+   );
+   */
 }

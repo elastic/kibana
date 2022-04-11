@@ -11,9 +11,9 @@ import { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/utils';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { IRouter } from '../../http';
+import { InternalHttpServiceSetup, InternalHttpServicePreboot } from '../../http';
 import { UiPlugins } from '../../plugins';
-import { FileHashCache } from './file_hash_cache';
+// import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
 /**
@@ -27,13 +27,13 @@ import { registerRouteForBundle } from './bundles_route';
  *  @return Array.of({Hapi.Route})
  */
 export function registerBundleRoutes({
-  router,
-  serverBasePath,
+  http,
+  // serverBasePath,
   uiPlugins,
   packageInfo,
 }: {
-  router: IRouter;
-  serverBasePath: string;
+  http: InternalHttpServiceSetup | InternalHttpServicePreboot;
+  // serverBasePath: string;
   uiPlugins: UiPlugins;
   packageInfo: PackageInfo;
 }) {
@@ -41,36 +41,36 @@ export function registerBundleRoutes({
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the most recently used hashes.
-  const fileHashCache = new FileHashCache();
+  // const fileHashCache = new FileHashCache();
 
-  registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+  registerRouteForBundle(http, {
+    // publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
     routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
     bundlesPath: UiSharedDepsNpm.distDir,
-    fileHashCache,
+    // fileHashCache,
     isDist,
   });
-  registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+  registerRouteForBundle(http, {
+    // publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
     routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
     bundlesPath: UiSharedDepsSrc.distDir,
-    fileHashCache,
+    // fileHashCache,
     isDist,
   });
-  registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/core/`,
+  registerRouteForBundle(http, {
+    // publicPath: `${serverBasePath}/${buildNum}/bundles/core/`,
     routePath: `/${buildNum}/bundles/core/`,
     bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
-    fileHashCache,
+    // fileHashCache,
     isDist,
   });
 
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
-    registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
+    registerRouteForBundle(http, {
+      // publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
       routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
       bundlesPath: publicTargetDir,
-      fileHashCache,
+      // fileHashCache,
       isDist,
     });
   });

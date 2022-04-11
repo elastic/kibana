@@ -25,7 +25,6 @@ interface CommonRoutesParams {
   router: IRouter;
   httpResources: HttpResources;
   basePath: IBasePath;
-  uiPlugins: UiPlugins;
   onResourceNotFound: (
     req: KibanaRequest,
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
@@ -47,24 +46,23 @@ export class CoreApp {
 
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
-      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
-      this.registerStaticDirs(corePreboot);
+      this.registerPrebootDefaultRoutes(corePreboot);
+      this.registerStaticDirs(corePreboot, uiPlugins);
     }
   }
 
   setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
-    this.registerDefaultRoutes(coreSetup, uiPlugins);
-    this.registerStaticDirs(coreSetup);
+    this.registerDefaultRoutes(coreSetup);
+    this.registerStaticDirs(coreSetup, uiPlugins);
   }
 
-  private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
+  private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot) {
     corePreboot.http.registerRoutes('', (router) => {
       this.registerCommonDefaultRoutes({
         basePath: corePreboot.http.basePath,
         httpResources: corePreboot.httpResources.createRegistrar(router),
         router,
-        uiPlugins,
         onResourceNotFound: async (req, res) =>
           // THe API consumers might call various Kibana APIs (e.g. `/api/status`) when Kibana is still at the preboot
           // stage, and the main HTTP server that registers API handlers isn't up yet. At this stage we don't know if
@@ -83,7 +81,7 @@ export class CoreApp {
     });
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  private registerDefaultRoutes(coreSetup: InternalCoreSetup) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter('');
     const resources = coreSetup.httpResources.createRegistrar(router);
@@ -104,7 +102,6 @@ export class CoreApp {
       basePath: coreSetup.http.basePath,
       httpResources: resources,
       router,
-      uiPlugins,
       onResourceNotFound: async (req, res) => res.notFound(),
     });
 
@@ -143,7 +140,6 @@ export class CoreApp {
   private registerCommonDefaultRoutes({
     router,
     basePath,
-    uiPlugins,
     onResourceNotFound,
     httpResources,
   }: CommonRoutesParams) {
@@ -186,21 +182,20 @@ export class CoreApp {
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
-
-    registerBundleRoutes({
-      router,
-      uiPlugins,
-      packageInfo: this.env.packageInfo,
-      serverBasePath: basePath.serverBasePath,
-    });
   }
 
-  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
+  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
     core.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
 
     core.http.registerStaticDir(
       '/node_modules/@kbn/ui-framework/dist/{path*}',
       fromRoot('node_modules/@kbn/ui-framework/dist')
     );
+
+    registerBundleRoutes({
+      http: core.http,
+      uiPlugins,
+      packageInfo: this.env.packageInfo,
+    });
   }
 }

@@ -46,7 +46,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
+import { HttpServiceSetup, HttpServerInfo, HttpAuth, RegisterStaticDirOptions } from './types';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -63,7 +63,7 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouterAfterListening: (router: IRouter) => void;
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: (path: string, dirPath: string, options?: RegisterStaticDirOptions) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -472,13 +472,22 @@ export class HttpServer {
     });
   }
 
-  private registerStaticDir(path: string, dirPath: string) {
+  private registerStaticDir(
+    path: string,
+    dirPath: string,
+    { etagMethod = 'hash', cache }: RegisterStaticDirOptions = {}
+  ) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
     if (this.stopping || this.stopped) {
       this.log.warn(`registerStaticDir called after stop`);
     }
+
+    const { expiresIn, otherwise, privacy } = cache ?? {
+      otherwise: 'must-revalidate',
+      privacy: 'public',
+    };
 
     this.server.route({
       path,
@@ -488,13 +497,20 @@ export class HttpServer {
           path: dirPath,
           listing: false,
           lookupCompressed: true,
+          // @ts-expect-error missing from typedef
+          lookupMap: {
+            gzip: '.gz',
+            br: '.br',
+          },
+          etagMethod,
         },
       },
       options: {
         auth: false,
         cache: {
-          privacy: 'public',
-          otherwise: 'must-revalidate',
+          privacy,
+          otherwise,
+          expiresIn,
         },
       },
     });

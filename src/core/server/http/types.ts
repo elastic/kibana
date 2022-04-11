@@ -379,6 +379,21 @@ export interface HttpServiceSetup {
 }
 
 /** @internal */
+export interface RegisterStaticDirOptions {
+  etagMethod?: 'hash' | 'simple' | false;
+  cache?: RegisterStaticDirCacheOptions;
+}
+
+/** @internal */
+export interface RegisterStaticDirCacheOptions {
+  privacy?: 'default' | 'public' | 'private';
+  /**  relative expiration expressed in the number of milliseconds since the item was saved in the cache */
+  expiresIn?: number;
+  /**  a string with the value of the 'Cache-Control' header when caching is disabled */
+  otherwise?: string | undefined;
+}
+
+/** @internal */
 export interface InternalHttpServiceSetup
   extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
   auth: HttpServerSetup['auth'];
@@ -389,7 +404,7 @@ export interface InternalHttpServiceSetup
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
   registerRouterAfterListening: (router: IRouter) => void;
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: (path: string, dirPath: string, options?: RegisterStaticDirOptions) => void;
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,

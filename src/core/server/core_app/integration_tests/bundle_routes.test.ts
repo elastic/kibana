@@ -12,10 +12,9 @@ import supertest from 'supertest';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { HttpService, IRouter } from '../../http';
+import { HttpService, InternalHttpServicePreboot, InternalHttpServiceSetup } from '../../http';
 import { createHttpServer } from '../../http/test_utils';
 import { registerRouteForBundle } from '../bundle_routes/bundles_route';
-import { FileHashCache } from '../bundle_routes/file_hash_cache';
 
 const buildNum = 1234;
 const fooPluginFixture = resolve(__dirname, './__fixtures__/plugin/foo');
@@ -24,12 +23,10 @@ describe('bundle routes', () => {
   let server: HttpService;
   let contextSetup: ReturnType<typeof contextServiceMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.create>;
-  let fileHashCache: FileHashCache;
 
   beforeEach(async () => {
     contextSetup = contextServiceMock.createSetupContract();
     logger = loggingSystemMock.create();
-    fileHashCache = new FileHashCache();
 
     server = createHttpServer({ logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
@@ -40,28 +37,26 @@ describe('bundle routes', () => {
   });
 
   const registerFooPluginRoute = (
-    router: IRouter,
+    http: InternalHttpServiceSetup | InternalHttpServicePreboot,
     { isDist = false }: { isDist?: boolean } = {}
   ) => {
-    registerRouteForBundle(router, {
+    registerRouteForBundle(http, {
       isDist,
-      fileHashCache,
       bundlesPath: fooPluginFixture,
       routePath: `/${buildNum}/bundles/plugin/foo/`,
-      publicPath: `/${buildNum}/bundles/plugin/foo/`,
     });
   };
 
   it('serves images inside from the bundle path', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const setup = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(setup);
     await server.start();
 
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(setup.server.listener)
       .get(`/${buildNum}/bundles/plugin/foo/image.png`)
       .expect(200);
 
@@ -71,15 +66,15 @@ describe('bundle routes', () => {
   });
 
   it('serves uncompressed js files', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const setup = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(setup);
     await server.start();
 
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(setup.server.listener)
       .get(`/${buildNum}/bundles/plugin/foo/plugin.js`)
       .expect(200);
 
@@ -89,43 +84,43 @@ describe('bundle routes', () => {
   });
 
   it('returns 404 for files outside of the bundlePath', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const setup = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(setup);
     await server.start();
 
-    await supertest(innerServer.listener)
+    await supertest(setup.server.listener)
       .get(`/${buildNum}/bundles/plugin/foo/../outside_output.js`)
       .expect(404);
   });
 
   it('returns 404 for non-existing files', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const setup = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(setup);
     await server.start();
 
-    await supertest(innerServer.listener)
+    await supertest(setup.server.listener)
       .get(`/${buildNum}/bundles/plugin/foo/missing.js`)
       .expect(404);
   });
 
   it('returns gzip version if present', async () => {
-    const { server: innerServer, createRouter } = await server.setup({
+    const setup = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
-    registerFooPluginRoute(createRouter(''));
+    registerFooPluginRoute(setup);
     await server.start();
 
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(setup.server.listener)
       .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
       .expect(200);
 
@@ -142,15 +137,15 @@ describe('bundle routes', () => {
 
   describe('in production mode', () => {
     it('uses max-age cache-control', async () => {
-      const { server: innerServer, createRouter } = await server.setup({
+      const setup = await server.setup({
         context: contextSetup,
         executionContext: executionContextServiceMock.createInternalSetupContract(),
       });
 
-      registerFooPluginRoute(createRouter(''), { isDist: true });
+      registerFooPluginRoute(setup, { isDist: true });
       await server.start();
 
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(setup.server.listener)
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
@@ -161,15 +156,15 @@ describe('bundle routes', () => {
 
   describe('in development mode', () => {
     it('uses etag cache-control', async () => {
-      const { server: innerServer, createRouter } = await server.setup({
+      const setup = await server.setup({
         context: contextSetup,
         executionContext: executionContextServiceMock.createInternalSetupContract(),
       });
 
-      registerFooPluginRoute(createRouter(''), { isDist: false });
+      registerFooPluginRoute(setup, { isDist: false });
       await server.start();
 
-      const response = await supertest(innerServer.listener)
+      const response = await supertest(setup.server.listener)
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 

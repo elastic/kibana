@@ -93,6 +93,8 @@ export type {
   HttpServiceStart,
   InternalHttpServiceStart,
   HttpServerInfo,
+  RegisterStaticDirOptions,
+  RegisterStaticDirCacheOptions,
 } from './types';
 export { BasePath } from './base_path_service';
 export type { IBasePath } from './base_path_service';
