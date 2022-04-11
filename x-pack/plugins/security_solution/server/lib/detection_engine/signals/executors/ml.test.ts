@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
 import { mlExecutor } from './ml';
