@@ -92,8 +92,16 @@ export const usePollingIncomingData = (agentsIds: string[]) => {
         const { data } = await sendGetAgentIncomingData({ agentsIds });
 
         if (data?.items) {
-          setIncomingData(data?.items);
-          setIsLoading(false);
+          // filter out agents that have `data = false` and keep polling
+          const filtered = data?.items.filter((item) => {
+            const key = Object.keys(item)[0];
+            return item[key].data === true;
+          });
+
+          if (filtered.length > 0) {
+            setIncomingData(filtered);
+            setIsLoading(false);
+          }
         }
         if (!isAborted) {
           poll();
