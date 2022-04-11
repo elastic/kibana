@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "ts_project", "pkg_npm", "pkg_npm_types")
 
-PKG_BASE_NAME = "elastic-datemath"
-PKG_REQUIRE_NAME = "@elastic/datemath"
+PKG_BASE_NAME = "kbn-datemath"
+PKG_REQUIRE_NAME = "@kbn/datemath"
 
 SOURCE_FILES = glob([
   "src/index.ts",
