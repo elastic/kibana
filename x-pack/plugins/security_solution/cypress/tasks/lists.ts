@@ -16,7 +16,16 @@ import {
   VALUE_LIST_TYPE_SELECTOR,
 } from '../screens/lists';
 
-export const waitForListsIndexToBeCreated = () => {
+export const createListsIndex = () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/lists/index',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+};
+
+export const waitForListsIndex = () => {
   cy.request({ url: '/api/lists/index', retryOnStatusCodeFailure: true }).then((response) => {
     if (response.status !== 200) {
       cy.wait(7500);
@@ -30,11 +39,11 @@ export const waitForValueListsModalToBeLoaded = () => {
 };
 
 export const openValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click();
+  return cy.get(VALUE_LISTS_MODAL_ACTIVATOR).click({ force: true });
 };
 
 export const closeValueListsModal = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(VALUE_LIST_CLOSE_BUTTON).click();
+  return cy.get(VALUE_LIST_CLOSE_BUTTON).click({ force: true });
 };
 
 export const selectValueListsFile = (file: string): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -109,6 +118,7 @@ export const uploadListItemData = (
       'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
     },
     body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
+    retryOnStatusCodeFailure: true,
   });
 };
 
@@ -136,7 +146,6 @@ export const checkListItemData = (
     testSuggestions == null
       ? data.split('\n').filter((line) => line.trim() !== '')
       : testSuggestions;
-
   return cy.wrap(importCheckLines).each((line) => {
     return cy
       .request({
@@ -170,12 +179,8 @@ export const importValueList = (
   file: string,
   type: string,
   testSuggestions: string[] | undefined = undefined
-): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy
-    .fixture<string>(file)
-    .then((data) => uploadListItemData(file, type, data))
-    .fixture<string>(file)
-    .then((data) => checkListItemData(file, data, testSuggestions));
+) => {
+  return cy.fixture<string>(file).then((data) => uploadListItemData(file, type, data));
 };
 
 /**
