@@ -26,6 +26,13 @@ import { TimelineId, TimelineType } from '../../../../common/types';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import {
+  BadCurrentPatternsMessage,
+  CurrentPatternsMessage,
+  DeprecatedMessage,
+  MissingPatternsMessage,
+  NoMatchDataMessage,
+} from './utils';
 
 interface Props {
   activePatterns?: string[];
@@ -52,65 +59,6 @@ const translations = {
       [TimelineType.template]: i18n.CALL_OUT_MISSING_PATTERNS_TEMPLATE_TITLE,
     },
     update: i18n.ADD_INDEX_PATTERN,
-  },
-};
-
-const messages = {
-  currentPatterns: {
-    [TimelineType.default]: {
-      id: 'xpack.securitySolution.indexPatterns.currentPatterns',
-      defaultMessage: 'The active index patterns in this timeline are{tooltip}: {callout}',
-    },
-    [TimelineType.template]: {
-      id: 'xpack.securitySolution.indexPatterns.timelineTemplate.currentPatterns',
-      defaultMessage: 'The active index patterns in this timeline template are{tooltip}: {callout}',
-    },
-  },
-  noMatchData: {
-    [TimelineType.default]: {
-      id: 'xpack.securitySolution.indexPatterns.noMatchData',
-      defaultMessage:
-        'The following index patterns are saved to this timeline but do not match any data streams, indices, or index aliases: {aliases}',
-    },
-    [TimelineType.template]: {
-      id: 'xpack.securitySolution.indexPatterns.timelineTemplate.noMatchData',
-      defaultMessage:
-        'The following index patterns are saved to this timeline template but do not match any data streams, indices, or index aliases: {aliases}',
-    },
-  },
-  badCurrentPatterns: {
-    [TimelineType.default]: {
-      id: 'xpack.securitySolution.indexPatterns.currentPatternsBad',
-      defaultMessage: 'The current index patterns in this timeline are: {callout}',
-    },
-    [TimelineType.template]: {
-      id: 'xpack.securitySolution.indexPatterns.timelineTemplate.currentPatternsBad',
-      defaultMessage: 'The current index patterns in this timeline template are: {callout}',
-    },
-  },
-  deprecated: {
-    [TimelineType.default]: {
-      id: 'xpack.securitySolution.indexPatterns.toggleToNewSourcerer',
-      defaultMessage:
-        "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}.",
-    },
-    [TimelineType.template]: {
-      id: 'xpack.securitySolution.indexPatterns.timelineTemplate.toggleToNewSourcerer',
-      defaultMessage:
-        "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}.",
-    },
-  },
-  missingPatterns: {
-    [TimelineType.default]: {
-      id: 'xpack.securitySolution.indexPatterns.missingPatterns.description',
-      defaultMessage:
-        "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}.",
-    },
-    [TimelineType.template]: {
-      id: 'xpack.securitySolution.indexPatterns.missingPatterns.timelineTemplate.description',
-      defaultMessage:
-        "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}.",
-    },
   },
 };
 
@@ -175,18 +123,15 @@ export const TemporarySourcererComp = React.memo<Props>(
           <EuiTextColor color="subdued">
             <p>
               {activePatterns && activePatterns.length > 0 ? (
-                <FormattedMessage
-                  data-test-subj="sourcerer-current-patterns-message"
-                  id={messages.currentPatterns[timelineType].id}
-                  defaultMessage={messages.currentPatterns[timelineType].defaultMessage}
+                <CurrentPatternsMessage
+                  timelineType={timelineType}
                   values={{
                     tooltip:
                       deadPatterns.length > 0 ? (
                         <EuiToolTip
                           content={
-                            <FormattedMessage
-                              id={messages.noMatchData[timelineType].id}
-                              defaultMessage={messages.noMatchData[timelineType].defaultMessage}
+                            <NoMatchDataMessage
+                              timelineType={timelineType}
                               values={{
                                 aliases: selectedPatterns
                                   .filter((p) => !activePatterns.includes(p))
@@ -202,9 +147,8 @@ export const TemporarySourcererComp = React.memo<Props>(
                   }}
                 />
               ) : (
-                <FormattedMessage
-                  id={messages.badCurrentPatterns[timelineType].id}
-                  defaultMessage={messages.badCurrentPatterns[timelineType].defaultMessage}
+                <BadCurrentPatternsMessage
+                  timelineType={timelineType}
                   values={{
                     callout: <Blockquote>{selectedPatterns.join(', ')}</Blockquote>,
                   }}
@@ -212,10 +156,8 @@ export const TemporarySourcererComp = React.memo<Props>(
               )}
 
               {isModified === 'deprecated' && (
-                <FormattedMessage
-                  data-test-subj="sourcerer-deprecated-message"
-                  id={messages.deprecated[timelineType].id}
-                  defaultMessage={messages.deprecated[timelineType].defaultMessage}
+                <DeprecatedMessage
+                  timelineType={timelineType}
                   values={{
                     link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
                   }}
@@ -231,10 +173,8 @@ export const TemporarySourcererComp = React.memo<Props>(
                       callout: <Blockquote>{missingPatterns.join(', ')}</Blockquote>,
                     }}
                   />
-                  <FormattedMessage
-                    data-test-subj="sourcerer-missing-patterns-message"
-                    id={messages.missingPatterns[timelineType].id}
-                    defaultMessage={messages.missingPatterns[timelineType].defaultMessage}
+                  <MissingPatternsMessage
+                    timelineType={timelineType}
                     values={{
                       link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
                     }}
