@@ -19773,7 +19773,6 @@
     "xpack.securitySolution.authenticationsTable.rows": "{numRows} {numRows, plural, =0 {ligne} =1 {ligne} other {lignes}}",
     "xpack.securitySolution.authenticationsTable.successes": "Réussites",
     "xpack.securitySolution.authenticationsTable.uncommonProcessTable": "Processus inhabituels",
-    "xpack.securitySolution.authenticationsTable.unit": "{totalCount, plural, =1 {utilisateur} other {utilisateurs}}",
     "xpack.securitySolution.authenticationsTable.user": "Utilisateur",
     "xpack.securitySolution.authz.mlUnavailable": "Le plug-in de Machine Learning n'est pas disponible. Essayez d'activer le plug-in.",
     "xpack.securitySolution.authz.userIsNotMlAdminMessage": "L'utilisateur actuel n'est pas un administrateur de Machine Learning.",
