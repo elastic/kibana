@@ -80,7 +80,6 @@ export class ScalingForm extends Component<Props, State> {
         optionId,
         i18n.translate('xpack.maps.source.esSearch.clusterScalingJoinMsg', {
           defaultMessage: `Scaling with clusters does not support term joins. Switching to clusters will remove all term joins from your layer configuration.`,
-          values: { clustersLabel: this._getClustersOptionLabel() },
         })
       );
     } else if (this.props.numberOfJoins > 1 && optionId === SCALING_TYPES.MVT) {

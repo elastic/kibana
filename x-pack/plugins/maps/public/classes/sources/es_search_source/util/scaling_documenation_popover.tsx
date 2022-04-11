@@ -88,31 +88,31 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.maps.scalingDocs.limitUseCase"
+                  id="xpack.maps.scalingDocs.limitUseCases"
                   defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
                 />
                 <ul>
                   <li>
                     <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase"
+                      id="xpack.maps.scalingDocs.limitUseCase.formatLabels"
                       defaultMessage="Formatted labels"
                     />
                   </li>
                   <li>
                     <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase"
+                      id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
                       defaultMessage="Multiple term joins"
                     />
                   </li>
                   <li>
                     <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase"
+                      id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
                       defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
                     />
                   </li>
                   <li>
                     <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase"
+                      id="xpack.maps.scalingDocs.limitUseCase.scriptedFields"
                       defaultMessage="Data driven styling from scripted fields"
                     />
                   </li>
