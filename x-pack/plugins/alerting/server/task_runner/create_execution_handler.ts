@@ -9,12 +9,7 @@ import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../types';
+import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
 
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
@@ -26,9 +21,9 @@ export type ExecutionHandler<ActionGroupIds extends string> = (
 ) => Promise<void>;
 
 export function createExecutionHandler<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,

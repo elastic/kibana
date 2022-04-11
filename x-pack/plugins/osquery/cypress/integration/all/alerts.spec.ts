@@ -17,6 +17,8 @@ import {
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
+import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { ROLES } from '../../test';
 
 describe('Alert Event Details', () => {
   before(() => {
@@ -24,7 +26,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
   });
 
   after(() => {
@@ -58,8 +60,16 @@ describe('Alert Event Details', () => {
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
+    cy.contains('1 agent selected.');
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
+
+    cy.getBySel(RESULTS_TABLE).within(() => {
+      cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
+    });
+    cy.contains('Save for later').click();
+    cy.contains('Save query');
+    cy.contains(/^Save$/);
   });
 });

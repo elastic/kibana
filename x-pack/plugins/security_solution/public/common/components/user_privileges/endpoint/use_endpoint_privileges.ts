@@ -18,6 +18,7 @@ import {
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
 import { FleetAuthz } from '../../../../../../fleet/common';
+import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -27,13 +28,19 @@ import { FleetAuthz } from '../../../../../../fleet/common';
  */
 export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const user = useCurrentUser();
-  const fleetServices = useKibana().services.fleet;
+  const fleetServicesFromUseKibana = useKibana().services.fleet;
+  // The `fleetServicesFromPluginStart` will be defined when this hooks called from a component
+  // that is being rendered under the Fleet context (UI extensions). The `fleetServicesFromUseKibana`
+  // above will be `undefined` in this case.
+  const fleetServicesFromPluginStart = useSecuritySolutionStartDependencies()?.fleet;
   const isMounted = useRef<boolean>(true);
   const licenseService = useLicense();
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
   const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
   const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
+
+  const fleetServices = fleetServicesFromUseKibana ?? fleetServicesFromPluginStart;
 
   const privileges = useMemo(() => {
     const privilegeList: EndpointPrivileges = Object.freeze({
