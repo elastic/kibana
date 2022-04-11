@@ -15,8 +15,7 @@ if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
   FULL_VERSION="$QUALIFIER_VERSION"
 
   # Beats artifacts will need to match a specific commit sha that matches other stack images
-  # for release builds.
-  # For now we are skipping staging Cloud builds until there's a pointer.
+  # for release builds.  For now we are skipping Cloud builds until there's a pointer.
   BUILD_ARGS="--release --skip-docker-cloud --version-qualifier=$VERSION_QUALIFIER"
   WORKFLOW="staging"
 else
