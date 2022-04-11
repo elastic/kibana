@@ -43,19 +43,19 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
       <div>
         <EuiText grow={false}>
           <dl>
-            <dt>{this.props.mvtOptionLabel}</dt>
+            <dt>{this.props.mvtOptionLabel} (Default)</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtDetails"
-                  defaultMessage="Partition your map into tiles, with each tile displaying features from the first {maxResultWindow} documents. Results exceeding {maxResultWindow} are not displayed in a tile. A bounding box indicates the area where data is incomplete."
+                  defaultMessage="Vector tiles partition your map into tiles, with each tile displaying features from the first {maxResultWindow} documents. Results exceeding {maxResultWindow} are not displayed in a tile. A bounding box indicates the area where data is incomplete."
                   values={{ maxResultWindow: this.props.maxResultWindow }}
                 />
               </p>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtUseCase"
-                  defaultMessage="Use this option to display large data sets with the fastest loading times. Does not support formatted labels and data driven styling from scripted fields."
+                  defaultMessage="Use this option to display large data sets with the fastest loading times."
                 />
               </p>
             </dd>
@@ -89,8 +89,34 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.limitUseCase"
-                  defaultMessage="Use this option to dislay formatted labels."
+                  defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
                 />
+                  <ul>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.maps.scalingDocs.limitUseCase"
+                        defaultMessage="Formatted labels"
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.maps.scalingDocs.limitUseCase"
+                        defaultMessage="Multiple term joins"
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.maps.scalingDocs.limitUseCase"
+                        defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.maps.scalingDocs.limitUseCase"
+                        defaultMessage="Data driven styling from scripted fields"
+                      />
+                    </li>
+                  </ul>
               </p>
             </dd>
           </dl>
