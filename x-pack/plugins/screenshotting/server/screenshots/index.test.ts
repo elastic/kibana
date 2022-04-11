@@ -6,7 +6,7 @@
  */
 
 import { of, throwError } from 'rxjs';
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from 'src/core/server';
 import { httpServiceMock } from 'src/core/server/mocks';
 import {
   SCREENSHOTTING_APP_ID,
@@ -31,6 +31,7 @@ describe('Screenshot Observable Pipeline', () => {
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
   let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
+  let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
   let screenshots: Screenshots;
 
@@ -44,6 +45,13 @@ describe('Screenshot Observable Pipeline', () => {
       error: jest.fn(),
       info: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
+    packageInfo = {
+      branch: 'screenshot-test',
+      buildNum: 567891011,
+      buildSha: 'screenshot-dfdfed0a',
+      dist: false,
+      version: '5000.0.0',
+    };
     options = {
       browserTimezone: 'UTC',
       headers: {},
@@ -56,7 +64,9 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
-    screenshots = new Screenshots(driverFactory, logger, http, { poolSize: 1 } as ConfigType);
+    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, {
+      poolSize: 1,
+    } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
