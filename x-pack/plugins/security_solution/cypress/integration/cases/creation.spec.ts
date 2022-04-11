@@ -49,12 +49,12 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
 describe('Cases', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
       cy
@@ -70,7 +70,8 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
-    loginAndWaitForPageWithoutDateRange(CASES_URL);
+    login();
+    visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
     attachTimeline(this.mycase);

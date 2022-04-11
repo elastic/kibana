@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
@@ -124,9 +125,10 @@ describe('Favorite Button', () => {
         </TestProviders>
       );
 
-      wrapper.simulate('click');
-
-      expect(spy).toHaveBeenCalled();
+      waitFor(() => {
+        wrapper.simulate('click');
+        expect(spy).toHaveBeenCalled();
+      });
     });
 
     test('should disable favorite button with filled star', () => {
