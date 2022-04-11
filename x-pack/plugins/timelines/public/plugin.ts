@@ -25,7 +25,7 @@ import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './type
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
-import { getHoverActions } from './components/hover_actions';
+import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
