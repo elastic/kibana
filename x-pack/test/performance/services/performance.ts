@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import Url from 'url';
 import { inspect } from 'util';
 import apm, { Span, Transaction } from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
@@ -20,6 +21,7 @@ apm.start({
 
 export interface StepCtx {
   page: Page;
+  kibanaUrl: string;
 }
 
 type StepFn = (ctx: StepCtx) => Promise<void>;
@@ -27,6 +29,7 @@ export type Steps = Array<{ name: string; handler: StepFn }>;
 
 export class PerformanceTestingService extends FtrService {
   private readonly auth = this.ctx.getService('auth');
+  private readonly config = this.ctx.getService('config');
 
   private browser: ChromiumBrowser | undefined;
   private currentSpanStack: Array<Span | null> = [];
@@ -34,6 +37,14 @@ export class PerformanceTestingService extends FtrService {
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
+  }
+
+  private getKibanaUrl() {
+    return Url.format({
+      protocol: this.config.get('servers.kibana.protocol'),
+      hostname: this.config.get('servers.kibana.hostname'),
+      port: this.config.get('servers.kibana.port'),
+    });
   }
 
   private async withTransaction<T>(name: string, block: () => Promise<T>) {
@@ -135,6 +146,7 @@ export class PerformanceTestingService extends FtrService {
       const browser = await this.getBrowserInstance();
       const viewport = { width: 1600, height: 1200 };
       const context = await browser.newContext({ viewport });
+
       if (!requireAuth) {
         const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
         await context.addCookies([cookie]);
@@ -171,7 +183,7 @@ export class PerformanceTestingService extends FtrService {
     for (const step of steps) {
       await this.withSpan(`step: ${step.name}`, 'step', async () => {
         try {
-          await step.handler({ page });
+          await step.handler({ page, kibanaUrl: this.getKibanaUrl() });
         } catch (e) {
           const error = new Error(`Step [${step.name}] failed: ${e.message}`);
           error.stack = e.stack;
@@ -190,7 +202,7 @@ export class PerformanceTestingService extends FtrService {
         const location = `${url},${lineNumber},${columnNumber}`;
 
         const text = args.length
-          ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg))).join(' ')
+          ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
           : message.text();
 
         console.log(`[console.${message.type()}]`, text);

@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Url from 'url';
-import { Page } from 'playwright';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { StepCtx } from '../../services/performance';
 
 export default function ecommerceDashboard({ getService }: FtrProviderContext) {
   describe('login', () => {
     it('login', async () => {
-      const config = getService('config');
       const inputDelays = getService('inputDelays');
       const performance = getService('performance');
 
@@ -20,13 +18,7 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
         [
           {
             name: 'Login',
-            handler: async ({ page }: { page: Page }) => {
-              const kibanaUrl = Url.format({
-                protocol: config.get('servers.kibana.protocol'),
-                hostname: config.get('servers.kibana.hostname'),
-                port: config.get('servers.kibana.port'),
-              });
-
+            handler: async ({ page, kibanaUrl }: StepCtx) => {
               await page.goto(`${kibanaUrl}`);
 
               const usernameLocator = page.locator('[data-test-subj=loginUsername]');

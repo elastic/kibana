@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { StepCtx } from '../../services/performance';
 
 export default function weblogDashboard({ getService }: FtrProviderContext) {
   describe('weblogs_dashboard', () => {
     it('weblogs_dashboard', async () => {
-      const config = getService('config');
       const performance = getService('performance');
       const logger = getService('log');
 
@@ -19,13 +18,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
         [
           {
             name: 'Go to Sample Data Page',
-            handler: async ({ page }) => {
-              const kibanaUrl = Url.format({
-                protocol: config.get('servers.kibana.protocol'),
-                hostname: config.get('servers.kibana.hostname'),
-                port: config.get('servers.kibana.port'),
-              });
-
+            handler: async ({ page, kibanaUrl }: StepCtx) => {
               await page.goto(`${kibanaUrl}/app/home#/tutorial_directory/sampleData`);
               await page.waitForSelector('text="More ways to add data"');
             },
@@ -52,7 +45,7 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
               await page.click('[data-test-subj=launchSampleDataSetlogs]');
               await page.click('[data-test-subj=viewSampleDataSetlogs-dashboard]');
 
-              await page.waitForFunction(() => {
+              await page.waitForFunction(function renderCompleted() {
                 const visualizations = Array.from(
                   document.querySelectorAll('[data-rendering-count]')
                 );

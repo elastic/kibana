@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { StepCtx } from '../../services/performance';
 
 export default function promotionTrackingDashboard({ getService }: FtrProviderContext) {
   describe('promotion_tracking_dashboard', () => {
-    const config = getService('config');
     const performance = getService('performance');
     const esArchiver = getService('esArchiver');
     const kibanaServer = getService('kibanaServer');
@@ -34,13 +33,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
         [
           {
             name: 'Go to Dashboards Page',
-            handler: async ({ page }) => {
-              const kibanaUrl = Url.format({
-                protocol: config.get('servers.kibana.protocol'),
-                hostname: config.get('servers.kibana.hostname'),
-                port: config.get('servers.kibana.port'),
-              });
-
+            handler: async ({ page, kibanaUrl }: StepCtx) => {
               await page.goto(`${kibanaUrl}/app/dashboards`);
               await page.waitForSelector('#dashboardListingHeading');
             },
@@ -71,7 +64,7 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
           {
             name: 'Wait for visualization animations to finish',
             handler: async ({ page }) => {
-              await page.waitForFunction(() => {
+              await page.waitForFunction(function renderCompleted() {
                 const visualizations = Array.from(
                   document.querySelectorAll('[data-rendering-count]')
                 );
