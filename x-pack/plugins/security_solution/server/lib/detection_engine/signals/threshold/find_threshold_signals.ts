@@ -99,9 +99,14 @@ export const findThresholdSignals = async ({
   // TODO: handle when no threshold fields are provided
   const aggregations = {
     thresholdTerms: {
-      multi_terms: {
-        terms: thresholdFields.map((term) => ({ field: term })),
-        min_doc_count: threshold.value,
+      composite: {
+        sources: thresholdFields.map((term, i) => ({
+          [term]: {
+            terms: {
+              field: term,
+            },
+          },
+        })),
         ...(threshold.cardinality?.length ? { order: { cardinality_count: 'desc' } } : {}),
         size: 10000,
       },

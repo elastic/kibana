@@ -147,17 +147,17 @@ const getTransformedHits = (
     ),
     _source: {
       [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
-      ...bucket.key.reduce(
-        (acc, val, j) => ({
+      ...Object.keys(bucket.key).reduce(
+        (acc, val) => ({
           ...acc,
-          [threshold.field[j]]: val,
+          [val]: bucket.key[val],
         }),
         {}
       ),
       threshold_result: {
-        terms: bucket.key.map((term, j) => ({
-          field: threshold.field[j],
-          value: term,
+        terms: Object.keys(bucket.key).map((term, j) => ({
+          field: term,
+          value: bucket.key[term],
         })),
         cardinality: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
         count: bucket.doc_count,
