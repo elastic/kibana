@@ -85,8 +85,9 @@ export function parseClientOptions(
         password: config.password,
       };
     } else if (config.serviceAccountToken) {
-      // TODO: change once ES client has native support for service account tokens: https://github.com/elastic/elasticsearch-js/issues/1477
-      clientOptions.headers!.authorization = `Bearer ${config.serviceAccountToken}`;
+      clientOptions.auth = {
+        bearer: config.serviceAccountToken,
+      };
     }
   }
 
