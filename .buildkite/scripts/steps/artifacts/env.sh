@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
+RELEASE_BUILD="${RELEASE_BUILD:="false"}"
+VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
+
 BASE_VERSION="$(jq -r '.version' package.json)"
-VERSION_QUALIFIER="${VERSION_QUALIFIER:=}"
 
 if [[ "$VERSION_QUALIFIER" == "" ]]; then
   QUALIFIER_VERSION="$BASE_VERSION"
@@ -11,7 +13,7 @@ else
   QUALIFIER_VERSION="$BASE_VERSION-$VERSION_QUALIFIER"
 fi
 
-if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
+if [[ "$RELEASE_BUILD" == "true" ]]; then
   FULL_VERSION="$QUALIFIER_VERSION"
 
   # Beats artifacts will need to match a specific commit sha that matches other stack images
