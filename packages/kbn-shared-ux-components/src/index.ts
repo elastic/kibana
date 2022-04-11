@@ -10,7 +10,7 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 /**
- * The Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspennse` or the
+ * The Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspense` or the
  * `withSuspense` HOC to load this component.
  */
 export const LazyExitFullScreenButton = React.lazy(() =>
@@ -42,12 +42,12 @@ export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 export const ToolbarButton = withSuspense(LazyToolbarButton);
 
 /**
- * An example of the solution toolbar button
+ * An example of the toolbar button and popover
  */
-export { AddFromLibraryButton } from './toolbar';
+export { AddFromLibraryButton, ToolbarPopover } from './toolbar';
 
 /**
- * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
+ * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspense` or the
  * `withSuspense` HOC to load this component.
  */
 export const LazyNoDataViews = React.lazy(() =>
@@ -64,7 +64,7 @@ export const LazyNoDataViews = React.lazy(() =>
 export const NoDataViews = withSuspense(LazyNoDataViews);
 
 /**
- * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspennse` or the
+ * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspense` or the
  * `withSuspense` HOC to load this component.
  */
 export const LazyNoDataViewsComponent = React.lazy(() =>
@@ -81,7 +81,7 @@ export const LazyNoDataViewsComponent = React.lazy(() =>
 export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
 
 /**
- * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspennse` or the
+ * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspense` or the
  * `withSuspense` HOC to load this component.
  */
 export const LazyIconButtonGroup = React.lazy(() =>

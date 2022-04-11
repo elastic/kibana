@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
