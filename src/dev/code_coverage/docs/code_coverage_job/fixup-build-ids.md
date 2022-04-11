@@ -40,3 +40,28 @@ return buildNum(params.ciRunUrl)
   }
 }
 ```
+
+### Actual   
+Against a copy of the production cluster
+```
+POST kibana_code_coverage/_update_by_query?wait_for_completion=false&refresh=true
+{
+  "query": {
+    "regexp": {
+      "BUILD_ID": {
+        "value": "[a-z0-9]*"
+      }
+    }
+  },
+  "script": {
+    "lang": "painless",
+    "source": """
+    
+def buildNum(def x) { /(.*\/)(\d*$)/.matcher(x).replaceAll('$2') }
+
+ctx._source.BUILD_ID = buildNum(ctx._source.ciRunUrl)
+
+    """
+  }
+}
+```
