@@ -659,7 +659,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:04.218Z'),
+        original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
           action: 'exec',
         },
@@ -844,7 +844,7 @@ export const mockAlerts: ProcessEvent[] = [
         status: 'active',
         workflow_status: 'open',
         reason: 'process event created low alert cmd test alert.',
-        original_time: new Date('2021-11-23T15:25:05.202Z'),
+        original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
           action: 'exit',
         },
@@ -1325,6 +1325,7 @@ export const childProcessMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
 };
 
 export const processMock: Process = {
@@ -1497,6 +1498,7 @@ export const processMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
 };
 
 export const sessionViewBasicProcessMock: Process = {
@@ -1504,6 +1506,7 @@ export const sessionViewBasicProcessMock: Process = {
   events: mockEvents,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const sessionViewAlertProcessMock: Process = {
@@ -1514,6 +1517,7 @@ export const sessionViewAlertProcessMock: Process = {
   getAlerts: () => mockAlerts,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const mockProcessMap = mockEvents.reduce(
@@ -1540,6 +1544,7 @@ export const mockProcessMap = mockEvents.reduce(
       getDetails: () => event,
       isUserEntered: () => false,
       getMaxAlertLevel: () => null,
+      getEndTime: () => '',
     };
     return processMap;
   },

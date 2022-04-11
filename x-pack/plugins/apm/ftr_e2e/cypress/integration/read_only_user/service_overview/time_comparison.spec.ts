@@ -50,7 +50,7 @@ const apisToIntercept = [
   },
 ];
 
-describe('Service overview: Time Comparison', () => {
+describe.skip('Service overview: Time Comparison', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({

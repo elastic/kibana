@@ -23,7 +23,7 @@ const serviceInventoryHref = url.format({
   },
 });
 
-describe('Home page', () => {
+describe.skip('Home page', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -63,7 +63,7 @@ describe('Home page', () => {
       cy.visit(serviceInventoryHref);
 
       cy.contains('Services');
-      cy.contains('opbeans-rum').realClick();
+      cy.contains('opbeans-rum').click({ force: true });
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',

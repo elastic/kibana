@@ -75,7 +75,7 @@ describe('When navigating to the service inventory', () => {
     cy.contains('h1', 'opbeans-node');
   });
 
-  describe('Calls APIs', () => {
+  describe.skip('Calls APIs', () => {
     beforeEach(() => {
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
@@ -86,7 +86,7 @@ describe('When navigating to the service inventory', () => {
     });
 
     it('with the correct environment when changing the environment', () => {
-      cy.wait(aliasNames, { requestTimeout: 30000 });
+      cy.wait(aliasNames);
 
       cy.get('[data-test-subj="environmentFilter"]').select('production');
 
@@ -97,13 +97,13 @@ describe('When navigating to the service inventory', () => {
     });
 
     it('when clicking the refresh button', () => {
-      cy.wait(aliasNames, { requestTimeout: 30000 });
+      cy.wait(aliasNames);
       cy.contains('Refresh').click();
       cy.wait(aliasNames);
     });
 
     it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(aliasNames, { requestTimeout: 30000 });
+      cy.wait(aliasNames);
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),

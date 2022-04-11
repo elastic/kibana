@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -39,6 +39,7 @@ import { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -49,6 +50,7 @@ export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { migrationMocks } from './saved_objects/migrations/mocks';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
@@ -62,6 +64,7 @@ export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+export { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export type { ElasticsearchClientMock } from './elasticsearch/client/mocks';
 
@@ -128,6 +131,7 @@ type CorePrebootMockType = MockedKeys<CorePreboot> & {
 
 function createCorePrebootMock() {
   const mock: CorePrebootMockType = {
+    analytics: analyticsServiceMock.createAnalyticsServicePreboot(),
     elasticsearch: elasticsearchServiceMock.createPreboot(),
     http: httpServiceMock.createPrebootContract(),
     preboot: prebootServiceMock.createPrebootContract(),
@@ -158,6 +162,7 @@ function createCoreSetupMock({
   };
 
   const mock: CoreSetupMockType = {
+    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
@@ -184,6 +189,7 @@ function createCoreSetupMock({
 
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
@@ -200,6 +206,7 @@ function createCoreStartMock() {
 
 function createInternalCorePrebootMock() {
   const prebootDeps = {
+    analytics: analyticsServiceMock.createAnalyticsServicePreboot(),
     context: contextServiceMock.createPrebootContract(),
     elasticsearch: elasticsearchServiceMock.createInternalPreboot(),
     http: httpServiceMock.createInternalPrebootContract(),
@@ -213,6 +220,7 @@ function createInternalCorePrebootMock() {
 
 function createInternalCoreSetupMock() {
   const setupDeps = {
+    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
@@ -236,6 +244,7 @@ function createInternalCoreSetupMock() {
 
 function createInternalCoreStartMock() {
   const startDeps = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
@@ -281,5 +290,3 @@ export const coreMock = {
   createPluginInitializerContext: pluginInitializerContextMock,
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
-
-export { savedObjectsClientMock };

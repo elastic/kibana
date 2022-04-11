@@ -19,8 +19,8 @@ import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 interface SessionViewDetailPanelDeps {
   selectedProcess: Process | undefined;
   alerts?: ProcessEvent[];
-  investigatedAlert?: ProcessEvent;
-  onProcessSelected: (process: Process) => void;
+  investigatedAlertId?: string;
+  onJumpToEvent: (event: ProcessEvent) => void;
   onShowAlertDetails: (alertId: string) => void;
 }
 
@@ -30,8 +30,8 @@ interface SessionViewDetailPanelDeps {
 export const SessionViewDetailPanel = ({
   alerts,
   selectedProcess,
-  investigatedAlert,
-  onProcessSelected,
+  investigatedAlertId,
+  onJumpToEvent,
   onShowAlertDetails,
 }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
@@ -76,9 +76,9 @@ export const SessionViewDetailPanel = ({
         content: alerts && (
           <DetailPanelAlertTab
             alerts={alerts}
-            onProcessSelected={onProcessSelected}
+            onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
-            investigatedAlert={investigatedAlert}
+            investigatedAlertId={investigatedAlertId}
           />
         ),
       },
@@ -88,9 +88,9 @@ export const SessionViewDetailPanel = ({
     alertsCount,
     processDetail,
     selectedProcess?.events,
-    onProcessSelected,
     onShowAlertDetails,
-    investigatedAlert,
+    investigatedAlertId,
+    onJumpToEvent,
   ]);
 
   const onSelectedTabChanged = useCallback((id: string) => {
@@ -105,7 +105,7 @@ export const SessionViewDetailPanel = ({
   const styles = useStyles();
 
   return (
-    <div css={styles.detailsPanelLeftBorder}>
+    <div css={styles.detailsPanel}>
       <EuiTabs size="l" expand>
         {tabs.map((tab, index) => (
           <EuiTab
