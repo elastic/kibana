@@ -7,7 +7,7 @@
  */
 
 import { flatten } from 'lodash';
-import { ShallowPromise } from '@kbn/utility-types';
+import { ShallowPromise, MaybePromise } from '@kbn/utility-types';
 import { pick } from 'lodash';
 import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } from '../..';
 
@@ -31,7 +31,7 @@ export type IContextProvider<
   // context.core will always be available, but plugin contexts are typed as optional
   context: Omit<Context, ContextName>,
   ...rest: HandlerParameters<RequestHandler>
-) => Promise<Context[ContextName]> | Context[ContextName];
+) => MaybePromise<Awaited<Context[ContextName]>>;
 
 /**
  * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
