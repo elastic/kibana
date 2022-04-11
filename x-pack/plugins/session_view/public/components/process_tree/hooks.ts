@@ -148,11 +148,8 @@ export class ProcessImpl implements Process {
   }
 
   getEndTime() {
-    const endEvent = this.filterEventsByAction(this.events, EventAction.end);
-    if (endEvent.length === 0) {
-      return '';
-    }
-    return endEvent[endEvent.length - 1]['@timestamp'];
+    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    return endEvent?.['@timestamp'] || '';
   }
 
   // isUserEntered is a best guess at which processes were initiated by a real person
