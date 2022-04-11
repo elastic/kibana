@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ChartsPluginSetup, PaletteOutput } from '../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { ChartsPluginSetup } from '../../../charts/public';
 import { ExpressionValueVisDimension } from '../../../visualizations/public';
 
 interface TagCloudCommonParams {

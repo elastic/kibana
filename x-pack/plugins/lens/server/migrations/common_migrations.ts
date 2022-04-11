@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
@@ -28,7 +28,7 @@ import {
   CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
-import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (

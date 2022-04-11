@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference, SavedObjectsResolveResponse } from 'kibana/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';

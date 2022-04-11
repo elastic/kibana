@@ -76,6 +76,11 @@ export interface ProcessFields {
   end?: string;
   user?: User;
   group?: Group;
+  real_user?: User;
+  real_group?: Group;
+  saved_user?: User;
+  saved_group?: Group;
+  supplemental_groups?: Group[];
   exit_code?: number;
   entry_meta?: EntryMeta;
   tty?: Teletype;
@@ -173,6 +178,7 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
+  getEndTime(): string;
 }
 
 export type ProcessMap = {
