@@ -149,7 +149,7 @@ describe('ESSearchSource', () => {
     it('blended layer', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
-        scalingType: SCALING_TYPES.MVT,
+        scalingType: SCALING_TYPES.CLUSTERS,
       });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(
         'Joins are not supported when scaling by clusters'

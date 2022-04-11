@@ -34,7 +34,15 @@ class MockSource {
 describe('getDescriptorWithUpdatedStyleProps', () => {
   const previousFieldName = 'doIStillExist';
   const mapColors = [];
-  const layer = {};
+  const layer = {
+    getSource: () => {
+      return {
+        isMvt: () => {
+          return false;
+        }
+      }
+    }
+  };
   const customIcons = [];
   const properties = {
     fillColor: {
