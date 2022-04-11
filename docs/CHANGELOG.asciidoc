@@ -132,6 +132,15 @@ Observability::
 Review the following information about the 7.17.1 release.
 
 [float]
+[[known-issue-v7.17.1]]
+=== Known issue
+
+Lens & visualizations::
+A change in the Markdown library that *TSVB* *Markdown* visualizations and *Text* dashboard panels use renders some tables differently.
+
+This known issue affects only 7.17.1. All other versions of {kib} render that Markdown in tables as expected.
+
+[float]
 [[breaking-changes-v7.17.1]]
 === Breaking changes
 
