@@ -91,12 +91,12 @@ describe('when navigating to integration page', () => {
   describe('checking Tail-based section based on apm version', () => {
     it('should display Tail-based section on latest version', () => {
       cy.visit('/app/fleet/integrations/apm/add-integration');
-      cy.get('.euiPanel').contains('Tail-based sampling').should('exist');
+      cy.contains('Tail-based sampling').should('exist');
     });
 
     it('should hide Tail-based section for 8.0.0 apm package', () => {
       cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
-      cy.get('.euiPanel').contains('Tail-based sampling').should('not.exist');
+      cy.contains('Tail-based sampling').should('not.exist');
     });
   });
 });
