@@ -5,7 +5,7 @@ set -euo pipefail
 BASE_VERSION="$(jq -r '.version' package.json)"
 VERSION_QUALIFIER="${VERSION_QUALIFIER:=}"
 
-if [[ "${VERSION_QUALIFIER:-}" == "" ]]; then
+if [[ "$VERSION_QUALIFIER" == "" ]]; then
   QUALIFIER_VERSION="$BASE_VERSION"
 else
   QUALIFIER_VERSION="$BASE_VERSION-$VERSION_QUALIFIER"
