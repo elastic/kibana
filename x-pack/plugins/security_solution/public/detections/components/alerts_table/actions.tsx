@@ -10,7 +10,7 @@
 import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
