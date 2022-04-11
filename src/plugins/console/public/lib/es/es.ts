@@ -7,7 +7,6 @@
  */
 
 import type { HttpResponse, HttpSetup } from 'kibana/public';
-import { parse } from 'query-string';
 import { trimStart } from 'lodash';
 import { API_BASE_PATH, KIBANA_API_KEYWORD } from '../../../common/constants';
 
@@ -46,16 +45,16 @@ export async function send({
   const isKibanaApiRequest = path.includes(KIBANA_API_KEYWORD);
 
   if (isKibanaApiRequest) {
-    const _method = method.toLowerCase() as Method;
-    const hasQueryParams = path.includes('?');
-    const [pathname, queryString] = path.split('?');
-    const url = hasQueryParams
-      ? `/${trimStart(pathname.split(KIBANA_API_KEYWORD)[1], '/')}`
-      : `/${trimStart(path.split(KIBANA_API_KEYWORD)[1], '/')}`;
-    const query = hasQueryParams ? parse(queryString) : {};
+    const httpMethod = method.toLowerCase() as Method;
+    const uri = new URL(
+      `${window.location.origin}/${trimStart(path.replace(KIBANA_API_KEYWORD, ''), '/')}`
+    );
+    const { pathname, searchParams } = uri;
+    const query = Object.fromEntries(searchParams.entries());
+    const body = ['post', 'put'].includes(httpMethod) ? data : null;
 
-    return await http[_method]<HttpResponse>(url, {
-      ...(data && { body: data }),
+    return await http[httpMethod]<HttpResponse>(pathname, {
+      body,
       query,
       asResponse,
       asSystemRequest,

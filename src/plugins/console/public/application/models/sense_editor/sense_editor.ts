@@ -15,7 +15,7 @@ import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
-import * as es from '../../../lib/es/es';
+import { constructUrl } from '../../../lib/es/es';
 
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
@@ -462,7 +462,6 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
-    // There should be another way of getting kibana base path??
     const kibanaBaseUrl = window.location.origin;
     const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
@@ -475,15 +474,14 @@ export class SenseEditor {
       const data = req.data;
 
       // this is the first url defined in elasticsearch.hosts
-      let url = es.constructUrl(elasticsearchBaseUrl, path);
+      let url = constructUrl(elasticsearchBaseUrl, path);
 
       if (path.includes(KIBANA_API_KEYWORD)) {
         path = path.replace(KIBANA_API_KEYWORD, '');
-        url = es.constructUrl(kibanaBaseUrl, path);
+        url = constructUrl(kibanaBaseUrl, path);
       }
 
-      // let ret = 'curl -X' + method + ' "' + url + '"';
-      let ret = `curl -X${method} "${url}" -H 'kbn-xsrf: reporting'`;
+      let ret = `curl -X${method} '${url}' -H 'kbn-xsrf: reporting'`;
       if (data && data.length) {
         ret += " -H 'Content-Type: application/json' -d'\n";
         const dataAsString = collapseLiteralStrings(data.join('\n'));

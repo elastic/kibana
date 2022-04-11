@@ -59,11 +59,11 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         return;
       }
       const req = requests.shift()!;
-      const esPath = req.url;
-      const esMethod = req.method;
-      let esData = collapseLiteralStrings(req.data.join('\n'));
-      if (esData) {
-        esData += '\n';
+      const path = req.url;
+      const method = req.method;
+      let data = collapseLiteralStrings(req.data.join('\n'));
+      if (data) {
+        data += '\n';
       } // append a new line for bulk requests.
 
       const startTime = Date.now();
@@ -71,9 +71,9 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       try {
         const { response, body } = await es.send({
           http: args.http,
-          method: esMethod,
-          path: esPath,
-          data: esData,
+          method,
+          path,
+          data,
           asResponse: true,
         });
 
@@ -115,9 +115,9 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
                 value,
               },
               request: {
-                data: esData,
-                method: esMethod,
-                path: esPath,
+                data,
+                method,
+                path,
               },
             });
 
@@ -157,9 +157,9 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             statusText: error?.response?.statusText ?? 'error',
           },
           request: {
-            data: esData,
-            method: esMethod,
-            path: esPath,
+            data,
+            method,
+            path,
           },
         });
       }
