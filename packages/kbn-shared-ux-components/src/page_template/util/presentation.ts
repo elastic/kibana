@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard, ElasticAgentCard } from './no_data_card';
-export { NoDataPage } from './no_data_page';
-export type { NoDataPageProps } from './types';
-export { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_config_page';
+import classNames from 'classnames';
+
+export const getClasses = (template: string | undefined, className: string | undefined) => {
+  return classNames('kbnPageTemplate', { [`kbnPageTemplate--${template}`]: template }, className);
+};

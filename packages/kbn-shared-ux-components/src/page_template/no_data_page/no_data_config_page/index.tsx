@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard, ElasticAgentCard } from './no_data_page';
-export { NoDataPage } from './no_data_page';
+export { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_config_page';

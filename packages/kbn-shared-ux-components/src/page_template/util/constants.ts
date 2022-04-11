@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { NoDataCard, ElasticAgentCard } from './no_data_card';
-export { NoDataPage } from './no_data_page';
-export type { NoDataPageProps } from './types';
-export { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_config_page';
+import { KibanaPageTemplateProps } from '../types';
+
+export const NO_DATA_PAGE_MAX_WIDTH = 950;
+
+export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+    paddingSize: 'none',
+  },
+};
