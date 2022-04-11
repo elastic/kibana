@@ -19,6 +19,7 @@ import { EnablementEmptyState } from '../../components/monitor_management/monito
 import { useEnablement } from '../../components/monitor_management/hooks/use_enablement';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { Loader } from '../../components/monitor_management/loader/loader';
+import { ERROR_HEADING_LABEL } from './content';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
@@ -137,10 +138,6 @@ const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
       'Monitor Management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor Management. Your existing monitors are paused.',
   }
 );
-
-const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
-  defaultMessage: 'Error loading Monitor Management',
-});
 
 const ERROR_HEADING_BODY = i18n.translate(
   'xpack.uptime.monitorManagement.editMonitorError.description',

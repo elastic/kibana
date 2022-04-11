@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from 'src/plugins/expressions';
 import { applyPaletteParams, findMinMaxByColumnId } from '../shared_components';
 import { DEFAULT_PALETTE_NAME } from './constants';

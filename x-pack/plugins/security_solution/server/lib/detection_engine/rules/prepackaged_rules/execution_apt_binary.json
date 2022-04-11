@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary apt/apt-get abuse to breakout out of restricted shells or environments by spawning an interactive system shell. The apt utility allows us to manage installation and removal of softwares on Debian based Linux distributions and the activity of spawning shell is not a standard use of this binary for a user or system administrator. It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via  apt/apt-get Changelog Escape",
+  "query": "process where event.type == \"start\" and process.name == \"sensible-pager\" and\n  process.args in (\"/bin/sh\", \"/bin/bash\", \"/bin/dash\", \"sh\", \"bash\", \"dash\") and\n  process.parent.name in (\"apt\", \"apt-get\") and process.parent.args == \"changelog\"\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/apt/",
+    "https://gtfobins.github.io/gtfobins/apt-get/"
+  ],
+  "risk_score": 47,
+  "rule_id": "8fed8450-847e-43bd-874c-3bbf0cd425f3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

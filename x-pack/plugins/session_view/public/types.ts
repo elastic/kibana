@@ -6,17 +6,22 @@
  */
 import { ReactNode } from 'react';
 import { CoreStart } from '../../../../src/core/public';
-import { ProcessEvent, Teletype } from '../common/types/process_tree';
+import { Teletype } from '../common/types/process_tree';
 
 export type SessionViewServices = CoreStart;
 
 export interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
-  height?: string;
+  height?: number;
+  isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
-  jumpToEvent?: ProcessEvent;
+  jumpToEntityId?: string;
+  jumpToCursor?: string;
+
+  // when loading session viewer from an alert, this prop can be set to add extra UX to keep the focus on the alert
+  investigatedAlertId?: string;
   // Callback to open the alerts flyout
   loadAlertDetails?: (
     alertUuid: string,

@@ -35,12 +35,12 @@ describe('DetailPanelAlertTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let mockOnProcessSelected = jest.fn((process) => process);
+  let mockOnJumpToEvent = jest.fn((process) => process);
   let mockShowAlertDetails = jest.fn((alertId) => alertId);
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockOnProcessSelected = jest.fn((process) => process);
+    mockOnJumpToEvent = jest.fn((process) => process);
     mockShowAlertDetails = jest.fn((alertId) => alertId);
   });
 
@@ -49,7 +49,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -68,7 +68,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -89,9 +89,9 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlert={mockAlerts[0]}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
         />
       );
 
@@ -106,9 +106,9 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlert={mockAlerts[0]}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
         />
       );
 
@@ -139,7 +139,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -171,7 +171,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -205,7 +205,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -223,7 +223,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -240,7 +240,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={[]}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
