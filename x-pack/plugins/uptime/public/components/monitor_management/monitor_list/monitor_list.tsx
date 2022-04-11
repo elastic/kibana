@@ -15,6 +15,7 @@ import {
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   CommonFields,
   ConfigKey,
@@ -34,7 +35,6 @@ import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface MonitorManagementListPageState {
   pageIndex: number;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
