@@ -15,9 +15,10 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
 
 jest.mock('../../../../common/lib/kibana/kibana_react');
-jest.mock('../../../../common/components/charts/draggable_legend', () => {
+
+jest.mock('./chart_label', () => {
   return {
-    DraggableLegend: jest.fn((props) => <div data-test-subj="legend" {...props} />),
+    ChartLabel: jest.fn((props) => <span data-test-subj="chart-label" {...props} />),
   };
 });
 jest.mock('./use_alerts_by_status', () => ({

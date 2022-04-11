@@ -39,9 +39,15 @@ jest.mock('uuid', () => {
   };
 });
 
+jest.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
+  return {
+    ChartLabel: jest.fn((props) => <span data-test-subj="chart-label" {...props} />),
+  };
+});
+
 jest.mock('./draggable_legend', () => {
   return {
-    DraggableLegend: jest.fn((props) => <div data-test-subj="legend" {...props} />),
+    DraggableLegend: jest.fn((props) => <span data-test-subj="draggable-legend" {...props} />),
   };
 });
 
@@ -95,7 +101,11 @@ describe('DonutChart', () => {
 
     expect((Settings as jest.Mock).mock.calls[0][0]).toEqual({
       baseTheme: {
-        eui: { euiColorDarkShade: '#fff', euiScrollBar: 0, euiScrollBarCorner: '#ccc' },
+        eui: {
+          euiColorDarkShade: '#fff',
+          euiScrollBar: 0,
+          euiScrollBarCorner: '#ccc',
+        },
       },
       theme: {
         chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
@@ -134,7 +144,7 @@ describe('DonutChart', () => {
 
   test('should render chart legend', () => {
     const { container } = render(<DonutChart {...props} />);
-    expect(container.querySelector(`[data-test-subj="legend"]`)).toBeInTheDocument();
+    expect(container.querySelector(`[data-test-subj="draggable-legend"]`)).toBeInTheDocument();
     expect((DraggableLegend as unknown as jest.Mock).mock.calls[0][0].legendItems).toEqual([
       {
         color: '#EF6550',
