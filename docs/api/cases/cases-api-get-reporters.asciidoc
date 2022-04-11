@@ -4,7 +4,7 @@
 <titleabbrev>Get reporters</titleabbrev>
 ++++
 
-Returns all case reporters (users who opened cases).
+Returns information about the users who opened cases.
 
 === Request
 
@@ -22,9 +22,9 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 === Query parameters
 
 `owner`::
-(Optional, string) A filter to limit the retrieved reporters to a specific set 
-of applications. If this parameter is omitted, the response will contain all 
-reporters that the user has access to read.
+(Optional, string or array of strings) A filter to limit the retrieved reporters 
+to a specific set of applications. If this parameter is omitted, the response 
+will contain all reporters from cases that the user has access to read.
 
 ==== Response code
 
