@@ -106,15 +106,17 @@ export function buildSrcUrl(svgString) {
 
 export async function styleSvg(svgString, fill, stroke) {
   const svgXml = await parseXmlString(svgString);
-  let style = '';
-  if (fill) {
-    style += `fill:${fill};`;
-  }
-  if (stroke) {
-    style += `stroke:${stroke};`;
-    style += `stroke-width:1;`;
-  }
-  if (style) svgXml.svg.$.style = style;
+
+  // Elements nested under svg root may define style attribute
+  // Wildcard descendent selector provides more specificity to ensure root svg style attribute is applied instead of children style attributes
+  svgXml.svg.style = `
+    svg * {
+      ${fill ? `fill: ${fill}` : '#000'} !important;
+      ${stroke ? `stroke: ${stroke}` : '#000'} !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  `;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
 }

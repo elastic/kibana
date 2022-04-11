@@ -13,7 +13,7 @@ export type SessionViewServices = CoreStart;
 export interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
-  height?: string;
+  height?: number;
   isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
