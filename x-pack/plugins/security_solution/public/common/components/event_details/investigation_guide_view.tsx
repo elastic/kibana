@@ -39,7 +39,7 @@ const InvestigationGuideViewComponent: React.FC<{
 
   return (
     <>
-      <EuiHorizontalRule />
+      <EuiSpacer size="l" />
       <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
         <h5>{i18n.INVESTIGATION_GUIDE}</h5>
       </EuiTitle>
