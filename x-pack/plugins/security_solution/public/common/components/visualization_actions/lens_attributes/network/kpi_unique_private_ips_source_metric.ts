@@ -20,7 +20,7 @@ export const kpiUniquePrivateIpsSourceMetricLensAttributes: LensAttributes = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: SOURCE_CHART_LABEL,
+                label: ' ',
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'source.ip',

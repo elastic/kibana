@@ -8,7 +8,7 @@
 import { LensAttributes } from '../../types';
 
 export const kpiUserAuthenticationsMetricFailureLensAttributes: LensAttributes = {
-  title: '[Host] User authentications - metric failure ',
+  title: '[Host] User authentications - metric failure',
   description: '',
   visualizationType: 'lnsMetric',
   state: {
@@ -61,7 +61,7 @@ export const kpiUserAuthenticationsMetricFailureLensAttributes: LensAttributes =
                   query: 'event.outcome : "failure" ',
                 },
                 isBucketed: false,
-                label: '',
+                label: ' ',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: '___records___',

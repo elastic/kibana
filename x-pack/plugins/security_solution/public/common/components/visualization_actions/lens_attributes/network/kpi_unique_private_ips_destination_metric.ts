@@ -21,7 +21,7 @@ export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes 
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: DESTINATION_CHART_LABEL,
+                label: ' ',
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'destination.ip',
