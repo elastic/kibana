@@ -3,7 +3,8 @@
 set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/steps/artifacts/env.sh
+
+source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Build Kibana artifacts"
 node scripts/build --all-platforms --debug --docker-cross-compile $(echo "$BUILD_ARGS")

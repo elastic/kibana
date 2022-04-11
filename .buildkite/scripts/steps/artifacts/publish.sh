@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-.buildkite/scripts/common/util.sh
-.buildkite/scripts/steps/artifacts/env.sh
+source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Download and verify artifacts"
 function download {

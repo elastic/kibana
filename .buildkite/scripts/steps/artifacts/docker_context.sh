@@ -3,7 +3,8 @@
 set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/steps/artifacts/env.sh
+
+source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Create contexts"
 mkdir -p target
