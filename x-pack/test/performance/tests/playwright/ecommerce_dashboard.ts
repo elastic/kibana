@@ -65,7 +65,9 @@ export default function ecommerceDashboard({ getService }: FtrProviderContext) {
             },
           },
         ],
-        false
+        {
+          requireAuth: false,
+        }
       );
     });
   });

@@ -65,7 +65,9 @@ export default function weblogDashboard({ getService }: FtrProviderContext) {
             },
           },
         ],
-        false
+        {
+          requireAuth: false,
+        }
       );
     });
   });

@@ -93,7 +93,7 @@ export class PerformanceTestingService extends FtrService {
       return this.browser;
     }
     return await this.withSpan('browser creation', 'setup', async () => {
-      const headless = process.env.TEST_BROWSER_HEADLESS === '1' || process.env.CI === 'true';
+      const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
       this.browser = await playwright.chromium.launch({ headless, timeout: 60000 });
       return this.browser;
     });
@@ -126,12 +126,16 @@ export class PerformanceTestingService extends FtrService {
     });
   }
 
-  public runUserJourney(journeyName: string, steps: Steps, isLoginJourney: boolean) {
+  public runUserJourney(
+    journeyName: string,
+    steps: Steps,
+    { requireAuth }: { requireAuth: boolean }
+  ) {
     return this.withTransaction(`Journey ${journeyName}`, async () => {
       const browser = await this.getBrowserInstance();
       const viewport = { width: 1600, height: 1200 };
       const context = await browser.newContext({ viewport });
-      if (!isLoginJourney) {
+      if (!requireAuth) {
         const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
         await context.addCookies([cookie]);
       }
@@ -177,25 +181,23 @@ export class PerformanceTestingService extends FtrService {
   }
 
   private onConsoleEvent() {
-    return (message: playwright.ConsoleMessage) => {
-      (async () => {
-        try {
-          const args = await Promise.all(message.args().map(async (handle) => handle.jsonValue()));
+    return async (message: playwright.ConsoleMessage) => {
+      try {
+        const args = await Promise.all(message.args().map(async (handle) => handle.jsonValue()));
 
-          const { url, lineNumber, columnNumber } = message.location();
+        const { url, lineNumber, columnNumber } = message.location();
 
-          const location = `${url},${lineNumber},${columnNumber}`;
+        const location = `${url},${lineNumber},${columnNumber}`;
 
-          const text = args.length
-            ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg))).join(' ')
-            : message.text();
+        const text = args.length
+          ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg))).join(' ')
+          : message.text();
 
-          console.log(`[console.${message.type()}]`, text);
-          console.log('    ', location);
-        } catch (e) {
-          console.error('Failed to evaluate console.log line', e);
-        }
-      })();
+        console.log(`[console.${message.type()}]`, text);
+        console.log('    ', location);
+      } catch (e) {
+        console.error('Failed to evaluate console.log line', e);
+      }
     };
   }
 }

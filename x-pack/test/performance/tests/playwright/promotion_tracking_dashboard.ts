@@ -84,7 +84,9 @@ export default function promotionTrackingDashboard({ getService }: FtrProviderCo
             },
           },
         ],
-        false
+        {
+          requireAuth: false,
+        }
       );
     });
   });

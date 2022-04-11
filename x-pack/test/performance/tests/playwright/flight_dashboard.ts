@@ -85,7 +85,9 @@ export default function flightDashboard({ getService }: FtrProviderContext) {
             },
           },
         ],
-        false
+        {
+          requireAuth: false,
+        }
       );
     });
   });
