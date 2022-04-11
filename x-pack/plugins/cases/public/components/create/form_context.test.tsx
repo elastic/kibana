@@ -847,7 +847,7 @@ describe('Create case', () => {
   });
 
   describe('Permissions', () => {
-    it('should not push to service if the user do not have access to actions', async () => {
+    it('should not push to service if the user does not have access to actions', async () => {
       mockedContext.coreStart.application.capabilities = {
         ...mockedContext.coreStart.application.capabilities,
         actions: { save: false, show: false },
