@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import uuid from 'uuid/v5';
+import { omit } from 'lodash';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import {
@@ -16,7 +17,11 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
-import { OutputUnauthorizedError, OutputInvalidError } from '../errors';
+import {
+  OutputUnauthorizedError,
+  OutputInvalidError,
+  FleetEncryptedSavedObjectEncryptionKeyRequired,
+} from '../errors';
 
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
@@ -26,6 +31,21 @@ type Nullable<T> = { [P in keyof T]: T[P] | null };
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+} as unknown as KibanaRequest;
 
 // differentiate
 function isUUID(val: string) {
@@ -45,10 +65,12 @@ export function outputIdToUuid(id: string) {
 }
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
-  const { output_id: outputId, ...atributes } = so.attributes;
+  const { output_id: outputId, ssl, ...atributes } = so.attributes;
+
   return {
     id: outputId ?? so.id,
     ...atributes,
+    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
   };
 }
 
@@ -86,8 +108,12 @@ async function validateLogstashOutputNotUsedInAPMPolicy(
 }
 
 class OutputService {
+  private get encryptedSoClient() {
+    return appContextService.getInternalUserSOClient(fakeRequest);
+  }
+
   private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
-    return await soClient.find<OutputSOAttributes>({
+    return await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
@@ -95,7 +121,7 @@ class OutputService {
   }
 
   private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
-    return await soClient.find<OutputSOAttributes>({
+    return await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
@@ -164,10 +190,15 @@ class OutputService {
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
-    const data: OutputSOAttributes = { ...output };
+    const data: OutputSOAttributes = { ...omit(output, 'ssl') };
 
     if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
+      if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+        throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+          'Logstash output needs encrypted saved object api key to be set'
+        );
+      }
     }
 
     // ensure only default output exists
@@ -202,15 +233,16 @@ class OutputService {
       data.output_id = options?.id;
     }
 
-    const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+    if (output.ssl) {
+      data.ssl = JSON.stringify(output.ssl);
+    }
+
+    const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id: options?.id ? outputIdToUuid(options.id) : undefined,
     });
 
-    return {
-      id: options?.id ?? newSo.id,
-      ...newSo.attributes,
-    };
+    return outputSavedObjectToOutput(newSo);
   }
 
   public async bulkGet(
@@ -218,7 +250,7 @@ class OutputService {
     ids: string[],
     { ignoreNotFound = false } = { ignoreNotFound: true }
   ) {
-    const res = await soClient.bulkGet<OutputSOAttributes>(
+    const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
 
@@ -237,7 +269,7 @@ class OutputService {
   }
 
   public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -254,7 +286,10 @@ class OutputService {
   }
 
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(id)
+    );
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -292,7 +327,7 @@ class OutputService {
       id
     );
 
-    return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
   public async update(
@@ -311,7 +346,7 @@ class OutputService {
       );
     }
 
-    const updateData: Nullable<Partial<Output>> = { ...data };
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
 
@@ -329,6 +364,10 @@ class OutputService {
         // remove logstash specific field
         updateData.ssl = null;
       }
+    }
+
+    if (data.ssl) {
+      updateData.ssl = JSON.stringify(data.ssl);
     }
 
     // ensure only default output exists
@@ -359,7 +398,7 @@ class OutputService {
     if (mergedType === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
-    const outputSO = await soClient.update<Nullable<OutputSOAttributes>>(
+    const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData

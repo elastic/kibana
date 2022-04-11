@@ -7,10 +7,10 @@
 
 import {
   ExperimentalFeatures,
-  allowedExperimentalValues,
   isValidExperimentalValue,
   getExperimentalAllowedValues,
 } from '../../common/experimental_features';
+import { ExperimentalFeaturesService } from './experimental_features_service';
 
 const allowedExperimentalValueKeys = getExperimentalAllowedValues();
 
@@ -23,5 +23,5 @@ export const getIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatu
     );
   }
 
-  return allowedExperimentalValues[feature];
+  return ExperimentalFeaturesService.get()[feature];
 };

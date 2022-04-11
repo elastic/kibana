@@ -28,10 +28,9 @@ import {
   OperatingSystem,
   BlocklistConditionEntryField,
   isPathValid,
-  hasSimpleExecutableName,
 } from '@kbn/securitysolution-utils';
 import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
 import { OS_TITLES } from '../../../../common/translations';
@@ -66,17 +65,26 @@ import { isValidHash } from '../../../../../../common/endpoint/service/trusted_a
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
 
-interface BlocklistEntry {
+const testIdPrefix = 'blocklist-form';
+
+export interface BlocklistEntry {
   field: BlocklistConditionEntryField;
   operator: 'included';
   type: 'match_any';
   value: string[];
 }
 
+type ERROR_KEYS = keyof typeof ERRORS;
+
+type ItemValidationNodes = {
+  [K in ERROR_KEYS]?: React.ReactNode;
+};
+
 interface ItemValidation {
-  name?: React.ReactNode[];
-  value?: React.ReactNode[];
+  name: ItemValidationNodes;
+  value: ItemValidationNodes;
 }
 
 function createValidationMessage(message: string): React.ReactNode {
@@ -95,17 +103,17 @@ function getDropdownDisplay(field: BlocklistConditionEntryField): React.ReactNod
 }
 
 function isValid(itemValidation: ItemValidation): boolean {
-  return !Object.values(itemValidation).some((error) => error.length);
+  return !Object.values(itemValidation).some((errors) => Object.keys(errors).length);
 }
 
-export const BlockListForm = memo(
-  ({ item, policies, policiesIsLoading, onChange, mode }: ArtifactFormComponentProps) => {
+export const BlockListForm = memo<ArtifactFormComponentProps>(
+  ({ item, policies, policiesIsLoading, onChange, mode }) => {
     const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({
       name: false,
       value: false,
     });
-    const warningsRef = useRef<ItemValidation>({});
-    const errorsRef = useRef<ItemValidation>({});
+    const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
+    const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
@@ -135,6 +143,8 @@ export const BlockListForm = memo(
 
       setSelectedPolicies(policiesData);
     }, [hasFormChanged, item.tags, policies]);
+
+    const getTestId = useTestIdGenerator(testIdPrefix);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {
       if (!item.entries.length) {
@@ -208,42 +218,38 @@ export const BlockListForm = memo(
         value: values = [],
       } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
 
-      const newValueWarnings: React.ReactNode[] = [];
-      const newNameErrors: React.ReactNode[] = [];
-      const newValueErrors: React.ReactNode[] = [];
+      const newValueWarnings: ItemValidationNodes = {};
+      const newNameErrors: ItemValidationNodes = {};
+      const newValueErrors: ItemValidationNodes = {};
 
       // error if name empty
       if (!nextItem.name.trim()) {
-        newNameErrors.push(createValidationMessage(ERRORS.NAME_REQUIRED));
+        newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
       }
 
       // error if no values
       if (!values.length) {
-        newValueErrors.push(createValidationMessage(ERRORS.VALUE_REQUIRED));
+        newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
       }
 
       // error if invalid hash
       if (field === 'file.hash.*' && values.some((value) => !isValidHash(value))) {
-        newValueErrors.push(createValidationMessage(ERRORS.INVALID_HASH));
+        newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
       }
 
       const isInvalidPath = values.some((value) => !isPathValid({ os, field, type, value }));
 
       // warn if invalid path
       if (field !== 'file.hash.*' && isInvalidPath) {
-        newValueWarnings.push(createValidationMessage(ERRORS.INVALID_PATH));
+        newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
       }
 
-      // warn if wildcard
-      if (
-        field !== 'file.hash.*' &&
-        !isInvalidPath &&
-        values.some((value) => !hasSimpleExecutableName({ os, type, value }))
-      ) {
-        newValueWarnings.push(createValidationMessage(ERRORS.WILDCARD_PRESENT));
+      // warn if duplicates
+      if (values.length !== uniq(values).length) {
+        newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
       }
 
-      warningsRef.current = { ...warningsRef, value: newValueWarnings };
+      warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
       errorsRef.current = { name: newNameErrors, value: newValueErrors };
     }, []);
 
@@ -276,16 +282,19 @@ export const BlockListForm = memo(
 
     const handleOnDescriptionChange = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const nextItem = {
+          ...item,
+          description: event.target.value,
+        };
+        validateValues(nextItem);
+
         onChange({
           isValid: isValid(errorsRef.current),
-          item: {
-            ...item,
-            description: event.target.value,
-          },
+          item: nextItem,
         });
         setHasFormChanged(true);
       },
-      [onChange, item]
+      [onChange, item, validateValues]
     );
 
     const handleOnOsChange = useCallback(
@@ -331,6 +340,27 @@ export const BlockListForm = memo(
       [validateValues, onChange, item, blocklistEntry]
     );
 
+    const handleOnValueTextChange = useCallback(
+      (value: string) => {
+        const nextWarnings = { ...warningsRef.current.value };
+
+        if (blocklistEntry.value.includes(value)) {
+          nextWarnings.DUPLICATE_VALUE = createValidationMessage(ERRORS.DUPLICATE_VALUE);
+        } else {
+          delete nextWarnings.DUPLICATE_VALUE;
+        }
+
+        warningsRef.current = {
+          ...warningsRef.current,
+          value: nextWarnings,
+        };
+
+        // trigger re-render without modifying item
+        setVisited((prevVisited) => ({ ...prevVisited }));
+      },
+      [blocklistEntry]
+    );
+
     // only triggered on remove / clear
     const handleOnValueChange = useCallback(
       (change: Array<EuiComboBoxOptionOption<string>>) => {
@@ -353,7 +383,7 @@ export const BlockListForm = memo(
     const handleOnValueAdd = useCallback(
       (option: string) => {
         const splitValues = option.split(',').filter((value) => value.trim());
-        const value = uniq([...blocklistEntry.value, ...splitValues]);
+        const value = [...blocklistEntry.value, ...splitValues];
 
         const nextItem = {
           ...item,
@@ -361,6 +391,7 @@ export const BlockListForm = memo(
         };
 
         validateValues(nextItem);
+        nextItem.entries[0].value = uniq(nextItem.entries[0].value);
 
         setVisited((prevVisited) => ({ ...prevVisited, value: true }));
         onChange({
@@ -401,7 +432,7 @@ export const BlockListForm = memo(
         </EuiTitle>
         <EuiSpacer size="xs" />
         {mode === 'create' && (
-          <EuiText size="s">
+          <EuiText size="s" data-test-subj={getTestId('header-description')}>
             <p>{DETAILS_HEADER_DESCRIPTION}</p>
           </EuiText>
         )}
@@ -409,8 +440,8 @@ export const BlockListForm = memo(
 
         <EuiFormRow
           label={NAME_LABEL}
-          isInvalid={visited.name && !!errorsRef.current.name?.length}
-          error={errorsRef.current.name}
+          isInvalid={visited.name && !!Object.keys(errorsRef.current.name).length}
+          error={Object.values(errorsRef.current.name)}
           fullWidth
         >
           <EuiFieldText
@@ -420,6 +451,7 @@ export const BlockListForm = memo(
             onBlur={handleOnNameBlur}
             required={visited.name}
             maxLength={256}
+            data-test-subj={getTestId('name-input')}
             fullWidth
           />
         </EuiFormRow>
@@ -428,6 +460,7 @@ export const BlockListForm = memo(
             name="description"
             value={item.description}
             onChange={handleOnDescriptionChange}
+            data-test-subj={getTestId('description-input')}
             fullWidth
             compressed
             maxLength={256}
@@ -449,6 +482,7 @@ export const BlockListForm = memo(
             options={osOptions}
             valueOfSelected={selectedOs}
             onChange={handleOnOsChange}
+            data-test-subj={getTestId('os-select')}
             fullWidth
           />
         </EuiFormRow>
@@ -463,6 +497,7 @@ export const BlockListForm = memo(
                   options={fieldOptions}
                   valueOfSelected={blocklistEntry.field}
                   onChange={handleOnFieldChange}
+                  data-test-subj={getTestId('field-select')}
                   fullWidth
                 />
               </EuiFormRow>
@@ -477,16 +512,18 @@ export const BlockListForm = memo(
         </EuiFormRow>
         <EuiFormRow
           label={valueLabel}
-          isInvalid={visited.value && !!errorsRef.current.value?.length}
-          helpText={warningsRef.current.value}
-          error={errorsRef.current.value}
+          isInvalid={visited.value && !!Object.keys(errorsRef.current.value).length}
+          helpText={Object.values(warningsRef.current.value)}
+          error={Object.values(errorsRef.current.value)}
           fullWidth
         >
           <EuiComboBox
             selectedOptions={selectedValues}
             onBlur={handleOnValueBlur}
+            onSearchChange={handleOnValueTextChange}
             onChange={handleOnValueChange}
             onCreateOption={handleOnValueAdd}
+            data-test-subj={getTestId('values-input')}
             fullWidth
             noSuggestions
           />

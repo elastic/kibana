@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays exit full screen logo button', async () => {
-      await testSubjects.click('exitFullScreenModeLogo');
+      await testSubjects.click('exitFullScreenModeButton');
       await a11y.testAppSnapshot();
     });
 

@@ -46,7 +46,7 @@ import {
   sendGetAgentPolicyList,
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
-} from '../../policy/store/services/ingest';
+} from '../../../services/policies/ingest';
 import { GetPolicyListResponse } from '../../policy/types';
 import {
   AgentIdsPendingActions,

@@ -48,6 +48,16 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    env: {
+      mode: {
+        name: 'development',
+        dev: true,
+        prod: false,
+      },
+      packageInfo: {
+        dist: false,
+      },
+    },
     version: 'version',
   } as any,
 };
@@ -83,7 +93,7 @@ describe('constructor', () => {
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
-    const injectedMetadata = { injectedMetadata: true } as any;
+    const injectedMetadata = { env: { mode: { dev: true }, packageInfo: { dist: false } } } as any;
 
     createCoreSystem({
       injectedMetadata,

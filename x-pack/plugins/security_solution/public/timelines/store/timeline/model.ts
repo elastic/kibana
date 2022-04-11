@@ -16,6 +16,7 @@ import type {
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { TGridModelForTimeline } from '../../../../../timelines/public';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -63,6 +64,7 @@ export type TimelineModel = TGridModelForTimeline & {
   resolveTimelineConfig?: ResolveTimelineConfig;
   showSaveModal?: boolean;
   savedQueryId?: string | null;
+  sessionViewConfig: SessionViewConfig | null;
   /** When true, show the timeline flyover */
   show: boolean;
   /** status: active | draft */
@@ -118,6 +120,7 @@ export type SubsetTimelineModel = Readonly<
     | 'dateRange'
     | 'selectAll'
     | 'selectedEventIds'
+    | 'sessionViewConfig'
     | 'show'
     | 'showCheckboxes'
     | 'sort'

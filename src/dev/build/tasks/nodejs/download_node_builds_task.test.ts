@@ -39,6 +39,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerPush: false,
     dockerTagQualifier: '',

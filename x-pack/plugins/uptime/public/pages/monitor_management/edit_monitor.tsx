@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview, FETCH_STATUS, useFetcher } from '../../../../observability/public';
 import { MonitorFields } from '../../../common/runtime_types';
@@ -16,6 +15,12 @@ import { getMonitor } from '../../state/api';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
+import {
+  LOADING_LABEL,
+  ERROR_HEADING_LABEL,
+  MONITOR_LOADING_ERROR_LABEL,
+  SERVICE_LOCATIONS_ERROR_LABEL,
+} from './content';
 
 export const EditMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
@@ -44,25 +49,3 @@ export const EditMonitorPage: React.FC = () => {
     </Loader>
   );
 };
-
-const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLoadingLabel', {
-  defaultMessage: 'Loading monitor',
-});
-
-const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
-  defaultMessage: 'Error loading monitor management',
-});
-
-const SERVICE_LOCATIONS_ERROR_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.addMonitorError',
-  {
-    defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
-  }
-);
-
-const MONITOR_LOADING_ERROR_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.editMonitorErrorBody',
-  {
-    defaultMessage: 'Monitor configuration was not able to be loaded. Please try again later.',
-  }
-);
