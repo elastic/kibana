@@ -57,6 +57,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 }));
 
 describe('empty RulesPage', () => {
+  let wrapper: ReactWrapper<any>;
   async function setup() {
     const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
     const { useLoadRuleTypes } = jest.requireMock('../../../../triggers_actions_ui/public');
@@ -1486,17 +1487,23 @@ describe('empty RulesPage', () => {
       ],
     });
     useFetchRules.mockReturnValue({ rulesState, noData: true });
+    wrapper = mountWithIntl(<RulesPage />);
   }
   it('renders empty screen', async () => {
     await setup();
 
-    const wrapper = mountWithIntl(<RulesPage />);
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
     expect(wrapper.find(RulesTable)).toHaveLength(0);
     expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
+  });
+  it('renders Create rule button', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="createFirstRuleButton"]').find('EuiButton')).toHaveLength(
+      1
+    );
   });
 });
 
