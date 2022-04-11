@@ -141,6 +141,7 @@ export interface DocLinks {
   };
   readonly logstash: {
     readonly base: string;
+    readonly inputElasticAgent: string;
   };
   readonly functionbeat: {
     readonly base: string;
@@ -213,6 +214,7 @@ export interface DocLinks {
   readonly kibana: {
     readonly guide: string;
     readonly autocompleteSuggestions: string;
+    readonly secureSavedObject: string;
     readonly xpackSecurity: string;
   };
   readonly upgradeAssistant: {

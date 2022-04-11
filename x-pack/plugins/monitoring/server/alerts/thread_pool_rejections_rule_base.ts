@@ -23,7 +23,7 @@ import {
 import { Alert } from '../../../alerting/server';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { Alert as Rule, RawAlertInstance } from '../../../alerting/common';
+import { Rule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 

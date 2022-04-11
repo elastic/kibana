@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary awk abuse to breakout out of restricted shells or environments by spawning an interactive system shell. The awk utility is a text processing language used for data extraction and reporting tools and the activity of spawning shell is not a standard use of this binary for a user or system administrator. It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via awk Commands",
+  "query": "process where event.type == \"start\" and process.name in (\"sh\", \"bash\", \"dash\") and\n  process.parent.name in (\"nawk\", \"mawk\", \"awk\", \"gawk\") and process.parent.args : \"BEGIN {system(*)}\"\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/nawk/",
+    "https://gtfobins.github.io/gtfobins/mawk/"
+  ],
+  "risk_score": 47,
+  "rule_id": "10754992-28c7-4472-be5b-f3770fd04f2d",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

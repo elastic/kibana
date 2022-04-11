@@ -49,7 +49,7 @@ import {
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
-
+import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {
@@ -287,13 +287,13 @@ export const updateGraphEventId = ({
   };
 };
 
-export const updateSessionViewSessionId = ({
+export const updateSessionViewConfig = ({
   id,
-  eventId,
+  sessionViewConfig,
   timelineById,
 }: {
   id: string;
-  eventId: string | null;
+  sessionViewConfig: SessionViewConfig | null;
   timelineById: TimelineById;
 }): TimelineById => {
   const timeline = timelineById[id];
@@ -302,7 +302,7 @@ export const updateSessionViewSessionId = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      sessionViewId: eventId,
+      sessionViewConfig,
     },
   };
 };

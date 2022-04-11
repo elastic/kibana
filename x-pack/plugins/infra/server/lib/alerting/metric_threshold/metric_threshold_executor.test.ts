@@ -12,7 +12,7 @@ import {
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
   AlertInstanceMock,
-  AlertServicesMock,
+  RuleExecutorServicesMock,
   alertsMock,
 } from '../../../../../alerting/server/mocks';
 import { LifecycleAlertServices } from '../../../../../rule_registry/server';
@@ -777,8 +777,9 @@ const mockLibs: any = {
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
-const alertsServices = alertsMock.createAlertServices();
-const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertContext, string> = {
+const alertsServices = alertsMock.createRuleExecutorServices();
+const services: RuleExecutorServicesMock &
+  LifecycleAlertServices<AlertState, AlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };

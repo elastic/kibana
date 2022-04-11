@@ -43,6 +43,7 @@ import type { Management } from './management';
 import type { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -56,6 +57,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;

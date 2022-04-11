@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CLOUD_POSTURE = i18n.translate('xpack.csp.navigation.cloudPosture', {
+export const CLOUD_POSTURE = i18n.translate('xpack.csp.navigation.cloudPostureBreadcrumbLabel', {
   defaultMessage: 'Cloud Posture',
 });
 
-export const FINDINGS = i18n.translate('xpack.csp.navigation.findings', {
+export const FINDINGS = i18n.translate('xpack.csp.navigation.findingsPageLabel', {
   defaultMessage: 'Findings',
 });
 
-export const DASHBOARD = i18n.translate('xpack.csp.navigation.dashboard', {
+export const DASHBOARD = i18n.translate('xpack.csp.navigation.dashboardPageLabel', {
   defaultMessage: 'Dashboard',
 });
 
-export const MY_BENCHMARKS = i18n.translate('xpack.csp.navigation.my_benchmarks', {
+export const MY_BENCHMARKS = i18n.translate('xpack.csp.navigation.myBenchmarksPageLabel', {
   defaultMessage: 'My Benchmarks',
 });
