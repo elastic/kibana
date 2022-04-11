@@ -97,7 +97,7 @@ export const SUPPORTED_CONNECTORS = [
 /**
  * Alerts
  */
-export const MAX_ALERTS_PER_CASE = 5000 as const;
+export const MAX_ALERTS_PER_CASE = 1000 as const;
 
 export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
