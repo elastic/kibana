@@ -2,15 +2,8 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-
-if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
-  VERSION="$(jq -r '.version' package.json)"
-  WORKFLOW="staging"
-else
-  VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
-  WORKFLOW="snapshot"
-fi
+.buildkite/scripts/common/util.sh
+.buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Download and verify artifacts"
 function download {
@@ -23,28 +16,28 @@ function download {
 mkdir -p target
 cd target
 
-download "kibana-$VERSION-docker-image.tar.gz"
-download "kibana-$VERSION-docker-image-aarch64.tar.gz"
-download "kibana-ubi8-$VERSION-docker-image.tar.gz"
+download "kibana-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
+download "kibana-ubi8-$FULL_VERSION-docker-image.tar.gz"
 
-download "kibana-$VERSION-arm64.deb"
-download "kibana-$VERSION-amd64.deb"
-download "kibana-$VERSION-x86_64.rpm"
-download "kibana-$VERSION-aarch64.rpm"
+download "kibana-$FULL_VERSION-arm64.deb"
+download "kibana-$FULL_VERSION-amd64.deb"
+download "kibana-$FULL_VERSION-x86_64.rpm"
+download "kibana-$FULL_VERSION-aarch64.rpm"
 
-download "kibana-$VERSION-docker-build-context.tar.gz"
-download "kibana-ironbank-$VERSION-docker-build-context.tar.gz"
-download "kibana-ubi8-$VERSION-docker-build-context.tar.gz"
+download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
 
-download "kibana-$VERSION-linux-aarch64.tar.gz"
-download "kibana-$VERSION-linux-x86_64.tar.gz"
+download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
+download "kibana-$FULL_VERSION-linux-x86_64.tar.gz"
 
-download "kibana-$VERSION-darwin-x86_64.tar.gz"
-download "kibana-$VERSION-darwin-aarch64.tar.gz"
+download "kibana-$FULL_VERSION-darwin-x86_64.tar.gz"
+download "kibana-$FULL_VERSION-darwin-aarch64.tar.gz"
 
-download "kibana-$VERSION-windows-x86_64.zip"
+download "kibana-$FULL_VERSION-windows-x86_64.zip"
 
-download "dependencies-$VERSION.csv"
+download "dependencies-$FULL_VERSION.csv"
 
 cd - 
 
@@ -61,8 +54,6 @@ echo "--- Publish artifacts"
 export VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
 export VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
 export VAULT_ADDR="https://secrets.elastic.co:8200"
-QUALIFIER=""
-BASE_VERSION="$(jq -r '.version' package.json)"
 docker run --rm \
   --name release-manager \
   -e VAULT_ADDR \
@@ -76,5 +67,5 @@ docker run --rm \
       --commit "$GIT_COMMIT" \
       --workflow "$WORKFLOW" \
       --version "$BASE_VERSION" \
-      --qualifier "$QUALIFIER" \
+      --qualifier "$VERSION_QUALIFIER" \
       --artifact-set main
