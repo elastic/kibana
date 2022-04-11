@@ -23,6 +23,7 @@ import {
   EuiPanel,
   EuiAccordion,
   EuiBadge,
+  EuiResizableContainer,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -327,8 +328,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
       </ExplorerPage>
     );
   }
-  const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
-  const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
   const bounds = timefilter.getActiveBounds();
   const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
@@ -344,208 +343,241 @@ export const Explorer: FC<ExplorerUIProps> = ({
       queryString={queryString}
       updateLanguage={updateLanguage}
     >
-      <div className="results-container">
-        {noInfluencersConfigured && (
-          <div className="no-influencers-warning">
-            <EuiIconTip
-              content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
-                defaultMessage:
-                  'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
-              })}
-              position="right"
-              type="iInCircle"
-            />
-          </div>
-        )}
-
-        {noInfluencersConfigured === false && (
-          <div className="column col-xs-2" data-test-subj="mlAnomalyExplorerInfluencerList">
-            <EuiSpacer size={'s'} />
-            <EuiTitle className="panel-title">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.explorer.topInfuencersTitle"
-                  defaultMessage="Top influencers"
-                />
-                <EuiIconTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.ml.explorer.topInfluencersTooltip"
-                      defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
-                    />
-                  }
-                  position="right"
-                />
-              </h2>
-            </EuiTitle>
-            {loading ? (
-              <EuiLoadingContent lines={10} />
-            ) : (
-              <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
-            )}
-          </div>
-        )}
-
-        <div className={mainColumnClasses}>
-          <EuiSpacer size="m" />
-          {stoppedPartitions && (
-            <EuiCallOut
-              size={'s'}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.explorer.stoppedPartitionsExistCallout"
-                  defaultMessage="There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection have stopped for some partitions in {jobsWithStoppedPartitions, plural, one {job} other {jobs}} [{stoppedPartitions}] where the categorization status has changed to warn."
-                  values={{
-                    jobsWithStoppedPartitions: stoppedPartitions.length,
-                    stoppedPartitions: stoppedPartitions.join(', '),
-                  }}
-                />
-              }
-            />
-          )}
-
-          <AnomalyTimeline explorerState={explorerState} />
-
-          <EuiSpacer size="m" />
-
-          {annotationsError !== undefined && (
-            <>
-              <EuiTitle
-                className="panel-title"
-                data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
-              >
-                <h2>
-                  <FormattedMessage
-                    id="xpack.ml.explorer.annotationsErrorTitle"
-                    defaultMessage="Annotations"
+      <EuiResizableContainer>
+        {(EuiResizablePanel, EuiResizableButton) => (
+          <>
+            <EuiResizablePanel
+              mode={[
+                'collapsible',
+                {
+                  className: 'panel-toggle',
+                  'data-test-subj': 'mlTopInfluencersToggle',
+                  position: 'top',
+                },
+              ]}
+              initialSize={20}
+              minSize="10%"
+              paddingSize={'s'}
+            >
+              {noInfluencersConfigured ? (
+                <div className="no-influencers-warning">
+                  <EuiIconTip
+                    content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
+                      defaultMessage:
+                        'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
+                    })}
+                    position="right"
+                    type="iInCircle"
                   />
-                </h2>
-              </EuiTitle>
-              <EuiPanel>
-                <EuiCallOut
-                  title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
-                    defaultMessage: 'An error occurred loading annotations:',
-                  })}
-                  color="danger"
-                  iconType="alert"
-                >
-                  <p>{annotationsError}</p>
-                </EuiCallOut>
-              </EuiPanel>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          {loading === false && tableData.anomalies?.length ? (
-            <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
-          ) : null}
-          {annotationsCnt > 0 && (
-            <>
-              <EuiPanel
-                data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded"
-                hasBorder
-                hasShadow={false}
-              >
-                <EuiAccordion
-                  id={htmlIdGen()}
-                  buttonContent={
-                    <EuiTitle
-                      className="panel-title"
-                      data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.explorer.annotationsTitle"
-                          defaultMessage="Annotations {badge}"
-                          values={{
-                            badge,
-                          }}
-                        />
-                      </h2>
-                    </EuiTitle>
-                  }
-                >
-                  <>
-                    <AnnotationsTable
-                      jobIds={selectedJobIds}
-                      annotations={annotationsData}
-                      drillDown={true}
-                      numberBadge={false}
-                    />
-                  </>
-                </EuiAccordion>
-              </EuiPanel>
-              <AnnotationFlyout />
-              <EuiSpacer size="m" />
-            </>
-          )}
-          {loading === false && (
-            <EuiPanel hasBorder hasShadow={false}>
-              <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
-                <EuiFlexItem grow={false}>
+                </div>
+              ) : (
+                <div data-test-subj="mlAnomalyExplorerInfluencerList">
+                  <EuiSpacer size={'s'} />
                   <EuiTitle className="panel-title">
                     <h2>
                       <FormattedMessage
-                        id="xpack.ml.explorer.anomaliesTitle"
-                        defaultMessage="Anomalies"
+                        id="xpack.ml.explorer.topInfuencersTitle"
+                        defaultMessage="Top influencers"
+                      />
+                      <EuiIconTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.ml.explorer.topInfluencersTooltip"
+                            defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
+                          />
+                        }
+                        position="right"
                       />
                     </h2>
                   </EuiTitle>
-                </EuiFlexItem>
+                  {loading ? (
+                    <EuiLoadingContent lines={10} />
+                  ) : (
+                    <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
+                  )}
+                </div>
+              )}
+            </EuiResizablePanel>
 
-                <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
-                  <AnomalyContextMenu
-                    selectedJobs={selectedJobs!}
-                    selectedCells={selectedCells}
-                    bounds={bounds}
-                    interval={
-                      swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined
+            <EuiResizableButton />
+
+            <EuiResizablePanel mode="main" initialSize={80} minSize="50px" paddingSize={'s'}>
+              <div>
+                <EuiSpacer size="m" />
+                {stoppedPartitions && (
+                  <EuiCallOut
+                    size={'s'}
+                    title={
+                      <FormattedMessage
+                        id="xpack.ml.explorer.stoppedPartitionsExistCallout"
+                        defaultMessage="There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection have stopped for some partitions in {jobsWithStoppedPartitions, plural, one {job} other {jobs}} [{stoppedPartitions}] where the categorization status has changed to warn."
+                        values={{
+                          jobsWithStoppedPartitions: stoppedPartitions.length,
+                          stoppedPartitions: stoppedPartitions.join(', '),
+                        }}
+                      />
                     }
-                    chartsCount={chartsData.seriesToPlot.length}
                   />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <SelectSeverity />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SelectInterval />
-                </EuiFlexItem>
-                {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-                  <EuiFlexItem grow={false}>
-                    <CheckboxShowCharts />
-                  </EuiFlexItem>
                 )}
-              </EuiFlexGroup>
 
-              <EuiSpacer size="m" />
+                <AnomalyTimeline explorerState={explorerState} />
 
-              <div className="euiText explorer-charts">
-                {showCharts ? (
-                  <ExplorerChartsContainer
-                    {...{
-                      ...chartsData,
-                      severity,
-                      timefilter,
-                      mlLocator,
-                      timeBuckets,
-                      onSelectEntity: applyFilter,
-                      chartsService,
-                    }}
-                  />
+                <EuiSpacer size="m" />
+
+                {annotationsError !== undefined && (
+                  <>
+                    <EuiTitle
+                      className="panel-title"
+                      data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
+                    >
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.explorer.annotationsErrorTitle"
+                          defaultMessage="Annotations"
+                        />
+                      </h2>
+                    </EuiTitle>
+                    <EuiPanel>
+                      <EuiCallOut
+                        title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
+                          defaultMessage: 'An error occurred loading annotations:',
+                        })}
+                        color="danger"
+                        iconType="alert"
+                      >
+                        <p>{annotationsError}</p>
+                      </EuiCallOut>
+                    </EuiPanel>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {loading === false && tableData.anomalies?.length ? (
+                  <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
                 ) : null}
-              </div>
+                {annotationsCnt > 0 && (
+                  <>
+                    <EuiPanel
+                      data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded"
+                      hasBorder
+                      hasShadow={false}
+                    >
+                      <EuiAccordion
+                        id={htmlIdGen()}
+                        buttonContent={
+                          <EuiTitle
+                            className="panel-title"
+                            data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
+                          >
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ml.explorer.annotationsTitle"
+                                defaultMessage="Annotations {badge}"
+                                values={{
+                                  badge,
+                                }}
+                              />
+                            </h2>
+                          </EuiTitle>
+                        }
+                      >
+                        <>
+                          <AnnotationsTable
+                            jobIds={selectedJobIds}
+                            annotations={annotationsData}
+                            drillDown={true}
+                            numberBadge={false}
+                          />
+                        </>
+                      </EuiAccordion>
+                    </EuiPanel>
+                    <AnnotationFlyout />
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {loading === false && (
+                  <EuiPanel hasBorder hasShadow={false}>
+                    <EuiFlexGroup
+                      direction="row"
+                      gutterSize="m"
+                      responsive={false}
+                      alignItems="center"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiTitle className="panel-title">
+                          <h2>
+                            <FormattedMessage
+                              id="xpack.ml.explorer.anomaliesTitle"
+                              defaultMessage="Anomalies"
+                            />
+                          </h2>
+                        </EuiTitle>
+                      </EuiFlexItem>
 
-              <AnomaliesTable
-                bounds={bounds}
-                tableData={tableData}
-                influencerFilter={applyFilter}
-              />
-            </EuiPanel>
-          )}
-        </div>
-      </div>
+                      <EuiFlexItem
+                        grow={false}
+                        style={{ marginLeft: 'auto', alignSelf: 'baseline' }}
+                      >
+                        <AnomalyContextMenu
+                          selectedJobs={selectedJobs!}
+                          selectedCells={selectedCells}
+                          bounds={bounds}
+                          interval={
+                            swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined
+                          }
+                          chartsCount={chartsData.seriesToPlot.length}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+
+                    <EuiFlexGroup
+                      direction="row"
+                      gutterSize="l"
+                      responsive={true}
+                      alignItems="center"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <SelectSeverity />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <SelectInterval />
+                      </EuiFlexItem>
+                      {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
+                        <EuiFlexItem grow={false}>
+                          <CheckboxShowCharts />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+
+                    <EuiSpacer size="m" />
+
+                    <div className="euiText explorer-charts">
+                      {showCharts ? (
+                        <ExplorerChartsContainer
+                          {...{
+                            ...chartsData,
+                            severity,
+                            timefilter,
+                            mlLocator,
+                            timeBuckets,
+                            onSelectEntity: applyFilter,
+                            chartsService,
+                          }}
+                        />
+                      ) : null}
+                    </div>
+
+                    <AnomaliesTable
+                      bounds={bounds}
+                      tableData={tableData}
+                      influencerFilter={applyFilter}
+                    />
+                  </EuiPanel>
+                )}
+              </div>
+            </EuiResizablePanel>
+          </>
+        )}
+      </EuiResizableContainer>
     </ExplorerPage>
   );
 };

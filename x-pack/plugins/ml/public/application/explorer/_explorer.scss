@@ -8,12 +8,6 @@ $borderRadius: $euiBorderRadius / 2;
   .results-container {
     padding: 0 0 $euiSize 0;
 
-    // SASSTODO: Overwrite of bootstrap
-    .col-xs-12 {
-      width: calc(100% - #{$euiSizeXL});
-      padding-left: $euiSize;
-    }
-
     .no-influencers-warning {
       float: left;
       padding-top: $euiSizeXS;
