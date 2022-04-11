@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,
+  EuiButtonIconProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
@@ -40,6 +41,7 @@ export interface QueryBarMenuProps {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
+  buttonProps?: Partial<EuiButtonIconProps>;
 }
 
 export function QueryBarMenu({
@@ -63,6 +65,7 @@ export function QueryBarMenu({
   showQueryInput,
   showFilterBar,
   showSaveQuery,
+  buttonProps,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -92,6 +95,7 @@ export function QueryBarMenu({
       size="m"
       display="base"
       onClick={onButtonClick}
+      {...buttonProps}
       iconType="filter"
       aria-label={buttonLabel}
       title={buttonLabel}

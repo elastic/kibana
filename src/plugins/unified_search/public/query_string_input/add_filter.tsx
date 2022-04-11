@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiButtonIconProps } from '@elastic/eui';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '../../../kibana_react/public';
@@ -23,6 +23,7 @@ interface AddFilterPopoverProps {
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   onFiltersUpdated?: (filters: Filter[]) => void;
+  buttonProps?: Partial<EuiButtonIconProps>;
 }
 
 export const AddFilterPopover = React.memo(function AddFilterPopover({
@@ -30,6 +31,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
   filters,
   timeRangeForSuggestionsOverride,
   onFiltersUpdated,
+  buttonProps,
 }: AddFilterPopoverProps) {
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, data, usageCollection, appName } = kibana.services;
@@ -78,6 +80,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
       data-test-subj="addFilter"
       onClick={() => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen)}
       size="m"
+      {...buttonProps}
     />
   );
 

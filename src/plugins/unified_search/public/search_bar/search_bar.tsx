@@ -340,6 +340,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   };
 
+  private shouldShowDatePickerAsBadge() {
+    return this.shouldRenderFilterBar() && !this.props.showQueryInput;
+  }
+
   public render() {
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
@@ -385,6 +389,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
+        buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(
@@ -396,6 +401,26 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       />
     );
+
+    let filterBar;
+    if (this.shouldRenderFilterBar()) {
+      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
+      });
+
+      filterBar = (
+        <div id="globalFilterGroup" className={filterGroupClasses}>
+          <FilterBar
+            className="globalFilterGroup__filterBar"
+            filters={this.props.filters!}
+            onFiltersUpdated={this.props.onFiltersUpdated}
+            indexPatterns={this.props.indexPatterns!}
+            appName={this.services.appName}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          />
+        </div>
+      );
+    }
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
@@ -434,27 +459,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
+          filterBar={this.shouldShowDatePickerAsBadge() ? filterBar : undefined}
         />
-      );
-    }
-
-    let filterBar;
-    if (this.shouldRenderFilterBar()) {
-      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
-      });
-
-      filterBar = (
-        <div id="globalFilterGroup" className={filterGroupClasses}>
-          <FilterBar
-            className="globalFilterGroup__filterBar"
-            filters={this.props.filters!}
-            onFiltersUpdated={this.props.onFiltersUpdated}
-            indexPatterns={this.props.indexPatterns!}
-            appName={this.services.appName}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          />
-        </div>
       );
     }
 
@@ -465,7 +471,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
-        {filterBar}
+        {!this.shouldShowDatePickerAsBadge() && filterBar}
       </div>
     );
   }

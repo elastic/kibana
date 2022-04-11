@@ -142,6 +142,7 @@ describe('SearchBar', () => {
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         showDatePicker: false,
+        showQueryInput: true,
         onFiltersUpdated: noop,
         filters: [],
       })
@@ -204,6 +205,7 @@ describe('SearchBar', () => {
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
+        showQueryInput: true,
         onQuerySubmit: noop,
         query: kqlQuery,
         filters: [],
