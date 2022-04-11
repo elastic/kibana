@@ -286,8 +286,6 @@ export function RulesPage() {
 
   const getRulesTable = () => {
     if (noData && !rulesState.isLoading) {
-      console.log('!!here');
-      console.log(authorizedToCreateAnyRules, '!!authorized');
       return authorizedToCreateAnyRules ? (
         <NoDataPrompt
           documentationLink={documentationLink}
