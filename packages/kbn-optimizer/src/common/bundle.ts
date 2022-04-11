@@ -101,7 +101,7 @@ export class Bundle {
       spec: omit(this.toSpec(), ['pageLoadAssetSizeLimit']),
       checksums: Object.fromEntries(paths.map((p) => [p, hashes.getCached(p)] as const)),
       dllName: dllManifest.name,
-      dllRefs: dllRefKeys.map((k) => [k, dllManifest.content[k]] as const),
+      dllRefs: Object.fromEntries(dllRefKeys.map((k) => [k, dllManifest.content[k]] as const)),
     };
   }
 
