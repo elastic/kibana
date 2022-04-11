@@ -11,20 +11,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
+import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import {
-  ColorMode,
-  CustomPaletteState,
-  PaletteOutput,
-} from '../../../../../src/plugins/charts/common';
-import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import { ColorMode, CustomPaletteState } from '../../../../../src/plugins/charts/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 

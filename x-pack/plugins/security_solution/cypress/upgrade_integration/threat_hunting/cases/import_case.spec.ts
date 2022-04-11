@@ -34,7 +34,7 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
-import { loginAndWaitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { importCase } from '../../../tasks/saved_objects';
 
 import { KIBANA_SAVED_OBJECTS } from '../../../urls/navigation';
@@ -80,7 +80,8 @@ const THIRD_PARTICIPANT = 3;
 
 describe('Import case after upgrade', () => {
   before(() => {
-    loginAndWaitForPageWithoutDateRange(KIBANA_SAVED_OBJECTS);
+    login();
+    visitWithoutDateRange(KIBANA_SAVED_OBJECTS);
     importCase(CASE_NDJSON);
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(CASES_PAGE);
