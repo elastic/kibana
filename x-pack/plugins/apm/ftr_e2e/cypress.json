@@ -14,6 +14,6 @@
   "video": false,
   "screenshotOnRunFailure": false,
   "retries": {
-    "runMode": 0
+    "runMode": 2
   }
 }
