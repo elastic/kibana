@@ -126,12 +126,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
-      it('should show the saved query management component when there are no saved queries', async () => {
+      it('should show the saved query management load button as disabled when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
-        const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
-        expect(descriptionText).to.eql(
-          'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
-        );
+        const loadFilterSetBtn = await testSubjects.find('saved-query-management-load-button');
+        const isDisabled = await loadFilterSetBtn.getAttribute('disabled');
+        expect(isDisabled).to.equal('true');
       });
 
       it('should allow a query to be saved via the saved objects management component', async () => {
@@ -171,9 +170,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        const contextMenuPanelTitleButton = await testSubjects.exists(
+          'contextMenuPanelTitleButton'
+        );
+        if (contextMenuPanelTitleButton) {
+          await testSubjects.click('contextMenuPanelTitleButton');
+        }
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
@@ -181,9 +187,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows saving the currently loaded query as a new query', async () => {
+        await queryBar.setQuery('response:400');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'OkResponseCopy',
-          '200 responses',
+          '400 responses',
           false,
           false
         );
@@ -214,17 +221,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows clearing if non default language was remembered in localstorage', async () => {
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
         await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('kql');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('lucene');
       });
 
       it('changing language removes saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });
