@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable ban/ban */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -12,6 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
+  const find = getService('find');
 
   const retry = getService('retry');
   async function createRule(rule: any) {
@@ -39,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    describe.skip('Feature flag', () => {
+    describe('Feature flag', () => {
       // Related to the config inside x-pack/test/observability_functional/with_rac_write.config.ts
       it('Link point to O11y Rules pages by default or when "xpack.observability.unsafe.rules.enabled: true"', async () => {
         const manageRulesPageHref = await observability.alerts.rulesPage.getManageRulesPageHref();
@@ -47,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Create rule button', () => {
+    describe('Create rule button', () => {
       it('Show Create Rule flyout when Create Rule button is clicked', async () => {
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
@@ -62,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Rules table', () => {
+    describe.only('Rules table', () => {
       before(async () => {
         const uptimeRule = {
           params: {
@@ -104,10 +107,25 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('shows the rules table ', async () => {
         await testSubjects.existOrFail('rulesList');
+        const tableRows = await find.allByCssSelector('.euiTableRow');
+
+        const rows = [];
+        for (const euiTableRow of tableRows) {
+          const $ = await euiTableRow.parseDomContent();
+          rows.push({
+            name: $.findTestSubjects('rulesTableCell-name').find('a').text(),
+            enabled: $.findTestSubjects('rulesTableCell-enabled').find('button').attr('title'),
+          });
+        }
+        expect(rows.length).to.be(2);
+        expect(rows[0].name).to.be('error-log');
+        expect(rows[0].enabled).to.be('Enabled');
+        expect(rows[1].name).to.be('uptime');
+        expect(rows[1].enabled).to.be('Enabled');
       });
     });
 
-    describe.skip('User permissions', () => {
+    describe('User permissions', () => {
       it('shows the Create Rule button when user has permissions', async () => {
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
