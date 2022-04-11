@@ -76,7 +76,7 @@ function createChoroplethLayerDescriptor({
     },
   };
   if (setLabelStyle) {
-    properties[VECTOR_STYLES.LABEL_TEXT] = {
+    styleProperties[VECTOR_STYLES.LABEL_TEXT] = {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
