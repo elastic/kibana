@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable ban/ban */
-
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -65,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('Rules table', () => {
+    describe('Rules table', () => {
       before(async () => {
         const uptimeRule = {
           params: {
