@@ -75,8 +75,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const nextFields = [new MockField({ fieldName: previousFieldName, dataType: 'number' })];
       const { hasChanges } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
         nextFields,
-        previousFields,
-        mapColors
+        mapColors,
+        previousFields
       );
       expect(hasChanges).toBe(false);
     });
@@ -88,7 +88,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
       const nextFields = [];
       const { hasChanges, nextStyleDescriptor } =
-        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors, previousFields);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {
@@ -131,7 +131,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
         },
       ];
       const { hasChanges, nextStyleDescriptor } =
-        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors, previousFields);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
         options: {
@@ -148,7 +148,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
       const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
       const { hasChanges, nextStyleDescriptor } =
-        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
+        await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, mapColors, previousFields);
       expect(hasChanges).toBe(true);
       expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
         options: {

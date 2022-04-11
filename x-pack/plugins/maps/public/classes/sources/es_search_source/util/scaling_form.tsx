@@ -35,19 +35,20 @@ interface Props {
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
   clusteringDisabledReason?: string | null;
-  hasJoins: boolean;
-  clearJoins: () => void;
+  numberOfJoins: number;
 }
 
 interface State {
   nextScalingType?: SCALING_TYPES;
   maxResultWindow: string;
   showModal: boolean;
+  modalMsg: string | null;
 }
 
 export class ScalingForm extends Component<Props, State> {
   state: State = {
     maxResultWindow: DEFAULT_MAX_RESULT_WINDOW.toLocaleString(),
+    modalMsg: null,
     showModal: false,
   };
   _isMounted = false;
@@ -74,8 +75,24 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   _onScalingTypeSelect = (optionId: SCALING_TYPES): void => {
-    if (this.props.hasJoins && optionId === SCALING_TYPES.CLUSTERS) {
-      this._openModal(optionId);
+    if (this.props.numberOfJoins > 0 && optionId === SCALING_TYPES.CLUSTERS) {
+      this._openModal(
+        optionId,
+        i18n.translate('xpack.maps.source.esSearch.clusterScalingJoinMsg', {
+          defaultMessage: `Scaling with clusters does not support term joins. Switching to clusters will remove all term joins from your layer configuration.`,
+          values: { clustersLabel: this._getClustersOptionLabel() },
+        })
+      );
+    } else if (this.props.numberOfJoins > 1 && optionId === SCALING_TYPES.MVT) {
+      this._openModal(
+        optionId,
+        i18n.translate('xpack.maps.source.esSearch.mvtScalingJoinMsg', {
+          defaultMessage: `Vector tiles support one term join. Your layer has {numberOfJoins} term joins. Switching to vector tiles will keep the first term join and remove all other term joins from your layer configuration.`,
+          values: {
+            numberOfJoins: this.props.numberOfJoins,
+          },
+        })
+      );
     } else {
       this._onScalingTypeChange(optionId);
     }
@@ -98,8 +115,9 @@ export class ScalingForm extends Component<Props, State> {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
-  _openModal = (optionId: SCALING_TYPES) => {
+  _openModal = (optionId: SCALING_TYPES, modalMsg: string) => {
     this.setState({
+      modalMsg,
       nextScalingType: optionId,
       showModal: true,
     });
@@ -107,14 +125,16 @@ export class ScalingForm extends Component<Props, State> {
 
   _closeModal = () => {
     this.setState({
+      modalMsg: null,
       nextScalingType: undefined,
       showModal: false,
     });
   };
 
   _acceptModal = () => {
-    this.props.clearJoins();
-    this._onScalingTypeChange(this.state.nextScalingType!);
+    if (this.state.nextScalingType) {
+      this._onScalingTypeChange(this.state.nextScalingType);
+    }
     this._closeModal();
   };
 
@@ -139,22 +159,14 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   _renderModal() {
-    if (!this.state.showModal || this.state.nextScalingType === undefined) {
+    if (!this.state.showModal || !this.state.modalMsg || this.state.nextScalingType === undefined) {
       return null;
     }
 
-    const scalingOptionLabel =
-      this.state.nextScalingType === SCALING_TYPES.CLUSTERS
-        ? i18n.translate('xpack.maps.source.esSearch.scalingModal.clusters', {
-            defaultMessage: `clusters`,
-          })
-        : i18n.translate('xpack.maps.source.esSearch.scalingModal.vectorTiles', {
-            defaultMessage: `vector tiles`,
-          });
     return (
       <EuiConfirmModal
         title={i18n.translate('xpack.maps.source.esSearch.scalingModal.title', {
-          defaultMessage: `Term joins not supported`,
+          defaultMessage: `Remove unsupported configurations?`,
         })}
         onCancel={this._closeModal}
         onConfirm={this._acceptModal}
@@ -170,13 +182,7 @@ export class ScalingForm extends Component<Props, State> {
         buttonColor="danger"
         defaultFocusedButton="cancel"
       >
-        <p>
-          <FormattedMessage
-            id="xpack.maps.source.esSearch.scalingModal.message"
-            defaultMessage="Scaling option {scalingOptionLabel} does not support term joins. Switching to {scalingOptionLabel} will remove all term joins from your layer configuration."
-            values={{ scalingOptionLabel }}
-          />
-        </p>
+        <p>{this.state.modalMsg}</p>
       </EuiConfirmModal>
     );
   }

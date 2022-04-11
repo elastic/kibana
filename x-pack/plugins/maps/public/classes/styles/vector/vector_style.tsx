@@ -84,11 +84,24 @@ export interface IVectorStyle extends IStyle {
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   getSourceFieldNames(): string[];
   getStyleMeta(): StyleMeta;
+
+  /*
+   * Changes to source descriptor and join descriptor will impact style properties.
+   * For instance, a style property may be dynamically tied to the value of an ordinal field defined
+   * by a join or a metric aggregation. The metric aggregation or join may be edited or removed.
+   * When this happens, the style will be linked to a no-longer-existing field.
+   * This method provides a way for a style to clean itself and return a descriptor that unsets any dynamic
+   * properties that are tied to missing fields
+   *
+   * This method does not update its descriptor. It just returns a new descriptor that the caller
+   * can then use to update store state via dispatch.
+   */
   getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
-    previousFields: IField[],
-    mapColors: string[]
+    mapColors: string[],
+    previousFields?: IField[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
+
   getIsPointsOnly(): boolean;
   isTimeAware(): boolean;
   getPrimaryColor(): string;
@@ -403,25 +416,14 @@ export class VectorStyle implements IVectorStyle {
     }
   }
 
-  /*
-   * Changes to source descriptor and join descriptor will impact style properties.
-   * For instance, a style property may be dynamically tied to the value of an ordinal field defined
-   * by a join or a metric aggregation. The metric aggregation or join may be edited or removed.
-   * When this happens, the style will be linked to a no-longer-existing ordinal field.
-   * This method provides a way for a style to clean itself and return a descriptor that unsets any dynamic
-   * properties that are tied to missing oridinal fields
-   *
-   * This method does not update its descriptor. It just returns a new descriptor that the caller
-   * can then use to update store state via dispatch.
-   */
   async getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
-    previousFields: IField[],
-    mapColors: string[]
+    mapColors: string[],
+    previousFields?: IField[]
   ) {
     const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
 
-    return previousFields.length === nextFields.length
+    return previousFields && previousFields.length === nextFields.length
       ? // Field-config changed
         await this._updateFieldsInDescriptor(
           nextFields,

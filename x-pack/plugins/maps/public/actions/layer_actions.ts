@@ -13,6 +13,7 @@ import {
   createLayerInstance,
   getEditState,
   getLayerById,
+  getLayerDescriptor,
   getLayerList,
   getLayerListRaw,
   getMapColors,
@@ -55,11 +56,12 @@ import {
   LayerDescriptor,
   StyleDescriptor,
   TileMetaFeature,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE, SCALING_TYPES } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
@@ -362,13 +364,17 @@ function updateSourcePropWithoutSync(
   value: unknown,
   newLayerType?: LAYER_TYPE
 ) {
-  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     if (propName === 'metrics') {
       if (newLayerType) {
         throw new Error('May not change layer-type when modifying metrics source-property');
       }
       return await dispatch(updateMetricsProp(layerId, value));
     }
+
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -378,7 +384,37 @@ function updateSourcePropWithoutSync(
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
-    await dispatch(updateStyleProperties(layerId, []));
+
+    if (propName === 'scalingType') {
+      // get joins from layer descriptor instead of layer.getJoins()
+      // 1) IVectorLayer implemenations my return empty array when descriptor has joins
+      // 2) getJoins returns instances and descriptors are needed.
+      const layerDescriptor = getLayerDescriptor(getState(), layerId) as VectorLayerDescriptor;
+      const joins = layerDescriptor.joins ? layerDescriptor.joins : [];
+      if (value === SCALING_TYPES.CLUSTERS && joins.length) {
+        // Blended scaling type does not support joins
+        // It is not possible to display join metrics when showing clusters
+        dispatch({
+          type: SET_JOINS,
+          layerId,
+          joins: [],
+        });
+        await dispatch(updateStyleProperties(layerId));
+      } else if (value === SCALING_TYPES.MVT) {
+        if (joins.length > 1) {
+          // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
+          // Therefore, Vector tile scaling supports only one join
+          dispatch({
+            type: SET_JOINS,
+            layerId,
+            joins: [joins[0]],
+          });
+        }
+        // update style props regardless of updating joins
+        // Allow style to clean-up data driven style properties with join fields that do not support feature-state.
+        await dispatch(updateStyleProperties(layerId));
+      }
+    }
   };
 }
 
@@ -563,7 +599,7 @@ function removeLayerFromLayerList(layerId: string) {
   };
 }
 
-function updateStyleProperties(layerId: string, previousFields: IField[]) {
+function updateStyleProperties(layerId: string, previousFields?: IField[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -585,7 +621,7 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
     const { hasChanges, nextStyleDescriptor } = await (
       style as IVectorStyle
-    ).getDescriptorWithUpdatedStyleProps(nextFields, previousFields, getMapColors(getState()));
+    ).getDescriptorWithUpdatedStyleProps(nextFields, getMapColors(getState()), previousFields);
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
     }
@@ -627,9 +663,9 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     const previousFields = await (layer as IVectorLayer).getFields();
-    await dispatch({
+    dispatch({
       type: SET_JOINS,
-      layer,
+      layerId: layer.getId(),
       joins,
     });
     await dispatch(updateStyleProperties(layer.getId(), previousFields));

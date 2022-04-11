@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { Join } from './resources/join';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
-import { JoinDescriptor } from '../../../../common/descriptor_types';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import React from 'react';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 const BUTTON_LABEL = i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButton.label', {
   defaultMessage: 'Add join',
@@ -43,7 +36,7 @@ export function AddJoinButton({ addJoin, isLayerSourceMvt, numJoins }: Props) {
   return isDisabled ? (
     <EuiToolTip
       content={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButton.mvtSingleJoinMsg', {
-        defaultMessage: `Vector tiles support one join. To add multiple joins, select 'Limit results' in 'Scaling'.`,
+        defaultMessage: `Vector tiles support one term join. To add multiple joins, select 'Limit results' in 'Scaling'.`,
       })}
     >
       {button}

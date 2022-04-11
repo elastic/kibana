@@ -30,6 +30,7 @@ import { StyleSettings } from './style_settings';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { VectorLayerDescriptor } from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
@@ -39,7 +40,6 @@ import { IField } from '../../classes/fields/field';
 const localStorage = new Storage(window.localStorage);
 
 export interface Props {
-  clearJoins: (layer: ILayer) => void;
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
 }
@@ -139,12 +139,6 @@ export class EditLayerPanel extends Component<Props, State> {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
 
-  _clearJoins = () => {
-    if (this.props.selectedLayer) {
-      this.props.clearJoins(this.props.selectedLayer);
-    }
-  };
-
   _renderLayerErrors() {
     if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
       return null;
@@ -230,6 +224,9 @@ export class EditLayerPanel extends Component<Props, State> {
       return null;
     }
 
+    const descriptor = this.props.selectedLayer.getDescriptor() as VectorLayerDescriptor;
+    const numberOfJoins = descriptor.joins ? descriptor.joins.length : 0;
+
     return (
       <KibanaContextProvider
         services={{
@@ -277,11 +274,8 @@ export class EditLayerPanel extends Component<Props, State> {
               />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
-                clearJoins: this._clearJoins,
                 currentLayerType: this.props.selectedLayer.getType(),
-                hasJoins: isVectorLayer(this.props.selectedLayer)
-                  ? (this.props.selectedLayer as IVectorLayer).hasJoins()
-                  : false,
+                numberOfJoins,
                 onChange: this._onSourceChange,
               })}
 

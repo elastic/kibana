@@ -222,7 +222,7 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
   map.mapState.editState;
 
-function getLayerDescriptor(state: MapStoreState, layerId: string) {
+export function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
   return layerListRaw.find((layer) => layer.id === layerId);
 }
