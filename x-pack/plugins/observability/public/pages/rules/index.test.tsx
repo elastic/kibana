@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-
-import { shallow, mount } from 'enzyme';
-import { RulesPage } from './index.tsx';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { RulesPage } from './index';
 import { RulesTable } from './components/rules_table';
 import { RuleState } from './types';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { AppMountParameters } from 'kibana/public';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -42,7 +41,18 @@ jest.mock('../../../../triggers_actions_ui/public', () => ({
 }));
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
+  appMountParameters: {} as AppMountParameters,
+  config: {
+    unsafe: {
+      alertingExperience: { enabled: true },
+      cases: { enabled: true },
+      overviewNext: { enabled: false },
+      rules: { enabled: true },
+    },
+  },
+  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
+  kibanaFeatures: [],
 }));
 
 // const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
@@ -1482,11 +1492,6 @@ describe('empty RulesPage', () => {
     await setup();
 
     const wrapper = mountWithIntl(<RulesPage />);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
     expect(wrapper.find(RulesTable)).toHaveLength(0);
     expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
   });
