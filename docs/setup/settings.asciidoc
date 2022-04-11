@@ -359,7 +359,7 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
- | The map attribution string. Provide attributions in markdown and use '+|+' to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
+ | The map attribution string. Provide attributions in markdown and use '+++|+++' to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
 | [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
