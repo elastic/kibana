@@ -123,7 +123,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const render: UiRender = (ui, options = {}) => {
     return reactRender(ui, {
-      wrapper: AppWrapper as React.ComponentType,
+      wrapper: AppWrapper,
       ...options,
     });
   };
