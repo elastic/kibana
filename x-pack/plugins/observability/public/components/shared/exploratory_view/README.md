@@ -33,7 +33,7 @@ After the dataView is created we also set field formats to promote human-readabi
 
 ### Visualization Configuration
 
-Each of data type may have one or more visualization configuration. The data type to visualization configuration can be found in [`exploratory_view/obs_exploratory_view`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability/public/components/shared/exploratory_view/obsv_exploratory_view.tsx#L86)
+Each data type may have one or more visualization configurations. The data type to visualization configuration can be found in [`exploratory_view/obs_exploratory_view`](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability/public/components/shared/exploratory_view/obsv_exploratory_view.tsx#L86)
 
 Each visualization configuration is mapped to a single report type.
 
