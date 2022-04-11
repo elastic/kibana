@@ -682,6 +682,8 @@ sources and images. When false, Vega can only get data from {es}. *Default: `fal
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 
+  When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
+
 |[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*

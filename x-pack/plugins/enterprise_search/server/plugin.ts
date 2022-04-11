@@ -24,6 +24,7 @@ import { SpacesPluginStart } from '../../spaces/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
@@ -89,6 +90,12 @@ export class EnterpriseSearchPlugin implements Plugin {
   ) {
     const config = this.config;
     const log = this.logger;
+    const PLUGIN_IDS = [
+      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      APP_SEARCH_PLUGIN.ID,
+      WORKPLACE_SEARCH_PLUGIN.ID,
+    ];
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(http, customIntegrations);
@@ -107,17 +114,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      app: [
-        'kibana',
-        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        APP_SEARCH_PLUGIN.ID,
-        WORKPLACE_SEARCH_PLUGIN.ID,
-      ],
-      catalogue: [
-        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        APP_SEARCH_PLUGIN.ID,
-        WORKPLACE_SEARCH_PLUGIN.ID,
-      ],
+      app: ['kibana', ...PLUGIN_IDS],
+      catalogue: PLUGIN_IDS,
       privileges: null,
     });
 
@@ -130,16 +128,18 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, spaces, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
+      const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
 
       return {
         navLinks: {
-          enterpriseSearch: showEnterpriseSearchOverview,
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
-          enterpriseSearch: showEnterpriseSearchOverview,
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
