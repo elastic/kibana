@@ -1375,7 +1375,7 @@ describe('Package policy service', () => {
       callbackCallingOrder.length = 0;
     });
 
-    it('should execute external callbacks', async () => {
+    it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
       const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
