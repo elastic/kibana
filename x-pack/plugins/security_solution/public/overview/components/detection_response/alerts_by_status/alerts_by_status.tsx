@@ -10,7 +10,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Datum } from '@elastic/charts';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
@@ -31,12 +30,11 @@ import {
   STATUS_LOW_LABEL,
   STATUS_MEDIUM_LABEL,
   STATUS_OPEN,
-  UPDATING,
 } from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
-import { UPDATED, VIEW_ALERTS } from '../../../pages/translations';
-import { SEVERITY_COLOR } from '../utils';
+import { VIEW_ALERTS } from '../../../pages/translations';
+import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
@@ -110,22 +108,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
       })),
     []
   );
-  const subtitle = useMemo(
-    () =>
-      loading ? (
-        UPDATING
-      ) : (
-        <>
-          {UPDATED}{' '}
-          <FormattedRelative
-            data-test-subj="alerts-by-status-last-update"
-            key={`formattedRelative-${Date.now()}`}
-            value={new Date(updatedAt)}
-          />
-        </>
-      ),
-    [loading, updatedAt]
-  );
+
   const totalAlerts =
     loading || donutData == null
       ? 0
@@ -156,7 +139,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
             title={ALERTS_TITLE}
-            subtitle={subtitle}
+            subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
@@ -74,25 +74,34 @@ export const parseAlertsData = (
   }, {});
 };
 
-export const useAlertsByStatus = ({
-  signalIndexName,
-  queryId,
-  skip = false,
-}: {
-  signalIndexName: string | null;
+export interface UseAlertsByStatusProps {
   queryId: string;
+  signalIndexName: string | null;
   skip?: boolean;
+}
+
+export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
+  items: ParsedAlertsData;
+  isLoading: boolean;
+  updatedAt: number;
+};
+
+export const useAlertsByStatus: UseAlertsByStatus = ({
+  queryId,
+  signalIndexName,
+  skip = false,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
+  const [items, setItems] = useState<null | ParsedAlertsData>(null);
 
   const {
-    loading: isLoading,
     data,
-    setQuery: setAlertsQuery,
-    response,
-    request,
+    loading: isLoading,
     refetch: refetchQuery,
+    request,
+    response,
+    setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, AlertsByStatusAgg>({
     query: getAlertsByStatusQuery({
       from,
@@ -101,13 +110,6 @@ export const useAlertsByStatus = ({
     indexName: signalIndexName,
     skip,
   });
-
-  const items = useMemo(() => {
-    if (data == null) {
-      return null;
-    }
-    return parseAlertsData(data);
-  }, [data]);
 
   useEffect(() => {
     setAlertsQuery(
@@ -119,10 +121,13 @@ export const useAlertsByStatus = ({
   }, [setAlertsQuery, from, to]);
 
   useEffect(() => {
-    if (!isLoading) {
-      setUpdatedAt(Date.now());
+    if (data == null) {
+      setItems(null);
+    } else {
+      setItems(parseAlertsData(data));
     }
-  }, [isLoading]);
+    setUpdatedAt(Date.now());
+  }, [data]);
 
   const refetch = useCallback(() => {
     if (!skip && refetchQuery) {

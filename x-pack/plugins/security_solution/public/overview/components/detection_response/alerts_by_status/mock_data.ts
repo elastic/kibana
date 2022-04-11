@@ -7,6 +7,9 @@
 
 import { AlertsByStatusResponse, AlertsByStatusAgg, ParsedAlertsData } from './types';
 
+export const from = '2022-04-05T12:00:00.000Z';
+export const to = '2022-04-08T12:00:00.000Z';
+
 export const mockAlertsData: AlertsByStatusResponse<[], AlertsByStatusAgg> = {
   took: 4,
   _shards: {
@@ -78,36 +81,18 @@ export const parsedMockAlertsData: ParsedAlertsData = {
     severities: [
       {
         key: 'low',
+        label: 'Low',
         value: 22717,
       },
       {
         key: 'high',
+        label: 'High',
         value: 5027,
       },
       {
         key: 'medium',
+        label: 'Medium',
         value: 405,
-      },
-    ],
-  },
-  acknowledged: {
-    total: 0,
-    severities: [
-      {
-        key: 'critical',
-        value: 0,
-      },
-      {
-        value: 0,
-        key: 'high',
-      },
-      {
-        value: 0,
-        key: 'medium',
-      },
-      {
-        value: 0,
-        key: 'low',
       },
     ],
   },
@@ -116,12 +101,37 @@ export const parsedMockAlertsData: ParsedAlertsData = {
     severities: [
       {
         key: 'high',
+        label: 'High',
         value: 4,
       },
       {
         key: 'low',
+        label: 'Low',
         value: 0,
       },
     ],
+  },
+};
+
+export const alertsByStatusQuery = {
+  size: 0,
+  query: {
+    bool: {
+      filter: [{ range: { '@timestamp': { gte: from, lte: to } } }],
+    },
+  },
+  aggs: {
+    alertsByStatus: {
+      terms: {
+        field: 'kibana.alert.workflow_status',
+      },
+      aggs: {
+        statusBySeverity: {
+          terms: {
+            field: 'kibana.alert.severity',
+          },
+        },
+      },
+    },
   },
 };
