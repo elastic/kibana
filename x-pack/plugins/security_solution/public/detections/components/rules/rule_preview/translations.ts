@@ -54,7 +54,7 @@ export const QUERY_PREVIEW_LABEL = i18n.translate(
 export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText',
   {
-    defaultMessage: 'Select a timeframe of data to preview query results',
+    defaultMessage: 'Select a timeframe of data to preview query results.',
   }
 );
 
