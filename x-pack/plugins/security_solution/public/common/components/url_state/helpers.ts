@@ -94,6 +94,9 @@ export const replaceQueryStringInLocation = (
 export const getUrlType = (pageName: string): UrlStateType => {
   if (pageName === SecurityPageName.overview) {
     return 'overview';
+  }
+  if (pageName === SecurityPageName.landing) {
+    return 'get_started';
   } else if (pageName === SecurityPageName.hosts) {
     return 'host';
   } else if (pageName === SecurityPageName.network) {

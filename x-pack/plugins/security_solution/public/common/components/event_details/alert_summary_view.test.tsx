@@ -68,7 +68,7 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
 
-    ['host.name', 'user.name', 'Rule type', 'query'].forEach((fieldId) => {
+    ['host.name', 'user.name', 'Rule type', 'query', 'Source event id'].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });

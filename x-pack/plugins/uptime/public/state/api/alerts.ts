@@ -12,7 +12,7 @@ import { ActionConnector } from '../alerts/alerts';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import type { ActionType, AsApiContract, Rule } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions, RuleAction } from './alert_actions';
@@ -42,7 +42,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
   );
 };
 
-export interface NewAlertParams extends AlertTypeParams {
+export interface NewAlertParams extends RuleTypeParams {
   selectedMonitor: Ping;
   defaultActions: ActionConnector[];
   defaultEmail?: DefaultEmail;

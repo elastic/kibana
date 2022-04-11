@@ -15,7 +15,7 @@ export const OptionsListStrings = {
     }),
   getDescription: () =>
     i18n.translate('controls.optionsList.description', {
-      defaultMessage: 'Add control that allows options to be selected from a dropdown.',
+      defaultMessage: 'Add a menu for selecting field values.',
     }),
   summary: {
     getSeparator: () =>
@@ -28,10 +28,6 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getIndexPatternTitle: () =>
-      i18n.translate('controls.optionsList.editor.indexPatternTitle', {
-        defaultMessage: 'Index pattern',
-      }),
     getDataViewTitle: () =>
       i18n.translate('controls.optionsList.editor.dataViewTitle', {
         defaultMessage: 'Data view',

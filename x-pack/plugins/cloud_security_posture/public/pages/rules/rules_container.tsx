@@ -214,8 +214,9 @@ export const RulesContainer = () => {
       )}
       {selectedRuleId && (
         <RuleFlyout
-          rule={rulesPageData.rules_map.get(selectedRuleId)!}
+          rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}
           onClose={() => setSelectedRuleId(null)}
+          toggleRule={toggleRule}
         />
       )}
     </div>

@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
@@ -28,7 +28,7 @@ import {
   CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
-import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -222,6 +222,20 @@ export const commonEnhanceTableRowHeight = (
   const vizState = newAttributes.state.visualization as VisState820;
   vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes;
+};
+
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
   return newAttributes;
 };
 

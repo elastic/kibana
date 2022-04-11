@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
+import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -20,14 +21,13 @@ import {
   useLogAnalysisSetupFlyoutStateContext,
 } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { LogsPageTemplate } from '../page_template';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
-import { LogsPageTemplate } from '../page_template';
-import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -156,10 +156,10 @@ const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   children,
   ...rest
 }) => {
-  const { sourceStatus } = useLogSourceContext();
+  const { logViewStatus } = useLogViewContext();
   return (
     <LogsPageTemplate
-      hasData={sourceStatus?.logIndexStatus !== 'missing'}
+      hasData={logViewStatus?.index !== 'missing'}
       data-test-subj="logsLogEntryRatePage"
       pageHeader={
         rest.isEmptyState

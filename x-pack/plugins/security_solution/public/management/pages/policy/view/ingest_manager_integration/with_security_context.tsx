@@ -15,6 +15,8 @@ import { managementReducer } from '../../../../store/reducer';
 import { managementMiddlewareFactory } from '../../../../store/middleware';
 import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { SecuritySolutionStartDependenciesContext } from '../../../../../common/components/user_privileges/endpoint/security_solution_start_dependencies';
+import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
 
 type ComposeType = typeof compose;
 declare global {
@@ -69,9 +71,13 @@ export const withSecurityContext = <P extends {}>({
 
     return (
       <ReduxStoreProvider store={store}>
-        <CurrentLicense>
-          <WrappedComponent {...props} />
-        </CurrentLicense>
+        <ReactQueryClientProvider>
+          <SecuritySolutionStartDependenciesContext.Provider value={depsStart}>
+            <CurrentLicense>
+              <WrappedComponent {...props} />
+            </CurrentLicense>
+          </SecuritySolutionStartDependenciesContext.Provider>
+        </ReactQueryClientProvider>
       </ReduxStoreProvider>
     );
   });

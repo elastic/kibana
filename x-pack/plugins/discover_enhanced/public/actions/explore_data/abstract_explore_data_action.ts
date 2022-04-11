@@ -11,6 +11,7 @@ import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { KibanaLocation } from '../../../../../../src/plugins/share/public';
+import { DOC_TYPE as LENS_DOC_TYPE } from '../../../../lens/common/constants';
 import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
@@ -41,6 +42,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;
+    if (embeddable.type === LENS_DOC_TYPE) return false;
 
     const { core, plugins } = this.params.start();
     const { capabilities } = core.application;

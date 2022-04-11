@@ -28,7 +28,7 @@ describe('monitoring_collection plugin', () => {
     it('should allow registering a collector and getting data from it', async () => {
       const { registerMetric } = plugin.setup(coreSetup);
       registerMetric<{ name: string }>({
-        type: 'actions',
+        type: 'cluster_actions',
         schema: {
           name: {
             type: 'text',
@@ -43,14 +43,14 @@ describe('monitoring_collection plugin', () => {
         },
       });
 
-      const metrics = await plugin.getMetric('actions');
+      const metrics = await plugin.getMetric('cluster_actions');
       expect(metrics).toStrictEqual([{ name: 'foo' }]);
     });
 
     it('should allow registering multiple ollectors and getting data from it', async () => {
       const { registerMetric } = plugin.setup(coreSetup);
       registerMetric<{ name: string }>({
-        type: 'actions',
+        type: 'cluster_actions',
         schema: {
           name: {
             type: 'text',
@@ -65,7 +65,7 @@ describe('monitoring_collection plugin', () => {
         },
       });
       registerMetric<{ name: string }>({
-        type: 'rules',
+        type: 'cluster_rules',
         schema: {
           name: {
             type: 'text',
@@ -86,7 +86,10 @@ describe('monitoring_collection plugin', () => {
         },
       });
 
-      const metrics = await Promise.all([plugin.getMetric('actions'), plugin.getMetric('rules')]);
+      const metrics = await Promise.all([
+        plugin.getMetric('cluster_actions'),
+        plugin.getMetric('cluster_rules'),
+      ]);
       expect(metrics).toStrictEqual([
         [{ name: 'foo' }],
         [{ name: 'foo' }, { name: 'bar' }, { name: 'foobar' }],

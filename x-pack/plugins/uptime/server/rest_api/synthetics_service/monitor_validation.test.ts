@@ -68,6 +68,7 @@ describe('validateMonitor', () => {
             lat: 33.4354332,
             lon: 73.4453553,
           },
+          isServiceManaged: true,
           url: 'https://test-url.com',
         },
       ],
@@ -167,6 +168,8 @@ describe('validateMonitor', () => {
       [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
       [ConfigKey.SOURCE_ZIP_PROXY_URL]: 'http://proxy-url.com',
       [ConfigKey.PARAMS]: '',
+      [ConfigKey.URLS]: undefined,
+      [ConfigKey.PORT]: undefined,
     };
 
     testBrowserAdvancedFields = {
@@ -434,7 +437,8 @@ function getJsonPayload() {
     '      "lat": 33.2343132435,' +
     '      "lon": 73.2342343434' +
     '    },' +
-    '    "url": "https://example-url.com"' +
+    '    "url": "https://example-url.com",' +
+    '    "isServiceManaged": true' +
     '  }]' +
     '}';
 

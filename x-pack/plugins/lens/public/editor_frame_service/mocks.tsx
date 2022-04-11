@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PaletteDefinition } from 'src/plugins/charts/public';
+import type { PaletteDefinition } from '@kbn/coloring';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../../src/plugins/expressions/public/mocks';

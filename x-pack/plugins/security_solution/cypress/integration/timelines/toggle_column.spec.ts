@@ -8,7 +8,7 @@
 import { ID_HEADER_FIELD, TIMESTAMP_HEADER_FIELD } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   clickIdToggleField,
@@ -25,7 +25,8 @@ describe('toggle column in timeline', () => {
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    loginAndWaitForPage(HOSTS_URL);
+    login();
+    visit(HOSTS_URL);
   });
 
   beforeEach(() => {

@@ -1,0 +1,161 @@
+// These are the various types in the dropdown, they each get a color
+$kbnTypeaheadTypes: (
+  field: $euiColorWarning,
+  value: $euiColorSuccess,
+  operator: $euiColorPrimary,
+  conjunction: $euiColorVis3,
+  recentSearch: $euiColorMediumShade,
+);
+
+.kbnTypeahead.kbnTypeahead--small {
+  max-height: 20vh;
+}
+
+.kbnTypeahead__popover--top {
+  @include euiBottomShadowFlat;
+  border-top-left-radius: $euiBorderRadius;
+  border-top-right-radius: $euiBorderRadius;
+}
+
+.kbnTypeahead__popover--bottom {
+  @include euiBottomShadow($adjustBorders: true);
+  border-bottom-left-radius: $euiBorderRadius;
+  border-bottom-right-radius: $euiBorderRadius;
+}
+
+.kbnTypeahead {
+  max-height: 60vh;
+
+  .kbnTypeahead__popover {
+    max-height: inherit;
+    @include euiScrollBar;
+    border: 1px solid;
+    border-color: $euiBorderColor;
+    color: $euiTextColor;
+    background-color: $euiColorEmptyShade;
+    position: relative;
+    z-index: $euiZContentMenu;
+    width: 100%;
+    overflow-y: auto;
+
+    .kbnTypeahead__item {
+      height: $euiSizeXL;
+      white-space: nowrap;
+      font-size: $euiFontSizeXS;
+      vertical-align: middle;
+      padding: 0;
+      border-bottom: none;
+      line-height: normal;
+    }
+
+    .kbnTypeahead__item:hover {
+      cursor: pointer;
+    }
+
+    .kbnTypeahead__item:last-child {
+      border-bottom: none;
+      border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
+    }
+
+    .kbnTypeahead__item:first-child {
+      border-bottom: none;
+      border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+    }
+
+    .kbnTypeahead__item.active {
+      background-color: $euiColorLightestShade;
+
+      .kbnSuggestionItem__callout {
+        background: $euiColorEmptyShade;
+      }
+
+      .kbnSuggestionItem__text {
+        color: $euiColorFullShade;
+      }
+
+      .kbnSuggestionItem__type {
+        color: $euiColorFullShade;
+      }
+
+      @each $name, $color in $kbnTypeaheadTypes {
+        .kbnSuggestionItem--#{$name} {
+          .kbnSuggestionItem__type {
+            background-color: tintOrShade($color, 80%, 60%);
+          }
+        }
+      }
+    }
+  }
+}
+
+.kbnSuggestionItem {
+  display: inline-flex;
+  align-items: center;
+  font-size: $euiFontSizeXS;
+  white-space: nowrap;
+  width: 100%;
+
+  @each $name, $color in $kbnTypeaheadTypes {
+    &.kbnSuggestionItem--#{$name} {
+      .kbnSuggestionItem__type {
+        background-color: tintOrShade($color, 90%, 50%);
+        color: makeHighContrastColor($color, tintOrShade($color, 90%, 50%));
+      }
+    }
+  }
+}
+
+.kbnSuggestionItem__text,
+.kbnSuggestionItem__type,
+.kbnSuggestionItem__description {
+  padding-right: $euiSize;
+}
+
+.kbnSuggestionItem__type {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: auto;
+  width: $euiSizeXL;
+  height: $euiSizeXL;
+  text-align: center;
+  overflow: hidden;
+  padding: $euiSizeXS;
+  justify-content: center;
+  align-items: center;
+}
+
+.kbnSuggestionItem__text {
+  font-family: $euiCodeFontFamily;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: $euiSizeS;
+  color: $euiTextColor;
+  min-width: 250px;
+}
+
+.kbnSuggestionItem__description {
+  color: $euiColorDarkShade;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+
+  // In case the description contains a paragraph in which the truncation needs to be at this level
+  > p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:empty {
+    width: 0;
+  }
+}
+
+.kbnSuggestionItem__callout {
+  font-family: $euiCodeFontFamily;
+  background: $euiColorLightestShade;
+  color: $euiColorFullShade;
+  padding: 0 $euiSizeXS;
+  display: inline-block;
+}

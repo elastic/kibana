@@ -12,6 +12,35 @@ import { docLinks } from '../../../shared/doc_links';
 import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
+export const staticExternalSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.SHAREPOINT,
+  iconName: SOURCE_NAMES.SHAREPOINT,
+  serviceType: 'external',
+  configuration: {
+    isPublicKey: false,
+    hasOauthRedirect: true,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
+    applicationPortalUrl: 'https://portal.azure.com/',
+  },
+  objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+  features: {
+    basicOrgContext: [
+      FeatureIds.SyncFrequency,
+      FeatureIds.SyncedItems,
+      FeatureIds.GlobalAccessPermissions,
+    ],
+    basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+    platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+  },
+  accountContextOnly: false,
+  internalConnectorAvailable: true,
+  externalConnectorAvailable: false,
+  customConnectorAvailable: false,
+  isBeta: true,
+};
+
 export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
@@ -231,6 +260,7 @@ export const staticSourceData: SourceDataItem[] = [
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
     },
     accountContextOnly: true,
+    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
@@ -502,39 +532,7 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
     externalConnectorAvailable: true,
   },
-  // TODO: temporary hack until backend sends us stuff
-  {
-    name: SOURCE_NAMES.SHAREPOINT,
-    iconName: SOURCE_NAMES.SHAREPOINT,
-    serviceType: 'external',
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: true,
-      needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
-      applicationPortalUrl: 'https://portal.azure.com/',
-    },
-    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
-    features: {
-      basicOrgContext: [
-        FeatureIds.SyncFrequency,
-        FeatureIds.SyncedItems,
-        FeatureIds.GlobalAccessPermissions,
-      ],
-      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
-      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-      platinumPrivateContext: [
-        FeatureIds.Private,
-        FeatureIds.SyncFrequency,
-        FeatureIds.SyncedItems,
-      ],
-    },
-    accountContextOnly: false,
-    internalConnectorAvailable: true,
-    externalConnectorAvailable: false,
-    customConnectorAvailable: false,
-    isBeta: true,
-  },
+  staticExternalSourceData,
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
     iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
@@ -560,14 +558,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: false,
-      // helpText: i18n.translate( // TODO updatae this
-      //   'xpack.enterpriseSearch.workplaceSearch.sources.helpText.sharepointServer',
-      //   {
-      //     defaultMessage:
-      //       "Here is some help text. It should probably give the user a heads up that they're going to have to deploy some code.",
-      //   }
-      // ),
-      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO update this
+      documentationUrl: docLinks.workplaceSearchSharePointServer,
       applicationPortalUrl: '',
       githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
     },
@@ -638,13 +629,16 @@ export const staticCustomSourceData: SourceDataItem = {
     isPublicKey: false,
     hasOauthRedirect: false,
     needsBaseUrl: false,
-    helpText: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.helpText.custom', {
-      defaultMessage:
-        'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
-    }),
     documentationUrl: docLinks.workplaceSearchCustomSources,
     applicationPortalUrl: '',
   },
   accountContextOnly: false,
   customConnectorAvailable: true,
+};
+
+export const getSourceData = (serviceType: string): SourceDataItem => {
+  return (
+    staticSourceData.find((staticSource) => staticSource.serviceType === serviceType) ||
+    staticCustomSourceData
+  );
 };

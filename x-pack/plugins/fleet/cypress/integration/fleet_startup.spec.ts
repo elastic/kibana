@@ -88,7 +88,7 @@ describe('Fleet startup', () => {
       cy.getBySel('agentPolicyDropdown');
 
       // verify fleet server enroll command contains created policy id
-      cy.getBySel('fleetServerHostInput').type('http://localhost:8220');
+      cy.getBySel('fleetServerHostInput').type('https://localhost:8220');
       cy.getBySel('fleetServerAddHostBtn').click();
       cy.getBySel('fleetServerGenerateServiceTokenBtn').click();
       cy.get('.euiCodeBlock__code').contains('--fleet-server-policy=fleet-server-policy');

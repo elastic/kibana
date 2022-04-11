@@ -257,10 +257,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       }
 
       // `undefined` will cause params to be dropped from url
-      setUrlParams({ itemId: undefined, show: undefined }, true);
+      setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
 
       onClose();
-    }, [isSubmittingData, onClose, setUrlParams]);
+    }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {
@@ -285,12 +285,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         if (isMounted) {
           // Close the flyout
           // `undefined` will cause params to be dropped from url
-          setUrlParams({ itemId: undefined, show: undefined }, true);
+          setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
 
           onSuccess();
         }
       },
-      [isEditFlow, isMounted, labels, onSuccess, setUrlParams, toasts]
+      [isEditFlow, isMounted, labels, onSuccess, setUrlParams, toasts, urlParams]
     );
 
     const handleSubmitClick = useCallback(() => {

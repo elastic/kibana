@@ -8,6 +8,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
+    "unifiedSearch",
     "lens",
     "licensing",
     "features",
@@ -24,9 +25,11 @@
     "mapsEms",
     "savedObjects",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "sharedUX"
   ],
   "optionalPlugins": [
+    "cloud",
     "customIntegrations",
     "home",
     "savedObjectsTagging",
@@ -44,6 +47,7 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "home"
+    "home",
+    "unifiedSearch"
   ]
 }

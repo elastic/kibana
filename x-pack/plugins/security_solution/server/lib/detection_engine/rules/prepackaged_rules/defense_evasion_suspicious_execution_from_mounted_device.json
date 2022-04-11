@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Execution from a Mounted Device",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and process.executable : \"C:\\\\*\" and\n  (process.working_directory : \"?:\\\\\" and not process.working_directory: \"C:\\\\\") and\n  process.parent.name : \"explorer.exe\" and\n  process.name : (\"rundll32.exe\", \"mshta.exe\", \"powershell.exe\", \"pwsh.exe\", \"cmd.exe\", \"regsvr32.exe\",\n                  \"cscript.exe\", \"wscript.exe\")\n",
   "references": [
     "https://www.microsoft.com/security/blog/2021/05/27/new-sophisticated-email-based-attack-from-nobelium/",
@@ -42,11 +43,6 @@
           "reference": "https://attack.mitre.org/techniques/T1218/",
           "subtechnique": [
             {
-              "id": "T1218.011",
-              "name": "Rundll32",
-              "reference": "https://attack.mitre.org/techniques/T1218/011/"
-            },
-            {
               "id": "T1218.005",
               "name": "Mshta",
               "reference": "https://attack.mitre.org/techniques/T1218/005/"
@@ -55,6 +51,11 @@
               "id": "T1218.010",
               "name": "Regsvr32",
               "reference": "https://attack.mitre.org/techniques/T1218/010/"
+            },
+            {
+              "id": "T1218.011",
+              "name": "Rundll32",
+              "reference": "https://attack.mitre.org/techniques/T1218/011/"
             }
           ]
         }
@@ -85,5 +86,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

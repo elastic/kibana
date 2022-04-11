@@ -54,7 +54,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 beforeEach(() => {
@@ -1809,7 +1809,154 @@ describe('update()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error when updating with an interval less than the minimum configured one', async () => {
+  test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      `Rule schedule interval (1s) for "myType" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+    );
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+  });
+
+  test('throws error when updating with an interval less than the minimum configured one when enforce = true', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
     await expect(
       rulesClient.update({
         id: '1',

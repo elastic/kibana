@@ -50,7 +50,51 @@ describe('ConfiguredSourcesList', () => {
         }}
       />
     );
-    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(1);
+    const button = wrapper.find(EuiButtonEmptyTo);
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual('/sources/add/external/connect');
+  });
+
+  it('connect button for an unconnected source with multiple connector options routes to choice page', () => {
+    const wrapper = shallow(
+      <ConfiguredSourcesList
+        {...{
+          sources: [
+            {
+              ...mergedConfiguredSources[0],
+              connected: false,
+              serviceType: 'share_point',
+              externalConnectorAvailable: true,
+            },
+          ],
+          isOrganization: true,
+        }}
+      />
+    );
+    const button = wrapper.find(EuiButtonEmptyTo);
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual('/sources/add/share_point/');
+  });
+
+  it('connect button for a source with multiple connector options routes to connect page for private sources', () => {
+    const wrapper = shallow(
+      <ConfiguredSourcesList
+        {...{
+          sources: [
+            {
+              ...mergedConfiguredSources[0],
+              connected: false,
+              serviceType: 'share_point',
+              externalConnectorAvailable: true,
+            },
+          ],
+          isOrganization: false,
+        }}
+      />
+    );
+    const button = wrapper.find(EuiButtonEmptyTo);
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual('/p/sources/add/share_point/connect');
   });
 
   it('handles empty state', () => {

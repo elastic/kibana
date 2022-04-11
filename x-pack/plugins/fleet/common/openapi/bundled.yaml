@@ -1412,7 +1412,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_enrollment_api_keys_response'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                required:
+                  - item
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
@@ -2238,6 +2243,7 @@ components:
         - lens
         - ml-module
         - security-rule
+        - csp_rule_template
     elasticsearch_asset_type:
       title: Elasticsearch asset type
       type: string
@@ -2271,10 +2277,16 @@ components:
               - api_keys
               - fleet_admin_user
               - fleet_server
+        missing_optional_features:
+          type: array
+          items:
+            type: string
+            enum:
               - encrypted_saved_object_encryption_key_required
       required:
         - isReady
         - missing_requirements
+        - missing_optional_features
     agent_type:
       type: string
       title: Agent type
@@ -2612,22 +2624,6 @@ components:
         - api_key
         - active
         - created_at
-    get_enrollment_api_keys_response:
-      title: Bulk install packages response
-      type: object
-      properties:
-        list:
-          type: array
-          deprecated: true
-          properties:
-            items:
-              $ref: '#/components/schemas/enrollment_api_key'
-        item:
-          type: array
-          items:
-            $ref: '#/components/schemas/enrollment_api_key'
-      required:
-        - item
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array

@@ -6,6 +6,7 @@
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { DEFAULT_THROTTLING } from '../../../common/runtime_types';
 import { AppState } from '../../state';
 
 /**
@@ -62,20 +63,29 @@ export const mockState: AppState = {
     refreshedMonitorIds: [],
   },
   monitorManagementList: {
+    throttling: DEFAULT_THROTTLING,
     list: {
       page: 1,
       perPage: 10,
       total: null,
       monitors: [],
+      syncErrors: null,
     },
     locations: [],
     loading: {
       monitorList: false,
       serviceLocations: false,
+      enablement: false,
     },
     error: {
       monitorList: null,
       serviceLocations: null,
+      enablement: null,
+    },
+    enablement: null,
+    syntheticsService: {
+      loading: false,
+      signupUrl: null,
     },
   },
   ml: {

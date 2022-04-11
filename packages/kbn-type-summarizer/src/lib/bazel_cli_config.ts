@@ -19,6 +19,10 @@ const TYPE_SUMMARIZER_PACKAGES = [
   '@kbn/mapbox-gl',
   '@kbn/ace',
   '@kbn/alerts',
+  '@kbn/analytics',
+  '@kbn/apm-config-loader',
+  '@kbn/apm-utils',
+  '@kbn/plugin-discovery',
 ];
 
 type TypeSummarizerType = 'api-extractor' | 'type-summarizer';

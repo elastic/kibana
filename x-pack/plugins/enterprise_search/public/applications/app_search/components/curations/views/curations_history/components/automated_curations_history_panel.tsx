@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID } from '../../../../../../../../common/constants';
@@ -18,6 +19,7 @@ import { EngineLogic } from '../../../../engine';
 
 export const AutomatedCurationsHistoryPanel: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
+  const [endTimestamp, setEndTimestamp] = useState(Date.now());
 
   const filters = [
     'event.kind: event',
@@ -31,14 +33,27 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
     <DataPanel
       iconType="tableDensityNormal"
       title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.automatedCurationsHistoryPanel.tableTitle',
-            {
-              defaultMessage: 'Adaptive relevance changes',
-            }
-          )}
-        </h2>
+        <EuiFlexGroup>
+          <EuiFlexItem component="h2">
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.curations.automatedCurationsHistoryPanel.tableTitle',
+              {
+                defaultMessage: 'Adaptive relevance changes',
+              }
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              size="xs"
+              onClick={() => setEndTimestamp(Date.now())}
+            >
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engines.curations.refreshButton', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curations.automatedCurationsHistoryPanel.tableDecription',
@@ -53,6 +68,7 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
         sourceId={ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID}
         hoursAgo={720}
         query={filters.join(' and ')}
+        endTimestamp={endTimestamp}
         columns={[
           {
             type: 'field',
