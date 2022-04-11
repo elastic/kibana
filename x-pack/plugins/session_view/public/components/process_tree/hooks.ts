@@ -32,6 +32,7 @@ interface UseProcessTreeDeps {
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   verboseMode: boolean;
+  jumpToEntityId?: string;
 }
 
 export class ProcessImpl implements Process {
@@ -162,11 +163,8 @@ export class ProcessImpl implements Process {
   }
 
   getEndTime() {
-    const endEvent = this.filterEventsByAction(this.events, EventAction.end);
-    if (endEvent.length === 0) {
-      return '';
-    }
-    return endEvent[endEvent.length - 1]['@timestamp'];
+    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    return endEvent?.['@timestamp'] || '';
   }
 
   // isUserEntered is a best guess at which processes were initiated by a real person
@@ -247,6 +245,7 @@ export const useProcessTree = ({
   searchQuery,
   updatedAlertsStatus,
   verboseMode,
+  jumpToEntityId,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
   // we add a fake session leader event, sourced from wide event data.
@@ -321,8 +320,8 @@ export const useProcessTree = ({
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
-    autoExpandProcessTree(processMap);
-  }, [searchQuery, processMap, verboseMode]);
+    autoExpandProcessTree(processMap, jumpToEntityId);
+  }, [searchQuery, processMap, jumpToEntityId]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

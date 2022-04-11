@@ -1326,6 +1326,7 @@ export const childProcessMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
 };
 
 export const processMock: Process = {
@@ -1499,6 +1500,7 @@ export const processMock: Process = {
     } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
+  getEndTime: () => '',
 };
 
 export const sessionViewBasicProcessMock: Process = {
@@ -1506,6 +1508,7 @@ export const sessionViewBasicProcessMock: Process = {
   events: mockEvents,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const sessionViewAlertProcessMock: Process = {
@@ -1516,6 +1519,7 @@ export const sessionViewAlertProcessMock: Process = {
   getAlerts: () => mockAlerts,
   hasExec: () => true,
   isUserEntered: () => true,
+  getEndTime: () => '',
 };
 
 export const mockProcessMap = mockEvents.reduce(
@@ -1543,6 +1547,7 @@ export const mockProcessMap = mockEvents.reduce(
       isUserEntered: () => false,
       getMaxAlertLevel: () => null,
       isVerbose: () => true,
+      getEndTime: () => '',
     };
     return processMap;
   },
