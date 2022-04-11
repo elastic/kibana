@@ -77,6 +77,14 @@ export const findThresholdSignals = async ({
           },
         }
       : {}),
+    count_check: {
+      bucket_selector: {
+        buckets_path: {
+          docCount: '_count',
+        },
+        script: `params.docCount >= ${threshold.value}`,
+      },
+    },
   };
 
   const thresholdFields = threshold.field;
@@ -107,7 +115,7 @@ export const findThresholdSignals = async ({
             },
           },
         })),
-        ...(threshold.cardinality?.length ? { order: { cardinality_count: 'desc' } } : {}),
+        // ...(threshold.cardinality?.length ? { order: { cardinality_count: 'desc' } } : {}),
         size: 10000,
       },
       aggs: leafAggs,

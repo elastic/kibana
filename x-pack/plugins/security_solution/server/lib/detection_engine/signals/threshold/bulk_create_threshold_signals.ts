@@ -143,7 +143,7 @@ const getTransformedHits = (
       ruleId,
       startedAt,
       threshold.field,
-      bucket.key.sort().join(',')
+      Object.keys(bucket.key).sort().join(',')
     ),
     _source: {
       [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
@@ -159,7 +159,10 @@ const getTransformedHits = (
           field: term,
           value: bucket.key[term],
         })),
-        cardinality: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
+        cardinality: {
+          field: threshold.cardinality[0].field,
+          value: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
+        },
         count: bucket.doc_count,
         from:
           new Date((bucket.min_timestamp as AggregationsMinAggregate).value_as_string as string) ??
