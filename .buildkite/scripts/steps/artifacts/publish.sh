@@ -69,3 +69,13 @@ docker run --rm \
       --version "$BASE_VERSION" \
       --qualifier "$VERSION_QUALIFIER" \
       --artifact-set main
+
+BUILD_SUBDOMAIN="artifacts-$WORKFLOW"
+BUILD_ID="$BASE_VERSION-${GIT_COMMIT:0:8}"
+BUILD_REPORT="summary-$FULL_VERSION.html"
+
+cat << EOF | buildkite-agent annotate --style "info" --context artifacts-summary
+  ### Artifacts Summary
+
+  https://$BUILD_SUBDOMAIN.elastic.co/kibana/$BUILD_ID/$BUILD_REPORT
+EOF
