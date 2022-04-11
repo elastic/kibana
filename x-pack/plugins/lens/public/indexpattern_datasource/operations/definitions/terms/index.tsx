@@ -236,9 +236,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       }).toAst();
     }
 
-    // To get more accurate results, the terms agg fetches more than the top "size" terms from each shard.
-    // It fetches the top shard_size terms, which defaults to "size" * 1.5 + 10.
-    // We set shard_size to a minimum of 1000
+    // To get more accurate results, we set shard_size to a minimum of 1000
+    // The other calculation matches the current Elasticsearch shard_size default,
+    // but they may diverge in the future
     const shardSize = column.params.accuracyMode
       ? Math.max(1000, column.params.size * 1.5 + 10)
       : undefined;
