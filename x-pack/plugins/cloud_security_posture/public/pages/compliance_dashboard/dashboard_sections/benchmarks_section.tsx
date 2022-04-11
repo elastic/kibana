@@ -100,6 +100,7 @@ export const BenchmarksSection = ({
                     <CloudPostureScoreChart
                       id={`${cluster.meta.clusterId}_score_chart`}
                       data={cluster.stats}
+                      trend={cluster.trend}
                       partitionOnElementClick={(elements) =>
                         handleElementClick(cluster.meta.clusterId, elements)
                       }
