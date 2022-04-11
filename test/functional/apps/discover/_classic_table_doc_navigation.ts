@@ -68,9 +68,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create an exists filter from the doc view of the selected document', async function () {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await docTable.clickRowToggle({ rowIndex: 0 });
-
-      await testSubjects.click('addExistsFilterButton-@timestamp');
+      await docTable.toggleRowExpanded();
+      const detailsRow = await docTable.getDetailsRow();
+      await docTable.addExistsFilter(detailsRow, '@timestamp');
 
       const hasExistsFilter = await filterBar.hasFilter('@timestamp', 'exists', true, false, false);
       expect(hasExistsFilter).to.be(true);

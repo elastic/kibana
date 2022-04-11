@@ -12,14 +12,12 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
-  field: string;
   onClick: () => void;
   disabled?: boolean;
   scripted?: boolean;
 }
 
 export function DocViewTableRowBtnFilterExists({
-  field,
   onClick,
   disabled = false,
   scripted = false,
@@ -51,7 +49,7 @@ export function DocViewTableRowBtnFilterExists({
         })}
         onClick={onClick}
         className="kbnDocViewer__actionButton"
-        data-test-subj={`addExistsFilterButton-${field}`}
+        data-test-subj="addExistsFilterButton"
         disabled={disabled}
         iconType={'filter'}
         iconSize={'s'}
