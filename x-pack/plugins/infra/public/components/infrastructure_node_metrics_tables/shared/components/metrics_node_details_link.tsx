@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from '@elastic/datemath';
+import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useLinkProps } from '../../../../../../observability/public';
