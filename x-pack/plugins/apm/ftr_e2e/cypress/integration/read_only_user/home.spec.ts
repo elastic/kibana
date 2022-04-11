@@ -63,7 +63,7 @@ describe('Home page', () => {
       cy.visit(serviceInventoryHref);
 
       cy.contains('Services');
-      cy.contains('opbeans-rum').realClick();
+      cy.contains('opbeans-rum').click();
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
