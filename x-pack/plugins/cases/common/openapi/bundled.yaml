@@ -13,6 +13,324 @@ servers:
   - url: http://localhost:5601
     description: local
 paths:
+  /api/cases:
+    post:
+      description: Creates a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      required:
+                        - fields
+                        - id
+                        - name
+                        - type
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                description:
+                  description: The description for the case.
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/owners'
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                tags:
+                  description: >-
+                    The words and phrases that help categorize cases. It can be
+                    an empty array.
+                  type: array
+                  items:
+                    type: string
+                title:
+                  description: A title for the case.
+                  type: string
+              required:
+                - connector
+                - description
+                - owner
+                - settings
+                - tags
+                - title
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    delete:
+      description: Deletes one or more cases.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - name: ids
+          description: >-
+            The cases that you want to removed. All non-ASCII characters must be
+            URL encoded.
+          in: query
+          schema:
+            type: string
+          example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    patch:
+      description: Updates one or more cases.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      required:
+                        - fields
+                        - id
+                        - name
+                        - type
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                description:
+                  description: The description for the case.
+                  type: string
+                id:
+                  description: The identifier for the case.
+                  type: string
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                status:
+                  $ref: '#/components/schemas/status'
+                tags:
+                  description: The words and phrases that help categorize cases.
+                  type: array
+                  items:
+                    type: string
+                title:
+                  description: A title for the case.
+                  type: string
+                version:
+                  description: The current version of the case.
+                  type: string
+              required:
+                - id
+                - version
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/cases/_find:
     get:
       description: Retrieves a paginated subset of cases.
@@ -39,6 +357,669 @@ paths:
               schema:
                 type: string
             examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/configure/connectors/_find:
+    get:
+      description: >-
+        Retrieves information about connectors. In particular, only the
+        connectors that are supported for use in cases are returned.
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/status:
+    get:
+      description: Returns the number of cases that are open, closed, and in progress.
+      deprecated: true
+      parameters:
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/tags:
+    get:
+      description: Aggregates and returns a list of case tags.
+      parameters:
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            tags from all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}:
+    get:
+      description: Retrieves a specified case.
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - in: query
+          name: includeComments
+          description: Determines whether case comments are returned.
+          deprecated: true
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/comments:
+    post:
+      description: Adds a comment to a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alertId:
+                  description: >-
+                    The alert identifier. It is required only when `type` is
+                    `alert`. This functionality is in technical preview and may
+                    be changed or removed in a future release. Elastic will
+                    apply best effort to fix any issues, but features in
+                    technical preview are not subject to the support SLA of
+                    official GA features.
+                  type: string
+                comment:
+                  description: The new comment. It is required only when `type` is `user`.
+                  type: string
+                index:
+                  description: >-
+                    The alert index. It is required only when `type` is `alert`.
+                    This functionality is in technical preview and may be
+                    changed or removed in a future release. Elastic will apply
+                    best effort to fix any issues, but features in technical
+                    preview are not subject to the support SLA of official GA
+                    features.
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/owners'
+                rule:
+                  description: >-
+                    The rule that is associated with the alert.  It is required
+                    only when type is alert. This functionality is in technical
+                    preview and may be changed or removed in a future release.
+                    Elastic will apply best effort to fix any issues, but
+                    features in technical preview are not subject to the support
+                    SLA of official GA features.
+                  type: object
+                  properties:
+                    id:
+                      description: The rule identifier.
+                      type: string
+                    name:
+                      description: The rule name.
+                      type: string
+                type:
+                  $ref: '#/components/schemas/comment_types'
+              required:
+                - owner
+                - type
+            examples:
+              '0':
+                value: |
+                  {
+
+                    "type": "user",
+
+                    "owner": "cases",
+
+                    "comment": "That is nothing - Ethan Hunt answered a targeted
+                      social media campaign promoting phishy pension schemes to IMF
+                      operatives."
+
+                  }
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    patch:
+      description: Updates a comment in a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alertId:
+                  description: >-
+                    The alert identifier. It is required only when `type` is
+                    `alert`. This functionality is in technical preview and may
+                    be changed or removed in a future release. Elastic will
+                    apply best effort to fix any issues, but features in
+                    technical preview are not subject to the support SLA of
+                    official GA features.
+                  type: string
+                comment:
+                  description: The new comment. It is required only when `type` is `user`.
+                  type: string
+                id:
+                  description: The identifier for the comment.
+                  type: string
+                index:
+                  description: >-
+                    The alert index. It is required only when `type` is `alert`.
+                    This functionality is in technical preview and may be
+                    changed or removed in a future release. Elastic will apply
+                    best effort to fix any issues, but features in technical
+                    preview are not subject to the support SLA of official GA
+                    features.
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/owners'
+                rule:
+                  description: >-
+                    The rule that is associated with the alert.  It is required
+                    only when type is alert. This functionality is in technical
+                    preview and may be changed or removed in a future release.
+                    Elastic will apply best effort to fix any issues, but
+                    features in technical preview are not subject to the support
+                    SLA of official GA features.
+                  type: object
+                  properties:
+                    id:
+                      description: The rule identifier.
+                      type: string
+                    name:
+                      description: The rule name.
+                      type: string
+                type:
+                  $ref: '#/components/schemas/comment_types'
+                version:
+                  description: The current version of the comment.
+                  type: string
+              required:
+                - id
+                - owner
+                - type
+                - version
+            examples:
+              '0':
+                value: |-
+                  {
+                          "id": "c7740680-b5e9-11ec-b141-0fdb20a7f9a9",
+                           "version": "WzI2NiwzXQ==",
+                           "type": "user",
+                            "comment": "Updated comment",
+                            "owner": "cases"
+                      }
+                  '1':
+                    value: |
+                      {
+                      "type": "user",
+                      "owner": "cases",
+                      "comment": "no2."
+                  }
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    delete:
+      description: Deletes all comments from a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    get:
+      description: Retrieves all the comments from a case.
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/comments/{commentId}:
+    delete:
+      description: Deletes a comment from a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    get:
+      description: Retrieves a comment from a case.
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/user_actions:
+    get:
+      description: Returns all user activity for the specified case.
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases:
+    post:
+      description: Creates a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      required:
+                        - fields
+                        - id
+                        - name
+                        - type
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                description:
+                  description: The description for the case.
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/owners'
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                tags:
+                  description: >-
+                    The words and phrases that help categorize cases. It can be
+                    an empty array.
+                  type: array
+                  items:
+                    type: string
+                title:
+                  description: A title for the case.
+                  type: string
+              required:
+                - connector
+                - description
+                - owner
+                - settings
+                - tags
+                - title
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    delete:
+      description: Deletes one or more cases.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - name: ids
+          description: >-
+            The cases that you want to removed. All non-ASCII characters must be
+            URL encoded.
+          in: query
+          schema:
+            type: string
+          example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    patch:
+      description: Updates one or more cases.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      required:
+                        - fields
+                        - id
+                        - name
+                        - type
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                description:
+                  description: The description for the case.
+                  type: string
+                id:
+                  description: The identifier for the case.
+                  type: string
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                status:
+                  $ref: '#/components/schemas/status'
+                tags:
+                  description: The words and phrases that help categorize cases.
+                  type: array
+                  items:
+                    type: string
+                title:
+                  description: A title for the case.
+                  type: string
+                version:
+                  description: The current version of the case.
+                  type: string
+              required:
+                - id
+                - version
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
       servers:
         - url: https://localhost:5601
     servers:
@@ -74,12 +1055,372 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/cases/configure/connectors/_find:
+    get:
+      description: >-
+        Retrieves information about connectors. In particular, only the
+        connectors that are supported for use in cases are returned.
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/status:
+    get:
+      description: Returns the number of cases that are open, closed, and in progress.
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/tags:
+    get:
+      description: Aggregates and returns a list of case tags.
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            tags from all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}:
+    get:
+      description: Retrieves a specified case.
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+        - in: query
+          name: includeComments
+          description: Determines whether case comments are returned.
+          deprecated: true
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/comments:
+    post:
+      description: Adds a comment to a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alertId:
+                  description: >-
+                    The alert identifier. It is required only when `type` is
+                    `alert`. This functionality is in technical preview and may
+                    be changed or removed in a future release. Elastic will
+                    apply best effort to fix any issues, but features in
+                    technical preview are not subject to the support SLA of
+                    official GA features.
+                  type: string
+                comment:
+                  description: The new comment. It is required only when `type` is `user`.
+                  type: string
+                index:
+                  description: >-
+                    The alert index. It is required only when `type` is `alert`.
+                    This functionality is in technical preview and may be
+                    changed or removed in a future release. Elastic will apply
+                    best effort to fix any issues, but features in technical
+                    preview are not subject to the support SLA of official GA
+                    features.
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/owners'
+                rule:
+                  description: >-
+                    The rule that is associated with the alert.  It is required
+                    only when type is alert. This functionality is in technical
+                    preview and may be changed or removed in a future release.
+                    Elastic will apply best effort to fix any issues, but
+                    features in technical preview are not subject to the support
+                    SLA of official GA features.
+                  type: object
+                  properties:
+                    id:
+                      description: The rule identifier.
+                      type: string
+                    name:
+                      description: The rule name.
+                      type: string
+                type:
+                  $ref: '#/components/schemas/comment_types'
+              required:
+                - owner
+                - type
+            examples:
+              '0':
+                value: |
+                  {
+
+                    "type": "user",
+
+                    "owner": "cases",
+
+                    "comment": "That is nothing - Ethan Hunt answered a targeted
+                      social media campaign promoting phishy pension schemes to IMF
+                      operatives."
+
+                  }
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    patch:
+      description: Updates a comment in a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alertId:
+                  description: >-
+                    The alert identifier. It is required only when `type` is
+                    `alert`. This functionality is in technical preview and may
+                    be changed or removed in a future release. Elastic will
+                    apply best effort to fix any issues, but features in
+                    technical preview are not subject to the support SLA of
+                    official GA features.
+                  type: string
+                comment:
+                  description: The new comment. It is required only when `type` is `user`.
+                  type: string
+                id:
+                  description: The identifier for the comment.
+                  type: string
+                index:
+                  description: >-
+                    The alert index. It is required only when `type` is `alert`.
+                    This functionality is in technical preview and may be
+                    changed or removed in a future release. Elastic will apply
+                    best effort to fix any issues, but features in technical
+                    preview are not subject to the support SLA of official GA
+                    features.
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/owners'
+                rule:
+                  description: >-
+                    The rule that is associated with the alert.  It is required
+                    only when type is alert. This functionality is in technical
+                    preview and may be changed or removed in a future release.
+                    Elastic will apply best effort to fix any issues, but
+                    features in technical preview are not subject to the support
+                    SLA of official GA features.
+                  type: object
+                  properties:
+                    id:
+                      description: The rule identifier.
+                      type: string
+                    name:
+                      description: The rule name.
+                      type: string
+                type:
+                  $ref: '#/components/schemas/comment_types'
+                version:
+                  description: The current version of the comment.
+                  type: string
+              required:
+                - id
+                - owner
+                - type
+                - version
+            examples:
+              '0':
+                value: |-
+                  {
+                          "id": "c7740680-b5e9-11ec-b141-0fdb20a7f9a9",
+                           "version": "WzI2NiwzXQ==",
+                           "type": "user",
+                            "comment": "Updated comment",
+                            "owner": "cases"
+                      }
+                  '1':
+                    value: |
+                      {
+                      "type": "user",
+                      "owner": "cases",
+                      "comment": "no2."
+                  }
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    delete:
+      description: Deletes all comments from a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    get:
+      description: Retrieves all the comments from a case.
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
+    delete:
+      description: Deletes a comment from a case.
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    get:
+      description: Retrieves a comment from a case.
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/user_actions:
+    get:
+      description: Returns all user activity for the specified case.
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
       type: http
-      scheme: basics
+      scheme: basic
   parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      required: true
     default_search_operator:
       in: query
       name: defaultSearchOperator
@@ -219,6 +1560,22 @@ components:
       schema:
         type: string
       example: now%2B1d
+    case_id:
+      in: path
+      name: caseId
+      description: An identifier for the case.
+      required: true
+      schema:
+        type: string
+        example: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
+    comment_id:
+      in: path
+      name: commentId
+      description: An identifier for the comment.
+      required: true
+      schema:
+        type: string
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
     space_id:
       in: path
       name: spaceId
@@ -226,13 +1583,37 @@ components:
       required: true
       schema:
         type: string
+        example: default
   schemas:
+    connector_types:
+      type: string
+      description: The type of connector.
+      enum:
+        - .jira
+        - .none
+        - .resilient
+        - .servicenow
+        - .servicenow-sir
+        - .swimlane
     owners:
       type: string
-      title: Owner apps
+      description: Owner apps
       enum:
         - cases
         - observability
         - securitySolution
+    status:
+      type: string
+      description: The status of the case.
+      enum:
+        - closed
+        - in-progress
+        - open
+    comment_types:
+      type: string
+      description: The type of comment.
+      enum:
+        - alert
+        - user
 security:
   - basicAuth: []
