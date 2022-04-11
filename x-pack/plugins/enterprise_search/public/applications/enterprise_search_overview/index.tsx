@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
@@ -18,6 +18,7 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ElasticsearchGuide } from './components/elasticsearch_guide';
 import { ErrorConnecting } from './components/error_connecting';
+import { EnterpriseSearchOverviewHeaderActions } from './components/layout';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH, ELASTICSEARCH_GUIDE_PATH } from './routes';
@@ -29,7 +30,12 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
   kibanaVersion,
 }) => {
   const { errorConnectingMessage } = useValues(HttpLogic);
-  const { config } = useValues(KibanaLogic);
+  const { config, renderHeaderActions } = useValues(KibanaLogic);
+
+  // TODO check if it needs to be stopped for rendering
+  useEffect(() => {
+    renderHeaderActions(EnterpriseSearchOverviewHeaderActions);
+  }, []);
 
   const showErrorConnecting = !!(config.host && errorConnectingMessage);
   const incompatibleVersions = !!(

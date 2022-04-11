@@ -16,31 +16,25 @@ import {
   EuiFlexItem,
   EuiImage,
   EuiLink,
+  EuiPageBody,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { Chat } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateSolutionNavAvatar,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
-} from '@kbn/kibana-react-plugin/public';
-
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-import AppSearchImage from '../../assets/app_search.png';
-import WorkplaceSearchImage from '../../assets/workplace_search.png';
-import { ElasticsearchCard } from '../elasticsearch_card';
+import { AddContentEmptyPrompt } from '../add_content_empty_prompt/';
+import { ElasticsearchResources } from '../elasticsearch_resources';
+import { GettingStartedSteps } from '../getting_started_steps';
+import { EnterpriseSearchOverviewPageTemplate } from '../layout';
 import { LicenseCallout } from '../license_callout';
-import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
+
 import { TrialCallout } from '../trial_callout';
 
 import illustration from './lock_light.svg';
@@ -53,10 +47,7 @@ interface ProductSelectorProps {
   isWorkplaceSearchAdmin: boolean;
 }
 
-export const ProductSelector: React.FC<ProductSelectorProps> = ({
-  access,
-  isWorkplaceSearchAdmin,
-}) => {
+export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
 
@@ -68,33 +59,16 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
   // need to contact an administrator to get access to one of the products.
   const shouldShowEnterpriseSearchCards = shouldShowAppSearchCard || shouldShowWorkplaceSearchCard;
 
-  const WORKPLACE_SEARCH_URL = isWorkplaceSearchAdmin
-    ? WORKPLACE_SEARCH_PLUGIN.URL
-    : WORKPLACE_SEARCH_PLUGIN.NON_ADMIN_URL;
-
   const productCards = (
     <>
-      <EuiFlexGroup justifyContent="center" gutterSize="xl">
-        {shouldShowAppSearchCard && (
-          <EuiFlexItem grow={false}>
-            <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
-          </EuiFlexItem>
-        )}
-        {shouldShowWorkplaceSearchCard && (
-          <EuiFlexItem grow={false}>
-            <ProductCard
-              product={WORKPLACE_SEARCH_PLUGIN}
-              url={WORKPLACE_SEARCH_URL}
-              image={WorkplaceSearchImage}
-            />
-          </EuiFlexItem>
-        )}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <GettingStartedSteps />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ElasticsearchResources />
+        </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="xxl" />
-
-      <ElasticsearchCard />
-
       <EuiSpacer size="xxl" />
 
       {config.host ? <LicenseCallout /> : <SetupGuideCta />}
@@ -103,7 +77,16 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
 
   const insufficientAccessMessage = (
     <EuiEmptyPrompt
-      icon={<EuiImage size="fullWidth" src={illustration} alt="" />}
+      icon={
+        <EuiImage
+          size="fullWidth"
+          src={illustration}
+          alt={i18n.translate(
+            'xpack.enterpriseSearch.overview.insufficientPermissionsIllustration',
+            { defaultMessage: 'Insufficient permissions illustration' }
+          )}
+        />
+      }
       title={
         <h2>
           {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsTitle', {
@@ -152,37 +135,22 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     />
   );
   return (
-    <KibanaPageTemplate {...NO_DATA_PAGE_TEMPLATE_PROPS}>
+    <EnterpriseSearchOverviewPageTemplate
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.overview.heading', {
+          defaultMessage: 'Welcome to Enterprise Search',
+        }),
+      }}
+    >
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
-      <EuiText textAlign="center">
-        <KibanaPageTemplateSolutionNavAvatar
-          name="Enterprise Search"
-          iconType="logoEnterpriseSearch"
-          size="xxl"
-        />
-
-        <EuiSpacer />
-
-        <h1>
-          {i18n.translate('xpack.enterpriseSearch.overview.heading', {
-            defaultMessage: 'Welcome to Elastic Enterprise Search',
-          })}
-        </h1>
-        <p>
-          {config.host
-            ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                defaultMessage: 'Add search to your app or organization.',
-              })
-            : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
-                defaultMessage: 'Choose a product to set up and get started.',
-              })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="xxl" />
-      {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
-      <Chat />
-    </KibanaPageTemplate>
+      <EuiPageBody paddingSize="none">
+        <AddContentEmptyPrompt />
+        <EuiSpacer size="xxl" />
+        {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
+        <Chat />
+      </EuiPageBody>
+    </EnterpriseSearchOverviewPageTemplate>
   );
 };
