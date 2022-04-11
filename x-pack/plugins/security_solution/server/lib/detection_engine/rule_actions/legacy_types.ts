@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectAttributes } from 'kibana/server';
-import { AlertActionParams } from '../../../../../alerting/common';
+import { RuleActionParams } from '../../../../../alerting/common';
 
 /**
  * This was the pre-7.16 version of LegacyRuleAlertAction and how it was stored on disk pre-7.16.
@@ -16,7 +16,7 @@ import { AlertActionParams } from '../../../../../alerting/common';
 export interface LegacyRuleAlertAction {
   group: string;
   id: string;
-  params: AlertActionParams;
+  params: RuleActionParams;
   action_type_id: string;
 }
 
@@ -26,7 +26,7 @@ export interface LegacyRuleAlertAction {
  */
 export interface LegacyRuleAlertSavedObjectAction {
   group: string;
-  params: AlertActionParams;
+  params: RuleActionParams;
   action_type_id: string;
   actionRef: string;
 }

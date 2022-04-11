@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectReference } from 'kibana/server';
 import { DependencyList } from 'react';
 import type { PersistableState } from 'src/plugins/kibana_utils/common';

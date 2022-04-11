@@ -495,7 +495,7 @@ describe('ShareToSpaceFlyout', () => {
         <EuiBadge
           color="hollow"
         >
-          Current
+          This space
         </EuiBadge>
       `);
       // by definition, the active space will always be checked
