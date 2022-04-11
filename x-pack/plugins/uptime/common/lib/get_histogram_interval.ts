@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { QUERY } from '../constants';
 
 export const parseRelativeDate = (dateStr: string, options = {}) => {
