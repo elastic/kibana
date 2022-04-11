@@ -28,13 +28,14 @@ export function parseDllManifest(manifest: DllManifest): ParsedDllManifest {
     content: Object.fromEntries(
       Object.entries(manifest.content).map(([k, v]) => {
         const { id, buildMeta, ...other } = v;
-        const otherJson = JSON.stringify(other);
+        const metaJson = JSON.stringify(buildMeta) || '{}';
+        const otherJson = JSON.stringify(other) || '{}';
 
         return [
           k,
           [
             v.id,
-            hash(JSON.stringify(buildMeta)),
+            ...(metaJson !== '{}' ? [hash(metaJson)] : []),
             ...(otherJson !== '{}' ? [hash(otherJson)] : []),
           ].join(':'),
         ];
