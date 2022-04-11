@@ -183,8 +183,7 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
-      // Backwards compatible way of detecting that we are taking a screenshot
-      const legacyPrintLayoutDetected =
+      const printLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
         screenshotModeService.getScreenshotContext('layout') === 'print';
 
@@ -194,10 +193,7 @@ export const useDashboardAppState = ({
         ...initialDashboardStateFromUrl,
         ...forwardedAppState,
 
-        // if we are in legacy print mode, dashboard needs to be in print viewMode
-        // ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
-        // HACK: just display the dashboard in "print" view
-        ...{ viewMode: ViewMode.PRINT },
+        ...(printLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
