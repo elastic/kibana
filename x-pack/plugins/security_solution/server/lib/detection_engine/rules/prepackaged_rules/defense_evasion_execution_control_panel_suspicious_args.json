@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Control Panel Process with Unusual Arguments",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.executable : (\"?:\\\\Windows\\\\SysWOW64\\\\control.exe\", \"?:\\\\Windows\\\\System32\\\\control.exe\") and\n process.command_line :\n          (\"*.jpg*\",\n           \"*.png*\",\n           \"*.gif*\",\n           \"*.bmp*\",\n           \"*.jpeg*\",\n           \"*.TIFF*\",\n           \"*.inf*\",\n           \"*.dat*\",\n           \"*.cpl:*/*\",\n           \"*../../..*\",\n           \"*/AppData/Local/*\",\n           \"*:\\\\Users\\\\Public\\\\*\",\n           \"*\\\\AppData\\\\Local\\\\*\")\n",
   "references": [
     "https://www.joesandbox.com/analysis/476188/1/html"
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

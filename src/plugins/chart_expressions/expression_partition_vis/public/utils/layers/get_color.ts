@@ -7,14 +7,9 @@
  */
 import { ShapeTreeNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
+import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import {
-  SeriesLayer,
-  PaletteRegistry,
-  lightenColor,
-  PaletteDefinition,
-  PaletteOutput,
-} from '../../../../../charts/public';
+import { lightenColor } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries, getDistinctSeries } from '../get_distinct_series';
