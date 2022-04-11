@@ -7,7 +7,7 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import { PaletteOutput } from '../../../../charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
