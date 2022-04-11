@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { PaletteRegistry } from '@kbn/coloring';
 import { createGetterSetter } from '../../../../kibana_utils/public';
-import { PaletteRegistry, ChartsPluginSetup } from '../../../../charts/public';
+import { ChartsPluginSetup } from '../../../../charts/public';
 
 export const [getPaletteService, setPaletteService] =
   createGetterSetter<PaletteRegistry>('palette');
