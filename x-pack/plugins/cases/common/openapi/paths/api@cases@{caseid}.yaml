@@ -1,0 +1,23 @@
+get:
+  description: Retrieves a specified case.
+  parameters:
+    - $ref: ../components/parameters/case_id.yaml
+    - in: query
+      name: includeComments
+      description: Determines whether case comments are returned.
+      deprecated: true
+      schema:
+        type: boolean
+        default: true
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+        examples: {}
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

@@ -4,3 +4,4 @@ description: An identifier for the case.
 required: true
 schema:
   type: string
+  example: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2

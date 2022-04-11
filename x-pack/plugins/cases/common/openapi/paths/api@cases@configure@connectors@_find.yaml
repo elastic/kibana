@@ -1,0 +1,14 @@
+get:
+  description: Retrieves information about connectors. In particular, only the connectors that are supported for use in cases are returned.
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+        examples: {}
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

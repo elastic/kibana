@@ -13,49 +13,47 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
+  /api/cases:
+    $ref: paths/api@cases.yaml
   /api/cases/_find:
-    $ref: paths/api@cases@_find.yaml  
+    $ref: paths/api@cases@_find.yaml
+  '/api/cases/configure/connectors/_find':
+    $ref: paths/api@cases@configure@connectors@_find.yaml
+  '/api/cases/status':
+    $ref: 'paths/api@cases@status.yaml'
+  '/api/cases/tags':
+    $ref: 'paths/api@cases@tags.yaml'
+  '/api/cases/{caseId}':
+    $ref: 'paths/api@cases@{caseid}.yaml'
+  '/api/cases/{caseId}/comments':
+    $ref: 'paths/api@cases@{caseid}@comments.yaml'
+  /api/cases/{caseId}/comments/{commentId}:
+    $ref: 'paths/api@cases@{caseid}@comments@{commentid}.yaml'
+  '/api/cases/{caseId}/user_actions':
+    $ref: 'paths/api@cases@{caseid}@user_actions.yaml'
+  
+  '/s/{spaceId}/api/cases':
+    $ref: 'paths/s@{spaceid}@api@cases.yaml'
   '/s/{spaceId}/api/cases/_find':
     $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
-#  '/api/cases/{caseId}':
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/{caseId}':
-#    #$ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
-#    $ref: paths/get-cases.yaml
-#  '/api/cases/{caseId}/user_actions':
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/{caseId}/user_actions':
-#   # $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
-#    $ref: paths/get-cases.yaml
-#  /api/cases/status:
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/status':
-#    $ref: paths/get-cases.yaml
-#  /api/cases/configure/connectors/_find:
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/configure/connectors/_find':
-#    $ref: paths/get-cases.yaml
-#  '/api/cases/{caseId}/comments':
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/{caseId}/comments':
-#    $ref: paths/get-cases.yaml
-#    # also in put-cases.yaml
-#  /api/cases/tags:
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/tags':
-#    $ref: paths/get-cases.yaml
-#  '/api/cases/{caseId}/comments/{commentId}':
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
-#    $ref: paths/get-cases.yaml
-#  /api/cases/configure:
-#    $ref: paths/get-cases.yaml
-#  '/s/{spaceId}/api/cases/configure':
-#    $ref: paths/get-cases.yaml
+  '/s/{spaceId}/api/cases/configure/connectors/_find':
+    $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
+  '/s/{spaceId}/api/cases/status':
+    $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
+  '/s/{spaceId}/api/cases/tags':
+    $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
+  '/s/{spaceId}/api/cases/{caseId}':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}.yaml'
+  '/s/{spaceId}/api/cases/{caseId}/comments':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments.yaml'
+  '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
+  '/s/{spaceId}/api/cases/{caseId}/user_actions':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@user_actions.yaml'
 components:
   securitySchemes:
     basicAuth:
       type: http
-      scheme: basics
+      scheme: basic
 security:
   - basicAuth: []

@@ -1,0 +1,65 @@
+fields:
+  description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+  nullable: true
+  type: object
+  properties:
+    caseId:
+      description: The case identifier for Swimlane connectors.
+      type: string
+    category:
+      description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors. 
+      type: string
+    destIp:
+      description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
+      type: string
+    impact:
+      description: The effect an incident had on business for ServiceNow ITSM connectors.
+      type: string
+    issueType:
+      description: The type of issue for Jira connectors.
+      type: string
+    issueTypes:
+      description: The type of incident for IBM Resilient connectors.
+      type: array
+      items:
+        type: number
+    malwareHash:
+      description: A comma-separated list of malware hashes for ServiceNow SecOps connectors. 
+      type: string
+    malwareUrl:
+      description: A comma-separated list of malware URLs for ServiceNow SecOps connectors. 
+      type: string
+    parent:
+      description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
+      type: string
+    priority:
+      description: The priority of the issue for Jira and ServiceNow SecOps connectors.
+      type: string
+    severity: 
+      description: The severity of the incident for ServiceNow ITSM connectors.
+      type: string
+    severityCode:
+      description: The severity code of the incident for IBM Resilient connectors.
+      type: number
+    sourceIp:
+      description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
+      type: string
+    subcategory:
+      description: The subcategory of the incident for ServiceNow ITSM connectors.
+      type: string
+    urgency:
+      description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
+      type: string
+  required:
+    - fields
+    - id
+    - name
+    - type
+id:
+  description: The identifier for the connector. To create a case without a connector, use `none`.
+  type: string
+name:
+  description: The name of the connector. To create a case without a connector, use `none`.
+  type: string
+type:
+  $ref: 'connector_types.yaml'

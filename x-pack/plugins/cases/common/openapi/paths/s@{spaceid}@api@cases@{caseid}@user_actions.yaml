@@ -1,0 +1,18 @@
+get:
+  description: Returns all user activity for the specified case.
+  deprecated: true
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+        examples: {}
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

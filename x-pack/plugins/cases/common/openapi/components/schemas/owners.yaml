@@ -1,5 +1,5 @@
 type: string
-title: Owner apps
+description: Owner apps
 enum:
   - cases
   - observability

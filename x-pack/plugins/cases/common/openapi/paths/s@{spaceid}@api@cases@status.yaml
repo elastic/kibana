@@ -1,0 +1,26 @@
+get:
+  description: Returns the number of cases that are open, closed, and in progress.
+  deprecated: true
+  parameters:
+    - $ref: '../components/parameters/space_id.yaml'
+    - in: query
+      name: owner
+      description: A filter to limit the retrieved case statistics to a specific set of applications. If this parameter is omitted, the response contains all cases that the user has access to read.
+      schema:
+        oneOf:
+          - $ref: '../components/schemas/owners.yaml'
+          - type: array
+            items:
+              $ref: '../components/schemas/owners.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+        examples: {}
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

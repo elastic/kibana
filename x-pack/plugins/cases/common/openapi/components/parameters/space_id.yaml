@@ -4,3 +4,4 @@ description: An identifier for the space.
 required: true
 schema:
   type: string
+  example: default

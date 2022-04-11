@@ -1,0 +1,32 @@
+delete:
+  description: Deletes a comment from a case.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/space_id.yaml'
+    - $ref: ../components/parameters/case_id.yaml
+    - $ref: '../components/parameters/comment_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+  servers:
+    - url: https://localhost:5601
+
+get:
+  description: Retrieves a comment from a case.
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/comment_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+        examples: {}
+  servers:
+    - url: https://localhost:5601
+
+servers:
+  - url: https://localhost:5601

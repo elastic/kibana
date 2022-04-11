@@ -1,0 +1,126 @@
+post:
+  description: Creates a case.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            connector:
+              description: An object that contains the connector configuration.
+              type: object
+              properties:
+                $ref: '../components/schemas/connector_properties.yaml'
+            description:
+              description: The description for the case.
+              type: string
+            owner:
+              $ref: '../components/schemas/owners.yaml'
+            settings:
+              description: An object that contains the case settings.
+              type: object
+              properties:
+                syncAlerts:
+                  description: Turns alert syncing on or off.
+                  type: boolean
+            tags:
+              description: The words and phrases that help categorize cases. It can be an empty array.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+          required:
+            - connector
+            - description
+            - owner
+            - settings
+            - tags
+            - title
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json; charset=utf-8:
+          schema:
+            type: string
+          examples: {}
+  servers:
+     - url: https://localhost:5601
+
+delete:
+  description: Deletes one or more cases.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - name: ids
+      description: The cases that you want to removed. All non-ASCII characters must be URL encoded.
+      in: query
+      schema:
+        type: string
+      example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
+  responses:
+    '204':
+      description: Indicates a successful call.
+  servers:
+    - url: https://localhost:5601
+
+patch:
+  description: Updates one or more cases.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            connector:
+              description: An object that contains the connector configuration.
+              type: object
+              properties:
+               $ref: '../components/schemas/connector_properties.yaml'
+            description:
+              description: The description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              description: An object that contains the case settings.
+              type: object
+              properties:
+                syncAlerts:
+                  description: Turns alert syncing on or off.
+                  type: boolean
+            status:
+              $ref: '../components/schemas/status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case.
+              type: string
+          required:
+            - id
+            - version
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+          examples: {}
+  servers:
+        - url: https://localhost:5601
+
+servers:
+      - url: https://localhost:5601

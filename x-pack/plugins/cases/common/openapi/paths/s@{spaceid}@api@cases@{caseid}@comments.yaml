@@ -1,0 +1,168 @@
+post:
+  description: Adds a comment to a case.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/case_id.yaml
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            alertId:
+              description: The alert identifier. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+              type: string
+            comment:
+              description: The new comment. It is required only when `type` is `user`.
+              type: string
+            index:
+              description: The alert index. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+              type: string
+            owner:
+              $ref: '../components/schemas/owners.yaml'
+            rule:
+              description: The rule that is associated with the alert.  It is required only when type is alert. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+              type: object
+              properties: 
+                id:
+                  description: The rule identifier.
+                  type: string
+                name: 
+                  description: The rule name.
+                  type: string
+            type:
+              $ref: '../components/schemas/comment_types.yaml'
+          required:
+            - owner
+            - type 
+        examples:
+          '0':
+            value: >
+              {
+
+                "type": "user",
+
+                "owner": "cases",
+
+                "comment": "That is nothing - Ethan Hunt answered a targeted
+                  social media campaign promoting phishy pension schemes to IMF
+                  operatives."
+
+              }
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+          examples: {}
+  servers:
+    - url: https://localhost:5601
+
+patch:
+  description: Updates a comment in a case.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/case_id.yaml
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            alertId:
+              description: The alert identifier. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+              type: string
+            comment:
+              description: The new comment. It is required only when `type` is `user`.
+              type: string
+            id: 
+              description: The identifier for the comment.
+              type: string
+            index:
+              description: The alert index. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+              type: string
+            owner:
+              $ref: '../components/schemas/owners.yaml'
+            rule:
+              description: The rule that is associated with the alert.  It is required only when type is alert. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+              type: object
+              properties: 
+                id:
+                  description: The rule identifier.
+                  type: string
+                name: 
+                  description: The rule name.
+                  type: string
+            type:
+              $ref: '../components/schemas/comment_types.yaml'
+            version:
+              description: The current version of the comment.
+              type: string
+          required:
+            - id
+            - owner
+            - type
+            - version  
+        examples:
+          '0':
+            value: |-
+              {
+                      "id": "c7740680-b5e9-11ec-b141-0fdb20a7f9a9",
+                       "version": "WzI2NiwzXQ==",
+                       "type": "user",
+                        "comment": "Updated comment",
+                        "owner": "cases"
+                  }
+              '1':
+                value: |
+                  {
+                  "type": "user",
+                  "owner": "cases",
+                  "comment": "no2."
+              }
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+          examples: {}
+  servers:
+    - url: https://localhost:5601
+
+delete:
+  description: Deletes all comments from a case.
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/case_id.yaml
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+  servers:
+    - url: https://localhost:5601
+
+get:
+  description: Retrieves all the comments from a case.
+  deprecated: true
+  parameters:
+    - $ref: '../components/parameters/case_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json; charset=utf-8:
+          schema:
+            type: string
+        examples: {}
+  servers:
+    - url: https://localhost:5601
+
+servers:
+      - url: https://localhost:5601
