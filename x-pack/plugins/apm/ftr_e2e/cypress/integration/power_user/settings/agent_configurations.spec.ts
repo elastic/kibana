@@ -85,11 +85,15 @@ describe('Agent configuration', () => {
     ).as('serviceEnvironmentApi');
     cy.contains('Create configuration').click();
     cy.get('[data-test-subj="serviceNameComboBox"]')
+      .click()
       .type('opbeans-node')
       .type('{enter}');
+
     cy.contains('opbeans-node').realClick();
     cy.wait('@serviceEnvironmentApi');
+
     cy.get('[data-test-subj="serviceEnviromentComboBox"]')
+      .click()
       .type('prod')
       .type('{enter}');
     cy.contains('production').realClick();
