@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '../../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { SearchBar } from '../../../../../../../../../src/plugins/unified_search/public';
 import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/public';
 import { urlFromQueryParams } from '../url_from_query_params';
@@ -53,7 +54,7 @@ export const AdminSearchBar = memo(() => {
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
-            indexPatterns={clonedIndexPatterns}
+            indexPatterns={clonedIndexPatterns as DataView[]}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             fillSubmitButton={true}
