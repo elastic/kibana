@@ -127,14 +127,21 @@ describe('Table Navigation', () => {
     );
   });
 
-  test('it renders a EuiBetaBadge on the sessions tab', () => {
-    const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-    wrapper.debug();
+  test('it renders a EuiBetaBadge only on the sessions tab', () => {
+    Object.keys(HostsTableType).forEach((tableType) => {
+      if (tableType !== HostsTableType.sessions) {
+        const wrapper = mount(<TabNavigationComponent {...mockProps} />);
 
-    const betaBadge = wrapper.find(
-      `EuiTab[data-test-subj="navigation-${HostsTableType.sessions}"] EuiBetaBadge`
-    );
+        const betaBadge = wrapper.find(
+          `EuiTab[data-test-subj="navigation-${tableType}"] EuiBetaBadge`
+        );
 
-    expect(betaBadge).toBeTruthy();
+        if (tableType === HostsTableType.sessions) {
+          expect(betaBadge).toBeTruthy();
+        } else {
+          expect(betaBadge).toEqual({});
+        }
+      }
+    });
   });
 });
