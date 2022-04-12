@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { PLUGIN_ID } from '../../../../common/constants';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
@@ -135,29 +136,9 @@ const AlertsPage: React.FunctionComponent = () => {
   };
 
   const tableProps = {
+    ownerPluginId: PLUGIN_ID,
     consumers,
     bulkActions: [],
-    columns: [
-      {
-        id: 'event.action',
-        displayAsText: 'Alert status',
-        initialWidth: 150,
-      },
-      {
-        id: '@timestamp',
-        displayAsText: 'Last updated',
-        initialWidth: 250,
-      },
-      {
-        id: 'kibana.alert.duration.us',
-        displayAsText: 'Duration',
-        initialWidth: 150,
-      },
-      {
-        id: 'kibana.alert.reason',
-        displayAsText: 'Reason',
-      },
-    ],
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: defaultPagination.pageSize,

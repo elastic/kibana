@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
@@ -18,13 +19,23 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageSize: props.pageSize,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
+  const alertsTableTypeRegistry = useKibana().services.alertsTableTypeRegistry;
+  if (!alertsTableTypeRegistry.has(props.ownerPluginId)) {
+    throw new Error(
+      'This plugin has no registered its alerts table parameters inside TriggersActionsUi'
+    );
+  }
+  const pluginCustomizations = alertsTableTypeRegistry.get(props.ownerPluginId);
+
+  const [visibleColumns, setVisibleColumns] = useState(
+    pluginCustomizations.columns.map(({ id }) => id)
+  );
 
   return (
     <section data-test-subj={props['data-test-subj']}>
       <EuiDataGrid
         aria-label="Alerts table"
-        columns={props.columns}
+        columns={pluginCustomizations.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         rowCount={alertsCount}

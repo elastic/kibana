@@ -388,9 +388,9 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
+  ownerPluginId: string;
   consumers: AlertConsumers[];
   bulkActions: BulkActionsObjectProp;
-  columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];

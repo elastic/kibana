@@ -10,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import { AlertsData } from '../../../types';
+import { PLUGIN_ID } from '../../../common/constants';
 jest.mock('../../../../../../../src/plugins/data/public/');
 jest.mock('../../../common/lib/kibana');
 
@@ -24,11 +25,6 @@ describe('AlertsTable', () => {
   const columns = [
     {
       id: 'kibana.alert.rule.name',
-      displayAsText: 'Name',
-    },
-    {
-      id: 'kibana.alert.rule.category',
-      displayAsText: 'Category',
     },
   ];
 
@@ -59,9 +55,9 @@ describe('AlertsTable', () => {
   };
 
   const tableProps = {
+    ownerPluginId: PLUGIN_ID,
     consumers,
     bulkActions: [],
-    columns,
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 1,

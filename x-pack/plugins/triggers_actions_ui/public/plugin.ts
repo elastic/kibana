@@ -51,6 +51,7 @@ import type {
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
+import { registerAlertsTable } from './application/sections/alerts_table/alerts_page/register_alerts_table';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -192,6 +193,8 @@ export class Plugin
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
     });
+
+    registerAlertsTable({ alertsTableTypeRegistry: this.alertsTableTypeRegistry });
 
     return {
       actionTypeRegistry: this.actionTypeRegistry,
