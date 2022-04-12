@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-/**
- * A service providing links to documentation about various features in Kibana.
- */
-export interface SharedUxDocLinksService {
-  /** A link to information about Data Views in Kibana */
-  dataViewsDocLink: string;
-  /** A link to Kibana guide starting page */
-  kibanaGuideDocLink: string;
-}
+export { EmptyStateAnalyticsPage } from './empty_state';

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NoDataViews, NoDataViewsComponent } from './no_data_views';
+export { EmptyStateAnalyticsPage } from './empty_state_analytics_page';

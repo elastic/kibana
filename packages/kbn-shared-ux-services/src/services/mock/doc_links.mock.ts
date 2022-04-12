@@ -19,4 +19,5 @@ export type MockDocLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>
  */
 export const docLinksServiceFactory: MockDocLinksServiceFactory = () => ({
   dataViewsDocLink: 'dummy link',
+  kibanaGuideDocLink: 'Kibana guide',
 });

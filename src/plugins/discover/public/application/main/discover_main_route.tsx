@@ -28,6 +28,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
 import { useExecutionContext } from '../../../../kibana_react/public';
+import { EmptyStateAnalyticsPage } from '../../../../shared_ux/public';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -52,6 +53,7 @@ export function DiscoverMainRoute() {
   const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
     []
   );
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
 
   useExecutionContext(core.executionContext, {
@@ -64,16 +66,21 @@ export function DiscoverMainRoute() {
     core.application.navigateToApp('kibanaOverview', { path: '#' });
   }, [core.application]);
 
+  const displayNoDataPage = () => {
+    const onDataViewCreated = () => {};
+    return <EmptyStateAnalyticsPage onDataViewCreated={onDataViewCreated} />;
+  };
+
   const checkForDataViews = useCallback(async () => {
     const hasUserDataView = await data.dataViews.hasUserDataView().catch(() => true);
     if (!hasUserDataView) {
-      navigateToOverview();
+      setShowNoDataPage(true);
     }
     const defaultDataView = await data.dataViews.getDefaultDataView();
     if (!defaultDataView) {
-      navigateToOverview();
+      setShowNoDataPage(true);
     }
-  }, [navigateToOverview, data.dataViews]);
+  }, [setShowNoDataPage, data.dataViews]);
 
   useEffect(() => {
     const savedSearchId = id;
@@ -173,6 +180,10 @@ export function DiscoverMainRoute() {
         : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
+
+  if (showNoDataPage) {
+    return displayNoDataPage();
+  }
 
   if (error) {
     return <DiscoverError error={error} />;

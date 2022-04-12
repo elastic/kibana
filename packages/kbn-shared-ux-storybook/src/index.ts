@@ -16,4 +16,5 @@ export {
   platformServiceFactory,
   servicesFactory,
   userPermissionsServiceFactory,
+  dataServiceFactory,
 } from './services';

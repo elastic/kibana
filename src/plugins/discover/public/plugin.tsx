@@ -26,6 +26,7 @@ import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwardi
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { EuiLoadingContent } from '@elastic/eui';
+import { SharedUXPluginStart } from 'src/plugins/shared_ux/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
@@ -172,6 +173,7 @@ export interface DiscoverStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  sharedUX: SharedUXPluginStart;
 }
 
 /**

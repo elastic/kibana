@@ -14,6 +14,7 @@ export type {
   SharedUxHttpService,
   SharedUxPlatformService,
   SharedUxUserPermissionsService,
+  SharedUxDataService,
 } from './services';
 
 export {
@@ -24,6 +25,7 @@ export {
   useHttp,
   usePermissions,
   usePlatformService,
+  useData,
   useSharedUxServices,
 } from './context';
 
