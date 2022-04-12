@@ -11,6 +11,13 @@ import type { ExpressionFunctionDefinition } from '../../../../expressions/commo
 import { AxisExtentConfig, AxisExtentConfigResult } from '../types';
 import { AxisExtentModes, AXIS_EXTENT_CONFIG } from '../constants';
 
+const errors = {
+  upperBoundLowerOrEqualToLowerBoundError: () =>
+    i18n.translate('expressionXY.reusable.function.axisExtentConfig.errors.emptyUpperBound', {
+      defaultMessage: 'Upper bound should be greater than lower bound, if custom mode is enabled.',
+    }),
+};
+
 export const axisExtentConfigFunction: ExpressionFunctionDefinition<
   typeof AXIS_EXTENT_CONFIG,
   null,
@@ -27,10 +34,12 @@ export const axisExtentConfigFunction: ExpressionFunctionDefinition<
   args: {
     mode: {
       types: ['string'],
-      options: [...Object.values(AxisExtentModes)],
       help: i18n.translate('expressionXY.axisExtentConfig.extentMode.help', {
         defaultMessage: 'The extent mode',
       }),
+      options: [...Object.values(AxisExtentModes)],
+      strict: true,
+      default: AxisExtentModes.FULL,
     },
     lowerBound: {
       types: ['number'],
@@ -46,6 +55,16 @@ export const axisExtentConfigFunction: ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
+    if (args.mode === AxisExtentModes.CUSTOM) {
+      if (
+        args.lowerBound !== undefined &&
+        args.upperBound !== undefined &&
+        args.lowerBound >= args.upperBound
+      ) {
+        throw new Error(errors.upperBoundLowerOrEqualToLowerBoundError());
+      }
+    }
+
     return {
       type: AXIS_EXTENT_CONFIG,
       ...args,

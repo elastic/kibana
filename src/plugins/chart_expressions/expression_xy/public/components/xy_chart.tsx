@@ -26,9 +26,7 @@ import {
   AxisStyle,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
+import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '../../../../expressions/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
@@ -53,7 +51,6 @@ import {
   isDataLayer,
   getAxesConfiguration,
   GroupsConfiguration,
-  validateExtent,
   computeOverallDataDomain,
   getLinesCausedPaddings,
 } from '../helpers';
@@ -314,36 +311,28 @@ export function XYChart({
     let min: number = NaN;
     let max: number = NaN;
 
-    if (extent.mode === 'custom') {
-      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
-      if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound ?? NaN;
-        max = extent.upperBound ?? NaN;
-      }
-    } else {
-      const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
-        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+    const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
+      yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
+    );
+    if (!fit && axisHasReferenceLine) {
+      // Remove this once the chart will support automatic annotation fit for other type of charts
+      const { min: computedMin, max: computedMax } = computeOverallDataDomain(
+        layers,
+        axis.series.map(({ accessor }) => accessor)
       );
-      if (!fit && axisHasReferenceLine) {
-        // Remove this once the chart will support automatic annotation fit for other type of charts
-        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
-          layers,
-          axis.series.map(({ accessor }) => accessor)
-        );
 
-        if (computedMin != null && computedMax != null) {
-          max = Math.max(computedMax, max || 0);
-          min = Math.min(computedMin, min || 0);
-        }
-        for (const { yConfig, table } of referenceLineLayers) {
-          for (const { axisMode, forAccessor } of yConfig || []) {
-            if (axis.groupId === axisMode) {
-              for (const row of table.rows) {
-                const value = row[forAccessor];
-                // keep the 0 in view
-                max = Math.max(value, max || 0, 0);
-                min = Math.min(value, min || 0, 0);
-              }
+      if (computedMin != null && computedMax != null) {
+        max = Math.max(computedMax, max || 0);
+        min = Math.min(computedMin, min || 0);
+      }
+      for (const { yConfig, table } of referenceLineLayers) {
+        for (const { axisMode, forAccessor } of yConfig || []) {
+          if (axis.groupId === axisMode) {
+            for (const row of table.rows) {
+              const value = row[forAccessor];
+              // keep the 0 in view
+              max = Math.max(value, max || 0, 0);
+              min = Math.min(value, min || 0, 0);
             }
           }
         }

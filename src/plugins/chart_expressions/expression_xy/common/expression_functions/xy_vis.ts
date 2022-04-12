@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
-import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
+import { AxisExtentConfigResult, XYArgs, XYLayerConfigResult, XYRender } from '../types';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -26,9 +26,31 @@ import {
   EndValues,
   ANNOTATION_LAYER,
   LayerTypes,
+  AxisExtentModes,
 } from '../constants';
 import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
+
+const errors = {
+  extendBoundsAreInvalidError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
+      defaultMessage:
+        'For area and bar modes, and custom extent mode, the lower bound should be less or greater than 0 and the upper bound - be greater or equal than 0',
+    }),
+};
+
+const validateExtent = (extent: AxisExtentConfigResult, hasBarOrArea: boolean) => {
+  const isValidLowerBound =
+    extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
+  const isValidUpperBound =
+    extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
+
+  const areValidBounds = isValidLowerBound && isValidUpperBound;
+
+  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
+    throw new Error(errors.extendBoundsAreInvalidError());
+  }
+};
 
 export const xyVisFunction: ExpressionFunctionDefinition<
   typeof XY_VIS,
@@ -215,6 +237,14 @@ export const xyVisFunction: ExpressionFunctionDefinition<
 
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
+
+    const hasBarOrArea =
+      dataLayers.filter(
+        ({ seriesType }) => seriesType.includes('bar') || seriesType.includes('area')
+      ).length > 0;
+
+    validateExtent(args.yLeftExtent, hasBarOrArea);
+    validateExtent(args.yRightExtent, hasBarOrArea);
 
     return {
       type: 'render',
