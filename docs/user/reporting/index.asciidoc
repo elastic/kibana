@@ -28,7 +28,7 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 * *Embed code* &mdash; Embed a fully interactive dashboard or visualization as an iframe on a web page.
 
 [[reporting-on-cloud-resource-requirements]]
-NOTE: On Elastic Cloud *PDF* and *PNG* reports require minimum 2GB of memory. Visual reports
+NOTE: On Elastic Cloud *PDF* and *PNG* reports require a Kibana with minimum 2GB RAM. Visual reports
 will be more stable at higher memory capacities.
 
 [float]
