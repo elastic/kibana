@@ -523,7 +523,9 @@ export const deleteAllAlerts = async (
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
         .send();
-      return finalCheck.data.length === 0;
+      return {
+        passed: finalCheck.data.length === 0,
+      };
     },
     'deleteAllAlerts',
     log,
@@ -615,7 +617,9 @@ export const createSignalsIndex = async (
   await countDownTest(
     async () => {
       await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createSignalsIndex',
     log
@@ -657,7 +661,9 @@ export const deleteSignalsIndex = async (
   await countDownTest(
     async () => {
       await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'deleteSignalsIndex',
     log
@@ -964,10 +970,12 @@ export const countDownES = async (
     async () => {
       const result = await esFunction();
       if (result.body.version_conflicts !== 0) {
-        log.error(`Version conflicts for ${result.body.version_conflicts}`);
-        return false;
+        return {
+          passed: false,
+          errorMessage: 'Version conflicts for ${result.body.version_conflicts}',
+        };
       } else {
-        return true;
+        return { passed: true };
       }
     },
     esFunctionName,
@@ -998,22 +1006,37 @@ export const refreshIndex = async (es: Client, index?: string) => {
  * @param retryCount The number of times to retry before giving up (has default)
  * @param timeoutWait Time to wait before trying again (has default)
  */
-export const countDownTest = async (
-  functionToTest: () => Promise<boolean>,
+export const countDownTest = async <T>(
+  functionToTest: () => Promise<{
+    passed: boolean;
+    returnValue?: T | undefined;
+    errorMessage?: string;
+  }>,
   name: string,
   log: ToolingLog,
-  retryCount: number = 20,
+  retryCount: number = 50,
   timeoutWait = 250,
   ignoreThrow: boolean = false
-) => {
+): Promise<T | undefined> => {
   if (retryCount > 0) {
     try {
-      const passed = await functionToTest();
-      if (!passed) {
-        log.error(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
+      const testReturn = await functionToTest();
+      if (!testReturn.passed) {
+        const error = testReturn.errorMessage != null ? ` error: ${testReturn.errorMessage},` : '';
+        log.error(`Failure trying to ${name},${error} retries left are: ${retryCount - 1}`);
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
+        const returnValue = await countDownTest(
+          functionToTest,
+          name,
+          log,
+          retryCount - 1,
+          timeoutWait,
+          ignoreThrow
+        );
+        return returnValue;
+      } else {
+        return testReturn.returnValue;
       }
     } catch (err) {
       if (ignoreThrow) {
@@ -1026,11 +1049,20 @@ export const countDownTest = async (
         );
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
+        const returnValue = await countDownTest(
+          functionToTest,
+          name,
+          log,
+          retryCount - 1,
+          timeoutWait,
+          ignoreThrow
+        );
+        return returnValue;
       }
     }
   } else {
     log.error(`Could not ${name}, no retries are left`);
+    return undefined;
   }
 };
 
@@ -1589,21 +1621,32 @@ export const getSignalsByRuleIds = async (
   log: ToolingLog,
   ruleIds: string[]
 ): Promise<estypes.SearchResponse<DetectionAlert>> => {
-  const response = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsRuleId(ruleIds));
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting a signal by rule_id (getSignalsByRuleIds). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+  const signalsOpen = await countDownTest<estypes.SearchResponse<DetectionAlert>>(
+    async () => {
+      const response = await supertest
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getQuerySignalsRuleId(ruleIds));
+      if (response.status !== 200) {
+        return {
+          passed: false,
+          errorMessage: `Status is not 200 as expected, it is: ${response.status}`,
+        };
+      } else {
+        return {
+          passed: true,
+          returnValue: response.body,
+        };
+      }
+    },
+    'getSignalsByRuleIds',
+    log
+  );
+  if (signalsOpen == null) {
+    throw new Error('Signals not defined after countdown, cannot continue');
+  } else {
+    return signalsOpen;
   }
-
-  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
-  return signalsOpen;
 };
 
 /**
@@ -1618,20 +1661,32 @@ export const getSignalsByIds = async (
   ids: string[],
   size?: number
 ): Promise<estypes.SearchResponse<DetectionAlert>> => {
-  const response = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids, size));
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting a signal by id. CI issues could happen (getSignalsByIds). Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+  const signalsOpen = await countDownTest<estypes.SearchResponse<DetectionAlert>>(
+    async () => {
+      const response = await supertest
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getQuerySignalsId(ids, size));
+      if (response.status !== 200) {
+        return {
+          passed: false,
+          errorMessage: `Status is not 200 as expected, it is: ${response.status}`,
+        };
+      } else {
+        return {
+          passed: true,
+          returnValue: response.body,
+        };
+      }
+    },
+    'getSignalsByIds',
+    log
+  );
+  if (signalsOpen == null) {
+    throw new Error('Signals not defined after countdown, cannot continue');
+  } else {
+    return signalsOpen;
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
-  return signalsOpen;
 };
 
 /**
@@ -1644,20 +1699,32 @@ export const getSignalsById = async (
   log: ToolingLog,
   id: string
 ): Promise<estypes.SearchResponse<DetectionAlert>> => {
-  const response = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId([id]));
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting signals by id (getSignalsById). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+  const signalsOpen = await countDownTest<estypes.SearchResponse<DetectionAlert>>(
+    async () => {
+      const response = await supertest
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getQuerySignalsId([id]));
+      if (response.status !== 200) {
+        return {
+          passed: false,
+          returnValue: undefined,
+        };
+      } else {
+        return {
+          passed: true,
+          returnValue: response.body,
+        };
+      }
+    },
+    'getSignalsById',
+    log
+  );
+  if (signalsOpen == null) {
+    throw new Error('Signals not defined after countdown, cannot continue');
+  } else {
+    return signalsOpen;
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
-  return signalsOpen;
 };
 
 export const installPrePackagedRules = async (
@@ -1671,14 +1738,15 @@ export const installPrePackagedRules = async (
         .set('kbn-xsrf', 'true')
         .send();
       if (status !== 200) {
-        log.debug(
-          `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+        return {
+          passed: false,
+          errorMessage: `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
             body
-          )}, status: ${JSON.stringify(status)}`
-        );
+          )}, status: ${JSON.stringify(status)}`,
+        };
+      } else {
+        return { passed: true };
       }
-
-      return status === 200;
     },
     'installPrePackagedRules',
     log

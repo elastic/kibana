@@ -37,7 +37,9 @@ export const createListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createListsIndex',
     log
@@ -55,7 +57,9 @@ export const deleteListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'deleteListsIndex',
     log
@@ -74,7 +78,9 @@ export const createExceptionListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createListsIndex',
     log
@@ -223,7 +229,9 @@ export const deleteAllExceptionsByType = async (
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
         .send();
-      return finalCheck.data.length === 0;
+      return {
+        passed: finalCheck.data.length === 0,
+      };
     },
     `deleteAllExceptions by type: "${type}"`,
     log,
