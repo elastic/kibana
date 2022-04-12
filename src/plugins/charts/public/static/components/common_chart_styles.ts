@@ -22,9 +22,9 @@ export const useCommonChartStyles = () => {
 
   const accent = useMemo(
     () => css`
-      fill: ${euiTheme.colors.accent};
+      fill: ${euiTheme.colors.ink};
     `,
-    [euiTheme.colors.accent]
+    [euiTheme.colors.ink]
   );
 
   return {

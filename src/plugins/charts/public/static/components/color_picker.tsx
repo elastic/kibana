@@ -79,7 +79,7 @@ export const legacyColors: string[] = [
   '#DEDAF7',
 ];
 
-interface ColorPickerProps {
+export interface ColorPickerProps {
   /**
    * Label that characterizes the color that is going to change
    */
@@ -148,7 +148,7 @@ export const ColorPicker = ({
 
   const visColorPickerValueStyle = useMemo(
     () => css`
-      width: ${euiTheme.size.l} * 8;
+      width: calc(${euiTheme.size.l} * 8);
     `,
     [euiTheme.size.l]
   );

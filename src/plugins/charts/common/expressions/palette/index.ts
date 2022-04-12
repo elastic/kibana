@@ -9,7 +9,7 @@
 export { SystemPaletteArguments, systemPalette } from './system_palette';
 export { palette } from './palette';
 
-export {
+export type {
   CustomPaletteArguments,
   CustomPaletteState,
   PaletteExpressionFunctionDefinition,
