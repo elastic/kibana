@@ -304,10 +304,10 @@ describe('metric_visualization', () => {
                             "center",
                           ],
                           "lHeight": Array [
-                            127.5,
+                            82.5,
                           ],
                           "size": Array [
-                            85,
+                            55,
                           ],
                           "sizeUnit": Array [
                             "px",
@@ -332,10 +332,10 @@ describe('metric_visualization', () => {
                             "center",
                           ],
                           "lHeight": Array [
-                            40.5,
+                            24,
                           ],
                           "size": Array [
-                            27,
+                            16,
                           ],
                           "sizeUnit": Array [
                             "px",
@@ -349,7 +349,7 @@ describe('metric_visualization', () => {
                   },
                 ],
                 "labelPosition": Array [
-                  "bottom",
+                  "top",
                 ],
                 "metric": Array [
                   Object {
