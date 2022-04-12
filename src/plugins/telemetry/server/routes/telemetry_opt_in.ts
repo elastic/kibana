@@ -49,12 +49,13 @@ export function registerTelemetryOptInRoutes({
     },
     async (context, req, res) => {
       const newOptInStatus = req.body.enabled;
+      const soClient = (await context.core).savedObjects.client;
       const attributes: TelemetrySavedObjectAttributes = {
         enabled: newOptInStatus,
         lastVersionChecked: currentKibanaVersion,
       };
       const config = await config$.pipe(take(1)).toPromise();
-      const telemetrySavedObject = await getTelemetrySavedObject(context.core.savedObjects.client);
+      const telemetrySavedObject = await getTelemetrySavedObject(soClient);
 
       if (telemetrySavedObject === false) {
         // If we get false, we couldn't get the saved object due to lack of permissions
@@ -97,7 +98,7 @@ export function registerTelemetryOptInRoutes({
       }
 
       try {
-        await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
+        await updateTelemetrySavedObject(soClient, attributes);
       } catch (e) {
         if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
           return res.forbidden();
