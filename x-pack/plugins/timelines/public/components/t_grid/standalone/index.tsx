@@ -79,7 +79,6 @@ export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
   dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
-  visibleCellActions?: number;
   deletedEventIds: Readonly<string[]>;
   disabledCellActions: string[];
   end: string;
@@ -121,7 +120,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   columns,
   dataViewId = null,
   defaultCellActions,
-  visibleCellActions,
   deletedEventIds,
   disabledCellActions,
   end,
@@ -363,7 +361,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       browserFields={browserFields}
                       data={nonDeletedEvents}
                       defaultCellActions={defaultCellActions}
-                      visibleCellActions={visibleCellActions}
                       disabledCellActions={disabledCellActions}
                       filterQuery={filterQuery}
                       hasAlertsCrud={hasAlertsCrud}

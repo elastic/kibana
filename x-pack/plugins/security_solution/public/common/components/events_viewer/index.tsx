@@ -219,7 +219,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               dataProviders,
               dataViewId,
               defaultCellActions,
-              visibleCellActions: 3,
               deletedEventIds,
               disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
               docValueFields,
