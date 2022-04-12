@@ -39,8 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await makeChecksWithStatus(es, LessAvailMonitor, 5, 2, 10000, {}, 'down');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/85208
-  describe.skip('Observer location', () => {
+  describe('Observer location', () => {
     const start = '~ 15 minutes ago';
     const end = 'now';
 

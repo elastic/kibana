@@ -65,8 +65,7 @@ const checkMonitorStatesResponse = ({
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/93705
-  describe.skip('monitor states endpoint', () => {
+  describe('monitor states endpoint', () => {
     const from = '2019-09-11T03:30:04.380Z';
     const to = '2019-09-11T03:40:34.410Z';
     const absFrom = new Date(from).valueOf();

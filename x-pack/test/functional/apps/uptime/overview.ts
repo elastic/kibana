@@ -15,8 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89072
-  describe.skip('overview page', function () {
+  describe('overview page', function () {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
