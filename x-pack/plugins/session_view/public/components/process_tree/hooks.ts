@@ -321,7 +321,7 @@ export const useProcessTree = ({
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
     autoExpandProcessTree(processMap, jumpToEntityId);
-  }, [searchQuery, processMap, jumpToEntityId]);
+  }, [searchQuery, processMap, jumpToEntityId, verboseMode]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];
