@@ -20,6 +20,7 @@ import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { StorageExplorerItem } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
+import { asPercent } from '../../../../../common/utils/formatters';
 
 export function StorageExplorer() {
   const rangeFrom = 'now/d';
@@ -50,7 +51,7 @@ export function StorageExplorer() {
   // const items = [
   //   {
   //     service: 'CartService',
-  //     environments: ['Prod'],
+  //     environments: ['Prod', 'Test'],
   //     size: '95 GB',
   //     calls: '8293',
   //     sampling: '10%',
@@ -125,6 +126,7 @@ export function StorageExplorer() {
           defaultMessage: 'Sampling',
         }
       ),
+      render: (value: string) => asPercent(parseFloat(value), 1),
       sortable: true,
     },
     {

@@ -6,16 +6,17 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '../../../../common/processor_event';
 // import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { Setup } from '../../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
-import { environmentQuery } from '../../../common/utils/environment_query';
+} from '../../../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { listConfigurations } from '../agent_configuration/list_configurations';
 
 export async function getServiceStorageStats({
   searchAggregatedTransactions,

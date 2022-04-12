@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sumBy } from 'lodash';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { Setup } from '../../lib/helpers/setup_request';
+import { sumBy, uniq } from 'lodash';
+import { ApmPluginRequestHandlerContext } from '../../typings';
+import { Setup } from '../../../lib/helpers/setup_request';
 
 export async function getTotalIndexDiskUsage({
   context,
@@ -15,17 +15,17 @@ export async function getTotalIndexDiskUsage({
   context: ApmPluginRequestHandlerContext;
   setup: Setup;
 }) {
-  const { indices } = setup;
-  const index = [
-    indices.transaction,
-    indices.span,
-    indices.metric,
-    indices.error,
-  ].join();
+  const {
+    indices: { transaction, span, metric, error },
+  } = setup;
+
+  const index = uniq([transaction, span, metric, error])
+    .join()
+    .replaceAll(',apm-*', '');
 
   const diskUsage =
     await context.core.elasticsearch.client.asCurrentUser.indices.diskUsage({
-      index: 'traces-apm*,logs-apm*',
+      index,
       // ignore_unavailable=true
       run_expensive_tasks: true,
     });

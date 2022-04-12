@@ -6,17 +6,18 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getTotalIndexDiskUsage } from './get_total_index_disk_usage';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
+import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getServiceStorageStats } from './get_service_storage_stats';
-import { environmentRt, rangeRt } from '../default_api_types';
-import { StorageExplorerItem } from '../../../common/storage_explorer_types';
+import { environmentRt, rangeRt } from '../../default_api_types';
+import { StorageExplorerItem } from '../../../../common/storage_explorer_types';
 import {
-  getTotalDocs,
+  getNumberOfApmDocs,
   mergeServiceStats,
-} from './get_estimated_service_disk_usage';
+} from './estimated_service_disk_usage';
+import { listConfigurations } from '../agent_configuration/list_configurations';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -42,23 +43,23 @@ const storageExplorerRoute = createApmServerRoute({
       kuery: '',
     });
 
-    const [serviceStats, totalDocs, totalIndexDiskUsage] = await Promise.all([
-      getServiceStorageStats({
-        searchAggregatedTransactions,
-        setup,
-        start,
-        end,
-        environment,
-      }),
-      getTotalDocs({
-        context,
-        setup,
-      }),
-      getTotalIndexDiskUsage({ context, setup }),
-    ]);
+    const [serviceStats, totalDocs, totalIndexDiskUsage, agentConfigs] =
+      await Promise.all([
+        getServiceStorageStats({
+          searchAggregatedTransactions,
+          setup,
+          start,
+          end,
+          environment,
+        }),
+        getNumberOfApmDocs({ context, setup }),
+        getTotalIndexDiskUsage({ context, setup }),
+        listConfigurations({ setup }),
+      ]);
 
     const mergedServiceStats = mergeServiceStats({
       serviceStats,
+      agentConfigs,
       totalDocs,
       totalIndexDiskUsage,
     });
