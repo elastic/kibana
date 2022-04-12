@@ -8,9 +8,12 @@
 import { LicensingRouter } from '../types';
 
 export function registerInfoRoute(router: LicensingRouter) {
-  router.get({ path: '/api/licensing/info', validate: false }, (context, request, response) => {
-    return response.ok({
-      body: (await context.licensing).license,
-    });
-  });
+  router.get(
+    { path: '/api/licensing/info', validate: false },
+    async (context, request, response) => {
+      return response.ok({
+        body: (await context.licensing).license,
+      });
+    }
+  );
 }
