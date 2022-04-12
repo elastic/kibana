@@ -98,27 +98,35 @@ export async function toPdf(
   { metrics, results }: CaptureResult
 ): Promise<PdfScreenshotResult> {
   const timeRange = getTimeRange(results);
-  try {
-    const { buffer, pages } = await pngsToPdf({
-      title: title ? `${title}${timeRange ? ` - ${timeRange}` : ''}` : undefined,
-      results,
-      layout,
-      logo,
-      logger,
-    });
+  let buffer: Buffer;
+  let pages: number;
+  const shouldConvertPngsToPdf = layout.id !== LayoutTypes.PRINT;
+  if (shouldConvertPngsToPdf) {
+    try {
+      ({ buffer, pages } = await pngsToPdf({
+        title: title ? `${title}${timeRange ? ` - ${timeRange}` : ''}` : undefined,
+        results,
+        layout,
+        logo,
+        logger,
+      }));
+    } catch (error) {
+      logger.error(`Could not generate the PDF buffer!`);
 
-    return {
-      metrics: {
-        ...(metrics ?? {}),
-        pages,
-      },
-      data: buffer,
-      errors: results.flatMap(({ error }) => (error ? [error] : [])),
-      renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),
-    };
-  } catch (error) {
-    logger.error(`Could not generate the PDF buffer!`);
-
-    throw error;
+      throw error;
+    }
+  } else {
+    buffer = results[0].screenshots[0].data;
+    pages = -1; // TODO: Figure out how to get page numbers
   }
+
+  return {
+    metrics: {
+      ...(metrics ?? {}),
+      pages,
+    },
+    data: buffer,
+    errors: results.flatMap(({ error }) => (error ? [error] : [])),
+    renderErrors: results.flatMap(({ renderErrors }) => renderErrors ?? []),
+  };
 }

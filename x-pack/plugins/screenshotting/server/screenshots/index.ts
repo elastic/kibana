@@ -26,6 +26,7 @@ import type { HttpServiceSetup, KibanaRequest, Logger } from 'src/core/server';
 import type { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import {
   LayoutParams,
+  LayoutTypes,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,

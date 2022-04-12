@@ -9,7 +9,7 @@ import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Headers, Logger } from 'src/core/server';
-import { errors } from '../../common';
+import { errors, LayoutTypes } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
 import type { Layout } from '../layouts';
@@ -18,7 +18,8 @@ import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
-import type { Screenshot } from './get_screenshots';
+import { getPdf } from './get_pdf';
+import type { Screenshot } from './types';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
@@ -247,7 +248,10 @@ export class ScreenshotObservableHandler {
             getDefaultElementPosition(this.layout.getViewport(1));
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.logger, elements);
+            screenshots =
+              this.layout.id === LayoutTypes.PRINT
+                ? await getPdf(this.driver, this.logger)
+                : await getScreenshots(this.driver, this.logger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
