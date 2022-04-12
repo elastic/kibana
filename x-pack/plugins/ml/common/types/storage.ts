@@ -51,7 +51,7 @@ export interface PanelState {
 
 export interface AnomalyExplorerPanelsState {
   topInfluencers: PanelState;
-  mainPage: PanelState;
+  mainPage: { size: number };
 }
 
 export type MlStorage = Partial<{

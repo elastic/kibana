@@ -177,7 +177,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
         size: 20,
       },
       mainPage: {
-        isCollapsed: false,
         size: 80,
       },
     });
@@ -187,32 +186,36 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const collapseFn = useRef<() => void | undefined>();
   const [panelsInitialized, setPanelsInitialized] = useState(false);
 
-  // useEffect(
-  //   function initTopInfluencersPanelCollapse() {
-  //     if (
-  //       panelsInitialized ||
-  //       !collapseFn.current ||
-  //       !topInfluencersPanelRef.current ||
-  //       anomalyExplorerPanelState.topInfluencers.isCollapsed === false
-  //     )
-  //       return;
-  //
-  //     collapseFn.current();
-  //     setPanelsInitialized(true);
-  //   },
-  //   [
-  //     collapseFn.current,
-  //     panelsInitialized,
-  //     topInfluencersPanelRef.current,
-  //     anomalyExplorerPanelState,
-  //   ]
-  // );
+  useEffect(
+    function initTopInfluencersPanelCollapse() {
+      if (
+        panelsInitialized ||
+        !collapseFn.current ||
+        !topInfluencersPanelRef.current ||
+        !anomalyExplorerPanelState.topInfluencers.isCollapsed
+      )
+        return;
+
+      setPanelsInitialized(true);
+
+      setTimeout(() => {
+        if (collapseFn.current) {
+          collapseFn.current();
+        }
+      }, 0);
+    },
+    [
+      collapseFn.current,
+      panelsInitialized,
+      topInfluencersPanelRef.current,
+      anomalyExplorerPanelState,
+    ]
+  );
 
   const onPanelWidthChange = useCallback(
     (newSizes) => {
       setAnomalyExplorerPanelState({
         mainPage: {
-          ...anomalyExplorerPanelState.mainPage,
           size: newSizes.mainPage,
         },
         topInfluencers: {
@@ -225,11 +228,26 @@ export const Explorer: FC<ExplorerUIProps> = ({
   );
 
   const onToggleCollapsed = useCallback(() => {
+    const isCurrentlyCollapsed = anomalyExplorerPanelState.topInfluencers.isCollapsed;
+
+    if (isCurrentlyCollapsed) {
+      setAnomalyExplorerPanelState({
+        mainPage: {
+          size: 80,
+        },
+        topInfluencers: {
+          size: 20,
+          isCollapsed: !isCurrentlyCollapsed,
+        },
+      });
+      return;
+    }
+
     setAnomalyExplorerPanelState({
       mainPage: anomalyExplorerPanelState.mainPage,
       topInfluencers: {
         ...anomalyExplorerPanelState.topInfluencers,
-        isCollapsed: true,
+        isCollapsed: !isCurrentlyCollapsed,
       },
     });
   }, [anomalyExplorerPanelState]);
@@ -448,7 +466,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     position: 'top',
                   },
                 ]}
-                size={anomalyExplorerPanelState.topInfluencers.size}
+                minSize={'200px'}
+                initialSize={20}
                 paddingSize={'s'}
               >
                 {noInfluencersConfigured ? (
@@ -496,7 +515,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
               <EuiResizablePanel
                 id="mainPage"
                 mode="main"
-                size={anomalyExplorerPanelState.mainPage.size}
+                minSize={'70%'}
+                initialSize={80}
                 paddingSize={'s'}
               >
                 <div>

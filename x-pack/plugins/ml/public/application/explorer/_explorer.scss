@@ -1,12 +1,7 @@
 $borderRadius: $euiBorderRadius / 2;
 
 .ml-explorer {
-  width: 100%;
-  display: inline-block;
-  color: $euiColorDarkShade;
-
   .results-container {
-    padding: 0 0 $euiSize 0;
 
     .no-influencers-warning {
       float: left;
