@@ -21,7 +21,11 @@ export function processDataForFocusAnomalies(
   functionDescription: any
 ): any;
 
-export function processScheduledEventsForChart(chartData: any, scheduledEvents: any): any;
+export function processScheduledEventsForChart(
+  chartData: any,
+  scheduledEvents: any,
+  aggregationInterval: any
+): any;
 
 export function findNearestChartPointToTime(chartData: any, time: any): any;
 

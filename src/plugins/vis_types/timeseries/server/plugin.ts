@@ -15,9 +15,9 @@ import {
   KibanaRequest,
   IUiSettingsClient,
 } from 'src/core/server';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -104,12 +104,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       logger,
       searchStrategyRegistry,
       getEsShardTimeout: () =>
-        globalConfig$
-          .pipe(
-            first(),
-            map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
-          )
-          .toPromise(),
+        firstValueFrom(
+          globalConfig$.pipe(map((config) => config.elasticsearch.shardTimeout.asMilliseconds()))
+        ),
       getIndexPatternsService: async (requestContext) => {
         const [, { dataViews }] = await core.getStartServices();
         const { elasticsearch, savedObjects } = await requestContext.core;

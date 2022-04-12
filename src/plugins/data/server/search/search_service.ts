@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { from, Observable, throwError } from 'rxjs';
+import { firstValueFrom, from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
@@ -221,16 +221,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
-    this.initializerContext.config
-      .create<ConfigSchema>()
-      .pipe(first())
-      .toPromise()
-      .then((value) => {
-        if (value.search.aggs.shardDelay.enabled) {
-          aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
-          expressions.registerFunction(aggShardDelay);
-        }
-      });
+    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+      if (value.search.aggs.shardDelay.enabled) {
+        aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+        expressions.registerFunction(aggShardDelay);
+      }
+    });
 
     return {
       __enhance: (enhancements: SearchEnhancements) => {

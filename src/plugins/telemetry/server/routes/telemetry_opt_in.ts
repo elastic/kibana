@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger } from 'kibana/server';
 import {
@@ -54,7 +53,7 @@ export function registerTelemetryOptInRoutes({
         enabled: newOptInStatus,
         lastVersionChecked: currentKibanaVersion,
       };
-      const config = await config$.pipe(take(1)).toPromise();
+      const config = await firstValueFrom(config$);
       const telemetrySavedObject = await getTelemetrySavedObject(soClient);
 
       if (telemetrySavedObject === false) {
