@@ -25,14 +25,6 @@ import {
   sendGetOneAgentPolicyFull,
 } from '../../../hooks';
 
-import {
-  deploymentModeStep,
-  ServiceTokenStep,
-  FleetServerCommandStep,
-  useFleetServerInstructions,
-  addFleetServerHostStep,
-} from '../../../applications/fleet/sections/agents/agent_requirements_page/components';
-
 import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
 
@@ -288,81 +280,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
-  ]);
-
-  return <EuiSteps steps={instructionsSteps} />;
-};
-
-export const FleetServerSteps: React.FunctionComponent<InstructionProps> = ({
-  agentPolicy,
-  agentPolicies,
-  selectedPolicy,
-  setSelectedPolicyId,
-  refreshAgentPolicies,
-}) => {
-  const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-
-  const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
-  const apiKeyData = apiKey?.data;
-  const fleetServerInstructions = useFleetServerInstructions(apiKeyData?.item?.policy_id);
-
-  const fleetServerSteps = useMemo(() => {
-    const {
-      serviceToken,
-      getServiceToken,
-      isLoadingServiceToken,
-      installCommand: managedInstallCommands,
-      platform,
-      setPlatform,
-      deploymentMode,
-      setDeploymentMode,
-      addFleetServerHost,
-    } = fleetServerInstructions;
-
-    return [
-      deploymentModeStep({ deploymentMode, setDeploymentMode }),
-      addFleetServerHostStep({ addFleetServerHost }),
-      ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
-      FleetServerCommandStep({
-        serviceToken,
-        installCommand: managedInstallCommands,
-        platform,
-        setPlatform,
-      }),
-    ];
-  }, [fleetServerInstructions]);
-
-  const instructionsSteps = useMemo(() => {
-    const steps: EuiContainedStepProps[] = !agentPolicy
-      ? [
-          AgentPolicySelectionStep({
-            selectedPolicy,
-            agentPolicies,
-            selectedApiKeyId,
-            setSelectedAPIKeyId,
-            setSelectedPolicyId,
-            refreshAgentPolicies,
-          }),
-        ]
-      : [
-          AgentEnrollmentKeySelectionStep({
-            selectedPolicy,
-            selectedApiKeyId,
-            setSelectedAPIKeyId,
-          }),
-        ];
-
-    steps.push(...fleetServerSteps);
-
-    return steps;
-  }, [
-    agentPolicy,
-    selectedPolicy,
-    agentPolicies,
-    selectedApiKeyId,
-    setSelectedPolicyId,
-    refreshAgentPolicies,
-    fleetServerSteps,
   ]);
 
   return <EuiSteps steps={instructionsSteps} />;

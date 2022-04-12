@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +34,7 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 
 type Props = {
   agentPolicies: AgentPolicy[];
-  selectedPolicy?: AgentPolicy;
+  selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
   onClickCreatePolicy: () => void;
@@ -50,23 +50,10 @@ type Props = {
     }
 );
 
-const resolveAgentId = (
-  agentPolicies: AgentPolicy[],
-  selectedAgentPolicyId?: string
-): undefined | string => {
-  if (agentPolicies.length && !selectedAgentPolicyId) {
-    if (agentPolicies.length === 1) {
-      return agentPolicies[0].id;
-    }
-  }
-
-  return selectedAgentPolicyId;
-};
-
 export const AgentPolicySelection: React.FC<Props> = (props) => {
   const {
     agentPolicies,
-    selectedPolicy,
+    selectedPolicyId,
     setSelectedPolicyId,
     excludeFleetServer,
     onClickCreatePolicy,
@@ -74,17 +61,6 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
   } = props;
 
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-
-  useEffect(
-    function useDefaultAgentPolicyEffect() {
-      const resolvedId = resolveAgentId(agentPolicies, selectedPolicy?.id);
-      // find AgentPolicy
-      if (resolvedId !== selectedPolicy?.id) {
-        setSelectedPolicyId(resolvedId);
-      }
-    },
-    [agentPolicies, setSelectedPolicyId, selectedPolicy]
-  );
 
   const onChangeCallback = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
@@ -143,7 +119,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}
-          value={selectedPolicy?.id}
+          value={selectedPolicyId}
           onChange={onChangeCallback}
           aria-label={i18n.translate(
             'xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel',
@@ -151,16 +127,16 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
               defaultMessage: 'Agent policy',
             }
           )}
-          hasNoInitialSelection={!selectedPolicy?.id}
+          hasNoInitialSelection={!selectedPolicyId}
           data-test-subj="agentPolicyDropdown"
-          isInvalid={!selectedPolicy?.id}
+          isInvalid={!selectedPolicyId}
         />
       </AgentPolicyFormRow>
-      {selectedPolicy?.id && !isFleetServerPolicy && (
+      {selectedPolicyId && !isFleetServerPolicy && (
         <>
           <EuiSpacer size="m" />
           <AgentPolicyPackageBadges
-            agentPolicyId={selectedPolicy?.id}
+            agentPolicyId={selectedPolicyId}
             excludeFleetServer={excludeFleetServer}
           />
         </>
@@ -172,7 +148,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
             selectedApiKeyId={props.selectedApiKeyId}
             onKeyChange={props.onKeyChange}
             initialAuthenticationSettingsOpen={!props.selectedApiKeyId}
-            agentPolicyId={selectedPolicy?.id}
+            agentPolicyId={selectedPolicyId}
           />
         </>
       )}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
+import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils';
 import type { K8sMode } from '../../../components/agent_enrollment_flyout/types';
 
 export const StandaloneInstructions = (

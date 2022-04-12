@@ -7,11 +7,11 @@
 
 import type { EuiStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 
 import { SelectCreateAgentPolicy } from '../../../components';
 
-import type { AgentPolicy, GetAgentPoliciesResponseItem } from '../../../types';
+import type { GetAgentPoliciesResponseItem } from '../../../types';
 
 export const getSelectAgentPolicyStep = ({
   policyId,
@@ -20,7 +20,7 @@ export const getSelectAgentPolicyStep = ({
   refreshEligibleFleetServerPolicies,
 }: {
   policyId?: string;
-  setPolicyId: (v: string) => void;
+  setPolicyId: (v?: string) => void;
   eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
   refreshEligibleFleetServerPolicies: () => void;
 }): EuiStepProps => {
@@ -47,7 +47,7 @@ export const getSelectAgentPolicyStep = ({
 
 const SelectAgentPolicyStepContent: React.FunctionComponent<{
   policyId?: string;
-  setPolicyId: (v: string) => void;
+  setPolicyId: (v?: string) => void;
   eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
   refreshEligibleFleetServerPolicies: () => void;
 }> = ({
@@ -63,21 +63,17 @@ const SelectAgentPolicyStepContent: React.FunctionComponent<{
     }
   }, [eligibleFleetServerPolicies, policyId, setPolicyId]);
 
-  const onChangeCallback = useCallback(
-    (key: string | undefined, policy?: AgentPolicy) => {
-      if (policy) {
-        refreshEligibleFleetServerPolicies();
-      }
-      setPolicyId(key!);
-    },
-    [setPolicyId, refreshEligibleFleetServerPolicies]
-  );
+  const setSelectedPolicyId = (agentPolicyId?: string) => {
+    setPolicyId(agentPolicyId);
+  };
 
   return (
     <SelectCreateAgentPolicy
       agentPolicies={eligibleFleetServerPolicies}
       withKeySelection={false}
-      onAgentPolicyChange={onChangeCallback}
+      selectedPolicyId={policyId}
+      setSelectedPolicyId={setSelectedPolicyId}
+      refreshAgentPolicies={refreshEligibleFleetServerPolicies}
       excludeFleetServer={false}
       isFleetServerPolicy={true}
     />

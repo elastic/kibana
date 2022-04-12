@@ -23,7 +23,7 @@ import { policyHasFleetServer } from '../../services';
 
 import type { InstructionProps } from './types';
 
-import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './steps';
+import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
@@ -96,11 +96,11 @@ export const Instructions = (props: InstructionProps) => {
             />
           </EuiText>
           <EuiSpacer size="l" />
-          {isFleetServerPolicySelected ? (
+          {/* {isFleetServerPolicySelected ? (
             <FleetServerSteps {...props} />
-          ) : (
-            <ManagedSteps {...props} />
-          )}
+          ) : ( */}
+          <ManagedSteps {...props} />
+          {/* )} */}
         </>
       );
     }

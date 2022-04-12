@@ -23,7 +23,7 @@ describe('step select agent policy', () => {
     (renderResult = testRenderer.render(
       <AgentPolicySelection
         setSelectedPolicyId={jest.fn()}
-        selectedPolicy={agentPolicies[0]}
+        selectedPolicyId={agentPolicies[0].id}
         agentPolicies={agentPolicies}
         withKeySelection={false}
         excludeFleetServer={true}
