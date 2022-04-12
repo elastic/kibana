@@ -29,14 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     nested: 'test/functional/fixtures/kbn_archiver/ccs/date_nested.json',
     discover: 'test/functional/fixtures/kbn_archiver/ccs/discover.json',
   };
-  const defaultIndexPatternString = config.get('esTestCluster.ccs')
+  const logstashIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
   const dateNestedIndexPattern = config.get('esTestCluster.ccs')
     ? 'ftr-remote:date-nested'
     : 'date-nested';
   const defaultSettings = {
-    defaultIndex: defaultIndexPatternString,
+    defaultIndex: logstashIndexPatternString,
   };
   const esNode = config.get('esTestCluster.ccs')
     ? getService('remoteEsArchiver' as 'esArchiver')
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('set up a query with filters to save');
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern('logstash-*');
+    await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
       const hitCount = await PageObjects.discover.getHitCount();
       expect(hitCount).to.be('4,731');
@@ -125,9 +125,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern(defaultIndexPatternString);
+        await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
         const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-        expect(currentDataView).to.be(defaultIndexPatternString);
+        expect(currentDataView).to.be(logstashIndexPatternString);
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be('4,731');
