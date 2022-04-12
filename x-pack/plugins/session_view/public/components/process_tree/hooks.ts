@@ -73,7 +73,6 @@ export class ProcessImpl implements Process {
 
   clearSearch() {
     this.searchMatched = null;
-    this.autoExpand = false;
   }
 
   getChildren(verboseMode: boolean) {

@@ -87,6 +87,10 @@ export function ProcessTreeNode({
     }
   }, [selectedProcess, process, childrenExpanded]);
 
+  useEffect(() => {
+    setChildrenExpanded(process.autoExpand);
+  }, [process.autoExpand]);
+
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
   const hasInvestigatedAlert = useMemo(
