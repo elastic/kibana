@@ -19,6 +19,8 @@ apm.start({
   secretToken: 'CTs9y3cvcfq13bQqsB',
 });
 
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export interface StepCtx {
   page: Page;
   kibanaUrl: string;
@@ -105,7 +107,7 @@ export class PerformanceTestingService extends FtrService {
     }
     return await this.withSpan('browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
-      this.browser = await playwright.chromium.launch({ headless, timeout: 60000 });
+      this.browser = await playwright.chromium.launch({ headless: false, timeout: 60000 });
       return this.browser;
     });
   }
@@ -166,6 +168,7 @@ export class PerformanceTestingService extends FtrService {
 
   private async tearDown(page: Page, client: CDPSession, context: BrowserContext) {
     if (page) {
+      await sleep(5000);
       apm.flush();
       await client.detach();
       await page.close();
