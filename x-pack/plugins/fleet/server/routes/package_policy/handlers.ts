@@ -34,7 +34,7 @@ export const getPackagePoliciesHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = (await context.core).savedObjects.client;
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
@@ -56,7 +56,7 @@ export const getPackagePoliciesHandler: RequestHandler<
 export const getOnePackagePolicyHandler: RequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = (await context.core).savedObjects.client;
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
@@ -86,11 +86,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
-  const spaceId = context.fleet.spaceId;
+  const spaceId = fleetContext.spaceId;
   try {
     const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
       soClient,
@@ -130,8 +132,9 @@ export const updatePackagePolicyHandler: RequestHandler<
   unknown,
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
@@ -196,8 +199,9 @@ export const deletePackagePolicyHandler: RequestHandler<
   unknown,
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
@@ -231,8 +235,9 @@ export const upgradePackagePolicyHandler: RequestHandler<
   unknown,
   TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
     const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
@@ -263,7 +268,7 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   unknown,
   TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = (await context.core).savedObjects.client;
   try {
     const body: UpgradePackagePolicyDryRunResponse = [];
     const { packagePolicyIds } = request.body;

@@ -23,10 +23,12 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutPreconfigurationSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-  const spaceId = context.fleet.spaceId;
+  const spaceId = fleetContext.spaceId;
   const { agentPolicies, packages } = request.body;
 
   try {
@@ -49,8 +51,9 @@ export const resetOnePreconfigurationHandler: FleetRequestHandler<
   undefined,
   undefined
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     await resetPreconfiguredAgentPolicies(soClient, esClient, request.params.agentPolicyId);
@@ -65,8 +68,9 @@ export const resetPreconfigurationHandler: FleetRequestHandler<
   undefined,
   undefined
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
     await resetPreconfiguredAgentPolicies(soClient, esClient);

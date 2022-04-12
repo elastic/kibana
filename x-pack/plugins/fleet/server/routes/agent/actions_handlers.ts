@@ -24,7 +24,7 @@ export const postNewAgentActionHandlerBuilder = function (
 > {
   return async (context, request, response) => {
     try {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
       const agent = await actionsService.getAgent(esClient, request.params.agentId);
 
