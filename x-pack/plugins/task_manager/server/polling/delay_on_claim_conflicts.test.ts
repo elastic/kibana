@@ -46,7 +46,7 @@ describe('delayOnClaimConflicts', () => {
       const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
-      const delays$ = firstValueFrom(
+      const delays$ = firstValueFrom<number[]>(
         delayOnClaimConflicts(of(maxWorkers), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
           take(2),
           bufferCount(2)
@@ -84,8 +84,8 @@ describe('delayOnClaimConflicts', () => {
 
       const delays$ = delayOnClaimConflicts(of(10), of(100), taskLifecycleEvents$, 80, 2);
 
-      const firstSubscriber$ = firstValueFrom(delays$.pipe(take(2), bufferCount(2)));
-      const secondSubscriber$ = firstValueFrom(delays$.pipe(take(2), bufferCount(2)));
+      const firstSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
+      const secondSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
 
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
@@ -102,7 +102,7 @@ describe('delayOnClaimConflicts', () => {
         )
       );
 
-      const thirdSubscriber$ = firstValueFrom(delays$.pipe(take(2), bufferCount(2)));
+      const thirdSubscriber$ = firstValueFrom<number[]>(delays$.pipe(take(2), bufferCount(2)));
 
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
