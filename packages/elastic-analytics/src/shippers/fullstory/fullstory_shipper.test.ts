@@ -7,7 +7,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { fullStoryApiMock } from './fullstory_shipper.mocks';
+import { fullStoryApiMock } from './fullstory_shipper.test.mocks';
 import { FullStoryShipper } from './fullstory_shipper';
 
 describe('FullStoryShipper', () => {

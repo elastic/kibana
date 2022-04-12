@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { formatPayload } from './format_payload';
 
 describe('formatPayload', () => {
@@ -62,18 +61,6 @@ describe('formatPayload', () => {
     const payload = {
       foo: new Date(),
       baz: [new Date()],
-    };
-
-    expect(formatPayload(payload)).toEqual({
-      foo_date: payload.foo,
-      baz_dates: payload.baz,
-    });
-  });
-
-  test('appends `_date` to moment values', () => {
-    const payload = {
-      foo: moment(),
-      baz: [moment()],
     };
 
     expect(formatPayload(payload)).toEqual({

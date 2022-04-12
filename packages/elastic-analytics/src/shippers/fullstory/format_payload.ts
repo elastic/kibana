@@ -51,14 +51,10 @@ function getFullStoryType(value: unknown) {
   // For arrays, make the decision based on the first element
   const isArray = Array.isArray(value);
   const v = isArray ? value[0] : value;
-  let type = '';
+  let type: string;
   switch (typeof v) {
     case 'string':
-      if (moment(v, moment.ISO_8601, true).isValid()) {
-        type = 'date';
-        break;
-      }
-      type = 'str';
+      type = moment(v, moment.ISO_8601, true).isValid() ? 'date' : 'str';
       break;
     case 'number':
       type = Number.isInteger(v) ? 'int' : 'real';
@@ -84,5 +80,5 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isDate(value: unknown): value is Date {
-  return value instanceof Date || moment.isMoment(value);
+  return value instanceof Date;
 }
