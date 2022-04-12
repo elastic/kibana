@@ -217,6 +217,7 @@
     "bitmap-sdf": "^1.0.3",
     "brace": "0.11.1",
     "broadcast-channel": "^4.10.0",
+    "brok": "^5.0.2",
     "canvg": "^3.0.9",
     "chalk": "^4.1.0",
     "cheerio": "^1.0.0-rc.10",

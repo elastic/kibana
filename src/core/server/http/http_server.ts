@@ -8,6 +8,8 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
+// @ts-expect-error no type support
+import HapiBrotliSupport from 'brok';
 import url from 'url';
 import uuid from 'uuid';
 import {
@@ -143,7 +145,7 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
-    await this.server.register([HapiStaticFiles]);
+    await this.server.register([HapiStaticFiles, HapiBrotliSupport]);
     this.config = config;
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.

@@ -2322,7 +2322,7 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hapi/validate@1.x.x", "@hapi/validate@^1.1.1":
+"@hapi/validate@1.x.x", "@hapi/validate@^1.1.1", "@hapi/validate@^1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@hapi/validate/-/validate-1.1.3.tgz#f750a07283929e09b51aa16be34affb44e1931ad"
   integrity sha512-/XMR0N0wjw0Twzq2pQOzPBZlDzkekGcoCtzO314BpIEsbXdYGthQUbxgkGDf4nhk1+IPDAsXqWjMohRQYO06UA==
@@ -9179,6 +9179,14 @@ broadcast-channel@^4.10.0:
     p-queue "6.6.2"
     rimraf "3.0.2"
     unload "2.3.1"
+
+brok@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/brok/-/brok-5.0.2.tgz#b77e7203ce89d30939a5b877a9bb3acb4dffc848"
+  integrity sha512-mqsoOGPjcP9oltC8dD4PnRCiJREmFg+ee588mVYZgZNd8YV5Zo6eOLv/fp6HxdYffaxvkKfPHjc+sRWIkuIu7A==
+  dependencies:
+    "@hapi/hoek" "^9.0.4"
+    "@hapi/validate" "^1.1.3"
 
 brorand@^1.0.1, brorand@^1.1.0:
   version "1.1.0"
