@@ -110,7 +110,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = context.alerting.getRulesClient();
+          const rulesClient = (await context.alerting).getRulesClient();
           const rule = req.body;
           const params = req.params;
 

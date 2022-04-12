@@ -36,7 +36,7 @@ export const unmuteAllAlertRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('unmuteAll', usageCounter);
-      const rulesClient = context.alerting.getRulesClient();
+      const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
       try {
         await rulesClient.unmuteAll({ id });

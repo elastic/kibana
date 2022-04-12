@@ -73,7 +73,7 @@ export const resolveRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const rule = await rulesClient.resolve({ id });
         return res.ok({
