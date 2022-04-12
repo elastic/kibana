@@ -248,7 +248,7 @@ export function DiscoverLayout({
                 defaultMessage: 'Discover - Search not yet saved',
               })}
         </h1>
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}

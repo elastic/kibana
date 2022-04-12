@@ -16,7 +16,7 @@ import { coreMock } from '../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { IIndexPattern } from '../../../data/public';
+import { DataView } from '../../../data_views/public';
 
 const mockTimeHistory = {
   get: () => {
@@ -66,7 +66,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as IIndexPattern;
+} as DataView;
 
 const kqlQuery = {
   query: 'response:200',
@@ -128,6 +128,7 @@ describe('SearchBar', () => {
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         showDatePicker: false,
+        showFilterBar: false,
       })
     );
 
@@ -148,7 +149,7 @@ describe('SearchBar', () => {
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
     expect(component.find(FILTER_BAR).length).toBe(1);
-    expect(component.find(QUERY_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(1);
   });
 
   it('Should NOT render filter bar, if disabled', () => {

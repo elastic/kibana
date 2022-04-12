@@ -34,28 +34,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('saved query management component functionality', function () {
+    describe('saved query management component functionality-miaou', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
       });
 
-      it('should show the saved query management component when there are no saved queries', async () => {
-        await savedQueryManagementComponent.openSavedQueryManagementComponent();
-        const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
-        expect(descriptionText).to.eql(
-          'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
-        );
+      it('should show the saved query management load button as disabled when there are no saved queries', async () => {
+        await testSubjects.click('showQueryBarMenu');
+        const loadFilterSetBtn = await testSubjects.find('saved-query-management-load-button');
+        const isDisabled = await loadFilterSetBtn.getAttribute('disabled');
+        expect(isDisabled).to.equal('true');
       });
 
       it('should allow a query to be saved via the saved objects management component', async () => {
         await queryBar.setQuery('response:200');
+        await queryBar.clickQuerySubmitButton();
+        await testSubjects.click('showQueryBarMenu');
         await savedQueryManagementComponent.saveNewQuery(
           'OkResponse',
           '200 responses for .jpg over 24 hours',
           true,
           true
         );
+        const contextMenuPanelTitleButton = await testSubjects.exists(
+          'contextMenuPanelTitleButton'
+        );
+        if (contextMenuPanelTitleButton) {
+          await testSubjects.click('contextMenuPanelTitleButton');
+        }
+
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
         await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
@@ -81,6 +89,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        const contextMenuPanelTitleButton = await testSubjects.exists(
+          'contextMenuPanelTitleButton'
+        );
+        if (contextMenuPanelTitleButton) {
+          await testSubjects.click('contextMenuPanelTitleButton');
+        }
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
@@ -88,9 +102,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows saving the currently loaded query as a new query', async () => {
+        await queryBar.setQuery('response:400');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'OkResponseCopy',
-          '200 responses',
+          '400 responses',
           false,
           false
         );

@@ -77,7 +77,6 @@ export interface QueryStringInputProps {
    * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
    */
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   /**
    * @param autoSubmit if user selects a value, in that case kuery will be auto submitted
    */
@@ -129,6 +128,8 @@ const KEY_CODES = {
 export default class QueryStringInputUI extends PureComponent<Props, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+    iconType: 'search',
+    isClearable: true,
   };
 
   public state: State = {
@@ -689,25 +690,24 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
-    const containerClassName = classNames(
-      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
-      this.props.className
-    );
-    const inputClassName = classNames(
-      'kbnQueryBar__textarea',
-      this.props.iconType ? 'kbnQueryBar__textarea--withIcon' : null,
-      this.props.prepend ? 'kbnQueryBar__textarea--hasPrepend' : null,
-      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textarea--hasAppend' : null
-    );
-    const inputWrapClassName = classNames(
-      'euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap',
-      this.props.prepend ? 'kbnQueryBar__textareaWrap--hasPrepend' : null,
-      !this.props.disableLanguageSwitcher ? 'kbnQueryBar__textareaWrap--hasAppend' : null
-    );
+    const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
+    const inputClassName = classNames('kbnQueryBar__textarea', {
+      'kbnQueryBar__textarea--withIcon': this.props.iconType,
+      'kbnQueryBar__textarea--isClearable': this.props.isClearable,
+    });
+    const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
 
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {this.props.prepend}
+        {this.props.disableLanguageSwitcher ? null : (
+          <QueryLanguageSwitcher
+            language={this.props.query.language}
+            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+            onSelectLanguage={this.onSelectLanguage}
+            nonKqlMode={this.props.nonKqlMode}
+          />
+        )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -725,7 +725,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Search',
+                    defaultMessage: 'Start typing to search or filter...',
                   })
                 }
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
@@ -805,15 +805,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {this.props.disableLanguageSwitcher ? null : (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            nonKqlMode={this.props.nonKqlMode}
-            nonKqlModeHelpText={this.props.nonKqlModeHelpText}
-          />
-        )}
       </div>
     );
   }

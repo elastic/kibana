@@ -256,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(allAvailableOptions);
-          await filterBar.removeAllFilters();
+          await filterBar.removeFilter('sound.keyword');
         });
 
         it('Does not apply time range to options list control', async () => {
@@ -376,6 +376,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Options List dashboard no validation', async () => {
         before(async () => {
+          await filterBar.removeAllFilters();
+          await queryBar.clickQuerySubmitButton();
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSelectOption('meow');
           await dashboardControls.optionsListPopoverSelectOption('bark');
@@ -401,6 +403,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await filterBar.removeAllFilters();
+        await queryBar.clickQuerySubmitButton();
         await dashboardControls.clearAllControls();
       });
     });

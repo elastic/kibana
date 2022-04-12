@@ -108,17 +108,21 @@ export function getIndexPatternsIds({
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
 }): string[] {
+  let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+    const indexPatternId = datasource.getCurrentIndexPatternId(datasourceStates[id].state);
+    currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
-
-  const uniqueFilterableIndexPatternIds = uniq(
-    references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-  );
-
-  return uniqueFilterableIndexPatternIds;
+  const referencesIds = references
+    .filter(({ type }) => type === 'index-pattern')
+    .map(({ id }) => id);
+  if (currentIndexPatternId) {
+    referencesIds.unshift(currentIndexPatternId);
+  }
+  return uniq(referencesIds);
 }
 
 export async function getIndexPatternsObjects(

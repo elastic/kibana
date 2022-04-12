@@ -6,27 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import {
-  buildEmptyFilter,
-  Filter,
-  enableFilter,
-  disableFilter,
-  pinFilter,
-  toggleFilterDisabled,
-  toggleFilterNegated,
-  unpinFilter,
-} from '@kbn/es-query';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-import { FilterOptions } from './filter_options';
+import { FilterItem } from './filter_item';
 import { useKibana } from '../../../kibana_react/public';
-import { UI_SETTINGS } from '../../../data/common';
 import { IDataPluginServices } from '../../../data/public';
 import { DataView } from '../../../data_views/public';
 
@@ -42,7 +30,6 @@ export interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
-  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
@@ -54,8 +41,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       props.onFiltersUpdated(filters);
     }
   }
-
-  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
 
   function renderItems() {
     return props.filters.map((filter, i) => (
@@ -74,65 +59,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     ));
   }
 
-  function renderAddFilter() {
-    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-    const [indexPattern] = props.indexPatterns;
-    const index = indexPattern && indexPattern.id;
-    const newFilter = buildEmptyFilter(isPinned, index);
-
-    const button = (
-      <EuiButtonEmpty
-        size="s"
-        onClick={onAddFilterClick}
-        data-test-subj="addFilter"
-        className="globalFilterBar__addButton"
-      >
-        +{' '}
-        <FormattedMessage
-          id="unifiedSearch.filter.filterBar.addFilterButtonLabel"
-          defaultMessage="Add filter"
-        />
-      </EuiButtonEmpty>
-    );
-
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="addFilterPopover"
-          button={button}
-          isOpen={isAddFilterPopoverOpen}
-          closePopover={() => setIsAddFilterPopoverOpen(false)}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          initialFocus=".filterEditor__hiddenItem"
-          ownFocus
-          repositionOnScroll
-        >
-          <EuiFlexItem grow={false}>
-            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-              <FilterEditor
-                filter={newFilter}
-                indexPatterns={props.indexPatterns}
-                onSubmit={onAdd}
-                onCancel={() => setIsAddFilterPopoverOpen(false)}
-                key={JSON.stringify(newFilter)}
-                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiPopover>
-      </EuiFlexItem>
-    );
-  }
-
-  function onAdd(filter: Filter) {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    setIsAddFilterPopoverOpen(false);
-
-    const filters = [...props.filters, filter];
-    onFiltersUpdated(filters);
-  }
-
   function onRemove(i: number) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:removed`);
     const filters = [...props.filters];
@@ -148,47 +74,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     onFiltersUpdated(filters);
   }
 
-  function onEnableAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
-    const filters = props.filters.map(enableFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onDisableAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
-    const filters = props.filters.map(disableFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onPinAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
-    const filters = props.filters.map(pinFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onUnpinAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
-    const filters = props.filters.map(unpinFilter);
-    onFiltersUpdated(filters);
-  }
-
-  function onToggleAllNegated() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
-    const filters = props.filters.map(toggleFilterNegated);
-    onFiltersUpdated(filters);
-  }
-
-  function onToggleAllDisabled() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:toggle_all`);
-    const filters = props.filters.map(toggleFilterDisabled);
-    onFiltersUpdated(filters);
-  }
-
-  function onRemoveAll() {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
-    onFiltersUpdated([]);
-  }
-
   const classes = classNames('globalFilterBar', props.className);
 
   return (
@@ -198,18 +83,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       alignItems="flexStart"
       responsive={false}
     >
-      <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
-        <FilterOptions
-          onEnableAll={onEnableAll}
-          onDisableAll={onDisableAll}
-          onPinAll={onPinAll}
-          onUnpinAll={onUnpinAll}
-          onToggleAllNegated={onToggleAllNegated}
-          onToggleAllDisabled={onToggleAllDisabled}
-          onRemoveAll={onRemoveAll}
-        />
-      </EuiFlexItem>
-
       <EuiFlexItem className="globalFilterGroup__filterFlexItem">
         <EuiFlexGroup
           ref={groupRef}
@@ -221,7 +94,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           tabIndex={-1}
         >
           {renderItems()}
-          {renderAddFilter()}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

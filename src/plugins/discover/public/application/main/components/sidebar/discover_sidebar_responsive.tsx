@@ -18,7 +18,6 @@ import {
   EuiBadge,
   EuiFlyoutHeader,
   EuiFlyout,
-  EuiSpacer,
   EuiIcon,
   EuiLink,
   EuiPortal,
@@ -280,7 +279,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       )}
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar__mobile">
-          <EuiSpacer size="s" />
           <EuiButton
             contentProps={{ className: 'dscSidebar__mobileButton' }}
             fullWidth

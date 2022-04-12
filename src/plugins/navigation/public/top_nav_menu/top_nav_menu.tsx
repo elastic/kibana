@@ -117,15 +117,15 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               {renderMenu(menuClassName)}
             </span>
           </MountPointPortal>
-          <span className={wrapperClassName}>{renderSearchBar()}</span>
+          {renderSearchBar()}
         </>
       );
     } else {
       return (
-        <span className={wrapperClassName}>
-          {renderMenu(menuClassName)}
+        <>
+          <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
           {renderSearchBar()}
-        </span>
+        </>
       );
     }
   }

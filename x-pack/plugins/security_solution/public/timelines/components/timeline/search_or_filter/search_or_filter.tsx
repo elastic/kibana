@@ -64,7 +64,6 @@ const SearchOrFilterContainer = styled.div`
   ${({ theme }) => `margin-top: ${theme.eui.euiSizeXS};`}
   user-select: none;
   .globalQueryBar {
-    padding: 0px;
     .kbnQueryBar {
       div:first-child {
         margin-right: 0px;

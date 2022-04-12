@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
+import type { Filter } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -20,8 +21,9 @@ import {
   EuiFieldText,
   usePrettyDuration,
   EuiIconProps,
-  EuiSuperUpdateButton,
+  EuiButtonIcon,
   OnRefreshProps,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import {
   IDataPluginServices,
@@ -37,14 +39,13 @@ import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../data/common';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
+import { AddFilterPopover } from './add_filter';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-const SuperUpdateButton = React.memo(
-  EuiSuperUpdateButton as any
-) as unknown as typeof EuiSuperUpdateButton;
+const SuperUpdateButton = React.memo(EuiButtonIcon);
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -64,7 +65,6 @@ export interface QueryBarTopRowProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
-  nonKqlModeHelpText?: string;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
@@ -75,10 +75,13 @@ export interface QueryBarTopRowProps {
   refreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
+  showAddFilter?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  filters: Filter[];
+  onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
 }
 
@@ -116,6 +119,7 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
 
 export const QueryBarTopRow = React.memo(
   function QueryBarTopRow(props: QueryBarTopRowProps) {
+    const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const { showQueryInput = true, showDatePicker = true, showAutoRefreshOnly = false } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
@@ -285,14 +289,16 @@ export const QueryBarTopRow = React.memo(
       return Boolean(showDatePicker || showAutoRefreshOnly);
     }
 
+    function shouldRenderUpdatebutton(): boolean {
+      return Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly);
+    }
+
     function renderDatePicker() {
       if (!shouldRenderDatePicker()) {
         return null;
       }
 
-      const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
-        'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
-      });
+      const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
       return (
         <EuiFlexItem className={wrapperClasses}>
@@ -310,21 +316,28 @@ export const QueryBarTopRow = React.memo(
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
+            isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
+            width={isMobile ? 'full' : 'auto'}
           />
         </EuiFlexItem>
       );
     }
 
     function renderUpdateButton() {
+      if (!shouldRenderUpdatebutton()) {
+        return null;
+      }
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <SuperUpdateButton
-          needsUpdate={props.isDirty}
+          display="base"
+          iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
+          aria-label={props.isLoading ? 'Update query' : 'Refresh query'}
           isDisabled={isDateRangeInvalid}
-          isLoading={props.isLoading}
           onClick={onClickSubmitButton}
-          fill={props.fillSubmitButton}
+          size="m"
+          color={props.isDirty ? 'success' : 'primary'}
           data-test-subj="querySubmitButton"
         />
       );
@@ -347,36 +360,52 @@ export const QueryBarTopRow = React.memo(
       if (!props.dataViewPickerComponentProps) return;
 
       return (
-        <EuiFlexItem grow={false}>
-          <DataViewPicker showNewMenuTour {...props.dataViewPickerComponentProps} />
+        <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+          <DataViewPicker
+            showNewMenuTour
+            {...props.dataViewPickerComponentProps}
+            trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
+          />
         </EuiFlexItem>
       );
     }
 
     function renderQueryInput() {
-      if (!shouldRenderQueryInput()) return;
-
       return (
-        <EuiFlexItem>
-          <QueryStringInput
-            disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
-            prepend={props.prepend}
-            query={props.query!}
-            screenTitle={props.screenTitle}
-            onChange={onQueryChange}
-            onChangeQueryInputFocus={onChangeQueryInputFocus}
-            onSubmit={onInputSubmit}
-            persistedLog={persistedLog}
-            dataTestSubj={props.dataTestSubj}
-            placeholder={props.placeholder}
-            isClearable={props.isClearable}
-            iconType={props.iconType}
-            nonKqlMode={props.nonKqlMode}
-            nonKqlModeHelpText={props.nonKqlModeHelpText}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-          />
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
+          {shouldRenderQueryInput() && (
+            <EuiFlexItem>
+              <QueryStringInput
+                disableAutoFocus={props.disableAutoFocus}
+                indexPatterns={props.indexPatterns!}
+                query={props.query!}
+                screenTitle={props.screenTitle}
+                onChange={onQueryChange}
+                onChangeQueryInputFocus={onChangeQueryInputFocus}
+                onSubmit={onInputSubmit}
+                persistedLog={persistedLog}
+                dataTestSubj={props.dataTestSubj}
+                placeholder={props.placeholder}
+                isClearable={props.isClearable}
+                iconType={props.iconType}
+                nonKqlMode={props.nonKqlMode}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                disableLanguageSwitcher={true}
+              />
+            </EuiFlexItem>
+          )}
+          {Boolean(props.showAddFilter) && (
+            <EuiFlexItem grow={false}>
+              <AddFilterPopover
+                indexPatterns={props.indexPatterns}
+                filters={props.filters}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                onFiltersUpdated={props.onFiltersUpdated}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       );
     }
 
@@ -388,12 +417,14 @@ export const QueryBarTopRow = React.memo(
     return (
       <EuiFlexGroup
         className={classes}
-        responsive={!!showDatePicker}
+        direction={isMobile ? 'column' : 'row'}
+        responsive={false}
         gutterSize="s"
         justifyContent="flexEnd"
+        wrap
       >
         {renderDataViewsPicker()}
-        {renderQueryInput()}
+        <EuiFlexItem style={{ minWidth: 320 }}>{renderQueryInput()}</EuiFlexItem>
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}

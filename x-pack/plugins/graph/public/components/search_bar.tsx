@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -110,6 +110,47 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
       }}
     >
       <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
+              defaultMessage: 'Select a data source to begin graphing relationships.',
+            })}
+          >
+            <EuiButton
+              className="gphSearchBar__datasourceButton"
+              data-test-subj="graphDatasourceButton"
+              onClick={() => {
+                confirmWipeWorkspace(
+                  () =>
+                    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected),
+                  i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+                    defaultMessage:
+                      'If you change data sources, your current fields and vertices will be reset.',
+                  }),
+                  {
+                    confirmButtonText: i18n.translate(
+                      'xpack.graph.clearWorkspace.confirmButtonLabel',
+                      {
+                        defaultMessage: 'Change data source',
+                      }
+                    ),
+                    title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+                      defaultMessage: 'Unsaved changes',
+                    }),
+                  }
+                );
+              }}
+            >
+              {currentIndexPattern
+                ? currentIndexPattern.title
+                : // This branch will be shown if the user exits the
+                  // initial picker modal
+                  i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                    defaultMessage: 'Select a data source',
+                  })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
         <EuiFlexItem>
           <QueryStringInput
             disableAutoFocus
@@ -119,51 +160,6 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               defaultMessage: 'Search your data and add to graph',
             })}
             query={query}
-            prepend={
-              <EuiToolTip
-                content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                  defaultMessage: 'Select a data source to begin graphing relationships.',
-                })}
-              >
-                <EuiButtonEmpty
-                  size="xs"
-                  className="gphSearchBar__datasourceButton"
-                  data-test-subj="graphDatasourceButton"
-                  onClick={() => {
-                    confirmWipeWorkspace(
-                      () =>
-                        openSourceModal(
-                          { overlays, savedObjects, uiSettings },
-                          onIndexPatternSelected
-                        ),
-                      i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-                        defaultMessage:
-                          'If you change data sources, your current fields and vertices will be reset.',
-                      }),
-                      {
-                        confirmButtonText: i18n.translate(
-                          'xpack.graph.clearWorkspace.confirmButtonLabel',
-                          {
-                            defaultMessage: 'Change data source',
-                          }
-                        ),
-                        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-                          defaultMessage: 'Unsaved changes',
-                        }),
-                      }
-                    );
-                  }}
-                >
-                  {currentIndexPattern
-                    ? currentIndexPattern.title
-                    : // This branch will be shown if the user exits the
-                      // initial picker modal
-                      i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                        defaultMessage: 'Select a data source',
-                      })}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            }
             onChange={setQuery}
           />
         </EuiFlexItem>

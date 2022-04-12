@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
-import styled from 'styled-components';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '../../../../../../../../../src/plugins/data/public';
 import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
@@ -18,12 +17,6 @@ import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
 import * as selectors from '../../store/selectors';
 import { clone } from '../../models/index_pattern';
-
-const AdminQueryBar = styled.div`
-  .globalQueryBar {
-    padding: 0;
-  }
-`;
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
@@ -57,7 +50,7 @@ export const AdminSearchBar = memo(() => {
   return (
     <div>
       {searchBarIndexPatterns && searchBarIndexPatterns.length > 0 && (
-        <AdminQueryBar>
+        <div className="globalQueryBar">
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
@@ -72,7 +65,7 @@ export const AdminSearchBar = memo(() => {
             showQueryBar={true}
             showQueryInput={true}
           />
-        </AdminQueryBar>
+        </div>
       )}
     </div>
   );

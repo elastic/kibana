@@ -6,8 +6,8 @@
   line-height: $euiSize;
   border: none;
   color: $euiTextColor;
-  padding-top: $euiSizeM / 2;
-  padding-bottom: $euiSizeM / 2;
+  padding-top: $euiSizeM / 2 + 1px;
+  padding-bottom: $euiSizeM / 2 + 1px;
   white-space: normal; /* 1 */
 
   .euiBadge__childButton {

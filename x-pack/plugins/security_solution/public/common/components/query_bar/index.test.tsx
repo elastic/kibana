@@ -297,7 +297,7 @@ describe('QueryBar ', () => {
   });
 
   describe('SavedQueryManagementComponent state', () => {
-    test('popover should hidden when "Save current query" button was clicked', async () => {
+    test('popover should remain open when "Save current query" button was clicked', async () => {
       const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
@@ -317,13 +317,11 @@ describe('QueryBar ', () => {
         />
       );
       const isSavedQueryPopoverOpen = () =>
-        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+        wrapper.find('EuiPopover[data-test-subj="queryBarMenuPopover"]').prop('isOpen');
 
       expect(isSavedQueryPopoverOpen()).toBeFalsy();
 
-      wrapper
-        .find('button[data-test-subj="saved-query-management-popover-button"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="showQueryBarMenu"]').simulate('click');
 
       await waitFor(() => {
         expect(isSavedQueryPopoverOpen()).toBeTruthy();
@@ -331,7 +329,7 @@ describe('QueryBar ', () => {
       wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
 
       await waitFor(() => {
-        expect(isSavedQueryPopoverOpen()).toBeFalsy();
+        expect(isSavedQueryPopoverOpen()).toBeTruthy();
       });
     });
   });

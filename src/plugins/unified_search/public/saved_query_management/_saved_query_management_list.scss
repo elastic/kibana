@@ -1,16 +1,7 @@
-.kbnSavedQueryManagement__popover {
-  max-width: $euiFormMaxWidth;
-}
-
 .kbnSavedQueryManagement__listWrapper {
   // Addition height will ensure one item is "cutoff" to indicate more below the scroll
   max-height: $euiFormMaxWidth + $euiSize;
   overflow-y: hidden;
-}
-
-.kbnSavedQueryManagement__pagination {
-  justify-content: center;
-  padding: ($euiSizeM / 2) $euiSizeM $euiSizeM;
 }
 
 .kbnSavedQueryManagement__text {

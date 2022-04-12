@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import './index.scss';
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Storage, IStorageWrapper } from '../../kibana_utils/public';
 import { ConfigSchema } from '../config';

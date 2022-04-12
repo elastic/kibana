@@ -1,5 +1,10 @@
 .gphSearchBar__datasourceButton {
-  height: 100% !important;
+  max-width: 320px;
+
+  @include euiBreakpoint('xs', 's') {
+    width: 100%;
+    max-width: none;
+  }
 }
 
 .gphSearchBar__datasourceButtonTooltip {

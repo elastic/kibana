@@ -20,6 +20,7 @@ import {
   EuiNotificationBadge,
   EuiPageSideBar,
   useResizeObserver,
+  EuiButton,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
@@ -495,6 +496,18 @@ export function DiscoverSidebarComponent({
               </div>
             )}
           </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="indexOpen"
+            data-test-subj="indexPattern-add-field_btn"
+            onClick={() => editField()}
+            size="s"
+          >
+            {i18n.translate('discover.fieldChooser.addField.label', {
+              defaultMessage: 'Add a field',
+            })}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPageSideBar>

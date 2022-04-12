@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SavedQueryManagementList } from './saved_query_management_list';
+module.exports = require('@kbn/storybook').defaultConfig;
