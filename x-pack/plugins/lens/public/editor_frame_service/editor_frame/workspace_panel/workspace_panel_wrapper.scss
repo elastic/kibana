@@ -87,16 +87,16 @@
 }
 
 .lnsWorkspacePanelWrapper__toolbar {
-  margin-bottom: 0;
+  margin-bottom: $euiSizeXS;
 
-  &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
-    padding: $euiSizeS $euiSizeS 0 $euiSizeS;
-    background-color: #FFF;
-  }
+  // &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
+  //   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+  //   background-color: #FFF;
+  // }
 
-  & > .euiFlexItem {
-    min-height: $euiButtonHeightSmall;
-  }
+  // & > .euiFlexItem {
+  //   min-height: $euiButtonHeightSmall;
+  // }
 }
 
 .lnsWorkspacePanel__promptIllustration {
