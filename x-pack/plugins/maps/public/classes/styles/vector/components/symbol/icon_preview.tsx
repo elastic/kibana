@@ -16,7 +16,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { mapboxgl, Map as MapboxMap } from '@kbn/mapbox-gl';
+import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
 import {
@@ -94,7 +94,6 @@ export class IconPreview extends Component<Props, State> {
       }
       const imageData = await createSdfIcon({ svg, cutoff, radius });
       if (map.hasImage(IconPreview.iconId)) {
-        // @ts-expect-error
         map.updateImage(IconPreview.iconId, imageData);
       } else {
         map.addImage(IconPreview.iconId, imageData, {
@@ -128,7 +127,7 @@ export class IconPreview extends Component<Props, State> {
   }
 
   _createMapInstance(): MapboxMap {
-    const map = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: this._containerRef!,
       interactive: false,
       center: [0, 0],

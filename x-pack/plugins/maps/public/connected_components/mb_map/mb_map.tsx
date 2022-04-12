@@ -409,7 +409,6 @@ export class MbMap extends Component<Props, State> {
       for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
           (imageData: ImageData) => {
-            // @ts-expect-error MapboxMap type is missing updateImage method
             if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
             else
               mbMap.addImage(symbolId, imageData, {

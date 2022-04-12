@@ -129,7 +129,7 @@ export class VegaMapView extends VegaBaseView {
       zoomSettings.maxZoom = defaultMapConfig.maxZoom;
       zoomSettings.minZoom = defaultMapConfig.minZoom;
       customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
-      style = (await tmsService.getVectorStyleSheet()) as StyleSpecification;
+      style = (await tmsService.getVectorStyleSheet()) as unknown as StyleSpecification;
     } else {
       const config = this._serviceSettings.getTileMapConfig();
       customAttribution = config.options.attribution;
