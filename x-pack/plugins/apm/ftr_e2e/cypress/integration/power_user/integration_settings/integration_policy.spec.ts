@@ -34,6 +34,24 @@ const policyFormFields = [
   },
 ];
 
+const apisToIntercept = [
+  {
+    endpoint: 'api/fleet/agent_policies*',
+    name: 'fleetAgentPolicies',
+    method: 'POST',
+  },
+  {
+    endpoint: 'api/fleet/agent_status*',
+    name: 'fleetAgentStatus',
+    method: 'GET',
+  },
+  {
+    endpoint: 'api/fleet/package_policies',
+    name: 'fleetPackagePolicies',
+    method: 'POST',
+  },
+];
+
 describe('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
@@ -61,17 +79,30 @@ describe('when navigating to integration page', () => {
   });
 
   it('adds a new policy without agent', () => {
+    apisToIntercept.map(({ endpoint, method, name }) => {
+      cy.intercept(method, endpoint).as(name);
+    });
+
     cy.url().should('include', 'app/fleet/integrations/apm/add-integration');
     policyFormFields.map((field) => {
       cy.get(`[data-test-subj="${field.selector}"`).clear().type(field.value);
     });
     cy.contains('Save and continue').click();
+    cy.wait('@fleetAgentPolicies');
+    cy.wait('@fleetAgentStatus');
+    cy.wait('@fleetPackagePolicies');
+
     cy.get('[data-test-subj="confirmModalCancelButton').click();
+
     cy.url().should('include', '/app/integrations/detail/apm/policies');
     cy.contains(policyName);
   });
 
   it('updates an existing policy', () => {
+    apisToIntercept.map(({ endpoint, method, name }) => {
+      cy.intercept(method, endpoint).as(name);
+    });
+
     policyFormFields.map((field) => {
       cy.get(`[data-test-subj="${field.selector}"`)
         .clear()
@@ -79,6 +110,10 @@ describe('when navigating to integration page', () => {
     });
 
     cy.contains('Save and continue').click();
+    cy.wait('@fleetAgentPolicies');
+    cy.wait('@fleetAgentStatus');
+    cy.wait('@fleetPackagePolicies');
+
     cy.get('[data-test-subj="confirmModalCancelButton').click();
     cy.contains(`${policyName}-new`).click();
 
