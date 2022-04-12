@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { getPrecisionErrorWarningMessages } from './utils';
 import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
 import type { DocLinksStart } from 'kibana/public';
 import { EuiButton } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
-import { mountWithProvider } from '../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 
