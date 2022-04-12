@@ -14,7 +14,7 @@ import { TimelineId } from '../../../../../common/types';
 
 import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
-const FIELDS_WITHOUT_ACTIONS = [AGENT_STATUS_FIELD_NAME];
+const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = { [AGENT_STATUS_FIELD_NAME]: true };
 
 export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   data,
@@ -37,21 +37,19 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
       style={{ flexGrow: 0 }}
       values={values}
     />
-    {timelineId !== TimelineId.active &&
-      !isReadOnly &&
-      !FIELDS_WITHOUT_ACTIONS.includes(data.field) && (
-        <ActionCell
-          contextId={timelineId}
-          data={data}
-          eventId={eventId}
-          fieldFromBrowserField={fieldFromBrowserField}
-          linkValue={linkValue}
-          timelineId={timelineId}
-          values={values}
-          applyWidthAndPadding={false}
-          hideAddToTimeline={false}
-        />
-      )}
+    {timelineId !== TimelineId.active && !isReadOnly && !FIELDS_WITHOUT_ACTIONS[data.field] && (
+      <ActionCell
+        contextId={timelineId}
+        data={data}
+        eventId={eventId}
+        fieldFromBrowserField={fieldFromBrowserField}
+        linkValue={linkValue}
+        timelineId={timelineId}
+        values={values}
+        applyWidthAndPadding={false}
+        hideAddToTimeline={false}
+      />
+    )}
   </>
 );
 
