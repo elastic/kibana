@@ -11,8 +11,31 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import { AlertsData } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../../../../../src/plugins/data/public/');
 jest.mock('../../../common/lib/kibana');
+
+const columns = [
+  {
+    id: 'kibana.alert.rule.name',
+    displayAsText: 'Name',
+  },
+  {
+    id: 'kibana.alert.rule.category',
+    displayAsText: 'Category',
+  },
+];
+
+const hookUseKibanaMock = useKibana as jest.Mock;
+hookUseKibanaMock().services.alertsTableTypeRegistry.has.mockImplementation((plugin: string) => {
+  return plugin === PLUGIN_ID;
+});
+hookUseKibanaMock().services.alertsTableTypeRegistry.get.mockImplementation((plugin: string) => {
+  if (plugin === PLUGIN_ID) {
+    return { columns };
+  }
+  return {};
+});
 
 describe('AlertsTable', () => {
   const consumers = [
@@ -21,11 +44,6 @@ describe('AlertsTable', () => {
     AlertConsumers.UPTIME,
     AlertConsumers.INFRASTRUCTURE,
     AlertConsumers.SIEM,
-  ];
-  const columns = [
-    {
-      id: 'kibana.alert.rule.name',
-    },
   ];
 
   const alerts: AlertsData[] = [
