@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ActionCell } from '../table/action_cell';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -19,7 +19,9 @@ const ActionWrapper = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
-const OverviewPanel = euiStyled(EuiPanel)`
+const OverviewPanel = euiStyled(EuiPanel)<{
+  $isPopoverVisible: boolean;
+}>`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
     padding: ${({ theme }) => theme.eui.paddingSizes.s};
@@ -45,15 +47,35 @@ const OverviewPanel = euiStyled(EuiPanel)`
         transform: translate(0);
       }
     }
+
+    ${(props) =>
+      props.$isPopoverVisible &&
+      `
+      & ${ActionWrapper} {
+        width: auto;
+        transform: translate(0);
+      }
+    `}
   }
 `;
 
 interface OverviewCardProps {
+  isPopoverVisible: boolean; // Prevent the hover actions from collapsing on each other when not directly hovered on
   title: string;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
-  <OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
+export const OverviewCard: React.FC<OverviewCardProps> = ({
+  title,
+  children,
+  isPopoverVisible,
+}) => (
+  <OverviewPanel
+    borderRadius="none"
+    hasShadow={false}
+    hasBorder={false}
+    paddingSize="s"
+    $isPopoverVisible={isPopoverVisible}
+  >
     <EuiText size="s">{title}</EuiText>
     <EuiSpacer size="s" />
     {children}
@@ -85,13 +107,20 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
   dataTestSubj,
   enrichedFieldInfo,
 }) => {
+  const [isPopoverVisisble, setIsPopoverVisible] = useState(false);
+
   return (
-    <OverviewCard title={title}>
+    <OverviewCard title={title} isPopoverVisible={isPopoverVisisble}>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
 
         <ActionWrapper>
-          <ActionCell {...enrichedFieldInfo} contextId={contextId} applyWidthAndPadding={false} />
+          <ActionCell
+            {...enrichedFieldInfo}
+            contextId={contextId}
+            setIsPopoverVisible={setIsPopoverVisible}
+            applyWidthAndPadding={false}
+          />
         </ActionWrapper>
       </EuiFlexGroup>
     </OverviewCard>
