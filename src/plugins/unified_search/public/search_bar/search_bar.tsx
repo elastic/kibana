@@ -23,7 +23,8 @@ import type { TimeHistoryContract, SavedQuery } from '../../../data/public';
 import type { SavedQueryAttributes } from '../../../data/common';
 import { IDataPluginServices } from '../../../data/public';
 import { FilterBar } from '../filter_bar';
-import { TimeRange, IIndexPattern } from '../../../data/common';
+import { TimeRange } from '../../../data/common';
+import { DataView } from '../../../data_views/public';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
@@ -40,7 +41,7 @@ export interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps {
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;

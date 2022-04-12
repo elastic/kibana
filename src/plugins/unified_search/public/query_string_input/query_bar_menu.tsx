@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
-import type { TimeRange, SavedQueryService, SavedQuery, IIndexPattern } from '../../../data/public';
+import type { TimeRange, SavedQueryService, SavedQuery } from '../../../data/public';
+import type { DataView } from '../../../data_views/public';
 import { QueryBarMenuPanels } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 
@@ -43,7 +44,7 @@ export interface QueryBarMenuProps {
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
   timeRangeForSuggestionsOverride?: boolean;
-  indexPatterns?: Array<IIndexPattern | string>;
+  indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
 }
 

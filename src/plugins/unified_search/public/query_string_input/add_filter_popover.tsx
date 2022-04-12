@@ -10,11 +10,11 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiButtonIconProps } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { IIndexPattern } from '../../../data/public';
+import type { DataView } from '../../../data_views/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 interface AddFilterPopoverProps {
-  indexPatterns?: Array<IIndexPattern | string>;
+  indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   onFiltersUpdated?: (filters: Filter[]) => void;

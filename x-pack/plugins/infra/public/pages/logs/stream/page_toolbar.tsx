@@ -10,6 +10,7 @@ import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { QueryStringInput } from '../../../../../../../src/plugins/unified_search/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
@@ -57,7 +58,7 @@ export const LogsToolbar = () => {
           <QueryStringInput
             disableLanguageSwitcher={true}
             iconType="search"
-            indexPatterns={[derivedDataView]}
+            indexPatterns={[derivedDataView as DataView]}
             isInvalid={!isFilterQueryDraftValid}
             onChange={(query: Query) => {
               setSurroundingLogsId(null);
