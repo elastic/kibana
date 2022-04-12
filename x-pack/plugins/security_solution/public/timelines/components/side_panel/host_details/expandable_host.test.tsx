@@ -38,8 +38,8 @@ describe('Expandable Host Component', () => {
       );
 
       expect(wrapper.find('HostOverview').prop('indexNames')).toStrictEqual([
-        EXCLUDE_ELASTIC_CLOUD_INDEX,
         ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
+        EXCLUDE_ELASTIC_CLOUD_INDEX,
       ]);
     });
   });

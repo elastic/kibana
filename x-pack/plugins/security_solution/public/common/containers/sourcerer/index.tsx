@@ -321,8 +321,8 @@ export const useSourcererDataView = (
   const selectedPatterns = useMemo(
     () =>
       scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
-        ? [...scopeSelectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-        : scopeSelectedPatterns,
+        ? [...scopeSelectedPatterns.sort(), EXCLUDE_ELASTIC_CLOUD_INDEX]
+        : scopeSelectedPatterns.sort(),
     [scopeSelectedPatterns]
   );
 
@@ -386,7 +386,7 @@ export const useSourcererDataView = (
       // all active & inactive patterns in DATA_VIEW
       patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW including filter
-      selectedPatterns: selectedPatterns.sort(),
+      selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
     }),
