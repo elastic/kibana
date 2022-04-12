@@ -40,7 +40,7 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, list_id: listId, namespace_type: namespaceType } = request.query;
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         if (id != null || listId != null) {
           const exceptionList = await exceptionLists.getExceptionList({
             id,
