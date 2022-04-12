@@ -74,7 +74,6 @@ const PackagePolicyInputsSchema = {
     )
   ),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
-  compiled_input: schema.maybe(schema.any()),
 };
 
 const PackagePolicyBaseSchema = {
@@ -161,9 +160,15 @@ export const PackagePolicySchema = schema.object({
     schema.object({
       privileges: schema.maybe(
         schema.object({
-          indices: schema.maybe(schema.arrayOf(schema.string())),
+          cluster: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+    })
+  ),
+  inputs: schema.arrayOf(
+    schema.object({
+      ...PackagePolicyInputsSchema,
+      compiled_input: schema.maybe(schema.any()),
     })
   ),
 });

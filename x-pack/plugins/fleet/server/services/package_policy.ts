@@ -905,6 +905,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
                 context,
                 request
               );
+              updatedNewData = PackagePolicySchema.validate(result);
             } else {
               result = await (callback as PostPackagePolicyCreateCallback)(
                 updatedNewData as NewPackagePolicy,
@@ -916,9 +917,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
               updatedNewData = NewPackagePolicySchema.validate(result);
             } else if (externalCallbackType === 'packagePolicyUpdate') {
               updatedNewData = UpdatePackagePolicySchema.validate(result);
-            } else if (externalCallbackType === 'packagePolicyPostCreate') {
-              console.log({ result });
-              updatedNewData = PackagePolicySchema.validate(result);
             }
           }
 

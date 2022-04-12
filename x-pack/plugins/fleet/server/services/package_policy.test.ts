@@ -1363,7 +1363,7 @@ describe('Package policy service', () => {
     const packagePolicy = {
       id: '93ac25fe-0467-4fcc-a3c5-57a26a8496e2',
       version: 'WzYyMzcsMV0=',
-      name: 'cis_kubernetes_benchmark-2',
+      name: 'my-cis_kubernetes_benchmark',
       namespace: 'default',
       description: '',
       package: {
@@ -1403,6 +1403,7 @@ describe('Package policy service', () => {
           type: 'yaml',
         },
       },
+      elasticsearch: undefined,
       revision: 1,
       created_at: '2022-04-11T12:44:43.385Z',
       created_by: 'elastic',
