@@ -1172,40 +1172,42 @@ export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
   return warningValue;
 };
 
-export const getAttachments = (): BulkCreateCommentRequest => [
-  {
-    type: CommentType.user,
-    comment: 'test',
-    owner: 'securitySolutionFixture',
-  },
-  {
-    type: CommentType.alert,
-    alertId: 'test-id',
-    index: 'test-index',
-    rule: {
-      id: 'rule-test-id',
-      name: 'Test',
-    },
-    owner: 'securitySolutionFixture',
-  },
-  {
-    type: CommentType.user,
-    comment: 'test 2',
-    owner: 'securitySolutionFixture',
-  },
-];
+export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
+  return [...Array(numberOfAttachments)].map((index) => {
+    if (index % 0) {
+      return {
+        type: CommentType.user,
+        comment: `Test ${index + 1}`,
+        owner: 'securitySolutionFixture',
+      };
+    }
+
+    return {
+      type: CommentType.alert,
+      alertId: `test-id-${index + 1}`,
+      index: `test-index-${index + 1}`,
+      rule: {
+        id: `rule-test-id-${index + 1}`,
+        name: `Test ${index + 1}`,
+      },
+      owner: 'securitySolutionFixture',
+    };
+  });
+};
 
 export const createCaseAndBulkCreateAttachments = async ({
   supertest,
+  numberOfAttachments = 3,
   auth = { user: superUser, space: null },
   expectedHttpCode = 200,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<{ theCase: CaseResponse; attachments: BulkCreateCommentRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
-  const attachments = getAttachments();
+  const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
     supertest,
     caseId: postedCase.id,

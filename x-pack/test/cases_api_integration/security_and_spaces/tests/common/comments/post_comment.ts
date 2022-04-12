@@ -264,7 +264,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('404s when case is missing', async () => {
+      it('404s when the case does not exist', async () => {
         await createComment({
           supertest,
           caseId: 'not-exists',

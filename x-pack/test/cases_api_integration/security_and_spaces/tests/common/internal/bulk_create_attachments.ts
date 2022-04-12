@@ -12,6 +12,8 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
 import {
+  BulkCreateCommentRequest,
+  CaseResponse,
   CaseStatuses,
   CommentRequest,
   CommentType,
@@ -63,13 +65,48 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
+  const validateComments = (
+    comments: CaseResponse['comments'],
+    attachments: BulkCreateCommentRequest
+  ) => {
+    comments?.forEach((attachment, index) => {
+      const comment = removeServerGeneratedPropertiesFromSavedObject(attachment);
+
+      expect(comment).to.eql({
+        ...attachments[index],
+        created_by: defaultUser,
+        pushed_at: null,
+        pushed_by: null,
+        updated_by: null,
+      });
+    });
+  };
+
   describe('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
     describe('creation', () => {
-      it('should bulk create attachments', async () => {
+      it('should no create an attachment on empty request', async () => {
+        const { theCase } = await createCaseAndBulkCreateAttachments({
+          supertest,
+          numberOfAttachments: 0,
+        });
+
+        expect(theCase.comments?.length).to.be(0);
+      });
+
+      it('should create one attachment', async () => {
+        const { theCase, attachments } = await createCaseAndBulkCreateAttachments({
+          supertest,
+          numberOfAttachments: 1,
+        });
+
+        validateComments(theCase.comments, attachments);
+      });
+
+      it('should bulk create multiple attachments', async () => {
         const { theCase, attachments } = await createCaseAndBulkCreateAttachments({
           supertest,
         });
@@ -77,17 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(theCase.totalComment).to.eql(attachments.length);
         expect(theCase.updated_by).to.eql(defaultUser);
 
-        theCase.comments?.forEach((attachment, index) => {
-          const comment = removeServerGeneratedPropertiesFromSavedObject(attachment);
-
-          expect(comment).to.eql({
-            ...attachments[index],
-            created_by: defaultUser,
-            pushed_at: null,
-            pushed_by: null,
-            updated_by: null,
-          });
-        });
+        validateComments(theCase.comments, attachments);
       });
 
       it('creates the correct user action', async () => {
@@ -273,7 +300,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('404s when case is missing', async () => {
+      it('404s when the case does not exist', async () => {
         await bulkCreateAttachments({
           supertest,
           caseId: 'not-exists',
@@ -289,6 +316,40 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s when adding an alert to a closed case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: CommentType.alert,
+              alertId: 'test-id',
+              index: 'test-index',
+              rule: {
+                id: 'id',
+                name: 'name',
+              },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding an alert with other attachments to a closed case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
