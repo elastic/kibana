@@ -99,6 +99,9 @@ export const SUPPORTED_CONNECTORS = [
  */
 export const MAX_ALERTS_PER_CASE = 1000 as const;
 
+/**
+ * Owner
+ */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 
@@ -113,6 +116,9 @@ export const OWNER_INFO = {
   },
 } as const;
 
+/**
+ * Searching
+ */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 
