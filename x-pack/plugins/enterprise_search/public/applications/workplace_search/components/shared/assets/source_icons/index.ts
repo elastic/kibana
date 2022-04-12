@@ -16,6 +16,7 @@ import jira from './jira.svg';
 import jiraServer from './jira_server.svg';
 import loadingSmall from './loading_small.svg';
 import oneDrive from './onedrive.svg';
+import outlook from './outlook.svg';
 import salesforce from './salesforce.svg';
 import serviceNow from './servicenow.svg';
 import sharePoint from './sharepoint.svg';
@@ -45,6 +46,7 @@ export const images = {
   jiraCloud: jira,
   loadingSmall,
   oneDrive,
+  outlook,
   salesforce,
   salesforceSandbox: salesforce,
   serviceNow,

@@ -176,6 +176,9 @@ export const SOURCE_NAMES = {
   ONEDRIVE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.oneDrive', {
     defaultMessage: 'OneDrive',
   }),
+  OUTLOOK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.outlook', {
+    defaultMessage: 'Outlook',
+  }),
   SALESFORCE: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.salesforce',
     { defaultMessage: 'Salesforce' }

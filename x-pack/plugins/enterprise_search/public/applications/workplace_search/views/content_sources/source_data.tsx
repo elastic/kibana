@@ -396,6 +396,25 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
   },
   {
+    name: SOURCE_NAMES.OUTLOOK,
+    iconName: SOURCE_NAMES.OUTLOOK,
+    categories: [
+      // TODO update this when we define these
+    ],
+    serviceType: 'outlook', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-outlook-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
+  },
+  {
     name: SOURCE_NAMES.SALESFORCE,
     iconName: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
