@@ -23,7 +23,8 @@ export function initializeGetCustomElementRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const customElement = await context.core.savedObjects.client.get<CustomElementAttributes>(
+      const soClient = (await context.core).savedObjects.client;
+      const customElement = await soClient.get<CustomElementAttributes>(
         CUSTOM_ELEMENT_TYPE,
         request.params.id
       );

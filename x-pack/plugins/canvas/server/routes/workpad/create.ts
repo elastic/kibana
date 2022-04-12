@@ -50,14 +50,16 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
       let workpad = request.body as CanvasWorkpad;
 
       if (isCreateFromTemplate(request.body)) {
-        const templateSavedObject = await context.core.savedObjects.client.get<TemplateAttributes>(
+        const soClient = (await context.core).savedObjects.client;
+        const templateSavedObject = await soClient.get<TemplateAttributes>(
           TEMPLATE_TYPE,
           request.body.templateId
         );
         workpad = templateSavedObject.attributes.template;
       }
 
-      const createdObject = await context.canvas.workpad.create(workpad);
+      const canvasContext = await context.canvas;
+      const createdObject = await canvasContext.workpad.create(workpad);
 
       return response.ok({
         body: { ...okResponse, id: createdObject.id },

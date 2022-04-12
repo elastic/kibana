@@ -37,14 +37,14 @@ export function initializeUpdateCustomElementRoute(deps: RouteInitializerDeps) {
       const id = request.params.id;
 
       const now = new Date().toISOString();
+      const soClient = (await context.core).savedObjects.client;
 
-      const customElementObject =
-        await context.core.savedObjects.client.get<CustomElementAttributes>(
-          CUSTOM_ELEMENT_TYPE,
-          id
-        );
+      const customElementObject = await soClient.get<CustomElementAttributes>(
+        CUSTOM_ELEMENT_TYPE,
+        id
+      );
 
-      await context.core.savedObjects.client.create<CustomElementAttributes>(
+      await soClient.create<CustomElementAttributes>(
         CUSTOM_ELEMENT_TYPE,
         {
           ...customElementObject.attributes,

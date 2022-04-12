@@ -34,7 +34,8 @@ export function initializeCreateCustomElementRoute(deps: RouteInitializerDeps) {
       const now = new Date().toISOString();
       const { id, ...payload } = customElement;
 
-      await context.core.savedObjects.client.create<CustomElementAttributes>(
+      const soClient = (await context.core).savedObjects.client;
+      await soClient.create<CustomElementAttributes>(
         CUSTOM_ELEMENT_TYPE,
         {
           ...payload,

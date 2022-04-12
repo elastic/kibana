@@ -24,7 +24,7 @@ export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
       },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const savedObjectsClient = (await context.core).savedObjects.client;
       const { name, page, perPage } = request.query;
 
       try {

@@ -28,7 +28,7 @@ export function initializeESFieldsRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { index, fields } = request.query;
 
       const config = {

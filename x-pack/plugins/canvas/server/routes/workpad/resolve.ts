@@ -23,7 +23,8 @@ export function initializeResolveWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const resolved = await context.canvas.workpad.resolve(request.params.id);
+      const canvasContext = await context.canvas;
+      const resolved = await canvasContext.workpad.resolve(request.params.id);
       const { saved_object: workpad } = resolved;
 
       shimWorkpad(workpad);
