@@ -50,6 +50,7 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
+            trend={complianceData.trend}
             partitionOnElementClick={handleElementClick}
           />
         </ChartPanel>

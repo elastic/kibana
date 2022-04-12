@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  EventKind,
   AlertStatusEventEntityIdMap,
+  EventKind,
   Process,
   ProcessEvent,
   ProcessMap,
@@ -55,7 +55,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
       processMap[id] = process;
     }
 
-    if (event.event?.kind === EventKind.signal) {
+    if (event.kibana?.alert) {
       process.addAlert(event);
     } else if (event.event?.kind === EventKind.event) {
       process.addEvent(event);
@@ -170,11 +170,11 @@ export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | 
 // b) matches the plain text search above
 // Returns the processMap with it's processes autoExpand bool set to true or false
 // process.autoExpand is read by process_tree_node to determine whether to auto expand it's child processes.
-export const autoExpandProcessTree = (processMap: ProcessMap) => {
+export const autoExpandProcessTree = (processMap: ProcessMap, jumpToEntityId?: string) => {
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
-    if (process.searchMatched || process.isUserEntered()) {
+    if (process.searchMatched || process.isUserEntered() || jumpToEntityId === process.id) {
       let { parent } = process;
       const parentIdSet = new Set<string>();
 
