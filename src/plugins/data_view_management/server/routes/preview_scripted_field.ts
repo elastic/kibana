@@ -24,7 +24,7 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { index, name, script, query, additionalFields } = request.body;
 
       try {

@@ -29,7 +29,7 @@ export const registerBulkGetRoute = (
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const managementService = await managementServicePromise;
-      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const objects = req.body;
       const uniqueTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());

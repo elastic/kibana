@@ -33,7 +33,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       }
 
       if (keyId) {
-        const client = context.core.savedObjects.getClient();
+        const client = (await context.core).savedObjects.getClient();
         await client.delete('test-deprecations-plugin', keyId, {
           refresh: true,
         });

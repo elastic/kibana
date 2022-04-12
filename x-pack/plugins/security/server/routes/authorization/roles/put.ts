@@ -66,12 +66,10 @@ export function definePutRolesRoutes({
       const { name } = request.params;
 
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const [features, rawRoles] = await Promise.all([
           getFeatures(),
-          context.core.elasticsearch.client.asCurrentUser.security.getRole(
-            { name: request.params.name },
-            { ignore: [404] }
-          ),
+          esClient.asCurrentUser.security.getRole({ name: request.params.name }, { ignore: [404] }),
         ]);
 
         const { validationErrors } = validateKibanaPrivileges(features, request.body.kibana);
@@ -91,7 +89,7 @@ export function definePutRolesRoutes({
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
-        await context.core.elasticsearch.client.asCurrentUser.security.putRole({
+        await esClient.asCurrentUser.security.putRole({
           name: request.params.name,
           // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
           body,

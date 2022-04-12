@@ -29,10 +29,10 @@ export function defineGetApiKeysRoutes({ router }: RouteDefinitionParams) {
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const isAdmin = request.query.isAdmin === 'true';
-        const apiResponse =
-          await context.core.elasticsearch.client.asCurrentUser.security.getApiKey({
-            owner: !isAdmin,
-          });
+        const esClient = (await context.core).elasticsearch.client;
+        const apiResponse = await esClient.asCurrentUser.security.getApiKey({
+          owner: !isAdmin,
+        });
 
         const validKeys = apiResponse.api_keys.filter(({ invalidated }) => !invalidated);
 

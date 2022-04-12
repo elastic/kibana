@@ -9,6 +9,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { isPromise } from '@kbn/std';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type {
   PluginInitializerContext,
@@ -280,6 +281,25 @@ function createCoreRequestHandlerContextMock() {
   };
 }
 
+export type CustomRequestHandlerMock<T> = {
+  core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
+} & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
+const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
+  return Object.entries(contextParts).reduce(
+    (context, [key, value]) => {
+      // @ts-expect-error type matching from inferred types is hard
+      context[key] = isPromise(value) ? value : Promise.resolve(value);
+      return context;
+    },
+    {
+      core: Promise.resolve(createCoreRequestHandlerContextMock()),
+    } as CustomRequestHandlerMock<T>
+  );
+};
+
 export const coreMock = {
   createPreboot: createCorePrebootMock,
   createSetup: createCoreSetupMock,
@@ -289,4 +309,5 @@ export const coreMock = {
   createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
+  createCustomRequestHandlerContext: createCustomRequestHandlerContextMock,
 };

@@ -51,8 +51,9 @@ export const routeDefinitionParamsMock = {
 };
 
 export const securityRequestHandlerContextMock = {
-  create: (): SecurityRequestHandlerContext => ({
-    core: coreMock.createRequestHandlerContext(),
-    licensing: licensingMock.createRequestHandlerContext(),
-  }),
+  create: (): SecurityRequestHandlerContext =>
+    coreMock.createCustomRequestHandlerContext({
+      core: coreMock.createRequestHandlerContext(),
+      licensing: licensingMock.createRequestHandlerContext(),
+    }),
 };

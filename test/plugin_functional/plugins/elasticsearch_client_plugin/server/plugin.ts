@@ -10,12 +10,14 @@ import { Plugin, CoreSetup, CoreStart, ICustomClusterClient } from 'src/core/ser
 
 export class ElasticsearchClientPlugin implements Plugin {
   private client?: ICustomClusterClient;
+
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/elasticsearch_client_plugin/context/ping', validate: false },
       async (context, req, res) => {
-        const body = await context.core.elasticsearch.client.asInternalUser.ping();
+        const esClient = (await context.core).elasticsearch.client;
+        const body = await esClient.asInternalUser.ping();
         return res.ok({ body: JSON.stringify(body) });
       }
     );
@@ -39,5 +41,6 @@ export class ElasticsearchClientPlugin implements Plugin {
   public start(core: CoreStart) {
     this.client = core.elasticsearch.createClient('my-custom-client-test');
   }
+
   public stop() {}
 }

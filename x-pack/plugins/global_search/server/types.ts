@@ -12,7 +12,7 @@ import type {
   SavedObjectsClientContract,
   Capabilities,
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
 } from 'src/core/server';
 import {
   GlobalSearchBatchedResults,
@@ -29,14 +29,15 @@ export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSear
 /**
  * @internal
  */
-export interface GlobalSearchRequestHandlerContext extends RequestHandlerContext {
+export type GlobalSearchRequestHandlerContext = CustomRequestHandlerContext<{
   globalSearch: RouteHandlerGlobalSearchContext;
-}
+}>;
 
 /**
  * @internal
  */
 export type GlobalSearchRouter = IRouter<GlobalSearchRequestHandlerContext>;
+
 /**
  * globalSearch route handler context.
  *
@@ -50,6 +51,7 @@ export interface RouteHandlerGlobalSearchContext {
     params: GlobalSearchFindParams,
     options: GlobalSearchFindOptions
   ): Observable<GlobalSearchBatchedResults>;
+
   /**
    * See {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}
    */
@@ -104,6 +106,7 @@ export interface GlobalSearchResultProvider {
    * id of the provider
    */
   id: string;
+
   /**
    * Method that should return an observable used to emit new results from the provider.
    *
