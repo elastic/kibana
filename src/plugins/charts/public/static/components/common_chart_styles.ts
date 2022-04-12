@@ -8,6 +8,8 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { useMemo } from 'react';
 
 export const useCommonChartStyles = () => {
@@ -20,12 +22,9 @@ export const useCommonChartStyles = () => {
     [euiTheme.colors.subdued]
   );
 
-  const accent = useMemo(
-    () => css`
-      fill: ${euiTheme.colors.ink};
-    `,
-    [euiTheme.colors.ink]
-  );
+  const accent = css`
+    fill: ${euiThemeVars.euiColorVis0};
+  `;
 
   return {
     chartIcon: { subdued, accent },
