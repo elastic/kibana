@@ -71,6 +71,8 @@ CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID
 # export TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
 # export TEST_ES_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
 
+# export TEST_BROWSER_HEADLESS=1
+
 # Error: attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ConnectionError: self signed certificate in certificate chain
 # export NODE_TLS_REJECT_UNAUTHORIZED=0
 
