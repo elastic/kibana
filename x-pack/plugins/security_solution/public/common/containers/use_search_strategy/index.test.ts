@@ -11,12 +11,6 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useObservable } from '@kbn/securitysolution-hook-utils';
 import { FactoryQueryTypes } from '../../../../common/search_strategy';
 
-jest.mock('../../../transforms/containers/use_transforms', () => ({
-  useTransforms: jest.fn(() => ({
-    getTransformChangesIfTheyExist: null,
-  })),
-}));
-
 const mockAddToastError = jest.fn();
 
 jest.mock('../../hooks/use_app_toasts', () => ({

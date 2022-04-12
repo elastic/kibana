@@ -10,6 +10,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HttpFetchError } from '../../../../../../src/core/public';
 import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
+import {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../common/constants';
 import type {
   PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
@@ -188,10 +194,16 @@ export const getCreateTransformSettingsRequestBody = (
   transformDetailsState: Partial<StepDetailsExposedState>
 ): { settings?: PutTransformsRequestSchema['settings'] } => {
   const settings: PutTransformsRequestSchema['settings'] = {
-    ...(transformDetailsState.transformSettingsMaxPageSearchSize
+    // conditionally add optional max_page_search_size, skip if default value
+    ...(transformDetailsState.transformSettingsMaxPageSearchSize &&
+    transformDetailsState.transformSettingsMaxPageSearchSize !==
+      DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
       ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
       : {}),
-    ...(transformDetailsState.transformSettingsDocsPerSecond
+    // conditionally add optional docs_per_second, skip if default value
+    ...(transformDetailsState.transformSettingsDocsPerSecond &&
+    transformDetailsState.transformSettingsDocsPerSecond !==
+      DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND
       ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
       : {}),
   };
@@ -213,8 +225,9 @@ export const getCreateTransformRequestBody = (
   ...(transformDetailsState.transformDescription !== ''
     ? { description: transformDetailsState.transformDescription }
     : {}),
-  // conditionally add optional frequency
-  ...(transformDetailsState.transformFrequency !== ''
+  // conditionally add optional frequency, skip if default value
+  ...(transformDetailsState.transformFrequency !== '' &&
+  transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
     ? { frequency: transformDetailsState.transformFrequency }
     : {}),
   dest: {
@@ -229,8 +242,11 @@ export const getCreateTransformRequestBody = (
     ? {
         sync: {
           time: {
+            // conditionally add continuous mode delay, skip if default value
+            ...(transformDetailsState.continuousModeDelay !== DEFAULT_CONTINUOUS_MODE_DELAY
+              ? { delay: transformDetailsState.continuousModeDelay }
+              : {}),
             field: transformDetailsState.continuousModeDateField,
-            delay: transformDetailsState.continuousModeDelay,
           },
         },
       }

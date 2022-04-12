@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PaletteDefinition, PaletteOutput } from '../../../../../charts/public';
+import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '../../../../../charts/public/mocks';
 import { Datatable } from '../../../../../expressions';
 import { byDataColorPaletteMap } from './get_color';

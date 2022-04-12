@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';

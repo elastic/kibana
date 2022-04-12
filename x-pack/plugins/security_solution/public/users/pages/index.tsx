@@ -12,13 +12,8 @@ import { UsersTableType } from '../store/model';
 import { Users } from './users';
 import { UsersDetails } from './details';
 import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './constants';
-import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
-import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 
 export const UsersContainer = React.memo(() => {
-  const capabilities = useMlCapabilities();
-  const hasMlPermissions = hasMlUserPermissions(capabilities);
-
   return (
     <Switch>
       <Route path={usersTabPath}>
@@ -31,7 +26,12 @@ export const UsersContainer = React.memo(() => {
           match: {
             params: { detailName },
           },
-        }) => <UsersDetails usersDetailsPagePath={usersDetailsPagePath} detailName={detailName} />}
+        }) => (
+          <UsersDetails
+            usersDetailsPagePath={usersDetailsPagePath}
+            detailName={decodeURIComponent(detailName)}
+          />
+        )}
       />
       <Route
         path={usersDetailsPagePath}
@@ -43,9 +43,7 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/${detailName}/${
-                hasMlPermissions ? UsersTableType.anomalies : UsersTableType.events
-              }`,
+              pathname: `${USERS_PATH}/${detailName}/${UsersTableType.authentications}`,
               search,
             }}
           />

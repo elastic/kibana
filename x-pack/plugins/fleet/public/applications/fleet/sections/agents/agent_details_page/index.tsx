@@ -124,7 +124,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <AgentDashboardLink agent={agentData?.item} />
+              <AgentDashboardLink agent={agentData?.item} agentPolicy={agentPolicyData?.item} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

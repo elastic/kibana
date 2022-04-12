@@ -85,6 +85,7 @@ export const AgentsApp: React.FunctionComponent = () => {
         <EuiPortal>
           <AgentEnrollmentFlyout
             defaultMode="standalone"
+            isIntegrationFlow={true}
             onClose={() => setIsEnrollmentFlyoutOpen(false)}
           />
         </EuiPortal>
