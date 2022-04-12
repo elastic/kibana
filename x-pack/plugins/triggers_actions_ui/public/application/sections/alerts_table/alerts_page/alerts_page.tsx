@@ -7,7 +7,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { get } from 'lodash';
 import {
-  EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiFlexItem,
   EuiFlexGroup,
@@ -24,7 +23,7 @@ import {
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
-import { AlertsData } from '../../../../types';
+import { AlertsData, RenderCellValueProps } from '../../../../types';
 
 const consumers = [
   AlertConsumers.APM,
@@ -163,16 +162,14 @@ const AlertsPage: React.FunctionComponent = () => {
     pageSize: defaultPagination.pageSize,
     pageSizeOptions: [2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: (rcvProps: EuiDataGridCellValueElementProps) => {
-      const { columnId, visibleRowIndex } = rcvProps as EuiDataGridCellValueElementProps & {
-        visibleRowIndex: number;
-      };
-      const value = (get(alerts[visibleRowIndex], columnId) ?? [])[0];
+    renderCellValue: ({ alert, field }: RenderCellValueProps) => {
+      const value = (get(alert, field) ?? [])[0];
       return value ?? 'N/A';
     },
     showCheckboxes,
     trailingControlColumns: [],
     useFetchAlertsData,
+    alerts,
     'data-test-subj': 'internalAlertsPage',
   };
 

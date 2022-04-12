@@ -365,7 +365,12 @@ export interface TriggersActionsUiConfig {
   };
 }
 
-export type AlertsData = Record<string, any[]>;
+export enum AlertsField {
+  name = 'kibana.alert.rule.name',
+  reason = 'kibana.alert.reason',
+}
+
+export type AlertsData = Record<AlertsField, any[]>;
 
 export interface FetchAlertData {
   activePage: number;
@@ -396,9 +401,22 @@ export interface AlertsTableProps {
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
+  renderCellValue: (props: RenderCellValueProps) => React.ReactNode;
   showCheckboxes: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
+  alerts: AlertsData[];
   'data-test-subj': string;
 }
+
+export interface AlertsFlyoutProps {
+  alert: AlertsData;
+  onClose: () => void;
+  onPaginateNext: () => void;
+  onPaginatePrevious: () => void;
+}
+
+export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
+  alert: AlertsData;
+  field: AlertsField;
+};
