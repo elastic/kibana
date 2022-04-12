@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../common/constants';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
@@ -23,6 +23,7 @@ import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -35,6 +36,7 @@ describe('create_rules_bulk', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
+    const logger = loggingSystemMock.createLogger();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful creation
@@ -42,7 +44,7 @@ describe('create_rules_bulk', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRulesBulkRoute(server.router, ml);
+    createRulesBulkRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
@@ -119,7 +121,7 @@ describe('create_rules_bulk', () => {
     test('returns an error object if duplicate rule_ids found in request payload', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()],
       });
       const response = await server.inject(request, context);
@@ -140,7 +142,7 @@ describe('create_rules_bulk', () => {
     test('allows rule type of query', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
@@ -151,7 +153,7 @@ describe('create_rules_bulk', () => {
     test('allows rule type of query and custom from and interval', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock() }],
       });
       const result = server.validate(request);
@@ -162,7 +164,7 @@ describe('create_rules_bulk', () => {
     test('disallows unknown rule type', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [{ ...getCreateRulesSchemaMock(), type: 'unexpected_type' }],
       });
       const result = server.validate(request);
@@ -173,7 +175,7 @@ describe('create_rules_bulk', () => {
     test('disallows invalid "from" param on rule', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+        path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [
           {
             from: 'now-3755555555555555.67s',

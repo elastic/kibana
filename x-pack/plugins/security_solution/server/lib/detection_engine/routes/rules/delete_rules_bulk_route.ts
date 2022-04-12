@@ -14,18 +14,19 @@ import {
   QueryRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import type { RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
+import type { RouteConfig, RequestHandler, Logger } from '../../../../../../../../src/core/server';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../common/constants';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 type Handler = RequestHandler<
@@ -36,19 +37,24 @@ type Handler = RequestHandler<
   'delete' | 'post'
 >;
 
-export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
+export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
         queryRulesBulkSchema
       ),
     },
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
       tags: ['access:securitySolution'],
     },
   };
   const handler: Handler = async (context, request, response) => {
+    logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
+
     const siemResponse = buildSiemResponse(response);
     const rulesClient = context.alerting.getRulesClient();
     const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
@@ -98,9 +104,16 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
     );
     const [validated, errors] = validate(rules, rulesBulkSchema);
     if (errors != null) {
-      return siemResponse.error({ statusCode: 500, body: errors });
+      return siemResponse.error({
+        statusCode: 500,
+        body: errors,
+        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+      });
     } else {
-      return response.ok({ body: validated ?? {} });
+      return response.ok({
+        body: validated ?? {},
+        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+      });
     }
   };
 

@@ -845,4 +845,30 @@ describe('Create case', () => {
         pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);
   });
+
+  describe('Permissions', () => {
+    it('should not push to service if the user does not have access to actions', async () => {
+      mockedContext.coreStart.application.capabilities = {
+        ...mockedContext.coreStart.application.capabilities,
+        actions: { save: false, show: false },
+      };
+
+      const result = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await act(async () => {
+        fillFormReactTestingLib(result);
+      });
+
+      await act(async () => {
+        userEvent.click(result.getByTestId('create-case-submit'));
+      });
+
+      expect(pushCaseToExternalService).not.toHaveBeenCalled();
+    });
+  });
 });

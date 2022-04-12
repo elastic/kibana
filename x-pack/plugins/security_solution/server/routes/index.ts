@@ -111,10 +111,10 @@ export const initRoutes = (
 
   addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security);
-  createRulesBulkRoute(router, ml);
-  updateRulesBulkRoute(router, ml);
-  patchRulesBulkRoute(router, ml);
-  deleteRulesBulkRoute(router);
+  createRulesBulkRoute(router, ml, logger);
+  updateRulesBulkRoute(router, ml, logger);
+  patchRulesBulkRoute(router, ml, logger);
+  deleteRulesBulkRoute(router, logger);
   performBulkActionRoute(router, ml, logger);
 
   getRuleExecutionEventsRoute(router);

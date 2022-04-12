@@ -11,7 +11,7 @@ import { createRulesBulkSchema } from '../../../../../common/detection_engine/sc
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
-  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
 } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -24,14 +24,20 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
+import { Logger } from '../../../../../../../../src/core/server';
 
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  logger: Logger
 ) => {
   router.post(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      path: DETECTION_ENGINE_RULES_BULK_CREATE,
       validate: {
         body: buildRouteValidation(createRulesBulkSchema),
       },
@@ -40,6 +46,8 @@ export const createRulesBulkRoute = (
       },
     },
     async (context, request, response) => {
+      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
+
       const siemResponse = buildSiemResponse(response);
       const rulesClient = context.alerting.getRulesClient();
       const savedObjectsClient = context.core.savedObjects.client;
@@ -116,9 +124,16 @@ export const createRulesBulkRoute = (
       ];
       const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
       if (errors != null) {
-        return siemResponse.error({ statusCode: 500, body: errors });
+        return siemResponse.error({
+          statusCode: 500,
+          body: errors,
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+        });
       } else {
-        return response.ok({ body: validated ?? {} });
+        return response.ok({
+          body: validated ?? {},
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+        });
       }
     }
   );
