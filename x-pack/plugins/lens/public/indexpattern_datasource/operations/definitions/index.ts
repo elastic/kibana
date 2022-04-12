@@ -357,6 +357,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * are not pass the transferable checks
    */
   getNonTransferableFields?: (column: C, indexPattern: IndexPattern) => string[];
+  /**
+   * Component rendered as inline help
+   */
+  helpComponent?: React.ComponentType<{}>;
 }
 
 interface BaseBuildColumnArgs {

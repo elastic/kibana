@@ -308,6 +308,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         [`aria-pressed`]: isActive,
+        extraAction:{
+          color: 'primary',
+          onClick: (e) => {
+            console.log(e.currentTarget);
+          },
+          alwaysShow: true,
+          iconType: 'help',
+          iconSize: 's',
+          'aria-label': 'Favorite link4',
+        },
         onClick() {
           if (
             ['none', 'fullReference', 'managedReference'].includes(
