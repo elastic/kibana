@@ -41,6 +41,11 @@ const errors = {
     i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
       defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
     }),
+  valueLabelsForNotBarsOrHistogramBarsChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
+      defaultMessage:
+        '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
+    }),
 };
 
 const validateExtent = (extent: AxisExtentConfigResult, hasBarOrArea: boolean) => {
@@ -136,6 +141,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Value labels mode',
       }),
       strict: true,
+      default: ValueLabelModes.HIDE,
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],
@@ -243,6 +249,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     }
 
     const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
+
     const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
 
     validateExtent(args.yLeftExtent, hasBar || hasArea);
@@ -250,6 +257,14 @@ export const xyVisFunction: ExpressionFunctionDefinition<
 
     if (!hasArea && args.fillOpacity !== undefined) {
       throw new Error(errors.notUsedFillOpacityError());
+    }
+
+    const hasNotHistogramBars =
+      dataLayers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && !isHistogram)
+        .length > 0;
+
+    if ((!hasBar || !hasNotHistogramBars) && args.valueLabels !== ValueLabelModes.HIDE) {
+      throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
     }
 
     return {

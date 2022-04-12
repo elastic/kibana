@@ -24,7 +24,7 @@ import {
   ValueLabelMode,
   XYCurveType,
 } from '../../common';
-import { SeriesTypes } from '../../common/constants';
+import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import {
   getColorAssignments,
   getFitOptions,
@@ -157,7 +157,7 @@ export const DataLayers: FC<Props> = ({
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
-                  showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                  showValueLabel: shouldShowValueLabels && valueLabels !== ValueLabelModes.HIDE,
                   isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
                   overflowConstraints: [

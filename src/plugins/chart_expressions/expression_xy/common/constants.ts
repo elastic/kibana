@@ -111,8 +111,7 @@ export const XYCurveTypes = {
 
 export const ValueLabelModes = {
   HIDE: 'hide',
-  INSIDE: 'inside',
-  OUTSIDE: 'outside',
+  SHOW: 'show',
 } as const;
 
 export const AvailableReferenceLineIcons = {

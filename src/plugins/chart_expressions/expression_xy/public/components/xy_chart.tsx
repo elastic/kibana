@@ -62,7 +62,7 @@ import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../
 
 import './xy_chart.scss';
 import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
-import { SeriesTypes } from '../../common/constants';
+import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 
 declare global {
@@ -349,7 +349,9 @@ export function XYChart({
     !isHistogramViz;
 
   const valueLabelsStyling =
-    shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
+    shouldShowValueLabels &&
+    valueLabels !== ValueLabelModes.HIDE &&
+    getValueLabelsStyling(shouldRotate);
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
