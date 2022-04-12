@@ -66,6 +66,10 @@ export class QueryBarService extends FtrService {
     if (contextMenuPanelTitleButton) {
       await this.testSubjects.click('contextMenuPanelTitleButton');
     }
+    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
+    if (!isOpenAlready) {
+      await this.testSubjects.click('showQueryBarMenu');
+    }
     await this.expectQueryLanguageOrFail(lang); // make sure lang is switched
   }
 
