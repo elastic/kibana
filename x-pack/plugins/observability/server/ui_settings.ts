@@ -8,8 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../../src/core/types';
-import { ProgressiveLoadingQuality } from '../../apm/common/progressive_loading';
-import { observabilityFeatureId } from '../common';
+import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
   enableComparisonByDefault,
   enableInspectEsQueries,
@@ -95,7 +94,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     description: i18n.translate('xpack.observabiity.apmProgressiveLoadingDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a high sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
+        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
       values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
     }),
     value: ProgressiveLoadingQuality.off,
@@ -123,19 +122,19 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       [ProgressiveLoadingQuality.low]: i18n.translate(
         'xpack.observabiity.apmProgressiveLoadingQualityLow',
         {
-          defaultMessage: 'Fastest, but least accurate',
+          defaultMessage: 'Low sampling rate (fastest, least accurate)',
         }
       ),
       [ProgressiveLoadingQuality.medium]: i18n.translate(
         'xpack.observabiity.apmProgressiveLoadingQualityMedium',
         {
-          defaultMessage: 'Fast, and reasonably accurate',
+          defaultMessage: 'Medium sampling rate',
         }
       ),
       [ProgressiveLoadingQuality.high]: i18n.translate(
         'xpack.observabiity.apmProgressiveLoadingQualityHigh',
         {
-          defaultMessage: 'High',
+          defaultMessage: 'High sampling rate (slower, most accurate)',
         }
       ),
     },

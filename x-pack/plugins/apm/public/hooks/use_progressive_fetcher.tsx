@@ -19,11 +19,11 @@ import type {
 } from '../services/rest/create_call_apm_api';
 import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { apmProgressiveLoading } from '../../../observability/common';
 import {
+  apmProgressiveLoading,
   getProbabilityFromProgressiveLoadingQuality,
   ProgressiveLoadingQuality,
-} from '../../common/progressive_loading';
+} from '../../../observability/common';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
   {

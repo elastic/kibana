@@ -19,6 +19,11 @@ export {
   apmProgressiveLoading,
 } from './ui_settings_keys';
 
+export {
+  ProgressiveLoadingQuality,
+  getProbabilityFromProgressiveLoadingQuality,
+} from './progressive_loading';
+
 export const casesFeatureId = 'observabilityCases';
 
 // The ID of the observability app. Should more appropriately be called
