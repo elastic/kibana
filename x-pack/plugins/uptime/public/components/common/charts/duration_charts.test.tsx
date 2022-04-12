@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { DurationChartComponent } from './duration_chart';
 import { MonitorDurationResult } from '../../../../common/types';
 import { render } from '../../../lib/helper/rtl_helpers';

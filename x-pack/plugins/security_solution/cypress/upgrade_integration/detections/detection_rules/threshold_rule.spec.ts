@@ -31,7 +31,7 @@ import {
   goToTheRuleDetailsOf,
   waitForRulesTableToBeLoaded,
 } from '../../../tasks/alerts_detection_rules';
-import { loginAndWaitForPage } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
@@ -73,7 +73,8 @@ const rule = {
 
 describe('After an upgrade, the threshold rule', () => {
   before(() => {
-    loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
+    login();
+    visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();

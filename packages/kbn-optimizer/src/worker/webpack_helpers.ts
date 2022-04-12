@@ -156,6 +156,8 @@ export interface WebpackDelegatedModule {
   type: string;
   id: number;
   dependencies: unknown[];
+  /** The ID of the module in the DLL manifest */
+  userRequest: string;
 }
 
 export function isDelegatedModule(module: any): module is WebpackDelegatedModule {

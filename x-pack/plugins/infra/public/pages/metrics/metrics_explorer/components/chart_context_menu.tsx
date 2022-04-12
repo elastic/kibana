@@ -14,7 +14,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { Capabilities } from 'src/core/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
