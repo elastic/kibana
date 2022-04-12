@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { sortProcesses } from '../../../common/utils/sort_processes';
 import {
   AlertStatusEventEntityIdMap,
   EventKind,
@@ -174,7 +175,7 @@ export const searchProcessTree = (
     }
   }
 
-  return results;
+  return results.sort(sortProcesses);
 };
 
 // Iterate over all processes in processMap, and mark each process (and it's ancestors) for auto expansion if:

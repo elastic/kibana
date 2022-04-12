@@ -114,6 +114,12 @@ export function ProcessTreeNode({
     shouldAddListener: hasInvestigatedAlert,
   });
 
+  useEffect(() => {
+    if (process.id === selectedProcess?.id && nodeRef.current?.scrollIntoView) {
+      nodeRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedProcess, process, nodeRef]);
+
   // Automatically expand alerts list when investigating an alert
   useEffect(() => {
     if (hasInvestigatedAlert) {

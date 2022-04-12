@@ -75,12 +75,12 @@ export class ProcessImpl implements Process {
 
     // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
     if (this.orphans.length) {
-      children = [...children, ...this.orphans].sort(sortProcesses);
+      children = [...children, ...this.orphans];
     }
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
-      return children.filter((child) => {
+      children = children.filter((child) => {
         if (child.events.length === 0) {
           return false;
         }
@@ -98,7 +98,7 @@ export class ProcessImpl implements Process {
       });
     }
 
-    return children;
+    return children.sort(sortProcesses);
   }
 
   isVerbose() {
@@ -319,8 +319,9 @@ export const useProcessTree = ({
       setProcessMap({ ...updatedProcessMap });
       setProcessedPages([...processedPages, ...newProcessedPages]);
       setOrphans(newOrphans);
+      autoExpandProcessTree(updatedProcessMap, jumpToEntityId);
     }
-  }, [data, processMap, orphans, processedPages, sessionEntityId]);
+  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId]);
 
   useEffect(() => {
     // currently we are loading a single page of alerts, with no pagination
@@ -334,8 +335,7 @@ export const useProcessTree = ({
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
-    autoExpandProcessTree(processMap, jumpToEntityId);
-  }, [searchQuery, processMap, jumpToEntityId, verboseMode]);
+  }, [searchQuery, processMap, verboseMode]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

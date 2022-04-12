@@ -53,12 +53,13 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         borderColor = colors.danger;
       }
 
-      if (hasInvestigatedAlert) {
-        bgColor = transparentize(colors.danger, 0.04);
-      }
-
       if (isSelected) {
         searchResColor = colors.warning;
+        bgColor = `${transparentize(colors.primary, 0.1)}!important`;
+      }
+
+      if (hasInvestigatedAlert) {
+        bgColor = transparentize(colors.danger, 0.04);
       }
 
       return { bgColor, borderColor, hoverColor, searchResColor };
