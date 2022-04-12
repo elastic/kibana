@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Shortcut File Written or Modified for Persistence",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and\n  user.domain != \"NT AUTHORITY\" and\n  file.path : (\"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\", \n               \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\StartUp\\\\*\") and\n  process.name : (\"cmd.exe\",\n                  \"powershell.exe\",\n                  \"wmic.exe\",\n                  \"mshta.exe\",\n                  \"pwsh.exe\",\n                  \"cscript.exe\",\n                  \"wscript.exe\",\n                  \"regsvr32.exe\",\n                  \"RegAsm.exe\",\n                  \"rundll32.exe\",\n                  \"EQNEDT32.EXE\",\n                  \"WINWORD.EXE\",\n                  \"EXCEL.EXE\",\n                  \"POWERPNT.EXE\",\n                  \"MSPUB.EXE\",\n                  \"MSACCESS.EXE\",\n                  \"iexplore.exe\",\n                  \"InstallUtil.exe\")\n",
   "risk_score": 47,
   "rule_id": "440e2db4-bc7f-4c96-a068-65b78da59bde",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

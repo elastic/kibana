@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 
 export const parseAbsoluteDate = (date: string, defaultValue: number, options = {}): number => {
   const momentWrapper = DateMath.parse(date, options);

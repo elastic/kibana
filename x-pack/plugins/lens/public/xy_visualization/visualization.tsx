@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';

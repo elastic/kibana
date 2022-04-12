@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYReferenceLineLayerConfig } from '../../types';
 import { FormatFactory } from '../../../../common';

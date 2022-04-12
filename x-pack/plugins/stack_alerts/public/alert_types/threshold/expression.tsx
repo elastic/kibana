@@ -64,7 +64,7 @@ function indexParamToArray(index: string | string[]): string[] {
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<IndexThresholdAlertParams>
+  Omit<RuleTypeParamsExpressionProps<IndexThresholdAlertParams>, 'unifiedSearch'>
 > = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
   const {
     index,

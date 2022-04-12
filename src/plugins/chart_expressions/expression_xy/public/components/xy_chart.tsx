@@ -26,6 +26,9 @@ import {
   AxisStyle,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
 import { RenderMode } from '../../../../expressions/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
@@ -41,7 +44,6 @@ import { EventAnnotationServiceType } from '../../../../event_annotation/public'
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
-  PaletteRegistry,
   useActiveCursor,
 } from '../../../../../plugins/charts/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common';

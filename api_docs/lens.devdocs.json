@@ -7416,7 +7416,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"median\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"filters\" | \"count\" | \"sum\" | \"max\" | \"min\" | \"median\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -7430,7 +7430,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"avg\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"filters\" | \"count\" | \"sum\" | \"avg\" | \"max\" | \"min\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,

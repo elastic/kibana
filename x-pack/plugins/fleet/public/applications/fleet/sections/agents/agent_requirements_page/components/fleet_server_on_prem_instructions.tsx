@@ -51,7 +51,7 @@ import { PlatformSelector } from '../../../../../../components/enrollment_instru
 import type { CommandsByPlatform } from './install_command_utils';
 import { getInstallCommandForPlatform } from './install_command_utils';
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 const REFRESH_INTERVAL = 10000;
 
 type DeploymentMode = 'production' | 'quickstart';
@@ -203,7 +203,6 @@ export const FleetServerCommandStep = ({
           windowsCommand={installCommand.windows}
           linuxDebCommand={installCommand.deb}
           linuxRpmCommand={installCommand.rpm}
-          troubleshootLink={docLinks.links.fleet.troubleshooting}
           isK8s={false}
         />
       </>
@@ -290,36 +289,16 @@ export const useFleetServerInstructions = (policyId?: string) => {
 };
 
 const AgentPolicySelectionStep = ({
-  policyId,
+  selectedPolicy,
   setPolicyId,
+  agentPolicies,
+  refreshAgentPolicies,
 }: {
-  policyId?: string;
-  setPolicyId: (v: string) => void;
+  selectedPolicy?: AgentPolicy;
+  setPolicyId: (v?: string) => void;
+  agentPolicies: AgentPolicy[];
+  refreshAgentPolicies: () => void;
 }): EuiStepProps => {
-  const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
-
-  const agentPolicies = useMemo(
-    () => (data ? data.items.filter((item) => policyHasFleetServer(item)) : []),
-    [data]
-  );
-
-  useEffect(() => {
-    // Select default value
-    if (agentPolicies.length && !policyId) {
-      setPolicyId(agentPolicies[0].id);
-    }
-  }, [agentPolicies, policyId, setPolicyId]);
-
-  const onChangeCallback = useCallback(
-    (key: string | undefined, policy?: AgentPolicy) => {
-      if (policy) {
-        refreshAgentPolicies();
-      }
-      setPolicyId(key!);
-    },
-    [setPolicyId, refreshAgentPolicies]
-  );
-
   return {
     title:
       agentPolicies.length === 0
@@ -335,9 +314,11 @@ const AgentPolicySelectionStep = ({
         <SelectCreateAgentPolicy
           agentPolicies={agentPolicies}
           withKeySelection={false}
-          onAgentPolicyChange={onChangeCallback}
           excludeFleetServer={false}
           isFleetServerPolicy={true}
+          selectedPolicy={selectedPolicy}
+          setSelectedPolicyId={setPolicyId}
+          refreshAgentPolicies={refreshAgentPolicies}
         />
       </>
     ),
@@ -379,7 +360,7 @@ export const AddFleetServerHostStepContent = ({
       } else {
         setError(
           i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostInvalidUrlError', {
-            defaultMessage: 'Invalid URL',
+            defaultMessage: 'Valid https URL required.',
           })
         );
         return false;
@@ -642,9 +623,28 @@ const CompleteStep = (): EuiStepProps => {
   };
 };
 
+const findPolicyById = (policies: AgentPolicy[], id: string | undefined) => {
+  if (!id) return undefined;
+  return policies.find((p) => p.id === id);
+};
+
 export const OnPremInstructions: React.FC = () => {
   const { notifications } = useStartServices();
-  const [policyId, setPolicyId] = useState<string | undefined>();
+
+  const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
+
+  const agentPolicies = useMemo(
+    () => (data ? data.items.filter((item) => policyHasFleetServer(item)) : []),
+    [data]
+  );
+
+  // Select default value
+  let defaultValue = '';
+  if (agentPolicies.length) {
+    defaultValue = agentPolicies[0].id;
+  }
+  const [policyId, setPolicyId] = useState<string | undefined>(defaultValue);
+  const selectedPolicy = findPolicyById(agentPolicies, policyId);
 
   const {
     serviceToken,
@@ -720,7 +720,12 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
-          AgentPolicySelectionStep({ policyId, setPolicyId }),
+          AgentPolicySelectionStep({
+            selectedPolicy,
+            setPolicyId,
+            agentPolicies,
+            refreshAgentPolicies,
+          }),
           DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),

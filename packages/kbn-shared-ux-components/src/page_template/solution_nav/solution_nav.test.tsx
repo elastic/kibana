@@ -14,6 +14,9 @@ jest.mock('@elastic/eui', () => ({
   useIsWithinBreakpoints: (args: string[]) => {
     return args[0] === 'xs';
   },
+  EuiSideNav: function Component() {
+    // no-op
+  },
 }));
 
 const items: KibanaPageTemplateSolutionNavProps['items'] = [
