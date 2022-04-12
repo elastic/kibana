@@ -144,7 +144,7 @@ export async function getIncomingDataByAgentsId(
           agent_ids: {
             terms: {
               field: 'agent.id',
-              size: 10,
+              size: agentsIds.length,
             },
           },
         },

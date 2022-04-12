@@ -39,6 +39,8 @@ describe('ProcessTreeNode component', () => {
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
     onShowAlertDetails: jest.fn(),
+    showTimestamp: true,
+    verboseMode: false,
   };
 
   beforeEach(() => {
@@ -123,6 +125,10 @@ describe('ProcessTreeNode component', () => {
           },
           process: {
             ...processMock.getDetails().process,
+            user: {
+              id: '-1',
+              name: 'root',
+            },
             parent: {
               ...processMock.getDetails().process!.parent,
               user: {
@@ -176,7 +182,7 @@ describe('ProcessTreeNode component', () => {
     it('When Timestamp is ON, it shows Timestamp', async () => {
       // set a mock where Timestamp is turned ON
       renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} timeStampOn={true} process={processMock} />
+        <ProcessTreeNode {...props} showTimestamp={true} process={processMock} />
       );
 
       expect(renderResult.getByTestId('sessionView:processTreeNodeTimestamp')).toBeTruthy();
@@ -185,7 +191,7 @@ describe('ProcessTreeNode component', () => {
     it('When Timestamp is OFF, it doesnt show Timestamp', async () => {
       // set a mock where Timestamp is turned OFF
       renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} timeStampOn={false} process={processMock} />
+        <ProcessTreeNode {...props} showTimestamp={false} process={processMock} />
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeTimestamp')).toBeFalsy();
