@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { TransformConfigSchema } from './transforms/types';
-
 /**
  * as const
  *
@@ -54,7 +52,6 @@ export const DEFAULT_INTERVAL_PAUSE = true as const;
 export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
-export const DEFAULT_TRANSFORMS = 'securitySolution:transforms' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
 export const GLOBAL_HEADER_HEIGHT = 96 as const; // px
 export const FILTERS_GLOBAL_HEIGHT = 109 as const; // px
@@ -203,38 +200,6 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
-/** The default settings for the transforms */
-export const defaultTransformsSetting: TransformConfigSchema = {
-  enabled: false,
-  auto_start: true,
-  auto_create: true,
-  query: {
-    range: {
-      '@timestamp': {
-        gte: 'now-1d/d',
-        format: 'strict_date_optional_time',
-      },
-    },
-  },
-  retention_policy: {
-    time: {
-      field: '@timestamp',
-      max_age: '1w',
-    },
-  },
-  max_page_search_size: 5000,
-  settings: [
-    {
-      prefix: 'all',
-      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      data_sources: [
-        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ],
-    },
-  ],
-};
-export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -370,13 +335,6 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-/**
- * Used for transforms for metrics_entities. If the security_solutions pulls in
- * the metrics_entities plugin, then it should pull this constant from there rather
- * than use it from here.
- */
-export const ELASTIC_NAME = 'estc' as const;
 
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 

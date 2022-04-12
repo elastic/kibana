@@ -2467,7 +2467,7 @@ describe('IndexPattern Data Source', () => {
   });
   describe('#isTimeBased', () => {
     it('should return true if date histogram exists in any layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2520,10 +2520,17 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
     it('should return false if date histogram exists but is detached from global time range in every layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2577,9 +2584,44 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
     });
     it('should return false if date histogram does not exist in any layer', () => {
+      let state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
+    it('should return true if the index pattern is time based even if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
@@ -2598,7 +2640,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
   });
 

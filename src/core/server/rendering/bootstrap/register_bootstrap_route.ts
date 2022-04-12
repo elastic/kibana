@@ -20,7 +20,6 @@ export const registerBootstrapRoute = ({
     {
       path: '/bootstrap.js',
       options: {
-        authRequired: 'optional',
         tags: ['api'],
       },
       validate: false,
@@ -28,6 +27,33 @@ export const registerBootstrapRoute = ({
     async (ctx, req, res) => {
       const uiSettingsClient = (await ctx.core).uiSettings.client;
       const { body, etag } = await renderer({ uiSettingsClient, request: req });
+
+      return res.ok({
+        body,
+        headers: {
+          etag,
+          'content-type': 'application/javascript',
+          'cache-control': 'must-revalidate',
+        },
+      });
+    }
+  );
+  router.get(
+    {
+      path: '/bootstrap-anonymous.js',
+      options: {
+        authRequired: 'optional',
+        tags: ['api'],
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const uiSettingsClient = ctx.core.uiSettings.client;
+      const { body, etag } = await renderer({
+        uiSettingsClient,
+        request: req,
+        isAnonymousPage: true,
+      });
 
       return res.ok({
         body,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { TimeRange } from '../../../../../common';
 
 export function toAbsoluteDates(range: TimeRange) {

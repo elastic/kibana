@@ -7,7 +7,7 @@
 
 // utility functions for handling dates
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { formatDate } from '@elastic/eui';
 import { TimeRange } from '../../../../../src/plugins/data/common';
 import { TIME_FORMAT } from '../constants/time_format';

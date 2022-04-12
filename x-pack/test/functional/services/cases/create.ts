@@ -12,6 +12,7 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const config = getService('config');
 
   return {
     /**
@@ -57,7 +58,9 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
       // save
       await testSubjects.click('create-case-submit');
 
-      await testSubjects.existOrFail('case-view-title');
+      await testSubjects.existOrFail('case-view-title', {
+        timeout: config.get('timeouts.waitFor'),
+      });
     },
   };
 }

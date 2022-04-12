@@ -95,10 +95,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings.client, {
-          includeUserSettings: true,
+          isAnonymousPage: false,
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
@@ -110,10 +111,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings.client, {
-          includeUserSettings: false,
+          isAnonymousPage: true,
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({

@@ -44,6 +44,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       textConvert = (range: any) => {
         const params = this._params;
 
+        if (range == null) {
+          return '';
+        }
+
         if (range.label) {
           return range.label;
         }
@@ -90,6 +94,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       textConvert = (range: DateRange) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,
@@ -103,6 +111,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       textConvert = (range: IpRangeKey) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,
