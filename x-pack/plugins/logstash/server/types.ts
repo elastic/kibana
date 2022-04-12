@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, CustomRequestHandlerContext } from 'src/core/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
 export interface PipelineListItemOptions {
@@ -18,9 +18,9 @@ export interface PipelineListItemOptions {
 /**
  * @internal
  */
-export interface LogstashRequestHandlerContext extends RequestHandlerContext {
+export type LogstashRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

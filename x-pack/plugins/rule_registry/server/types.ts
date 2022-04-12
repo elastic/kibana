@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { CustomRequestHandlerContext } from 'kibana/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -68,6 +68,6 @@ export interface RacApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface RacRequestHandlerContext extends RequestHandlerContext {
+export type RacRequestHandlerContext = CustomRequestHandlerContext<{
   rac: RacApiRequestHandlerContext;
-}
+}>;

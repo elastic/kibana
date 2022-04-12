@@ -7,7 +7,7 @@
 
 import {
   CoreSetup,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   Logger,
   KibanaRequest,
   CoreStart,
@@ -24,11 +24,11 @@ import {
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { UxUIFilters } from '../../common/ux_ui_filter';
 
-export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
+export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   rac: RacApiRequestHandlerContext;
-}
+}>;
 
 export interface APMRouteCreateOptions {
   options: {

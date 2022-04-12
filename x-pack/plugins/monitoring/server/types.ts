@@ -10,7 +10,7 @@ import type {
   IRouter,
   Logger,
   ICustomClusterClient,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   ElasticsearchClient,
 } from 'kibana/server';
 import type Boom from '@hapi/boom';
@@ -57,12 +57,12 @@ export interface PluginsSetup {
   cloud?: CloudSetup;
 }
 
-export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
+export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<{
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
   infra: InfraRequestHandlerContext;
   ruleRegistry?: RacApiRequestHandlerContext;
-}
+}>;
 
 export interface PluginsStart {
   alerting: AlertingPluginStartContract;
@@ -167,6 +167,7 @@ export interface Bucket {
 export interface Aggregation {
   buckets: Bucket[];
 }
+
 export interface ClusterSettingsReasonResponse {
   found: boolean;
   reason?: {
@@ -217,10 +218,12 @@ export interface PipelineResponse {
     throughput?: PipelineMetricsProcessed;
   };
 }
+
 export interface PipelinesResponse {
   pipelines: PipelineResponse[];
   totalPipelineCount: number;
 }
+
 export interface PipelineMetrics {
   bucket_size: string;
   timeRange: {
@@ -238,6 +241,7 @@ export interface PipelineMetrics {
     isDerivative: boolean;
   };
 }
+
 export type PipelineMetricsRes = PipelineMetrics & {
   data: Array<[number, { [key: string]: number }]>;
 };

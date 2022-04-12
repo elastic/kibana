@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from 'src/core/server';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -16,6 +16,7 @@ import {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
+
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
@@ -34,13 +35,21 @@ export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 // the object exposed by plugin.setup()
 export interface IEventLogService {
   isLoggingEntries(): boolean;
+
   isIndexingEntries(): boolean;
+
   registerProviderActions(provider: string, actions: string[]): void;
+
   isProviderActionRegistered(provider: string, action: string): boolean;
+
   getProviderActions(): Map<string, Set<string>>;
+
   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
+
   getLogger(properties: IEvent): IEventLogger;
+
   getIndexPattern(): string;
+
   isEsContextReady(): Promise<boolean>;
 }
 
@@ -55,6 +64,7 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+
   aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],
@@ -65,7 +75,9 @@ export interface IEventLogClient {
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
+
   startTiming(event: IEvent): void;
+
   stopTiming(event: IEvent): void;
 }
 
@@ -79,9 +91,9 @@ export interface EventLogApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface EventLogRequestHandlerContext extends RequestHandlerContext {
+export type EventLogRequestHandlerContext = CustomRequestHandlerContext<{
   eventLog: EventLogApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

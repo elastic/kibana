@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { IClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IClusterClient, IRouter, CustomRequestHandlerContext } from 'src/core/server';
 import { ILicense } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
@@ -35,9 +35,9 @@ export interface LicensingApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface LicensingRequestHandlerContext extends RequestHandlerContext {
+export type LicensingRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

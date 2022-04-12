@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, CoreRequestHandlerContext } from 'src/core/server';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+} from 'src/core/server';
 import type { ActionsApiRequestHandlerContext } from '../../actions/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 import type { FleetRequestHandlerContext } from '../../fleet/server';
@@ -34,13 +38,13 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getExceptionListClient: () => ExceptionListClient | null;
 }
 
-export interface SecuritySolutionRequestHandlerContext extends RequestHandlerContext {
+export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
   securitySolution: SecuritySolutionApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
   lists?: ListsApiRequestHandlerContext;
   fleet?: FleetRequestHandlerContext['fleet'];
-}
+}>;
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RequestHandlerContext, IRouter } from 'src/core/server';
+import type { CustomRequestHandlerContext, IRouter } from 'src/core/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
 /**
  * @internal
  */
-export interface FeaturesRequestHandlerContext extends RequestHandlerContext {
+export type FeaturesRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

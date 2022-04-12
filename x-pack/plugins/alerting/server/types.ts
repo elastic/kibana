@@ -7,7 +7,7 @@
 
 import type {
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
 } from 'src/core/server';
@@ -60,9 +60,9 @@ export interface AlertingApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

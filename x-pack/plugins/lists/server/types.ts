@@ -9,7 +9,7 @@ import {
   ElasticsearchClient,
   IContextProvider,
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
@@ -25,6 +25,7 @@ import type {
 
 export type ContextProvider = IContextProvider<ListsRequestHandlerContext, 'lists'>;
 export type ListsPluginStart = void;
+
 export interface PluginsStart {
   security: SecurityPluginStart | undefined | null;
   spaces: SpacesPluginStart | undefined | null;
@@ -61,9 +62,9 @@ export interface ListsApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface ListsRequestHandlerContext extends RequestHandlerContext {
+export type ListsRequestHandlerContext = CustomRequestHandlerContext<{
   lists?: ListsApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

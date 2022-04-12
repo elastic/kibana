@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandlerContext, IRouter } from 'src/core/server';
+import { CustomRequestHandlerContext, IRouter } from 'src/core/server';
 import { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
-export interface BannersRequestHandlerContext extends RequestHandlerContext {
+export type BannersRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-}
+}>;
 
 export type BannersRouter = IRouter<BannersRequestHandlerContext>;

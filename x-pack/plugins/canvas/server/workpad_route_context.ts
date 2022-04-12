@@ -6,7 +6,7 @@
  */
 
 import {
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   RequestHandlerContextProvider,
   SavedObject,
   SavedObjectsResolveResponse,
@@ -18,7 +18,7 @@ import { injectReferences, extractReferences } from './saved_objects/workpad_ref
 import { getId } from '../common/lib/get_id';
 import { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
 
-export interface CanvasRouteHandlerContext extends RequestHandlerContext {
+export type CanvasRouteHandlerContext = CustomRequestHandlerContext<{
   canvas: {
     workpad: {
       create: (attributes: CanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
@@ -31,7 +31,7 @@ export interface CanvasRouteHandlerContext extends RequestHandlerContext {
       ) => Promise<SavedObject<WorkpadAttributes>>;
     };
   };
-}
+}>;
 
 interface Deps {
   expressions: ExpressionsServiceStart;

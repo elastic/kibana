@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, RequestHandlerContext } from 'src/core/server';
+import type { CoreSetup, CustomRequestHandlerContext } from 'src/core/server';
 import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
 import type { MlPluginSetup } from '../../ml/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
@@ -47,7 +47,7 @@ export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
 /**
  * @internal
  */
-export interface InfraPluginRequestHandlerContext extends RequestHandlerContext {
+export type InfraPluginRequestHandlerContext = CustomRequestHandlerContext<{
   infra: InfraRequestHandlerContext;
   search: SearchRequestHandlerContext;
-}
+}>;

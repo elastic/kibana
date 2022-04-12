@@ -21,7 +21,7 @@ export const registerInfoRoute = (router: BannersRouter, config: BannersConfigTy
       },
     },
     async (ctx, req, res) => {
-      const allowed = isValidLicense(ctx.licensing.license);
+      const allowed = isValidLicense((await ctx.licensing).license);
 
       const bannerConfig =
         req.auth.isAuthenticated && config.disableSpaceBanners === false

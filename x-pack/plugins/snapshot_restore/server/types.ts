@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, IScopedClusterClient } from 'src/core/server';
+import type { IRouter, CustomRequestHandlerContext, IScopedClusterClient } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
@@ -63,6 +63,6 @@ export interface SnapshotRestoreContext {
 /**
  * @internal
  */
-export interface SnapshotRestoreRequestHandlerContext extends RequestHandlerContext {
+export type SnapshotRestoreRequestHandlerContext = CustomRequestHandlerContext<{
   snapshotRestore: SnapshotRestoreContext;
-}
+}>;

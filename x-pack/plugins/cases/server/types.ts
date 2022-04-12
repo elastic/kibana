@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, CustomRequestHandlerContext } from 'src/core/server';
 import {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -22,9 +22,9 @@ export interface CaseRequestContext {
 /**
  * @internal
  */
-export interface CasesRequestHandlerContext extends RequestHandlerContext {
+export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
-}
+}>;
 
 /**
  * @internal

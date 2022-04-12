@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
+import type { CustomRequestHandlerContext, RequestHandler } from 'src/core/server';
 
 import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
 
@@ -13,7 +13,7 @@ export const createLicensedRouteHandler = <
   P,
   Q,
   B,
-  Context extends RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext }
+  Context extends CustomRequestHandlerContext<{ licensing: LicensingApiRequestHandlerContext }>
 >(
   handler: RequestHandler<P, Q, B, Context>
 ) => {
@@ -22,7 +22,7 @@ export const createLicensedRouteHandler = <
     request,
     responseToolkit
   ) => {
-    const { license } = context.licensing;
+    const { license } = await context.licensing;
     const licenseCheck = license.check('spaces', 'basic');
     if (licenseCheck.state === 'unavailable' || licenseCheck.state === 'invalid') {
       return responseToolkit.forbidden({ body: { message: licenseCheck.message! } });

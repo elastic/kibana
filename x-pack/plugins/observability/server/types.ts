@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, CustomRequestHandlerContext } from 'src/core/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
@@ -20,10 +20,10 @@ export type {
 /**
  * @internal
  */
-export interface ObservabilityRequestHandlerContext extends RequestHandlerContext {
+export type ObservabilityRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
