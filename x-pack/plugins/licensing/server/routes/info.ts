@@ -10,7 +10,7 @@ import { LicensingRouter } from '../types';
 export function registerInfoRoute(router: LicensingRouter) {
   router.get({ path: '/api/licensing/info', validate: false }, (context, request, response) => {
     return response.ok({
-      body: context.licensing.license,
+      body: (await context.licensing).license,
     });
   });
 }

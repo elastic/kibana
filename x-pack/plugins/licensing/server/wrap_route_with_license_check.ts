@@ -23,7 +23,8 @@ export function wrapRouteWithLicenseCheck<P, Q, B, Context extends LicensingRequ
     request: KibanaRequest<P, Q, B, RouteMethod>,
     response: KibanaResponseFactory
   ) => {
-    const licenseCheckResult = checkLicense(context.licensing.license);
+    const { license } = await context.licensing;
+    const licenseCheckResult = checkLicense(license);
 
     if (licenseCheckResult.valid) {
       return handler(context, request, response);

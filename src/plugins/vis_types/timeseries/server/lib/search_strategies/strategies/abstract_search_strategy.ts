@@ -50,7 +50,7 @@ export abstract class AbstractSearchStrategy {
     esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
       const startTime = Date.now();
       requests.push(
-        requestContext.search
+        (await requestContext.search)
           .search(
             {
               indexType,

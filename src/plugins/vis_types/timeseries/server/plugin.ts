@@ -112,10 +112,10 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
           .toPromise(),
       getIndexPatternsService: async (requestContext) => {
         const [, { dataViews }] = await core.getStartServices();
-
+        const { elasticsearch, savedObjects } = await requestContext.core;
         return await dataViews.dataViewsServiceFactory(
-          requestContext.core.savedObjects.client,
-          requestContext.core.elasticsearch.client.asCurrentUser
+          savedObjects.client,
+          elasticsearch.client.asCurrentUser
         );
       },
       getFieldFormatsService: async (uiSettings) => {
