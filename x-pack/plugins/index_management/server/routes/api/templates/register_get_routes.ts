@@ -21,7 +21,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
@@ -66,7 +66,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { params: paramsSchema, query: querySchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params as TypeOf<typeof paramsSchema>;
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 

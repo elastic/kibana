@@ -103,7 +103,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
   router.get(
     { path: addBasePath('/data_streams'), validate: { query: querySchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       const includeStats = (request.query as TypeOf<typeof querySchema>).includeStats === 'true';
 
@@ -152,7 +152,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
     },
     async (context, request, response) => {
       const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       try {
         const [{ data_streams: dataStreams }, { data_streams: dataStreamsStats }] =
           await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);

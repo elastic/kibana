@@ -24,7 +24,7 @@ export const registerCreateRoute = ({
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       const serializedComponentTemplate = serializeComponentTemplate(request.body);
 

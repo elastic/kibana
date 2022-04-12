@@ -25,7 +25,7 @@ export function registerMappingRoute({ router, lib: { handleEsError } }: RouteDe
   router.get(
     { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none' as const,
