@@ -7,12 +7,11 @@
  */
 
 import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { PaletteContinuity } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
+import { checkIsMaxContinuity, checkIsMinContinuity } from '@kbn/coloring';
 import { last } from 'lodash';
 import { paletteIds } from './constants';
-import { checkIsMaxContinuity, checkIsMinContinuity } from './static';
-
-import type { PaletteContinuity } from './types';
 
 export interface CustomPaletteArguments {
   color?: string[];
