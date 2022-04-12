@@ -100,9 +100,12 @@ class FilterEditorUI extends Component<Props, State> {
     const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
       defaultMessage: 'Add filter',
     });
-    const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.editButtonLabel', {
-      defaultMessage: 'Edit filter',
-    });
+    const updateButtonLabel = i18n.translate(
+      'unifiedSearch.filter.filterEditor.updateButtonLabel',
+      {
+        defaultMessage: 'Update filter',
+      }
+    );
 
     return (
       <div>
