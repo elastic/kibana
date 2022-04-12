@@ -160,6 +160,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.fork,
       category: 'process',
       kind: EventKind.event,
+      id: '1',
     },
     host: {
       architecture: 'x86_64',
@@ -317,6 +318,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.event,
+      id: '2',
     },
   },
   {
@@ -459,6 +461,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+      id: '3',
     },
     host: {
       architecture: 'x86_64',
@@ -621,6 +624,7 @@ export const mockEvents: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.event,
+      id: '4',
     },
     host: {
       architecture: 'x86_64',
@@ -809,6 +813,7 @@ export const mockAlerts: ProcessEvent[] = [
       action: EventAction.exec,
       category: 'process',
       kind: EventKind.signal,
+      id: '5',
     },
     host: {
       architecture: 'x86_64',
@@ -995,6 +1000,7 @@ export const mockAlerts: ProcessEvent[] = [
       action: EventAction.end,
       category: 'process',
       kind: EventKind.signal,
+      id: '6',
     },
     host: {
       architecture: 'x86_64',
@@ -1273,6 +1279,7 @@ export const childProcessMock: Process = {
         kind: EventKind.event,
         category: 'process',
         action: EventAction.exec,
+        id: '1',
       },
       host: {
         architecture: 'x86_64',
@@ -1357,6 +1364,7 @@ export const processMock: Process = {
         kind: EventKind.event,
         category: 'process',
         action: EventAction.exec,
+        id: '2',
       },
       host: {
         architecture: 'x86_64',

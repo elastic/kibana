@@ -55,10 +55,16 @@ export class ProcessImpl implements Process {
     this.searchMatched = null;
   }
 
-  addEvent(event: ProcessEvent) {
+  addEvent(newEvent: ProcessEvent) {
     // rather than push new events on the array, we return a new one
     // this helps the below memoizeOne functions to behave correctly.
-    this.events = this.events.concat(event);
+    const exists = this.events.find((event) => {
+      return event.event?.id === newEvent.event?.id;
+    });
+
+    if (!exists) {
+      this.events = this.events.concat(newEvent);
+    }
   }
 
   addAlert(alert: ProcessEvent) {

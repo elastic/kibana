@@ -59,7 +59,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       }
 
       if (hasInvestigatedAlert) {
-        bgColor = transparentize(colors.danger, 0.04);
+        bgColor = `${transparentize(colors.danger, 0.04)}!important`;
       }
 
       return { bgColor, borderColor, hoverColor, searchResColor };

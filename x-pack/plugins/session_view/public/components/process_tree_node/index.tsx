@@ -116,7 +116,7 @@ export function ProcessTreeNode({
 
   useEffect(() => {
     if (process.id === selectedProcess?.id && nodeRef.current?.scrollIntoView) {
-      nodeRef.current.scrollIntoView({ behavior: 'smooth' });
+      nodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [selectedProcess, process, nodeRef]);
 
