@@ -99,7 +99,7 @@ const accuracyModeDisabledWarning = (
 ) => (
   <>
     <FormattedMessage
-      id="xpack.lens.indexPattern.precisionErrorWarning"
+      id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
       defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. If you need this field to be more exact, try enabling accuracy mode (this may impact performance). To learn more about this limit, {link}."
       values={{
         name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
@@ -124,7 +124,7 @@ const accuracyModeDisabledWarning = (
 
 const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   <FormattedMessage
-    id="xpack.lens.indexPattern.precisionErrorWarning"
+    id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
     defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
     values={{
       name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
@@ -178,6 +178,8 @@ export function getPrecisionErrorWarningMessages(
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && checkColumnForPrecisionError(column)) {
           const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
+          // currentColumnIsTerms is mostly a type guard. If there's a precision error,
+          // we already know that we're dealing with a terms-based operation (at least for now).
           const currentColumnIsTerms = isColumnOfType<TermsIndexPatternColumn>(
             'terms',
             currentColumn
