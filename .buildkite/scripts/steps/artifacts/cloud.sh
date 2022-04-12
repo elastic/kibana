@@ -34,7 +34,7 @@ docker logout docker.elastic.co
 cd -
 
 echo "--- Create deployment"
-CLOUD_DEPLOYMENT_NAME="kibana-release-$TAG"
+CLOUD_DEPLOYMENT_NAME="kibana-artifacts-$TAG"
 
 LOGS=$(mktemp --suffix ".json")
 DEPLOYMENT_SPEC=$(mktemp --suffix ".json")
