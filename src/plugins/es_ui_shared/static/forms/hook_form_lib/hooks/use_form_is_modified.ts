@@ -78,12 +78,13 @@ export const useFormIsModified = ({
     ? ([path]: [string, FieldHook]) => fieldsToDiscard[path] !== true
     : () => true;
 
+  // Calculate next state value
   // 1. Check if any field has been modified
-  let isModified = Object.entries(getFields())
+  let nextIsModified = Object.entries(getFields())
     .filter(isFieldIncluded)
     .some(([_, field]) => field.isModified);
 
-  if (!isModified) {
+  if (!nextIsModified) {
     // 2. Check if any field has been removed.
     // If somme field has been removed **and** they were originaly present on the
     // form "defaultValue" then the form has been modified.
@@ -96,12 +97,13 @@ export const useFormIsModified = ({
           .filter(fieldOnFormDefaultValue)
       : Object.keys(__getFieldsRemoved()).filter(fieldOnFormDefaultValue);
 
-    isModified = fieldsRemovedFromDOM.length > 0;
+    nextIsModified = fieldsRemovedFromDOM.length > 0;
   }
 
-  if (isModified && !isFormModified) {
+  // Update the state **only** if it has changed to avoid creating an infinite re-render
+  if (nextIsModified && !isFormModified) {
     setIsFormModified(true);
-  } else if (!isModified && isFormModified) {
+  } else if (!nextIsModified && isFormModified) {
     setIsFormModified(false);
   }
 

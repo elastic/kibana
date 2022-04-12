@@ -205,6 +205,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       if (defaultValueDeserialized.current === undefined) {
         defaultValueDeserialized.current = {} as I;
       }
+
+      // We allow "undefined" to be passed to be able to remove a value from the form `defaultValue` object.
+      // When <UseField path="foo" defaultValue="bar" /> mounts it calls `updateDefaultValueAt("foo", "bar")` to
+      // update the form "defaultValue" object. When that component unmounts we want to be able to clean up and
+      // remove its defaultValue on the form.
       if (value === undefined) {
         const updated = flattenObject(defaultValueDeserialized.current!);
         delete updated[path];
