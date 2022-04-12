@@ -9,8 +9,15 @@
 import React from 'react';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './empty_placeholder.scss';
-import classnames from 'classnames';
+import { css } from '@emotion/react';
+
+const style = css`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
 
 export const EmptyPlaceholder = ({
   icon,
@@ -25,17 +32,16 @@ export const EmptyPlaceholder = ({
   dataTestSubj?: string;
   className?: string;
 }) => (
-  <>
-    <EuiText
-      data-test-subj={dataTestSubj}
-      className={classnames('chart__empty-placeholder', className)}
-      textAlign="center"
-      color="subdued"
-      size="xs"
-    >
-      <EuiIcon type={icon} color={iconColor} size="l" />
-      <EuiSpacer size="s" />
-      <p>{message}</p>
-    </EuiText>
-  </>
+  <EuiText
+    data-test-subj={dataTestSubj}
+    css={style}
+    className={className}
+    textAlign="center"
+    color="subdued"
+    size="xs"
+  >
+    <EuiIcon type={icon} color={iconColor} size="l" />
+    <EuiSpacer size="s" />
+    <p>{message}</p>
+  </EuiText>
 );

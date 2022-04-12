@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { LegendToggle } from './legend_toggle';
-export { ColorPicker } from './color_picker';
-export { CurrentTime } from './current_time';
-export { EmptyPlaceholder } from './empty_placeholder';
+export { SystemPaletteArguments, systemPalette } from './system_palette';
+export { palette } from './palette';
 
-export { useCommonChartStyles } from './common_chart_styles';
-export * from './endzones';
+export {
+  CustomPaletteArguments,
+  CustomPaletteState,
+  PaletteExpressionFunctionDefinition,
+} from './types';

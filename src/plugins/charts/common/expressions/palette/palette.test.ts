@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 import type { PaletteOutput } from '@kbn/coloring';
-import {
-  palette,
-  defaultCustomColors,
-  systemPalette,
-  CustomPaletteState,
-  CustomPaletteArguments,
-} from './palette';
+import { palette, CustomPaletteState, CustomPaletteArguments } from './index';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
+import { defaultCustomColors } from '../../constants';
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (
@@ -92,22 +87,5 @@ describe('palette', () => {
         expect(result.params!.stops).toEqual(stops);
       });
     });
-  });
-});
-
-describe('system_palette', () => {
-  const fn = functionWrapper(systemPalette()) as (
-    context: null,
-    args: { name: string; params?: unknown }
-  ) => PaletteOutput<unknown>;
-
-  it('results a palette', () => {
-    const result = fn(null, { name: 'test' });
-    expect(result).toHaveProperty('type', 'palette');
-  });
-
-  it('returns the name', () => {
-    const result = fn(null, { name: 'test' });
-    expect(result).toHaveProperty('name', 'test');
   });
 });
