@@ -8,7 +8,7 @@
 import React from 'react';
 import { injectI18n } from '@kbn/i18n-react';
 import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
-import { FilterItem } from '../../../../../../../src/plugins/data/public';
+import { FilterItem } from '../../../../../../../src/plugins/unified_search/public';
 import type { DataView } from '../../../../../../../src/plugins/data_views/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 

@@ -40,6 +40,7 @@ describe('useExpViewTimeRange', function () {
           page: 1,
           total: 0,
           monitors: [],
+          syncErrors: null,
         },
         locations: [],
         enablement: null,
@@ -55,6 +56,7 @@ describe('useExpViewTimeRange', function () {
         },
         syntheticsService: {
           loading: false,
+          signupUrl: null,
         },
       },
     };

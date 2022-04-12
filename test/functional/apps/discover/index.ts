@@ -15,12 +15,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover app', function () {
     this.tags('ciGroup6');
 
-    before(function () {
-      return browser.setWindowSize(1300, 800);
+    before(async function () {
+      await browser.setWindowSize(1300, 800);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    after(async function unloadMakelogs() {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     loadTestFile(require.resolve('./_saved_queries'));
@@ -37,7 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
     loadTestFile(require.resolve('./_inspector'));
-    loadTestFile(require.resolve('./_doc_navigation'));
+    loadTestFile(require.resolve('./_classic_table_doc_navigation'));
     loadTestFile(require.resolve('./_date_nanos'));
     loadTestFile(require.resolve('./_date_nanos_mixed'));
     loadTestFile(require.resolve('./_indexpattern_without_timefield'));

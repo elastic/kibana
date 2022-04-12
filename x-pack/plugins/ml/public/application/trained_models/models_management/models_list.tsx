@@ -729,11 +729,7 @@ export const ModelsList: FC<Props> = ({
     <>
       {isManagementTable ? null : (
         <>
-          <SavedObjectsWarning
-            mlSavedObjectType="trained-model"
-            onCloseFlyout={fetchModelsData}
-            forceRefresh={isLoading}
-          />
+          <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
         </>
       )}
       <EuiFlexGroup justifyContent="spaceBetween">

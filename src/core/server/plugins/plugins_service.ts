@@ -9,7 +9,7 @@
 import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, tap, toArray } from 'rxjs/operators';
-import { getFlattenedObject, pick } from '@kbn/std';
+import { getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -26,6 +26,7 @@ import {
 } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { InternalEnvironmentServicePreboot } from '../environment';
@@ -228,16 +229,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
           return [
             pluginId,
-            this.configService.atPath(plugin.configPath).pipe(
-              map((config: any) =>
-                pick(
-                  config || {},
-                  Object.entries(configDescriptor.exposeToBrowser!)
-                    .filter(([_, exposed]) => exposed)
-                    .map(([key, _]) => key)
-                )
-              )
-            ),
+            this.configService
+              .atPath(plugin.configPath)
+              .pipe(map((config: any) => createBrowserConfig(config, configDescriptor))),
           ];
         })
     );

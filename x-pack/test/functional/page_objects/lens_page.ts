@@ -596,7 +596,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const lastIndex = (
         await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
       ).length;
-      await testSubjects.click('indexPattern-terms-add-field');
+      await retry.waitFor('check for field combobox existance', async () => {
+        await testSubjects.click('indexPattern-terms-add-field');
+        const comboboxExists = await testSubjects.exists(
+          `indexPattern-dimension-field-${lastIndex}`
+        );
+        return comboboxExists === true;
+      });
       // count the number of defined terms
       const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
       // await comboBox.openOptionsList(target);
@@ -714,6 +720,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      const searchInput = await testSubjects.find('lnsChartSwitchSearch');
+      await searchInput.focus();
       await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
       await PageObjects.header.waitUntilLoadingHasFinished();

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -20,7 +19,6 @@ import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction }
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
@@ -47,14 +45,6 @@ export interface DataPublicPluginSetup {
   autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
-}
-
-/**
- * Data plugin prewired UI components
- */
-export interface DataPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 
 /**
@@ -110,11 +100,6 @@ export interface DataPublicPluginStart {
    * {@link QueryStart}
    */
   query: QueryStart;
-  /**
-   * prewired UI components
-   * {@link DataPublicPluginStartUi}
-   */
-  ui: DataPublicPluginStartUi;
 
   nowProvider: NowProviderPublicContract;
 }

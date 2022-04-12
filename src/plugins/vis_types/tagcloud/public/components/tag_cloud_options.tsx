@@ -9,7 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from '../../../../charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { VisEditorOptionsProps } from '../../../../visualizations/public';
 import { SelectOption, SwitchOption, PalettePicker } from '../../../../vis_default_editor/public';
 import { ValidatedDualRange } from '../../../../kibana_react/public';

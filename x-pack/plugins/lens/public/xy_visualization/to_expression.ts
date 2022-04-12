@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
 import {
@@ -31,8 +31,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { defaultAnnotationLabel } from './annotations/config_panel';
-import { getUniqueLabels } from './annotations/helpers';
+import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (

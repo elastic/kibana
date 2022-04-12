@@ -64,7 +64,7 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService },
+    services: { history, notifications, settings: settingsService, esHostService, http },
     docLinkVersion,
   } = useServicesContext();
 
@@ -105,7 +105,6 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     const loadBufferFromRemote = (url: string) => {
       const coreEditor = editor.getCoreEditor();
-
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
@@ -121,7 +120,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
-          await editor.update(data, true);
+          // when we load data from another Api we also must pass history
+          await editor.update(`${initialTextValue}\n ${data}`, true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
           editor.highlightCurrentRequestsAndUpdateActionBar();
@@ -194,7 +194,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(http, settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
@@ -214,6 +214,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     history,
     setInputEditor,
     settingsService,
+    http,
   ]);
 
   useEffect(() => {

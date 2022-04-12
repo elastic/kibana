@@ -16,6 +16,7 @@ import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import type { FilterManager, TimeRange, SavedQuery } from 'src/plugins/data/public';
+import type { DataView } from 'src/plugins/data_views/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 
@@ -83,9 +84,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           timefilter: { timefilter },
           filterManager,
         },
-        ui: { SearchBar },
       },
       storage,
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
     } = useKibana().services;
 
     useEffect(() => {
@@ -296,7 +299,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={indexPatterns}
+          indexPatterns={indexPatterns as DataView[]}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}

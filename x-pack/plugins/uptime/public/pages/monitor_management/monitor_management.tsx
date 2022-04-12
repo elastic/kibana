@@ -17,7 +17,9 @@ import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadc
 import { MonitorListContainer } from '../../components/monitor_management/monitor_list/monitor_list_container';
 import { EnablementEmptyState } from '../../components/monitor_management/monitor_list/enablement_empty_state';
 import { useEnablement } from '../../components/monitor_management/hooks/use_enablement';
+import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { Loader } from '../../components/monitor_management/loader/loader';
+import { ERROR_HEADING_LABEL } from './content';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
@@ -32,6 +34,7 @@ export const MonitorManagementPage: React.FC = () => {
     loading: enablementLoading,
     enableSynthetics,
   } = useEnablement();
+  const { loading: locationsLoading } = useLocations();
   const { list: monitorList } = useSelector(monitorManagementListSelector);
   const { isEnabled } = enablement;
 
@@ -62,7 +65,7 @@ export const MonitorManagementPage: React.FC = () => {
   return (
     <>
       <Loader
-        loading={enablementLoading || monitorList.total === null}
+        loading={enablementLoading || locationsLoading || monitorList.total === null}
         error={Boolean(enablementError)}
         loadingTitle={LOADING_LABEL}
         errorTitle={ERROR_HEADING_LABEL}
@@ -135,10 +138,6 @@ const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
       'Monitor Management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor Management. Your existing monitors are paused.',
   }
 );
-
-const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
-  defaultMessage: 'Error loading Monitor Management',
-});
 
 const ERROR_HEADING_BODY = i18n.translate(
   'xpack.uptime.monitorManagement.editMonitorError.description',

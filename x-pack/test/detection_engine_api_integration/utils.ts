@@ -26,6 +26,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ToolingLog } from '@kbn/dev-utils';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectReference } from 'kibana/server';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -50,6 +52,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -58,8 +61,9 @@ import {
   SECURITY_TELEMETRY_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
-import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 import { DetectionMetrics } from '../../plugins/security_solution/server/usage/detections/types';
+import { LegacyRuleActions } from '../../plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types';
+import { DetectionAlert } from '../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -113,12 +117,12 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 /**
  * This is a typical simple preview rule for testing that is easy for most basic testing
  * @param ruleId
- * @param enabled The number of times the rule will be run through the executors. Defaulted to 20,
+ * @param enabled The number of times the rule will be run through the executors. Defaulted to 12,
  * the execution time for the default interval time of 5m.
  */
 export const getSimplePreviewRule = (
   ruleId = 'preview-rule-1',
-  invocationCount = 20
+  invocationCount = 12
 ): PreviewRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
@@ -510,18 +514,9 @@ export const deleteAllAlerts = async (
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
-        .set('kbn-xsrf', 'true')
-        .send();
-
-      const ids = body.data.map((rule: FullResponseSchema) => ({
-        id: rule.id,
-      }));
-
       await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-        .send(ids)
+        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+        .send({ action: 'delete', query: '' })
         .set('kbn-xsrf', 'true');
 
       const { body: finalCheck } = await supertest
@@ -638,7 +633,7 @@ export const createLegacyRuleAction = async (
     .query({ alert_id: alertId })
     .send({
       name: 'Legacy notification with one action',
-      interval: '1m',
+      interval: '1h',
       actions: [
         {
           id: connectorId,
@@ -1593,7 +1588,7 @@ export const getSignalsByRuleIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   ruleIds: string[]
-): Promise<estypes.SearchResponse<RACAlert>> => {
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
   const response = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
@@ -1607,7 +1602,7 @@ export const getSignalsByRuleIds = async (
     );
   }
 
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
+  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
   return signalsOpen;
 };
 
@@ -1622,7 +1617,7 @@ export const getSignalsByIds = async (
   log: ToolingLog,
   ids: string[],
   size?: number
-): Promise<estypes.SearchResponse<RACAlert>> => {
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
   const response = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
@@ -1635,7 +1630,7 @@ export const getSignalsByIds = async (
       )}, status: ${JSON.stringify(response.status)}`
     );
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
+  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
   return signalsOpen;
 };
 
@@ -1648,7 +1643,7 @@ export const getSignalsById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string
-): Promise<estypes.SearchResponse<RACAlert>> => {
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
   const response = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
@@ -1661,7 +1656,7 @@ export const getSignalsById = async (
       )}, status: ${JSON.stringify(response.status)}`
     );
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
+  const { body: signalsOpen }: { body: estypes.SearchResponse<DetectionAlert> } = response;
   return signalsOpen;
 };
 
@@ -2100,3 +2095,17 @@ export const getSimpleThreatMatch = (
   ],
   threat_filters: [],
 });
+
+interface LegacyActionSO extends LegacyRuleActions {
+  references: SavedObjectReference[];
+}
+
+/**
+ * Fetch all legacy action sidecar SOs from the .kibana index
+ * @param es The ElasticSearch service
+ */
+export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-actions',
+  });

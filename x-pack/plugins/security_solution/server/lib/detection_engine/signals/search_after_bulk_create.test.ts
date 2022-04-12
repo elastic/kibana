@@ -15,7 +15,7 @@ import {
   sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -33,11 +33,25 @@ import { BuildReasonMessage } from './reason_formatters';
 import { QueryRuleParams } from '../schemas/rule_schemas';
 import { createPersistenceServicesMock } from '../../../../../rule_registry/server/utils/create_persistence_rule_type_wrapper.mock';
 import { PersistenceServices } from '../../../../../rule_registry/server';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
+import { SERVER_APP_ID } from '../../../../common/constants';
+import { CommonAlertFieldsLatest } from '../../../../../rule_registry/common/schemas';
 
 const buildRuleMessage = mockBuildRuleMessage;
 
 describe('searchAfterAndBulkCreate', () => {
-  let mockService: AlertServicesMock;
+  let mockService: RuleExecutorServicesMock;
   let mockPersistenceServices: jest.Mocked<PersistenceServices>;
   let buildReasonMessage: BuildReasonMessage;
   let bulkCreate: BulkCreate;
@@ -50,6 +64,18 @@ describe('searchAfterAndBulkCreate', () => {
   const defaultFilter = {
     match_all: {},
   };
+  const mockCommonFields: CommonAlertFieldsLatest = {
+    [ALERT_RULE_CATEGORY]: 'Custom Query Rule',
+    [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+    [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',
+    [ALERT_RULE_NAME]: 'rule-name',
+    [ALERT_RULE_PRODUCER]: 'siem',
+    [ALERT_RULE_TYPE_ID]: 'siem.queryRule',
+    [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
+    [SPACE_IDS]: ['default'],
+    [ALERT_RULE_TAGS]: [],
+    [TIMESTAMP]: '2020-04-20T21:27:45+0000',
+  };
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
   beforeEach(() => {
@@ -58,7 +84,7 @@ describe('searchAfterAndBulkCreate', () => {
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
-    mockService = alertsMock.createAlertServices();
+    mockService = alertsMock.createRuleExecutorServices();
     tuple = getRuleRangeTuples({
       logger: mockLogger,
       previousStartedAt: new Date(),
@@ -92,7 +118,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -103,7 +135,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -114,7 +152,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -125,7 +169,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '4', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '4',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -178,7 +228,13 @@ describe('searchAfterAndBulkCreate', () => {
       )
     );
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -189,7 +245,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -200,7 +262,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -254,10 +322,26 @@ describe('searchAfterAndBulkCreate', () => {
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
       createdAlerts: [
-        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '4',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
       ],
       errors: {},
     });
@@ -365,10 +449,26 @@ describe('searchAfterAndBulkCreate', () => {
   test('should return success when empty string sortId present', async () => {
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
       createdAlerts: [
-        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '4',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
       ],
       errors: {},
     });
@@ -478,10 +578,26 @@ describe('searchAfterAndBulkCreate', () => {
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
       createdAlerts: [
-        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '4',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
       ],
       errors: {},
     });
@@ -530,10 +646,26 @@ describe('searchAfterAndBulkCreate', () => {
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
       createdAlerts: [
-        { _id: '1', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '2', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '3', _index: '.internal.alerts-security.alerts-default-000001' },
-        { _id: '4', _index: '.internal.alerts-security.alerts-default-000001' },
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+        {
+          _id: '4',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
       ],
       errors: {},
     });
@@ -695,7 +827,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {
         'error on creation': {
           count: 1,
@@ -713,7 +851,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -724,7 +868,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -735,7 +885,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '4', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '4',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -777,7 +933,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '1', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '1',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -788,7 +950,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '2', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '2',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 
@@ -799,7 +967,13 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     mockPersistenceServices.alertWithPersistence.mockResolvedValueOnce({
-      createdAlerts: [{ _id: '3', _index: '.internal.alerts-security.alerts-default-000001' }],
+      createdAlerts: [
+        {
+          _id: '3',
+          _index: '.internal.alerts-security.alerts-default-000001',
+          ...mockCommonFields,
+        },
+      ],
       errors: {},
     });
 

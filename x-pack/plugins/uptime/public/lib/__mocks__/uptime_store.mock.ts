@@ -69,6 +69,7 @@ export const mockState: AppState = {
       perPage: 10,
       total: null,
       monitors: [],
+      syncErrors: null,
     },
     locations: [],
     loading: {
@@ -84,6 +85,7 @@ export const mockState: AppState = {
     enablement: null,
     syntheticsService: {
       loading: false,
+      signupUrl: null,
     },
   },
   ml: {

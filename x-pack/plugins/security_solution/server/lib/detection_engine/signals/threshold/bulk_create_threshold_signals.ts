@@ -14,7 +14,7 @@ import { Logger } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
@@ -30,11 +30,12 @@ import type {
   WrapHits,
 } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
   completeRule: CompleteRule<ThresholdRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   filter: unknown;
@@ -205,7 +206,7 @@ export const transformThresholdResultsToEcs = (
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const ruleParams = params.completeRule.ruleParams;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(

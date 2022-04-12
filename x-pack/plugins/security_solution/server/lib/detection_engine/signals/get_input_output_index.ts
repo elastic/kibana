@@ -9,7 +9,7 @@ import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/con
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -17,7 +17,7 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 export interface GetInputIndex {
   experimentalFeatures: ExperimentalFeatures;
   index: string[] | null | undefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
 }
 

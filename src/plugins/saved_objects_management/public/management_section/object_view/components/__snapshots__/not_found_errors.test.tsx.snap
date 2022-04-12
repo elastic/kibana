@@ -106,11 +106,12 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
                       type="popout"
                     >
                       <span
-                        aria-label="External link"
                         className="euiLink__externalIcon"
                         data-euiicon-type="popout"
                         size="s"
-                      />
+                      >
+                        External link
+                      </span>
                     </EuiIcon>
                     <EuiScreenReaderOnly>
                       <span
@@ -243,11 +244,12 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
                       type="popout"
                     >
                       <span
-                        aria-label="External link"
                         className="euiLink__externalIcon"
                         data-euiicon-type="popout"
                         size="s"
-                      />
+                      >
+                        External link
+                      </span>
                     </EuiIcon>
                     <EuiScreenReaderOnly>
                       <span
@@ -380,11 +382,12 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
                       type="popout"
                     >
                       <span
-                        aria-label="External link"
                         className="euiLink__externalIcon"
                         data-euiicon-type="popout"
                         size="s"
-                      />
+                      >
+                        External link
+                      </span>
                     </EuiIcon>
                     <EuiScreenReaderOnly>
                       <span
@@ -509,11 +512,12 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
                       type="popout"
                     >
                       <span
-                        aria-label="External link"
                         className="euiLink__externalIcon"
                         data-euiicon-type="popout"
                         size="s"
-                      />
+                      >
+                        External link
+                      </span>
                     </EuiIcon>
                     <EuiScreenReaderOnly>
                       <span

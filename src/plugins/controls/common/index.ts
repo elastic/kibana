@@ -16,3 +16,5 @@ export { OPTIONS_LIST_CONTROL } from './control_types/options_list/types';
 export { RANGE_SLIDER_CONTROL } from './control_types/range_slider/types';
 
 export { getDefaultControlGroupInput } from './control_group/control_group_constants';
+
+export { TIME_SLIDER_CONTROL } from './control_types/time_slider/types';
