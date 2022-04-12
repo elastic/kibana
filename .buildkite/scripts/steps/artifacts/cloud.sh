@@ -78,4 +78,4 @@ CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID
 # node --no-warnings scripts/functional_test_runner.js --include-tag=cloud -exclude-tag=skipCloud 
 
 echo "--- Shutdown deployment"
-ecctl deployment shutdown --force --track --output json &> "$LOGS"
+ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json &> "$LOGS"
