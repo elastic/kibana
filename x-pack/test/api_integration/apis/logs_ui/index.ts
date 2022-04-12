@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Logs UI routes', () => {
     loadTestFile(require.resolve('./log_views'));
+    loadTestFile(require.resolve('./log_threshold_alert'));
   });
 }

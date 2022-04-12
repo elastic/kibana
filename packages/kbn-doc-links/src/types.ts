@@ -233,6 +233,7 @@ export interface DocLinks {
     readonly detectionsReq: string;
     readonly networkMap: string;
     readonly troubleshootGaps: string;
+    readonly ruleApiOverview: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
