@@ -44,12 +44,14 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: ci-group-4d
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -61,6 +63,8 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -72,6 +76,8 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -83,6 +89,8 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -94,6 +102,8 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -105,6 +115,8 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -116,6 +128,8 @@ steps:
     timeout_in_minutes: 120
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -123,17 +137,25 @@ steps:
     label: 'Jest Tests'
     parallelism: 8
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     timeout_in_minutes: 90
     key: jest
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
     parallelism: 3
     agents:
-      queue: n2-4
+      queue: n2-4-spot
     timeout_in_minutes: 120
     key: jest-integration
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/test/api_integration.sh
     label: 'API Integration Tests'
@@ -141,6 +163,10 @@ steps:
       queue: n2-2
     timeout_in_minutes: 120
     key: api-integration
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
@@ -176,6 +202,10 @@ steps:
       queue: n2-4
     key: build_api_docs
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
