@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     if (config.get('esTestCluster.ccs')) {
       loadTestFile(require.resolve('./_data_view_editor'));
+      loadTestFile(require.resolve('./_saved_queries'));
     } else {
       loadTestFile(require.resolve('./_saved_queries'));
       loadTestFile(require.resolve('./_discover'));
@@ -40,6 +41,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_source_filters'));
       loadTestFile(require.resolve('./_large_string'));
       loadTestFile(require.resolve('./_inspector'));
+      loadTestFile(require.resolve('./_classic_table_doc_navigation'));
       loadTestFile(require.resolve('./_date_nanos'));
       loadTestFile(require.resolve('./_date_nanos_mixed'));
       loadTestFile(require.resolve('./_indexpattern_without_timefield'));
