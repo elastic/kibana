@@ -41,14 +41,11 @@ describe('when navigating to integration page', () => {
     cy.loginAsPowerUser();
     cy.visit(integrationsPath);
 
+    // open integration policy form
     cy.get('[data-test-subj="integration-card:epr:apm:featured').click();
-    cy.get('[aria-selected="true"]').contains('Elastic APM in Fleet');
-    cy.contains('Elastic APM now available in Fleet!');
+    cy.contains('Elastic APM in Fleet').click();
     cy.contains('a', 'APM integration').click();
-    cy.url().should('include', 'app/integrations/detail/apm/overview');
-    cy.get('[data-test-subj="addIntegrationPolicyButton"]')
-      .should('not.disabled')
-      .click();
+    cy.get('[data-test-subj="addIntegrationPolicyButton"]').click();
   });
 
   it('checks validators for required fields', () => {
@@ -64,6 +61,7 @@ describe('when navigating to integration page', () => {
   });
 
   it('adds a new policy without agent', () => {
+    cy.url().should('include', 'app/fleet/integrations/apm/add-integration');
     policyFormFields.map((field) => {
       cy.get(`[data-test-subj="${field.selector}"`).clear().type(field.value);
     });
