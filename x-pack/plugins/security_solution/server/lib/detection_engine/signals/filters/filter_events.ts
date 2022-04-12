@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { partition } from 'lodash';
 import { FilterEventsOptions } from './types';
 
 /**
@@ -12,12 +13,14 @@ import { FilterEventsOptions } from './types';
  * If the entry is in both an inclusion and exclusion list it will not be filtered out.
  * @param events The events to check against
  * @param fieldAndSetTuples The field and set tuples
+ * @returns A tuple where the first element is an array of alerts that should be created and second element is
+ * an array of alerts that matched the exception and should not be created.
  */
-export const filterEvents = <T>({
+export const partitionEvents = <T>({
   events,
   fieldAndSetTuples,
-}: FilterEventsOptions<T>): Array<estypes.SearchHit<T>> => {
-  return events.filter((item) => {
+}: FilterEventsOptions<T>): [Array<estypes.SearchHit<T>>, Array<estypes.SearchHit<T>>] => {
+  return partition(events, (item) => {
     return fieldAndSetTuples
       .map((tuple) => {
         const eventItem = item.fields ? item.fields[tuple.field] : undefined;

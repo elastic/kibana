@@ -8,7 +8,7 @@
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
-import { SignalSearchResponse, SignalSource } from './types';
+import { SignalSource, SignalSourceHit } from './types';
 import { Logger } from '../../../../../../../src/core/server';
 
 interface SearchResultSource {
@@ -18,9 +18,9 @@ interface SearchResultSource {
 type CreatedSignalId = string;
 type AlertId = string;
 
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+export function selectEvents(filteredEvents: SignalSourceHit[]): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
+  const sources: TelemetryEvent[] = filteredEvents.map(function (
     obj: SearchResultSource
   ): TelemetryEvent {
     return obj._source;
@@ -46,7 +46,7 @@ export function enrichEndpointAlertsSignalID(
 export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: ITelemetryEventsSender | undefined,
-  filteredEvents: SignalSearchResponse,
+  filteredEvents: SignalSourceHit[],
   createdEvents: SignalSource[],
   buildRuleMessage: BuildRuleMessage
 ) {

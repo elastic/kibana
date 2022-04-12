@@ -910,6 +910,23 @@ export const sampleDocSearchResultsNoSortIdNoHits = (
   },
 });
 
+export const repeatedHitsWithSortId = (
+  count: number,
+  guids: string[],
+  ips?: Array<string | string[]>,
+  destIps?: Array<string | string[]>,
+  sortIds?: string[]
+): SignalSourceHit[] => {
+  return Array.from({ length: count }).map((x, index) => ({
+    ...sampleDocWithSortId(
+      guids[index],
+      sortIds,
+      ips ? ips[index] : '127.0.0.1',
+      destIps ? destIps[index] : '127.0.0.1'
+    ),
+  }));
+};
+
 export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
@@ -929,14 +946,7 @@ export const repeatedSearchResultsWithSortId = (
   hits: {
     total,
     max_score: 100,
-    hits: Array.from({ length: pageSize }).map((x, index) => ({
-      ...sampleDocWithSortId(
-        guids[index],
-        sortIds,
-        ips ? ips[index] : '127.0.0.1',
-        destIps ? destIps[index] : '127.0.0.1'
-      ),
-    })),
+    hits: repeatedHitsWithSortId(pageSize, guids, ips, destIps, sortIds),
   },
 });
 
