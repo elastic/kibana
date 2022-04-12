@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
-        await retry.waitForWithTimeout('innerhtml to change', 45000, async () => {
+        await retry.try(async () => {
           const conApp2 = await find.byCssSelector('.conApp');
           const secondInnerHtml = await conApp2.getAttribute('innerHTML');
           return firstInnerHtml !== secondInnerHtml;
