@@ -24,7 +24,7 @@ export function registerRestoreRoutes({
   router.get(
     { path: addBasePath('restores'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       try {
         const snapshotRestores: SnapshotRestore[] = [];
@@ -99,7 +99,7 @@ export function registerRestoreRoutes({
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof restoreParamsSchema>;
       const restoreSettings = req.body as TypeOf<typeof restoreSettingsSchema>;
 
