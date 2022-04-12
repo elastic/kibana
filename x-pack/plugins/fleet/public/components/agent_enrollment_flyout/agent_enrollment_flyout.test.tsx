@@ -26,11 +26,12 @@ import {
 } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
+import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
-import type { Props } from '.';
+import type { FlyOutProps } from './types';
 import { AgentEnrollmentFlyout } from '.';
 
-const TestComponent = (props: Props) => (
+const TestComponent = (props: FlyOutProps) => (
   <KibanaContextProvider services={coreMock.createStart()}>
     <ConfigContext.Provider value={{ agents: { enabled: true, elasticsearch: {} }, enabled: true }}>
       <KibanaVersionContext.Provider value={'8.1.0'}>
@@ -42,7 +43,7 @@ const TestComponent = (props: Props) => (
   </KibanaContextProvider>
 );
 
-const setup = (props?: Props) => {
+const setup = (props?: FlyOutProps) => {
   const testBed = registerTestBed(TestComponent)(props);
   const { find, component } = testBed;
 
@@ -82,6 +83,10 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
 
     (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
+    (useFleetServerUnhealthy as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isUnhealthy: false,
+    });
 
     (sendGetOneAgentPolicy as jest.Mock).mockResolvedValue({
       data: { item: { package_policies: [] } },
@@ -152,7 +157,6 @@ describe('<AgentEnrollmentFlyout />', () => {
       const { exists } = testBed;
 
       expect(exists('agentEnrollmentFlyout')).toBe(true);
-
       expect(exists('agent-policy-selection-step')).toBe(true);
       expect(exists('agent-enrollment-key-selection-step')).toBe(false);
     });
@@ -172,7 +176,6 @@ describe('<AgentEnrollmentFlyout />', () => {
       it('uses the configure enrollment step, not the agent policy selection step', () => {
         const { exists } = testBed;
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-
         expect(exists('agent-policy-selection-step')).toBe(false);
         expect(exists('agent-enrollment-key-selection-step')).toBe(true);
       });
@@ -197,51 +200,13 @@ describe('<AgentEnrollmentFlyout />', () => {
       });
     });
 
-    // Skipped due to implementation details in the step components. See https://github.com/elastic/kibana/issues/103894
-    describe.skip('"View data" extension point', () => {
-      it('shows the "View data" step when UI extension is provided', () => {
-        jest.clearAllMocks();
-        act(() => {
-          testBed = setup({
-            onClose: jest.fn(),
-            viewDataStep: { title: 'View Data', children: <div /> },
-          });
-          testBed.component.update();
-        });
-        const { exists, actions } = testBed;
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('view-data-step')).toBe(true);
-
-        jest.clearAllMocks();
-        actions.goToStandaloneTab();
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('view-data-step')).toBe(false);
-      });
-
-      it('does not call the "View data" step when UI extension is not provided', () => {
-        jest.clearAllMocks();
-        act(() => {
-          testBed = setup({
-            onClose: jest.fn(),
-            viewDataStep: undefined,
-          });
-          testBed.component.update();
-        });
-        const { exists, actions } = testBed;
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('view-data-step')).toBe(false);
-
-        jest.clearAllMocks();
-        actions.goToStandaloneTab();
-        expect(exists('view-data-step')).toBe(false);
-      });
-    });
-  });
-
-  describe('standalone instructions', () => {
-    it('uses the agent policy selection step', () => {
+  // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
+  // to provide value around the new flyout structure
+  describe.skip('standalone instructions', () => {
+    it('uses the agent policy selection step', async () => {
       const { exists, actions } = testBed;
       actions.goToStandaloneTab();
+
       expect(exists('agentEnrollmentFlyout')).toBe(true);
       expect(exists('agent-policy-selection-step')).toBe(true);
       expect(exists('agent-enrollment-key-selection-step')).toBe(false);
@@ -262,13 +227,10 @@ describe('<AgentEnrollmentFlyout />', () => {
       it('does not use either of the agent policy selection or enrollment key steps', () => {
         const { exists, actions } = testBed;
         jest.clearAllMocks();
-        expect(exists('agentEnrollmentFlyout')).toBe(true);
+
         actions.goToStandaloneTab();
 
-        // TODO: Determine why this forced re-render is necessary. The component is stale and doesn't
-        // actually reflect navigation to the standalone tab without this.
-        testBed.component.update();
-
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
         expect(exists('agent-policy-selection-step')).toBe(false);
         expect(exists('agent-enrollment-key-selection-step')).toBe(false);
       });

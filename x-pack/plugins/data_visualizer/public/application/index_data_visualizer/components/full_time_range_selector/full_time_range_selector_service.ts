@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { TimefilterContract } from 'src/plugins/data/public';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from 'kibana/public';

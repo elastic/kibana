@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CaseStatuses } from '../../../../plugins/cases/common';
 
@@ -64,9 +63,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('deletes a case correctly from the list', async () => {
-        await testSubjects.click('action-delete');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.existOrFail('euiToastHeader');
+        await cases.casesTable.deleteFirstListedCase();
         await cases.casesTable.waitForTableToFinishLoading();
 
         await retry.tryForTime(2000, async () => {
@@ -83,13 +80,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('filtering', () => {
-      const id = uuid.v4();
-      const caseTitle = 'matchme-' + id;
+      const caseTitle = 'matchme';
 
       before(async () => {
-        await cases.api.createNthRandomCases(2);
         await cases.api.createCase({ title: caseTitle, tags: ['one'] });
-        await cases.api.createCase({ tags: ['two'] });
+        await cases.api.createCase({ title: 'test2', tags: ['two'] });
+        await cases.api.createCase({ title: 'test3' });
+        await cases.api.createCase({ title: 'test4' });
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });

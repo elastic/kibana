@@ -24,6 +24,16 @@ jest.mock('../../hooks/use_request', () => {
   };
 });
 
+jest.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy', () => {
+  const module = jest.requireActual(
+    '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'
+  );
+  return {
+    ...module,
+    useFleetServerUnhealthy: jest.fn(),
+  };
+});
+
 jest.mock(
   '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form',
   () => {
@@ -64,10 +74,6 @@ jest.mock('./steps', () => {
     AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
       'data-test-subj': 'agent-enrollment-key-selection-step',
       title: 'agent-enrollment-key-selection-step',
-    }),
-    ViewDataStep: jest.fn().mockReturnValue({
-      'data-test-subj': 'view-data-step',
-      title: 'view-data-step',
     }),
     DownloadStep: jest
       .fn()

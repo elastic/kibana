@@ -11,11 +11,11 @@ import { useKibanaVersion } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
 
 import { PlatformSelector } from '../../../components';
+import { InstallationMessage } from '../../agent_enrollment_flyout/installation_message';
 
 interface Props {
   fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
-  policyId: string | undefined;
   isK8s: string | undefined;
 }
 
@@ -26,7 +26,6 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   fleetServerHosts,
-  policyId,
   isK8s,
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
@@ -56,13 +55,16 @@ sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
   return (
-    <PlatformSelector
-      linuxCommand={linuxCommand}
-      macCommand={macCommand}
-      windowsCommand={windowsCommand}
-      linuxDebCommand={linuxDebCommand}
-      linuxRpmCommand={linuxRpmCommand}
-      isK8s={false}
-    />
+    <>
+      <InstallationMessage />
+      <PlatformSelector
+        linuxCommand={linuxCommand}
+        macCommand={macCommand}
+        windowsCommand={windowsCommand}
+        linuxDebCommand={linuxDebCommand}
+        linuxRpmCommand={linuxRpmCommand}
+        isK8s={isK8s === 'IS_KUBERNETES'}
+      />
+    </>
   );
 };

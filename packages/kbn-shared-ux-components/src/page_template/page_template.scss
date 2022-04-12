@@ -1,0 +1,19 @@
+.kbnPageTemplate__pageSideBar {
+  overflow: hidden;
+  // Temporary hack till the sizing is changed directly in EUI
+  min-width: 248px;
+
+  @include euiCanAnimate {
+    transition: min-width $euiAnimSpeedFast $euiAnimSlightResistance;
+  }
+
+  &.kbnPageTemplate__pageSideBar--shrink {
+    min-width: $euiSizeXXL;
+  }
+
+  .kbnPageTemplate--centeredBody & {
+    @include euiBreakpoint('m', 'l', 'xl') {
+      border-right: $euiBorderThin;
+    }
+  }
+}

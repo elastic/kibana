@@ -147,8 +147,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
-
-      if (isValid && !!ecsFieldValue) {
+      if (isValid && (!ecsMappingField || !!ecsFieldValue)) {
         try {
           await mutateAsync(
             pickBy(
