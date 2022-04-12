@@ -24,6 +24,18 @@ export default ({ getService }: FtrProviderContext) => {
     return ruleResponse.body.id;
   }
 
+  const getRulesList = async (tableRows: any[]) => {
+    const rows = [];
+    for (const euiTableRow of tableRows) {
+      const $ = await euiTableRow.parseDomContent();
+      rows.push({
+        name: $.findTestSubjects('rulesTableCell-name').find('a').text(),
+        enabled: $.findTestSubjects('rulesTableCell-ContextStatus').find('button').attr('title'),
+      });
+    }
+    return rows;
+  };
+
   describe('Observability Rules page', function () {
     this.tags('includeFirefox');
 
@@ -106,20 +118,21 @@ export default ({ getService }: FtrProviderContext) => {
       it('shows the rules table ', async () => {
         await testSubjects.existOrFail('rulesList');
         const tableRows = await find.allByCssSelector('.euiTableRow');
-
-        const rows = [];
-        for (const euiTableRow of tableRows) {
-          const $ = await euiTableRow.parseDomContent();
-          rows.push({
-            name: $.findTestSubjects('rulesTableCell-name').find('a').text(),
-            enabled: $.findTestSubjects('rulesTableCell-enabled').find('button').attr('title'),
-          });
-        }
+        const rows = await getRulesList(tableRows);
         expect(rows.length).to.be(2);
         expect(rows[0].name).to.be('error-log');
         expect(rows[0].enabled).to.be('Enabled');
         expect(rows[1].name).to.be('uptime');
         expect(rows[1].enabled).to.be('Enabled');
+      });
+
+      it('changes the rule status to "disabled"', async () => {
+        await testSubjects.existOrFail('rulesList');
+        await observability.alerts.rulesPage.clickRuleStatusDropDownMenu();
+        await observability.alerts.rulesPage.clickDisableFromDropDownMenu();
+        const tableRows = await find.allByCssSelector('.euiTableRow');
+        const rows = await getRulesList(tableRows);
+        expect(rows[0].enabled).to.be('Disabled');
       });
     });
 

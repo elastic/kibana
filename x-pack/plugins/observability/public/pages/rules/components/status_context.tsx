@@ -96,6 +96,7 @@ export function StatusContext({
       anchorPosition="downLeft"
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
+      data-test-subj="statusContextButton"
     >
       <EuiContextMenuPanel items={panelItems} />
     </EuiPopover>

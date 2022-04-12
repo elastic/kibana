@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPage = await testSubjects.find('manageRulesPages');
@@ -19,5 +20,14 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     return createRuleButton.click();
   };
 
-  return { getManageRulesPageHref, clickCreateRuleButton };
+  const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusContextButton');
+  const clickDisableFromDropDownMenu = async () =>
+    find.clickByCssSelector('div.euiContextMenuPanel > div > div > button:nth-child(2)');
+
+  return {
+    getManageRulesPageHref,
+    clickCreateRuleButton,
+    clickRuleStatusDropDownMenu,
+    clickDisableFromDropDownMenu,
+  };
 }
