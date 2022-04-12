@@ -50,11 +50,8 @@ export function registerExecuteRoute({
       const watch = Watch.fromDownstreamJson(request.body.watch);
 
       try {
-        const hit = await executeWatch(
-          ctx.core.elasticsearch.client,
-          executeDetails.upstreamJson,
-          watch.watchJson
-        );
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await executeWatch(esClient, executeDetails.upstreamJson, watch.watchJson);
         const id = get(hit, '_id');
         const watchHistoryItemJson = get(hit, 'watch_record');
         const watchId = get(hit, 'watch_record.watch_id');

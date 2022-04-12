@@ -87,7 +87,8 @@ export function registerGetRoute({ router, license, lib: { handleEsError } }: Ro
       const { pattern } = request.body;
 
       try {
-        const indices = await getIndices(ctx.core.elasticsearch.client, pattern);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const indices = await getIndices(esClient, pattern);
         return response.ok({ body: { indices } });
       } catch (e) {
         return handleEsError({ error: e, response });

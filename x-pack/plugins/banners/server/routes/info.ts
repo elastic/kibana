@@ -25,7 +25,7 @@ export const registerInfoRoute = (router: BannersRouter, config: BannersConfigTy
 
       const bannerConfig =
         req.auth.isAuthenticated && config.disableSpaceBanners === false
-          ? await getBannerConfig(ctx.core.uiSettings.client)
+          ? await getBannerConfig((await ctx.core).uiSettings.client)
           : config;
 
       return res.ok({

@@ -35,8 +35,9 @@ export function registerDeleteRoute({
       const { watchId } = request.params;
 
       try {
+        const esClient = (await ctx.core).elasticsearch.client;
         return response.ok({
-          body: await deleteWatch(ctx.core.elasticsearch.client, watchId),
+          body: await deleteWatch(esClient, watchId),
         });
       } catch (e) {
         if (e?.statusCode === 404 && e.meta?.body?.error) {
