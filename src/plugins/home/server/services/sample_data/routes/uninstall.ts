@@ -32,7 +32,7 @@ export function createUninstallRoute(
         return response.notFound();
       }
 
-      const sampleDataInstaller = getSampleDataInstaller({
+      const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
         sampleDatasets,
         logger,

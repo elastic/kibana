@@ -20,7 +20,6 @@ const {
     savedObjects: { client: mockSavedObjectsClient },
   },
 } = mockContext;
-const context = registerSavedQueryRouteHandlerContext(mockContext);
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -73,7 +72,13 @@ const savedQueryReferences = [
 ];
 
 describe('saved query route handler context', () => {
-  beforeEach(() => {
+  let context: Awaited<ReturnType<typeof registerSavedQueryRouteHandlerContext>>;
+
+  beforeEach(async () => {
+    context = await registerSavedQueryRouteHandlerContext({
+      core: Promise.resolve(mockContext.core),
+    });
+
     mockSavedObjectsClient.create.mockClear();
     mockSavedObjectsClient.resolve.mockClear();
     mockSavedObjectsClient.find.mockClear();

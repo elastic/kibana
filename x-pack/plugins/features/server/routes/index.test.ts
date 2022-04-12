@@ -16,8 +16,10 @@ import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '
 
 function createContextMock(licenseType: LicenseType = 'platinum') {
   return {
-    core: coreMock.createRequestHandlerContext(),
-    licensing: licensingMock.createRequestHandlerContext({ license: { type: licenseType } }),
+    core: Promise.resolve(coreMock.createRequestHandlerContext()),
+    licensing: Promise.resolve(
+      licensingMock.createRequestHandlerContext({ license: { type: licenseType } })
+    ),
   };
 }
 
