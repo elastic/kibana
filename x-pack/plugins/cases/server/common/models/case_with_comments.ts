@@ -24,6 +24,7 @@ import {
   CaseAttributes,
   ActionTypes,
   Actions,
+  CommentRequestAlertType,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -38,6 +39,7 @@ import {
   transformNewComment,
   getOrUpdateLensReferences,
   createAlertUpdateRequest,
+  isCommentRequestTypeAlert,
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
@@ -192,7 +194,7 @@ export class CaseCommentModel {
     id: string;
   }): Promise<CaseCommentModel> {
     try {
-      this.validateCreateCommentRequest([commentReq]);
+      await this.validateCreateCommentRequest([commentReq]);
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(commentReq)];
 
@@ -225,10 +227,13 @@ export class CaseCommentModel {
     }
   }
 
-  private validateCreateCommentRequest(req: CommentRequest[]) {
-    const totalAlertsInReq = req.filter(
-      (attachment) => attachment.type === CommentType.alert
-    ).length;
+  private async validateCreateCommentRequest(req: CommentRequest[]) {
+    const totalAlertsInReq = req
+      .filter<CommentRequestAlertType>(isCommentRequestTypeAlert)
+      .reduce((count, attachment) => {
+        const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
+        return count + ids.length;
+      }, 0);
 
     const reqHasAlerts = totalAlertsInReq > 0;
 
@@ -241,7 +246,7 @@ export class CaseCommentModel {
     }
 
     if (reqHasAlerts) {
-      this.validateAlertsLimitOnCase(totalAlertsInReq);
+      await this.validateAlertsLimitOnCase(totalAlertsInReq);
     }
   }
 
@@ -251,7 +256,7 @@ export class CaseCommentModel {
       caseId: this.caseInfo.id,
     });
 
-    if (alertsValueCount + totalAlertsInReq >= MAX_ALERTS_PER_CASE) {
+    if (alertsValueCount + totalAlertsInReq > MAX_ALERTS_PER_CASE) {
       throw Boom.badRequest(
         `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`
       );
@@ -378,7 +383,7 @@ export class CaseCommentModel {
     attachments: Array<{ id: string } & CommentRequest>;
   }): Promise<CaseCommentModel> {
     try {
-      this.validateCreateCommentRequest(attachments);
+      await this.validateCreateCommentRequest(attachments);
 
       const caseReference = this.buildRefsToCase();
 

@@ -295,6 +295,48 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('400s when attempting to add more than 1K alerts to a case', async () => {
+        const alerts = [...Array(1001).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...postCommentAlertReq, alertId: alerts, index: alerts },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add more than 1K alerts to a case in multiple calls', async () => {
+        const alerts = [...Array(1000).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertReq,
+            alertId: alerts.slice(0, 500),
+            index: alerts.slice(0, 500),
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertReq,
+            alertId: alerts.slice(500),
+            index: alerts.slice(500),
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+          expectedHttpCode: 400,
+        });
+      });
     });
 
     describe('alerts', () => {
