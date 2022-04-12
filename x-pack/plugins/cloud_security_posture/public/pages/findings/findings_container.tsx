@@ -74,7 +74,7 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
         {INTERNAL_FEATURE_FLAGS.showFindingsGroupBy && (
           <FindingsGroupBySelector
             type={groupBy}
-            onChange={(type) => setUrlQuery({ groupBy: type[0].value })}
+            onChange={(type) => setUrlQuery({ groupBy: type[0]?.value })}
             options={groupByOptions}
           />
         )}
