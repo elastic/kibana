@@ -2085,6 +2085,7 @@ describe('Lens migrations', () => {
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
       const visState = result.attributes.state.visualization as MetricState;
+      expect(visState.textAlign).toBe('center');
       expect(visState.titlePosition).toBe('bottom');
       expect(visState.size).toBe('xl');
     });
@@ -2097,6 +2098,7 @@ describe('Lens migrations', () => {
             ...example.attributes,
             state: {
               visualization: {
+                textAlign: 'right',
                 titlePosition: 'top',
                 size: 's',
               },
@@ -2106,6 +2108,7 @@ describe('Lens migrations', () => {
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       const visState = result.attributes.state.visualization as MetricState;
+      expect(visState.textAlign).toBe('right');
       expect(visState.titlePosition).toBe('top');
       expect(visState.size).toBe('s');
     });

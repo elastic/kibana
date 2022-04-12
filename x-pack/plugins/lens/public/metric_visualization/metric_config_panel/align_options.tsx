@@ -15,6 +15,8 @@ export interface TitlePositionProps {
   setState: (newState: MetricState) => void;
 }
 
+export const DEFAULT_TEXT_ALIGNMENT = 'left';
+
 const alignButtonIcons = [
   {
     id: `left`,

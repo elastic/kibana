@@ -24,6 +24,7 @@ import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
+import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 
 interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -111,7 +112,7 @@ const toExpression = (
                   type: 'function',
                   function: 'font',
                   arguments: {
-                    align: [state?.textAlign || 'center'],
+                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
                     size: [metricFontSize],
                     weight: ['600'],
                     lHeight: [metricFontSize * 1.5],
@@ -129,7 +130,7 @@ const toExpression = (
                   type: 'function',
                   function: 'font',
                   arguments: {
-                    align: [state?.textAlign || 'center'],
+                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
                     size: [labelFont.size],
                     lHeight: [labelFont.size * 1.5],
                     sizeUnit: [labelFont.sizeUnit],

@@ -248,6 +248,7 @@ export const commonLockOldMetricVisSettings = (
   }
 
   const visState = newAttributes.state.visualization as MetricState;
+  visState.textAlign = visState.textAlign ?? 'center';
   visState.titlePosition = visState.titlePosition ?? 'bottom';
   visState.size = visState.size ?? 'xl';
   return newAttributes;
