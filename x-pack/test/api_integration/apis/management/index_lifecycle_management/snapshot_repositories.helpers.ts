@@ -44,7 +44,7 @@ export const registerSnapshotRepositoriesHelpers = (
       })
       .catch((err) => {
         // eslint-disable-next-line no-console
-        console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+        console.error(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
   return {
