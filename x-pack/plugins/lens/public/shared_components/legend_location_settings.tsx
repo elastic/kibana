@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
-import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface LegendLocationSettingsProps {
   /**
@@ -161,32 +160,22 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
             defaultMessage: 'Location',
           })}
         >
-          <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-              defaultMessage: 'Requires legend to be shown',
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.shared.legendLocationLabel', {
+              defaultMessage: 'Location',
             })}
-            condition={isDisabled}
-            position="top"
-            delay="regular"
-            display="block"
-          >
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.shared.legendLocationLabel', {
-                defaultMessage: 'Location',
-              })}
-              data-test-subj="lens-legend-location-btn"
-              name="legendLocation"
-              buttonSize="compressed"
-              options={locationOptions}
-              isDisabled={isDisabled}
-              idSelected={locationOptions.find(({ value }) => value === location)!.id}
-              onChange={(optionId) => {
-                const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
-                onLocationChange(newLocation);
-              }}
-            />
-          </TooltipWrapper>
+            data-test-subj="lens-legend-location-btn"
+            name="legendLocation"
+            buttonSize="compressed"
+            options={locationOptions}
+            isDisabled={isDisabled}
+            idSelected={locationOptions.find(({ value }) => value === location)!.id}
+            onChange={(optionId) => {
+              const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
+              onLocationChange(newLocation);
+            }}
+          />
         </EuiFormRow>
       )}
       <EuiFormRow
@@ -197,62 +186,42 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
       >
         <>
           {(!location || location === 'outside') && (
-            <TooltipWrapper
-              tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
+                defaultMessage: 'Alignment',
               })}
-              condition={isDisabled}
-              position="top"
-              delay="regular"
-              display="block"
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
-                  defaultMessage: 'Alignment',
-                })}
-                isDisabled={isDisabled}
-                data-test-subj="lens-legend-position-btn"
-                name="legendPosition"
-                buttonSize="compressed"
-                options={toggleButtonsIcons}
-                idSelected={position || Position.Right}
-                onChange={onPositionChange}
-                isIconOnly
-              />
-            </TooltipWrapper>
+              isDisabled={isDisabled}
+              data-test-subj="lens-legend-position-btn"
+              name="legendPosition"
+              buttonSize="compressed"
+              options={toggleButtonsIcons}
+              idSelected={position || Position.Right}
+              onChange={onPositionChange}
+              isIconOnly
+            />
           )}
           {location === 'inside' && (
-            <TooltipWrapper
-              tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
+                defaultMessage: 'Alignment',
               })}
-              condition={isDisabled}
-              position="top"
-              delay="regular"
-              display="block"
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
-                  defaultMessage: 'Alignment',
-                })}
-                type="single"
-                data-test-subj="lens-legend-inside-alignment-btn"
-                name="legendInsideAlignment"
-                buttonSize="compressed"
-                isDisabled={isDisabled}
-                options={locationAlignmentButtonsIcons}
-                idSelected={
-                  locationAlignmentButtonsIcons.find(({ value }) => value === alignment)!.id
-                }
-                onChange={(optionId) => {
-                  const newAlignment = locationAlignmentButtonsIcons.find(
-                    ({ id }) => id === optionId
-                  )!.value;
-                  onAlignmentChange(newAlignment);
-                }}
-                isIconOnly
-              />
-            </TooltipWrapper>
+              type="single"
+              data-test-subj="lens-legend-inside-alignment-btn"
+              name="legendInsideAlignment"
+              buttonSize="compressed"
+              isDisabled={isDisabled}
+              options={locationAlignmentButtonsIcons}
+              idSelected={
+                locationAlignmentButtonsIcons.find(({ value }) => value === alignment)!.id
+              }
+              onChange={(optionId) => {
+                const newAlignment = locationAlignmentButtonsIcons.find(
+                  ({ id }) => id === optionId
+                )!.value;
+                onAlignmentChange(newAlignment);
+              }}
+              isIconOnly
+            />
           )}
         </>
       </EuiFormRow>
