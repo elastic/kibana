@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import type { Plugin, CoreSetup, TelemetryCounter, CoreStart } from 'src/core/public';
 import type { Action } from './custom_shipper';
@@ -55,7 +55,7 @@ export class AnalyticsPluginA implements Plugin {
 
     window.__analyticsPluginA__ = {
       getLastActions: async (takeNumberOfActions: number) =>
-        this.actions$.pipe(take(takeNumberOfActions), toArray()).toPromise(),
+        firstValueFrom(this.actions$.pipe(take(takeNumberOfActions), toArray())),
       stats,
       setOptIn(optIn: boolean) {
         analytics.optIn({ global: { enabled: optIn } });

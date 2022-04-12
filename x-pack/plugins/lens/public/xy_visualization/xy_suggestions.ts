@@ -32,6 +32,7 @@ const columnSortOrder = {
   histogram: 6,
   geo_point: 7,
   geo_shape: 8,
+  murmur3: 9,
 };
 
 /**

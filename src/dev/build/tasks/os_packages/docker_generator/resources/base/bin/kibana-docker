@@ -170,6 +170,7 @@ kibana_vars=(
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.hidePrivacyStatement
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom

@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, Subject } from 'rxjs';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
@@ -113,14 +113,14 @@ describe('AnalyticsClient', () => {
         },
       });
 
-      // eslint-disable-next-line dot-notation
-      const internalQueuePromise = analyticsClient['internalEventQueue$']
-        .pipe(take(3), toArray())
-        .toPromise();
+      const internalQueuePromise = lastValueFrom(
+        // eslint-disable-next-line dot-notation
+        analyticsClient['internalEventQueue$'].pipe(take(3), toArray())
+      );
 
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3), toArray())
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3), toArray())
+      );
 
       analyticsClient.reportEvent('testEvent', { a_field: 'a' });
       analyticsClient.reportEvent('testEvent', { a_field: 'b' });
@@ -259,7 +259,7 @@ describe('AnalyticsClient', () => {
       // Typescript also helps with the config type inference <3
       analyticsClient.registerShipper(MockedShipper, { telemetryCounter$: mockTelemetryCounter$ });
 
-      const counterEventPromise = analyticsClient.telemetryCounter$.pipe(take(1)).toPromise();
+      const counterEventPromise = lastValueFrom(analyticsClient.telemetryCounter$.pipe(take(1)));
 
       const counter: TelemetryCounter = {
         type: TelemetryCounterType.succeeded,
@@ -383,7 +383,7 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(2), toArray()).toPromise();
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(2), toArray()));
       context$.next({ a_field: true });
       await expect(globalContextPromise).resolves.toEqual([
         {}, // Original empty state
@@ -392,7 +392,7 @@ describe('AnalyticsClient', () => {
     });
 
     test('It does not break if context emits `undefined`', async () => {
-      const context$ = new Subject<{ a_field: boolean }>();
+      const context$ = new Subject<{ a_field: boolean } | undefined | void>();
       analyticsClient.registerContextProvider({
         name: 'contextProviderA',
         schema: {
@@ -406,7 +406,7 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(3), toArray()).toPromise();
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(3), toArray()));
       context$.next();
       context$.next(undefined);
       await expect(globalContextPromise).resolves.toEqual([
@@ -431,7 +431,7 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(1), toArray()).toPromise();
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(1), toArray()));
       await expect(globalContextPromise).resolves.toEqual([
         { a_field: true }, // No original empty state
       ]);
@@ -473,7 +473,7 @@ describe('AnalyticsClient', () => {
         context$: contextB$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(6), toArray()).toPromise();
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(6), toArray()));
       contextA$.next({ a_field: true });
       contextB$.next({ b_field: 1 });
       contextB$.next({ a_field: false, b_field: 1 });
@@ -512,7 +512,7 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(6), toArray()).toPromise();
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(6), toArray()));
       context$.next({ b_field: 1 });
       context$.next({ a_field: false, b_field: 1 });
       context$.next({ a_field: true, b_field: 1 });
@@ -620,7 +620,7 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(4), toArray()).toPromise();
+      const globalContextPromise = lastValueFrom(globalContext$.pipe(take(4), toArray()));
       context$.next({ a_field: true });
       // The size of the registry grows on the first emission
       expect(contextProvidersRegistry.size).toBe(1);
@@ -774,11 +774,11 @@ describe('AnalyticsClient', () => {
       // eslint-disable-next-line dot-notation
       const internalEventQueue$ = analyticsClient['internalEventQueue$'];
 
-      const internalQueuePromise = internalEventQueue$.pipe(take(2), toArray()).toPromise();
+      const internalQueuePromise = lastValueFrom(internalEventQueue$.pipe(take(2), toArray()));
 
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(2), toArray())
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(2), toArray())
+      );
 
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
       analyticsClient.reportEvent('event-type-b', { b_field: 100 });
@@ -819,9 +819,9 @@ describe('AnalyticsClient', () => {
     });
 
     test('Sends events from the internal queue when there are shippers and an opt-in response is true', async () => {
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
+      );
 
       // Send multiple events of 1 type to test the grouping logic as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
@@ -900,9 +900,9 @@ describe('AnalyticsClient', () => {
     });
 
     test('Discards events from the internal queue when there are shippers and an opt-in response is false', async () => {
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3), toArray()) // Waiting for 3 enqueued
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3), toArray()) // Waiting for 3 enqueued
+      );
 
       // Send multiple events of 1 type to test the grouping logic as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
@@ -942,9 +942,9 @@ describe('AnalyticsClient', () => {
     });
 
     test('Discards only one type of the enqueued events based on event_type config', async () => {
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3 + 1), toArray()) // Waiting for 3 enqueued + 1 batch-shipped events
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3 + 1), toArray()) // Waiting for 3 enqueued + 1 batch-shipped events
+      );
 
       // Send multiple events of 1 type to test the grouping logic as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
@@ -1003,9 +1003,9 @@ describe('AnalyticsClient', () => {
     });
 
     test('Discards the event at the shipper level (for a specific event)', async () => {
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
+      );
 
       // Send multiple events of 1 type to test the grouping logic as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
@@ -1099,9 +1099,9 @@ describe('AnalyticsClient', () => {
     });
 
     test('Discards all the events at the shipper level (globally disabled)', async () => {
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3 + 2), toArray()) // Waiting for 3 enqueued + 2 batch-shipped events
+      );
 
       // Send multiple events of 1 type to test the grouping logic as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
@@ -1192,9 +1192,9 @@ describe('AnalyticsClient', () => {
       analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
       analyticsClient.optIn({ global: { enabled: false } });
 
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3), toArray()) // Waiting for 3 enqueued
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3), toArray()) // Waiting for 3 enqueued
+      );
 
       // Send multiple events of 1 type to test the non-grouping logic at this stage as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
@@ -1235,9 +1235,9 @@ describe('AnalyticsClient', () => {
       analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
       analyticsClient.optIn({ global: { enabled: true } });
 
-      const telemetryCounterPromise = analyticsClient.telemetryCounter$
-        .pipe(take(3 * 2), toArray()) // Waiting for 2 events per each reportEvent call: enqueued and sent_to_shipper
-        .toPromise();
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(3 * 2), toArray()) // Waiting for 2 events per each reportEvent call: enqueued and sent_to_shipper
+      );
 
       // Send multiple events of 1 type to test the non-grouping logic at this stage as well
       analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
