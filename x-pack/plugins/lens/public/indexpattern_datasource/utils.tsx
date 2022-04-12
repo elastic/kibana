@@ -114,7 +114,7 @@ const accuracyModeDisabledWarning = (
       }}
     />
     <EuiSpacer size="s" />
-    <EuiButton onClick={enableAccuracyMode}>
+    <EuiButton data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
       {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
         defaultMessage: 'Enable accuracy mode',
       })}
