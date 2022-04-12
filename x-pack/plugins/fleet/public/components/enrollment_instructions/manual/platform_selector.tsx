@@ -7,14 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiCodeBlock,
-  EuiButtonGroup,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCodeBlock, EuiButtonGroup, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -27,7 +20,6 @@ interface Props {
   windowsCommand: string;
   linuxDebCommand: string;
   linuxRpmCommand: string;
-  troubleshootLink: string;
   isK8s: boolean;
 }
 
@@ -44,7 +36,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   windowsCommand,
   linuxDebCommand,
   linuxRpmCommand,
-  troubleshootLink,
   isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();
@@ -127,23 +118,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           )}
         </>
       )}
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-          defaultMessage="If you are having trouble connecting, see our {link}."
-          values={{
-            link: (
-              <EuiLink target="_blank" external href={troubleshootLink}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
     </>
   );
 };

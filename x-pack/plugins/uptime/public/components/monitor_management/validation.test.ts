@@ -23,6 +23,7 @@ describe('[Monitor Management] validation', () => {
     [ConfigKey.LOCATIONS]: [
       {
         id: 'test-service-location',
+        isServiceManaged: true,
         url: 'https:test-url.com',
         geo: { lat: 33.33432323, lon: 73.23424221 },
         label: 'EU West',

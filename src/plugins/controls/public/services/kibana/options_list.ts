@@ -7,7 +7,7 @@
  */
 
 import { memoize } from 'lodash';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { buildEsQuery } from '@kbn/es-query';
 
 import { TimeRange } from '../../../../data/public';

@@ -21,13 +21,13 @@ import {
   euiPaletteComplimentary,
   euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
+import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
 import {
   ChartsPluginSetup,
   createColorPalette as createLegacyColorPalette,
 } from '../../../../../../src/plugins/charts/public';
 import { lightenColor } from './lighten_color';
-import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
 import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
