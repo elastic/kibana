@@ -111,7 +111,7 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} setEditorInstance={(instance) => setEditorInstance(instance)} />
+          <Editor loading={!done} setEditorInstance={setEditorInstance} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

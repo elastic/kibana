@@ -162,6 +162,11 @@ export function DevToolsSettingsModal(props: Props) {
     [props.editorInstance]
   );
 
+  const toggleSavingToHistory = useCallback(
+    (isDisabled: boolean) => setIsHistoryDisabled(isDisabled),
+    []
+  );
+
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
     fields || indices || templates ? (
@@ -291,7 +296,7 @@ export function DevToolsSettingsModal(props: Props) {
                 id="console.settingsPage.savingRequestsToHistoryMessage"
               />
             }
-            onChange={(e) => setIsHistoryDisabled(e.target.checked)}
+            onChange={(e) => toggleSavingToHistory(e.target.checked)}
           />
         </EuiFormRow>
 
