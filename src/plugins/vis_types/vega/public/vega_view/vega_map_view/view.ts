@@ -171,7 +171,10 @@ export class VegaMapView extends VegaBaseView {
 
   private initControls(mapBoxInstance: Map) {
     if (this.shouldShowZoomControl) {
-      mapBoxInstance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+      mapBoxInstance.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        'top-left'
+      );
     }
 
     // disable map rotation using right click + drag
