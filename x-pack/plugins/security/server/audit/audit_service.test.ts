@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
+import { lastValueFrom, Observable, of } from 'rxjs';
 
 import {
   coreMock,
@@ -382,8 +382,8 @@ describe('#createLoggingConfig', () => {
       allowAuditLogging: true,
     });
 
-    const loggingConfig = await features$
-      .pipe(
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
         createLoggingConfig({
           enabled: false,
           appender: {
@@ -394,7 +394,7 @@ describe('#createLoggingConfig', () => {
           },
         })
       )
-      .toPromise();
+    );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
@@ -404,8 +404,8 @@ describe('#createLoggingConfig', () => {
       allowAuditLogging: false,
     });
 
-    const loggingConfig = await features$
-      .pipe(
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
         createLoggingConfig({
           enabled: true,
           appender: {
@@ -416,7 +416,7 @@ describe('#createLoggingConfig', () => {
           },
         })
       )
-      .toPromise();
+    );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
