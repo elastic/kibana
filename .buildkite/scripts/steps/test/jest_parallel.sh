@@ -30,6 +30,8 @@ while read -r config; do
       export CODE_COVERAGE=''
     fi
 
+    echo "--- $ node scripts/jest --config $config"
+
     if [[ "$CODE_COVERAGE" == "true" ]]; then
       node --max-old-space-size=14336 ./scripts/jest --config="$config" --runInBand \
         --passWithNoTests --coverageReporters json --coverageDirectory target/jest-coverage --coverage
@@ -55,10 +57,10 @@ done <<< "$(find src x-pack packages -name "$1" -not -path "*/__fixtures__/*" | 
 
 # Combine the reports into one file before uploading anything to codecov
 if [[ -d target/jest-coverage ]]; then
+  echo "--- Uploading to codecov"
   mv target/jest-coverage .nyc_output
   yarn nyc report --reporter=json --report-dir=target/jest-coverage-merged
 
-  echo "Uploading to codecov"
   node .buildkite/scripts/steps/test/clean_coverage_paths.js target/jest-coverage-merged/coverage-final.json
   # codecov exits with an error if max-old-space-size is set, see https://github.com/codecov/uploader/issues/475
   NODE_OPTIONS="" ./codecov -f target/jest-coverage-merged/coverage-final.json # TODO move ./codecov
