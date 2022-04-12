@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
   const retry = getService('retry');
+  const find = getService('find');
 
   describe('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -38,19 +39,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest();
       });
+
       it('should add a comma after previous non empty line', async () => {
+        const conApp1 = await find.byCssSelector('.conApp');
+        const firstInnerHtml = await conApp1.getAttribute('innerHTML');
         await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
         await PageObjects.console.pressEnter();
         await PageObjects.console.pressEnter();
         await PageObjects.console.pressEnter();
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
-
-        await retry.waitForWithTimeout('text area to contain comma', 25000, async () => {
-          const textAreaString = await PageObjects.console.getAllVisibleText();
-          return textAreaString.includes(',');
+        await retry.waitForWithTimeout('innerhtml to change', 45000, async () => {
+          const conApp2 = await find.byCssSelector('.conApp');
+          const secondInnerHtml = await conApp2.getAttribute('innerHTML');
+          return firstInnerHtml !== secondInnerHtml;
         });
-
+        const textAreaString = await PageObjects.console.getAllVisibleText();
+        expect(textAreaString).to.contain(',');
         const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
         expect(lastChar).to.be.eql(',');
