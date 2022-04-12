@@ -26,7 +26,7 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
         query: schema.object({ ignoreValidLicenses: schema.boolean({ defaultValue: false }) }),
       },
     },
-    (context, request, response) => {
+    async (context, request, response) => {
       const { license: currentLicense } = await context.licensing;
 
       const allFeatures = featureRegistry.getAllKibanaFeatures(
