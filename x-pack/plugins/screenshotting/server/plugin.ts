@@ -11,6 +11,7 @@ import type {
   CoreSetup,
   CoreStart,
   Logger,
+  PackageInfo,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
@@ -41,6 +42,7 @@ export interface ScreenshottingStart {
    * @returns Observable with output messages.
    */
   diagnose: HeadlessChromiumDriverFactory['diagnose'];
+
   /**
    * Takes screenshots of multiple pages.
    * @param options Screenshots session options.
@@ -54,6 +56,7 @@ export interface ScreenshottingStart {
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
   private config: ConfigType;
   private logger: Logger;
+  private packageInfo: PackageInfo;
   private screenshotMode!: ScreenshotModePluginSetup;
   private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
   private screenshots!: Promise<Screenshots>;
@@ -61,6 +64,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.packageInfo = context.env.packageInfo;
   }
 
   setup({ http }: CoreSetup, { screenshotMode }: SetupDeps) {
@@ -108,7 +112,12 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
           switchMap((screenshots) => screenshots.getScreenshots(options)),
           mergeMap<ScreenshotResult, Promise<PngScreenshotResult | PdfScreenshotResult>>(
             options.format === 'pdf'
-              ? toPdf({ logger: this.logger, logo: options.logo, title: options.title })
+              ? toPdf({
+                  logger: this.logger,
+                  packageInfo: this.packageInfo,
+                  logo: options.logo,
+                  title: options.title,
+                })
               : toPng
           )
         ),

@@ -6,7 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from 'src/core/server';
 import { LayoutParams, LayoutTypes } from '../../../common';
 import { ScreenshotResult, ScreenshotOptions } from '../../screenshots';
 import { FormattedScreenshotResult } from '../types';
@@ -54,6 +54,7 @@ export interface PdfScreenshotResult extends Omit<FormattedScreenshotResult, 're
 
 interface ScreenshotsResultsToPdfArgs {
   logger: Logger;
+  packageInfo: PackageInfo;
   title?: string;
   logo?: string;
 }
@@ -68,13 +69,14 @@ const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
   return null;
 };
 
-export function toPdf({ title, logo, logger }: ScreenshotsResultsToPdfArgs) {
+export function toPdf({ title, logo, logger, packageInfo }: ScreenshotsResultsToPdfArgs) {
   return async (screenshotResult: ScreenshotResult): Promise<PdfScreenshotResult> => {
     const timeRange = getTimeRange(screenshotResult.results);
     try {
       const { buffer, pageCount } = await pngsToPdf({
         results: screenshotResult.results,
         title: title ? title + (timeRange ? ` - ${timeRange}` : '') : undefined,
+        packageInfo,
         logo,
         layout: screenshotResult.layout,
         logger,
