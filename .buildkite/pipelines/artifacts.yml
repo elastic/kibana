@@ -32,7 +32,7 @@ steps:
     timeout_in_minutes: 20
 
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
-    label: 'FTR on Cloud'
+    label: 'Cloud Deployment'
     agents:
       queue: n2-2
     timeout_in_minutes: 60
