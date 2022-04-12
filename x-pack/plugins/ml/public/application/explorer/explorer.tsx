@@ -184,19 +184,19 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const topInfluencersPanelRef = useRef<HTMLDivElement | null>(null);
 
   const collapseFn = useRef<() => void | undefined>();
-  const [panelsInitialized, setPanelsInitialized] = useState(false);
+  const panelsInitialized = useRef<boolean>(false);
 
   useEffect(
     function initTopInfluencersPanelCollapse() {
       if (
-        panelsInitialized ||
+        panelsInitialized.current ||
         !collapseFn.current ||
         !topInfluencersPanelRef.current ||
         !anomalyExplorerPanelState.topInfluencers.isCollapsed
       )
         return;
 
-      setPanelsInitialized(true);
+      panelsInitialized.current = true;
 
       setTimeout(() => {
         if (collapseFn.current) {
@@ -228,6 +228,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   );
 
   const onToggleCollapsed = useCallback(() => {
+    panelsInitialized.current = true;
+
     const isCurrentlyCollapsed = anomalyExplorerPanelState.topInfluencers.isCollapsed;
 
     if (isCurrentlyCollapsed) {
