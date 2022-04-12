@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
 import { Ping } from '../../../../../common/runtime_types';
 import { useTickTick } from '../use_tick_tick';
@@ -63,8 +63,23 @@ export const useSimpleRunOnceMonitors = ({
     { name: 'TestRunData' }
   );
 
+  const lastUpdated = useRef<{ checksum: string; time: number }>({
+    checksum: '',
+    time: Date.now(),
+  });
+
   return useMemo(() => {
     const docs = data?.hits.hits ?? [];
+
+    // Whenever a new found document is fetched, update lastUpdated
+    const docsChecksum = docs
+      .map(({ _id }: { _id: string }) => _id)
+      .reduce((acc, cur) => acc + cur, '');
+    if (docsChecksum !== lastUpdated.current.checksum) {
+      // Mutating lastUpdated
+      lastUpdated.current.checksum = docsChecksum;
+      lastUpdated.current.time = Date.now();
+    }
 
     if (docs.length > 0) {
       if (docs.length >= expectSummaryDocs) {
@@ -79,6 +94,7 @@ export const useSimpleRunOnceMonitors = ({
           timestamp: (doc._source as Record<string, string>)?.['@timestamp'],
           docId: doc._id,
         })),
+        lastUpdated: lastUpdated.current.time,
       };
     }
 
@@ -86,6 +102,7 @@ export const useSimpleRunOnceMonitors = ({
       data,
       loading,
       summaryDocs: null,
+      lastUpdated: lastUpdated.current.time,
     };
   }, [expectSummaryDocs, data, loading, refreshTimer]);
 };

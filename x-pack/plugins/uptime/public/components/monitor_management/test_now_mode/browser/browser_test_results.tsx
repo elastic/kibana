@@ -21,19 +21,17 @@ interface Props {
   onDone: () => void;
 }
 export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, onDone }: Props) => {
-  const { summariesLoading, stepLoadingInProgress, checkGroupResults } = useBrowserRunOnceMonitors({
-    configId: monitorId,
-    expectSummaryDocs: expectPings,
-  });
+  const { summariesLoading, expectedSummariesLoaded, stepLoadingInProgress, checkGroupResults } =
+    useBrowserRunOnceMonitors({
+      configId: monitorId,
+      expectSummaryDocs: expectPings,
+    });
 
   useEffect(() => {
-    const allSummariesLoaded = checkGroupResults.every(
-      (checkGroupResult) => !!checkGroupResult.summaryDoc
-    );
-    if (!summariesLoading && allSummariesLoaded) {
+    if (expectedSummariesLoaded) {
       onDone();
     }
-  }, [onDone, summariesLoading, checkGroupResults]);
+  }, [onDone, expectedSummariesLoaded]);
 
   return (
     <>

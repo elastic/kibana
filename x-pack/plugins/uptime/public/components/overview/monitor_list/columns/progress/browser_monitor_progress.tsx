@@ -6,7 +6,9 @@
  */
 
 import { EuiBadge, EuiProgress } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { scheduleToMilli } from '../../../../../../common/lib/schedule_to_time';
+import { SyntheticsMonitorSchedule } from '../../../../../../common/runtime_types';
 import { useBrowserRunOnceMonitors } from '../../../../monitor_management/test_now_mode/browser/use_browser_run_once_monitors';
 import {
   IN_PROGRESS_LABEL,
@@ -17,52 +19,53 @@ export const BrowserMonitorProgress = ({
   configId,
   testRunId,
   duration,
+  schedule,
   isUpdating,
+  expectPings,
   updateMonitorStatus,
+  stopProgressTrack,
 }: {
   configId: string;
   testRunId: string;
   duration: number;
+  schedule: SyntheticsMonitorSchedule;
   isUpdating: boolean;
+  expectPings: number;
   updateMonitorStatus: () => void;
+  stopProgressTrack: () => void;
 }) => {
-  const { journeyStarted, summaryDoc, data } = useBrowserRunOnceMonitors({
+  const { data, summariesLoading, checkGroupResults, lastUpdated } = useBrowserRunOnceMonitors({
     configId,
     testRunId,
     refresh: false,
     skipDetails: true,
+    expectSummaryDocs: expectPings,
   });
 
-  const [startTime, setStartTime] = useState(Date.now());
+  const journeyStarted = checkGroupResults.some((result) => result.journeyStarted);
   const [passedTime, setPassedTime] = useState(0);
 
+  const startTime = useRef(Date.now());
+
   useEffect(() => {
-    if (summaryDoc) {
+    if (!summariesLoading) {
       updateMonitorStatus();
     }
-  }, [updateMonitorStatus, summaryDoc]);
+  }, [updateMonitorStatus, summariesLoading]);
 
   useEffect(() => {
-    const interVal = setInterval(() => {
-      if (journeyStarted) {
-        setPassedTime((Date.now() - startTime) * 1000);
-      }
-    }, 500);
-    const startTimeValue = startTime;
-    return () => {
-      if ((Date.now() - startTimeValue) * 1000 > duration) {
-        clearInterval(interVal);
-      }
-    };
-  }, [data, duration, journeyStarted, startTime]);
+    setPassedTime((Date.now() - startTime.current) * 1000);
 
-  useEffect(() => {
-    if (journeyStarted) {
-      setStartTime(Date.now());
+    // Stop waiting for docs if time elapsed is more than monitor frequency
+    const timeSinceLastDoc = Date.now() - lastUpdated;
+    const usualDurationMilli = duration / 1000;
+    const maxTimeout = scheduleToMilli(schedule) - usualDurationMilli;
+    if (timeSinceLastDoc >= maxTimeout) {
+      stopProgressTrack();
     }
-  }, [journeyStarted]);
+  }, [data, checkGroupResults, lastUpdated, duration, schedule, stopProgressTrack]);
 
-  if (isUpdating || passedTime > duration) {
+  if (journeyStarted && (isUpdating || passedTime > duration)) {
     return (
       <>
         <EuiBadge>{IN_PROGRESS_LABEL}</EuiBadge>
@@ -72,7 +75,7 @@ export const BrowserMonitorProgress = ({
   }
 
   return (
-    <span>
+    <>
       {journeyStarted ? (
         <>
           <EuiBadge>{IN_PROGRESS_LABEL}</EuiBadge>
@@ -84,6 +87,6 @@ export const BrowserMonitorProgress = ({
           <EuiProgress size="xs" />
         </>
       )}
-    </span>
+    </>
   );
 };

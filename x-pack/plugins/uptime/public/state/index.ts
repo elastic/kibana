@@ -9,6 +9,7 @@ import { createStore, applyMiddleware } from 'redux';
 import type { Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { rootEffect } from './effects';
 import { rootReducer } from './reducers';
 
@@ -19,3 +20,5 @@ const sagaMW = createSagaMiddleware();
 export const store: Store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMW)));
 
 sagaMW.run(rootEffect);
+
+export const storage = new Storage(window.localStorage);

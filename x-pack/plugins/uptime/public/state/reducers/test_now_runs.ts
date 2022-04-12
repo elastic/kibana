@@ -7,6 +7,13 @@
 
 import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
+import { IHttpFetchError } from 'kibana/public';
+import {
+  Locations,
+  ScheduleUnit,
+  ServiceLocationErrors,
+  SyntheticsMonitorSchedule,
+} from '../../../common/runtime_types';
 import { clearTestNowMonitorAction, testNowMonitorAction } from '../actions';
 import { TestNowResponse } from '../api';
 import { AppState } from '..';
@@ -21,15 +28,17 @@ interface TestNowRun {
   monitorId: string;
   testRunId?: string;
   status: TestRunStats;
+  schedule: SyntheticsMonitorSchedule;
+  locations: Locations;
+  errors?: ServiceLocationErrors;
+  fetchError?: { name: string; message: string };
 }
 
 export interface TestNowRunsState {
-  testNowRuns: TestNowRun[];
+  [monitorId: string]: TestNowRun;
 }
 
-export const initialState: TestNowRunsState = {
-  testNowRuns: [],
-};
+export const initialState: TestNowRunsState = {};
 
 export const testNowRunsReducer = createReducer(initialState, (builder) => {
   builder
@@ -37,40 +46,75 @@ export const testNowRunsReducer = createReducer(initialState, (builder) => {
       String(testNowMonitorAction.get),
       (state: WritableDraft<TestNowRunsState>, action: PayloadAction<string>) => ({
         ...state,
-        testNowRuns: [
-          ...state.testNowRuns,
-          { monitorId: action.payload, status: TestRunStats.LOADING },
-        ],
+        [action.payload]: {
+          monitorId: action.payload,
+          status: TestRunStats.LOADING,
+          schedule: { unit: ScheduleUnit.MINUTES, number: '3' },
+          locations: [],
+        },
       })
     )
     .addCase(
       String(testNowMonitorAction.success),
       (state: WritableDraft<TestNowRunsState>, { payload }: PayloadAction<TestNowResponse>) => ({
         ...state,
-        testNowRuns: state.testNowRuns.map((tRun) =>
-          tRun.monitorId === payload.monitorId
-            ? {
-                monitorId: payload.monitorId,
-                testRunId: payload.testRunId,
-                status: TestRunStats.IN_PROGRESS,
-              }
-            : tRun
-        ),
+        [payload.monitorId]: {
+          monitorId: payload.monitorId,
+          testRunId: payload.testRunId,
+          status: TestRunStats.IN_PROGRESS,
+          errors: payload.errors,
+          schedule: payload.schedule,
+          locations: payload.locations,
+        },
       })
     )
     .addCase(
       String(testNowMonitorAction.fail),
-      (state: WritableDraft<TestNowRunsState>, action: PayloadAction<TestNowResponse>) => ({
-        ...state,
-        testNowRuns: [...(state.testNowRuns ?? [])],
-      })
+      (state: WritableDraft<TestNowRunsState>, action: PayloadAction<TestNowResponse>) => {
+        const fetchError = action.payload as unknown as IHttpFetchError;
+        if (fetchError?.request.url) {
+          const { name, message } = fetchError;
+
+          const [, errorMonitor] =
+            Object.entries(state).find(
+              ([key]) => fetchError.request.url.indexOf(key) > -1 ?? false
+            ) ?? [];
+
+          if (errorMonitor) {
+            return {
+              ...state,
+              [errorMonitor.monitorId]: {
+                ...state[errorMonitor.monitorId],
+                status: TestRunStats.COMPLETED,
+                errors: undefined,
+                fetchError: { name, message },
+              },
+            };
+          }
+        }
+
+        if (action.payload.monitorId) {
+          return {
+            ...state,
+            [action.payload.monitorId]: {
+              ...state[action.payload.monitorId],
+              status: TestRunStats.COMPLETED,
+              errors: action.payload.errors,
+              fetchError: undefined,
+            },
+          };
+        }
+
+        return state;
+      }
     )
     .addCase(
       String(clearTestNowMonitorAction),
-      (state: WritableDraft<TestNowRunsState>, action: PayloadAction<string>) => ({
-        ...state,
-        testNowRuns: state.testNowRuns.filter((tRun) => tRun.monitorId !== action.payload),
-      })
+      (state: WritableDraft<TestNowRunsState>, action: PayloadAction<string>) => {
+        const { [action.payload]: payloadTestRun, ...rest } = state;
+
+        return rest;
+      }
     );
 });
 
@@ -79,4 +123,4 @@ export const testNowRunsSelector = ({ testNowRuns }: AppState) => testNowRuns.te
 export const testNowRunSelector =
   (monitorId?: string) =>
   ({ testNowRuns }: AppState) =>
-    testNowRuns.testNowRuns.find((tRun) => monitorId && monitorId === tRun.monitorId);
+    monitorId ? testNowRuns[monitorId] : undefined;

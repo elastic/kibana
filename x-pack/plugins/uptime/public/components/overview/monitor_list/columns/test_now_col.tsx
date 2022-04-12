@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { testNowMonitorAction } from '../../../../state/actions';
-import { testNowRunSelector } from '../../../../state/reducers/test_now_runs';
+import { testNowRunSelector, TestRunStats } from '../../../../state/reducers/test_now_runs';
 
 export const TestNowColumn = ({
   monitorId,
@@ -35,7 +35,10 @@ export const TestNowColumn = ({
     dispatch(testNowMonitorAction.get(configId));
   };
 
-  if (testNowRun && testNowRun.status === 'loading') {
+  const isTestNowLoading = testNowRun && testNowRun.status === TestRunStats.LOADING;
+  const isTestNowCompleted = !testNowRun || testNowRun.status === TestRunStats.COMPLETED;
+
+  if (isTestNowLoading) {
     return <EuiLoadingSpinner size="s" />;
   }
 
@@ -44,7 +47,7 @@ export const TestNowColumn = ({
       <EuiButtonIcon
         iconType="play"
         onClick={() => testNowClick()}
-        isDisabled={Boolean(testNowRun)}
+        isDisabled={!isTestNowCompleted}
         aria-label={TEST_NOW_ARIA_LABEL}
       />
     </EuiToolTip>

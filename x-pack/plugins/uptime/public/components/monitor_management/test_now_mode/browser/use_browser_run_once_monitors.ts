@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { useTickTick } from '../use_tick_tick';
@@ -103,6 +103,11 @@ export const useBrowserRunOnceMonitors = ({
       }));
   });
 
+  const lastUpdated = useRef<{ checksum: string; time: number }>({
+    checksum: '',
+    time: Date.now(),
+  });
+
   const { data, loading: summariesLoading } = useBrowserEsResults({
     configId,
     testRunId,
@@ -187,6 +192,16 @@ export const useBrowserRunOnceMonitors = ({
     return Promise.resolve(null);
   }, [checkGroupCheckSum, setCheckGroupResults, lastRefresh]);
 
+  // Whenever a new found document is fetched, update lastUpdated
+  useEffect(() => {
+    const currentChecksum = getCheckGroupChecksum(checkGroupResults);
+    if (checkGroupCheckSum !== lastUpdated.current.checksum) {
+      // Mutating lastUpdated
+      lastUpdated.current.checksum = currentChecksum;
+      lastUpdated.current.time = Date.now();
+    }
+  }, [checkGroupResults, checkGroupCheckSum]);
+
   const updateCheckGroupResult = (id: string, result: Partial<CheckGroupResult>) => {
     setCheckGroupResults((prevState) => {
       return prevState.map((r) => {
@@ -229,9 +244,13 @@ export const useBrowserRunOnceMonitors = ({
   };
 
   return {
+    data,
     summariesLoading,
     stepLoadingInProgress,
+    expectedSummariesLoaded:
+      checkGroupResults.filter(({ summaryDoc }) => !!summaryDoc).length >= expectSummaryDocs,
     checkGroupResults,
+    lastUpdated: lastUpdated.current.time,
   };
 };
 
@@ -246,4 +265,14 @@ function mergeCheckGroups(prev: CheckGroupResult, curr: Partial<CheckGroupResult
     ...curr,
     completedSteps,
   };
+}
+
+function getCheckGroupChecksum(checkGroupResults: CheckGroupResult[]) {
+  return checkGroupResults.reduce((acc, cur) => {
+    return (
+      acc + cur?.journeyDoc?._id ??
+      '' + cur?.summaryDoc?._id ??
+      '' + (cur?.steps ?? []).reduce((stepAcc, { _id }) => stepAcc + _id, '')
+    );
+  }, '');
 }
