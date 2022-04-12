@@ -106,8 +106,9 @@ export function registerAddPolicyRoute({
       const { templateName, policyName, aliasName } = body;
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const updatedTemplate = await updateIndexTemplate(
-          context.core.elasticsearch.client.asCurrentUser,
+          esClient.asCurrentUser,
           isLegacy,
           templateName,
           policyName,

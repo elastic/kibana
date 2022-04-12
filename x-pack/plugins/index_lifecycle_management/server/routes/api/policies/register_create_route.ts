@@ -55,7 +55,8 @@ export function registerCreateRoute({
       const { name, ...rest } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, rest);
+        const esClient = (await context.core).elasticsearch.client;
+        await createPolicy(esClient.asCurrentUser, name, rest);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

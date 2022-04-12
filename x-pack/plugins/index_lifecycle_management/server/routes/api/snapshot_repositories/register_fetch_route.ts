@@ -28,7 +28,8 @@ export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
       }
 
       try {
-        const esResult = await ctx.core.elasticsearch.client.asCurrentUser.snapshot.getRepository({
+        const esClient = (await ctx.core).elasticsearch.client;
+        const esResult = await esClient.asCurrentUser.snapshot.getRepository({
           name: '*',
         });
         const repos: ListSnapshotReposResponse = {
