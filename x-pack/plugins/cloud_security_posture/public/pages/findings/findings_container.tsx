@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -31,16 +31,16 @@ const getDefaultQuery = (): CspFindingsRequest & { groupBy: GroupBy } => ({
   groupBy: 'none',
 });
 
-const getGroupByOptions = () => [
+const getGroupByOptions = (): Array<EuiComboBoxOptionOption<GroupBy>> => [
   {
     value: 'none',
-    text: i18n.translate('xpack.csp.findings.groupBySelector.groupByNoneLabel', {
+    label: i18n.translate('xpack.csp.findings.groupBySelector.groupByNoneLabel', {
       defaultMessage: 'None',
     }),
   },
   {
     value: 'resourceType',
-    text: i18n.translate('xpack.csp.findings.groupBySelector.groupByResourceTypeLabel', {
+    label: i18n.translate('xpack.csp.findings.groupBySelector.groupByResourceTypeLabel', {
       defaultMessage: 'Resource Type',
     }),
   },
@@ -74,7 +74,7 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
         {INTERNAL_FEATURE_FLAGS.showFindingsGroupBy && (
           <FindingsGroupBySelector
             type={groupBy}
-            onChange={(type) => setUrlQuery({ groupBy: type })}
+            onChange={(type) => setUrlQuery({ groupBy: type[0].value })}
             options={groupByOptions}
           />
         )}

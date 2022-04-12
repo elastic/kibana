@@ -5,24 +5,24 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFormLabel, EuiSelect, EuiFormControlLayout, type EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormLabel, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GroupBy } from './findings_container';
 
 interface Props {
   type: GroupBy;
-  options: EuiSelectOption[];
-  onChange(type: GroupBy): void;
+  options: Array<EuiComboBoxOptionOption<GroupBy>>;
+  onChange(selectedOptions: Array<EuiComboBoxOptionOption<GroupBy>>): void;
 }
 
 export const FindingsGroupBySelector = ({ type, options, onChange }: Props) => (
-  <EuiFormControlLayout prepend={<GroupByLabel />} style={{ maxWidth: 275 }}>
-    <EuiSelect
-      value={type}
-      options={options}
-      onChange={(event) => onChange(event.target.value as GroupBy)}
-    />
-  </EuiFormControlLayout>
+  <EuiComboBox
+    prepend={<GroupByLabel />}
+    singleSelection={{ asPlainText: true }}
+    options={options}
+    selectedOptions={options.filter((o) => o.value === type)}
+    onChange={onChange}
+  />
 );
 
 const GroupByLabel = () => (
