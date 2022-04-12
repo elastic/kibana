@@ -17,7 +17,7 @@ export const createLicensedRouteHandler = <
 >(
   handler: RequestHandler<P, Q, B, Context>
 ) => {
-  const licensedRouteHandler: RequestHandler<P, Q, B, Context> = (
+  const licensedRouteHandler: RequestHandler<P, Q, B, Context> = async (
     context,
     request,
     responseToolkit
