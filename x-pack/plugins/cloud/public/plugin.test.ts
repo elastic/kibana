@@ -10,9 +10,8 @@ import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
 import { CloudPlugin, CloudConfigType, loadUserId } from './plugin';
-import { Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { KibanaExecutionContext } from 'kibana/public';
-import { first } from 'rxjs/operators';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -101,7 +100,7 @@ describe('Cloud Plugin', () => {
           ([{ name }]) => name === 'cloud_user_id'
         )!;
 
-        await expect(context$.pipe(first()).toPromise()).resolves.toEqual({
+        await expect(firstValueFrom(context$)).resolves.toEqual({
           userId: '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
         });
       });
@@ -119,7 +118,7 @@ describe('Cloud Plugin', () => {
             ([{ name }]) => name === 'cloud_user_id'
           )!;
 
-        const hashId1 = await context1$.pipe(first()).toPromise();
+        const hashId1 = await firstValueFrom(context1$);
 
         const { coreSetup: coreSetup2 } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
@@ -133,7 +132,7 @@ describe('Cloud Plugin', () => {
             ([{ name }]) => name === 'cloud_user_id'
           )!;
 
-        const hashId2 = await context2$.pipe(first()).toPromise();
+        const hashId2 = await firstValueFrom(context2$);
 
         expect(hashId1).not.toEqual(hashId2);
       });

@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, lastValueFrom, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, lastValueFrom, Subject } from 'rxjs';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
@@ -550,7 +550,7 @@ describe('AnalyticsClient', () => {
         context$,
       });
 
-      const globalContextPromise = globalContext$.pipe(take(6), toArray()).toPromise();
+      const globalContextPromise = firstValueFrom(globalContext$.pipe(take(6), toArray()));
       context$.next({ b_field: 1 });
       context$.next({ a_field: false, b_field: 1 });
       context$.next({ a_field: true, b_field: 1 });
