@@ -13,7 +13,7 @@
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/security_solution_cypress/visual_config.ts",
     "cypress:open:upgrade": "yarn cypress:open --config integrationFolder=./cypress/upgrade_integration",
     "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
-    "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec ./cypress/integration/cases/*.spec.ts,./cypress/integration/detection_alerts/attach_to_case.spec.ts,; status=$?; yarn junit:merge && exit $status",
+    "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/integration/cases/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run:firefox": "yarn cypress:run:reporter --browser firefox --spec './cypress/integration/**/*.spec.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run:reporter": "yarn cypress run --config-file ./cypress/cypress.json --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
     "cypress:run:ccs": "yarn cypress:run:reporter --browser chrome --config integrationFolder=./cypress/ccs_integration; status=$?; yarn junit:merge && exit $status",
