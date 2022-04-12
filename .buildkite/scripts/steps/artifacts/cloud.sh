@@ -75,11 +75,11 @@ CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID
 # export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # echo "--- Run default functional tests"
-# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud
+# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud -exclude-tag=skipCloud
 
 # echo "--- Run x-pack functional tests"
 # cd x-pack
-# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud
+# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud -exclude-tag=skipCloud 
 
 echo "--- Shutdown deployment"
 ecctl deployment shutdown --force --track --output json &> "$LOGS"'
