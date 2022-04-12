@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SystemPaletteArguments, systemPalette } from './system_palette';
 export { palette } from './palette';
+
+export { systemPalette } from './system_palette';
+export type { SystemPaletteArguments } from './system_palette';
 
 export type {
   CustomPaletteArguments,
