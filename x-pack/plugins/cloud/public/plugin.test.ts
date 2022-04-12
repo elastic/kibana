@@ -168,14 +168,14 @@ describe('Cloud Plugin', () => {
 
         expect(latestContext).toEqual({
           pageName: 'App1',
-          app_id: 'App1',
+          applicationId: 'App1',
         });
 
         // context clear
         currentContext$.next({});
         expect(latestContext).toEqual({
           pageName: '',
-          app_id: 'unknown',
+          applicationId: 'unknown',
         });
 
         // different app
@@ -186,9 +186,9 @@ describe('Cloud Plugin', () => {
         });
         expect(latestContext).toEqual({
           pageName: 'App2:page2',
-          app_id: 'App2',
+          applicationId: 'App2',
           page: 'page2',
-          ent_id: '123',
+          entityId: '123',
         });
 
         // Back to first app
@@ -200,9 +200,9 @@ describe('Cloud Plugin', () => {
 
         expect(latestContext).toEqual({
           pageName: 'App1:page3',
-          app_id: 'App1',
+          applicationId: 'App1',
           page: 'page3',
-          ent_id: '123',
+          entityId: '123',
         });
       });
 
