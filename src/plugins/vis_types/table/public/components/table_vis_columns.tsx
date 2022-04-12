@@ -57,7 +57,7 @@ export const createGridColumns = (
       ? [
           ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
             const filterForText = i18n.translate(
@@ -77,24 +77,22 @@ export const createGridColumns = (
             );
 
             return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterForAriaLabel}
-                  data-test-subj="tbvChartCell__filterForCellValue"
-                  onClick={() => {
-                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                    closePopover?.();
-                  }}
-                  iconType="plusInCircle"
-                >
-                  {filterForText}
-                </Component>
-              )
+              <Component
+                aria-label={filterForAriaLabel}
+                data-test-subj="tbvChartCell__filterForCellValue"
+                onClick={() => {
+                  onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
+                  closePopover?.();
+                }}
+                iconType="plusInCircle"
+              >
+                {filterForText}
+              </Component>
             );
           },
           ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
             const filterOutText = i18n.translate(
@@ -114,18 +112,16 @@ export const createGridColumns = (
             );
 
             return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterOutAriaLabel}
-                  onClick={() => {
-                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                    closePopover?.();
-                  }}
-                  iconType="minusInCircle"
-                >
-                  {filterOutText}
-                </Component>
-              )
+              <Component
+                aria-label={filterOutAriaLabel}
+                onClick={() => {
+                  onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
+                  closePopover?.();
+                }}
+                iconType="minusInCircle"
+              >
+                {filterOutText}
+              </Component>
             );
           },
         ]
