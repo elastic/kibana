@@ -21,15 +21,18 @@ import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { DataView } from '../../../data_views/public';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../../../data/public';
-import { getIndexPatterns } from '../services';
+import {
+  getIndexPatternFromFilter as getDataViewFromFilter,
+  getDisplayValueFromFilter,
+} from '../../../data/public';
+import { getDataViews } from '../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
 
 export interface FilterItemProps {
   id: string;
   filter: Filter;
-  indexPatterns: DataView[];
+  dataViews: DataView[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
@@ -61,28 +64,28 @@ export const FILTER_EDITOR_WIDTH = 800;
 
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
-  const { id, filter, indexPatterns, hiddenPanelOptions } = props;
+  const [dataViewExists, setDataViewExists] = useState<boolean | undefined>(undefined);
+  const { id, filter, dataViews, hiddenPanelOptions } = props;
 
   useEffect(() => {
     const index = props.filter.meta.index;
     let isSubscribed = true;
     if (index) {
-      getIndexPatterns()
+      getDataViews()
         .get(index)
-        .then((indexPattern) => {
+        .then((dataView) => {
           if (isSubscribed) {
-            setIndexPatternExists(!!indexPattern);
+            setDataViewExists(!!dataView);
           }
         })
         .catch(() => {
           if (isSubscribed) {
-            setIndexPatternExists(false);
+            setDataViewExists(false);
           }
         });
     } else if (isSubscribed) {
-      // Allow filters without an index pattern and don't validate them.
-      setIndexPatternExists(true);
+      // Allow filters without an data view and don't validate them.
+      setDataViewExists(true);
     }
     return () => {
       isSubscribed = false;
@@ -252,7 +255,7 @@ export function FilterItem(props: FilterItemProps) {
           <div>
             <FilterEditor
               filter={filter}
-              indexPatterns={indexPatterns}
+              dataViews={dataViews}
               onSubmit={onSubmit}
               onCancel={() => {
                 setIsPopoverOpen(false);
@@ -266,19 +269,19 @@ export function FilterItem(props: FilterItemProps) {
   }
 
   /**
-   * Checks if filter field exists in any of the index patterns provided,
-   * Because if so, a filter for the wrong index pattern may still be applied.
+   * Checks if filter field exists in any of the data views provided,
+   * Because if so, a filter for the wrong data view may still be applied.
    * This function makes this behavior explicit, but it needs to be revised.
    */
   function isFilterApplicable() {
-    // Any filter is applicable if no index patterns were provided to FilterBar.
-    if (!props.indexPatterns.length) return true;
+    // Any filter is applicable if no data views were provided to FilterBar.
+    if (!props.dataViews.length) return true;
 
-    const ip = getIndexPatternFromFilter(filter, indexPatterns);
+    const ip = getDataViewFromFilter(filter, dataViews);
     if (ip) return true;
 
-    const allFields = indexPatterns.map((indexPattern) => {
-      return indexPattern.fields.map((field) => field.name);
+    const allFields = dataViews.map((dataView) => {
+      return dataView.fields.map((field) => field.name);
     });
     const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
     return flatFields.includes(filter.meta?.key || '');
@@ -295,7 +298,7 @@ export function FilterItem(props: FilterItemProps) {
       return label;
     }
 
-    if (indexPatternExists === false) {
+    if (dataViewExists === false) {
       label.status = FILTER_ITEM_ERROR;
       label.title = props.intl.formatMessage({
         id: 'unifiedSearch.filter.filterBar.labelErrorText',
@@ -304,15 +307,15 @@ export function FilterItem(props: FilterItemProps) {
       label.message = props.intl.formatMessage(
         {
           id: 'unifiedSearch.filter.filterBar.labelErrorInfo',
-          defaultMessage: 'Index pattern {indexPattern} not found',
+          defaultMessage: 'Data view {dataView} not found',
         },
         {
-          indexPattern: filter.meta.index,
+          dataView: filter.meta.index,
         }
       );
     } else if (isFilterApplicable()) {
       try {
-        label.title = getDisplayValueFromFilter(filter, indexPatterns);
+        label.title = getDisplayValueFromFilter(filter, dataViews);
       } catch (e) {
         label.status = FILTER_ITEM_ERROR;
         label.title = props.intl.formatMessage({
@@ -342,7 +345,7 @@ export function FilterItem(props: FilterItemProps) {
   }
 
   // Don't render until we know if the index pattern is valid
-  if (indexPatternExists === undefined) return null;
+  if (dataViewExists === undefined) return null;
   const valueLabelConfig = getValueLabel();
 
   // Disable errored filters and re-render

@@ -14,8 +14,8 @@ import { FILTER_OPERATORS, Operator } from './filter_operators';
 import { isFilterable, IFieldType, IpAddress } from '../../../../../data/common';
 import { DataView } from '../../../../../data_views/common';
 
-export function getFieldFromFilter(filter: FieldFilter, indexPattern: DataView) {
-  return indexPattern.fields.find((field) => field.name === filter.meta.key);
+export function getFieldFromFilter(filter: FieldFilter, dataView: DataView) {
+  return dataView.fields.find((field) => field.name === filter.meta.key);
 }
 
 export function getOperatorFromFilter(filter: Filter) {
@@ -24,8 +24,8 @@ export function getOperatorFromFilter(filter: Filter) {
   });
 }
 
-export function getFilterableFields(indexPattern: DataView) {
-  return indexPattern.fields.filter(isFilterable);
+export function getFilterableFields(dataView: DataView) {
+  return dataView.fields.filter(isFilterable);
 }
 
 export function getOperatorOptions(field: IFieldType) {
@@ -58,12 +58,12 @@ export function validateParams(params: any, field: IFieldType) {
 }
 
 export function isFilterValid(
-  indexPattern?: DataView,
+  dataView?: DataView,
   field?: IFieldType,
   operator?: Operator,
   params?: any
 ) {
-  if (!indexPattern || !field || !operator) {
+  if (!dataView || !field || !operator) {
     return false;
   }
   switch (operator.type) {

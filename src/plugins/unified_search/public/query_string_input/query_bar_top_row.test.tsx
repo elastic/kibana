@@ -18,7 +18,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { stubIndexPattern } from '../../../data/public/stubs';
+import { stubDataView } from '../../../data/public/stubs';
 import { UI_SETTINGS } from '../../../data/common';
 import { setAutocomplete } from '../../../unified_search/public/services';
 import { unifiedSearchPluginMock } from '../../../unified_search/public/mocks';
@@ -126,7 +126,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         screenTitle: 'Another Screen',
         isDirty: false,
-        indexPatterns: [stubIndexPattern],
+        dataViews: [stubDataView],
         timeHistory: mockTimeHistory,
       })
     );
@@ -140,7 +140,7 @@ describe('QueryBarTopRowTopRow', () => {
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
-        indexPatterns: [stubIndexPattern],
+        dataViews: [stubDataView],
         timeHistory: mockTimeHistory,
         disableAutoFocus: true,
         isDirty: false,
@@ -213,7 +213,7 @@ describe('QueryBarTopRowTopRow', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
-        indexPatterns: [stubIndexPattern],
+        dataViews: [stubDataView],
         isDirty: false,
         screenTitle: 'Another Screen',
         showDatePicker: false,
@@ -233,7 +233,7 @@ describe('QueryBarTopRowTopRow', () => {
         query: kqlQuery,
         isDirty: false,
         screenTitle: 'Another Screen',
-        indexPatterns: [stubIndexPattern],
+        dataViews: [stubDataView],
         showQueryInput: false,
         showDatePicker: false,
         timeHistory: mockTimeHistory,

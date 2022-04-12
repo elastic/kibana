@@ -56,7 +56,7 @@ export interface QueryBarTopRowProps {
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<DataView | string>;
+  dataViews?: Array<DataView | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;
@@ -276,7 +276,7 @@ export const QueryBarTopRow = React.memo(
     );
 
     function shouldRenderQueryInput(): boolean {
-      return Boolean(showQueryInput && props.indexPatterns && props.query && storage);
+      return Boolean(showQueryInput && props.dataViews && props.query && storage);
     }
 
     function shouldRenderDatePicker(): boolean {
@@ -348,7 +348,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem>
           <QueryStringInput
             disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
+            dataViews={props.dataViews!}
             prepend={props.prepend}
             query={props.query!}
             screenTitle={props.screenTitle}

@@ -45,12 +45,12 @@ import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { DataView, IFieldType } from '../../../../data_views/common';
-import { getIndexPatternFromFilter } from '../../../../data/public';
+import { getIndexPatternFromFilter as getDataViewFromFilter } from '../../../../data/public';
 import { CodeEditor } from '../../../../kibana_react/public';
 
 export interface Props {
   filter: Filter;
-  indexPatterns: DataView[];
+  dataViews: DataView[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
@@ -58,7 +58,7 @@ export interface Props {
 }
 
 interface State {
-  selectedIndexPattern?: DataView;
+  selectedDataView?: DataView;
   selectedField?: IFieldType;
   selectedOperator?: Operator;
   params: any;
@@ -72,7 +72,7 @@ class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      selectedIndexPattern: this.getIndexPatternFromFilter(),
+      selectedDataView: this.getDataViewFromFilter(),
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
@@ -119,7 +119,7 @@ class FilterEditorUI extends Component<Props, State> {
 
         <div className="globalFilterItem__editorForm">
           <EuiForm>
-            {this.renderIndexPatternInput()}
+            {this.renderDataViewInput()}
 
             {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
 
@@ -191,44 +191,42 @@ class FilterEditorUI extends Component<Props, State> {
     );
   }
 
-  private renderIndexPatternInput() {
+  private renderDataViewInput() {
     if (
-      this.props.indexPatterns.length <= 1 &&
-      this.props.indexPatterns.find(
-        (indexPattern) => indexPattern === this.getIndexPatternFromFilter()
-      )
+      this.props.dataViews.length <= 1 &&
+      this.props.dataViews.find((dataView) => dataView === this.getDataViewFromFilter())
     ) {
       /**
-       * Don't render the index pattern selector if there's just one \ zero index patterns
-       * and if the index pattern the filter was LOADED with is in the indexPatterns list.
+       * Don't render the data view selector if there's just one \ zero data views
+       * and if the data view the filter was LOADED with is in the dataViews list.
        **/
 
       return '';
     }
-    const { selectedIndexPattern } = this.state;
+    const { selectedDataView } = this.state;
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
             label={this.props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.indexPatternSelectLabel',
-              defaultMessage: 'Index Pattern',
+              id: 'unifiedSearch.filter.filterEditor.dataViewSelectLabel',
+              defaultMessage: 'Data View',
             })}
           >
-            <IndexPatternComboBox
+            <DataViewComboBox
               fullWidth
               placeholder={this.props.intl.formatMessage({
-                id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
-                defaultMessage: 'Select an index pattern',
+                id: 'unifiedSearch.filter.filterBar.dataViewSelectPlaceholder',
+                defaultMessage: 'Select an data view',
               })}
-              options={this.props.indexPatterns}
-              selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-              getLabel={(indexPattern) => indexPattern.title}
-              onChange={this.onIndexPatternChange}
+              options={this.props.dataViews}
+              selectedOptions={selectedDataView ? [selectedDataView] : []}
+              getLabel={(dataView) => dataView.title}
+              onChange={this.onDataViewChange}
               singleSelection={{ asPlainText: true }}
               isClearable={false}
-              data-test-subj="filterIndexPatternsSelect"
+              data-test-subj="filterDataViewsSelect"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -252,8 +250,8 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderFieldInput() {
-    const { selectedIndexPattern, selectedField } = this.state;
-    const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
+    const { selectedDataView, selectedField } = this.state;
+    const fields = selectedDataView ? getFilterableFields(selectedDataView) : [];
 
     return (
       <EuiFormRow
@@ -266,7 +264,7 @@ class FilterEditorUI extends Component<Props, State> {
         <FieldComboBox
           fullWidth
           id="fieldInput"
-          isDisabled={!selectedIndexPattern}
+          isDisabled={!selectedDataView}
           placeholder={this.props.intl.formatMessage({
             id: 'unifiedSearch.filter.filterEditor.fieldSelectPlaceholder',
             defaultMessage: 'Select a field first',
@@ -344,8 +342,8 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderParamsEditor() {
-    const indexPattern = this.state.selectedIndexPattern;
-    if (!indexPattern || !this.state.selectedOperator || !this.state.selectedField) {
+    const dataView = this.state.selectedDataView;
+    if (!dataView || !this.state.selectedOperator || !this.state.selectedField) {
       return '';
     }
 
@@ -355,7 +353,7 @@ class FilterEditorUI extends Component<Props, State> {
       case 'phrase':
         return (
           <PhraseValueInput
-            indexPattern={indexPattern}
+            dataView={dataView}
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
@@ -367,7 +365,7 @@ class FilterEditorUI extends Component<Props, State> {
       case 'phrases':
         return (
           <PhrasesValuesInput
-            indexPattern={indexPattern}
+            dataView={dataView}
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
@@ -397,13 +395,13 @@ class FilterEditorUI extends Component<Props, State> {
     return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
   }
 
-  private getIndexPatternFromFilter() {
-    return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+  private getDataViewFromFilter() {
+    return getDataViewFromFilter(this.props.filter, this.props.dataViews);
   }
 
   private getFieldFromFilter() {
-    const indexPattern = this.getIndexPatternFromFilter();
-    return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
+    const dataView = this.getDataViewFromFilter();
+    return dataView && getFieldFromFilter(this.props.filter as FieldFilter, dataView);
   }
 
   private getSelectedOperator() {
@@ -414,7 +412,7 @@ class FilterEditorUI extends Component<Props, State> {
     const {
       isCustomEditorOpen,
       queryDsl,
-      selectedIndexPattern: indexPattern,
+      selectedDataView: dataView,
       selectedField: field,
       selectedOperator: operator,
       params,
@@ -429,14 +427,14 @@ class FilterEditorUI extends Component<Props, State> {
       }
     }
 
-    return isFilterValid(indexPattern, field, operator, params);
+    return isFilterValid(dataView, field, operator, params);
   }
 
-  private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
+  private onDataViewChange = ([selectedDataView]: DataView[]) => {
     const selectedField = undefined;
     const selectedOperator = undefined;
     const params = undefined;
-    this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
+    this.setState({ selectedDataView, selectedField, selectedOperator, params });
   };
 
   private onFieldChange = ([selectedField]: IFieldType[]) => {
@@ -475,7 +473,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private onSubmit = () => {
     const {
-      selectedIndexPattern: indexPattern,
+      selectedDataView: dataView,
       selectedField: field,
       selectedOperator: operator,
       params,
@@ -493,13 +491,13 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       const { index, disabled = false, negate = false } = this.props.filter.meta;
-      const newIndex = index || this.props.indexPatterns[0].id!;
+      const newIndex = index || this.props.dataViews[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
-    } else if (indexPattern && field && operator) {
+    } else if (dataView && field && operator) {
       const filter = buildFilter(
-        indexPattern,
+        dataView,
         field,
         operator.type,
         operator.negate,
@@ -513,7 +511,7 @@ class FilterEditorUI extends Component<Props, State> {
   };
 }
 
-function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
+function DataViewComboBox(props: GenericComboBoxProps<DataView>) {
   return GenericComboBox(props);
 }
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import indexPatternResponse from './__fixtures__/index_pattern_response.json';
+import dataViewResponse from './__fixtures__/data_view_response.json';
 
 import { setupGetFieldSuggestions } from './field';
-import { indexPatterns as indexPatternsUtils, KueryNode } from '../../../../../data/public';
+import { indexPatterns as dataViewsUtils, KueryNode } from '../../../../../data/public';
 import { QuerySuggestionGetFnArgs } from '../../index';
 import { coreMock } from '../../../../../../core/public/mocks';
 
@@ -21,7 +21,7 @@ describe('Kuery field suggestions', () => {
 
   beforeEach(() => {
     querySuggestionsArgs = {
-      indexPatterns: [indexPatternResponse],
+      dataViews: [dataViewResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
     getSuggestions = setupGetFieldSuggestions(coreMock.createSetup());
@@ -38,7 +38,7 @@ describe('Kuery field suggestions', () => {
       querySuggestionsArgs,
       mockKueryNode({ prefix, suffix })
     );
-    const filterableFields = indexPatternResponse.fields.filter(indexPatternsUtils.isFilterable);
+    const filterableFields = dataViewResponse.fields.filter(dataViewsUtils.isFilterable);
 
     expect(suggestions.length).toBe(filterableFields.length);
   });

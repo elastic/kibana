@@ -11,7 +11,7 @@ import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConfigSchema } from '../../config';
 import { IFieldType, getFieldSubtypeNested } from '../../../data/common';
-import { findIndexPatternById, getFieldByName } from '../data_views';
+import { findIndexPatternById as findDataViewById, getFieldByName } from '../data_views';
 
 export async function termsAggSuggestions(
   config: ConfigSchema,
@@ -30,9 +30,9 @@ export async function termsAggSuggestions(
   };
 
   if (!field?.name && !field?.type) {
-    const indexPattern = await findIndexPatternById(savedObjectsClient, index);
+    const dataView = await findDataViewById(savedObjectsClient, index);
 
-    field = indexPattern && getFieldByName(fieldName, indexPattern);
+    field = dataView && getFieldByName(fieldName, dataView);
   }
 
   const body = await getBody(autocompleteSearchOptions, field ?? fieldName, query, filters);

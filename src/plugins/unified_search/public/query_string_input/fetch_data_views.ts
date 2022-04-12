@@ -9,24 +9,24 @@
 import { isEmpty } from 'lodash';
 import { DataViewsContract } from '../../../data_views/public';
 
-export async function fetchIndexPatterns(
-  indexPatternsService: DataViewsContract,
-  indexPatternStrings: string[]
+export async function fetchDataViews(
+  dataViewsService: DataViewsContract,
+  dataViewStrings: string[]
 ) {
-  if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
+  if (!dataViewStrings || isEmpty(dataViewStrings)) {
     return [];
   }
 
-  const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
+  const searchString = dataViewStrings.map((string) => `"${string}"`).join(' | ');
 
-  const exactMatches = (await indexPatternsService.find(searchString)).filter((ip) =>
-    indexPatternStrings.includes(ip.title)
+  const exactMatches = (await dataViewsService.find(searchString)).filter((ip) =>
+    dataViewStrings.includes(ip.title)
   );
 
   const allMatches =
-    exactMatches.length === indexPatternStrings.length
+    exactMatches.length === dataViewStrings.length
       ? exactMatches
-      : [...exactMatches, await indexPatternsService.getDefault()];
+      : [...exactMatches, await dataViewsService.getDefault()];
 
   return allMatches;
 }

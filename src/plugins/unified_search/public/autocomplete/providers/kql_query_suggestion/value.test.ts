@@ -7,7 +7,7 @@
  */
 
 import { setupGetValueSuggestions } from './value';
-import indexPatternResponse from './__fixtures__/index_pattern_response.json';
+import dataViewResponse from './__fixtures__/data_view_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KueryNode } from '../../../../../data/public';
 import { QuerySuggestionGetFnArgs } from '../../index';
@@ -44,7 +44,7 @@ describe('Kuery value suggestions', () => {
     });
     getSuggestions = setupGetValueSuggestions(coreSetup);
     querySuggestionsArgs = {
-      indexPatterns: [indexPatternResponse],
+      dataViews: [dataViewResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
     jest.clearAllMocks();

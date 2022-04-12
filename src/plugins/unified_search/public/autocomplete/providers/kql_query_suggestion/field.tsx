@@ -9,7 +9,7 @@
 import { flatten } from 'lodash';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import { IFieldType, indexPatterns as indexPatternsUtils } from '../../../../../data/public';
+import { IFieldType, indexPatterns as dataViewsUtils } from '../../../../../data/public';
 import { QuerySuggestionField, QuerySuggestionTypes } from '../../index';
 import { KqlQuerySuggestionProvider } from './types';
 
@@ -27,15 +27,15 @@ const keywordComparator = (first: IFieldType, second: IFieldType) => {
 export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = (
   core
 ) => {
-  return ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
+  return ({ dataViews }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
-      indexPatterns.map((indexPattern) => {
-        return indexPattern.fields.filter(indexPatternsUtils.isFilterable);
+      dataViews.map((dataView) => {
+        return dataView.fields.filter(dataViewsUtils.isFilterable);
       })
     );
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
-      const subTypeNested = indexPatternsUtils.getFieldSubtypeNested(field);
+      const subTypeNested = dataViewsUtils.getFieldSubtypeNested(field);
       return (
         (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
         field.name.toLowerCase().includes(search)

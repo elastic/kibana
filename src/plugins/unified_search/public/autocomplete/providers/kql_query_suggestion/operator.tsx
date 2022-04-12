@@ -159,10 +159,10 @@ const getOperatorByName = (operator: string) => operators[operator as Operators]
 const getDescription = (operator: string) => <p>{getOperatorByName(operator).description}</p>;
 
 export const setupGetOperatorSuggestions: KqlQuerySuggestionProvider = () => {
-  return ({ indexPatterns }, { end, fieldName, nestedPath }) => {
+  return ({ dataViews }, { end, fieldName, nestedPath }) => {
     const allFields = flatten(
-      indexPatterns.map((indexPattern) => {
-        return indexPattern.fields.slice();
+      dataViews.map((dataView) => {
+        return dataView.fields.slice();
       })
     );
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;

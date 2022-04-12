@@ -22,7 +22,7 @@ import { AutocompleteUsageCollector } from '../collectors';
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
 interface ValueSuggestionsGetFnArgs {
-  indexPattern: IIndexPattern;
+  dataView: IIndexPattern;
   field: IFieldType;
   query: string;
   useTimeRange?: boolean;
@@ -31,10 +31,7 @@ interface ValueSuggestionsGetFnArgs {
   method?: ValueSuggestionsMethod;
 }
 
-const getAutocompleteTimefilter = (
-  { timefilter }: TimefilterSetup,
-  indexPattern: IIndexPattern
-) => {
+const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, dataView: IIndexPattern) => {
   const timeRange = timefilter.getTime();
 
   // Use a rounded timerange so that memoizing works properly
@@ -42,7 +39,7 @@ const getAutocompleteTimefilter = (
     from: dateMath.parse(timeRange.from)!.startOf('minute').toISOString(),
     to: dateMath.parse(timeRange.to)!.endOf('minute').toISOString(),
   };
-  return timefilter.createFilter(indexPattern, roundedTimerange);
+  return timefilter.createFilter(dataView, roundedTimerange);
 };
 
 export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
@@ -93,7 +90,7 @@ export const setupValueSuggestionProvider = (
   );
 
   return async ({
-    indexPattern,
+    dataView,
     field,
     query,
     useTimeRange,
@@ -106,7 +103,7 @@ export const setupValueSuggestionProvider = (
     );
     useTimeRange =
       useTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
-    const { title } = indexPattern;
+    const { title } = dataView;
 
     const isVersionFieldType = field.type === 'string' && field.esTypes?.includes('version');
 
@@ -121,10 +118,8 @@ export const setupValueSuggestionProvider = (
       return [];
     }
 
-    const timeFilter = useTimeRange
-      ? getAutocompleteTimefilter(timefilter, indexPattern)
-      : undefined;
-    const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
+    const timeFilter = useTimeRange ? getAutocompleteTimefilter(timefilter, dataView) : undefined;
+    const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], dataView).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
       usageCollector?.trackCall();

@@ -34,7 +34,7 @@ export interface Props {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
-  indexPatterns: DataView[];
+  dataViews: DataView[];
   intl: InjectedIntl;
   appName: string;
   timeRangeForSuggestionsOverride?: boolean;
@@ -66,7 +66,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           filter={filter}
           onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
-          indexPatterns={props.indexPatterns}
+          dataViews={props.dataViews}
           uiSettings={uiSettings!}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         />
@@ -76,8 +76,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   function renderAddFilter() {
     const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-    const [indexPattern] = props.indexPatterns;
-    const index = indexPattern && indexPattern.id;
+    const [dataView] = props.dataViews;
+    const index = dataView && dataView.id;
     const newFilter = buildEmptyFilter(isPinned, index);
 
     const button = (
@@ -112,7 +112,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
               <FilterEditor
                 filter={newFilter}
-                indexPatterns={props.indexPatterns}
+                dataViews={props.dataViews}
                 onSubmit={onAdd}
                 onCancel={() => setIsAddFilterPopoverOpen(false)}
                 key={JSON.stringify(newFilter)}

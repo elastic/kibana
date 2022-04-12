@@ -26,7 +26,7 @@ import { DataView } from '../../../data_views/public';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: DataView[];
+  dataViews: DataView[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }
@@ -49,7 +49,7 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
     };
   }
   private getLabel(filter: Filter) {
-    const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = getDisplayValueFromFilter(filter, this.props.dataViews);
     return <FilterLabel filter={filter} valueLabel={valueLabel} />;
   }
 

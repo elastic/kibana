@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import indexPatternResponse from './__fixtures__/index_pattern_response.json';
+import dataViewResponse from './__fixtures__/data_view_response.json';
 
 import { setupGetOperatorSuggestions } from './operator';
 import { KueryNode } from '../../../../../data/public';
@@ -21,7 +21,7 @@ describe('Kuery operator suggestions', () => {
 
   beforeEach(() => {
     querySuggestionsArgs = {
-      indexPatterns: [indexPatternResponse],
+      dataViews: [dataViewResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
     getSuggestions = setupGetOperatorSuggestions(coreMock.createSetup());

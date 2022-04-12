@@ -7,7 +7,8 @@
  */
 import type { DataViewsPublicPluginStart } from '../../data_views/public';
 import type { FieldFormatsStart } from '../../field_formats/public';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './index';
+import { StatefulSearchBarProps } from './index';
+import { DataViewSelectProps } from './data_view_select';
 import type { DataPublicPluginStart } from '../../data/public';
 import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
@@ -33,8 +34,8 @@ export interface UnifiedSearchStartDependencies {
 /**
  * Unified search plugin prewired UI components
  */
-export interface UnifiedSearchPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+interface UnifiedSearchPublicPluginStartUi {
+  IndexPatternSelect: React.ComponentType<DataViewSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 

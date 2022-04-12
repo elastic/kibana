@@ -11,8 +11,7 @@ import { createGetterSetter } from '../../kibana_utils/public';
 import { DataViewsContract } from '../../data_views/public';
 import { AutocompleteStart } from '../public';
 
-export const [getIndexPatterns, setIndexPatterns] =
-  createGetterSetter<DataViewsContract>('IndexPatterns');
+export const [getDataViews, setDataViews] = createGetterSetter<DataViewsContract>('IndexPatterns');
 
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 

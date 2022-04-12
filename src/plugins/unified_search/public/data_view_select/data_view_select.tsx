@@ -11,44 +11,44 @@ import React, { Component } from 'react';
 
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { IndexPatternsContract } from '../../../data/public';
+import { IndexPatternsContract as DataViewsContract } from '../../../data/public';
 
-export type IndexPatternSelectProps = Required<
+export type DataViewSelectProps = Required<
   Omit<
     EuiComboBoxProps<any>,
     'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'
   >,
   'placeholder'
 > & {
-  onChange: (indexPatternId?: string) => void;
-  indexPatternId: string;
-  onNoIndexPatterns?: () => void;
+  onChange: (dataViewId?: string) => void;
+  dataViewId: string;
+  onNoDataViews?: () => void;
 };
 
-export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
-  indexPatternService: IndexPatternsContract;
+export type DataViewSelectInternalProps = DataViewSelectProps & {
+  dataViewService: DataViewsContract;
 };
 
-interface IndexPatternSelectState {
+interface DataViewSelectState {
   isLoading: boolean;
   options: [];
-  selectedIndexPattern: { value: string; label: string } | undefined;
+  selectedDataView: { value: string; label: string } | undefined;
   searchValue: string | undefined;
 }
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
+export default class DataViewSelect extends Component<DataViewSelectInternalProps> {
   private isMounted: boolean = false;
-  state: IndexPatternSelectState;
+  state: DataViewSelectState;
 
-  constructor(props: IndexPatternSelectInternalProps) {
+  constructor(props: DataViewSelectInternalProps) {
     super(props);
 
     this.state = {
       isLoading: false,
       options: [],
-      selectedIndexPattern: undefined,
+      selectedDataView: undefined,
       searchValue: undefined,
     };
   }
@@ -61,27 +61,27 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   componentDidMount() {
     this.isMounted = true;
     this.fetchOptions('');
-    this.fetchSelectedIndexPattern(this.props.indexPatternId);
+    this.fetchSelectedDataView(this.props.dataViewId);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectInternalProps) {
-    if (nextProps.indexPatternId !== this.props.indexPatternId) {
-      this.fetchSelectedIndexPattern(nextProps.indexPatternId);
+  UNSAFE_componentWillReceiveProps(nextProps: DataViewSelectInternalProps) {
+    if (nextProps.dataViewId !== this.props.dataViewId) {
+      this.fetchSelectedDataView(nextProps.dataViewId);
     }
   }
 
-  fetchSelectedIndexPattern = async (indexPatternId: string) => {
-    if (!indexPatternId) {
+  fetchSelectedDataView = async (dataViewId: string) => {
+    if (!dataViewId) {
       this.setState({
-        selectedIndexPattern: undefined,
+        selecteddataView: undefined,
       });
       return;
     }
 
-    let indexPatternTitle;
+    let dataViewTitle;
     try {
-      const indexPattern = await this.props.indexPatternService.get(indexPatternId);
-      indexPatternTitle = indexPattern.title;
+      const dataView = await this.props.dataViewService.get(dataViewId);
+      dataViewTitle = dataView.title;
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -92,15 +92,15 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
     }
 
     this.setState({
-      selectedIndexPattern: {
-        value: indexPatternId,
-        label: indexPatternTitle,
+      selectedDataView: {
+        value: dataViewId,
+        label: dataViewTitle,
       },
     });
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle();
+    const idsAndTitles = await this.props.dataViewService.getIdsWithTitle();
     if (!this.isMounted || searchValue !== this.state.searchValue) {
       return;
     }
@@ -120,8 +120,8 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
       options,
     });
 
-    if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
-      this.props.onNoIndexPatterns();
+    if (this.props.onNoDataViews && searchValue === '' && options.length === 0) {
+      this.props.onNoDataViews();
     }
   }, 300);
 
@@ -140,14 +140,8 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   };
 
   render() {
-    const {
-      onChange,
-      indexPatternId,
-      placeholder,
-      onNoIndexPatterns,
-      indexPatternService,
-      ...rest
-    } = this.props;
+    const { onChange, dataViewId, placeholder, onNoDataViews, dataViewService, ...rest } =
+      this.props;
 
     return (
       <EuiComboBox
@@ -157,7 +151,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
         isLoading={this.state.isLoading}
         onSearchChange={this.fetchOptions}
         options={this.state.options}
-        selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
+        selectedOptions={this.state.selectedDataView ? [this.state.selectedDataView] : []}
         onChange={this.onChange}
       />
     );

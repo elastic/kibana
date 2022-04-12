@@ -11,11 +11,11 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Storage, IStorageWrapper } from '../../kibana_utils/public';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './services';
+import { setDataViews, setTheme, setOverlays, setAutocomplete } from './services';
 import { AutocompleteService } from './autocomplete';
 import type { UsageCollectionSetup } from '../../usage_collection/public';
 import { createSearchBar } from './search_bar';
-import { createIndexPatternSelect } from './index_pattern_select';
+import { createDataViewSelect } from './data_view_select';
 import { UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart } from './types';
 import type { UnifiedSearchStartDependencies, UnifiedSearchSetupDependencies } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
@@ -58,7 +58,7 @@ export class UnifiedSearchPublicPlugin
   ): UnifiedSearchPublicPluginStart {
     setTheme(core.theme);
     setOverlays(core.overlays);
-    setIndexPatterns(dataViews);
+    setDataViews(dataViews);
     const autocompleteStart = this.autocomplete.start();
     setAutocomplete(autocompleteStart);
 
@@ -76,7 +76,7 @@ export class UnifiedSearchPublicPlugin
 
     return {
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(dataViews),
+        IndexPatternSelect: createDataViewSelect(dataViews),
         SearchBar,
       },
       autocomplete: autocompleteStart,

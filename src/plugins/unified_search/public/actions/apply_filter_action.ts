@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ThemeServiceSetup } from 'kibana/public';
 import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
-import { getOverlays, getIndexPatterns } from '../services';
+import { getOverlays, getDataViews } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '../../../data/public';
 
@@ -59,9 +59,9 @@ export function createFilterAction(
       let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
-        const indexPatterns = await Promise.all(
+        const dataViews = await Promise.all(
           filters.map((filter) => {
-            return getIndexPatterns().get(filter.meta.index!);
+            return getDataViews().get(filter.meta.index!);
           })
         );
 
@@ -70,7 +70,7 @@ export function createFilterAction(
             toMountPoint(
               applyFiltersPopover(
                 filters,
-                indexPatterns,
+                dataViews,
                 () => {
                   overlay.close();
                   resolve([]);

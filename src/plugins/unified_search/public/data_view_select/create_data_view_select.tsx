@@ -9,12 +9,12 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { IndexPatternsContract } from '../../../data/public';
-import { IndexPatternSelect, IndexPatternSelectProps } from './';
+import { IndexPatternsContract as DataViewsContract } from '../../../data/public';
+import DataViewSelect, { DataViewSelectProps } from './data_view_select';
 
 // Takes in stateful runtime dependencies and pre-wires them to the component
-export function createIndexPatternSelect(indexPatternService: IndexPatternsContract) {
-  return (props: IndexPatternSelectProps) => (
-    <IndexPatternSelect {...props} indexPatternService={indexPatternService} />
+export function createDataViewSelect(dataViewService: DataViewsContract) {
+  return (props: DataViewSelectProps) => (
+    <DataViewSelect {...props} dataViewService={dataViewService} />
   );
 }

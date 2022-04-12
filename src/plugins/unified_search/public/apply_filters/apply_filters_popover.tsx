@@ -19,14 +19,14 @@ const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_p
 
 export const applyFiltersPopover = (
   filters: Filter[],
-  indexPatterns: DataView[],
+  dataViews: DataView[],
   onCancel: CancelFnType,
   onSubmit: SubmitFnType
 ) => {
   return (
     <React.Suspense fallback={<Fallback />}>
       <LazyApplyFiltersPopoverContent
-        indexPatterns={indexPatterns}
+        dataViews={dataViews}
         filters={filters}
         onCancel={onCancel}
         onSubmit={onSubmit}

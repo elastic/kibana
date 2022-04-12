@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
         await retry.try(async () => {
           await testSubjects.click('addFilter');
-          const indexPatternSelectExists = await testSubjects.exists('filterIndexPatternsSelect');
+          const indexPatternSelectExists = await testSubjects.exists('filterDataViewsSelect');
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });

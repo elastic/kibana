@@ -37,7 +37,7 @@ import { fromUser } from './from_user';
 import type { PersistedLog } from '../../../data/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../data/common';
 import { KibanaReactContextValue, toMountPoint } from '../../../kibana_react/public';
-import { fetchIndexPatterns } from './fetch_index_patterns';
+import { fetchDataViews } from './fetch_data_views';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
@@ -45,7 +45,7 @@ import { onRaf } from '../utils';
 import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string>;
+  dataViews: Array<DataView | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -99,7 +99,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
-  indexPatterns: DataView[];
+  dataViews: DataView[];
 
   /**
    * Part of state because passed down to child components
@@ -133,7 +133,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     suggestionLimit: 50,
     selectionStart: null,
     selectionEnd: null,
-    indexPatterns: [],
+    dataViews: [],
     queryBarInputDiv: null,
   };
 
@@ -141,7 +141,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
-  private fetchIndexPatternsAbortController?: AbortController;
+  private fetchDataViewsAbortController?: AbortController;
   private services = this.props.kibana.services;
   private reportUiCounter = this.services.usageCollection?.reportUiCounter.bind(
     this.services.usageCollection,
@@ -159,28 +159,28 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     return toUser(this.props.query.query);
   };
 
-  private fetchIndexPatterns = debounce(async () => {
-    const stringPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern === 'string'
+  private fetchDataViews = debounce(async () => {
+    const stringPatterns = this.props.dataViews.filter(
+      (dataView) => typeof dataView === 'string'
     ) as string[];
-    const objectPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern !== 'string'
+    const objectPatterns = this.props.dataViews.filter(
+      (dataView) => typeof dataView !== 'string'
     ) as DataView[];
 
     // abort the previous fetch to avoid overriding with outdated data
     // issue https://github.com/elastic/kibana/issues/80831
-    if (this.fetchIndexPatternsAbortController) this.fetchIndexPatternsAbortController.abort();
-    this.fetchIndexPatternsAbortController = new AbortController();
-    const currentAbortController = this.fetchIndexPatternsAbortController;
+    if (this.fetchDataViewsAbortController) this.fetchDataViewsAbortController.abort();
+    this.fetchDataViewsAbortController = new AbortController();
+    const currentAbortController = this.fetchDataViewsAbortController;
 
-    const objectPatternsFromStrings = (await fetchIndexPatterns(
+    const objectPatternsFromStrings = (await fetchDataViews(
       this.services.data.indexPatterns,
       stringPatterns
     )) as DataView[];
 
     if (!currentAbortController.signal.aborted) {
       this.setState({
-        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+        dataViews: [...objectPatterns, ...objectPatternsFromStrings],
       });
 
       this.updateSuggestions();
@@ -200,13 +200,13 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
     if (
       !hasQuerySuggestions ||
-      !Array.isArray(this.state.indexPatterns) ||
-      compact(this.state.indexPatterns).length === 0
+      !Array.isArray(this.state.dataViews) ||
+      compact(this.state.dataViews).length === 0
     ) {
       return recentSearchSuggestions;
     }
 
-    const indexPatterns = this.state.indexPatterns;
+    const dataViews = this.state.dataViews;
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
@@ -219,7 +219,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       const suggestions =
         (await getAutocomplete().getQuerySuggestions({
           language,
-          indexPatterns,
+          dataViews,
           query: queryString,
           selectionStart,
           selectionEnd,
@@ -605,7 +605,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     }
 
     this.initPersistedLog();
-    this.fetchIndexPatterns();
+    this.fetchDataViews();
     this.handleAutoHeight();
 
     window.addEventListener('resize', this.handleAutoHeight);
@@ -619,8 +619,8 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
     this.initPersistedLog();
 
-    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
-      this.fetchIndexPatterns();
+    if (!isEqual(prevProps.dataViews, this.props.dataViews)) {
+      this.fetchDataViews();
     } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();
     }

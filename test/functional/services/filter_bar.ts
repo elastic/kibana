@@ -198,7 +198,7 @@ export class FilterBarService extends FtrService {
    */
   public async getIndexPatterns(): Promise<string> {
     await this.testSubjects.click('addFilter');
-    const indexPatterns = await this.comboBox.getOptionsList('filterIndexPatternsSelect');
+    const indexPatterns = await this.comboBox.getOptionsList('filterDataViewsSelect');
     await this.ensureFieldEditorModalIsClosed();
     return indexPatterns.trim().split('\n').join(',');
   }
@@ -209,7 +209,7 @@ export class FilterBarService extends FtrService {
    */
   public async selectIndexPattern(indexPatternTitle: string): Promise<void> {
     await this.testSubjects.click('addFilter');
-    await this.comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
+    await this.comboBox.set('filterDataViewsSelect', indexPatternTitle);
     await this.testSubjects.click('addFilter');
   }
 }

@@ -38,7 +38,7 @@ describe('<FilterEditor />', () => {
             type: 'phase',
           } as any,
         },
-        indexPatterns: [],
+        dataViews: [],
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
       };

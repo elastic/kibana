@@ -9,7 +9,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from '../../../data/common';
-import { findIndexPatternById, getFieldByName } from '../data_views';
+import { findIndexPatternById as findDataViewById, getFieldByName } from '../data_views';
 import { ConfigSchema } from '../../config';
 
 export async function termsEnumSuggestions(
@@ -25,8 +25,8 @@ export async function termsEnumSuggestions(
 ) {
   const { tiers } = config.autocomplete.valueSuggestions;
   if (!field?.name && !field?.type) {
-    const indexPattern = await findIndexPatternById(savedObjectsClient, index);
-    field = indexPattern && getFieldByName(fieldName, indexPattern);
+    const dataView = await findDataViewById(savedObjectsClient, index);
+    field = dataView && getFieldByName(fieldName, dataView);
   }
 
   const result = await esClient.termsEnum(

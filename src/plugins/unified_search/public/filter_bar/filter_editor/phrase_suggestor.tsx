@@ -17,7 +17,7 @@ import { getAutocomplete } from '../../services';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  indexPattern: DataView;
+  dataView: DataView;
   field: IFieldType;
   timeRangeForSuggestionsOverride?: boolean;
 }
@@ -74,14 +74,13 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   protected updateSuggestions = debounce(async (query: string = '') => {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const { indexPattern, field, timeRangeForSuggestionsOverride } = this
-      .props as PhraseSuggestorProps;
+    const { dataView, field, timeRangeForSuggestionsOverride } = this.props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
     }
     this.setState({ isLoading: true });
     const suggestions = await getAutocomplete().getValueSuggestions({
-      indexPattern,
+      dataView,
       field,
       query,
       signal: this.abortController.signal,

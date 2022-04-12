@@ -8,10 +8,7 @@
 
 import { stubFieldSpecMap, stubLogstashFieldSpecMap } from './field.stub';
 import { createStubDataView } from './data_views/data_view.stub';
-export {
-  createStubDataView,
-  createStubDataView as createStubIndexPattern,
-} from './data_views/data_view.stub';
+export { createStubDataView } from './data_views/data_view.stub';
 import { SavedObject } from '../../../core/types';
 import { DataViewAttributes } from './types';
 
@@ -24,8 +21,6 @@ export const stubDataView = createStubDataView({
   },
 });
 
-export const stubIndexPattern = stubDataView;
-
 export const stubDataViewWithoutTimeField = createStubDataView({
   spec: {
     id: 'logstash-*',
@@ -33,8 +28,6 @@ export const stubDataViewWithoutTimeField = createStubDataView({
     title: 'logstash-*',
   },
 });
-
-export const stubIndexPatternWithoutTimeField = stubDataViewWithoutTimeField;
 
 export const stubLogstashDataView = createStubDataView({
   spec: {
@@ -44,8 +37,6 @@ export const stubLogstashDataView = createStubDataView({
     fields: stubLogstashFieldSpecMap,
   },
 });
-
-export const stubLogstashIndexPattern = stubLogstashDataView;
 
 export function stubbedSavedObjectDataView(
   id: string | null = null
@@ -62,5 +53,3 @@ export function stubbedSavedObjectDataView(
     references: [],
   };
 }
-
-export const stubbedSavedObjectIndexPattern = stubbedSavedObjectDataView;

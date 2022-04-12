@@ -7,16 +7,16 @@
  */
 
 import React from 'react';
-import type { IndexPatternSelectInternalProps } from './index_pattern_select';
+import type { DataViewSelectInternalProps } from './data_view_select';
 
 const Fallback = () => <div />;
 
-const LazyIndexPatternSelect = React.lazy(() => import('./index_pattern_select'));
-export const IndexPatternSelect = (props: IndexPatternSelectInternalProps) => (
+const LazyDataViewSelect = React.lazy(() => import('./data_view_select'));
+export const DataViewSelect = (props: DataViewSelectInternalProps) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyIndexPatternSelect {...props} />
+    <LazyDataViewSelect {...props} />
   </React.Suspense>
 );
 
-export * from './create_index_pattern_select';
-export type { IndexPatternSelectProps } from './index_pattern_select';
+export * from './create_data_view_select';
+export type { DataViewSelectProps } from './data_view_select';

@@ -31,25 +31,25 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
     .getStartServices()
     .then(([_, __, dataStart]) => dataStart.autocomplete);
   return async (
-    { indexPatterns, boolFilter, useTimeRange, signal, method },
+    { dataViews, boolFilter, useTimeRange, signal, method },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
 
-    const indexPatternFieldEntries: Array<[IIndexPattern, IFieldType]> = [];
-    indexPatterns.forEach((indexPattern) => {
-      indexPattern.fields
+    const dataViewFieldEntries: Array<[IIndexPattern, IFieldType]> = [];
+    dataViews.forEach((dataView) => {
+      dataView.fields
         .filter((field) => field.name === fullFieldName)
-        .forEach((field) => indexPatternFieldEntries.push([indexPattern, field]));
+        .forEach((field) => dataViewFieldEntries.push([dataView, field]));
     });
 
     const query = `${prefix}${suffix}`.trim();
     const { getValueSuggestions } = await autoCompleteServicePromise;
 
     const data = await Promise.all(
-      indexPatternFieldEntries.map(([indexPattern, field]) =>
+      dataViewFieldEntries.map(([dataView, field]) =>
         getValueSuggestions({
-          indexPattern,
+          dataView,
           field,
           query,
           boolFilter,

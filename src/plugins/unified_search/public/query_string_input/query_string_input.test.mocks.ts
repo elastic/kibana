@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { stubIndexPattern } from '../../../data/public/stubs';
+import { stubDataView } from '../../../data/public/stubs';
 
 export const mockPersistedLog = {
   add: jest.fn(),
@@ -17,16 +17,14 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
   return mockPersistedLog;
 });
 
-export const mockFetchIndexPatterns = jest
-  .fn()
-  .mockReturnValue(Promise.resolve([stubIndexPattern]));
+export const mockFetchDataViews = jest.fn().mockReturnValue(Promise.resolve([stubDataView]));
 
 jest.mock('../../../data/public/query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 
 jest.mock('./fetch_index_patterns', () => ({
-  fetchIndexPatterns: mockFetchIndexPatterns,
+  fetchDataViews: mockFetchDataViews,
 }));
 
 import _ from 'lodash';
