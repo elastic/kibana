@@ -92,6 +92,172 @@ describe('ContextContainer', () => {
   });
 
   describe('context building', () => {
+    it('lazily loads the providers when accessed', async () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+
+      const core1provider = jest.fn().mockReturnValue('core1');
+      const ctxFromAProvider = jest.fn().mockReturnValue('ctxFromA');
+
+      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+        coreId,
+        'core1',
+        core1provider
+      );
+
+      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+        pluginA,
+        'ctxFromA',
+        ctxFromAProvider
+      );
+
+      let context: any;
+      const rawHandler1 = jest.fn((ctx) => {
+        context = ctx;
+        return 'rawHandler1' as any;
+      });
+      const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
+
+      const request = httpServerMock.createKibanaRequest();
+      const response = httpServerMock.createResponseFactory();
+      await handler1(request, response);
+
+      expect(core1provider).not.toHaveBeenCalled();
+      expect(ctxFromAProvider).not.toHaveBeenCalled();
+
+      await context!.core1;
+
+      expect(core1provider).toHaveBeenCalledTimes(1);
+      expect(ctxFromAProvider).not.toHaveBeenCalled();
+
+      await context!.ctxFromA;
+
+      expect(core1provider).toHaveBeenCalledTimes(1);
+      expect(ctxFromAProvider).toHaveBeenCalledTimes(1);
+    });
+
+    it(`does not eagerly loads a provider's dependencies`, async () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+
+      const core1provider = jest.fn().mockReturnValue('core1');
+      const ctxFromAProvider = jest.fn().mockReturnValue('ctxFromA');
+
+      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+        coreId,
+        'core1',
+        core1provider
+      );
+
+      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+        pluginA,
+        'ctxFromA',
+        ctxFromAProvider
+      );
+
+      let context: any;
+      const rawHandler1 = jest.fn((ctx) => {
+        context = ctx;
+        return 'rawHandler1' as any;
+      });
+      const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
+
+      const request = httpServerMock.createKibanaRequest();
+      const response = httpServerMock.createResponseFactory();
+      await handler1(request, response);
+
+      expect(core1provider).not.toHaveBeenCalled();
+      expect(ctxFromAProvider).not.toHaveBeenCalled();
+
+      await context!.ctxFromA;
+
+      expect(core1provider).not.toHaveBeenCalled();
+      expect(ctxFromAProvider).toHaveBeenCalledTimes(1);
+    });
+
+    it(`allows to load a dependency from a provider`, async () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+
+      const core1provider = jest.fn().mockReturnValue('core1');
+      const ctxFromAProvider = jest.fn().mockImplementation(async (ctx: any) => {
+        const core1 = await ctx.core1;
+        return `${core1}-ctxFromA`;
+      });
+
+      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+        coreId,
+        'core1',
+        core1provider
+      );
+
+      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+        pluginA,
+        'ctxFromA',
+        ctxFromAProvider
+      );
+
+      let context: any;
+      const rawHandler1 = jest.fn((ctx) => {
+        context = ctx;
+        return 'rawHandler1' as any;
+      });
+      const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
+
+      const request = httpServerMock.createKibanaRequest();
+      const response = httpServerMock.createResponseFactory();
+      await handler1(request, response);
+
+      expect(core1provider).not.toHaveBeenCalled();
+      expect(ctxFromAProvider).not.toHaveBeenCalled();
+
+      const contextValue = await context!.ctxFromA;
+
+      expect(contextValue).toEqual('core1-ctxFromA');
+      expect(core1provider).toHaveBeenCalledTimes(1);
+      expect(ctxFromAProvider).toHaveBeenCalledTimes(1);
+    });
+
+    it(`only calls a provider once and caches the returned value`, async () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+
+      const core1provider = jest.fn().mockReturnValue('core1');
+      const ctxFromAProvider = jest.fn().mockImplementation(async (ctx: any) => {
+        const core1 = await ctx.core1;
+        return `${core1}-ctxFromA`;
+      });
+
+      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+        coreId,
+        'core1',
+        core1provider
+      );
+
+      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+        pluginA,
+        'ctxFromA',
+        ctxFromAProvider
+      );
+
+      let context: any;
+      const rawHandler1 = jest.fn((ctx) => {
+        context = ctx;
+        return 'rawHandler1' as any;
+      });
+      const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
+
+      const request = httpServerMock.createKibanaRequest();
+      const response = httpServerMock.createResponseFactory();
+      await handler1(request, response);
+
+      expect(core1provider).not.toHaveBeenCalled();
+      expect(ctxFromAProvider).not.toHaveBeenCalled();
+
+      await context!.core1;
+      await context!.ctxFromA;
+      await context!.core1;
+
+      expect(core1provider).toHaveBeenCalledTimes(1);
+      expect(ctxFromAProvider).toHaveBeenCalledTimes(1);
+    });
+
     it('resolves dependencies', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
       expect.assertions(8);

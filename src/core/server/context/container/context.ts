@@ -8,7 +8,6 @@
 
 import { flatten } from 'lodash';
 import { ShallowPromise, MaybePromise } from '@kbn/utility-types';
-import { pick } from 'lodash';
 import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } from '../..';
 
 /**
@@ -224,42 +223,40 @@ export class ContextContainer implements IContextContainer {
     }
 
     return (async (...args: HandlerParameters<RequestHandler>) => {
-      const context = await this.buildContext(source, ...args);
+      const context = this.buildContext(source, ...args);
       return handler(context, ...args);
     }) as (
       ...args: HandlerParameters<RequestHandler>
     ) => ShallowPromise<ReturnType<RequestHandler>>;
   };
 
-  private async buildContext(
+  private buildContext(
     source: symbol,
     ...contextArgs: HandlerParameters<RequestHandler>
-  ): Promise<HandlerContextType<RequestHandler>> {
+  ): HandlerContextType<RequestHandler> {
     const contextsToBuild = new Set(this.getContextNamesForSource(source));
-
-    const builtContextes: Partial<HandlerContextType<RequestHandler>> = {};
+    const builtContextParts: Partial<HandlerContextType<RequestHandler>> = {};
 
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
-      .reduce((alreadyBuildContextParts, [contextName, { provider, source: providerSource }]) => {
-        // For the next provider, only expose the context available based on the dependencies of the plugin that
-        // registered that provider.
-        const exposedContext = pick(alreadyBuildContextParts, [
-          ...this.getContextNamesForSource(providerSource),
-        ]);
-
-        Object.defineProperty(alreadyBuildContextParts, contextName, {
+      .reduce((contextAccessors, [contextName, { provider, source: providerSource }]) => {
+        const exposedContext = createExposedContext({
+          currentContextName: contextName,
+          exposedContextNames: [...this.getContextNamesForSource(providerSource)],
+          contextAccessors,
+        });
+        Object.defineProperty(contextAccessors, contextName, {
           get: async () => {
             const contextKey = contextName as keyof HandlerContextType<RequestHandler>;
-            if (!builtContextes[contextKey]) {
-              builtContextes[contextKey] = await provider(exposedContext, ...contextArgs);
+            if (!builtContextParts[contextKey]) {
+              builtContextParts[contextKey] = await provider(exposedContext, ...contextArgs);
             }
-            return builtContextes[contextKey]!;
+            return builtContextParts[contextKey]!;
           },
         });
 
-        return alreadyBuildContextParts;
+        return contextAccessors;
       }, {} as HandlerContextType<RequestHandler>);
   }
 
@@ -306,3 +303,26 @@ const sortByCoreFirst =
       return rightProvider.source === coreId ? 1 : 0;
     }
   };
+
+const createExposedContext = ({
+  currentContextName,
+  exposedContextNames,
+  contextAccessors,
+}: {
+  currentContextName: string;
+  exposedContextNames: string[];
+  contextAccessors: Partial<HandlerContextType<RequestHandler>>;
+}) => {
+  const exposedContext: Partial<HandlerContextType<RequestHandler>> = {};
+  for (const contextName of exposedContextNames) {
+    if (contextName === currentContextName) {
+      continue;
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(contextAccessors, contextName);
+    if (descriptor) {
+      Object.defineProperty(exposedContext, contextName, descriptor);
+    }
+  }
+
+  return exposedContext;
+};
