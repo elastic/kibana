@@ -7,10 +7,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import { IndexPatternsContract } from '../../../data/public';
+import { DataViewsContract } from '../../../data_views/public';
 
 export async function fetchIndexPatterns(
-  indexPatternsService: IndexPatternsContract,
+  indexPatternsService: DataViewsContract,
   indexPatternStrings: string[]
 ) {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
