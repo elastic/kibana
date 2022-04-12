@@ -45,6 +45,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
     case 'boolean': {
       return (
         <EuiSwitch
+          data-test-subj={row.dataTestSubj}
           disabled={isDisabled}
           label={row.placeholder || (value ? ENABLED_LABEL : DISABLED_LABEL)}
           checked={value}
@@ -58,6 +59,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
     case 'text': {
       return (
         <EuiFieldText
+          data-test-subj={row.dataTestSubj}
           disabled={isDisabled}
           value={value}
           prepend={isDisabled ? <EuiIcon type="lock" /> : undefined}
@@ -70,6 +72,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
     case 'area': {
       return (
         <EuiTextArea
+          data-test-subj={row.dataTestSubj}
           disabled={isDisabled}
           value={value}
           onChange={(e) => {
@@ -82,6 +85,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
     case 'integer': {
       return (
         <EuiFieldNumber
+          data-test-subj={row.dataTestSubj}
           disabled={isDisabled}
           value={value}
           onChange={(e) => {
@@ -96,6 +100,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
         : [];
       return (
         <EuiComboBox
+          data-test-subj={row.dataTestSubj}
           noSuggestions
           placeholder={i18n.translate(
             'xpack.apm.fleet_integration.settings.selectOrCreateOptions',

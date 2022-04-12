@@ -1,21 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<IconButtonGroup /> is rendered 1`] = `
-.emotion-0.euiButtonGroupButton {
-  background-color: #FFF;
-  border: 1px solid #D3DAE6!important;
-}
-
-.emotion-0.euiButtonGroupButton:first-of-type {
-  border-top-left-radius: 6px!important;
-  border-bottom-left-radius: 6px!important;
-}
-
-.emotion-0.euiButtonGroupButton:last-of-type {
-  border-top-right-radius: 6px!important;
-  border-bottom-right-radius: 6px!important;
-}
-
 <SharedUxServicesProvider
   application={
     Object {
@@ -115,13 +100,14 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
         >
           <EuiButtonGroupButton
             aria-label="Text"
-            className="emotion-0"
             color="text"
+            css="unknown styles"
             element="button"
             iconType="visText"
             id="generated-id0"
             isDisabled={false}
             isIconOnly={true}
+            key="0"
             label="Text"
             name="generated-id"
             onChange={[Function]}
@@ -129,84 +115,201 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
             size="m"
             title="Text"
           >
-            <EuiButtonDisplay
-              aria-label="Text"
-              baseClassName="euiButtonGroupButton"
-              className="euiButtonGroupButton-isIconOnly emotion-0"
-              color="text"
-              data-test-subj="generated-id0"
-              element="button"
-              fill={false}
-              iconType="visText"
-              id="generated-id"
-              isDisabled={false}
-              isSelected={false}
-              onClick={[MockFunction]}
-              size="m"
-              textProps={
+            <Insertion
+              cache={
                 Object {
-                  "className": "euiScreenReaderOnly",
-                  "data-text": "Text",
-                  "ref": [Function],
+                  "insert": [Function],
+                  "inserted": Object {
+                    "iuv015-EuiButtonGroup": true,
+                  },
+                  "key": "css",
+                  "nonce": undefined,
+                  "registered": Object {
+                    "css-iuv015-EuiButtonGroup": "&.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6 !important;&:first-of-type{border-top-left-radius:6px !important;border-bottom-left-radius:6px !important;}&:last-of-type{border-top-right-radius:6px !important;border-bottom-right-radius:6px !important;}};;label:EuiButtonGroup;",
+                  },
+                  "sheet": StyleSheet {
+                    "_alreadyInsertedOrderInsensitiveRule": true,
+                    "_insertTag": [Function],
+                    "before": null,
+                    "container": <head>
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup{}
+                      </style>
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6!important;}
+                      </style>
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup.euiButtonGroupButton:first-of-type{border-top-left-radius:6px!important;border-bottom-left-radius:6px!important;}
+                      </style>
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup.euiButtonGroupButton:last-of-type{border-top-right-radius:6px!important;border-bottom-right-radius:6px!important;}
+                      </style>
+                      <style
+                        data-styled="active"
+                        data-styled-version="5.1.0"
+                      />
+                    </head>,
+                    "ctr": 4,
+                    "insertionPoint": undefined,
+                    "isSpeedy": false,
+                    "key": "css",
+                    "nonce": undefined,
+                    "prepend": undefined,
+                    "tags": Array [
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup{}
+                      </style>,
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6!important;}
+                      </style>,
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup.euiButtonGroupButton:first-of-type{border-top-left-radius:6px!important;border-bottom-left-radius:6px!important;}
+                      </style>,
+                      <style
+                        data-emotion="css"
+                        data-s=""
+                      >
+                        
+                        .css-iuv015-EuiButtonGroup.euiButtonGroupButton:last-of-type{border-top-right-radius:6px!important;border-bottom-right-radius:6px!important;}
+                      </style>,
+                    ],
+                  },
                 }
               }
+              isStringTag={false}
+              serialized={
+                Object {
+                  "map": undefined,
+                  "name": "iuv015-EuiButtonGroup",
+                  "next": undefined,
+                  "styles": "&.euiButtonGroupButton{background-color:#FFF;border:1px solid #D3DAE6 !important;&:first-of-type{border-top-left-radius:6px !important;border-bottom-left-radius:6px !important;}&:last-of-type{border-top-right-radius:6px !important;border-bottom-right-radius:6px !important;}};;label:EuiButtonGroup;",
+                  "toString": [Function],
+                }
+              }
+            />
+            <EuiButtonGroupButton
+              aria-label="Text"
+              className="css-iuv015-EuiButtonGroup"
+              color="text"
+              element="button"
+              iconType="visText"
+              id="generated-id0"
+              isDisabled={false}
+              isIconOnly={true}
+              label="Text"
+              name="generated-id"
+              onChange={[Function]}
+              onClick={[MockFunction]}
+              size="m"
               title="Text"
-              type="button"
             >
-              <button
+              <EuiButtonDisplay
                 aria-label="Text"
-                aria-pressed={false}
-                className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly emotion-0"
+                baseClassName="euiButtonGroupButton"
+                className="euiButtonGroupButton-isIconOnly css-iuv015-EuiButtonGroup"
+                color="text"
                 data-test-subj="generated-id0"
-                disabled={false}
+                element="button"
+                fill={false}
+                iconType="visText"
                 id="generated-id"
+                isDisabled={false}
+                isSelected={false}
                 onClick={[MockFunction]}
-                style={
+                size="m"
+                textProps={
                   Object {
-                    "minWidth": undefined,
+                    "className": "euiScreenReaderOnly",
+                    "data-text": "Text",
+                    "ref": [Function],
                   }
                 }
                 title="Text"
                 type="button"
               >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  iconType="visText"
-                  textProps={
+                <button
+                  aria-label="Text"
+                  aria-pressed={false}
+                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton-isIconOnly css-iuv015-EuiButtonGroup"
+                  data-test-subj="generated-id0"
+                  disabled={false}
+                  id="generated-id"
+                  onClick={[MockFunction]}
+                  style={
                     Object {
-                      "className": "euiButton__text euiScreenReaderOnly",
-                      "data-text": "Text",
-                      "ref": [Function],
+                      "minWidth": undefined,
                     }
                   }
+                  title="Text"
+                  type="button"
                 >
-                  <span
-                    className="euiButtonContent euiButton__content"
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="visText"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text euiScreenReaderOnly",
+                        "data-text": "Text",
+                        "ref": [Function],
+                      }
+                    }
                   >
-                    <EuiIcon
-                      className="euiButtonContent__icon"
-                      color="inherit"
-                      size="m"
-                      type="visText"
+                    <span
+                      className="euiButtonContent euiButton__content"
                     >
-                      <span
+                      <EuiIcon
                         className="euiButtonContent__icon"
                         color="inherit"
-                        data-euiicon-type="visText"
                         size="m"
-                      />
-                    </EuiIcon>
-                    <span
-                      className="euiButton__text euiScreenReaderOnly"
-                      data-text="Text"
-                    >
-                      Text
+                        type="visText"
+                      >
+                        <span
+                          className="euiButtonContent__icon"
+                          color="inherit"
+                          data-euiicon-type="visText"
+                          size="m"
+                        />
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text euiScreenReaderOnly"
+                        data-text="Text"
+                      >
+                        Text
+                      </span>
                     </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButtonGroupButton>
           </EuiButtonGroupButton>
         </div>
       </fieldset>
