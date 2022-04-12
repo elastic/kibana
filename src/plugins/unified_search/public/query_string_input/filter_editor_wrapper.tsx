@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '../../../kibana_react/public';
@@ -70,17 +69,15 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   }
 
   return (
-    <EuiFlexItem grow={false}>
-      <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-        <FilterEditor
-          filter={newFilter}
-          indexPatterns={dataViews}
-          onSubmit={onAdd}
-          onCancel={() => closePopover?.()}
-          key={JSON.stringify(newFilter)}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-        />
-      </div>
-    </EuiFlexItem>
+    <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
+      <FilterEditor
+        filter={newFilter}
+        indexPatterns={dataViews}
+        onSubmit={onAdd}
+        onCancel={() => closePopover?.()}
+        key={JSON.stringify(newFilter)}
+        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+      />
+    </div>
   );
 });

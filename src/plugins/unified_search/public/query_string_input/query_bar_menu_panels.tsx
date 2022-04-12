@@ -229,7 +229,7 @@ export function QueryBarMenuPanels({
       name: i18n.translate('unifiedSearch.filter.options.addFilterButtonLabel', {
         defaultMessage: 'Add filter',
       }),
-      icon: 'plusInCircleFilled',
+      icon: 'plus',
       onClick: () => {
         setRenderedComponent('addFilter');
       },

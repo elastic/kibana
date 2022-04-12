@@ -152,15 +152,13 @@ export function QueryBarMenu({
         return (
           <EuiContextMenuPanel
             items={[
-              <div style={{ padding: 16 }}>
-                <FilterEditorWrapper
-                  indexPatterns={indexPatterns}
-                  filters={filters!}
-                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                  onFiltersUpdated={onFiltersUpdated}
-                  closePopover={closePopover}
-                />
-              </div>,
+              <FilterEditorWrapper
+                indexPatterns={indexPatterns}
+                filters={filters!}
+                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                onFiltersUpdated={onFiltersUpdated}
+                closePopover={closePopover}
+              />,
             ]}
           />
         );
@@ -175,7 +173,7 @@ export function QueryBarMenu({
         isOpen={openQueryBarMenu}
         closePopover={closePopover}
         panelPaddingSize="none"
-        anchorPosition="rightUp"
+        anchorPosition="downLeft"
         repositionOnScroll
         data-test-subj="queryBarMenuPopover"
       >
