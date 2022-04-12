@@ -15,7 +15,7 @@ export abstract class ReportingError extends Error {
    *
    * @note Convention for codes: lower-case, snake-case and end in `_error`.
    */
-  public abstract code: string;
+  public abstract get code(): string;
 
   constructor(public details?: string) {
     super();
@@ -38,22 +38,34 @@ export abstract class ReportingError extends Error {
  * access token expired.
  */
 export class AuthenticationExpiredError extends ReportingError {
-  code = 'authentication_expired_error';
+  static tcode = 'authentication_expired_error' as const;
+  public get code(): string {
+    return AuthenticationExpiredError.tcode;
+  }
 }
 
 export class QueueTimeoutError extends ReportingError {
-  code = 'queue_timeout_error';
+  static code = 'queue_timeout_error' as const;
+  public get code(): string {
+    return QueueTimeoutError.code;
+  }
 }
 
 /**
  * An unknown error has occurred. See details.
  */
 export class UnknownError extends ReportingError {
-  code = 'unknown_error';
+  static code = 'unknown_error' as const;
+  public get code(): string {
+    return UnknownError.code;
+  }
 }
 
 export class PdfWorkerOutOfMemoryError extends ReportingError {
-  code = 'pdf_worker_out_of_memory_error';
+  static code = 'pdf_worker_out_of_memory_error' as const;
+  public get code(): string {
+    return PdfWorkerOutOfMemoryError.code;
+  }
 
   details = i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
     defaultMessage:
@@ -70,7 +82,10 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
 }
 
 export class BrowserCouldNotLaunchError extends ReportingError {
-  code = 'browser_could_not_launch_error';
+  static code = 'browser_could_not_launch_error' as const;
+  public get code(): string {
+    return BrowserCouldNotLaunchError.code;
+  }
 
   details = i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
     defaultMessage: 'Cannot generate screenshots because the browser did not launch.',
@@ -86,17 +101,42 @@ export class BrowserCouldNotLaunchError extends ReportingError {
 }
 
 export class BrowserUnexpectedlyClosedError extends ReportingError {
-  code = 'browser_unexpectedly_closed_error';
+  static code = 'browser_unexpectedly_closed_error' as const;
+  public get code(): string {
+    return BrowserUnexpectedlyClosedError.code;
+  }
 }
 
 export class BrowserScreenshotError extends ReportingError {
-  code = 'browser_screenshot_error';
+  static code = 'browser_screenshot_error' as const;
+  public get code(): string {
+    return BrowserScreenshotError.code;
+  }
 }
 
 export class KibanaShuttingDownError extends ReportingError {
-  code = 'kibana_shutting_down_error';
+  static code = 'kibana_shutting_down_error' as const;
+  public get code(): string {
+    return KibanaShuttingDownError.code;
+  }
 }
 
+/**
+ * Special error case that should only occur on Cloud when trying to generate
+ * a report on a Kibana instance that is too small to be running Chromium.
+ */
 export class VisualReportingSoftDisabledError extends ReportingError {
-  code = 'visual_reporting_soft_disabled_error';
+  static code = 'visual_reporting_soft_disabled_error' as const;
+  public get code(): string {
+    return VisualReportingSoftDisabledError.code;
+  }
+
+  details = i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
+    defaultMessage:
+      'This report cannot be generated because Kibana does not have sufficient memory.',
+  });
+
+  public override get message() {
+    return this.details;
+  }
 }

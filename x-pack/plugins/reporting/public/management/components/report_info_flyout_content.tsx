@@ -17,9 +17,12 @@ import {
 import moment from 'moment';
 
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { VisualReportingSoftDisabledError } from '../../../common/errors';
 
 import type { Job } from '../../lib/job';
 import { useKibana } from '../../shared_imports';
+
+import { i18nTexts } from './i18n_texts';
 
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
   defaultMessage: 'N/A',
@@ -186,7 +189,14 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   ];
 
   const warnings = info.getWarnings();
-  const errored = info.getError();
+  const errored =
+    /*
+     * We link the user to documentation if they hit this error case. Note: this
+     * should only occur on cloud.
+     */
+    info.error_code === VisualReportingSoftDisabledError.code
+      ? i18nTexts.cloud.insufficientMemoryError('#')
+      : info.getError();
 
   return (
     <>
