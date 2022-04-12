@@ -28,13 +28,17 @@ describe('DELETE role', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRole.mockImplementation(
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.deleteRole.mockImplementation(
           (async () => ({ body: await apiResponse() })) as any
         );
       }
@@ -56,10 +60,10 @@ describe('DELETE role', () => {
 
       if (apiResponse) {
         expect(
-          mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRole
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.deleteRole
         ).toHaveBeenCalledWith({ name });
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
