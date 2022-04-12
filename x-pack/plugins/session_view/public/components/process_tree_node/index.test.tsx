@@ -39,6 +39,8 @@ describe('ProcessTreeNode component', () => {
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
     onShowAlertDetails: jest.fn(),
+    showTimestamp: true,
+    verboseMode: false,
   };
 
   beforeEach(() => {
@@ -64,7 +66,7 @@ describe('ProcessTreeNode component', () => {
     //   expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
     // });
 
-    it('renders Exec icon and exit code for executed process', async () => {
+    it('renders Exec icon', async () => {
       const executedProcessMock: typeof processMock = {
         ...processMock,
         hasExec: () => true,
@@ -75,26 +77,6 @@ describe('ProcessTreeNode component', () => {
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeExecIcon')).toBeTruthy();
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeTruthy();
-    });
-
-    it('does not render exit code if it does not exist', async () => {
-      const processWithoutExitCode: typeof processMock = {
-        ...processMock,
-        hasExec: () => true,
-        getDetails: () => ({
-          ...processMock.getDetails(),
-          process: {
-            ...processMock.getDetails().process,
-            exit_code: undefined,
-          },
-        }),
-      };
-
-      renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} process={processWithoutExitCode} />
-      );
-      expect(renderResult.queryByTestId('sessionView:processTreeNodeExitCode')).toBeFalsy();
     });
 
     it('calls onChangeJumpToEventVisibility with isVisible false if jumpToEvent is not visible', async () => {
@@ -143,6 +125,10 @@ describe('ProcessTreeNode component', () => {
           },
           process: {
             ...processMock.getDetails().process,
+            user: {
+              id: '-1',
+              name: 'root',
+            },
             parent: {
               ...processMock.getDetails().process!.parent,
               user: {
@@ -196,7 +182,7 @@ describe('ProcessTreeNode component', () => {
     it('When Timestamp is ON, it shows Timestamp', async () => {
       // set a mock where Timestamp is turned ON
       renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} timeStampOn={true} process={processMock} />
+        <ProcessTreeNode {...props} showTimestamp={true} process={processMock} />
       );
 
       expect(renderResult.getByTestId('sessionView:processTreeNodeTimestamp')).toBeTruthy();
@@ -205,7 +191,7 @@ describe('ProcessTreeNode component', () => {
     it('When Timestamp is OFF, it doesnt show Timestamp', async () => {
       // set a mock where Timestamp is turned OFF
       renderResult = mockedContext.render(
-        <ProcessTreeNode {...props} timeStampOn={false} process={processMock} />
+        <ProcessTreeNode {...props} showTimestamp={false} process={processMock} />
       );
 
       expect(renderResult.queryByTestId('sessionView:processTreeNodeTimestamp')).toBeFalsy();

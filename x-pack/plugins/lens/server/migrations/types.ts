@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { Filter } from '@kbn/es-query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
-import type { CustomPaletteParams, LayerType, PersistableFilter } from '../../common';
+import type { LayerType, PersistableFilter } from '../../common';
 
 export type CustomVisualizationMigrations = Record<string, () => MigrateFunctionsObject>;
 

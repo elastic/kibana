@@ -93,7 +93,7 @@ export const FormContext: React.FC<Props> = ({
           await afterCaseCreated(updatedCase, postComment);
         }
 
-        if (updatedCase?.id && dataConnectorId !== 'none') {
+        if (updatedCase?.id && connectorToUpdate.id !== 'none') {
           await pushCaseToExternalService({
             caseId: updatedCase.id,
             connector: connectorToUpdate,
