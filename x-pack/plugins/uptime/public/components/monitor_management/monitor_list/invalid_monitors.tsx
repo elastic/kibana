@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { MonitorManagementList, MonitorManagementListPageState } from './monitor_list';
-import { MonitorManagementListResult, Ping } from '../../../../common/runtime_types';
+import { monitorManagementListSelector } from '../../../state/selectors';
+import {
+  MonitorManagementListResult,
+  Ping,
+  DEFAULT_THROTTLING,
+} from '../../../../common/runtime_types';
 
 interface Props {
   loading: boolean;
@@ -31,6 +37,8 @@ export const InvalidMonitors = ({
 
   const startIndex = (pageIndex - 1) * pageSize;
 
+  const monitorList = useSelector(monitorManagementListSelector);
+
   return (
     <MonitorManagementList
       pageState={pageState}
@@ -40,10 +48,14 @@ export const InvalidMonitors = ({
           page: pageState.pageIndex,
           perPage: pageState.pageSize,
           total: invalidTotal ?? 0,
+          syncErrors: null,
         },
-        error: { monitorList: null, serviceLocations: null },
-        loading: { monitorList: summariesLoading, serviceLocations: false },
-        locations: [],
+        enablement: null,
+        error: { monitorList: null, serviceLocations: null, enablement: null },
+        loading: { monitorList: summariesLoading, serviceLocations: false, enablement: false },
+        locations: monitorList.locations,
+        syntheticsService: monitorList.syntheticsService,
+        throttling: DEFAULT_THROTTLING,
       }}
       onPageStateChange={onPageStateChange}
       onUpdate={onUpdate}

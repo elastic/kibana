@@ -25,20 +25,16 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
-import {
-  TransformChangesIfTheyExist,
-  useTransforms,
-} from '../../../transforms/containers/use_transforms';
 import { getInspectResponse } from '../../../helpers';
 import { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 type UseSearchStrategyRequestArgs = RequestBasicOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
   factoryQueryType: FactoryQueryTypes;
-  getTransformChangesIfTheyExist: TransformChangesIfTheyExist;
 };
 
 const search = <ResponseType extends IKibanaSearchResponse>({
@@ -48,26 +44,14 @@ const search = <ResponseType extends IKibanaSearchResponse>({
   defaultIndex,
   filterQuery,
   timerange,
-  getTransformChangesIfTheyExist,
   ...requestProps
 }: UseSearchStrategyRequestArgs): Observable<ResponseType> => {
-  const {
-    indices: transformIndices,
-    factoryQueryType: transformFactoryQueryType,
-    timerange: transformTimerange,
-  } = getTransformChangesIfTheyExist({
-    factoryQueryType,
-    indices: defaultIndex,
-    filterQuery,
-    timerange,
-  });
-
   return data.search.search<RequestBasicOptions, ResponseType>(
     {
       ...requestProps,
-      factoryQueryType: transformFactoryQueryType,
-      defaultIndex: transformIndices,
-      timerange: transformTimerange,
+      factoryQueryType,
+      defaultIndex,
+      timerange,
       filterQuery,
     },
     {
@@ -96,7 +80,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   factoryQueryType,
   initialResult,
   errorMessage,
-  skip = false,
+  abort = false,
 }: {
   factoryQueryType: QueryType;
   /**
@@ -107,10 +91,12 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    * Message displayed to the user on a Toast when an erro happens.
    */
   errorMessage?: string;
-  skip?: boolean;
+  /**
+   * When the flag switches from `false` to `true`, it will abort any ongoing request.
+   */
+  abort?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { data } = useKibana().services;
@@ -122,7 +108,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   >(searchComplete);
 
   useEffect(() => {
-    if (error != null) {
+    if (error != null && !(error instanceof AbortError)) {
       addError(error, {
         title: errorMessage ?? i18n.DEFAULT_ERROR_SEARCH_STRATEGY(factoryQueryType),
       });
@@ -137,7 +123,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
           ...props,
           data,
           factoryQueryType,
-          getTransformChangesIfTheyExist,
           signal: abortCtrl.current.signal,
         } as never); // This typescast is required because every StrategyRequestType instance has different fields.
       };
@@ -147,7 +132,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
       refetch.current = asyncSearch;
     },
-    [data, start, factoryQueryType, getTransformChangesIfTheyExist]
+    [data, start, factoryQueryType]
   );
 
   useEffect(() => {
@@ -157,10 +142,10 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   }, []);
 
   useEffect(() => {
-    if (skip) {
+    if (abort) {
       abortCtrl.current.abort();
     }
-  }, [skip]);
+  }, [abort]);
 
   const [formatedResult, inspect] = useMemo(
     () => [

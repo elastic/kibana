@@ -38,7 +38,7 @@ import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestNowColumn } from './columns/test_now_col';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
+import { NoItemsMessage } from './no_items_message';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -46,11 +46,6 @@ interface Props extends MonitorListProps {
   monitorList: MonitorList;
   refreshedMonitorIds: string[];
 }
-
-export const noItemsMessage = (loading: boolean, filters?: string) => {
-  if (loading) return labels.LOADING;
-  return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
-};
 
 export const MonitorListComponent: ({
   filters,
@@ -104,8 +99,6 @@ export const MonitorListComponent: ({
       };
     }, {});
   };
-
-  const { config } = useUptimeSettingsContext();
 
   const columns = [
     ...[
@@ -209,19 +202,15 @@ export const MonitorListComponent: ({
         />
       ),
     },
-    ...(config.ui?.monitorManagement?.enabled
-      ? [
-          {
-            align: 'center' as const,
-            field: '',
-            name: TEST_NOW_COLUMN,
-            width: '100px',
-            render: (item: MonitorSummary) => (
-              <TestNowColumn monitorId={item.monitor_id} configId={item.configId} />
-            ),
-          },
-        ]
-      : []),
+    {
+      align: 'center' as const,
+      field: '',
+      name: TEST_NOW_COLUMN,
+      width: '100px',
+      render: (item: MonitorSummary) => (
+        <TestNowColumn monitorId={item.monitor_id} configId={item.configId} />
+      ),
+    },
     ...(!hideExtraColumns
       ? [
           {
@@ -259,7 +248,7 @@ export const MonitorListComponent: ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={noItemsMessage(loading, filters)}
+        noItemsMessage={<NoItemsMessage loading={loading} filters={filters} />}
         columns={columns}
         tableLayout={'auto'}
         rowProps={

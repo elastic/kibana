@@ -4,6 +4,7 @@ set -euo pipefail
 
 echo "--- Build Platform Plugins"
 node scripts/build_kibana_platform_plugins \
+  --scan-dir "$KIBANA_DIR/test/analytics/__fixtures__/plugins" \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/interpreter_functional/plugins" \
   --scan-dir "$KIBANA_DIR/test/common/fixtures/plugins" \

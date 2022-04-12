@@ -35,6 +35,12 @@ jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () =
 }));
 jest.mock('../../../cases/components/use_insert_timeline');
 
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+  }),
+}));
+
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));

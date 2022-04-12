@@ -51,12 +51,7 @@ export const doSearch = async (
         },
       },
       size: PROCESS_EVENTS_PER_PAGE,
-      // we first sort by process.start, this allows lifecycle events to load all at once for a given process, and
-      // avoid issues like where the session leaders 'end' event is loaded at the very end of what could be multiple pages of events
-      sort: [
-        { 'process.start': forward ? 'asc' : 'desc' },
-        { '@timestamp': forward ? 'asc' : 'desc' },
-      ],
+      sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
       search_after: cursor ? [cursor] : undefined,
     },
   });
@@ -67,7 +62,11 @@ export const doSearch = async (
     events.reverse();
   }
 
+  const total =
+    typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+
   return {
+    total,
     events,
   };
 };

@@ -31,30 +31,43 @@ import { initVegaLayer, initTmsRasterLayer } from './layers';
 
 import { maplibregl } from '@kbn/mapbox-gl';
 
-jest.mock('@kbn/mapbox-gl', () => ({
-  maplibregl: {
-    setRTLTextPlugin: jest.fn(),
-    Map: jest.fn().mockImplementation(() => ({
-      getLayer: () => '',
-      removeLayer: jest.fn(),
-      once: (eventName: string, handler: Function) => handler(),
-      remove: () => jest.fn(),
-      getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
-      getCenter: () => ({ lat: 20, lng: 20 }),
-      getZoom: () => 3,
-      addControl: jest.fn(),
-      addLayer: jest.fn(),
-      dragRotate: {
-        disable: jest.fn(),
+jest.mock('@kbn/mapbox-gl', () => {
+  const zoomTo = jest.fn();
+  const setCenter = jest.fn();
+  const fitBounds = jest.fn();
+  return {
+    maplibregl: {
+      mocks: {
+        zoomTo,
+        setCenter,
+        fitBounds,
       },
-      touchZoomRotate: {
-        disableRotation: jest.fn(),
-      },
-    })),
-    MapboxOptions: jest.fn(),
-    NavigationControl: jest.fn(),
-  },
-}));
+      setRTLTextPlugin: jest.fn(),
+      Map: jest.fn().mockImplementation(() => ({
+        getLayer: () => '',
+        removeLayer: jest.fn(),
+        once: (eventName: string, handler: Function) => handler(),
+        remove: () => jest.fn(),
+        getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
+        getCenter: () => ({ lat: 20, lng: 20 }),
+        getZoom: () => 3,
+        zoomTo,
+        setCenter,
+        fitBounds,
+        addControl: jest.fn(),
+        addLayer: jest.fn(),
+        dragRotate: {
+          disable: jest.fn(),
+        },
+        touchZoomRotate: {
+          disableRotation: jest.fn(),
+        },
+      })),
+      MapboxOptions: jest.fn(),
+      NavigationControl: jest.fn(),
+    },
+  };
+});
 
 jest.mock('./layers', () => ({
   initVegaLayer: jest.fn(),
@@ -205,6 +218,58 @@ describe('vega_map_view/view', () => {
       await vegaMapView.init();
 
       expect(maplibregl.NavigationControl).toHaveBeenCalled();
+    });
+
+    describe('setMapView', () => {
+      let vegaMapView: VegaMapView;
+      beforeEach(async () => {
+        vegaMapView = await createVegaMapView();
+        await vegaMapView.init();
+        maplibregl.mocks.setCenter.mockReset();
+        maplibregl.mocks.zoomTo.mockReset();
+        maplibregl.mocks.fitBounds.mockReset();
+      });
+
+      test('should set just lat lng', async () => {
+        vegaMapView.setMapViewHandler(1, 2);
+        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
+      });
+
+      test('should set just lng lat via array', async () => {
+        vegaMapView.setMapViewHandler([1, 2]);
+        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 2, lng: 1 });
+      });
+
+      test('should set lat lng and zoom', async () => {
+        vegaMapView.setMapViewHandler(1, 2, 6);
+        expect(maplibregl.mocks.setCenter).toHaveBeenCalledWith({ lat: 1, lng: 2 });
+        expect(maplibregl.mocks.zoomTo).toHaveBeenCalledWith(6);
+      });
+
+      test('should set bounds', async () => {
+        vegaMapView.setMapViewHandler([
+          [1, 2],
+          [6, 7],
+        ]);
+        expect(maplibregl.mocks.fitBounds).toHaveBeenCalledWith([
+          { lat: 2, lng: 1 },
+          { lat: 7, lng: 6 },
+        ]);
+      });
+
+      test('should throw on invalid input', async () => {
+        expect(() => {
+          vegaMapView.setMapViewHandler(undefined);
+        }).toThrow();
+
+        expect(() => {
+          vegaMapView.setMapViewHandler(['a', 'b'] as unknown as [number, number]);
+        }).toThrow();
+
+        expect(() => {
+          vegaMapView.setMapViewHandler([1, 2, 3, 4, 5] as unknown as [number, number]);
+        }).toThrow();
+      });
     });
   });
 });

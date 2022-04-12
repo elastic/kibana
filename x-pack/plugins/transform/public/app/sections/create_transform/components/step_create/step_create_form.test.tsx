@@ -17,7 +17,7 @@ describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
     // Arrange
     const props: StepCreateFormProps = {
-      createIndexPattern: false,
+      createDataView: false,
       transformId: 'the-transform-id',
       transformConfig: {
         dest: {
@@ -31,7 +31,7 @@ describe('Transform: <StepCreateForm />', () => {
           index: 'the-source-index',
         },
       },
-      overrides: { created: false, started: false, indexPatternId: undefined },
+      overrides: { created: false, started: false, dataViewId: undefined },
       onChange() {},
     };
 

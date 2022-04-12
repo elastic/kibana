@@ -27,7 +27,7 @@ import {
 
 const SESSION_ENTITY_ID = '3d0192c6-7c54-5ee6-a110-3539a7cf42bc';
 const SEARCH_QUERY = 'vi';
-const SEARCH_RESULT_PROCESS_ID = '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727';
+const SEARCH_RESULT_PROCESS_ID = '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726';
 
 describe('process tree hook helpers tests', () => {
   let processMap: ProcessMap;
@@ -41,7 +41,7 @@ describe('process tree hook helpers tests', () => {
 
     // processes are added to processMap
     mockEvents.forEach((event) => {
-      expect(processMap[event.process.entity_id]).toBeTruthy();
+      expect(processMap[event?.process?.entity_id!]).toBeTruthy();
     });
   });
 
@@ -54,14 +54,14 @@ describe('process tree hook helpers tests', () => {
 
     // processes are added under their parent's childrean array in processMap
     mockEvents.forEach((event) => {
-      expect(sessionLeaderChildrenIds.has(event.process.entity_id));
+      expect(sessionLeaderChildrenIds.has(event?.process?.entity_id!));
     });
 
     expect(newOrphans.length).toBe(0);
   });
 
   it('searchProcessTree works', () => {
-    const searchResults = searchProcessTree(mockProcessMap, SEARCH_QUERY);
+    const searchResults = searchProcessTree(mockProcessMap, SEARCH_QUERY, true);
 
     // search returns the process with search query in its event args
     expect(searchResults[0].id).toBe(SEARCH_RESULT_PROCESS_ID);
@@ -76,7 +76,7 @@ describe('process tree hook helpers tests', () => {
     processMap[SESSION_ENTITY_ID].children = childProcesses;
 
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeFalsy();
-    processMap = autoExpandProcessTree(processMap);
+    processMap = autoExpandProcessTree(processMap, SEARCH_RESULT_PROCESS_ID);
     // session leader should have autoExpand to be true
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeTruthy();
   });
@@ -84,23 +84,25 @@ describe('process tree hook helpers tests', () => {
   it('updateAlertEventStatus works', () => {
     let events: ProcessEvent[] = cloneDeep([...mockEvents, ...mockAlerts]);
     const updatedAlertsStatus: AlertStatusEventEntityIdMap = {
-      [mockAlerts[0].kibana?.alert.uuid!]: {
+      [mockAlerts[0].kibana?.alert?.uuid!]: {
         status: ALERT_STATUS.CLOSED,
-        processEntityId: mockAlerts[0].process.entity_id,
+        processEntityId: mockAlerts[0].process?.entity_id!,
       },
     };
 
     expect(
       events.find(
         (event) =>
-          event.kibana?.alert.uuid && event.kibana?.alert.uuid === mockAlerts[0].kibana?.alert.uuid
-      )?.kibana?.alert.workflow_status
+          event.kibana?.alert?.uuid &&
+          event.kibana?.alert?.uuid === mockAlerts[0].kibana?.alert?.uuid
+      )?.kibana?.alert?.workflow_status
     ).toEqual(ALERT_STATUS.OPEN);
     expect(
       events.find(
         (event) =>
-          event.kibana?.alert.uuid && event.kibana?.alert.uuid === mockAlerts[1].kibana?.alert.uuid
-      )?.kibana?.alert.workflow_status
+          event.kibana?.alert?.uuid &&
+          event.kibana?.alert?.uuid === mockAlerts[1].kibana?.alert?.uuid
+      )?.kibana?.alert?.workflow_status
     ).toEqual(ALERT_STATUS.OPEN);
 
     events = updateAlertEventStatus(events, updatedAlertsStatus);
@@ -108,14 +110,16 @@ describe('process tree hook helpers tests', () => {
     expect(
       events.find(
         (event) =>
-          event.kibana?.alert.uuid && event.kibana?.alert.uuid === mockAlerts[0].kibana?.alert.uuid
-      )?.kibana?.alert.workflow_status
+          event.kibana?.alert?.uuid &&
+          event.kibana?.alert?.uuid === mockAlerts[0].kibana?.alert?.uuid
+      )?.kibana?.alert?.workflow_status
     ).toEqual(ALERT_STATUS.CLOSED);
     expect(
       events.find(
         (event) =>
-          event.kibana?.alert.uuid && event.kibana?.alert.uuid === mockAlerts[1].kibana?.alert.uuid
-      )?.kibana?.alert.workflow_status
+          event.kibana?.alert?.uuid &&
+          event.kibana?.alert?.uuid === mockAlerts[1].kibana?.alert?.uuid
+      )?.kibana?.alert?.workflow_status
     ).toEqual(ALERT_STATUS.OPEN);
   });
 });

@@ -84,6 +84,13 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-es-output'): {
+        return mockOutputSO('existing-es-output', {
+          type: 'elasticsearch',
+          is_default: false,
+        });
+      }
+
       default:
         throw new Error('not found: ' + id);
     }
@@ -154,6 +161,8 @@ function getMockedSoClient(
     };
   });
 
+  mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+
   return soClient;
 }
 
@@ -162,6 +171,8 @@ describe('Output Service', () => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
+    mockedAppContextService.getInternalUserSOClient.mockReset();
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
   });
   describe('create', () => {
     it('work with a predefined id', async () => {
@@ -314,6 +325,42 @@ describe('Output Service', () => {
         { is_default: false }
       );
     });
+
+    // With logstash output
+    it('should throw if encryptedSavedObject is not configured', async () => {
+      const soClient = getMockedSoClient({});
+
+      await expect(
+        outputService.create(
+          soClient,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'logstash',
+          },
+          { id: 'output-test' }
+        )
+      ).rejects.toThrow(`Logstash output needs encrypted saved object api key to be set`);
+    });
+
+    it('should work if encryptedSavedObject is  configured', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      await outputService.create(
+        soClient,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+        },
+        { id: 'output-test' }
+      );
+      expect(soClient.create).toBeCalled();
+    });
   });
 
   describe('update', () => {
@@ -445,6 +492,26 @@ describe('Output Service', () => {
       );
     });
 
+    // With ES output
+    it('Should delete Logstash specific fields if the output type change to ES', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, 'existing-logstash-output', {
+        type: 'elasticsearch',
+        hosts: ['http://test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'elasticsearch',
+        hosts: ['http://test:4343'],
+        ssl: null,
+      });
+    });
+
     // With logstash output
     it('Should work if you try to make that output the default output and no policies using default output has APM integration', async () => {
       const soClient = getMockedSoClient({});
@@ -471,6 +538,25 @@ describe('Output Service', () => {
           is_default: true,
         })
       ).rejects.toThrow(`Logstash output cannot be used with APM integration.`);
+    });
+    it('Should delete ES specific fields if the output type change to logstash', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, 'existing-es-output', {
+        type: 'logstash',
+        hosts: ['test:4343'],
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['test:4343'],
+        ca_sha256: null,
+        ca_trusted_fingerprint: null,
+      });
     });
   });
 

@@ -49,8 +49,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   readonly _source: IMvtVectorSource;
 
-  constructor({ layerDescriptor, source }: VectorLayerArguments) {
-    super({ layerDescriptor, source });
+  constructor({ layerDescriptor, source, customIcons }: VectorLayerArguments) {
+    super({ layerDescriptor, source, customIcons });
     this._source = source as IMvtVectorSource;
   }
 

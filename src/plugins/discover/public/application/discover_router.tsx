@@ -16,6 +16,7 @@ import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
+import { ViewAlertRoute } from './view_alert';
 
 export const discoverRouter = (services: DiscoverServices, history: History) => (
   <KibanaContextProvider services={services}>
@@ -35,6 +36,9 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
           />
           <Route path="/doc/:indexPatternId/:index">
             <SingleDocRoute />
+          </Route>
+          <Route path="/viewAlert/:id">
+            <ViewAlertRoute />
           </Route>
           <Route path="/view/:id">
             <DiscoverMainRoute />

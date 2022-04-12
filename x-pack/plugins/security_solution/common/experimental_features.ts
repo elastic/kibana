@@ -12,7 +12,6 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  metricsEntitiesEnabled: false,
   ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
@@ -24,7 +23,7 @@ export const allowedExperimentalValues = Object.freeze({
   riskyUsersEnabled: false,
   securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
-  policyListEnabled: false,
+  policyListEnabled: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.

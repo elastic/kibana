@@ -10,7 +10,7 @@ export const ALERTS_ROUTE = '/internal/session_view/alerts_route';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status_route';
 export const SESSION_ENTRY_LEADERS_ROUTE = '/internal/session_view/session_entry_leaders_route';
 export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-default';
-export const ALERTS_INDEX = '.alerts-security.alerts-default'; // TODO: changes to remove this and use AlertsClient instead to get indices.
+export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
 export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ hh:mm:ss.SSS';
@@ -50,6 +50,7 @@ export const ALERT_COUNT_THRESHOLD = 999;
 // react-query caching keys
 export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
 export const QUERY_KEY_ALERTS = 'sessionViewAlerts';
+export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 

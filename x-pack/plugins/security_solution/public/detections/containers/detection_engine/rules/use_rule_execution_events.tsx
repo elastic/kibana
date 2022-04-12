@@ -6,18 +6,64 @@
  */
 
 import { useQuery } from 'react-query';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';
 
-export const useRuleExecutionEvents = (ruleId: string) => {
+interface UseRuleExecutionEventsArgs {
+  ruleId: string;
+  start: string;
+  end: string;
+  queryText?: string;
+  statusFilters?: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
+}
+
+export const useRuleExecutionEvents = ({
+  ruleId,
+  start,
+  end,
+  queryText,
+  statusFilters,
+  page,
+  perPage,
+  sortField,
+  sortOrder,
+}: UseRuleExecutionEventsArgs) => {
   const { addError } = useAppToasts();
 
-  return useQuery(
-    ['ruleExecutionEvents', ruleId],
+  return useQuery<GetAggregateRuleExecutionEventsResponse>(
+    [
+      'ruleExecutionEvents',
+      {
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+      },
+    ],
     async ({ signal }) => {
-      const response = await fetchRuleExecutionEvents({ ruleId, signal });
-      return response.events;
+      return fetchRuleExecutionEvents({
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        signal,
+      });
     },
     {
       onError: (e) => {

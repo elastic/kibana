@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays exit full screen logo button', async () => {
-      await testSubjects.click('exitFullScreenModeLogo');
+      await testSubjects.click('exitFullScreenModeButton');
       await a11y.testAppSnapshot();
     });
 
@@ -112,17 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('provides bulk delete', async function () {
       await testSubjects.click('deleteSelectedItems');
       await a11y.testAppSnapshot();
-    });
-
-    it('single delete modal', async function () {
-      await testSubjects.click('confirmModalConfirmButton');
-      await a11y.testAppSnapshot();
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/128332
-    it.skip('single cancel modal', async function () {
-      await testSubjects.click('confirmModalCancelButton');
-      await a11y.testAppSnapshot();
+      await retry.waitFor(
+        'maps cancel button exists',
+        async () => await testSubjects.exists('confirmModalCancelButton')
+      );
     });
   });
 }

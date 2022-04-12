@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
   MetricExpressionParams,

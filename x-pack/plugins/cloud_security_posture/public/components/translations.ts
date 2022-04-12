@@ -6,62 +6,31 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const CRITICAL = i18n.translate('xpack.csp.critical', {
-  defaultMessage: 'Critical',
-});
-
-export const WARNING = i18n.translate('xpack.csp.warning', {
-  defaultMessage: 'Warning',
-});
-
-export const HEALTHY = i18n.translate('xpack.csp.healthy', {
-  defaultMessage: 'Healthy',
-});
-
-export const PAGE_NOT_FOUND = i18n.translate('xpack.csp.page_not_found', {
-  defaultMessage: 'Page not found',
-});
-
-export const LOADING = i18n.translate('xpack.csp.loading', {
-  defaultMessage: 'Loading...',
-});
-
-export const CSP_EVALUATION_BADGE_FAILED = i18n.translate(
-  'xpack.csp.cspEvaluationBadge.failedLabelText',
-  {
-    defaultMessage: 'FAILED',
-  }
-);
-
-export const CSP_EVALUATION_BADGE_PASSED = i18n.translate(
-  'xpack.csp.cspEvaluationBadge.passedLabelText',
-  {
-    defaultMessage: 'PASSED',
-  }
-);
-
-export const NO_DATA_CONFIG_TITLE = i18n.translate('xpack.csp.pageTemplate.noDataConfigTitle', {
-  defaultMessage: 'Understand your cloud security posture',
-});
-
-export const NO_DATA_CONFIG_SOLUTION_NAME = i18n.translate(
-  'xpack.csp.pageTemplate.noDataConfig.solutionNameLabel',
-  {
+export const PACKAGE_NOT_INSTALLED_TEXT = {
+  PAGE_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.pageTitle', {
+    defaultMessage: 'Install Integration to get started',
+  }),
+  SOLUTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.solutionNameLabel', {
     defaultMessage: 'Cloud Security Posture',
-  }
-);
-
-export const NO_DATA_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.csp.pageTemplate.noDataConfigDescription',
-  {
+  }),
+  BUTTON_TITLE: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.buttonLabel', {
+    defaultMessage: 'Add a CIS integration',
+  }),
+  DESCRIPTION: i18n.translate('xpack.csp.cspPageTemplate.packageNotInstalled.description', {
     defaultMessage:
       'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
-  }
-);
+  }),
+};
 
-export const NO_DATA_CONFIG_BUTTON = i18n.translate(
-  'xpack.csp.pageTemplate.noDataConfigButtonLabel',
-  {
-    defaultMessage: 'Add a CIS integration',
-  }
-);
+export const DEFAULT_NO_DATA_TEXT = {
+  PAGE_TITLE: i18n.translate('xpack.csp.cspPageTemplate.defaultNoDataConfig.pageTitle', {
+    defaultMessage: 'No data found',
+  }),
+  SOLUTION: i18n.translate('xpack.csp.cspPageTemplate.defaultNoDataConfig.solutionNameLabel', {
+    defaultMessage: 'Cloud Security Posture',
+  }),
+};
+
+export const CLOUD_SECURITY_POSTURE = i18n.translate('xpack.csp.cspPageTemplate.navigationTitle', {
+  defaultMessage: 'Cloud Security Posture',
+});

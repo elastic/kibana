@@ -30,3 +30,35 @@ export const getUsersDetailsPageFilters = (userName: string): Filter[] => [
     },
   },
 ];
+
+export const userNameExistsFilter: Filter[] = [
+  {
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'user.name',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    meta: {
+      alias: '',
+      disabled: false,
+      key: 'bool',
+      negate: false,
+      type: 'custom',
+      value:
+        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "user.name"}}],"minimum_should_match": 1}}]}}}',
+    },
+  },
+];

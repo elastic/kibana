@@ -18,12 +18,12 @@ export type {
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
-  AlertExecutorOptions,
-  AlertActionParams,
-  AlertServices,
-  AlertTypeState,
-  AlertTypeParams,
-  PartialAlert,
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleActionParams,
+  RuleTypeState,
+  RuleTypeParams,
+  PartialRule,
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
@@ -59,6 +59,13 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
       'xpack.alerting.invalidateApiKeysTask.removalDelay',
       { level: 'warning' }
+    ),
+    renameFromRoot(
+      'xpack.alerting.defaultRuleTaskTimeout',
+      'xpack.alerting.rules.execution.timeout',
+      {
+        level: 'warning',
+      }
     ),
   ],
 };

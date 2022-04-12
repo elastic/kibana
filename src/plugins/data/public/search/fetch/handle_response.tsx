@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
-import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
+import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { ThemeServiceStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';

@@ -170,6 +170,7 @@ kibana_vars=(
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.hidePrivacyStatement
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
@@ -199,6 +200,8 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.rules.execution.timeout
+    xpack.alerting.rules.execution.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
     xpack.alerting.rules.minimumScheduleInterval.value
     xpack.alerting.rules.minimumScheduleInterval.enforce

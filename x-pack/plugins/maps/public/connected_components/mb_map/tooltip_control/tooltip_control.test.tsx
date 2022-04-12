@@ -154,7 +154,7 @@ describe('TooltipControl', () => {
     test('should un-register all map callbacks on unmount', () => {
       const component = mount(<TooltipControl {...defaultProps} />);
 
-      expect(Object.keys(mockMbMapHandlers).length).toBe(3);
+      expect(Object.keys(mockMbMapHandlers).length).toBe(4);
 
       component.unmount();
       expect(Object.keys(mockMbMapHandlers).length).toBe(0);

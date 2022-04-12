@@ -73,17 +73,25 @@ export interface Props {
 }
 
 export class TooltipControl extends Component<Props, {}> {
+  private _isMapRemoved = false;
+
   componentDidMount() {
     this.props.mbMap.on('mouseout', this._onMouseout);
     this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.on('click', this._lockTooltip);
+    this.props.mbMap.on('remove', this._setIsMapRemoved);
   }
 
   componentWillUnmount() {
     this.props.mbMap.off('mouseout', this._onMouseout);
     this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.off('click', this._lockTooltip);
+    this.props.mbMap.off('remove', this._setIsMapRemoved);
   }
+
+  _setIsMapRemoved = () => {
+    this._isMapRemoved = true;
+  };
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();
@@ -274,6 +282,11 @@ export class TooltipControl extends Component<Props, {}> {
   };
 
   _updateHoverTooltipState = _.debounce((e: MapMouseEvent) => {
+    if (this._isMapRemoved) {
+      // ignore debounced events after mbMap.remove is called.
+      return;
+    }
+
     if (this.props.filterModeActive || this.props.hasLockedTooltips || this.props.drawModeActive) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;

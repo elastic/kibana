@@ -16,13 +16,17 @@ export function useLocations() {
     error: { serviceLocations: serviceLocationsError },
     loading: { serviceLocations: serviceLocationsLoading },
     locations,
+    throttling,
   } = useSelector(monitorManagementListSelector);
 
   useEffect(() => {
-    dispatch(getServiceLocations());
-  }, [dispatch]);
+    if (!locations.length) {
+      dispatch(getServiceLocations());
+    }
+  }, [dispatch, locations]);
 
   return {
+    throttling,
     locations,
     error: serviceLocationsError,
     loading: serviceLocationsLoading,

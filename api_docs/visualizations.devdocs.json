@@ -303,16 +303,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               "[] | Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               "[]>) | undefined"
             ],
@@ -1257,7 +1257,7 @@
             "section": "def-common.Dimension",
             "text": "Dimension"
           },
-          "[]) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionName: string | undefined; type: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -1283,7 +1283,9 @@
           },
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
-          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: ",
+          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
+          "DatatableMeta",
+          " | undefined; rows: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -1332,6 +1334,20 @@
                 "text": "Dimension"
               },
               "[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.prepareLogTable.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "removeUnmappedColumns",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
@@ -2009,7 +2025,7 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"conflict\" | \"aliasMatch\" | \"exactMatch\" | undefined; aliasTargetId?: string | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false
@@ -2688,8 +2704,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | undefined"
             ],
@@ -3142,7 +3158,7 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -3659,16 +3675,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               "[] | Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               "[]>) | undefined"
             ],
@@ -6091,7 +6107,7 @@
             "section": "def-common.Dimension",
             "text": "Dimension"
           },
-          "[]) => { columns: { meta: { dimensionName: string | undefined; type: ",
+          "[], removeUnmappedColumns?: boolean) => { columns: { meta: { dimensionName: string | undefined; type: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -6117,7 +6133,9 @@
           },
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
-          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: ",
+          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
+          "DatatableMeta",
+          " | undefined; rows: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -6166,6 +6184,20 @@
                 "text": "Dimension"
               },
               "[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.prepareLogTable.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "removeUnmappedColumns",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,

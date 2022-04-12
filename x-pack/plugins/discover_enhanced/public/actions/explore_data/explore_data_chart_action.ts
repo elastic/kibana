@@ -10,10 +10,8 @@ import {
   DiscoverAppLocatorParams,
   SearchInput,
 } from '../../../../../../src/plugins/discover/public';
-import {
-  ApplyGlobalFilterActionContext,
-  esFilters,
-} from '../../../../../../src/plugins/data/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/unified_search/public';
+import { extractTimeRange } from '../../../../../../src/plugins/data/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
@@ -55,7 +53,7 @@ export class ExploreDataChartAction
     }
 
     const { embeddable } = context;
-    const { restOfFilters: filters, timeRange } = esFilters.extractTimeRange(
+    const { restOfFilters: filters, timeRange } = extractTimeRange(
       context.filters,
       context.timeFieldName
     );
