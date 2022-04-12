@@ -25,9 +25,9 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -39,10 +39,9 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -174,9 +173,9 @@ exports[`after fetch initialFilter 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -188,10 +187,9 @@ exports[`after fetch initialFilter 1`] = `
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -322,9 +320,9 @@ exports[`after fetch renders all table rows 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -336,10 +334,9 @@ exports[`after fetch renders all table rows 1`] = `
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -470,9 +467,9 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -484,10 +481,9 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -618,9 +614,9 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -632,10 +628,9 @@ exports[`after fetch renders call to action with continue when no dashboards exi
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -777,9 +772,9 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -791,10 +786,9 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -925,9 +919,9 @@ exports[`after fetch showWriteControls 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -939,10 +933,9 @@ exports[`after fetch showWriteControls 1`] = `
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
