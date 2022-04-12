@@ -8,6 +8,7 @@
 import { DataViewBase } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { TimeHistory } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { SearchBar } from '../../../../../../../src/plugins/unified_search/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { translations } from '../../../config';
@@ -47,7 +48,7 @@ export function AlertsSearchBar({
 
   return (
     <SearchBar
-      indexPatterns={compatibleIndexPatterns}
+      indexPatterns={compatibleIndexPatterns as DataView[]}
       placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}
