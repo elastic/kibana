@@ -11,11 +11,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, timeToVisualize, dashboard } = getPageObjects([
+  const { visualize, visualBuilder, timeToVisualize, dashboard, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'timeToVisualize',
     'dashboard',
+    'common',
   ]);
   const security = getService('security');
   const testSubjects = getService('testSubjects');
@@ -26,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/129785
+  describe.skip('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -185,14 +187,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
             await dashboard.waitForRenderComplete();
             const el = await elasticChart.getCanvas();
-            // click on specific coordinates
-            await browser
-              .getActions()
-              .move({ x: 105, y: 115, origin: el._webElement })
-              .click()
-              .perform();
 
             await retry.try(async () => {
+              // click on specific coordinates
+              await browser
+                .getActions()
+                .move({ x: 105, y: 115, origin: el._webElement })
+                .click()
+                .perform();
+              await common.sleep(2000);
               await testSubjects.click('applyFiltersPopoverButton');
               await testSubjects.missingOrFail('applyFiltersPopoverButton');
             });

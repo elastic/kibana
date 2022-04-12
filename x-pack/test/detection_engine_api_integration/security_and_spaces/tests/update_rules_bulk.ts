@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { FullResponseSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+} from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -30,6 +33,27 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   describe('update_rules_bulk', () => {
+    describe('deprecations', () => {
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should return a warning header', async () => {
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+        const updatedRule = getSimpleRuleUpdate('rule-1');
+
+        const { header } = await supertest
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .send([updatedRule])
+          .expect(200);
+
+        expect(header.warning).to.be(
+          '299 Kibana "Deprecated endpoint: /api/detection_engine/rules/_bulk_update API is deprecated since v8.2. Please use the /api/detection_engine/rules/_bulk_action API instead. See https://www.elastic.co/guide/en/security/master/rule-api-overview.html for more detail."'
+        );
+      });
+    });
+
     describe('update rules bulk', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
@@ -48,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update a simple rule's name
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule])
           .expect(200);
@@ -78,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update both rule names
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
           .expect(200);
@@ -137,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update both rule names
         const { body }: { body: FullResponseSchema[] } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
           .expect(200);
@@ -199,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update both rule names
         const { body }: { body: FullResponseSchema[] } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
           .expect(200);
@@ -225,7 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
         delete updatedRule1.rule_id;
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1])
           .expect(200);
@@ -253,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
         delete updatedRule2.rule_id;
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
           .expect(200);
@@ -282,7 +306,7 @@ export default ({ getService }: FtrProviderContext) => {
         delete updatedRule1.rule_id;
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1])
           .expect(200);
@@ -303,7 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.enabled = false;
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1])
           .expect(200);
@@ -326,7 +350,7 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.timeline_id = 'some id';
 
         await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([ruleUpdate])
           .expect(200);
@@ -336,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate2.name = 'some other name';
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([ruleUpdate2])
           .expect(200);
@@ -355,7 +379,7 @@ export default ({ getService }: FtrProviderContext) => {
         delete ruleUpdate.rule_id;
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([ruleUpdate])
           .expect(200);
@@ -377,7 +401,7 @@ export default ({ getService }: FtrProviderContext) => {
         delete ruleUpdate.id;
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([ruleUpdate])
           .expect(200);
@@ -403,7 +427,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update one rule name and give a fake id for the second
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([ruleUpdate, ruleUpdate2])
           .expect(200);
@@ -440,7 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
         rule2.name = 'some other name';
 
         const { body } = await supertest
-          .put(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([rule1, rule2])
           .expect(200);

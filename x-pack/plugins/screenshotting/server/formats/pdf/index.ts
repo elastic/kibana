@@ -7,7 +7,7 @@
 
 import { groupBy } from 'lodash';
 import type { Values } from '@kbn/utility-types';
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from 'src/core/server';
 import type { LayoutParams } from '../../../common';
 import { LayoutTypes } from '../../../common';
 import type { Layout } from '../../layouts';
@@ -93,6 +93,7 @@ function getTimeRange(results: CaptureResult['results']) {
 
 export async function toPdf(
   logger: Logger,
+  packageInfo: PackageInfo,
   layout: Layout,
   { logo, title }: PdfScreenshotOptions,
   { metrics, results }: CaptureResult
@@ -104,6 +105,7 @@ export async function toPdf(
       results,
       layout,
       logo,
+      packageInfo,
       logger,
     });
 

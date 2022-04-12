@@ -8,6 +8,7 @@
 import { services as functionalServices } from '../../functional/services';
 import { PerformanceTestingService } from './performance';
 import { InputDelaysProvider } from './input_delays';
+import { AuthProvider } from './auth';
 
 export const services = {
   es: functionalServices.es,
@@ -16,4 +17,5 @@ export const services = {
   retry: functionalServices.retry,
   performance: PerformanceTestingService,
   inputDelays: InputDelaysProvider,
+  auth: AuthProvider,
 };
