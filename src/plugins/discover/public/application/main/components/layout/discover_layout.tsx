@@ -25,7 +25,7 @@ import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { generateFilters } from '../../../../../../data/public';
-import { DataViewField } from '../../../../../../data_views/public';
+import { DataView, DataViewField, DataViewType } from '../../../../../../data_views/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -48,7 +48,7 @@ import {
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DataViewType, DataView } from '../../../../../../data_views/public';
+import { hasActiveFilter } from './utils';
 
 /**
  * Local storage key for sidebar persistence state
@@ -237,7 +237,16 @@ export function DiscoverLayout({
           history={history}
         />
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
-          {savedSearch.title}
+          {savedSearch.title
+            ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                defaultMessage: 'Discover - {savedSearchTitle}',
+                values: {
+                  savedSearchTitle: savedSearch.title,
+                },
+              })
+            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                defaultMessage: 'Discover - Search not yet saved',
+              })}
         </h1>
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
           <EuiFlexItem grow={false}>
@@ -296,9 +305,7 @@ export function DiscoverLayout({
                   data={data}
                   error={dataState.error}
                   hasQuery={!!state.query?.query}
-                  hasFilters={
-                    state.filters && state.filters.filter((f) => !f.meta.disabled).length > 0
-                  }
+                  hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />
               )}

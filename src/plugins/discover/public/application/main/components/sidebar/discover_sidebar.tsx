@@ -197,16 +197,31 @@ export function DiscoverSidebarComponent({
     }
   }, [paginate, scrollContainer, unpopularFields]);
 
-  const fieldTypes = useMemo(() => {
+  const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
+    const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
       for (const field of fields) {
-        if (result.indexOf(field.type) === -1) {
-          result.push(field.type);
+        if (field.type !== '_source') {
+          // If it's a string type, we want to distinguish between keyword and text
+          // For this purpose we need the ES type
+          const type =
+            field.type === 'string' &&
+            field.esTypes &&
+            ['keyword', 'text'].includes(field.esTypes[0])
+              ? field.esTypes?.[0]
+              : field.type;
+          // _id and _index would map to string, that's why we don't add the string type here
+          if (type && type !== 'string') {
+            dataViewFieldTypes.add(type);
+          }
+          if (result.indexOf(field.type) === -1) {
+            result.push(field.type);
+          }
         }
       }
     }
-    return result;
+    return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
   }, [fields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
@@ -319,6 +334,7 @@ export function DiscoverSidebarComponent({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              presentFieldTypes={presentFieldTypes}
             />
           </form>
         </EuiFlexItem>
