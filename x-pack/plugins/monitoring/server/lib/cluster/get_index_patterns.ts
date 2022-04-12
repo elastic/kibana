@@ -6,7 +6,7 @@
  */
 
 import { LegacyServer } from '../../types';
-import { prefixIndexPattern } from '../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_ELASTICSEARCH_ECS,
@@ -27,13 +27,13 @@ export function getIndexPatterns(
   ccs: string[] = server.config.ui.ccs.remotePatterns
 ) {
   const config = server.config;
-  const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-  const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
-  const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
-  const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
-  const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
-  const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
-  const enterpriseSearchIndexPattern = prefixIndexPattern(
+  const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+  const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
+  const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);
+  const beatsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
+  const apmIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
+  const alertsIndex = prefixIndexPatternWithCcs(config, INDEX_ALERTS, ccs);
+  const enterpriseSearchIndexPattern = prefixIndexPatternWithCcs(
     config,
     INDEX_PATTERN_ENTERPRISE_SEARCH,
     ccs
@@ -49,7 +49,7 @@ export function getIndexPatterns(
     ...Object.keys(additionalPatterns).reduce((accum, varName) => {
       return {
         ...accum,
-        [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
+        [varName]: prefixIndexPatternWithCcs(config, additionalPatterns[varName], ccs),
       };
     }, {}),
   };
@@ -88,7 +88,7 @@ export function getLegacyIndexPattern({
     default:
       throw new Error(`invalid module type to create index pattern: ${moduleType}`);
   }
-  return prefixIndexPattern(config, indexPattern, ccs);
+  return prefixIndexPatternWithCcs(config, indexPattern, ccs);
 }
 
 export function getDsIndexPattern({
@@ -112,7 +112,7 @@ export function getDsIndexPattern({
   } else {
     datasetsPattern = `${moduleType}.*`;
   }
-  return prefixIndexPattern(config, `${type}-${datasetsPattern}-${namespace}`, ccs);
+  return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace}`, ccs);
 }
 
 export function getNewIndexPatterns({

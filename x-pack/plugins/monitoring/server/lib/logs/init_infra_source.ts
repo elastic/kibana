@@ -6,14 +6,14 @@
  */
 
 // @ts-ignore
-import { prefixIndexPattern } from '../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
 import { InfraPluginSetup } from '../../../../infra/server';
 
 export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPluginSetup) => {
   if (infraPlugin) {
-    const filebeatIndexPattern = prefixIndexPattern(
+    const filebeatIndexPattern = prefixIndexPatternWithCcs(
       config,
       config.ui.logs.index,
       config.ui.ccs.remotePatterns

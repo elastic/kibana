@@ -12,7 +12,7 @@ import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
 import { getLogs } from '../../../../lib/logs/get_logs';
 
@@ -47,7 +47,7 @@ export function esNodeRoute(server) {
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const filebeatIndexPattern = prefixIndexPattern(
+      const filebeatIndexPattern = prefixIndexPatternWithCcs(
         config,
         config.ui.logs.index,
         config.ui.ccs.remotePatterns

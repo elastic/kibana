@@ -17,10 +17,10 @@ import { MonitoringConfig } from '../server/config';
  * @param  {Object} config The Kibana configuration object.
  * @param  {String} indexPattern The index pattern name
  * @param  {Array|String} ccs The optional cluster-prefixes to prepend. An array when passed from config
- * and a string when passed from a request
+ * and a string when passed from a request.  This is optional because the request could be empty if its not a remote cluster
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(
+export function prefixIndexPatternWithCcs(
   config: MonitoringConfig,
   indexPattern: string,
   ccs?: string[] | string
