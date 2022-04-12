@@ -199,6 +199,9 @@ export const SOURCE_NAMES = {
   SLACK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.slack', {
     defaultMessage: 'Slack',
   }),
+  TEAMS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.teams', {
+    defaultMessage: 'Teams',
+  }),
   ZENDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zendesk', {
     defaultMessage: 'Zendesk',
   }),

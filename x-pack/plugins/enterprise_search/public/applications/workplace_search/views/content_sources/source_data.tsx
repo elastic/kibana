@@ -589,6 +589,25 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
   },
   {
+    name: SOURCE_NAMES.TEAMS,
+    iconName: SOURCE_NAMES.TEAMS,
+    categories: [
+      // TODO update this when we define these
+    ],
+    serviceType: 'teams', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-teams-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
+  },
+  {
     name: SOURCE_NAMES.ZENDESK,
     iconName: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',

@@ -21,6 +21,7 @@ import serviceNow from './servicenow.svg';
 import sharePoint from './sharepoint.svg';
 import sharePointServer from './sharepoint_server.svg';
 import slack from './slack.svg';
+import teams from './teams.svg';
 import zendesk from './zendesk.svg';
 import zoom from './zoom.svg';
 
@@ -50,6 +51,7 @@ export const images = {
   sharePoint,
   sharePointServer,
   slack,
+  teams,
   zendesk,
   zoom,
 } as { [key: string]: string };
