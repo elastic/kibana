@@ -7,11 +7,12 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { PackageInfo } from 'kibana/server';
 import path from 'path';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { isUint8Array } from 'util/types';
-import { createMockLayout } from '../../../../layouts/mock';
 import { errors } from '../../../../../common';
+import { createMockLayout } from '../../../../layouts/mock';
 import { PdfMaker } from '../pdfmaker';
 
 const imageBase64 = Buffer.from(
@@ -23,11 +24,19 @@ describe.skip('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let packageInfo: Readonly<PackageInfo>;
 
   beforeEach(() => {
     layout = createMockLayout();
     logger = loggingSystemMock.createLogger();
-    pdf = new PdfMaker(layout, undefined, logger);
+    packageInfo = {
+      branch: 'screenshot-test',
+      buildNum: 567891011,
+      buildSha: 'screenshot-dfdfed0a',
+      dist: false,
+      version: '1000.0.0',
+    };
+    pdf = new PdfMaker(layout, undefined, packageInfo, logger);
   });
 
   describe('generate', () => {
@@ -56,14 +65,14 @@ describe.skip('PdfMaker', () => {
         protected workerMaxOldHeapSizeMb = 2;
         protected workerMaxYoungHeapSizeMb = 2;
         protected workerModulePath = path.resolve(__dirname, './memory_leak_worker.js');
-      })(layout, undefined, logger);
+      })(layout, undefined, packageInfo, logger);
       await expect(leakyMaker.generate()).rejects.toBeInstanceOf(errors.PdfWorkerOutOfMemoryError);
     });
 
     it.skip('restarts the PDF worker if it crashes', async () => {
       const buggyMaker = new (class BuggyPdfMaker extends PdfMaker {
         protected workerModulePath = path.resolve(__dirname, './buggy_worker.js');
-      })(layout, undefined, logger);
+      })(layout, undefined, packageInfo, logger);
 
       await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
       await expect(buggyMaker.generate()).rejects.toEqual(new Error('This is a bug'));
