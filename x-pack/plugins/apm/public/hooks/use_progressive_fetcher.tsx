@@ -19,7 +19,11 @@ import type {
 } from '../services/rest/create_call_apm_api';
 import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { enableRandomSampling } from '../../../observability/common';
+import { apmProgressiveLoading } from '../../../observability/common';
+import {
+  getProbabilityFromProgressiveLoadingQuality,
+  ProgressiveLoadingQuality,
+} from '../../common/progressive_loading';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
   {
@@ -59,11 +63,6 @@ type APMProgressiveAPIClient = <
     >
 ) => Promise<ReturnOf<APMProgressivelyLoadingServerRouteRepository, TEndpoint>>;
 
-const HIGH = 0.001;
-const MEDIUM = 0.01;
-const LOW = 0.1;
-const NONE = 1;
-
 function clientWithProbability(
   regularCallApmApi: APMClient,
   probability: number
@@ -97,71 +96,60 @@ export function useProgressiveFetcher<TReturn>(
   callback: (
     callApmApi: APMProgressiveAPIClient
   ) => Promise<TReturn> | undefined,
-  dependencies: any[]
+  dependencies: any[],
+  options?: Parameters<typeof useFetcher>[2]
 ): FetcherResult<TReturn> {
   const {
     services: { uiSettings },
   } = useKibana();
 
-  const isSamplingEnabled =
-    uiSettings?.get<boolean>(enableRandomSampling) || false;
+  const progressiveLoadingQuality =
+    uiSettings?.get<ProgressiveLoadingQuality>(apmProgressiveLoading) ??
+    ProgressiveLoadingQuality.off;
 
-  const highFetch = useFetcher(
-    (regularCallApmApi) => {
-      if (!isSamplingEnabled) {
-        return;
-      }
-      return callback(clientWithProbability(regularCallApmApi, HIGH));
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isSamplingEnabled, ...dependencies]
+  const sampledProbability = getProbabilityFromProgressiveLoadingQuality(
+    progressiveLoadingQuality
   );
 
-  const mediumFetch = useFetcher(
+  const sampledFetch = useFetcher(
     (regularCallApmApi) => {
-      if (!isSamplingEnabled) {
+      if (progressiveLoadingQuality === ProgressiveLoadingQuality.off) {
         return;
       }
-      return callback(clientWithProbability(regularCallApmApi, MEDIUM));
+      return callback(
+        clientWithProbability(regularCallApmApi, sampledProbability)
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isSamplingEnabled, ...dependencies]
+    dependencies,
+    options
   );
 
-  const lowFetch = useFetcher(
+  const unsampledFetch = useFetcher(
     (regularCallApmApi) => {
-      if (!isSamplingEnabled) {
-        return;
-      }
-      return callback(clientWithProbability(regularCallApmApi, LOW));
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isSamplingEnabled, ...dependencies]
-  );
-
-  const noneFetch = useFetcher(
-    (regularCallApmApi) => {
-      return callback(clientWithProbability(regularCallApmApi, NONE));
+      return callback(clientWithProbability(regularCallApmApi, 1));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies
   );
 
-  const fetches = [noneFetch, lowFetch, mediumFetch, highFetch];
+  const fetches = [unsampledFetch, sampledFetch];
 
-  const isError = noneFetch.status === FETCH_STATUS.FAILURE;
+  const isError = unsampledFetch.status === FETCH_STATUS.FAILURE;
 
   const usedFetch =
     (!isError &&
       fetches.find((fetch) => fetch.status === FETCH_STATUS.SUCCESS)) ||
-    noneFetch;
+    unsampledFetch;
+
+  const status =
+    unsampledFetch.status === FETCH_STATUS.LOADING &&
+    usedFetch.status === FETCH_STATUS.SUCCESS
+      ? FETCH_STATUS.LOADING
+      : usedFetch.status;
 
   return {
     ...usedFetch,
-    status:
-      noneFetch.status === FETCH_STATUS.LOADING &&
-      usedFetch.status === FETCH_STATUS.SUCCESS
-        ? FETCH_STATUS.LOADING
-        : usedFetch.status,
+    status,
   };
 }

@@ -12,25 +12,21 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
 
   const apmApiClient = getService('apmApiClient');
   const synthtrace = getService('synthtraceEsClient');
-
-  const supertestAsApmReadUserWithoutMlAccess = getService(
-    'legacySupertestAsApmReadUserWithoutMlAccess'
-  );
 
   const archiveName = 'apm_8.0.0';
 
   const archiveRange = archives_metadata[archiveName];
 
   // url parameters
-  const archiveStart = encodeURIComponent(archiveRange.start);
-  const archiveEnd = encodeURIComponent(archiveRange.end);
+  const archiveStart = archiveRange.start;
+  const archiveEnd = archiveRange.end;
 
   const start = '2021-10-01T00:00:00.000Z';
   const end = '2021-10-01T00:05:00.000Z';
@@ -40,9 +36,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services`,
+          params: {
+            query: {
+              start,
+              end,
+              environment: ENVIRONMENT_ALL.value,
+              kuery: '',
+              probability: 1,
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(0);
@@ -159,6 +164,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 environment: ENVIRONMENT_ALL.value,
                 kuery: '',
+                probability: 1,
               },
             },
           });
@@ -210,6 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 environment: 'production',
                 kuery: '',
+                probability: 1,
               },
             },
           });
@@ -244,6 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 environment: ENVIRONMENT_ALL.value,
                 kuery: 'service.node.name:"multiple-env-service-development"',
+                probability: 1,
               },
             },
           });
@@ -278,6 +286,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 environment: ENVIRONMENT_ALL.value,
                 kuery: 'not (transaction.type:request)',
+                probability: 1,
               },
             },
           });
@@ -306,9 +315,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           };
 
           before(async () => {
-            response = await supertest.get(
-              `/internal/apm/services?start=${archiveStart}&end=${archiveEnd}&environment=ENVIRONMENT_ALL&kuery=`
-            );
+            response = await apmApiClient.readUser({
+              endpoint: `GET /internal/apm/services`,
+              params: {
+                query: {
+                  start: archiveStart,
+                  end: archiveEnd,
+                  environment: ENVIRONMENT_ALL.value,
+                  kuery: '',
+                  probability: 1,
+                },
+              },
+            });
           });
 
           it('the response is successful', () => {
@@ -350,11 +368,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with a user that does not have access to ML', () => {
-        let response: Awaited<ReturnType<typeof supertest.get>>;
+        let response: SupertestReturnType<'GET /internal/apm/services'>;
         before(async () => {
-          response = await supertestAsApmReadUserWithoutMlAccess.get(
-            `/internal/apm/services?start=${archiveStart}&end=${archiveEnd}&environment=ENVIRONMENT_ALL&kuery=`
-          );
+          response = await apmApiClient.noMlAccessUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start: archiveStart,
+                end: archiveEnd,
+                environment: ENVIRONMENT_ALL.value,
+                kuery: '',
+                probability: 1,
+              },
+            },
+          });
         });
 
         it('the response is successful', () => {
@@ -367,7 +394,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('contains no health statuses', () => {
           const definedHealthStatuses = response.body.items
-            .map((item: any) => item.healthStatus)
+            .map((item) => item.healthStatus)
             .filter(Boolean);
 
           expect(definedHealthStatuses.length).to.be(0);
@@ -375,13 +402,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('and fetching a list of services with a filter', () => {
-        let response: Awaited<ReturnType<typeof supertest.get>>;
+        let response: SupertestReturnType<'GET /internal/apm/services'>;
         before(async () => {
-          response = await supertest.get(
-            `/internal/apm/services?environment=ENVIRONMENT_ALL&start=${archiveStart}&end=${archiveEnd}&kuery=${encodeURIComponent(
-              'service.name:opbeans-java'
-            )}`
-          );
+          response = await apmApiClient.noMlAccessUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                start: archiveStart,
+                end: archiveEnd,
+                environment: ENVIRONMENT_ALL.value,
+                kuery: 'service.name:opbeans-java',
+                probability: 1,
+              },
+            },
+          });
         });
 
         it('does not return health statuses for services that are not found in APM data', () => {

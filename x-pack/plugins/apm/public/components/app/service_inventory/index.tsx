@@ -89,7 +89,7 @@ function useServicesFetcher() {
 
   const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
 
-  const comparisonFetch = useFetcher(
+  const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (
         start &&
@@ -147,11 +147,23 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const isLoading =
-    sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
-    (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
-      sortedAndFilteredServicesFetch.data?.services.length === 0 &&
-      mainStatisticsFetch.status === FETCH_STATUS.LOADING);
+  const useOptimizedSorting =
+    useKibana().services.uiSettings?.get<boolean>(
+      apmServiceInventoryOptimizedSorting
+    ) || false;
+
+  let isLoading: boolean;
+
+  if (useOptimizedSorting) {
+    isLoading =
+      // ensures table is usable when sorted and filtered services have loaded
+      sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
+      (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
+        sortedAndFilteredServicesFetch.data?.services.length === 0 &&
+        mainStatisticsFetch.status === FETCH_STATUS.LOADING);
+  } else {
+    isLoading = mainStatisticsFetch.status === FETCH_STATUS.LOADING;
+  }
 
   const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (
@@ -175,9 +187,7 @@ export function ServiceInventory() {
     ...preloadedServices,
   ].some((item) => 'healthStatus' in item);
 
-  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
-    apmServiceInventoryOptimizedSorting
-  )
+  const tiebreakerField = useOptimizedSorting
     ? ServiceInventoryFieldName.ServiceName
     : ServiceInventoryFieldName.Throughput;
 

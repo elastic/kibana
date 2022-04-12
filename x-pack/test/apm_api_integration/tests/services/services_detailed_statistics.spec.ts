@@ -19,6 +19,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
+  const apmApiClient = getService('apmApiClient');
+
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
   const { start, end } = metadata;
@@ -29,9 +31,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start,
               end,
@@ -39,9 +41,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
               offset: '1d',
+              probability: 1,
             },
-          })
-        );
+          },
+        });
+
         expect(response.status).to.be(200);
         expect(response.body.currentPeriod).to.be.empty();
         expect(response.body.previousPeriod).to.be.empty();
@@ -55,18 +59,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
       before(async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start,
               end,
               serviceNames: JSON.stringify(serviceNames),
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
+              probability: 1,
             },
-          })
-        );
+          },
+        });
         expect(response.status).to.be(200);
         servicesDetailedStatistics = response.body;
       });
@@ -106,52 +111,55 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns empty when empty service names is passed', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start,
               end,
               serviceNames: JSON.stringify([]),
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
+              probability: 1,
             },
-          })
-        );
+          },
+        });
         expect(response.status).to.be(400);
         expect(response.body.message).to.equal('serviceNames cannot be empty');
       });
 
       it('filters by environment', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start,
               end,
               serviceNames: JSON.stringify(serviceNames),
               environment: 'production',
               kuery: '',
+              probability: 1,
             },
-          })
-        );
+          },
+        });
         expect(response.status).to.be(200);
         expect(Object.keys(response.body.currentPeriod).length).to.be(1);
         expect(response.body.currentPeriod['opbeans-java']).not.to.be.empty();
       });
       it('filters by kuery', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start,
               end,
               serviceNames: JSON.stringify(serviceNames),
               environment: 'ENVIRONMENT_ALL',
               kuery: 'transaction.type : "invalid_transaction_type"',
+              probability: 1,
             },
-          })
-        );
+          },
+        });
         expect(response.status).to.be(200);
         expect(Object.keys(response.body.currentPeriod)).to.be.empty();
       });
@@ -164,9 +172,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
       before(async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/detailed_statistics`,
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/services/detailed_statistics`,
+          params: {
             query: {
               start: moment(end).subtract(15, 'minutes').toISOString(),
               end,
@@ -174,9 +182,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               offset: '15m',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
+              probability: 1,
             },
-          })
-        );
+          },
+        });
+
         expect(response.status).to.be(200);
         servicesDetailedStatistics = response.body;
       });

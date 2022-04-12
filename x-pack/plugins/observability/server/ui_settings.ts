@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../../src/core/types';
+import { ProgressiveLoadingQuality } from '../../apm/common/progressive_loading';
 import { observabilityFeatureId } from '../common';
 import {
   enableComparisonByDefault,
@@ -15,7 +16,7 @@ import {
   maxSuggestions,
   enableInfrastructureView,
   defaultApmServiceEnvironment,
-  enableRandomSampling,
+  apmProgressiveLoading,
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
 } from '../common/ui_settings_keys';
@@ -87,15 +88,57 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: '',
     schema: schema.string(),
   },
-  [enableRandomSampling]: {
+  [apmProgressiveLoading]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableRandomSampling', {
-      defaultMessage: 'Enable progressive loading of selected APM views',
+    name: i18n.translate('xpack.observability.apmProgressiveLoading', {
+      defaultMessage: 'Use progressive loading of selected APM views',
     }),
-    description:
-      'Whether to load data progressively for APM views. Data may be requested with a high sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
-    value: false,
-    schema: schema.boolean(),
+    description: i18n.translate('xpack.observabiity.apmProgressiveLoadingDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a high sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    value: ProgressiveLoadingQuality.off,
+    schema: schema.oneOf([
+      schema.literal(ProgressiveLoadingQuality.off),
+      schema.literal(ProgressiveLoadingQuality.low),
+      schema.literal(ProgressiveLoadingQuality.medium),
+      schema.literal(ProgressiveLoadingQuality.high),
+    ]),
+    requiresPageReload: false,
+    type: 'select',
+    options: [
+      ProgressiveLoadingQuality.off,
+      ProgressiveLoadingQuality.low,
+      ProgressiveLoadingQuality.medium,
+      ProgressiveLoadingQuality.high,
+    ],
+    optionLabels: {
+      [ProgressiveLoadingQuality.off]: i18n.translate(
+        'xpack.observabiity.apmProgressiveLoadingQualityOff',
+        {
+          defaultMessage: 'Off',
+        }
+      ),
+      [ProgressiveLoadingQuality.low]: i18n.translate(
+        'xpack.observabiity.apmProgressiveLoadingQualityLow',
+        {
+          defaultMessage: 'Fastest, but least accurate',
+        }
+      ),
+      [ProgressiveLoadingQuality.medium]: i18n.translate(
+        'xpack.observabiity.apmProgressiveLoadingQualityMedium',
+        {
+          defaultMessage: 'Fast, and reasonably accurate',
+        }
+      ),
+      [ProgressiveLoadingQuality.high]: i18n.translate(
+        'xpack.observabiity.apmProgressiveLoadingQualityHigh',
+        {
+          defaultMessage: 'High',
+        }
+      ),
+    },
   },
   [enableServiceGroups]: {
     category: [observabilityFeatureId],

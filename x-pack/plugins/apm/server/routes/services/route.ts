@@ -145,10 +145,14 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/detailed_statistics',
   params: t.type({
     query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
+      // t.intersection seemingly only supports 5 arguments so let's wrap them in another intersection
+      t.intersection([
+        environmentRt,
+        kueryRt,
+        rangeRt,
+        offsetRt,
+        probabilityRt,
+      ]),
       t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
     ]),
   }),
@@ -189,8 +193,15 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery, offset, serviceNames, start, end } =
-      params.query;
+    const {
+      environment,
+      kuery,
+      offset,
+      serviceNames,
+      start,
+      end,
+      probability,
+    } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       start,
@@ -211,6 +222,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       serviceNames,
       start,
       end,
+      probability,
     });
   },
 });
