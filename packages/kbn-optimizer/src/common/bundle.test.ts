@@ -8,6 +8,7 @@
 
 import { Bundle, BundleSpec, parseBundles } from './bundle';
 import { Hashes } from './hashes';
+import { parseDllManifest } from './dll_manifest';
 
 jest.mock('fs');
 
@@ -31,12 +32,30 @@ it('creates cache keys', () => {
   ].sort(() => (Math.random() > 0.5 ? 1 : -1));
 
   const hashes = new Hashes(new Map(hashEntries));
+  const dllManifest = parseDllManifest({
+    name: 'manifest-name',
+    content: {
+      './some-foo.ts': {
+        id: 1,
+        buildMeta: {
+          a: 'b',
+        },
+        unknownField: 'hi',
+      },
+    },
+  });
+  const dllRefKeys = ['./some-foo.ts'];
 
-  expect(bundle.createCacheKey(['/foo/bar/a', '/foo/bar/c'], hashes)).toMatchInlineSnapshot(`
+  expect(bundle.createCacheKey(['/foo/bar/a', '/foo/bar/c'], hashes, dllManifest, dllRefKeys))
+    .toMatchInlineSnapshot(`
     Object {
       "checksums": Object {
         "/foo/bar/a": "123",
         "/foo/bar/c": "789",
+      },
+      "dllName": "manifest-name",
+      "dllRefs": Object {
+        "./some-foo.ts": "1:ku/53aRMuAA+4TmQeCWA/w:GtuPW9agF2yecW0xAIHtUQ",
       },
       "spec": Object {
         "banner": undefined,

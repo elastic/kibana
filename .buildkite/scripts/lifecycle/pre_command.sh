@@ -26,7 +26,16 @@ retry 5 15 install_deps
 
 cd ..
 
+echo '--- Agent Debug/SSH Info'
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
+
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  echo ""
+  echo "To SSH into this agent, run:"
+  echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
+  echo ""
+fi
+
 
 echo '--- Job Environment Setup'
 

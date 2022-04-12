@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { PALETTES } from '../../../common/enums';
 import type { PanelData } from '../../../common/types';
 import { computeGradientFinalColor } from './compute_gradient_final_color';

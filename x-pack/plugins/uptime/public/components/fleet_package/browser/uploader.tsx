@@ -38,7 +38,7 @@ export function Uploader({ onUpload }: Props) {
       onUpload({ scriptText: '', fileName: '' });
       return;
     }
-    if (files.length && files[0].type !== 'text/javascript') {
+    if (files.length && !files[0].type.includes('javascript')) {
       setError(INVALID_FILE_ERROR);
       filePickerRef.current?.removeFiles();
       return;

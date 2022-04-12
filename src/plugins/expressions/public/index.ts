@@ -29,10 +29,11 @@ export type { ExpressionLoader } from './loader';
 export type { ExpressionRenderHandler } from './render';
 export type {
   ExpressionRendererComponent,
+  ExpressionRendererParams,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
-  useExpressionRenderer,
 } from './react_expression_renderer';
+export { useExpressionRenderer } from './react_expression_renderer';
 export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,

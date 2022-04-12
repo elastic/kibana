@@ -32,7 +32,10 @@ import {
   useFieldBrowserOptions,
   FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
-import { useSessionView } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import {
+  useSessionViewNavigation,
+  useSessionView,
+} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -105,7 +108,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
-      sessionViewId,
+      sessionViewConfig,
       showCheckboxes,
       sort,
     } = defaultModel,
@@ -157,18 +160,22 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
-  const { DetailsPanel, SessionView, Navigation } = useSessionView({
+  const { Navigation } = useSessionViewNavigation({
+    timelineId: id,
+  });
+
+  const { DetailsPanel, SessionView } = useSessionView({
     entityType,
     timelineId: id,
   });
 
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
-      (graphEventId != null && graphEventId.length > 0) || sessionViewId !== null;
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
       <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
     ) : null;
-  }, [graphEventId, id, sessionViewId, SessionView, Navigation]);
+  }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));

@@ -126,4 +126,22 @@ describe('Table Navigation', () => {
       `/app/securitySolutionUI/hosts/siem-window/authentications${mockSearchQuery}`
     );
   });
+
+  test('it renders a EuiBetaBadge only on the sessions tab', () => {
+    Object.keys(HostsTableType).forEach((tableType) => {
+      if (tableType !== HostsTableType.sessions) {
+        const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+
+        const betaBadge = wrapper.find(
+          `EuiTab[data-test-subj="navigation-${tableType}"] EuiBetaBadge`
+        );
+
+        if (tableType === HostsTableType.sessions) {
+          expect(betaBadge).toBeTruthy();
+        } else {
+          expect(betaBadge).toEqual({});
+        }
+      }
+    });
+  });
 });

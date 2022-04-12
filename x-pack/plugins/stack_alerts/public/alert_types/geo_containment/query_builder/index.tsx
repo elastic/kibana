@@ -16,7 +16,8 @@ import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { DataView } from '../../../../../../../src/plugins/data/common';
-import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { Query } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/unified_search/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -45,7 +46,7 @@ function validateQuery(query: Query) {
 
 export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
-> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, data }) => {
+> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, data, unifiedSearch }) => {
   const {
     index,
     indexId,
@@ -173,6 +174,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         indexPattern={indexPattern}
         isInvalid={!indexId || !dateField || !geoField}
         data={data}
+        unifiedSearch={unifiedSearch}
       />
       <EntityByExpression
         errors={errors}
@@ -223,6 +225,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         }
         boundaryNameField={boundaryNameField}
         data={data}
+        unifiedSearch={unifiedSearch}
       />
       <EuiSpacer size="s" />
       <EuiFlexItem>

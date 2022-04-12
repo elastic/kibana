@@ -67,7 +67,7 @@ image::images/lens_clickAndDragZoom_7.16.gif[Cursor clicking and dragging across
 
 To identify the 75th percentile of orders, add a reference line:
 
-. In the layer pane, click *Add layer > Add reference layer*.
+. In the layer pane, click *Add layer > Reference lines*.
 
 . Click *Static value*.
 
@@ -154,7 +154,7 @@ To analyze multiple visualization types, create an area chart that displays the 
 
 Add a layer to display the customer traffic:
 
-. In the layer pane, click *Add layer > Add visualization layer*.
+. In the layer pane, click *Add layer > Visualization*.
 
 . From the *Available fields* list, drag *customer_id* to the *Vertical Axis* field in the second layer.
 

@@ -8,7 +8,7 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
@@ -468,6 +468,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         <EuiText size="s">
           {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
             defaultMessage: `Summary information is not available for range type fields.`,
+          })}
+        </EuiText>
+      </>
+    );
+  } else if (field.type === 'murmur3') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsMurmur3Limited', {
+            defaultMessage: `Summary information is not available for murmur3 fields.`,
           })}
         </EuiText>
       </>
