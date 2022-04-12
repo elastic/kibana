@@ -151,6 +151,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
   const alignment = `${verticalAlignment || VerticalAlignment.Top}_${
     horizontalAlignment || HorizontalAlignment.Right
   }`;
+  if (isDisabled) return null;
   return (
     <>
       {location && (
