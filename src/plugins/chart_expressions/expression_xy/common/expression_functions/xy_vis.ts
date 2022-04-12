@@ -37,6 +37,10 @@ const errors = {
       defaultMessage:
         'For area and bar modes, and custom extent mode, the lower bound should be less or greater than 0 and the upper bound - be greater or equal than 0',
     }),
+  notUsedFillOpacityError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
+      defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
+    }),
 };
 
 const validateExtent = (extent: AxisExtentConfigResult, hasBarOrArea: boolean) => {
@@ -238,13 +242,15 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
-    const hasBarOrArea =
-      dataLayers.filter(
-        ({ seriesType }) => seriesType.includes('bar') || seriesType.includes('area')
-      ).length > 0;
+    const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
+    const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
 
-    validateExtent(args.yLeftExtent, hasBarOrArea);
-    validateExtent(args.yRightExtent, hasBarOrArea);
+    validateExtent(args.yLeftExtent, hasBar || hasArea);
+    validateExtent(args.yRightExtent, hasBar || hasArea);
+
+    if (!hasArea && args.fillOpacity !== undefined) {
+      throw new Error(errors.notUsedFillOpacityError());
+    }
 
     return {
       type: 'render',
