@@ -408,8 +408,7 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -487,8 +486,7 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -847,8 +845,7 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -928,7 +925,7 @@ describe('editor_frame', () => {
               },
               {
                 score: 0.6,
-                state: {},
+                state: suggestionVisState,
                 title: 'Suggestion2',
                 previewIcon: 'empty',
               },
@@ -939,7 +936,7 @@ describe('editor_frame', () => {
             getSuggestions: () => [
               {
                 score: 0.8,
-                state: suggestionVisState,
+                state: {},
                 title: 'Suggestion3',
                 previewIcon: 'empty',
               },
@@ -980,6 +977,8 @@ describe('editor_frame', () => {
         })
       ).instance;
 
+      instance.update();
+
       act(() => {
         instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
           {
@@ -992,7 +991,7 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1035,20 +1034,8 @@ describe('editor_frame', () => {
         visualizationMap: {
           testVis: {
             ...mockVisualization,
-            getSuggestions: () => [
-              {
-                score: 0.2,
-                state: {},
-                title: 'Suggestion1',
-                previewIcon: 'empty',
-              },
-              {
-                score: 0.6,
-                state: {},
-                title: 'Suggestion2',
-                previewIcon: 'empty',
-              },
-            ],
+            // do not return suggestions for the currently active vis, otherwise it will be chosen
+            getSuggestions: () => [],
           },
           testVis2: {
             ...mockVisualization2,
@@ -1079,6 +1066,7 @@ describe('editor_frame', () => {
       } as EditorFrameProps;
 
       instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+      instance.update();
 
       act(() => {
         instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(

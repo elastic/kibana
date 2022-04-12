@@ -14,8 +14,7 @@ import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';

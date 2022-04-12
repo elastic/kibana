@@ -52,6 +52,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -116,12 +117,12 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 /**
  * This is a typical simple preview rule for testing that is easy for most basic testing
  * @param ruleId
- * @param enabled The number of times the rule will be run through the executors. Defaulted to 20,
+ * @param enabled The number of times the rule will be run through the executors. Defaulted to 12,
  * the execution time for the default interval time of 5m.
  */
 export const getSimplePreviewRule = (
   ruleId = 'preview-rule-1',
-  invocationCount = 20
+  invocationCount = 12
 ): PreviewRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
@@ -513,18 +514,9 @@ export const deleteAllAlerts = async (
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
-        .set('kbn-xsrf', 'true')
-        .send();
-
-      const ids = body.data.map((rule: FullResponseSchema) => ({
-        id: rule.id,
-      }));
-
       await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-        .send(ids)
+        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+        .send({ action: 'delete', query: '' })
         .set('kbn-xsrf', 'true');
 
       const { body: finalCheck } = await supertest

@@ -8,11 +8,11 @@
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { AlertServices } from '../../../../alerting/server';
+import { RuleExecutorServices } from '../../../../alerting/server';
 import { getAlertType, ActionGroupId } from './alert_type';
 import { ActionContext } from './action_context';
 import { Params } from './alert_type_params';
-import { AlertServicesMock, alertsMock } from '../../../../alerting/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '../../../../alerting/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
 
 describe('alertType', () => {
@@ -20,7 +20,7 @@ describe('alertType', () => {
   const data = {
     timeSeriesQuery: jest.fn(),
   };
-  const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+  const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
   const alertType = getAlertType(logger, Promise.resolve(data));
 
@@ -173,7 +173,11 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: alertServices as unknown as AlertServices<{}, ActionContext, typeof ActionGroupId>,
+      services: alertServices as unknown as RuleExecutorServices<
+        {},
+        ActionContext,
+        typeof ActionGroupId
+      >,
       params,
       state: {
         latestTimestamp: undefined,
@@ -208,7 +212,7 @@ describe('alertType', () => {
   });
 
   it('should ensure a null result does not fire actions', async () => {
-    const customAlertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const customAlertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
     data.timeSeriesQuery.mockImplementation((...args) => {
       return {
         results: [
@@ -235,7 +239,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: customAlertServices as unknown as AlertServices<
+      services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
         typeof ActionGroupId
@@ -274,7 +278,7 @@ describe('alertType', () => {
   });
 
   it('should ensure an undefined result does not fire actions', async () => {
-    const customAlertServices: AlertServicesMock = alertsMock.createAlertServices();
+    const customAlertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
     data.timeSeriesQuery.mockImplementation((...args) => {
       return {
         results: [
@@ -301,7 +305,7 @@ describe('alertType', () => {
       executionId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: customAlertServices as unknown as AlertServices<
+      services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
         typeof ActionGroupId

@@ -11,7 +11,6 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { useHttp } from '../../../../../../common/lib/kibana/hooks';
 import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
-import { ReactQueryClientProvider } from '../../../../../../common/containers/query_client/query_client_provider';
 import { FleetArtifactsCard } from './components/fleet_artifacts_card';
 import {
   getBlocklistsListPath,
@@ -23,6 +22,7 @@ import { TrustedAppsApiClient } from '../../../../trusted_apps/service/trusted_a
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 
 export const TRUSTED_APPS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -96,6 +96,8 @@ export const BLOCKLISTS_LABELS = {
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     const http = useHttp();
+    const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+
     const trustedAppsApiClientInstance = useMemo(
       () => TrustedAppsApiClient.getInstance(http),
       [http]
@@ -115,39 +117,41 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
 
     return (
       <div data-test-subj="fleetEndpointPackageCustomContent">
-        <ReactQueryClientProvider>
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={trustedAppsApiClientInstance}
-            getArtifactsPath={getTrustedAppsListPath}
-            labels={TRUSTED_APPS_LABELS}
-            data-test-subj="trustedApps"
-          />
-          <EuiSpacer />
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={eventFiltersApiClientInstance}
-            getArtifactsPath={getEventFiltersListPath}
-            labels={EVENT_FILTERS_LABELS}
-            data-test-subj="eventFilters"
-          />
-          <EuiSpacer />
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
-            getArtifactsPath={getHostIsolationExceptionsListPath}
-            labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
-            data-test-subj="hostIsolationExceptions"
-          />
-          <EuiSpacer />
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={bloklistsApiClientInstance}
-            getArtifactsPath={getBlocklistsListPath}
-            labels={BLOCKLISTS_LABELS}
-            data-test-subj="blocklists"
-          />
-        </ReactQueryClientProvider>
+        <FleetArtifactsCard
+          {...props}
+          artifactApiClientInstance={trustedAppsApiClientInstance}
+          getArtifactsPath={getTrustedAppsListPath}
+          labels={TRUSTED_APPS_LABELS}
+          data-test-subj="trustedApps"
+        />
+        <EuiSpacer />
+        <FleetArtifactsCard
+          {...props}
+          artifactApiClientInstance={eventFiltersApiClientInstance}
+          getArtifactsPath={getEventFiltersListPath}
+          labels={EVENT_FILTERS_LABELS}
+          data-test-subj="eventFilters"
+        />
+        {canSeeHostIsolationExceptions && (
+          <>
+            <EuiSpacer />
+            <FleetArtifactsCard
+              {...props}
+              artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
+              getArtifactsPath={getHostIsolationExceptionsListPath}
+              labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+              data-test-subj="hostIsolationExceptions"
+            />
+          </>
+        )}
+        <EuiSpacer />
+        <FleetArtifactsCard
+          {...props}
+          artifactApiClientInstance={bloklistsApiClientInstance}
+          getArtifactsPath={getBlocklistsListPath}
+          labels={BLOCKLISTS_LABELS}
+          data-test-subj="blocklists"
+        />
       </div>
     );
   }

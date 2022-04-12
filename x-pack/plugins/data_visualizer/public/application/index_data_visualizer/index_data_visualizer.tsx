@@ -274,6 +274,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     dataViewFieldEditor,
     uiActions,
     charts,
+    unifiedSearch,
   } = getPluginsStart();
   const services = {
     data,
@@ -287,6 +288,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     dataViewFieldEditor,
     uiActions,
     charts,
+    unifiedSearch,
     ...coreStart,
   };
 

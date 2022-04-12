@@ -21,3 +21,6 @@ export const userRiskScoreSelector = () =>
 
 export const usersRiskScoreSeverityFilterSelector = () =>
   createSelector(selectUserPage, (users) => users.queries[UsersTableType.risk].severitySelection);
+
+export const authenticationsSelector = () =>
+  createSelector(selectUserPage, (users) => users.queries[UsersTableType.authentications]);
