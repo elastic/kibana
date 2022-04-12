@@ -24,11 +24,7 @@ import type {
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Query } from '@kbn/data-plugin/public';
 import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
-import type {
-  UiActionsStart,
-  RowClickContext,
-  VisualizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -44,6 +40,7 @@ import {
   LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
+import { RowClickContext } from './datatable_visualization/row_click_trigger';
 import type { LensInspector } from './lens_inspector_service';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -991,7 +988,7 @@ export function isLensEditEvent<T extends LensEditSupportedActions>(
 
 export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
-): event is LensBrushEvent {
+): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 

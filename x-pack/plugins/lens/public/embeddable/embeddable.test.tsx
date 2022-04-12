@@ -30,6 +30,7 @@ import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Visualization } from '../types';
+import { ROW_CLICK_TRIGGER } from '../datatable_visualization/row_click_trigger';
 
 jest.mock('@kbn/inspector-plugin/public', () => ({
   isAvailable: false,
@@ -923,7 +924,7 @@ describe('embeddable', () => {
 
     onEvent({ name: 'tableRowContextMenuClick', data: {} });
 
-    expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick);
+    expect(getTrigger).toHaveBeenCalledWith(ROW_CLICK_TRIGGER);
   });
 
   it('should not re-render if only change is in disabled filter', async () => {

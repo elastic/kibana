@@ -74,6 +74,7 @@ import { getLensInspectorService, LensInspector } from '../lens_inspector_servic
 import { SharingSavedObjectProps } from '../types';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
+import { ROW_CLICK_TRIGGER } from '../datatable_visualization/row_click_trigger';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -554,7 +555,7 @@ export class Embeddable
       if (!getTriggerCompatibleActions) {
         return false;
       }
-      const actions = await getTriggerCompatibleActions(VIS_EVENT_TO_TRIGGER[event.name], {
+      const actions = await getTriggerCompatibleActions(ROW_CLICK_TRIGGER, {
         data: event.data,
         embeddable: this,
       });
@@ -635,7 +636,7 @@ export class Embeddable
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+      this.deps.getTrigger(ROW_CLICK_TRIGGER).exec(
         {
           data: event.data,
           embeddable: this,

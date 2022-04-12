@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin';
-import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
@@ -41,8 +41,7 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
-  | RangeSelectContext<T>
-  | RowClickContext;
+  | RangeSelectContext<T>;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger = {
@@ -106,11 +105,6 @@ export const isValueClickTriggerContext = (
 export const isRangeSelectTriggerContext = (
   context: ChartActionContext
 ): context is RangeSelectContext => context.data && 'range' in context.data;
-
-export const isRowClickTriggerContext = (context: ChartActionContext): context is RowClickContext =>
-  !!context.data &&
-  typeof context.data === 'object' &&
-  typeof (context as RowClickContext).data.rowIndex === 'number';
 
 export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
   !!context &&

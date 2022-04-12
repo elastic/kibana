@@ -10,6 +10,7 @@
   "references": [
     { "path": "../../../../src/core/tsconfig.json" },
     { "path": "../../ui_actions_enhanced/tsconfig.json" },
+    { "path": "../../lens/tsconfig.json" },
     { "path": "../../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../../../src/plugins/kibana_react/tsconfig.json" },

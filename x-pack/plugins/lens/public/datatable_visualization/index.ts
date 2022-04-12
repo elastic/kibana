@@ -9,8 +9,10 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { EditorFrameSetup } from '../types';
 import type { FormatFactory } from '../../common';
+import { rowClickTrigger } from './row_click_trigger';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;
@@ -20,13 +22,21 @@ export interface DatatableVisualizationPluginSetupPlugins {
   formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export class DatatableVisualization {
   setup(
     core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
-    { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
+    {
+      expressions,
+      formatFactory,
+      editorFrame,
+      charts,
+      uiActions,
+    }: DatatableVisualizationPluginSetupPlugins
   ) {
+    uiActions.registerTrigger(rowClickTrigger);
     editorFrame.registerVisualization(async () => {
       const { getDatatableRenderer, getDatatableVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();

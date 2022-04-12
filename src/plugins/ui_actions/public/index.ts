@@ -23,14 +23,12 @@ export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from './util';
-export type { Trigger, RowClickContext } from './triggers';
+export type { Trigger } from './triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
-  ROW_CLICK_TRIGGER,
-  rowClickTrigger,
 } from './triggers';
 export type { VisualizeFieldContext } from './types';
 export {

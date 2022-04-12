@@ -10,14 +10,17 @@ import { monaco } from '@kbn/monaco';
 import {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
-  isRowClickTriggerContext,
   isContextMenuTriggerContext,
   RangeSelectContext,
   SELECT_RANGE_TRIGGER,
   ValueClickContext,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  RowClickContext,
+  ROW_CLICK_TRIGGER,
+  isRowClickTriggerContext,
+} from '@kbn/lens-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import type {
   ActionContext,
@@ -128,12 +131,12 @@ const getEventScopeFromRowClickTriggerContext = (
 };
 
 export const getEventScopeValues = (eventScopeInput: EventScopeInput): UrlDrilldownEventScope => {
-  if (isRangeSelectTriggerContext(eventScopeInput)) {
+  if (isRowClickTriggerContext(eventScopeInput)) {
+    return getEventScopeFromRowClickTriggerContext(eventScopeInput);
+  } else if (isRangeSelectTriggerContext(eventScopeInput)) {
     return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
   } else if (isValueClickTriggerContext(eventScopeInput)) {
     return getEventScopeFromValueClickTriggerContext(eventScopeInput);
-  } else if (isRowClickTriggerContext(eventScopeInput)) {
-    return getEventScopeFromRowClickTriggerContext(eventScopeInput);
   } else if (isContextMenuTriggerContext(eventScopeInput)) {
     return {};
   } else {

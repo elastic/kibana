@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
@@ -53,6 +54,7 @@ const createPlugin = async () => {
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
   const setup = await plugin.setup(coreSetup);
+  const uiActions = uiActionsPluginMock.createStartContract();
 
   return {
     pluginInitializerContext,
@@ -60,7 +62,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart),
+    doStart: async () => await plugin.start(coreStart, { uiActions }),
   };
 };
 

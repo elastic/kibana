@@ -26,6 +26,7 @@ import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
+import { ROW_CLICK_TRIGGER } from './row_click_trigger';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -88,7 +89,7 @@ export const getDatatableVisualization = ({
 
   switchVisualizationType: (_, state) => state,
 
-  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, ROW_CLICK_TRIGGER],
 
   initialize(addNewLayer, state) {
     return (

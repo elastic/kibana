@@ -15,7 +15,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/lens-plugin/public';
 import { Query, Filter, TimeRange } from '@kbn/data-plugin/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -55,7 +55,7 @@ interface UrlDrilldownDeps {
   uiSettings: IUiSettingsClient;
 }
 
-export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
+export type ActionContext = ChartActionContext<EmbeddableWithQueryInput> | RowClickContext;
 export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER

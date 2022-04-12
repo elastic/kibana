@@ -34,6 +34,7 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import {
   UiActionsStart,
@@ -109,6 +110,7 @@ export interface LensPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   discover?: DiscoverSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -245,6 +247,7 @@ export class LensPlugin {
       globalSearch,
       usageCollection,
       uiActionsEnhanced,
+      uiActions,
       discover,
     }: LensPluginSetupDependencies
   ) {
@@ -261,7 +264,8 @@ export class LensPlugin {
         expressions,
         fieldFormats,
         plugins.fieldFormats.deserialize,
-        eventAnnotation
+        eventAnnotation,
+        uiActions
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
       const datasourceMap = await this.editorFrameService!.loadDatasources();
@@ -333,7 +337,8 @@ export class LensPlugin {
             expressions,
             fieldFormats,
             deps.fieldFormats.deserialize,
-            eventAnnotation
+            eventAnnotation,
+            uiActions
           ),
           ensureDefaultDataView(),
         ]);
@@ -391,7 +396,8 @@ export class LensPlugin {
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
     formatFactory: FormatFactory,
-    eventAnnotation: EventAnnotationPluginSetup
+    eventAnnotation: EventAnnotationPluginSetup,
+    uiActions: UiActionsSetup
   ) {
     const {
       DatatableVisualization,
@@ -426,6 +432,7 @@ export class LensPlugin {
       editorFrame: editorFrameSetupInterface,
       formatFactory,
       eventAnnotation,
+      uiActions,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

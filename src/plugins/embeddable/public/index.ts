@@ -71,7 +71,6 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
-  isRowClickTriggerContext,
   isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableRenderer,

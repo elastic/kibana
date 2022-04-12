@@ -17,7 +17,7 @@ import {
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { of } from '@kbn/kibana-utils-plugin';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/lens-plugin/public';
 
 const mockDataPoints = [
   {
