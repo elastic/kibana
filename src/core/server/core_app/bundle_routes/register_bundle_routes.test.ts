@@ -12,7 +12,6 @@ import { PackageInfo } from '@kbn/config';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { InternalPluginInfo, UiPlugins } from '../../plugins';
 import { registerBundleRoutes } from './register_bundle_routes';
-import { FileHashCache } from './file_hash_cache';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   ...parts,
@@ -38,10 +37,10 @@ const createUiPlugins = (...ids: string[]): UiPlugins => ({
 });
 
 describe('registerBundleRoutes', () => {
-  let router: ReturnType<typeof httpServiceMock.createRouter>;
+  let httpSetup: ReturnType<typeof httpServiceMock.createInternalSetupContract>;
 
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
+    httpSetup = httpServiceMock.createInternalSetupContract();
   });
 
   afterEach(() => {
@@ -50,62 +49,50 @@ describe('registerBundleRoutes', () => {
 
   it('registers core and shared-dep bundles', () => {
     registerBundleRoutes({
-      router,
-      serverBasePath: '/server-base-path',
+      http: httpSetup,
       packageInfo: createPackageInfo(),
       uiPlugins: createUiPlugins(),
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledTimes(3);
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(httpSetup, {
       isDist: true,
       bundlesPath: 'uiSharedDepsSrcDistDir',
-      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps-src/',
       routePath: '/42/bundles/kbn-ui-shared-deps-src/',
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(httpSetup, {
       isDist: true,
       bundlesPath: 'uiSharedDepsNpmDistDir',
-      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps-npm/',
       routePath: '/42/bundles/kbn-ui-shared-deps-npm/',
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(httpSetup, {
       isDist: true,
       bundlesPath: expect.stringMatching(/src\/core\/target\/public/),
-      publicPath: '/server-base-path/42/bundles/core/',
       routePath: '/42/bundles/core/',
     });
   });
 
   it('registers plugin bundles', () => {
     registerBundleRoutes({
-      router,
-      serverBasePath: '/server-base-path',
+      http: httpSetup,
       packageInfo: createPackageInfo(),
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(httpSetup, {
       isDist: true,
       bundlesPath: '/plugins/plugin-a/public-target-dir',
-      publicPath: '/server-base-path/42/bundles/plugin/plugin-a/8.0.0/',
       routePath: '/42/bundles/plugin/plugin-a/8.0.0/',
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
-      fileHashCache: expect.any(FileHashCache),
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(httpSetup, {
       isDist: true,
       bundlesPath: '/plugins/plugin-b/public-target-dir',
-      publicPath: '/server-base-path/42/bundles/plugin/plugin-b/8.0.0/',
       routePath: '/42/bundles/plugin/plugin-b/8.0.0/',
     });
   });

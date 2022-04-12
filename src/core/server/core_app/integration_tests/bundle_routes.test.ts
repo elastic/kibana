@@ -149,7 +149,7 @@ describe('bundle routes', () => {
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
-      expect(response.get('cache-control')).toEqual('max-age=31536000');
+      expect(response.get('cache-control')).toEqual('max-age=31536000, must-revalidate, public');
       expect(response.get('etag')).toBeUndefined();
     });
   });
