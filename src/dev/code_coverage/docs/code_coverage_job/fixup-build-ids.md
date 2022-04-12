@@ -65,3 +65,32 @@ ctx._source.BUILD_ID = buildNum(ctx._source.ciRunUrl)
   }
 }
 ```
+
+### Actual on Production Cluster  
+The only difference between the request submitted against  
+the production cluster and the copy is the regex: 
+  - prod: `"value": "[a-z0-9]{8}"`
+  - copy: `"value": "[a-z0-9]*"`
+```
+POST kibana_code_coverage/_update_by_query?wait_for_completion=false
+{
+  "query": {
+    "regexp": {
+      "BUILD_ID": {
+        "value": "[a-z0-9]{8}"
+      }
+    }
+  },
+  "script": {
+    "lang": "painless",
+    "source": """
+    
+def buildNum(def x) { /(.*\/)(\d*$)/.matcher(x).replaceAll('$2') }
+
+ctx._source.BUILD_ID = buildNum(ctx._source.ciRunUrl)
+
+    """
+  }
+}
+GET _tasks/VixXAChpQ4CYfADW11pzMw:309094242
+```
