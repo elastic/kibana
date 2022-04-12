@@ -15,7 +15,11 @@ import { Observable } from 'rxjs';
 import { KibanaFeature } from '../../../features/common';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
-import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
+import {
+  ActionTypeRegistryContract,
+  AlertsTableRegistryContract,
+  RuleTypeRegistryContract,
+} from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
@@ -44,6 +48,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  alertsTableTypeRegistry: AlertsTableRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;

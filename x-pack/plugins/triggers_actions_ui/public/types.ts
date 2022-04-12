@@ -93,6 +93,7 @@ export type ActionTypeRegistryContract<
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+export type AlertsTableRegistryContract = PublicMethodsOf<TypeRegistry<AlertsTableRegistry>>;
 
 export type ActionConnectorFieldsCallbacks = {
   beforeActionConnectorSave?: () => Promise<void>;

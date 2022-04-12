@@ -119,6 +119,7 @@ export class Plugin
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+    const alertsTableTypeRegistry = this.alertsTableTypeRegistry;
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
@@ -182,6 +183,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
+          alertsTableTypeRegistry,
           kibanaFeatures,
         });
       },

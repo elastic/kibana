@@ -16,7 +16,11 @@ import {
 } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
-import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
+import {
+  RuleTypeRegistryContract,
+  ActionTypeRegistryContract,
+  AlertsTableRegistryContract,
+} from '../../../types';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -45,6 +49,12 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
+    alertsTableTypeRegistry: {
+      has: jest.fn(),
+      register: jest.fn(),
+      get: jest.fn(),
+      list: jest.fn(),
+    } as AlertsTableRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
     kibanaFeatures: [],
