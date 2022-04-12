@@ -96,3 +96,7 @@ export class BrowserScreenshotError extends ReportingError {
 export class KibanaShuttingDownError extends ReportingError {
   code = 'kibana_shutting_down_error';
 }
+
+export class VisualReportingSoftDisabledError extends ReportingError {
+  code = 'visual_reporting_soft_disabled_error';
+}

@@ -24,13 +24,16 @@ import {
 } from 'rxjs/operators';
 import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from 'src/core/server';
 import type { ExpressionAstExpression } from 'src/plugins/expressions/common';
+import type { CloudSetup } from '../../../cloud/server';
 import {
   LayoutParams,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
+  errors,
 } from '../../common';
 import type { ConfigType } from '../config';
+import { hasSufficientMemory } from '../cloud';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { createLayout } from '../layouts';
 import type { Layout } from '../layouts';
@@ -101,7 +104,8 @@ export class Screenshots {
     private readonly logger: Logger,
     private readonly packageInfo: PackageInfo,
     private readonly http: HttpServiceSetup,
-    { poolSize }: ConfigType
+    { poolSize }: ConfigType,
+    private readonly cloud?: CloudSetup
   ) {
     this.semaphore = new Semaphore(poolSize);
   }
@@ -188,10 +192,17 @@ export class Screenshots {
     return `${protocol}://${hostname}:${port}${this.http.basePath.serverBasePath}/app/${SCREENSHOTTING_APP_ID}`;
   }
 
+  private throwIfInsufficientMemoryOnCloud() {
+    if (!hasSufficientMemory(this.cloud)) {
+      throw new errors.InsufficientMemoryAvailableOnCloudError();
+    }
+  }
+
   getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult>;
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    this.throwIfInsufficientMemoryOnCloud();
     const transaction = apm.startTransaction('screenshot-pipeline', 'screenshotting');
     const layout = this.createLayout(transaction, options);
     const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
