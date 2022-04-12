@@ -200,39 +200,40 @@ describe('<AgentEnrollmentFlyout />', () => {
       });
     });
 
-  // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
-  // to provide value around the new flyout structure
-  describe.skip('standalone instructions', () => {
-    it('uses the agent policy selection step', async () => {
-      const { exists, actions } = testBed;
-      actions.goToStandaloneTab();
-
-      expect(exists('agentEnrollmentFlyout')).toBe(true);
-      expect(exists('agent-policy-selection-step')).toBe(true);
-      expect(exists('agent-enrollment-key-selection-step')).toBe(false);
-    });
-
-    describe('with a specific policy', () => {
-      beforeEach(() => {
-        jest.clearAllMocks();
-        act(() => {
-          testBed = setup({
-            agentPolicy: testAgentPolicy,
-            onClose: jest.fn(),
-          });
-          testBed.component.update();
-        });
-      });
-
-      it('does not use either of the agent policy selection or enrollment key steps', () => {
+    // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
+    // to provide value around the new flyout structure
+    describe.skip('standalone instructions', () => {
+      it('uses the agent policy selection step', async () => {
         const { exists, actions } = testBed;
-        jest.clearAllMocks();
-
         actions.goToStandaloneTab();
 
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('agent-policy-selection-step')).toBe(false);
+        expect(exists('agent-policy-selection-step')).toBe(true);
         expect(exists('agent-enrollment-key-selection-step')).toBe(false);
+      });
+
+      describe('with a specific policy', () => {
+        beforeEach(() => {
+          jest.clearAllMocks();
+          act(() => {
+            testBed = setup({
+              agentPolicy: testAgentPolicy,
+              onClose: jest.fn(),
+            });
+            testBed.component.update();
+          });
+        });
+
+        it('does not use either of the agent policy selection or enrollment key steps', () => {
+          const { exists, actions } = testBed;
+          jest.clearAllMocks();
+
+          actions.goToStandaloneTab();
+
+          expect(exists('agentEnrollmentFlyout')).toBe(true);
+          expect(exists('agent-policy-selection-step')).toBe(false);
+          expect(exists('agent-enrollment-key-selection-step')).toBe(false);
+        });
       });
     });
   });

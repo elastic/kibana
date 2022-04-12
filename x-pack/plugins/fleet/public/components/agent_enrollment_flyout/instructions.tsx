@@ -13,13 +13,13 @@ import { useFleetStatus, useGetAgents } from '../../hooks';
 
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
-
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
 import { Loading } from '..';
+
+import { policyHasFleetServer } from '../../services';
 
 import type { InstructionProps } from './types';
 

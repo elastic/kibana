@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
-import { PlatformSelector } from '../../enrollment_instructions/manual/platform_selector';
-
 import { InstallationMessage } from '../installation_message';
 
 import type { K8sMode } from '../types';
+import { PlatformSelector } from '../../platform_selector';
+import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils';
 
 export const InstallStandaloneAgentStep = ({
   installCommand,
