@@ -42,7 +42,8 @@ export const updateAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) 
     },
     async (context, req, response) => {
       try {
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
         const { status, ids, index, _version } = req.body;
 
         const updatedAlert = await alertsClient.update({

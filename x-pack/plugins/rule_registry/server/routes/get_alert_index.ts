@@ -34,7 +34,8 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
     },
     async (context, request, response) => {
       try {
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
         const { features } = request.query;
         const indexName = await alertsClient.getAuthorizedAlertsIndices(
           features?.split(',') ?? validFeatureIds

@@ -43,7 +43,8 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { query, aggs, _source, track_total_hits, size, index } = request.body;
 
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
 
         const alerts = await alertsClient.find({
           query,
