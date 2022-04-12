@@ -145,7 +145,10 @@ export async function getPackageInfo(options: {
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
-    latestVersion: latestPackage?.version ?? resolvedPkgVersion,
+    latestVersion:
+      latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
+        ? latestPackage.version
+        : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     removable: true,
