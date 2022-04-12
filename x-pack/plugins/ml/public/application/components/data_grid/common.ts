@@ -7,13 +7,9 @@
 
 import moment from 'moment-timezone';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
-import {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridSorting,
-  EuiDataGridStyle,
-} from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -178,7 +174,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined | estypes.MappingRuntimeField['type']
+  fieldType: ES_FIELD_TYPES | undefined | estypes.MappingRuntimeField['type'] | 'number'
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
@@ -204,6 +200,7 @@ export const getDataGridSchemaFromESFieldType = (
     case ES_FIELD_TYPES.LONG:
     case ES_FIELD_TYPES.SCALED_FLOAT:
     case ES_FIELD_TYPES.SHORT:
+    case 'number':
       schema = 'numeric';
       break;
     // keep schema undefined for text based columns
@@ -375,16 +372,9 @@ export const useRenderCellValue = (
 
       const cellValue = getCellValue(columnId);
 
-      // React by default doesn't allow us to use a hook in a callback.
-      // However, this one will be passed on to EuiDataGrid and its docs
-      // recommend wrapping `setCellProps` in a `useEffect()` hook
-      // so we're ignoring the linting rule here.
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useEffect(() => {
-        if (typeof cellPropsCallback === 'function') {
-          cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
-        }
-      }, [columnId, cellValue]);
+      if (typeof cellPropsCallback === 'function') {
+        cellPropsCallback(columnId, cellValue, fullItem, setCellProps);
+      }
 
       if (typeof cellValue === 'object' && cellValue !== null) {
         return JSON.stringify(cellValue);
@@ -417,6 +407,16 @@ export const useRenderCellValue = (
   return renderCellValue;
 };
 
+// Value can be nested or the fieldName itself might contain other special characters like `.`
+export const getNestedOrEscapedVal = (obj: any, sortId: string) =>
+  getNestedProperty(obj, sortId, null) ?? obj[sortId];
+
+export interface MultiColumnSorter {
+  id: string;
+  direction: 'asc' | 'desc';
+  type: string;
+}
+
 /**
  * Helper to sort an array of objects based on an EuiDataGrid sorting configuration.
  * `sortFn()` is recursive to support sorting on multiple columns.
@@ -424,17 +424,17 @@ export const useRenderCellValue = (
  * @param sortingColumns - The EUI data grid sorting configuration
  * @returns The sorting function which can be used with an array's sort() function.
  */
-export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['columns']) => {
-  const isString = (arg: any): arg is string => {
-    return typeof arg === 'string';
-  };
-
+export const multiColumnSortFactory = (sortingColumns: MultiColumnSorter[]) => {
   const sortFn = (a: any, b: any, sortingColumnIndex = 0): number => {
     const sort = sortingColumns[sortingColumnIndex];
-    const aValue = getNestedProperty(a, sort.id, null);
-    const bValue = getNestedProperty(b, sort.id, null);
 
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
+    // Value can be nested or the fieldName itself might contain `.`
+    let aValue = getNestedOrEscapedVal(a, sort.id);
+    let bValue = getNestedOrEscapedVal(b, sort.id);
+
+    if (sort.type === 'number') {
+      aValue = aValue ?? 0;
+      bValue = bValue ?? 0;
       if (aValue < bValue) {
         return sort.direction === 'asc' ? -1 : 1;
       }
@@ -443,7 +443,10 @@ export const multiColumnSortFactory = (sortingColumns: EuiDataGridSorting['colum
       }
     }
 
-    if (isString(aValue) && isString(bValue)) {
+    if (sort.type === 'string') {
+      aValue = aValue ?? '';
+      bValue = bValue ?? '';
+
       if (aValue.localeCompare(bValue) === -1) {
         return sort.direction === 'asc' ? -1 : 1;
       }

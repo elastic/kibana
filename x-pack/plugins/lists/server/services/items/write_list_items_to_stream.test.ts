@@ -41,9 +41,7 @@ describe('write_list_items_to_stream', () => {
       const firstResponse = getSearchListItemMock();
       firstResponse.hits.hits = [];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(firstResponse)
-      );
+      esClient.search.mockResponse(firstResponse);
       exportListItemsToStream({ ...options, esClient });
 
       let chunks: string[] = [];
@@ -61,9 +59,7 @@ describe('write_list_items_to_stream', () => {
       const options = getExportListItemsToStreamOptionsMock();
       const response = getSearchListItemMock();
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-      );
+      esClient.search.mockResponse(response);
       exportListItemsToStream({ ...options, esClient });
 
       let chunks: string[] = [];
@@ -83,9 +79,7 @@ describe('write_list_items_to_stream', () => {
       const secondResponse = getSearchListItemMock();
       firstResponse.hits.hits = [...firstResponse.hits.hits, ...secondResponse.hits.hits];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(firstResponse)
-      );
+      esClient.search.mockResponse(firstResponse);
       exportListItemsToStream({ ...options, esClient });
 
       let chunks: string[] = [];
@@ -111,12 +105,8 @@ describe('write_list_items_to_stream', () => {
       }
 
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(firstResponse)
-      );
-      esClient.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(secondResponse)
-      );
+      esClient.search.mockResponseOnce(firstResponse);
+      esClient.search.mockResponseOnce(secondResponse);
       exportListItemsToStream({ ...options, esClient });
 
       let chunks: string[] = [];
@@ -136,9 +126,7 @@ describe('write_list_items_to_stream', () => {
       const options = getWriteNextResponseOptions();
       const listItem = getSearchListItemMock();
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(listItem)
-      );
+      esClient.search.mockResponse(listItem);
       const searchAfter = await writeNextResponse({ ...options, esClient });
       expect(searchAfter).toEqual(undefined);
     });
@@ -148,9 +136,7 @@ describe('write_list_items_to_stream', () => {
       listItem.hits.hits[0].sort = ['sort-value-1'];
       const options = getWriteNextResponseOptions();
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(listItem)
-      );
+      esClient.search.mockResponse(listItem);
       const searchAfter = await writeNextResponse({ ...options, esClient });
       expect(searchAfter).toEqual(['sort-value-1']);
     });
@@ -160,9 +146,7 @@ describe('write_list_items_to_stream', () => {
       listItem.hits.hits = [];
       const options = getWriteNextResponseOptions();
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-      esClient.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(listItem)
-      );
+      esClient.search.mockResponse(listItem);
       const searchAfter = await writeNextResponse({ ...options, esClient });
       expect(searchAfter).toEqual(undefined);
     });

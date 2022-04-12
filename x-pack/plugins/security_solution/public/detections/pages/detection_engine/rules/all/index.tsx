@@ -8,6 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
+import { RulesFeatureTour } from './feature_tour/rules_feature_tour';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
@@ -20,7 +21,6 @@ interface AllRulesProps {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
 }
 
 /**
@@ -41,12 +41,12 @@ export const AllRules = React.memo<AllRulesProps>(
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
-    setRefreshRulesData,
   }) => {
     const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
 
     return (
       <>
+        <RulesFeatureTour />
         <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
         <EuiSpacer />
         <RulesTables
@@ -59,7 +59,6 @@ export const AllRules = React.memo<AllRulesProps>(
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
           selectedTab={activeTab}
-          setRefreshRulesData={setRefreshRulesData}
         />
       </>
     );

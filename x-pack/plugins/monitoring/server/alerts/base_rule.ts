@@ -9,12 +9,12 @@ import { Logger, ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
   RuleType,
-  AlertExecutorOptions,
-  AlertInstance,
+  RuleExecutorOptions,
+  Alert,
   RulesClient,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../alerting/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -65,7 +65,7 @@ export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
-    public sanitizedRule?: SanitizedAlert,
+    public sanitizedRule?: SanitizedRule,
     public ruleOptions: RuleOptions = defaultRuleOptions()
   ) {
     const defaultOptions = defaultRuleOptions();
@@ -94,7 +94,7 @@ export class BaseRule {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: (
-        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+        options: RuleExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;
         }
       ): Promise<any> => this.execute(options),
@@ -113,7 +113,7 @@ export class BaseRule {
     rulesClient: RulesClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<SanitizedAlert<AlertTypeParams>> {
+  ): Promise<SanitizedRule<RuleTypeParams>> {
     const existingRuleData = await rulesClient.find({
       options: {
         search: this.ruleOptions.id,
@@ -121,7 +121,7 @@ export class BaseRule {
     });
 
     if (existingRuleData.total > 0) {
-      return existingRuleData.data[0] as Alert;
+      return existingRuleData.data[0] as Rule;
     }
 
     const ruleActions = [];
@@ -147,7 +147,7 @@ export class BaseRule {
       throttle = '1d',
       interval = '1m',
     } = this.ruleOptions;
-    return await rulesClient.create<AlertTypeParams>({
+    return await rulesClient.create<RuleTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -215,7 +215,7 @@ export class BaseRule {
     services,
     params,
     state,
-  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+  }: RuleExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
     state: ExecutedState;
   }): Promise<any> {
     this.scopedLogger.debug(
@@ -255,7 +255,7 @@ export class BaseRule {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices<AlertInstanceState, never, 'default'>,
+    services: RuleExecutorServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -272,7 +272,7 @@ export class BaseRule {
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
         // quick fix for now so that non node level alerts will use the cluster id
-        const instance = services.alertInstanceFactory(
+        const instance = services.alertFactory.create(
           node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
         );
 
@@ -331,7 +331,7 @@ export class BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     instanceState: AlertInstanceState | AlertState | unknown,
     item: AlertData | unknown,
     cluster?: AlertCluster | unknown

@@ -13,6 +13,7 @@ https://ci.kibana.dev/es-snapshots[A dashboard] is available that shows the curr
 2. Each snapshot is uploaded to a public Google Cloud Storage bucket, `kibana-ci-es-snapshots-daily`.
 ** At this point, the snapshot is not automatically used in CI or local development. It needs to be tested/verified first.
 3. Each snapshot is tested with the latest commit of the corresponding {kib} branch, using the full CI suite.
+3a. If a test fails during snapshot verification the Kibana Operations team will skip it and create an issue for the team to fix the test, or work with the Elasticsearch team to get a fix implemented there. Once the fix is ready a Kibana PR can be opened to unskip the test.
 4. After CI
 ** If the snapshot passes, it is promoted and automatically used in CI and local development.
 ** If the snapshot fails, the issue must be investigated and resolved. A new incompatibility may exist between {es} and {kib}.

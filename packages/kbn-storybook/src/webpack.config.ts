@@ -121,6 +121,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
       },
       symlinks: false,
     },

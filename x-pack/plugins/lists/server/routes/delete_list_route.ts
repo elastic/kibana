@@ -10,6 +10,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListSchema,
+  FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   deleteListSchema,
   exceptionListItemSchema,
@@ -19,7 +21,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import type { ListsPluginRouter } from '../types';
-import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
+import type { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../services/utils/escape_query';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
@@ -47,26 +49,31 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
 
         // ignoreReferences=true maintains pre-7.11 behavior of deleting value list without performing any additional checks
         if (!ignoreReferences) {
-          const referencedExceptionListItems = await exceptionLists.findValueListExceptionListItems(
-            {
-              page: 1,
-              perPage: 10000,
-              sortField: undefined,
-              sortOrder: undefined,
-              valueListId: id,
-            }
-          );
+          // Stream the results from the Point In Time (PIT) finder into this array
+          let referencedExceptionListItems: ExceptionListItemSchema[] = [];
+          const executeFunctionOnStream = (foundResponse: FoundExceptionListItemSchema): void => {
+            referencedExceptionListItems = [...referencedExceptionListItems, ...foundResponse.data];
+          };
 
-          if (referencedExceptionListItems?.data?.length) {
+          await exceptionLists.findValueListExceptionListItemsPointInTimeFinder({
+            executeFunctionOnStream,
+            maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+            perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+            sortField: undefined,
+            sortOrder: undefined,
+            valueListId: id,
+          });
+          if (referencedExceptionListItems.length) {
             // deleteReferences=false to perform dry run and identify referenced exception lists/items
             if (deleteReferences) {
               // Delete referenced exception list items
               // TODO: Create deleteListItems to delete in batch
               deleteExceptionItemResponses = await Promise.all(
-                referencedExceptionListItems.data.map(async (listItem) => {
+                referencedExceptionListItems.map(async (listItem) => {
                   // Ensure only the single entry is deleted as there could be a separate value list referenced that is okay to keep // TODO: Add API to delete single entry
-                  // @ts-ignore inline way of verifying entry type is EntryList?
-                  const remainingEntries = listItem.entries.filter((e) => e?.list?.id !== id);
+                  const remainingEntries = listItem.entries.filter(
+                    (e) => e.type === 'list' && e.list.id !== id
+                  );
                   if (remainingEntries.length === 0) {
                     // All entries reference value list specified in request, delete entire exception list item
                     return deleteExceptionListItem(exceptionLists, listItem);
@@ -79,14 +86,12 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
             } else {
               const referencedExceptionLists = await getReferencedExceptionLists(
                 exceptionLists,
-                referencedExceptionListItems.data
+                referencedExceptionListItems
               );
               const refError = `Value list '${id}' is referenced in existing exception list(s)`;
-              const references = referencedExceptionListItems.data.map((item) => ({
+              const references = referencedExceptionListItems.map((item) => ({
                 exception_item: item,
-                exception_list: referencedExceptionLists.data.find(
-                  (l) => l.list_id === item.list_id
-                ),
+                exception_list: referencedExceptionLists.find((l) => l.list_id === item.list_id),
               }));
 
               return siemResponse.error({
@@ -140,7 +145,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
 const getReferencedExceptionLists = async (
   exceptionLists: ExceptionListClient,
   exceptionListItems: ExceptionListItemSchema[]
-): Promise<FoundExceptionListSchema> => {
+): Promise<ExceptionListSchema[]> => {
   const filter = exceptionListItems
     .map(
       (item) =>
@@ -149,14 +154,22 @@ const getReferencedExceptionLists = async (
         })}.attributes.list_id: "${escapeQuotes(item.list_id)}"`
     )
     .join(' OR ');
-  return exceptionLists.findExceptionList({
+
+  // Stream the results from the Point In Time (PIT) finder into this array
+  let exceptionList: ExceptionListSchema[] = [];
+  const executeFunctionOnStream = (response: FoundExceptionListSchema): void => {
+    exceptionList = [...exceptionList, ...response.data];
+  };
+  await exceptionLists.findExceptionListPointInTimeFinder({
+    executeFunctionOnStream,
     filter: `(${filter})`,
+    maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
     namespaceType: ['agnostic', 'single'],
-    page: 1,
-    perPage: 10000,
+    perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     sortField: undefined,
     sortOrder: undefined,
   });
+  return exceptionList;
 };
 
 /**

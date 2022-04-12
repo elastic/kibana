@@ -6,7 +6,13 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { SavedObjectsClientContract, IScopedClusterClient, Logger } from 'src/core/server';
+import type {
+  SavedObjectsClientContract,
+  IScopedClusterClient,
+  Logger,
+  IBasePath,
+} from 'src/core/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 import { ObservabilityPluginSetup } from '../../../../../observability/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -21,6 +27,7 @@ import { PluginSetupContract } from '../../../../../features/server';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
 import { UptimeESClient } from '../../lib';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../types';
 import { SecurityPluginStart } from '../../../../../security/server';
 import { CloudSetup } from '../../../../../cloud/server';
@@ -52,6 +59,10 @@ export interface UptimeServerSetup {
   syntheticsService: SyntheticsService;
   kibanaVersion: string;
   logger: Logger;
+  telemetry: TelemetryEventsSender;
+  uptimeEsClient: UptimeESClient;
+  basePath: IBasePath;
+  isDev?: boolean;
 }
 
 export interface UptimeCorePluginsSetup {
@@ -64,6 +75,7 @@ export interface UptimeCorePluginsSetup {
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
+  telemetry: TelemetryPluginSetup;
 }
 
 export interface UptimeCorePluginsStart {
@@ -71,6 +83,7 @@ export interface UptimeCorePluginsStart {
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
+  telemetry: TelemetryPluginStart;
 }
 
 export interface UMBackendFrameworkAdapter {

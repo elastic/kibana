@@ -7,5 +7,6 @@
  */
 
 export interface BaseMeta {
-  index?: string;
+  dataViewId?: string;
+  indexPatternString?: string;
 }

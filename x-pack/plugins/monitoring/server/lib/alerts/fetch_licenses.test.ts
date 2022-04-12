@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { fetchLicenses } from './fetch_licenses';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
@@ -33,20 +31,18 @@ describe('fetchLicenses', () => {
 
   it('return a list of licenses', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _source: {
-                license,
-                cluster_uuid: clusterUuid,
-              },
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _source: {
+              license,
+              cluster_uuid: clusterUuid,
             },
-          ],
-        },
-      } as any)
-    );
+          },
+        ],
+      },
+    } as any);
     const clusters = [{ clusterUuid, clusterName }];
     const result = await fetchLicenses(esClient, clusters);
     expect(result).toEqual([
@@ -79,7 +75,7 @@ describe('fetchLicenses', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
@@ -88,7 +84,9 @@ describe('fetchLicenses', () => {
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
       filter_path: [
         'hits.hits._source.license.*',
+        'hits.hits._source.elasticsearch.cluster.stats.license.*',
         'hits.hits._source.cluster_uuid',
+        'hits.hits._source.elasticsearch.cluster.id',
         'hits.hits._index',
       ],
       body: {
@@ -102,6 +100,7 @@ describe('fetchLicenses', () => {
                 bool: {
                   should: [
                     { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -122,7 +121,7 @@ describe('fetchLicenses', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);

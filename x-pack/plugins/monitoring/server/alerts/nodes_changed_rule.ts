@@ -19,10 +19,10 @@ import {
   AlertInstanceState,
   AlertNodesChangedState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_NODES_CHANGED, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { AlertSeverity } from '../../common/enums';
 interface AlertNodesChangedStates {
@@ -56,7 +56,7 @@ function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
 }
 
 export class NodesChangedRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_NODES_CHANGED,
       name: LEGACY_RULE_DETAILS[RULE_NODES_CHANGED].label,
@@ -174,7 +174,7 @@ export class NodesChangedRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

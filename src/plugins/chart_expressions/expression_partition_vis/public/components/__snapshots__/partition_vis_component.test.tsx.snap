@@ -1,0 +1,2003 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PartitionVisComponent should render correct structure for donut 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "13h2mjc",
+      "next": undefined,
+      "styles": "
+  
+  min-height: 0;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="partitionVisChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "19k4zle",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
+        "toString": [Function],
+      }
+    }
+  >
+    <ContextProvider
+      value={
+        Object {
+          "bucketColumns": Array [
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "string",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-0-2",
+              "meta": Object {
+                "field": "Carrier",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "string",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "2",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Carrier",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "Carrier: Descending",
+            },
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "boolean",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-2-3",
+              "meta": Object {
+                "field": "Cancelled",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "boolean",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "3",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Cancelled",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "boolean",
+              },
+              "name": "Cancelled: Descending",
+            },
+          ],
+          "data": Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ],
+          "distinctColors": false,
+          "legendPosition": "right",
+          "palette": "default",
+          "setColor": [Function],
+          "uiState": Object {
+            "emit": [MockFunction],
+            "get": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+              ],
+            },
+            "set": [MockFunction],
+            "setSilent": [MockFunction],
+          },
+        }
+      }
+    >
+      <Memo(LegendToggleComponent)
+        legendPosition="right"
+        onClick={[Function]}
+        showLegend={true}
+      />
+      <Chart
+        renderer="canvas"
+        size="100%"
+      >
+        <ChartSplit />
+        <Settings
+          ariaUseDefaultSummary={true}
+          baseTheme={Object {}}
+          debugState={false}
+          flatLegend={false}
+          legendAction={[Function]}
+          legendColorPicker={[Function]}
+          legendMaxDepth={1}
+          legendPosition="right"
+          onElementClick={[Function]}
+          onRenderChange={[Function]}
+          showLegend={true}
+          theme={
+            Array [
+              Object {
+                "background": Object {
+                  "color": "transparent",
+                },
+              },
+              Object {
+                "chartMargins": Object {
+                  "bottom": 0,
+                  "left": 0,
+                  "right": 0,
+                  "top": 0,
+                },
+                "partition": Object {
+                  "circlePadding": 4,
+                  "emptySizeRatio": 0.3,
+                  "fontFamily": undefined,
+                  "linkLabel": Object {
+                    "fontSize": 11,
+                    "maxCount": 5,
+                    "maxTextLength": 100,
+                    "textColor": undefined,
+                  },
+                  "maxFontSize": 16,
+                  "minFontSize": 10,
+                  "outerSizeRatio": undefined,
+                  "sectorLineStroke": undefined,
+                  "sectorLineWidth": 1.5,
+                },
+              },
+              Object {},
+              Object {
+                "legend": Object {
+                  "labelOptions": Object {
+                    "maxLines": 1,
+                  },
+                },
+              },
+            ]
+          }
+          tooltip={
+            Object {
+              "type": "follow",
+            }
+          }
+        />
+        <Partition
+          data={
+            Array [
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 0,
+                "col-3-1": 689,
+              },
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 1,
+                "col-3-1": 108,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 0,
+                "col-3-1": 654,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 1,
+                "col-3-1": 112,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 0,
+                "col-3-1": 665,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 1,
+                "col-3-1": 79,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 0,
+                "col-3-1": 655,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 1,
+                "col-3-1": 76,
+              },
+            ]
+          }
+          id="donut"
+          layers={
+            Array [
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": undefined,
+              },
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": undefined,
+              },
+            ]
+          }
+          layout="sunburst"
+          percentFormatter={[Function]}
+          smallMultiples="__pie_chart_sm__"
+          valueAccessor={[Function]}
+          valueFormatter={[Function]}
+          valueGetter="percent"
+        />
+      </Chart>
+    </ContextProvider>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for mosaic 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "13h2mjc",
+      "next": undefined,
+      "styles": "
+  
+  min-height: 0;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="partitionVisChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "19k4zle",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
+        "toString": [Function],
+      }
+    }
+  >
+    <ContextProvider
+      value={
+        Object {
+          "bucketColumns": Array [
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "string",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-0-2",
+              "meta": Object {
+                "field": "Carrier",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "string",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "2",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Carrier",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "Carrier: Descending",
+            },
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "boolean",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-2-3",
+              "meta": Object {
+                "field": "Cancelled",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "boolean",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "3",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Cancelled",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "boolean",
+              },
+              "name": "Cancelled: Descending",
+            },
+          ],
+          "data": Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ],
+          "distinctColors": false,
+          "legendPosition": "right",
+          "palette": "default",
+          "setColor": [Function],
+          "uiState": Object {
+            "emit": [MockFunction],
+            "get": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+              ],
+            },
+            "set": [MockFunction],
+            "setSilent": [MockFunction],
+          },
+        }
+      }
+    >
+      <Memo(LegendToggleComponent)
+        legendPosition="right"
+        onClick={[Function]}
+        showLegend={true}
+      />
+      <Chart
+        renderer="canvas"
+        size="100%"
+      >
+        <ChartSplit />
+        <Settings
+          ariaUseDefaultSummary={true}
+          baseTheme={Object {}}
+          debugState={false}
+          flatLegend={false}
+          legendAction={[Function]}
+          legendColorPicker={[Function]}
+          legendPosition="right"
+          onElementClick={[Function]}
+          onRenderChange={[Function]}
+          showLegend={true}
+          theme={
+            Array [
+              Object {
+                "background": Object {
+                  "color": "transparent",
+                },
+              },
+              Object {
+                "chartMargins": Object {
+                  "bottom": 0,
+                  "left": 0,
+                  "right": 0,
+                  "top": 0,
+                },
+                "partition": Object {
+                  "circlePadding": 4,
+                  "emptySizeRatio": 0,
+                  "fontFamily": undefined,
+                  "linkLabel": Object {
+                    "fontSize": 11,
+                    "maxCount": 5,
+                    "maxTextLength": undefined,
+                    "textColor": undefined,
+                  },
+                  "maxFontSize": 16,
+                  "minFontSize": 10,
+                  "outerSizeRatio": 1,
+                  "sectorLineStroke": undefined,
+                  "sectorLineWidth": 1.5,
+                },
+              },
+              Object {},
+              Object {
+                "legend": Object {
+                  "labelOptions": Object {
+                    "maxLines": 1,
+                  },
+                },
+              },
+            ]
+          }
+          tooltip={
+            Object {
+              "type": "follow",
+            }
+          }
+        />
+        <Partition
+          data={
+            Array [
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 0,
+                "col-3-1": 689,
+              },
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 1,
+                "col-3-1": 108,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 0,
+                "col-3-1": 654,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 1,
+                "col-3-1": 112,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 0,
+                "col-3-1": 665,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 1,
+                "col-3-1": 79,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 0,
+                "col-3-1": 655,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 1,
+                "col-3-1": 76,
+              },
+            ]
+          }
+          id="mosaic"
+          layers={
+            Array [
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": [Function],
+              },
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": [Function],
+              },
+            ]
+          }
+          layout="mosaic"
+          percentFormatter={[Function]}
+          smallMultiples="__pie_chart_sm__"
+          valueAccessor={[Function]}
+          valueFormatter={[Function]}
+          valueGetter="percent"
+        />
+      </Chart>
+    </ContextProvider>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for pie 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "13h2mjc",
+      "next": undefined,
+      "styles": "
+  
+  min-height: 0;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="partitionVisChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "19k4zle",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
+        "toString": [Function],
+      }
+    }
+  >
+    <ContextProvider
+      value={
+        Object {
+          "bucketColumns": Array [
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "string",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-0-2",
+              "meta": Object {
+                "field": "Carrier",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "string",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "2",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Carrier",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "Carrier: Descending",
+            },
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "boolean",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-2-3",
+              "meta": Object {
+                "field": "Cancelled",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "boolean",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "3",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Cancelled",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "boolean",
+              },
+              "name": "Cancelled: Descending",
+            },
+          ],
+          "data": Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ],
+          "distinctColors": false,
+          "legendPosition": "right",
+          "palette": "default",
+          "setColor": [Function],
+          "uiState": Object {
+            "emit": [MockFunction],
+            "get": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+              ],
+            },
+            "set": [MockFunction],
+            "setSilent": [MockFunction],
+          },
+        }
+      }
+    >
+      <Memo(LegendToggleComponent)
+        legendPosition="right"
+        onClick={[Function]}
+        showLegend={true}
+      />
+      <Chart
+        renderer="canvas"
+        size="100%"
+      >
+        <ChartSplit />
+        <Settings
+          ariaUseDefaultSummary={true}
+          baseTheme={Object {}}
+          debugState={false}
+          flatLegend={false}
+          legendAction={[Function]}
+          legendColorPicker={[Function]}
+          legendMaxDepth={1}
+          legendPosition="right"
+          onElementClick={[Function]}
+          onRenderChange={[Function]}
+          showLegend={true}
+          theme={
+            Array [
+              Object {
+                "background": Object {
+                  "color": "transparent",
+                },
+              },
+              Object {
+                "chartMargins": Object {
+                  "bottom": 0,
+                  "left": 0,
+                  "right": 0,
+                  "top": 0,
+                },
+                "partition": Object {
+                  "circlePadding": 4,
+                  "emptySizeRatio": 0,
+                  "fontFamily": undefined,
+                  "linkLabel": Object {
+                    "fontSize": 11,
+                    "maxCount": 5,
+                    "maxTextLength": 100,
+                    "textColor": undefined,
+                  },
+                  "maxFontSize": 16,
+                  "minFontSize": 10,
+                  "outerSizeRatio": undefined,
+                  "sectorLineStroke": undefined,
+                  "sectorLineWidth": 1.5,
+                },
+              },
+              Object {},
+              Object {
+                "legend": Object {
+                  "labelOptions": Object {
+                    "maxLines": 1,
+                  },
+                },
+              },
+            ]
+          }
+          tooltip={
+            Object {
+              "type": "follow",
+            }
+          }
+        />
+        <Partition
+          data={
+            Array [
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 0,
+                "col-3-1": 689,
+              },
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 1,
+                "col-3-1": 108,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 0,
+                "col-3-1": 654,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 1,
+                "col-3-1": 112,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 0,
+                "col-3-1": 665,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 1,
+                "col-3-1": 79,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 0,
+                "col-3-1": 655,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 1,
+                "col-3-1": 76,
+              },
+            ]
+          }
+          id="pie"
+          layers={
+            Array [
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": undefined,
+              },
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": undefined,
+              },
+            ]
+          }
+          layout="sunburst"
+          percentFormatter={[Function]}
+          smallMultiples="__pie_chart_sm__"
+          valueAccessor={[Function]}
+          valueFormatter={[Function]}
+          valueGetter="percent"
+        />
+      </Chart>
+    </ContextProvider>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for treemap 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "13h2mjc",
+      "next": undefined,
+      "styles": "
+  
+  min-height: 0;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="partitionVisChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "19k4zle",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
+        "toString": [Function],
+      }
+    }
+  >
+    <ContextProvider
+      value={
+        Object {
+          "bucketColumns": Array [
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "string",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-0-2",
+              "meta": Object {
+                "field": "Carrier",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "string",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "2",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Carrier",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "Carrier: Descending",
+            },
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "boolean",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-2-3",
+              "meta": Object {
+                "field": "Cancelled",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "boolean",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "3",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Cancelled",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "boolean",
+              },
+              "name": "Cancelled: Descending",
+            },
+          ],
+          "data": Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ],
+          "distinctColors": false,
+          "legendPosition": "right",
+          "palette": "default",
+          "setColor": [Function],
+          "uiState": Object {
+            "emit": [MockFunction],
+            "get": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+              ],
+            },
+            "set": [MockFunction],
+            "setSilent": [MockFunction],
+          },
+        }
+      }
+    >
+      <Memo(LegendToggleComponent)
+        legendPosition="right"
+        onClick={[Function]}
+        showLegend={true}
+      />
+      <Chart
+        renderer="canvas"
+        size="100%"
+      >
+        <ChartSplit />
+        <Settings
+          ariaUseDefaultSummary={true}
+          baseTheme={Object {}}
+          debugState={false}
+          flatLegend={false}
+          legendAction={[Function]}
+          legendColorPicker={[Function]}
+          legendPosition="right"
+          onElementClick={[Function]}
+          onRenderChange={[Function]}
+          showLegend={true}
+          theme={
+            Array [
+              Object {
+                "background": Object {
+                  "color": "transparent",
+                },
+              },
+              Object {
+                "chartMargins": Object {
+                  "bottom": 0,
+                  "left": 0,
+                  "right": 0,
+                  "top": 0,
+                },
+                "partition": Object {
+                  "circlePadding": 4,
+                  "emptySizeRatio": 0,
+                  "fontFamily": undefined,
+                  "linkLabel": Object {
+                    "fontSize": 11,
+                    "maxCount": 5,
+                    "maxTextLength": undefined,
+                    "textColor": undefined,
+                  },
+                  "maxFontSize": 16,
+                  "minFontSize": 10,
+                  "outerSizeRatio": 1,
+                  "sectorLineStroke": undefined,
+                  "sectorLineWidth": 1.5,
+                },
+              },
+              Object {},
+              Object {
+                "legend": Object {
+                  "labelOptions": Object {
+                    "maxLines": 1,
+                  },
+                },
+              },
+            ]
+          }
+          tooltip={
+            Object {
+              "type": "follow",
+            }
+          }
+        />
+        <Partition
+          data={
+            Array [
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 0,
+                "col-3-1": 689,
+              },
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 1,
+                "col-3-1": 108,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 0,
+                "col-3-1": 654,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 1,
+                "col-3-1": 112,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 0,
+                "col-3-1": 665,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 1,
+                "col-3-1": 79,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 0,
+                "col-3-1": 655,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 1,
+                "col-3-1": 76,
+              },
+            ]
+          }
+          id="treemap"
+          layers={
+            Array [
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": undefined,
+              },
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": undefined,
+              },
+            ]
+          }
+          layout="treemap"
+          percentFormatter={[Function]}
+          smallMultiples="__pie_chart_sm__"
+          valueAccessor={[Function]}
+          valueFormatter={[Function]}
+          valueGetter="percent"
+        />
+      </Chart>
+    </ContextProvider>
+  </div>
+</div>
+`;
+
+exports[`PartitionVisComponent should render correct structure for waffle 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "13h2mjc",
+      "next": undefined,
+      "styles": "
+  
+  min-height: 0;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
+;
+
+  inset: 0;
+  position: absolute;
+  padding: 8px;
+",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="partitionVisChart"
+>
+  <div
+    css={
+      Object {
+        "map": undefined,
+        "name": "19k4zle",
+        "next": undefined,
+        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
+        "toString": [Function],
+      }
+    }
+  >
+    <ContextProvider
+      value={
+        Object {
+          "bucketColumns": Array [
+            Object {
+              "format": Object {
+                "id": "terms",
+                "params": Object {
+                  "id": "string",
+                  "missingBucketLabel": "Missing",
+                  "otherBucketLabel": "Other",
+                },
+              },
+              "id": "col-0-2",
+              "meta": Object {
+                "field": "Carrier",
+                "index": "kibana_sample_data_flights",
+                "params": Object {
+                  "id": "terms",
+                  "params": Object {
+                    "id": "string",
+                    "missingBucketLabel": "Missing",
+                    "otherBucketLabel": "Other",
+                  },
+                },
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "enabled": true,
+                  "id": "2",
+                  "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                  "params": Object {
+                    "field": "Carrier",
+                    "missingBucket": false,
+                    "missingBucketLabel": "Missing",
+                    "order": "desc",
+                    "orderBy": "1",
+                    "otherBucket": false,
+                    "otherBucketLabel": "Other",
+                    "size": 5,
+                  },
+                  "schema": "segment",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "Carrier: Descending",
+            },
+          ],
+          "data": Array [
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 0,
+              "col-3-1": 689,
+            },
+            Object {
+              "col-0-2": "Logstash Airways",
+              "col-1-1": 797,
+              "col-2-3": 1,
+              "col-3-1": 108,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 0,
+              "col-3-1": 654,
+            },
+            Object {
+              "col-0-2": "JetBeats",
+              "col-1-1": 766,
+              "col-2-3": 1,
+              "col-3-1": 112,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 0,
+              "col-3-1": 665,
+            },
+            Object {
+              "col-0-2": "ES-Air",
+              "col-1-1": 744,
+              "col-2-3": 1,
+              "col-3-1": 79,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 0,
+              "col-3-1": 655,
+            },
+            Object {
+              "col-0-2": "Kibana Airlines",
+              "col-1-1": 731,
+              "col-2-3": 1,
+              "col-3-1": 76,
+            },
+          ],
+          "distinctColors": false,
+          "legendPosition": "right",
+          "palette": "default",
+          "setColor": [Function],
+          "uiState": Object {
+            "emit": [MockFunction],
+            "get": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+                Array [
+                  "vis.legendOpen",
+                  true,
+                ],
+                Array [
+                  "vis.colors",
+                  Object {},
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+                Object {
+                  "type": "return",
+                  "value": true,
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {},
+                },
+              ],
+            },
+            "set": [MockFunction],
+            "setSilent": [MockFunction],
+          },
+        }
+      }
+    >
+      <Memo(LegendToggleComponent)
+        legendPosition="right"
+        onClick={[Function]}
+        showLegend={true}
+      />
+      <Chart
+        renderer="canvas"
+        size="100%"
+      >
+        <ChartSplit />
+        <Settings
+          ariaUseDefaultSummary={true}
+          baseTheme={Object {}}
+          debugState={false}
+          flatLegend={false}
+          legendAction={[Function]}
+          legendColorPicker={[Function]}
+          legendMaxDepth={1}
+          legendPosition="right"
+          onElementClick={[Function]}
+          onRenderChange={[Function]}
+          showLegend={true}
+          showLegendExtra={true}
+          theme={
+            Array [
+              Object {
+                "background": Object {
+                  "color": "transparent",
+                },
+              },
+              Object {
+                "chartMargins": Object {
+                  "bottom": 0,
+                  "left": 0,
+                  "right": 0,
+                  "top": 0,
+                },
+                "partition": Object {
+                  "circlePadding": 4,
+                  "emptySizeRatio": 0,
+                  "fontFamily": undefined,
+                  "linkLabel": Object {
+                    "fontSize": 11,
+                    "maxCount": 5,
+                    "maxTextLength": undefined,
+                    "textColor": undefined,
+                  },
+                  "maxFontSize": 16,
+                  "minFontSize": 10,
+                  "outerSizeRatio": 1,
+                  "sectorLineStroke": undefined,
+                  "sectorLineWidth": 1.5,
+                },
+              },
+              Object {},
+              Object {
+                "legend": Object {
+                  "labelOptions": Object {
+                    "maxLines": 1,
+                  },
+                },
+              },
+            ]
+          }
+          tooltip={
+            Object {
+              "type": "follow",
+            }
+          }
+        />
+        <Partition
+          data={
+            Array [
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 0,
+                "col-3-1": 689,
+              },
+              Object {
+                "col-0-2": "Logstash Airways",
+                "col-1-1": 797,
+                "col-2-3": 1,
+                "col-3-1": 108,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 0,
+                "col-3-1": 654,
+              },
+              Object {
+                "col-0-2": "JetBeats",
+                "col-1-1": 766,
+                "col-2-3": 1,
+                "col-3-1": 112,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 0,
+                "col-3-1": 665,
+              },
+              Object {
+                "col-0-2": "ES-Air",
+                "col-1-1": 744,
+                "col-2-3": 1,
+                "col-3-1": 79,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 0,
+                "col-3-1": 655,
+              },
+              Object {
+                "col-0-2": "Kibana Airlines",
+                "col-1-1": 731,
+                "col-2-3": 1,
+                "col-3-1": 76,
+              },
+            ]
+          }
+          id="mosaic"
+          layers={
+            Array [
+              Object {
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "groupByRollup": [Function],
+                "nodeLabel": [Function],
+                "shape": Object {
+                  "fillColor": [Function],
+                },
+                "showAccessor": [Function],
+                "sortPredicate": [Function],
+              },
+            ]
+          }
+          layout="mosaic"
+          percentFormatter={[Function]}
+          smallMultiples="__pie_chart_sm__"
+          valueAccessor={[Function]}
+          valueFormatter={[Function]}
+          valueGetter="percent"
+        />
+      </Chart>
+    </ContextProvider>
+  </div>
+</div>
+`;

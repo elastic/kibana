@@ -8,13 +8,16 @@
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../lib/suspended_component_with_props';
 
-export type { ActionGroupWithCondition, AlertConditionsProps } from './alert_form/alert_conditions';
+export type {
+  ActionGroupWithCondition,
+  RuleConditionsProps as AlertConditionsProps,
+} from './rule_form/rule_conditions';
 
-export const AlertConditions = lazy(() => import('./alert_form/alert_conditions'));
-export const AlertConditionsGroup = lazy(() => import('./alert_form/alert_conditions_group'));
+export const AlertConditions = lazy(() => import('./rule_form/rule_conditions'));
+export const AlertConditionsGroup = lazy(() => import('./rule_form/rule_conditions_group'));
 
-export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./alert_form/alert_add')));
-export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./alert_form/alert_edit')));
+export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_add')));
+export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_edit')));
 
 export const ConnectorAddFlyout = suspendedComponentWithProps(
   lazy(() => import('./action_connector_form/connector_add_flyout'))

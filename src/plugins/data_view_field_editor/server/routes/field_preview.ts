@@ -70,7 +70,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
           body,
         });
 
-        const fieldValue = response.body.hits.hits[0]?.fields?.my_runtime_field ?? '';
+        const fieldValue = response.hits.hits[0]?.fields?.my_runtime_field ?? '';
 
         return res.ok({ body: { values: fieldValue } });
       } catch (error: any) {

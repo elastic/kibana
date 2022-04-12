@@ -10,7 +10,6 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
-  transformAlertToRule,
   getIdError,
   transformFindAlerts,
   transform,
@@ -28,7 +27,7 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter } from '../../types';
 import { BulkError, createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialAlert } from '../../../../../../alerting/server';
+import { PartialRule } from '../../../../../../alerting/server';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
@@ -39,6 +38,7 @@ import {
   getQueryRuleParams,
   getThreatRuleParams,
 } from '../../schemas/rule_schemas.mock';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { requestContextMock } from '../__mocks__';
 
 // eslint-disable-next-line no-restricted-imports
@@ -70,17 +70,17 @@ describe.each([
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
   const { clients } = requestContextMock.createTools();
 
-  describe('transformAlertToRule', () => {
+  describe('internalRuleToAPIResponse', () => {
     test('should work with a full data set', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const rule = transformAlertToRule(fullRule);
+      const rule = internalRuleToAPIResponse(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
     test('should omit note if note is undefined', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.params.note = undefined;
-      const rule = transformAlertToRule(fullRule);
+      const rule = internalRuleToAPIResponse(fullRule);
       const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
       expect(rule).toEqual(expectedWithoutNote);
     });
@@ -88,7 +88,7 @@ describe.each([
     test('should return enabled is equal to false', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.enabled = false;
-      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      const ruleWithEnabledFalse = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.enabled = false;
       expect(ruleWithEnabledFalse).toEqual(expected);
@@ -97,7 +97,7 @@ describe.each([
     test('should return immutable is equal to false', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.params.immutable = false;
-      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      const ruleWithEnabledFalse = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
@@ -105,7 +105,7 @@ describe.each([
     test('should work with tags but filter out any internal tags', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
-      const rule = transformAlertToRule(fullRule);
+      const rule = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.tags = ['tag 1', 'tag 2'];
       expect(rule).toEqual(expected);
@@ -117,7 +117,7 @@ describe.each([
       mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
-      const rule = transformAlertToRule(mlRule);
+      const rule = internalRuleToAPIResponse(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
@@ -165,7 +165,7 @@ describe.each([
       threatRule.params.threatMapping = threatMapping;
       threatRule.params.threatQuery = '*:*';
 
-      const rule = transformAlertToRule(threatRule);
+      const rule = internalRuleToAPIResponse(threatRule);
       expect(rule).toEqual(
         expect.objectContaining({
           threat_index: ['index-123'],
@@ -183,7 +183,7 @@ describe.each([
         lists: [],
         ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
       };
-      const rule = transformAlertToRule(result);
+      const rule = internalRuleToAPIResponse(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
           lists: [],
@@ -198,7 +198,7 @@ describe.each([
         exceptions_list: [],
         ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
       };
-      const rule = transformAlertToRule(result);
+      const rule = internalRuleToAPIResponse(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
           exceptions_list: [],
@@ -383,7 +383,7 @@ describe.each([
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
       const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
       expect(output).toBeNull();
     });

@@ -110,9 +110,12 @@ export class CheckMetadataTransformsTask {
 
     let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
-      transformStatsResponse = await esClient?.transform.getTransformStats({
-        transform_id: METADATA_TRANSFORMS_PATTERN,
-      });
+      transformStatsResponse = await esClient?.transform.getTransformStats(
+        {
+          transform_id: METADATA_TRANSFORMS_PATTERN,
+        },
+        { meta: true }
+      );
     } catch (e) {
       const err = wrapErrorIfNeeded(e);
       const errMessage = `failed to get transform stats with error: ${err}`;

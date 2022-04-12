@@ -310,12 +310,14 @@ export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeT
  */
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
+  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
-  uebaPageExternalAlerts = 'ueba-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
@@ -325,10 +327,10 @@ export enum TimelineId {
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
-  runtimeTypes.literal(TimelineId.uebaPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
 ]);
@@ -464,12 +466,9 @@ export enum TimelineTabs {
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  session = 'session',
   eql = 'eql',
 }
-
-export type CreateFieldComponentType = React.FC<{
-  onClick: () => void;
-}>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Partial<Record<any, never>>;
@@ -494,6 +493,15 @@ export type TimelineExpandedHostType =
     }
   | EmptyObject;
 
+export type TimelineExpandedUserType =
+  | {
+      panelView?: 'userDetail';
+      params?: {
+        userName: string;
+      };
+    }
+  | EmptyObject;
+
 enum FlowTarget {
   client = 'client',
   destination = 'destination',
@@ -514,7 +522,8 @@ export type TimelineExpandedNetworkType =
 export type TimelineExpandedDetailType =
   | TimelineExpandedEventType
   | TimelineExpandedHostType
-  | TimelineExpandedNetworkType;
+  | TimelineExpandedNetworkType
+  | TimelineExpandedUserType;
 
 export type TimelineExpandedDetail = Partial<
   Record<TimelineTabs | string, TimelineExpandedDetailType>

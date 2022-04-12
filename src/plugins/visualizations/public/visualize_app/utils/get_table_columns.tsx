@@ -59,11 +59,11 @@ const getBadge = (item: VisualizationListItem) => {
         className="visListingTable__experimentalIcon"
         label="E"
         title={i18n.translate('visualizations.listing.experimentalTitle', {
-          defaultMessage: 'Experimental',
+          defaultMessage: 'Technical preview',
         })}
         tooltipContent={i18n.translate('visualizations.listing.experimentalTooltip', {
           defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
         })}
       />
     );

@@ -11,8 +11,6 @@ import {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
-  HostAuthenticationsRequestOptions,
-  HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
   HostsQueries,
@@ -28,8 +26,6 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
   HostFirstLastSeenRequestOptions,
-  HostsRiskScoreStrategyResponse,
-  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -75,34 +71,40 @@ import {
   CtiDataSourceRequestOptions,
   CtiDataSourceStrategyResponse,
 } from './cti';
+
 import {
-  HostRulesRequestOptions,
-  HostRulesStrategyResponse,
-  HostTacticsRequestOptions,
-  HostTacticsStrategyResponse,
-  RiskScoreRequestOptions,
   RiskScoreStrategyResponse,
-  UebaQueries,
-  UserRulesRequestOptions,
-  UserRulesStrategyResponse,
-} from './ueba';
+  RiskQueries,
+  RiskScoreRequestOptions,
+  KpiRiskScoreStrategyResponse,
+  KpiRiskScoreRequestOptions,
+} from './risk_score';
+import { UsersQueries } from './users';
+import { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
 import {
-  HostsKpiRiskyHostsRequestOptions,
-  HostsKpiRiskyHostsStrategyResponse,
-} from './hosts/kpi/risky_hosts';
+  TotalUsersKpiRequestOptions,
+  TotalUsersKpiStrategyResponse,
+} from './users/kpi/total_users';
+import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
+import {
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsStrategyResponse,
+} from './users/authentications';
 
 export * from './cti';
 export * from './hosts';
+export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
-export * from './ueba';
+export * from './users';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
-  | UebaQueries
+  | UsersQueries
   | NetworkQueries
   | NetworkKpiQueries
+  | RiskQueries
   | CtiQueries
   | typeof MatrixHistogramQuery
   | typeof MatrixHistogramQueryEntities;
@@ -131,20 +133,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsStrategyResponse
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
-  : T extends UebaQueries.riskScore
-  ? RiskScoreStrategyResponse
-  : T extends HostsQueries.hostsRiskScore
-  ? HostsRiskScoreStrategyResponse
-  : T extends UebaQueries.hostRules
-  ? HostRulesStrategyResponse
-  : T extends UebaQueries.userRules
-  ? UserRulesStrategyResponse
-  : T extends UebaQueries.hostTactics
-  ? HostTacticsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
-  : T extends HostsQueries.authentications
-  ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
@@ -153,10 +143,16 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
-  : T extends HostsKpiQueries.kpiRiskyHosts
-  ? HostsKpiRiskyHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
+  : T extends UsersQueries.details
+  ? UserDetailsStrategyResponse
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiStrategyResponse
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsStrategyResponse
+  : T extends UsersQueries.users
+  ? UsersStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -189,18 +185,18 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? CtiEventEnrichmentStrategyResponse
   : T extends CtiQueries.dataSource
   ? CtiDataSourceStrategyResponse
+  : T extends RiskQueries.riskScore
+  ? RiskScoreStrategyResponse
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends HostsQueries.hostsRiskScore
-  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends HostsQueries.authentications
-  ? HostAuthenticationsRequestOptions
   : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
@@ -211,8 +207,14 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
-  : T extends HostsKpiQueries.kpiRiskyHosts
-  ? HostsKpiRiskyHostsRequestOptions
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsRequestOptions
+  : T extends UsersQueries.details
+  ? UserDetailsRequestOptions
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.users
+  ? UsersRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -239,20 +241,16 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniqueFlowsRequestOptions
   : T extends NetworkKpiQueries.uniquePrivateIps
   ? NetworkKpiUniquePrivateIpsRequestOptions
-  : T extends UebaQueries.riskScore
-  ? RiskScoreRequestOptions
-  : T extends UebaQueries.hostRules
-  ? HostRulesRequestOptions
-  : T extends UebaQueries.userRules
-  ? UserRulesRequestOptions
-  : T extends UebaQueries.hostTactics
-  ? HostTacticsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
   : T extends CtiQueries.dataSource
   ? CtiDataSourceRequestOptions
+  : T extends RiskQueries.riskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

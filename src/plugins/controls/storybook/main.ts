@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { defaultConfigWebFinal } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
 
-// We have to do this because the kbn/storybook preset overrides the manager entries,
-// so we can't customize the theme.
-module.exports = {
-  ...defaultConfigWebFinal,
-  addons: ['@storybook/addon-a11y', '@storybook/addon-essentials'],
-};
+module.exports = defaultConfig;

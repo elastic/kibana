@@ -17,16 +17,13 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
-import { AuditLogger } from '../../../../security/server';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { AlertingAuthorizationEntity } from '../../../../alerting/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
-const auditLogger = {
-  log: jest.fn(),
-  enabled: true,
-} as jest.Mocked<AuditLogger>;
+const auditLogger = auditLoggerMock.create();
 
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
@@ -84,43 +81,35 @@ describe('bulkUpdate()', () => {
       test('logs successful event in audit logger', async () => {
         const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
-        esClientMock.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              docs: [
-                {
-                  found: true,
-                  _id: fakeAlertId,
-                  _index: indexName,
-                  _source: {
-                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                    [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                    [SPACE_IDS]: [DEFAULT_SPACE],
-                  },
-                },
-              ],
+        esClientMock.mget.mockResponseOnce({
+          docs: [
+            {
+              found: true,
+              _id: fakeAlertId,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
             },
-          })
-        );
-        esClientMock.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              errors: false,
-              took: 1,
-              items: [
-                {
-                  update: {
-                    _id: fakeAlertId,
-                    _index: '.alerts-observability.apm.alerts',
-                    result: 'updated',
-                    status: 200,
-                  },
-                },
-              ],
+          ],
+        });
+        esClientMock.bulk.mockResponseOnce({
+          errors: false,
+          took: 1,
+          items: [
+            {
+              update: {
+                _id: fakeAlertId,
+                _index: '.alerts-observability.apm.alerts',
+                result: 'updated',
+                status: 200,
+              },
             },
-          })
-        );
+          ],
+        });
         await alertsClient.bulkUpdate({
           ids: [fakeAlertId],
           query: undefined,
@@ -142,25 +131,21 @@ describe('bulkUpdate()', () => {
       test('audit error access if user is unauthorized for given alert', async () => {
         const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
-        esClientMock.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              docs: [
-                {
-                  found: true,
-                  _id: fakeAlertId,
-                  _index: indexName,
-                  _source: {
-                    [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
-                    [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                    [SPACE_IDS]: [DEFAULT_SPACE],
-                  },
-                },
-              ],
+        esClientMock.mget.mockResponseOnce({
+          docs: [
+            {
+              found: true,
+              _id: fakeAlertId,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
             },
-          })
-        );
+          ],
+        });
 
         await expect(
           alertsClient.bulkUpdate({
@@ -189,36 +174,32 @@ describe('bulkUpdate()', () => {
       test('logs multiple error events in audit logger', async () => {
         const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
-        esClientMock.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              docs: [
-                {
-                  found: true,
-                  _id: successfulAuthzHit,
-                  _index: indexName,
-                  _source: {
-                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                    [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                    [SPACE_IDS]: [DEFAULT_SPACE],
-                  },
-                },
-                {
-                  found: true,
-                  _id: unsuccessfulAuthzHit,
-                  _index: indexName,
-                  _source: {
-                    [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
-                    [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                    [SPACE_IDS]: [DEFAULT_SPACE],
-                  },
-                },
-              ],
+        esClientMock.mget.mockResponseOnce({
+          docs: [
+            {
+              found: true,
+              _id: successfulAuthzHit,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
             },
-          })
-        );
+            {
+              found: true,
+              _id: unsuccessfulAuthzHit,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
+            },
+          ],
+        });
 
         await expect(
           alertsClient.bulkUpdate({
@@ -267,44 +248,36 @@ describe('bulkUpdate()', () => {
       test('logs successful event in audit logger', async () => {
         const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
-        esClientMock.search.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              took: 5,
-              timed_out: false,
-              _shards: {
-                total: 1,
-                successful: 1,
-                failed: 0,
-                skipped: 0,
+        esClientMock.search.mockResponseOnce({
+          took: 5,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            failed: 0,
+            skipped: 0,
+          },
+          hits: {
+            total: 1,
+            max_score: 999,
+            hits: [
+              {
+                _id: fakeAlertId,
+                _index: '.alerts-observability.apm.alerts',
+                _source: {
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                  [SPACE_IDS]: [DEFAULT_SPACE],
+                },
               },
-              hits: {
-                total: 1,
-                max_score: 999,
-                hits: [
-                  {
-                    _id: fakeAlertId,
-                    _index: '.alerts-observability.apm.alerts',
-                    _source: {
-                      [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                      [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                      [SPACE_IDS]: [DEFAULT_SPACE],
-                    },
-                  },
-                ],
-              },
-            },
-          })
-        );
+            ],
+          },
+        });
 
-        esClientMock.updateByQuery.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              updated: 1,
-            },
-          })
-        );
+        esClientMock.updateByQuery.mockResponseOnce({
+          updated: 1,
+        });
 
         await alertsClient.bulkUpdate({
           ids: undefined,
@@ -327,36 +300,32 @@ describe('bulkUpdate()', () => {
       test('audit error access if user is unauthorized for given alert', async () => {
         const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
-        esClientMock.search.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              took: 5,
-              timed_out: false,
-              _shards: {
-                total: 1,
-                successful: 1,
-                failed: 0,
-                skipped: 0,
+        esClientMock.search.mockResponseOnce({
+          took: 5,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            failed: 0,
+            skipped: 0,
+          },
+          hits: {
+            total: 1,
+            max_score: 999,
+            hits: [
+              {
+                _id: fakeAlertId,
+                _index: '.alerts-observability.apm.alerts',
+                _source: {
+                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                  [SPACE_IDS]: [DEFAULT_SPACE],
+                },
               },
-              hits: {
-                total: 1,
-                max_score: 999,
-                hits: [
-                  {
-                    _id: fakeAlertId,
-                    _index: '.alerts-observability.apm.alerts',
-                    _source: {
-                      [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
-                      [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                      [SPACE_IDS]: [DEFAULT_SPACE],
-                    },
-                  },
-                ],
-              },
-            },
-          })
-        );
+            ],
+          },
+        });
         await expect(
           alertsClient.bulkUpdate({
             ids: undefined,
@@ -388,46 +357,42 @@ describe('bulkUpdate()', () => {
       test('logs multiple error events in audit logger', async () => {
         const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
-        esClientMock.search.mockResolvedValueOnce(
-          elasticsearchClientMock.createApiResponse({
-            body: {
-              took: 5,
-              timed_out: false,
-              _shards: {
-                total: 1,
-                successful: 1,
-                failed: 0,
-                skipped: 0,
+        esClientMock.search.mockResponseOnce({
+          took: 5,
+          timed_out: false,
+          _shards: {
+            total: 1,
+            successful: 1,
+            failed: 0,
+            skipped: 0,
+          },
+          hits: {
+            total: 2,
+            max_score: 999,
+            hits: [
+              {
+                _id: successfulAuthzHit,
+                _index: '.alerts-observability.apm.alerts',
+                _source: {
+                  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                  [SPACE_IDS]: [DEFAULT_SPACE],
+                },
               },
-              hits: {
-                total: 2,
-                max_score: 999,
-                hits: [
-                  {
-                    _id: successfulAuthzHit,
-                    _index: '.alerts-observability.apm.alerts',
-                    _source: {
-                      [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-                      [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                      [SPACE_IDS]: [DEFAULT_SPACE],
-                    },
-                  },
-                  {
-                    _id: unsuccessfulAuthzHit,
-                    _index: '.alerts-observability.apm.alerts',
-                    _source: {
-                      [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
-                      [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                      [SPACE_IDS]: [DEFAULT_SPACE],
-                    },
-                  },
-                ],
+              {
+                _id: unsuccessfulAuthzHit,
+                _index: '.alerts-observability.apm.alerts',
+                _source: {
+                  [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                  [ALERT_RULE_CONSUMER]: 'apm',
+                  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                  [SPACE_IDS]: [DEFAULT_SPACE],
+                },
               },
-            },
-          })
-        );
+            ],
+          },
+        });
         await expect(
           alertsClient.bulkUpdate({
             ids: undefined,

@@ -34,9 +34,9 @@ export type {
 export {
   esTestConfig,
   createTestEsCluster,
-  convertToKibanaClient,
   createEsClientForTesting,
   createEsClientForFtrConfig,
+  createRemoteEsClientForFtrConfig,
 } from './es';
 
 export {

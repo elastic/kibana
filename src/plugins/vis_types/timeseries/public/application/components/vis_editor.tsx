@@ -12,6 +12,7 @@ import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
 import type { IUiSettingsClient } from 'kibana/public';
+import type { DataView } from 'src/plugins/data_views/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -46,6 +47,7 @@ export interface TimeseriesEditorProps {
   query: EditorRenderProps['query'];
   uiState: EditorRenderProps['uiState'];
   vis: Vis<TimeseriesVisParams>;
+  defaultIndexPattern?: DataView;
 }
 
 interface TimeseriesEditorState {
@@ -216,6 +218,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
               visData$={this.visData$}
               onChange={this.handleChange}
               getConfig={this.getConfig}
+              defaultIndexPattern={this.props.defaultIndexPattern}
             />
           </div>
         </div>
@@ -236,6 +239,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
   componentWillUnmount() {
     this.updateVisState.cancel();
+    this.abortControllerFetchFields?.abort();
     this.props.eventEmitter.off('updateEditor', this.updateModel);
   }
 

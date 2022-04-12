@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
+
 jest.mock('../../static_globals', () => ({
   Globals: {
     app: {
@@ -28,23 +29,21 @@ describe('fetchClusterHealth', () => {
     const clusterUuid = 'sdfdsaj34434';
     const clusters = [{ clusterUuid, clusterName: 'foo' }];
     const status = 'green';
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [
-            {
-              _index: '.monitoring-es-7',
-              _source: {
-                cluster_state: {
-                  status,
-                },
-                cluster_uuid: clusterUuid,
+    esClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _index: '.monitoring-es-7',
+            _source: {
+              cluster_state: {
+                status,
               },
+              cluster_uuid: clusterUuid,
             },
-          ],
-        },
-      } as estypes.SearchResponse)
-    );
+          },
+        ],
+      },
+    } as estypes.SearchResponse);
 
     const health = await fetchClusterHealth(esClient, clusters);
     expect(health).toEqual([
@@ -66,7 +65,9 @@ describe('fetchClusterHealth', () => {
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
       filter_path: [
         'hits.hits._source.cluster_state.status',
+        'hits.hits._source.elasticsearch.cluster.stats.status',
         'hits.hits._source.cluster_uuid',
+        'hits.hits._source.elasticsearch.cluster.id',
         'hits.hits._index',
       ],
       body: {
@@ -80,6 +81,7 @@ describe('fetchClusterHealth', () => {
                 bool: {
                   should: [
                     { term: { type: 'cluster_stats' } },
+                    { term: { 'metricset.name': 'cluster_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -101,7 +103,7 @@ describe('fetchClusterHealth', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({} as any);
+      return Promise.resolve({} as any);
     });
 
     await fetchClusterHealth(esClient, [{ clusterUuid: '1', clusterName: 'foo1' }]);

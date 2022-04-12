@@ -42,6 +42,10 @@ export const HOST_NAME = i18n.translate('xpack.securitySolution.ml.table.hostNam
   defaultMessage: 'Host name',
 });
 
+export const USER_NAME = i18n.translate('xpack.securitySolution.ml.table.userNameTitle', {
+  defaultMessage: 'User name',
+});
+
 export const INFLUENCED_BY = i18n.translate('xpack.securitySolution.ml.table.influencedByTitle', {
   defaultMessage: 'Influenced by',
 });

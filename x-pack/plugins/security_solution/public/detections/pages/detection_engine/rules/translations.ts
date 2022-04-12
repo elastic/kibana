@@ -55,7 +55,7 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
 export const EXPERIMENTAL_ON = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOn',
   {
-    defaultMessage: 'Experimental: On',
+    defaultMessage: 'Technical preview: On',
   }
 );
 
@@ -63,14 +63,14 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
   {
     defaultMessage:
-      'The experimental rules table view allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
+      'The experimental rules table view is in technical preview and allows for advanced sorting capabilities. If you experience performance issues when working with the table, you can turn this setting off.',
   }
 );
 
 export const EXPERIMENTAL_OFF = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.experimentalOff',
   {
-    defaultMessage: 'Experimental: Off',
+    defaultMessage: 'Technical preview: Off',
   }
 );
 
@@ -193,29 +193,19 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
+  {
+    defaultMessage: 'Apply timeline template',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
     defaultMessage: 'Options',
   }
 );
-
-export const BULK_EDIT_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditSuccessToastTitle',
-  {
-    defaultMessage: 'Rules changes updated',
-  }
-);
-
-export const BULK_EDIT_SUCCESS_TOAST_DESCRIPTION = (rulesCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditSuccessToastDescription',
-    {
-      values: { rulesCount },
-      defaultMessage:
-        'You’ve successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.',
-    }
-  );
 
 export const BULK_EDIT_WARNING_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle',
@@ -239,22 +229,6 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
     defaultMessage: `Notify me when done`,
   }
 );
-
-export const BULK_EDIT_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastTitle',
-  {
-    defaultMessage: 'Rule updates failed',
-  }
-);
-
-export const BULK_EDIT_ERROR_TOAST_DESCIRPTION = (rulesCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditErrorToastDescription',
-    {
-      values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to update.',
-    }
-  );
 
 export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
   i18n.translate(
@@ -356,7 +330,7 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_TAGS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxHelpText',
   {
     defaultMessage:
-      'Add one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+      'Add one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
   }
 );
 
@@ -364,7 +338,7 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteTagsComboboxHelpText',
   {
     defaultMessage:
-      'Delete one or more custom identifying tags for selected rules. Press enter after each tag to begin a new one.',
+      'Delete one or more tags for selected rules from the dropdown. You can also enter custom identifying tags and press Enter to begin a new one.',
   }
 );
 
@@ -410,24 +384,6 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
-    {
-      values: { totalRules },
-      defaultMessage: 'Error enabling {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
-export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
-    {
-      values: { totalRules },
-      defaultMessage: 'Error disabling {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
 export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
   {
@@ -435,36 +391,10 @@ export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_DELETE_SELECTED_ERROR = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedErrorTitle',
-    {
-      values: { totalRules },
-      defaultMessage: 'Error deleting {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
   {
     defaultMessage: 'rules_export',
-  }
-);
-
-export const SUCCESSFULLY_EXPORTED_RULES = (exportedRules: number, totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyExportedXofYRulesTitle',
-    {
-      values: { totalRules, exportedRules },
-      defaultMessage:
-        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
-    }
-  );
-
-export const ALL_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tableTitle',
-  {
-    defaultMessage: 'All rules',
   }
 );
 
@@ -478,7 +408,8 @@ export const SEARCH_RULES = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
-    defaultMessage: 'e.g. rule name',
+    defaultMessage:
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
   }
 );
 
@@ -535,30 +466,6 @@ export const DUPLICATE_RULE = i18n.translate(
   }
 );
 
-export const SUCCESSFULLY_DUPLICATED_RULES = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.successfullyDuplicatedRulesTitle',
-    {
-      values: { totalRules },
-      defaultMessage:
-        'Successfully duplicated {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
-    }
-  );
-
-export const DUPLICATE_RULE_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
-  {
-    defaultMessage: 'Error duplicating rule',
-  }
-);
-
-export const BULK_ACTION_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription',
-  {
-    defaultMessage: 'Failed to execute bulk action',
-  }
-);
-
 export const EXPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.exportRuleDescription',
   {
@@ -567,7 +474,7 @@ export const EXPORT_RULE = i18n.translate(
 );
 
 export const DELETE_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteeRuleDescription',
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteRuleDescription',
   {
     defaultMessage: 'Delete rule',
   }
@@ -675,6 +582,13 @@ export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
     defaultMessage: 'Last Gap (if any)',
+  }
+);
+
+export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
+  {
+    defaultMessage: 'see documentation',
   }
 );
 
@@ -948,3 +862,226 @@ export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
     values: { totalLists },
     defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
   });
+
+/**
+ * Bulk Export
+ */
+
+export const RULES_BULK_EXPORT_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.successToastTitle',
+  {
+    defaultMessage: 'Rules exported',
+  }
+);
+
+export const RULES_BULK_EXPORT_SUCCESS_DESCRIPTION = (exportedRules: number, totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.successToastDescription',
+    {
+      values: { totalRules, exportedRules },
+      defaultMessage:
+        'Successfully exported {exportedRules} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}. Prebuilt rules were excluded from the resulting file.',
+    }
+  );
+
+export const RULES_BULK_EXPORT_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.errorToastTitle',
+  {
+    defaultMessage: 'Error exporting rules',
+  }
+);
+
+export const RULES_BULK_EXPORT_FAILURE_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.export.errorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to export.',
+    }
+  );
+
+/**
+ * Bulk Duplicate
+ */
+
+export const RULES_BULK_DUPLICATE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.successToastTitle',
+  {
+    defaultMessage: 'Rules duplicated',
+  }
+);
+
+export const RULES_BULK_DUPLICATE_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully duplicated {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_DUPLICATE_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.errorToastTitle',
+  {
+    defaultMessage: 'Error duplicating rule',
+  }
+);
+
+export const RULES_BULK_DUPLICATE_FAILURE_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.errorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to duplicate.',
+    }
+  );
+
+/**
+ * Bulk Delete
+ */
+
+export const RULES_BULK_DELETE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.delete.successToastTitle',
+  {
+    defaultMessage: 'Rules deleted',
+  }
+);
+
+export const RULES_BULK_DELETE_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.delete.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully deleted {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_DELETE_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.delete.errorToastTitle',
+  {
+    defaultMessage: 'Error deleting rules',
+  }
+);
+
+export const RULES_BULK_DELETE_FAILURE_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.delete.errorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to delete.',
+    }
+  );
+
+/**
+ * Bulk Enable
+ */
+
+export const RULES_BULK_ENABLE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enable.successToastTitle',
+  {
+    defaultMessage: 'Rules enabled',
+  }
+);
+
+export const RULES_BULK_ENABLE_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkAction.enable.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully enabled {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_ENABLE_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enable.errorToastTitle',
+  {
+    defaultMessage: 'Error enabling rules',
+  }
+);
+
+export const RULES_BULK_ENABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enable.errorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to enable.',
+    }
+  );
+
+/**
+ * Bulk Disable
+ */
+
+export const RULES_BULK_DISABLE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disable.successToastTitle',
+  {
+    defaultMessage: 'Rules disabled',
+  }
+);
+
+export const RULES_BULK_DISABLE_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disable.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully disabled {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_DISABLE_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disable.errorToastTitle',
+  {
+    defaultMessage: 'Error disabling rules',
+  }
+);
+
+export const RULES_BULK_DISABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disable.errorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to disable.',
+    }
+  );
+
+/**
+ * Bulk Edit
+ */
+
+export const RULES_BULK_EDIT_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastTitle',
+  {
+    defaultMessage: 'Rules updated',
+  }
+);
+
+export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}.",
+    }
+  );
+
+export const RULES_BULK_EDIT_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastTitle',
+  {
+    defaultMessage: 'Error updating rules',
+  }
+);
+
+export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
+    }
+  );

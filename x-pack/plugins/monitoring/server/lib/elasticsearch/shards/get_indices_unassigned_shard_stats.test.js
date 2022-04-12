@@ -30,9 +30,7 @@ describe('getIndicesUnassignedShardStats', () => {
     const req = {
       payload: {},
       server: {
-        config: () => ({
-          get: () => {},
-        }),
+        config: { ui: { max_bucket_size: 10000 } },
         plugins: {
           elasticsearch: {
             getCluster: () => ({

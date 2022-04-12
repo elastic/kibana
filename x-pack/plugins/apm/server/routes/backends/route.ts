@@ -8,12 +8,7 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import {
-  environmentRt,
-  kueryRt,
-  offsetRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getMetadataForBackend } from './get_metadata_for_backend';
 import { getLatencyChartsForBackend } from './get_latency_charts_for_backend';
@@ -21,6 +16,8 @@ import { getTopBackends } from './get_top_backends';
 import { getUpstreamServicesForBackend } from './get_upstream_services_for_backend';
 import { getThroughputChartsForBackend } from './get_throughput_charts_for_backend';
 import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
+import { ConnectionStatsItemWithImpact } from './../../../common/connections';
+import { offsetRt } from '../../../common/offset_rt';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/top_backends',
@@ -105,10 +102,11 @@ const topBackendsRoute = createApmServerRoute({
     ]);
 
     return {
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       backends: currentBackends.map((backend) => {
         const { stats, ...rest } = backend;
         const prev = previousBackends.find(
-          (item) => item.location.id === backend.location.id
+          (item): boolean => item.location.id === backend.location.id
         );
         return {
           ...rest,
@@ -221,17 +219,24 @@ const upstreamServicesForBackendRoute = createApmServerRoute({
     ]);
 
     return {
-      services: currentServices.map((service) => {
-        const { stats, ...rest } = service;
-        const prev = previousServices.find(
-          (item) => item.location.id === service.location.id
-        );
-        return {
-          ...rest,
-          currentStats: stats,
-          previousStats: prev?.stats ?? null,
-        };
-      }),
+      services: currentServices.map(
+        (
+          service
+        ): Omit<ConnectionStatsItemWithImpact, 'stats'> & {
+          currentStats: ConnectionStatsItemWithImpact['stats'];
+          previousStats: ConnectionStatsItemWithImpact['stats'] | null;
+        } => {
+          const { stats, ...rest } = service;
+          const prev = previousServices.find(
+            (item): boolean => item.location.id === service.location.id
+          );
+          return {
+            ...rest,
+            currentStats: stats,
+            previousStats: prev?.stats ?? null,
+          };
+        }
+      ),
     };
   },
 });

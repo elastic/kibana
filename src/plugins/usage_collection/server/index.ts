@@ -17,7 +17,6 @@ export type {
   UsageCollectorOptions,
   CollectorFetchContext,
   CollectorFetchMethod,
-  CollectorOptionsFetchExtendedContext,
 } from './collector';
 
 export type {

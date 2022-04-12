@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/dom';
-import { render, mockAppIndexPattern } from './rtl_helpers';
+import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
 import * as pluginHook from '../../../hooks/use_plugin_context';
@@ -19,7 +19,7 @@ jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   },
 } as any);
 describe('ExploratoryView', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   beforeEach(() => {
     const indexPattern = createStubIndexPattern({
@@ -50,8 +50,6 @@ describe('ExploratoryView', () => {
 
     expect(await screen.findByText(/No series found. Please add a series./i)).toBeInTheDocument();
     expect(await screen.findByText(/Hide chart/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Refresh/i)).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: /Explore data/i })).toBeInTheDocument();
   });
 
   it('renders lens component when there is series', async () => {
@@ -61,5 +59,18 @@ describe('ExploratoryView', () => {
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
 
     expect(screen.getByTestId('exploratoryViewSeriesPanel0')).toBeInTheDocument();
+  });
+
+  it('shows/hides the chart', async () => {
+    render(<ExploratoryView />);
+    expect(screen.queryByText('Refresh')).toBeInTheDocument();
+
+    const toggleButton = await screen.findByText('Hide chart');
+    expect(toggleButton).toBeInTheDocument();
+
+    toggleButton.click();
+
+    expect(toggleButton.textContent).toBe('Show chart');
+    expect(screen.queryByText('Refresh')).toBeNull();
   });
 });

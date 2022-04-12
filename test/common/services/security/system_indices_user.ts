@@ -6,24 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/dev-utils';
+import {
+  systemIndicesSuperuser,
+  createEsClientForFtrConfig,
+  createRemoteEsClientForFtrConfig,
+} from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';
 
-export async function createSystemIndicesUser(ctx: FtrProviderContext) {
-  const log = ctx.getService('log');
-  const config = ctx.getService('config');
-
-  const enabled = !config
-    .get('esTestCluster.serverArgs')
-    .some((arg: string) => arg === 'xpack.security.enabled=false');
-
-  if (!enabled) {
+async function ensureSystemIndicesUser(es: Client, log: ToolingLog) {
+  // There are cases where the test config file doesn't have security disabled
+  // but tests are still executed on ES without security. Checking this case
+  // by trying to fetch the users list.
+  try {
+    await es.security.getUser();
+  } catch (error) {
+    log.debug('Could not fetch users, assuming security is disabled');
     return;
   }
-
-  const es = createEsClientForFtrConfig(config);
 
   log.debug('===============creating system indices role and user===============');
 
@@ -56,4 +59,25 @@ export async function createSystemIndicesUser(ctx: FtrProviderContext) {
   });
 
   await es.close();
+}
+
+export async function createSystemIndicesUser(ctx: FtrProviderContext) {
+  const log = ctx.getService('log');
+  const config = ctx.getService('config');
+
+  const enabled = !config
+    .get('esTestCluster.serverArgs')
+    .some((arg: string) => arg === 'xpack.security.enabled=false');
+
+  if (!enabled) {
+    return;
+  }
+
+  const localEs = createEsClientForFtrConfig(config);
+  await ensureSystemIndicesUser(localEs, log);
+
+  if (config.get('esTestCluster.ccs')) {
+    const remoteEs = createRemoteEsClientForFtrConfig(config);
+    await ensureSystemIndicesUser(remoteEs, log);
+  }
 }

@@ -29,7 +29,7 @@ function extractSortNumberFromId(id: string): number {
 }
 
 async function fetchDocs(esClient: ElasticsearchClient, index: string, type: string) {
-  const { body } = await esClient.search<any>({
+  const body = await esClient.search<any>({
     index,
     size: 10000,
     body: {
@@ -180,7 +180,7 @@ describe('migration v2', () => {
     });
 
     await root.start();
-    const esClient = esServer.es.getKibanaEsClient();
+    const esClient = esServer.es.getClient();
 
     const migratedFooDocs = await fetchDocs(esClient, migratedIndex, 'foo');
     expect(migratedFooDocs.length).toBe(2500);

@@ -23,11 +23,13 @@ interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload, cloud } = getPluginsStart();
+  const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
+    getPluginsStart();
   const services = {
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,
@@ -42,7 +44,7 @@ export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView
-            indexPatterns={data.indexPatterns}
+            dataViewsContract={data.dataViews}
             savedObjectsClient={coreStart.savedObjects.client}
             http={coreStart.http}
             fileUpload={fileUpload}

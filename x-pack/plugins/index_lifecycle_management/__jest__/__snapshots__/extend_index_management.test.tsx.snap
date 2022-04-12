@@ -101,7 +101,7 @@ exports[`extend index management ilm summary extension should return extension w
     Object {
       "aliases": "none",
       "documents": 2,
-      "documents_deleted": "0",
+      "documents_deleted": 0,
       "health": "yellow",
       "hidden": false,
       "ilm": Object {
@@ -130,7 +130,6 @@ exports[`extend index management ilm summary extension should return extension w
         "step": "ERROR",
         "step_info": Object {
           "reason": "setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined",
-          "stack_trace": "fakestacktrace",
           "type": "illegal_argument_exception",
         },
         "step_time_millis": 1544187776208,
@@ -332,81 +331,6 @@ exports[`extend index management ilm summary extension should return extension w
               illegal_argument_exception
               : 
               setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiPopover
-                anchorPosition="downCenter"
-                button={
-                  <EuiButtonEmpty
-                    onClick={[Function]}
-                  >
-                    <FormattedMessage
-                      defaultMessage="Stack trace"
-                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                      values={Object {}}
-                    />
-                  </EuiButtonEmpty>
-                }
-                closePopover={[Function]}
-                display="inlineBlock"
-                hasArrow={true}
-                id="stackPopover"
-                isOpen={false}
-                ownFocus={true}
-                panelPaddingSize="m"
-              >
-                <div
-                  className="euiPopover euiPopover--anchorDownCenter"
-                  id="stackPopover"
-                >
-                  <div
-                    className="euiPopover__anchor"
-                  >
-                    <EuiButtonEmpty
-                      onClick={[Function]}
-                    >
-                      <button
-                        className="euiButtonEmpty euiButtonEmpty--primary"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconSide="left"
-                          iconSize="m"
-                          textProps={
-                            Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Stack trace"
-                                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                                values={Object {}}
-                              >
-                                Stack trace
-                              </FormattedMessage>
-                            </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </div>
-                </div>
-              </EuiPopover>
             </div>
           </EuiTextColor>
         </div>
@@ -649,7 +573,7 @@ exports[`extend index management ilm summary extension should return extension w
     Object {
       "aliases": "none",
       "documents": 2,
-      "documents_deleted": "0",
+      "documents_deleted": 0,
       "health": "yellow",
       "hidden": false,
       "ilm": Object {

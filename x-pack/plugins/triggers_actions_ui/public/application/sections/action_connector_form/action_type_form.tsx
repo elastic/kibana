@@ -25,10 +25,10 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
+import { ActionVariable, RuleActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
-  AlertAction,
+  RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
@@ -43,13 +43,13 @@ import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
 import { ConnectorsSelection } from './connectors_selection';
 
 export type ActionTypeFormProps = {
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   actionConnector: ActionConnector;
   index: number;
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
+  setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -346,7 +346,7 @@ function getAvailableActionVariables(
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionVariables,
-    actionGroup?.omitOptionalMessageVariables
+    actionGroup?.omitMessageVariables
   );
 
   // partition deprecated items so they show up last

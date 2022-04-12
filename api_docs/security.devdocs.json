@@ -888,13 +888,7 @@
             "text": "AuditEvent"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/logging",
-            "scope": "server",
-            "docId": "kibKbnLoggingPluginApi",
-            "section": "def-server.LogMeta",
-            "text": "LogMeta"
-          }
+          "LogMeta"
         ],
         "path": "x-pack/plugins/security/server/audit/audit_events.ts",
         "deprecated": false,
@@ -981,6 +975,18 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditLogger.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nIndicates whether audit logging is enabled or not.\n\nUseful for skipping resource-intense operations that don't need to be performed when audit\nlogging is disabled."
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_service.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1683,6 +1689,20 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-server.CasesSupportedOperations",
+        "type": "Type",
+        "tags": [],
+        "label": "CasesSupportedOperations",
+        "description": [],
+        "signature": [
+          "\"getCase\" | \"getComment\" | \"getTags\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"createCase\" | \"deleteCase\" | \"updateCase\" | \"pushCase\" | \"createComment\" | \"deleteComment\" | \"updateComment\" | \"createConfiguration\" | \"updateConfiguration\""
+        ],
+        "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-server.ROUTE_TAG_CAN_REDIRECT",
         "type": "string",
         "tags": [],
@@ -1832,6 +1852,10 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/saved_objects/initialization/initialization.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/server/saved_objects/sync_task.ts"
             },
             {
               "plugin": "ml",

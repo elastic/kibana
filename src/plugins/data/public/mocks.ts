@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin, DataViewsContract } from '.';
 import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 import { searchServiceMock } from './search/mocks';
@@ -58,6 +59,7 @@ const createStartContract = (): Start => {
       createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteStartMock,
+    datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,

@@ -16,6 +16,7 @@ import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
+import { OptionsListStrings } from './options_list_strings';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
@@ -36,8 +37,8 @@ export class OptionsListEmbeddableFactory
   ) => {
     if (
       embeddable &&
-      (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
-        !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
+      ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
+        (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
       // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
       newInput.selectedOptions = [];
@@ -49,7 +50,9 @@ export class OptionsListEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDisplayName = () => 'Options List Control';
+  public getDisplayName = () => OptionsListStrings.getDisplayName();
+  public getIconType = () => 'editorChecklist';
+  public getDescription = () => OptionsListStrings.getDescription();
 
   public inject = createOptionsListInject();
   public extract = createOptionsListExtract();

@@ -21,16 +21,16 @@ import {
   CommonAlertFilter,
   IndexShardSizeStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_LARGE_SHARD_SIZE, RULE_DETAILS } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
+import { SanitizedRule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
 export class LargeShardSizeRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LARGE_SHARD_SIZE,
       name: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].label,
@@ -149,7 +149,7 @@ export class LargeShardSizeRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

@@ -17,9 +17,10 @@ import { useMonitorName } from './use_monitor_name';
 
 interface Props {
   validate: Validation;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
-export const MonitorNameAndLocation = ({ validate }: Props) => {
+export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
   const { name, setName, locations = [], setLocations } = usePolicyConfigContext();
   const isNameInvalid = !!validate[ConfigKey.NAME]?.({ [ConfigKey.NAME]: name });
   const isLocationsInvalid = !!validate[ConfigKey.LOCATIONS]?.({
@@ -43,7 +44,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
             defaultMessage="Monitor name"
           />
         }
-        fullWidth={true}
+        fullWidth={false}
         isInvalid={isNameInvalid || nameAlreadyExists}
         error={
           nameAlreadyExists ? (
@@ -64,6 +65,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
           fullWidth={true}
           name="name"
           onChange={(event) => setLocalName(event.target.value)}
+          onBlur={() => onFieldBlur?.(ConfigKey.NAME)}
           data-test-subj="monitorManagementMonitorName"
         />
       </EuiFormRow>
@@ -71,6 +73,7 @@ export const MonitorNameAndLocation = ({ validate }: Props) => {
         setLocations={setLocations}
         selectedLocations={locations}
         isInvalid={isLocationsInvalid}
+        onBlur={() => onFieldBlur?.(ConfigKey.LOCATIONS)}
       />
     </>
   );

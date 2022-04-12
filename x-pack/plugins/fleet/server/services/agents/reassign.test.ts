@@ -129,7 +129,7 @@ function createClientsMock() {
 
   const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // @ts-expect-error
-  esClientMock.mget.mockImplementation(async () => {
+  esClientMock.mget.mockResponseImplementation(() => {
     return {
       body: {
         docs: [agentInHostedDoc, agentInRegularDoc, agentInHostedDoc2],
@@ -137,7 +137,7 @@ function createClientsMock() {
     };
   });
   // @ts-expect-error
-  esClientMock.get.mockImplementation(async ({ id }) => {
+  esClientMock.get.mockResponseImplementation(({ id }) => {
     switch (id) {
       case agentInHostedDoc._id:
         return { body: agentInHostedDoc };
@@ -147,10 +147,10 @@ function createClientsMock() {
         throw new Error(`${id} not found`);
     }
   });
-  esClientMock.bulk.mockResolvedValue({
+  esClientMock.bulk.mockResponse(
     // @ts-expect-error not full interface
-    body: { items: [] },
-  });
+    { items: [] }
+  );
 
   return { soClient: soClientMock, esClient: esClientMock };
 }

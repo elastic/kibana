@@ -12,26 +12,26 @@ import { getAgentStatusById } from './status';
 describe('Agent status service', () => {
   it('should return inactive when agent is not active', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockElasticsearchClient.get.mockResolvedValue({
+    mockElasticsearchClient.get.mockResponse(
       // @ts-expect-error not full interface
-      body: {
+      {
         _id: 'id',
         _source: {
           active: false,
           local_metadata: {},
           user_provided_metadata: {},
         },
-      },
-    });
+      }
+    );
     const status = await getAgentStatusById(mockElasticsearchClient, 'id');
     expect(status).toEqual('inactive');
   });
 
   it('should return online when agent is active', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockElasticsearchClient.get.mockResolvedValue({
+    mockElasticsearchClient.get.mockResponse(
       // @ts-expect-error not full interface
-      body: {
+      {
         _id: 'id',
         _source: {
           active: true,
@@ -39,36 +39,35 @@ describe('Agent status service', () => {
           local_metadata: {},
           user_provided_metadata: {},
         },
-      },
-    });
+      }
+    );
     const status = await getAgentStatusById(mockElasticsearchClient, 'id');
     expect(status).toEqual('online');
   });
 
   it('should return enrolling when agent is active but never checkin', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockElasticsearchClient.get.mockResolvedValue({
+    mockElasticsearchClient.get.mockResponse(
       // @ts-expect-error not full interface
-      body: {
+      {
         _id: 'id',
         _source: {
           active: true,
           local_metadata: {},
           user_provided_metadata: {},
         },
-      },
-    });
+      }
+    );
     const status = await getAgentStatusById(mockElasticsearchClient, 'id');
     expect(status).toEqual('enrolling');
   });
 
   it('should return unenrolling when agent is unenrolling', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockElasticsearchClient.get.mockResolvedValue({
+    mockElasticsearchClient.get.mockResponse(
       // @ts-expect-error not full interface
-      body: {
+      {
         _id: 'id',
-
         _source: {
           active: true,
           last_checkin: new Date().toISOString(),
@@ -76,8 +75,8 @@ describe('Agent status service', () => {
           local_metadata: {},
           user_provided_metadata: {},
         },
-      },
-    });
+      }
+    );
     const status = await getAgentStatusById(mockElasticsearchClient, 'id');
     expect(status).toEqual('unenrolling');
   });

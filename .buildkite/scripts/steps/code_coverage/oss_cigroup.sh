@@ -20,9 +20,18 @@ export CODE_COVERAGE=1
 echo "--- OSS CI Group $CI_GROUP"
 echo " -> Running Functional tests with code coverage"
 
-node scripts/functional_tests \
+NODE_OPTIONS=--max_old_space_size=14336 \
+  ./node_modules/.bin/nyc \
+  --nycrc-path src/dev/code_coverage/nyc_config/nyc.server.config.js \
+  node scripts/functional_tests \
   --include-tag "ciGroup$CI_GROUP" \
   --exclude-tag "skipCoverage" || true
+
+if [[ -d "$KIBANA_DIR/target/kibana-coverage/server" ]]; then
+  echo "--- Server side code coverage collected"
+  mkdir -p target/kibana-coverage/functional
+  mv target/kibana-coverage/server/coverage-final.json "target/kibana-coverage/functional/oss-${CI_GROUP}-server-coverage.json"
+fi
 
 if [[ -d "$KIBANA_DIR/target/kibana-coverage/functional" ]]; then
   echo "--- Merging code coverage for CI Group $CI_GROUP"

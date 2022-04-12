@@ -43,6 +43,8 @@ declare interface JobService {
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
+  customUrlsByJob: Record<string, any[]>;
+  detectorsByJob: Record<string, any>;
 }
 
 export const mlJobService: JobService;

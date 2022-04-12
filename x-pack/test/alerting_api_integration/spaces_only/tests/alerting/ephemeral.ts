@@ -11,7 +11,7 @@ import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
   ObjectRemover,
-  getTestAlertData,
+  getTestRuleData,
   getEventLog,
   ESTestIndexTool,
   ES_TEST_INDEX_NAME,
@@ -69,7 +69,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       const pattern = {
         instance: [true, true, true, false, true, true],
       };
-      const alertData = getTestAlertData({
+      const alertData = getTestRuleData({
         rule_type_id: 'test.patternFiring',
         params: { pattern },
         schedule: { interval: '1m' },

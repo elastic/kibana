@@ -10,10 +10,9 @@ import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
-import job from '../../../../plugins/ml/server/models/data_recognizer/modules/apm_transaction/ml/apm_tx_metrics.json';
-import datafeed from '../../../../plugins/ml/server/models/data_recognizer/modules/apm_transaction/ml/datafeed_apm_tx_metrics.json';
 import { ServiceAnomalyTimeseries } from '../../../../plugins/apm/common/anomaly_detection/service_anomaly_timeseries';
 import { ApmMlDetectorType } from '../../../../plugins/apm/common/anomaly_detection/apm_ml_detectors';
+import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -104,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
           .rate(1)
-          .flatMap((timestamp) => {
+          .spans((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
             const count = isInSpike ? 4 : NORMAL_RATE;
             const duration = isInSpike ? 1000 : NORMAL_DURATION;
@@ -169,62 +168,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('with ml jobs', () => {
         before(async () => {
           await Promise.all([
-            ml.createAndRunAnomalyDetectionLookbackJob(
-              // @ts-expect-error not entire job config
-              {
-                ...job,
-                job_id: 'apm-tx-metrics-prod',
-                allow_lazy_open: false,
-                custom_settings: {
-                  job_tags: {
-                    apm_ml_version: '3',
-                    environment: 'production',
-                  },
-                },
-              },
-              {
-                ...datafeed,
-                job_id: 'apm-tx-metrics-prod',
-                indices: ['apm-*'],
-                datafeed_id: 'apm-tx-metrics-prod-datafeed',
-                query: {
-                  bool: {
-                    filter: [
-                      ...datafeed.query.bool.filter,
-                      { term: { 'service.environment': 'production' } },
-                    ],
-                  },
-                },
-              }
-            ),
-            ml.createAndRunAnomalyDetectionLookbackJob(
-              // @ts-expect-error not entire job config
-              {
-                ...job,
-                job_id: 'apm-tx-metrics-development',
-                allow_lazy_open: false,
-                custom_settings: {
-                  job_tags: {
-                    apm_ml_version: '3',
-                    environment: 'development',
-                  },
-                },
-              },
-              {
-                ...datafeed,
-                job_id: 'apm-tx-metrics-development',
-                indices: ['apm-*'],
-                datafeed_id: 'apm-tx-metrics-development-datafeed',
-                query: {
-                  bool: {
-                    filter: [
-                      ...datafeed.query.bool.filter,
-                      { term: { 'service.environment': 'development' } },
-                    ],
-                  },
-                },
-              }
-            ),
+            createAndRunApmMlJob({ environment: 'production', ml }),
+            createAndRunApmMlJob({ environment: 'development', ml }),
           ]);
         });
 
@@ -288,7 +233,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(latencySeries)).to.eql({
               type: ApmMlDetectorType.txLatency,
-              jobId: 'apm-tx-metrics-prod',
+              jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
@@ -297,7 +242,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(throughputSeries)).to.eql({
               type: ApmMlDetectorType.txThroughput,
-              jobId: 'apm-tx-metrics-prod',
+              jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',
@@ -306,7 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(omitTimeseriesData(failureRateSeries)).to.eql({
               type: ApmMlDetectorType.txFailureRate,
-              jobId: 'apm-tx-metrics-prod',
+              jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
               transactionType: 'request',

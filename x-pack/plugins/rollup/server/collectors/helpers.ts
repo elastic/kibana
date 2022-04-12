@@ -47,7 +47,7 @@ export async function fetchRollupIndexPatterns(kibanaIndex: string, esClient: El
     },
   };
 
-  const { body: esResponse } = await esClient.search(searchParams);
+  const esResponse = await esClient.search(searchParams);
 
   return get(esResponse, 'hits.hits', []).map((indexPattern: any) => {
     const { _id: savedObjectId } = indexPattern;
@@ -68,7 +68,7 @@ const getSavedObjectsList = async ({
   filterPath: string[];
   filter: ESFilterProps;
 }) => {
-  const { body: esResponse } = await esClient.search({
+  const esResponse = await esClient.search({
     body: {
       search_after: searchAfter,
       sort: [{ updated_at: 'asc' }],

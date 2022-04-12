@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([
           {
             count: 8,
-            from: '1900-01-01T00:00:00.000Z',
+            from: '2020-10-27T05:00:53.000Z',
             terms: [
               {
                 field: 'event.dataset',

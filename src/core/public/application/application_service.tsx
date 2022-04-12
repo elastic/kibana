@@ -31,6 +31,7 @@ import {
   InternalApplicationStart,
   Mounter,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
@@ -67,8 +68,9 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   return appendAppPath(appBasePath, path);
 };
 
-const getAppDeepLinkPath = (mounters: Map<string, Mounter>, appId: string, deepLinkId: string) => {
-  return mounters.get(appId)?.deepLinkPaths[deepLinkId];
+const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) => {
+  const flattenedLinks = flattenDeepLinks(app.deepLinks);
+  return flattenedLinks[deepLinkId];
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -182,7 +184,6 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
-          deepLinkPaths: toDeepLinkPaths(app.deepLinks),
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
@@ -234,23 +235,31 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
+      {
+        deepLinkId,
+        path,
+        state,
+        replace = false,
+        openInNewTab = false,
+        skipAppLeave = false,
+      }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
-      const shouldNavigate = navigatingToSameApp
-        ? true
-        : await this.shouldNavigate(overlays, appId);
+      const shouldNavigate =
+        navigatingToSameApp || skipAppLeave ? true : await this.shouldNavigate(overlays, appId);
+
+      const targetApp = applications$.value.get(appId);
 
       if (shouldNavigate) {
-        if (deepLinkId) {
-          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
           if (deepLinkPath) {
             path = appendAppPath(deepLinkPath, path);
           }
         }
         if (path === undefined) {
-          path = applications$.value.get(appId)?.defaultPath;
+          path = targetApp?.defaultPath;
         }
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
@@ -290,8 +299,9 @@ export class ApplicationService {
           deepLinkId,
         }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
-        if (deepLinkId) {
-          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+        const targetApp = applications$.value.get(appId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
           if (deepLinkPath) {
             path = appendAppPath(deepLinkPath, path);
           }
@@ -301,12 +311,19 @@ export class ApplicationService {
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
-      navigateToUrl: async (url) => {
+      navigateToUrl: async (
+        url: string,
+        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+      ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
-        if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path });
-        } else {
+        if ((forceRedirect || !appInfo) === true) {
+          if (skipAppLeave) {
+            window.removeEventListener('beforeunload', this.onBeforeUnload);
+          }
           return this.redirectTo!(url);
+        }
+        if (appInfo) {
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
         }
       },
       getComponent: () => {
@@ -362,6 +379,8 @@ export class ApplicationService {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
+        confirmButtonText: action.confirmButtonText,
+        buttonColor: action.buttonColor,
       });
       if (!confirmed) {
         if (action.callback) {
@@ -439,12 +458,12 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }));
 };
 
-const toDeepLinkPaths = (deepLinks?: AppDeepLink[]): Mounter['deepLinkPaths'] => {
+const flattenDeepLinks = (deepLinks?: AppDeepLink[]): Record<string, string> => {
   if (!deepLinks) {
     return {};
   }
-  return deepLinks.reduce((deepLinkPaths: Mounter['deepLinkPaths'], deepLink) => {
+  return deepLinks.reduce((deepLinkPaths: Record<string, string>, deepLink) => {
     if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
-    return { ...deepLinkPaths, ...toDeepLinkPaths(deepLink.deepLinks) };
+    return { ...deepLinkPaths, ...flattenDeepLinks(deepLink.deepLinks) };
   }, {});
 };

@@ -22,7 +22,7 @@ import {
   EuiFlexItem,
   EuiCallOut,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
@@ -34,22 +34,26 @@ import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
-import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
+import { Immutable, HostInfo, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
   pagePathGetters,
 } from '../../../../../../fleet/public';
 import { SecurityPageName } from '../../../../app/types';
-import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
+import {
+  getEndpointListPath,
+  getEndpointDetailsPath,
+  getPoliciesPath,
+} from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { EndpointAction } from '../store/action';
-import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -60,6 +64,11 @@ import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
+import {
+  BackToExternalAppButton,
+  BackToExternalAppButtonProps,
+} from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { DevConsole } from './dev_console';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -123,12 +132,45 @@ export const EndpointList = () => {
     metadataTransformStats,
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
+  const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
+
+  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
+
+  const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
+    if (routeState?.backLink) {
+      return {
+        onBackButtonNavigateTo: routeState.backLink.navigateTo,
+        backButtonLabel: routeState.backLink.label,
+        backButtonUrl: routeState.backLink.href,
+      };
+    }
+
+    // default back button is to the policy list
+    const policyListPath = getPoliciesPath();
+
+    return {
+      backButtonLabel: i18n.translate('xpack.securitySolution.endpoint.list.backToPolicyButton', {
+        defaultMessage: 'Back to policy list',
+      }),
+      backButtonUrl: getAppUrl({ path: policyListPath }),
+      onBackButtonNavigateTo: [
+        APP_UI_ID,
+        {
+          path: policyListPath,
+        },
+      ],
+    };
+  }, [getAppUrl, routeState?.backLink]);
+
+  const backToPolicyList = (
+    <BackToExternalAppButton {...backLinkOptions} data-test-subj="endpointListBackLink" />
+  );
 
   useEffect(() => {
     // if no endpoint policy, skip transform check
@@ -157,7 +199,7 @@ export const EndpointList = () => {
       pageSize,
       totalItemCount: maxPageCount,
       pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-      hidePerPageOptions: false,
+      showPerPageOptions: true,
     };
   }, [pageIndex, pageSize, maxPageCount]);
 
@@ -200,6 +242,23 @@ export const EndpointList = () => {
       },
     }
   );
+
+  const backToEndpointList: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    const endpointListPath = getEndpointListPath({ name: 'endpointList' }, searchParams);
+
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: endpointListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+        defaultMessage: 'View all endpoints',
+      }),
+      href: getAppUrl({ path: endpointListPath }),
+    };
+  }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
     dispatch({
@@ -322,6 +381,7 @@ export const EndpointList = () => {
                   policyId={policy.id}
                   className="eui-textTruncate"
                   data-test-subj="policyNameCellLink"
+                  backLink={backToEndpointList}
                 >
                   {policy.name}
                 </EndpointPolicyLink>
@@ -464,7 +524,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -611,6 +671,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
+      hideHeader={!(endpointsExist || areEndpointsEnrolling)}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -623,7 +684,11 @@ export const EndpointList = () => {
           defaultMessage="Hosts running endpoint security"
         />
       }
+      headerBackComponent={routeState.backLink && backToPolicyList}
     >
+      {/* FIXME: Remove once Console is implemented via ConsoleManagementProvider */}
+      <DevConsole />
+
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (

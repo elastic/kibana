@@ -18,7 +18,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import { ITelemetryReceiver } from './receiver';
-import { allowlistEventFields, copyAllowlistedFields } from './filters';
+import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists/index';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
@@ -217,7 +217,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
     return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      return copyAllowlistedFields(allowlistEventFields, obj);
+      return copyAllowlistedFields(endpointAllowlistFields, obj);
     });
   }
 
@@ -318,6 +318,14 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.debug(`Error sending events: ${err}`);
+      const errorStatus = err?.response?.status;
+      if (errorStatus !== undefined && errorStatus !== null) {
+        this.telemetryUsageCounter?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+          counterType: errorStatus.toString(),
+          incrementBy: 1,
+        });
+      }
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

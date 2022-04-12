@@ -13,7 +13,6 @@ import {
   ABOUT_RULE_DESCRIPTION,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -25,6 +24,7 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../../screens/rule_details';
 
+import { getDetails } from '../../../tasks/rule_details';
 import { expandFirstAlert } from '../../../tasks/alerts';
 import { waitForPageToBeLoaded } from '../../../tasks/common';
 import {
@@ -49,7 +49,7 @@ const EXPECTED_NUMBER_OF_ALERTS = '1';
 
 const alert = {
   rule: 'Threshold rule',
-  severity: 'medium',
+  severity: 'Medium',
   riskScore: '17',
   reason: 'event created medium alert Threshold rule.',
   hostName: 'security-solution.local',
@@ -125,7 +125,7 @@ describe('After an upgrade, the threshold rule', () => {
 
     cy.get(OVERVIEW_STATUS).should('have.text', 'open');
     cy.get(OVERVIEW_RULE).should('have.text', alert.rule);
-    cy.get(OVERVIEW_SEVERITY).should('have.text', alert.severity);
+    cy.get(OVERVIEW_SEVERITY).contains(alert.severity, { matchCase: false });
     cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
     cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
     cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);

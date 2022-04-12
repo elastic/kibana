@@ -44,17 +44,27 @@ export const CaseView = React.memo(
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
-    const { data, resolveOutcome, resolveAliasId, isLoading, isError, fetchCase, updateCase } =
-      useGetCase(caseId);
+    const {
+      data,
+      resolveOutcome,
+      resolveAliasId,
+      resolveAliasPurpose,
+      isLoading,
+      isError,
+      fetchCase,
+      updateCase,
+    } = useGetCase(caseId);
 
     useEffect(() => {
       if (spacesApi && resolveOutcome === 'aliasMatch' && resolveAliasId != null) {
-        const newPath = `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}${
-          window.location.search
-        }${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl(newPath, i18n.CASE);
+        const newPath = `${basePath}${generateCaseViewPath({ detailName: resolveAliasId })}`;
+        spacesApi.ui.redirectLegacyUrl({
+          path: `${newPath}${window.location.search}${window.location.hash}`,
+          aliasPurpose: resolveAliasPurpose,
+          objectNoun: i18n.CASE,
+        });
       }
-    }, [resolveOutcome, resolveAliasId, basePath, spacesApi]);
+    }, [resolveOutcome, resolveAliasId, resolveAliasPurpose, basePath, spacesApi]);
 
     const getLegacyUrlConflictCallout = useCallback(() => {
       // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario

@@ -26,7 +26,9 @@ export async function mountManagementSection(
   const [coreStart, depsStart] = await getStartServices();
   const {
     docLinks,
+    application,
     i18n: { Context: I18nContext },
+    executionContext,
   } = coreStart;
 
   documentationService.setup(docLinks);
@@ -41,8 +43,10 @@ export async function mountManagementSection(
     notifications,
     history,
     uiSettings: coreStart.uiSettings,
-    urlGenerators: depsStart.share.urlGenerators,
+    share: depsStart.share,
     fileUpload: depsStart.fileUpload,
+    application,
+    executionContext,
   };
 
   return renderApp(element, I18nContext, services, { http }, { theme$ });

@@ -92,7 +92,7 @@ export function MachineLearningStackManagementJobsProvider(
       const resultToast = await toasts.getToastElement(1);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
       const title: string = await titleElement.getVisibleText();
-      expect(title).to.match(/^\d+ job[s]? synchronized$/);
+      expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
       const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
       await dismissButton.click();
@@ -182,7 +182,7 @@ export function MachineLearningStackManagementJobsProvider(
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'aria-selected',
+        'data-test-selected',
         1000
       );
       return state === 'true';

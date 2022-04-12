@@ -7,14 +7,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiAccordion,
-  EuiCheckbox,
-  EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCheckbox, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { useTCPAdvancedFieldsContext } from '../contexts';
 
@@ -24,9 +18,11 @@ import { OptionalLabel } from '../optional_label';
 
 interface Props {
   children?: React.ReactNode;
+  minColumnWidth?: string;
+  onFieldBlur?: (field: ConfigKey) => void;
 }
 
-export const TCPAdvancedFields = memo<Props>(({ children }) => {
+export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useTCPAdvancedFieldsContext();
 
   const handleInputChange = useCallback(
@@ -43,7 +39,8 @@ export const TCPAdvancedFields = memo<Props>(({ children }) => {
       data-test-subj="syntheticsTCPAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
-      <EuiDescribedFormGroup
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -83,6 +80,7 @@ export const TCPAdvancedFields = memo<Props>(({ children }) => {
                 configKey: ConfigKey.PROXY_URL,
               })
             }
+            onBlur={() => onFieldBlur?.(ConfigKey.PROXY_URL)}
             data-test-subj="syntheticsProxyUrl"
           />
         </EuiFormRow>
@@ -131,11 +129,13 @@ export const TCPAdvancedFields = memo<Props>(({ children }) => {
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.REQUEST_SEND_CHECK)}
             data-test-subj="syntheticsTCPRequestSendCheck"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
+      </DescribedFormGroupWithWrap>
+      <DescribedFormGroupWithWrap
+        minColumnWidth={minColumnWidth}
         title={
           <h4>
             <FormattedMessage
@@ -176,10 +176,11 @@ export const TCPAdvancedFields = memo<Props>(({ children }) => {
                 }),
               [handleInputChange]
             )}
+            onBlur={() => onFieldBlur?.(ConfigKey.RESPONSE_RECEIVE_CHECK)}
             data-test-subj="syntheticsTCPResponseReceiveCheck"
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
+      </DescribedFormGroupWithWrap>
       {children}
     </EuiAccordion>
   );

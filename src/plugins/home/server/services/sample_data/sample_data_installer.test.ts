@@ -206,17 +206,13 @@ describe('SampleDataInstaller', () => {
       it('deletes the alias and the index', async () => {
         const indexName = 'target_index';
 
-        esClient.asCurrentUser.indices.getAlias.mockResolvedValue(
-          elasticsearchServiceMock.createApiResponse({
-            body: {
-              [indexName]: {
-                aliases: {
-                  kibana_sample_data_test_single_data_index: {},
-                },
-              },
+        esClient.asCurrentUser.indices.getAlias.mockResponse({
+          [indexName]: {
+            aliases: {
+              kibana_sample_data_test_single_data_index: {},
             },
-          })
-        );
+          },
+        });
 
         await installer.install('test_single_data_index');
 
@@ -301,17 +297,13 @@ describe('SampleDataInstaller', () => {
       it('deletes the alias and the index', async () => {
         const indexName = 'target_index';
 
-        esClient.asCurrentUser.indices.getAlias.mockResolvedValue(
-          elasticsearchServiceMock.createApiResponse({
-            body: {
-              [indexName]: {
-                aliases: {
-                  kibana_sample_data_test_single_data_index: {},
-                },
-              },
+        esClient.asCurrentUser.indices.getAlias.mockResponse({
+          [indexName]: {
+            aliases: {
+              kibana_sample_data_test_single_data_index: {},
             },
-          })
-        );
+          },
+        });
 
         await installer.uninstall('test_single_data_index');
 

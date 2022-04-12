@@ -11,6 +11,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
+import { DatatableUtilitiesService } from './datatable_utilities';
 import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -21,12 +22,14 @@ import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
+import { AutocompleteSetup } from './autocomplete/autocomplete_service';
 
 interface DataEnhancements {
   search: SearchEnhancements;
 }
 
 export interface DataPluginSetup {
+  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
   /**
@@ -46,6 +49,11 @@ export interface DataPluginStart {
    */
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
+
+  /**
+   * Datatable type utility functions.
+   */
+  datatableUtilities: DatatableUtilitiesService;
 }
 
 export interface DataPluginSetupDependencies {
@@ -91,10 +99,9 @@ export class DataServerPlugin
   ) {
     this.scriptsService.setup(core);
     const querySetup = this.queryService.setup(core);
-    this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
-    core.uiSettings.register(getUiSettings());
+    core.uiSettings.register(getUiSettings(core.docLinks));
 
     const searchSetup = this.searchService.setup(core, {
       bfetch,
@@ -103,6 +110,7 @@ export class DataServerPlugin
     });
 
     return {
+      autocomplete: this.autocompleteService.setup(core),
       __enhance: (enhancements: DataEnhancements) => {
         searchSetup.__enhance(enhancements.search);
       },
@@ -113,10 +121,19 @@ export class DataServerPlugin
   }
 
   public start(core: CoreStart, { fieldFormats, dataViews }: DataPluginStartDependencies) {
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
+    const datatableUtilities = new DatatableUtilitiesService(
+      search.aggs,
+      dataViews,
+      fieldFormats,
+      core.uiSettings
+    );
+
     return {
+      datatableUtilities,
+      search,
       fieldFormats,
       indexPatterns: dataViews,
-      search: this.searchService.start(core, { fieldFormats, indexPatterns: dataViews }),
     };
   }
 

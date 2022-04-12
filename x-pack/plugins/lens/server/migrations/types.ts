@@ -8,7 +8,10 @@
 import type { PaletteOutput } from 'src/plugins/charts/common';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import type { CustomPaletteParams, LayerType, PersistableFilter } from '../../common';
+
+export type CustomVisualizationMigrations = Record<string, () => MigrateFunctionsObject>;
 
 export type OperationTypePre712 =
   | 'avg'
@@ -197,9 +200,38 @@ export interface LensDocShape715<VisualizationState = unknown> {
 
 export type LensDocShape810<VisualizationState = unknown> = Omit<
   LensDocShape715<VisualizationState>,
-  'filters'
+  'filters' | 'state'
 > & {
   filters: Filter[];
+  state: Omit<LensDocShape715['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      indexpattern: Omit<LensDocShape715['state']['datasourceStates']['indexpattern'], 'layers'> & {
+        layers: Record<
+          string,
+          Omit<
+            LensDocShape715['state']['datasourceStates']['indexpattern']['layers'][string],
+            'columns'
+          > & {
+            columns: Record<
+              string,
+              | {
+                  operationType: 'terms';
+                  params: {
+                    secondaryFields?: string[];
+                  };
+                  [key: string]: unknown;
+                }
+              | {
+                  operationType: OperationTypePost712;
+                  params: Record<string, unknown>;
+                  [key: string]: unknown;
+                }
+            >;
+          }
+        >;
+      };
+    };
+  };
 };
 
 export type VisState716 =
@@ -214,3 +246,14 @@ export type VisState716 =
   | {
       palette?: PaletteOutput<CustomPaletteParams>;
     };
+
+// Datatable only
+export interface VisState810 {
+  fitRowToContent?: boolean;
+}
+
+// Datatable only
+export interface VisState820 {
+  rowHeight: 'auto' | 'single' | 'custom';
+  rowHeightLines: number;
+}

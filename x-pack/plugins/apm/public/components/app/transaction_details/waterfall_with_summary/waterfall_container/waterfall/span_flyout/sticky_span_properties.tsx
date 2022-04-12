@@ -34,12 +34,8 @@ interface Props {
 
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
-  const {
-    environment,
-    latencyAggregationType,
-    comparisonEnabled,
-    comparisonType,
-  } = query;
+  const { environment, latencyAggregationType, comparisonEnabled, offset } =
+    query;
 
   const trackEvent = useUiTracker();
 
@@ -49,7 +45,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
   });
 
   const spanName = span.span.name;
-  const backendName = span.span.destination?.service.resource;
+  const dependencyName = span.span.destination?.service.resource;
 
   const transactionStickyProperties = transaction
     ? [
@@ -88,7 +84,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               environment={nextEnvironment}
               latencyAggregationType={latencyAggregationType}
               comparisonEnabled={comparisonEnabled}
-              comparisonType={comparisonType}
+              offset={offset}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>
@@ -98,13 +94,13 @@ export function StickySpanProperties({ span, transaction }: Props) {
       ]
     : [];
 
-  const backendStickyProperties = backendName
+  const dependencyStickyProperties = dependencyName
     ? [
         {
           label: i18n.translate(
-            'xpack.apm.transactionDetails.spanFlyout.backendLabel',
+            'xpack.apm.transactionDetails.spanFlyout.dependencyLabel',
             {
-              defaultMessage: 'Backend',
+              defaultMessage: 'Dependency',
             }
           ),
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -112,7 +108,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
             <BackendLink
               query={{
                 ...query,
-                backendName,
+                backendName: dependencyName,
               }}
               subtype={span.span.subtype}
               type={span.span.type}
@@ -143,7 +139,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
       truncated: true,
       width: '25%',
     },
-    ...backendStickyProperties,
+    ...dependencyStickyProperties,
     ...transactionStickyProperties,
   ];
 

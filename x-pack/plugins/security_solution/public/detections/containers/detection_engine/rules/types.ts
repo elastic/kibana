@@ -22,6 +22,8 @@ import {
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   SortOrder,
   author,
   building_block_type,
@@ -41,8 +43,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 
 /**
- * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * Params is an "record", since it is a type of RuleActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/rule.ts
  * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
@@ -115,8 +117,9 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
-    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    outcome: savedObjectResolveOutcome,
     alias_target_id: t.string,
+    alias_purpose: savedObjectResolveAliasPurpose,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
@@ -216,19 +219,6 @@ export interface FetchRuleProps {
   signal: AbortSignal;
 }
 
-export interface EnableRulesProps {
-  ids: string[];
-  enabled: boolean;
-}
-
-export interface DeleteRulesProps {
-  ids: string[];
-}
-
-export interface DuplicateRulesProps {
-  rules: Rule[];
-}
-
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
   query?: string;
@@ -236,18 +226,41 @@ export interface BulkActionProps<Action extends BulkAction> {
   edit?: BulkActionEditPayload[];
 }
 
-export interface BulkActionResult {
-  success: boolean;
-  rules_count: number;
+export interface BulkActionSummary {
+  failed: number;
+  succeeded: number;
+  total: number;
 }
 
-export type BulkActionResponse<Action extends BulkAction> = {
-  [BulkAction.delete]: BulkActionResult;
-  [BulkAction.disable]: BulkActionResult;
-  [BulkAction.enable]: BulkActionResult;
-  [BulkAction.duplicate]: BulkActionResult;
+export interface BulkActionResult {
+  updated: Rule[];
+  created: Rule[];
+  deleted: Rule[];
+}
+
+export interface BulkActionAggregatedError {
+  message: string;
+  status_code: number;
+  rules: Array<{ id: string; name?: string }>;
+}
+
+export interface BulkActionResponse {
+  success?: boolean;
+  rules_count?: number;
+  attributes: {
+    summary: BulkActionSummary;
+    results: BulkActionResult;
+    errors?: BulkActionAggregatedError[];
+  };
+}
+
+export type BulkActionResponseMap<Action extends BulkAction> = {
+  [BulkAction.delete]: BulkActionResponse;
+  [BulkAction.disable]: BulkActionResponse;
+  [BulkAction.enable]: BulkActionResponse;
+  [BulkAction.duplicate]: BulkActionResponse;
   [BulkAction.export]: Blob;
-  [BulkAction.edit]: BulkActionResult;
+  [BulkAction.edit]: BulkActionResponse;
 }[Action];
 
 export interface BasicFetchProps {

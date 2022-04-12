@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import { mergeMap } from 'rxjs/operators';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { createMockBrowserDriverFactory } from './browsers/mock';
 import { createMockScreenshots } from './screenshots/mock';
 import type { ScreenshottingStart } from '.';
+import { PdfScreenshotResult, PngScreenshotResult, toPdf, toPng } from './formats';
+import { ScreenshotResult } from './screenshots';
 
 export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart> {
   const driver = createMockBrowserDriverFactory();
@@ -17,6 +20,13 @@ export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart
 
   return {
     diagnose,
-    getScreenshots: jest.fn((options) => getScreenshots(driver, {} as Logger, options)),
+    getScreenshots: jest.fn(
+      (options): ReturnType<ScreenshottingStart['getScreenshots']> =>
+        getScreenshots(options).pipe(
+          mergeMap<ScreenshotResult, Promise<PngScreenshotResult | PdfScreenshotResult>>(
+            options.format === 'pdf' ? toPdf({ logger: loggingSystemMock.createLogger() }) : toPng
+          )
+        )
+    ),
   };
 }

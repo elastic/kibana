@@ -6,7 +6,7 @@
  */
 
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
@@ -14,11 +14,11 @@ import {
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { NavigationWarningPromptProvider } from '../../../observability/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
-import { createKibanaContextForPlugin } from '../hooks/use_kibana';
-import { InfraClientStartDeps } from '../types';
+import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
+import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
 export const CommonInfraProviders: React.FC<{
@@ -43,18 +43,28 @@ export const CommonInfraProviders: React.FC<{
   );
 };
 
-export const CoreProviders: React.FC<{
+export interface CoreProvidersProps {
   core: CoreStart;
+  pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
-}> = ({ children, core, plugins, theme$ }) => {
-  const { Provider: KibanaContextProviderForPlugin } = useMemo(
-    () => createKibanaContextForPlugin(core, plugins),
-    [core, plugins]
+}
+
+export const CoreProviders: React.FC<CoreProvidersProps> = ({
+  children,
+  core,
+  pluginStart,
+  plugins,
+  theme$,
+}) => {
+  const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
+    core,
+    plugins,
+    pluginStart
   );
 
   return (
-    <KibanaContextProviderForPlugin services={{ ...core, ...plugins }}>
+    <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
       <core.i18n.Context>
         <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
       </core.i18n.Context>

@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EnterpriseSearchPageTemplate } from '../../../../shared/layout';
+import { EnterpriseSearchPageTemplateWrapper } from '../../../../shared/layout';
 import { rerender } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
@@ -55,7 +55,7 @@ describe('Curation', () => {
     setMockValues({ dataLoading: true });
     const wrapper = shallow(<Curation />);
 
-    expect(wrapper.is(EnterpriseSearchPageTemplate)).toBe(true);
+    expect(wrapper.is(EnterpriseSearchPageTemplateWrapper)).toBe(true);
   });
 
   it('renders a view for automated curations', () => {

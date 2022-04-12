@@ -50,6 +50,7 @@ export type {
   EsAssetReference,
   KibanaAssetReference,
   RegistryPackage,
+  BundledPackage,
   InstallablePackage,
   AssetType,
   Installable,
@@ -62,6 +63,8 @@ export type {
   RegistrySearchResult,
   IndexTemplateEntry,
   IndexTemplateMappings,
+  TemplateMap,
+  TemplateMapEntry,
   Settings,
   SettingsSOAttributes,
   InstallType,
@@ -73,6 +76,7 @@ export type {
   FleetServerAgent,
   FleetServerAgentAction,
   FleetServerPolicy,
+  FullAgentPolicyInputStream,
 } from '../../common';
 export {
   ElasticsearchAssetType,

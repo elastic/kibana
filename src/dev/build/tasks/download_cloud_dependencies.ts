@@ -20,28 +20,41 @@ export const DownloadCloudDependencies: Task = {
       const version = config.getBuildVersion();
       const buildId = id.match(/[0-9]\.[0-9]\.[0-9]-[0-9a-z]{8}/);
       const buildIdUrl = buildId ? `${buildId[0]}/` : '';
-      const architecture = process.arch === 'arm64' ? 'arm64' : 'x86_64';
-      const url = `https://${subdomain}-no-kpi.elastic.co/${buildIdUrl}downloads/beats/${beat}/${beat}-${version}-linux-${architecture}.tar.gz`;
-      const checksum = await downloadToString({ log, url: url + '.sha512', expectStatus: 200 });
-      const destination = config.resolveFromRepo('.beats', Path.basename(url));
-      return downloadToDisk({
-        log,
-        url,
-        destination,
-        shaChecksum: checksum.split(' ')[0],
-        shaAlgorithm: 'sha512',
-        maxAttempts: 3,
+
+      const localArchitecture = [process.arch === 'arm64' ? 'arm64' : 'x86_64'];
+      const allArchitectures = ['arm64', 'x86_64'];
+      const architectures = config.getDockerCrossCompile() ? allArchitectures : localArchitecture;
+      const downloads = architectures.map(async (arch) => {
+        const url = `https://${subdomain}-no-kpi.elastic.co/${buildIdUrl}downloads/beats/${beat}/${beat}-${version}-linux-${arch}.tar.gz`;
+        const checksum = await downloadToString({ log, url: url + '.sha512', expectStatus: 200 });
+        const destination = config.resolveFromRepo('.beats', Path.basename(url));
+        return downloadToDisk({
+          log,
+          url,
+          destination,
+          shaChecksum: checksum.split(' ')[0],
+          shaAlgorithm: 'sha512',
+          maxAttempts: 3,
+        });
       });
+      return Promise.all(downloads);
     };
 
     let buildId = '';
     if (!config.isRelease) {
-      const manifest = await Axios.get(
-        `https://artifacts-api.elastic.co/v1/versions/${config.getBuildVersion()}/builds/latest`
-      );
-      buildId = manifest.data.build.build_id;
+      const manifestUrl = `https://artifacts-api.elastic.co/v1/versions/${config.getBuildVersion()}/builds/latest`;
+      try {
+        const manifest = await Axios.get(manifestUrl);
+        buildId = manifest.data.build.build_id;
+      } catch (e) {
+        log.error(
+          `Unable to find Elastic artifacts for ${config.getBuildVersion()} at ${manifestUrl}.`
+        );
+        throw e;
+      }
     }
     await del([config.resolveFromRepo('.beats')]);
+
     await downloadBeat('metricbeat', buildId);
     await downloadBeat('filebeat', buildId);
   },

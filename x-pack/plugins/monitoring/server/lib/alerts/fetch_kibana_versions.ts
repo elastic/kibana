@@ -41,7 +41,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('kibana_stats', 'kibana.stats'),
+            createDatasetFilter('kibana_stats', 'stats', 'kibana.stats'),
             {
               range: {
                 timestamp: {
@@ -104,7 +104,7 @@ export async function fetchKibanaVersions(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

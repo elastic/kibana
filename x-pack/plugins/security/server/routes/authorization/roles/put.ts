@@ -66,7 +66,7 @@ export function definePutRolesRoutes({
       const { name } = request.params;
 
       try {
-        const [features, { body: rawRoles }] = await Promise.all([
+        const [features, rawRoles] = await Promise.all([
           getFeatures(),
           context.core.elasticsearch.client.asCurrentUser.security.getRole(
             { name: request.params.name },

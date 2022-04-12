@@ -34,6 +34,7 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
   });
 
   step(`shows error if name already exists`, async () => {
+    await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
     await uptime.createBasicMonitorDetails({
       name: 'Test monitor',
@@ -55,5 +56,11 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     });
 
     expect(await page.isEnabled(byTestId('monitorTestNowRunBtn'))).toBeTruthy();
+  });
+
+  step('delete monitor', async () => {
+    await uptime.navigateToMonitorManagement();
+    await uptime.deleteMonitors();
+    await uptime.enableMonitorManagement(false);
   });
 });

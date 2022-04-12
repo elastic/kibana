@@ -202,13 +202,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       updateCase,
     ]);
 
-    const {
-      loading: isLoadingConnectors,
-      connectors,
-      permissionsError,
-    } = useConnectors({
-      toastPermissionsErrors: false,
-    });
+    const { loading: isLoadingConnectors, connectors } = useConnectors();
 
     const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
@@ -356,9 +350,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                         isLoadingUserActions={isLoadingUserActions}
                         onShowAlertDetails={onShowAlertDetails}
                         onUpdateField={onUpdateField}
-                        renderInvestigateInTimelineActionComponent={
-                          timelineUi?.renderInvestigateInTimelineActionComponent
-                        }
                         statusActionButton={
                           userCanCrud ? (
                             <StatusActionButton
@@ -406,7 +397,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                   isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
                   isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}
-                  permissionsError={permissionsError}
                   updateCase={handleUpdateCase}
                   userActions={caseUserActions}
                   userCanCrud={userCanCrud}

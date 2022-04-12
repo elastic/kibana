@@ -210,15 +210,11 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef === undefined) {
-    errors.push(
-      i18n.translate('xpack.fleet.packagePolicyValidation.nonExistentVarMessage', {
-        defaultMessage: '{varName} var definition does not exist',
-        values: {
-          varName,
-        },
-      })
-    );
-    return errors;
+    // TODO return validation error here once https://github.com/elastic/kibana/issues/125655 is fixed
+    // eslint-disable-next-line no-console
+    console.debug(`No variable definition for ${varName} found`);
+
+    return null;
   }
 
   if (varDef.required) {

@@ -53,7 +53,7 @@ describe('checkForUnknownDocs', () => {
 
   it('calls `client.search` with the correct parameters', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ hits: { hits: [] } })
+      Promise.resolve({ hits: { hits: [] } })
     );
 
     const task = checkForUnknownDocs({
@@ -85,7 +85,7 @@ describe('checkForUnknownDocs', () => {
 
   it('resolves with `Either.right` when no unknown docs are found', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ hits: { hits: [] } })
+      Promise.resolve({ hits: { hits: [] } })
     );
 
     const task = checkForUnknownDocs({
@@ -103,7 +103,7 @@ describe('checkForUnknownDocs', () => {
 
   it('resolves with `Either.left` when unknown docs are found', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         hits: {
           hits: [
             { _id: '12', _source: { type: 'foo' } },
@@ -134,7 +134,7 @@ describe('checkForUnknownDocs', () => {
 
   it('uses `unknown` as the type when the document does not contain a type field', async () => {
     const client = elasticsearchClientMock.createInternalClient(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      Promise.resolve({
         hits: {
           hits: [{ _id: '12', _source: {} }],
         },

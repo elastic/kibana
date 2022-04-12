@@ -13,17 +13,18 @@ import type {
   PluginStart,
   DataRequestHandlerContext,
 } from '../../../../../src/plugins/data/server';
+import type { PluginStart as DataViewPluginStart } from '../../../../../src/plugins/data_views/server';
 import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
-import { validateEsRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
 import { getUiSettings } from './ui_settings';
 
 export interface TimelionPluginStartDeps {
   data: PluginStart;
+  dataViews: DataViewPluginStart;
 }
 
 /**
@@ -66,7 +67,6 @@ export class TimelionPlugin implements Plugin<void, void, TimelionPluginStartDep
 
     functionsRoute(router, deps);
     runRoute(router, deps);
-    validateEsRoute(router);
 
     core.uiSettings.register(getUiSettings(config));
   }

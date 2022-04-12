@@ -12,12 +12,12 @@ import * as rt from 'io-ts';
 import { v4 } from 'uuid';
 import { difference } from 'lodash';
 import {
-  AlertExecutorOptions,
-  AlertInstance,
+  RuleExecutorOptions,
+  Alert,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
@@ -37,16 +37,13 @@ import {
   TIMESTAMP,
   VERSION,
 } from '../../common/technical_rule_data_field_names';
+import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
-import {
-  CommonAlertFieldName,
-  CommonAlertIdFieldName,
-  getCommonAlertFields,
-} from './get_common_alert_fields';
+import { getCommonAlertFields } from './get_common_alert_fields';
 
-type ImplicitTechnicalFieldName = CommonAlertFieldName | CommonAlertIdFieldName;
+type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
 type ExplicitTechnicalAlertFields = Partial<
   Omit<ParsedTechnicalFields, ImplicitTechnicalFieldName>
@@ -62,7 +59,7 @@ export type LifecycleAlertService<
 > = (alert: {
   id: string;
   fields: ExplicitAlertFields;
-}) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+}) => Alert<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,
@@ -70,11 +67,12 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
+  getAlertStartedDate: (alertId: string) => string | null;
 }
 
 export type LifecycleRuleExecutor<
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
@@ -97,10 +95,10 @@ const trackedAlertStateRt = rt.type({
 
 export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
 
-const alertTypeStateRt = <State extends AlertTypeState>() =>
+const alertTypeStateRt = <State extends RuleTypeState>() =>
   rt.record(rt.string, rt.unknown) as rt.Type<State, State, unknown>;
 
-const wrappedStateRt = <State extends AlertTypeState>() =>
+const wrappedStateRt = <State extends RuleTypeState>() =>
   rt.type({
     wrapped: alertTypeStateRt<State>(),
     trackedAlerts: rt.record(rt.string, trackedAlertStateRt),
@@ -111,7 +109,7 @@ const wrappedStateRt = <State extends AlertTypeState>() =>
  * there's no easy way to instantiate generic values such as the runtime type
  * factory function.
  */
-export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeState & {
+export type WrappedLifecycleRuleState<State extends RuleTypeState> = RuleTypeState & {
   wrapped: State | void;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
 };
@@ -119,8 +117,8 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
 export const createLifecycleExecutor =
   (logger: Logger, ruleDataClient: PublicContract<IRuleDataClient>) =>
   <
-    Params extends AlertTypeParams = never,
-    State extends AlertTypeState = never,
+    Params extends RuleTypeParams = never,
+    State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
     ActionGroupIds extends string = never
@@ -134,7 +132,7 @@ export const createLifecycleExecutor =
     >
   ) =>
   async (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       Params,
       WrappedLifecycleRuleState<State>,
       InstanceState,
@@ -143,7 +141,7 @@ export const createLifecycleExecutor =
     >
   ): Promise<WrappedLifecycleRuleState<State>> => {
     const {
-      services: { alertInstanceFactory, shouldWriteAlerts },
+      services: { alertFactory, shouldWriteAlerts },
       state: previousState,
     } = options;
 
@@ -165,8 +163,9 @@ export const createLifecycleExecutor =
     > = {
       alertWithLifecycle: ({ id, fields }) => {
         currentAlerts[id] = fields;
-        return alertInstanceFactory(id);
+        return alertFactory.create(id);
       },
+      getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
     };
 
     const nextWrappedState = await wrappedExecutor({

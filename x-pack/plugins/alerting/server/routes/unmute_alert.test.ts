@@ -10,7 +10,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -71,7 +71,7 @@ describe('unmuteAlertRoute', () => {
     const [, handler] = router.post.mock.calls[0];
 
     rulesClient.unmuteInstance.mockRejectedValue(
-      new AlertTypeDisabledError('Fail', 'license_invalid')
+      new RuleTypeDisabledError('Fail', 'license_invalid')
     );
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [

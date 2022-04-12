@@ -7,7 +7,6 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { DatatableColumn } from 'src/plugins/expressions';
 import { IndexPattern } from '../..';
 import {
   aggAvg,
@@ -88,13 +87,15 @@ import {
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  AggConfig,
   aggFilteredMetric,
   aggSinglePercentile,
 } from './';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 import { AggParamsSignificantText } from './buckets/significant_text';
+import { AggParamsTopMetrics } from './metrics/top_metrics';
+import { aggTopMetrics } from './metrics/top_metrics_fn';
+import { AggParamsCount } from './metrics';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
@@ -111,11 +112,6 @@ export interface AggsCommonSetup {
 
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  datatableUtilities: {
-    getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
-    getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
-    isFilterable: (column: DatatableColumn) => boolean;
-  };
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[]
@@ -173,7 +169,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
-  [METRIC_TYPES.COUNT]: BaseAggParams;
+  [METRIC_TYPES.COUNT]: AggParamsCount;
   [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
   [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
   [METRIC_TYPES.MAX]: AggParamsMax;
@@ -194,6 +190,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
+  [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetrics;
 }
 
 /**
@@ -236,4 +233,5 @@ export interface AggFunctionsMapping {
   aggStdDeviation: ReturnType<typeof aggStdDeviation>;
   aggSum: ReturnType<typeof aggSum>;
   aggTopHit: ReturnType<typeof aggTopHit>;
+  aggTopMetrics: ReturnType<typeof aggTopMetrics>;
 }

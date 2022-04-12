@@ -13,7 +13,7 @@ import { Logger } from 'src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
@@ -60,7 +60,7 @@ export const thresholdExecutor = async ({
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
@@ -115,11 +115,13 @@ export const thresholdExecutor = async ({
       index: ruleParams.index,
     });
 
+    // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
       timestampOverride: ruleParams.timestampOverride,
     });
 
+    // Combine dupe filter with other filters
     const esFilter = await getFilter({
       type: ruleParams.type,
       filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
@@ -131,6 +133,7 @@ export const thresholdExecutor = async ({
       lists: exceptionItems,
     });
 
+    // Look for new events over threshold
     const {
       searchResult: thresholdResults,
       searchErrors,
@@ -147,6 +150,7 @@ export const thresholdExecutor = async ({
       buildRuleMessage,
     });
 
+    // Build and index new alerts
     const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
       await bulkCreateThresholdSignals({
         someResult: thresholdResults,

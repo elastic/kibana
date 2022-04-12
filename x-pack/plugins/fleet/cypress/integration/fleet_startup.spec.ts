@@ -5,47 +5,17 @@
  * 2.0.
  */
 
-import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import {
+  AGENTS_TAB,
+  ADD_AGENT_BUTTON_TOP,
+  AGENT_FLYOUT_CLOSE_BUTTON,
+  STANDALONE_TAB,
+} from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
+import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
-  function navigateToTab(tab: string) {
-    cy.getBySel(tab).click();
-    cy.get('.euiBasicTable-loading').should('not.exist');
-  }
-
-  function navigateToAgentPolicy(name: string) {
-    cy.get('.euiLink').contains(name).click();
-    cy.get('.euiLoadingSpinner').should('not.exist');
-  }
-
-  function navigateToEnrollmentTokens() {
-    cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
-    cy.get('.euiBasicTable-loading').should('not.exist');
-    cy.get('.euiButtonIcon--danger'); // wait for trash icon
-  }
-
-  function verifyPolicy(name: string, integrations: string[]) {
-    navigateToTab(AGENT_POLICIES_TAB);
-
-    navigateToAgentPolicy(name);
-    integrations.forEach((integration) => {
-      cy.get('.euiLink').contains(integration);
-    });
-
-    cy.get('.euiButtonEmpty').contains('View all agent policies').click();
-
-    navigateToEnrollmentTokens();
-
-    cy.get('.euiTableCellContent').contains(name);
-  }
-
-  function verifyAgentPackage() {
-    cy.visit('/app/integrations/installed');
-    cy.getBySel('integration-card:epr:elastic_agent');
-  }
-
   // skipping Fleet Server enroll, to enable, comment out runner.ts line 23
   describe.skip('Fleet Server', () => {
     it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
@@ -77,8 +47,8 @@ describe('Fleet startup', () => {
     });
 
     it('should create agent policy', () => {
-      cy.getBySel('addAgentBtnTop').click();
-      cy.getBySel('standaloneTab').click();
+      cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
+      cy.getBySel(STANDALONE_TAB).click();
 
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
@@ -97,7 +67,7 @@ describe('Fleet startup', () => {
         // verify agent.yml code block has new policy id
         cy.get('.euiCodeBlock__code').contains(`id: ${agentPolicyId}`);
 
-        cy.getBySel('euiFlyoutCloseButton').click();
+        cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
 
         // verify policy is created and has system package
         verifyPolicy('Agent policy 1', ['System']);

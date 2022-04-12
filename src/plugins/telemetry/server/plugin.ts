@@ -23,6 +23,7 @@ import type {
   Plugin,
   Logger,
 } from 'src/core/server';
+import type { SecurityPluginStart } from '../../../../x-pack/plugins/security/server';
 import { SavedObjectsClient } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -42,6 +43,7 @@ interface TelemetryPluginsDepsSetup {
 
 interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
+  security?: SecurityPluginStart;
 }
 
 /**
@@ -90,6 +92,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private savedObjectsInternalClient$ = new ReplaySubject<SavedObjectsClient>(1);
 
+  private security?: SecurityPluginStart;
+
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
@@ -119,6 +123,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       router,
       telemetryCollectionManager,
       savedObjectsInternalClient$: this.savedObjectsInternalClient$,
+      getSecurity: () => this.security,
     });
 
     this.registerMappings((opts) => savedObjects.registerType(opts));
@@ -137,11 +142,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
+  public start(
+    core: CoreStart,
+    { telemetryCollectionManager, security }: TelemetryPluginsDepsStart
+  ) {
     const { savedObjects } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsInternalRepository = savedObjectsInternalRepository;
     this.savedObjectsInternalClient$.next(new SavedObjectsClient(savedObjectsInternalRepository));
+
+    this.security = security;
+
     this.startFetcher(core, telemetryCollectionManager);
 
     return {

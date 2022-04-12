@@ -11,10 +11,13 @@ import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+import type {
+  ListArray,
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import {
@@ -22,19 +25,20 @@ import {
   Privilege,
   RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common';
-import {
+import type {
   ElasticsearchClient,
+  IUiSettingsClient,
   Logger,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
   parseDuration,
 } from '../../../../../alerting/server';
-import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import {
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+import type {
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -47,9 +51,9 @@ import {
   SimpleHit,
   WrappedEventHit,
 } from './types';
-import { BuildRuleMessage } from './rule_messages';
-import { ShardError } from '../../types';
-import {
+import type { BuildRuleMessage } from './rule_messages';
+import type { ShardError } from '../../types';
+import type {
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
@@ -58,10 +62,11 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { RACAlert, WrappedRACAlert } from '../rule_types/types';
-import { SearchTypes } from '../../../../common/detection_engine/types';
-import { IRuleExecutionLogForExecutors } from '../rule_execution_log';
+import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
+import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -90,12 +95,19 @@ export const hasReadIndexPrivileges = async (args: {
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger } = args;
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
+
+  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
 
   const indexNames = Object.keys(privileges.index);
+  const filteredIndexNames = isCcsPermissionWarningEnabled
+    ? indexNames
+    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+
   const [, indexesWithNoReadPrivileges] = partition(
-    indexNames,
+    filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
 
@@ -140,7 +152,7 @@ export const hasTimestampFields = async (args: {
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
         ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
         : ''
@@ -181,7 +193,7 @@ export const hasTimestampFields = async (args: {
 };
 
 export const checkPrivileges = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
   checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
@@ -193,21 +205,19 @@ export const checkPrivilegesFromEsClient = async (
   withSecuritySpan(
     'checkPrivilegesFromEsClient',
     async () =>
-      (
-        await esClient.transport.request({
-          path: '/_security/user/_has_privileges',
-          method: 'POST',
-          body: {
-            index: [
-              {
-                names: indices ?? [],
-                allow_restricted_indices: true,
-                privileges: ['read'],
-              },
-            ],
-          },
-        })
-      ).body as Privilege
+      (await esClient.transport.request({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: indices ?? [],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      })) as Privilege
   );
 
 export const getNumCatchupIntervals = ({
@@ -237,7 +247,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;
@@ -271,18 +281,28 @@ export const getExceptions = async ({
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
-      const items = await client.findExceptionListsItem({
+
+      // Stream the results from the Point In Time (PIT) finder into this array
+      let items: ExceptionListItemSchema[] = [];
+      const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+        items = [...items, ...response.data];
+      };
+
+      await client.findExceptionListsItemPointInTimeFinder({
+        executeFunctionOnStream,
         listId: listIds,
         namespaceType: namespaceTypes,
-        page: 1,
-        perPage: MAX_EXCEPTION_LIST_SIZE,
+        perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
         filter: [],
+        maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
         sortOrder: undefined,
         sortField: undefined,
       });
-      return items != null ? items.data : [];
-    } catch {
-      throw new Error('unable to fetch exception list items');
+      return items;
+    } catch (e) {
+      throw new Error(
+        `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
+      );
     }
   } else {
     return [];
@@ -951,18 +971,18 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
-  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+  return !isWrappedSignalHit(event) && !isWrappedDetectionAlert(event);
 };
 
 export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
   return (event as WrappedSignalHit)?._source?.signal != null;
 };
 
-export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
+export const isWrappedDetectionAlert = (event: SimpleHit): event is BaseHit<DetectionAlert> => {
+  return (event as BaseHit<DetectionAlert>)?._source?.[ALERT_UUID] != null;
 };
 
-export const isRACAlert = (event: unknown): event is RACAlert => {
+export const isDetectionAlert = (event: unknown): event is DetectionAlert => {
   return get(event, ALERT_UUID) != null;
 };
 
@@ -999,19 +1019,19 @@ export const racFieldMappings: Record<string, string> = {
   'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
 };
 
-export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
-  if (isWrappedRACAlert(event)) {
+export const getField = (event: SimpleHit, field: string): SearchTypes | undefined => {
+  if (isWrappedDetectionAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     const parts = mappedField.split('.');
     if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {
       const params = get(event._source, ALERT_RULE_PARAMETERS);
       return get(params, parts[parts.length - 1]);
     }
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedSignalHit(event)) {
     const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedEventHit(event)) {
-    return get(event._source, field) as T;
+    return get(event._source, field) as SearchTypes | undefined;
   }
 };

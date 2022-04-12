@@ -7,41 +7,39 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { DataViewsContract, IndexPattern } from 'src/plugins/data_views/public';
-import { setDataStart } from './services';
+import { DataView } from 'src/plugins/data_views/public';
+import { setDataViewsStart } from './services';
 import type { TimeseriesVisParams } from './types';
 import type { Vis } from 'src/plugins/visualizations/public';
 import { metricsVisDefinition } from './metrics_type';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 describe('metricsVisDefinition', () => {
   describe('getUsedIndexPattern', () => {
-    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as IndexPattern;
-    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as IndexPattern;
+    const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataView;
+    const indexPattern2 = { id: '2', title: 'pattern2' } as unknown as DataView;
     let defaultParams: TimeseriesVisParams;
 
     beforeEach(async () => {
+      setDataViewsStart({
+        async getDefault() {
+          return indexPattern1;
+        },
+        async find(title: string) {
+          if (title === 'pattern1') return [indexPattern1];
+          if (title === 'pattern2') return [indexPattern2];
+          return [];
+        },
+        async get(id: string) {
+          if (id === '1') return indexPattern1;
+          if (id === '2') return indexPattern2;
+          throw new Error();
+        },
+      } as DataViewsPublicPluginStart);
       defaultParams = (
         await metricsVisDefinition.setup!({
           params: cloneDeep(metricsVisDefinition.visConfig.defaults),
         } as unknown as Vis<TimeseriesVisParams>)
       ).params;
-      setDataStart({
-        indexPatterns: {
-          async getDefault() {
-            return indexPattern1;
-          },
-          async find(title: string) {
-            if (title === 'pattern1') return [indexPattern1];
-            if (title === 'pattern2') return [indexPattern2];
-            return [];
-          },
-          async get(id: string) {
-            if (id === '1') return indexPattern1;
-            if (id === '2') return indexPattern2;
-            throw new Error();
-          },
-        } as unknown as DataViewsContract,
-      } as DataPublicPluginStart);
     });
 
     it('should resolve correctly the base index pattern by id', async () => {

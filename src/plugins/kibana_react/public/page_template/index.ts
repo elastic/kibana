@@ -8,5 +8,7 @@
 
 export type { KibanaPageTemplateProps } from './page_template';
 export { KibanaPageTemplate } from './page_template';
-export { KibanaPageTemplateSolutionNavAvatar } from './solution_nav';
+export { KibanaPageTemplateSolutionNavAvatar, KibanaPageTemplateSolutionNav } from './solution_nav';
 export * from './no_data_page';
+export { withSolutionNav } from './with_solution_nav';
+export { NO_DATA_PAGE_MAX_WIDTH, NO_DATA_PAGE_TEMPLATE_PROPS } from './util';

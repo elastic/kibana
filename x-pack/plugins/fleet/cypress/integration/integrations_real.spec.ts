@@ -24,6 +24,7 @@ import {
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
 } from '../screens/integrations';
+import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 
 describe('Add Integration - Real API', () => {
@@ -75,7 +76,7 @@ describe('Add Integration - Real API', () => {
 
       cy.visit(`/app/fleet/policies/${agentPolicyId}`);
       cy.intercept('GET', '/api/fleet/epm/packages?*').as('packages');
-      cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
       cy.get('.euiLoadingSpinner').should('not.exist');
       cy.get('input[placeholder="Search for integrations"]').type('Apache');

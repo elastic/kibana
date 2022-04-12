@@ -17,7 +17,7 @@ export function defineGetAllUsersRoutes({ router }: RouteDefinitionParams) {
         return response.ok({
           // Return only values since keys (user names) are already duplicated there.
           body: Object.values(
-            (await context.core.elasticsearch.client.asCurrentUser.security.getUser()).body
+            await context.core.elasticsearch.client.asCurrentUser.security.getUser()
           ),
         });
       } catch (error) {

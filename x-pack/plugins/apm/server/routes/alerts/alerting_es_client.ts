@@ -9,13 +9,13 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../src/core/types/elasticsearch';
-import { AlertServices } from '../../../../alerting/server';
+import { RuleExecutorServices } from '../../../../alerting/server';
 
 export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient,
   params,
 }: {
-  scopedClusterClient: AlertServices<
+  scopedClusterClient: RuleExecutorServices<
     never,
     never,
     never
@@ -27,5 +27,5 @@ export async function alertingEsClient<TParams extends ESSearchRequest>({
     ignore_unavailable: true,
   });
 
-  return response.body as unknown as ESSearchResponse<unknown, TParams>;
+  return response as unknown as ESSearchResponse<unknown, TParams>;
 }

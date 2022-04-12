@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
+import { Logger } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from './types';
@@ -26,15 +27,21 @@ import {
   RecoveredActionGroupId,
   ActionGroup,
   validateDurationSchema,
+  parseDuration,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
+import { InMemoryMetrics } from './monitoring';
+import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
+  logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  inMemoryMetrics: InMemoryMetrics;
 }
 
 export interface RegistryRuleType
@@ -49,8 +56,8 @@ export interface RegistryRuleType
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
-    | 'minimumScheduleInterval'
     | 'defaultScheduleInterval'
+    | 'doesSetRecoveryContext'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -77,9 +84,9 @@ const ruleTypeIdSchema = schema.string({
 });
 
 export type NormalizedRuleType<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -114,9 +121,9 @@ export type NormalizedRuleType<
   >;
 
 export type UntypedNormalizedRuleType = NormalizedRuleType<
-  AlertTypeParams,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   string,
@@ -124,17 +131,31 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly logger: Logger;
   private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
+  private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
+  private readonly inMemoryMetrics: InMemoryMetrics;
 
-  constructor({ taskManager, taskRunnerFactory, licenseState, licensing }: ConstructorOptions) {
+  constructor({
+    logger,
+    taskManager,
+    taskRunnerFactory,
+    licenseState,
+    licensing,
+    minimumScheduleInterval,
+    inMemoryMetrics,
+  }: ConstructorOptions) {
+    this.logger = logger;
     this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
     this.licensing = licensing;
+    this.minimumScheduleInterval = minimumScheduleInterval;
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public has(id: string) {
@@ -146,9 +167,9 @@ export class RuleTypeRegistry {
   }
 
   public register<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
@@ -208,24 +229,20 @@ export class RuleTypeRegistry {
           )
         );
       }
-    }
 
-    // validate minimumScheduleInterval here
-    if (ruleType.minimumScheduleInterval) {
-      const invalidMinimumTimeout = validateDurationSchema(ruleType.minimumScheduleInterval);
-      if (invalidMinimumTimeout) {
-        throw new Error(
-          i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError',
-            {
-              defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
-              values: {
-                id: ruleType.id,
-                errorMessage: invalidMinimumTimeout,
-              },
-            }
-          )
-        );
+      const defaultIntervalInMs = parseDuration(ruleType.defaultScheduleInterval);
+      const minimumIntervalInMs = parseDuration(this.minimumScheduleInterval.value);
+      if (defaultIntervalInMs < minimumIntervalInMs) {
+        if (this.minimumScheduleInterval.enforce) {
+          this.logger.warn(
+            `Rule type "${ruleType.id}" cannot specify a default interval less than the configured minimum of "${this.minimumScheduleInterval.value}". "${this.minimumScheduleInterval.value}" will be used.`
+          );
+          ruleType.defaultScheduleInterval = this.minimumScheduleInterval.value;
+        } else {
+          this.logger.warn(
+            `Rule type "${ruleType.id}" has a default interval of "${ruleType.defaultScheduleInterval}", which is less than the configured minimum of "${this.minimumScheduleInterval.value}".`
+          );
+        }
       }
     }
 
@@ -257,7 +274,7 @@ export class RuleTypeRegistry {
             InstanceContext,
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedRuleType, context),
+          >(normalizedRuleType, context, this.inMemoryMetrics),
       },
     });
     // No need to notify usage on basic alert types
@@ -270,9 +287,9 @@ export class RuleTypeRegistry {
   }
 
   public get<
-    Params extends AlertTypeParams = AlertTypeParams,
-    ExtractedParams extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
+    Params extends RuleTypeParams = RuleTypeParams,
+    ExtractedParams extends RuleTypeParams = RuleTypeParams,
+    State extends RuleTypeState = RuleTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
@@ -329,8 +346,8 @@ export class RuleTypeRegistry {
             minimumLicenseRequired,
             isExportable,
             ruleTaskTimeout,
-            minimumScheduleInterval,
             defaultScheduleInterval,
+            doesSetRecoveryContext,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -343,8 +360,8 @@ export class RuleTypeRegistry {
           minimumLicenseRequired,
           isExportable,
           ruleTaskTimeout,
-          minimumScheduleInterval,
           defaultScheduleInterval,
+          doesSetRecoveryContext,
           enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,
@@ -365,9 +382,9 @@ function normalizedActionVariables(actionVariables: RuleType['actionVariables'])
 }
 
 function augmentActionGroupsWithReserved<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,

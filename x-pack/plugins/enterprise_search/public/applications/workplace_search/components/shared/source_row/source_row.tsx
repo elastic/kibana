@@ -70,6 +70,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
     errorReason,
     allowsReauth,
     activities,
+    mainIcon,
   },
   onSearchableToggle,
   isOrganization,
@@ -115,7 +116,11 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <SourceIcon serviceType={isIndexing ? 'loadingSmall' : serviceType} name={name} />
+            <SourceIcon
+              serviceType={isIndexing ? 'loadingSmall' : serviceType}
+              name={name}
+              iconAsBase64={mainIcon}
+            />
           </EuiFlexItem>
           <EuiFlexItem>{name}</EuiFlexItem>
         </EuiFlexGroup>

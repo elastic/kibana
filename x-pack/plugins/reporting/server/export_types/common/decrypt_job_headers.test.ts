@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { cryptoFactory } from '../../lib';
-import { createMockLevelLogger } from '../../test_helpers';
 import { decryptJobHeaders } from './';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 const encryptHeaders = async (encryptionKey: string, headers: Record<string, string>) => {
   const crypto = cryptoFactory(encryptionKey);

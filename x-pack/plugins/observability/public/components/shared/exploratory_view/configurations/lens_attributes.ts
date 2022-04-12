@@ -30,7 +30,7 @@ import {
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import {
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
@@ -91,7 +91,7 @@ export interface LayerConfig {
   operationType?: OperationType;
   reportDefinitions: URLReportDefinition;
   time: { to: string; from: string };
-  indexPattern: IndexPattern;
+  indexPattern: DataView; // TODO: Figure out if this can be renamed or if it's a Lens requirement
   selectedMetricField: string;
   color: string;
   name: string;
@@ -150,7 +150,7 @@ export class LensAttributes {
     sourceField: string;
     layerId: string;
     labels: Record<string, string>;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
 
@@ -280,6 +280,7 @@ export class LensAttributes {
       filter: columnFilter,
       params: {
         sortField: '@timestamp',
+        showArrayValues: false,
       },
     };
   }
@@ -500,14 +501,15 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label } = layerConfig.seriesConfig.yAxisColumns[0];
+    const { sourceField, operationType, label, timeScale } =
+      layerConfig.seriesConfig.yAxisColumns[0];
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return getDistributionInPercentageColumn({ label, layerId, columnFilter }).main;
     }
 
     if (sourceField === RECORDS_FIELD || !sourceField) {
-      return this.getRecordsColumn(label);
+      return this.getRecordsColumn(label, undefined, timeScale);
     }
 
     return this.getColumnBasedOnType({
@@ -627,6 +629,7 @@ export class LensAttributes {
     });
 
     const urlFilters = urlFiltersToKueryString(filters ?? []);
+
     if (!baseFilters) {
       return urlFilters;
     }
@@ -681,7 +684,6 @@ export class LensAttributes {
       const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
       const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
       const mainYAxis = this.getMainYAxis(layerConfig, layerId, columnFilter);
-
       const { sourceField } = seriesConfig.xAxisColumn;
 
       const label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;

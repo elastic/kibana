@@ -7,8 +7,6 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -17,7 +15,9 @@ import { Tokens } from './tokens';
 
 describe('Tokens', () => {
   let tokens: Tokens;
-  let mockElasticsearchClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let mockElasticsearchClient: ReturnType<
+    typeof elasticsearchServiceMock.createElasticsearchClient
+  >;
   beforeEach(() => {
     mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -103,18 +103,14 @@ describe('Tokens', () => {
     it('returns token pair if refresh API call succeeds', async () => {
       const authenticationInfo = mockAuthenticatedUser();
       const tokenPair = { accessToken: 'access-token', refreshToken: 'refresh-token' };
-      mockElasticsearchClient.security.getToken.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            access_token: tokenPair.accessToken,
-            refresh_token: tokenPair.refreshToken,
-            authentication: authenticationInfo,
-            type: 'Bearer',
-            expires_in: 1200,
-            scope: 'FULL',
-          },
-        })
-      );
+      mockElasticsearchClient.security.getToken.mockResponse({
+        access_token: tokenPair.accessToken,
+        refresh_token: tokenPair.refreshToken,
+        authentication: authenticationInfo,
+        type: 'Bearer',
+        expires_in: 1200,
+        scope: 'FULL',
+      });
 
       await expect(tokens.refresh(refreshToken)).resolves.toEqual({
         authenticationInfo,
@@ -199,16 +195,12 @@ describe('Tokens', () => {
     it('invalidates all provided tokens', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_tokens: 1,
-            previously_invalidated_tokens: 0,
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockElasticsearchClient.security.invalidateToken.mockResponse({
+        invalidated_tokens: 1,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+        error_details: [],
+      });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
@@ -224,16 +216,12 @@ describe('Tokens', () => {
     it('invalidates only access token if only access token is provided', async () => {
       const tokenPair = { accessToken: 'foo' };
 
-      mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_tokens: 1,
-            previously_invalidated_tokens: 0,
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockElasticsearchClient.security.invalidateToken.mockResponse({
+        invalidated_tokens: 1,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+        error_details: [],
+      });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
@@ -246,16 +234,12 @@ describe('Tokens', () => {
     it('invalidates only refresh token if only refresh token is provided', async () => {
       const tokenPair = { refreshToken: 'foo' };
 
-      mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_tokens: 1,
-            previously_invalidated_tokens: 0,
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockElasticsearchClient.security.invalidateToken.mockResponse({
+        invalidated_tokens: 1,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+        error_details: [],
+      });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
@@ -297,16 +281,12 @@ describe('Tokens', () => {
     it('does not fail if more than one token per access or refresh token were invalidated', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockElasticsearchClient.security.invalidateToken.mockResolvedValue(
-        securityMock.createApiResponse({
-          body: {
-            invalidated_tokens: 5,
-            previously_invalidated_tokens: 0,
-            error_count: 0,
-            error_details: [],
-          },
-        })
-      );
+      mockElasticsearchClient.security.invalidateToken.mockResponse({
+        invalidated_tokens: 5,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+        error_details: [],
+      });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 

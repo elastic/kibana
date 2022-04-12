@@ -34,7 +34,12 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        await depsStart.embeddableExamples.createSampleData();
+        try {
+          await depsStart.embeddableExamples.createSampleData();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to create sample data', error);
+        }
         return renderApp(
           {
             notifications: coreStart.notifications,

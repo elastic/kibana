@@ -126,3 +126,5 @@ WARNING: Validation is not performed for object properties. Submitting an invali
 change will render the object unusable. A more failsafe approach is to use
 *Discover* or *Dashboard* to create new objects instead of
 directly editing an existing one.
+
+include::saved-objects/saved-object-ids.asciidoc[]

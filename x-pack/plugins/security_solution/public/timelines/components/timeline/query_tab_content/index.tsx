@@ -191,6 +191,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
+    dataViewId,
     docValueFields,
     loading: loadingSourcerer,
     indexPattern,
@@ -201,7 +202,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
   const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
@@ -282,18 +283,19 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
+      dataViewId,
       docValueFields,
       endDate: end,
+      fields: getTimelineQueryFields(),
+      filterQuery: combinedQueries?.filterQuery,
       id: timelineId,
       indexNames: selectedPatterns,
-      fields: getTimelineQueryFields(),
       language: kqlQuery.language,
       limit: itemsPerPage,
-      filterQuery: combinedQueries?.filterQuery,
       runtimeMappings,
-      startDate: start,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
+      startDate: start,
       timerangeKind,
     });
 

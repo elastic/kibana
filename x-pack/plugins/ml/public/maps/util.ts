@@ -25,12 +25,10 @@ export const ML_ANOMALY_LAYERS = {
 export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
-function getCoordinates(actualCoordinateStr: string, round: boolean = false): number[] {
-  const convertWithRounding = (point: string) => Math.round(Number(point) * 100) / 100;
-  const convert = (point: string) => Number(point);
-  return actualCoordinateStr
+function getCoordinates(latLonString: string): number[] {
+  return latLonString
     .split(',')
-    .map(round ? convertWithRounding : convert)
+    .map((coordinate: string) => Number(coordinate))
     .reverse();
 }
 
@@ -108,21 +106,10 @@ export async function getResultsForJobId(
   const features: Feature[] =
     resp?.hits.hits.map(({ _source }) => {
       const geoResults = _source.geo_results;
-      const actualCoordStr = geoResults && geoResults.actual_point;
-      const typicalCoordStr = geoResults && geoResults.typical_point;
-      let typical: number[] = [];
-      let typicalDisplay: number[] = [];
-      let actual: number[] = [];
-      let actualDisplay: number[] = [];
-
-      if (actualCoordStr !== undefined) {
-        actual = getCoordinates(actualCoordStr);
-        actualDisplay = getCoordinates(actualCoordStr, true);
-      }
-      if (typicalCoordStr !== undefined) {
-        typical = getCoordinates(typicalCoordStr);
-        typicalDisplay = getCoordinates(typicalCoordStr, true);
-      }
+      const actual =
+        geoResults && geoResults.actual_point ? getCoordinates(geoResults.actual_point) : [0, 0];
+      const typical =
+        geoResults && geoResults.typical_point ? getCoordinates(geoResults.typical_point) : [0, 0];
 
       let geometry: Geometry;
       if (locationType === ML_ANOMALY_LAYERS.TYPICAL || locationType === ML_ANOMALY_LAYERS.ACTUAL) {
@@ -136,24 +123,40 @@ export async function getResultsForJobId(
           coordinates: [typical, actual],
         };
       }
+
+      const splitFields = {
+        ...(_source.partition_field_name
+          ? { [_source.partition_field_name]: _source.partition_field_value }
+          : {}),
+        ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
+        ...(_source.over_field_name ? { [_source.over_field_name]: _source.over_field_value } : {}),
+      };
+
+      const splitFieldKeys = Object.keys(splitFields);
+      const influencers = _source.influencers
+        ? _source.influencers.filter(
+            ({ influencer_field_name: name, influencer_field_values: values }) => {
+              // remove influencers without values and influencers on partition fields
+              return values.length && !splitFieldKeys.includes(name);
+            }
+          )
+        : [];
+
       return {
         type: 'Feature',
         geometry,
         properties: {
           actual,
-          actualDisplay,
           typical,
-          typicalDisplay,
           fieldName: _source.field_name,
           functionDescription: _source.function_description,
           timestamp: formatHumanReadableDateTimeSeconds(_source.timestamp),
           record_score: Math.floor(_source.record_score),
-          ...(_source.partition_field_name
-            ? { [_source.partition_field_name]: _source.partition_field_value }
-            : {}),
-          ...(_source.by_field_name ? { [_source.by_field_name]: _source.by_field_value } : {}),
-          ...(_source.over_field_name
-            ? { [_source.over_field_name]: _source.over_field_value }
+          ...(Object.keys(splitFields).length > 0 ? splitFields : {}),
+          ...(influencers.length
+            ? {
+                influencers,
+              }
             : {}),
         },
       };

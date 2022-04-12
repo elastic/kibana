@@ -20,7 +20,7 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../alerting/common';
 
 export type AnomalyDetectionAlertContext = {
@@ -53,7 +53,7 @@ export function registerAnomalyDetectionAlertType({
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
     never, // Only use if defining useSavedObjectReferences hook
-    AlertTypeState,
+    RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
     AnomalyScoreMatchGroupId
@@ -139,7 +139,7 @@ export function registerAnomalyDetectionAlertType({
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;
-        const alertInstance = services.alertInstanceFactory(alertInstanceName);
+        const alertInstance = services.alertFactory.create(alertInstanceName);
         alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
       }
     },

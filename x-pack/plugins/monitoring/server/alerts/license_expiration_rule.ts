@@ -20,18 +20,18 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
+import { RuleExecutorOptions, Alert } from '../../../alerting/server';
 import { RULE_LICENSE_EXPIRATION, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export class LicenseExpirationRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LICENSE_EXPIRATION,
       name: LEGACY_RULE_DETAILS[RULE_LICENSE_EXPIRATION].label,
@@ -64,7 +64,7 @@ export class LicenseExpirationRule extends BaseRule {
     });
   }
 
-  protected async execute(options: AlertExecutorOptions): Promise<any> {
+  protected async execute(options: RuleExecutorOptions): Promise<any> {
     if (!Globals.app.config.ui.show_license_expiration) {
       return;
     }
@@ -143,7 +143,7 @@ export class LicenseExpirationRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

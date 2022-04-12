@@ -862,4 +862,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_trampoline_detection',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_trampoline_detection',
+      {
+        defaultMessage:
+          'Enable trampoline-based shellcode injection detection as a part of memory protection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.kernel.capture_mode',
+    first_supported_version: '8.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
+      {
+        defaultMessage:
+          'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: auto',
+      }
+    ),
+  },
 ];

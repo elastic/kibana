@@ -5,22 +5,41 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-import { ReportingAPIClient } from './lib/reporting_api_client';
+import type { PluginInitializerContext } from 'src/core/public';
 import { ReportingPublicPlugin } from './plugin';
-import { getSharedComponents } from './shared';
+import type { ReportingPublicComponents } from './shared/get_shared_components';
 
+/**
+ * Setup contract for the Reporting plugin.
+ */
 export interface ReportingSetup {
+  /**
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   *
+   * @returns boolean
+   */
   usesUiCapabilities: () => boolean;
-  components: ReturnType<typeof getSharedComponents>;
+
+  /**
+   * A set of React components for displaying a Reporting share menu in an application
+   */
+  components: ReportingPublicComponents;
 }
 
+/**
+ * Start contract for the Reporting plugin.
+ */
 export type ReportingStart = ReportingSetup;
 
-export { ReportingAPIClient, ReportingPublicPlugin as Plugin };
+/**
+ * Public interface needed for shared components
+ */
+export type { ApplicationProps } from './shared';
+export type { ReportingPublicComponents };
 
 /**
  * @internal
+ *
  * @param {PluginInitializerContext} initializerContext
  * @returns {ReportingPublicPlugin}
  */

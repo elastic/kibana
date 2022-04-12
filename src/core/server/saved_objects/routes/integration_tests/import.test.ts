@@ -229,7 +229,6 @@ describe(`POST ${URL}`, () => {
         {
           id: mockIndexPattern.id,
           type: mockIndexPattern.type,
-          title: mockIndexPattern.attributes.title,
           meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
           error: { type: 'conflict' },
         },
@@ -322,7 +321,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: {
             type: 'missing_references',
@@ -386,7 +384,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: {
             type: 'missing_references',
@@ -396,7 +393,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: { type: 'conflict' },
         },
@@ -457,7 +453,6 @@ describe(`POST ${URL}`, () => {
         {
           id: 'my-vis',
           type: 'visualization',
-          title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           overwrite: true,
           error: {

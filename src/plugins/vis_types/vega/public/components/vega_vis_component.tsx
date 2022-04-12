@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
-import { EuiResizeObserver } from '@elastic/eui';
+import React, { useEffect, useRef, useMemo, useCallback } from 'react';
+import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
 import { throttle } from 'lodash';
 
 import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
@@ -27,6 +27,8 @@ interface VegaVisComponentProps {
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
 
+const THROTTLE_INTERVAL = 300;
+
 export const VegaVisComponent = ({
   visData,
   fireEvent,
@@ -35,6 +37,7 @@ export const VegaVisComponent = ({
   renderMode,
 }: VegaVisComponentProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
+  const renderCompleted = useRef(false);
   const visController = useRef<VegaVisController | null>(null);
 
   useEffect(() => {
@@ -42,7 +45,6 @@ export const VegaVisComponent = ({
       const VegaVis = createVegaVisualization(deps, renderMode);
       visController.current = new VegaVis(chartDiv.current, fireEvent);
     }
-
     return () => {
       visController.current?.destroy();
       visController.current = null;
@@ -50,23 +52,40 @@ export const VegaVisComponent = ({
   }, [deps, fireEvent, renderMode]);
 
   useEffect(() => {
-    if (visController.current) {
-      visController.current.render(visData).then(renderComplete);
-    }
-  }, [visData, renderComplete]);
+    const asyncRender = async (visCtrl: VegaVisController) => {
+      await visCtrl.render(visData);
+      renderCompleted.current = true;
+      renderComplete();
+    };
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const updateChartSize = useCallback(
-    throttle(() => {
-      if (visController.current) {
-        visController.current.render(visData).then(renderComplete);
+    if (visController.current) {
+      asyncRender(visController.current);
+    }
+  }, [renderComplete, visData]);
+
+  const resizeChart = useMemo(
+    () =>
+      throttle(
+        (dimensions) => {
+          visController.current?.resize(dimensions);
+        },
+        THROTTLE_INTERVAL,
+        { leading: false, trailing: true }
+      ),
+    []
+  );
+
+  const onContainerResize: EuiResizeObserverProps['onResize'] = useCallback(
+    (dimensions) => {
+      if (renderCompleted.current) {
+        resizeChart(dimensions);
       }
-    }, 300),
-    [renderComplete, visData]
+    },
+    [resizeChart]
   );
 
   return (
-    <EuiResizeObserver onResize={updateChartSize}>
+    <EuiResizeObserver onResize={onContainerResize}>
       {(resizeRef) => (
         <div className="vgaVis__wrapper" ref={resizeRef}>
           <div ref={chartDiv} />

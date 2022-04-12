@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+const Path = require('path');
+const Fs = require('fs');
+
+const globby = require('globby');
+
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -89,22 +94,16 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const packagePkgJsons = globby.sync('*/package.json', {
+  cwd: Path.resolve(__dirname, 'packages'),
+  absolute: true,
+});
+
 /** Packages which should not be included within production code. */
-const DEV_PACKAGES = [
-  'kbn-babel-code-parser',
-  'kbn-dev-utils',
-  'kbn-cli-dev-mode',
-  'kbn-docs-utils',
-  'kbn-es*',
-  'kbn-eslint*',
-  'kbn-optimizer',
-  'kbn-plugin-generator',
-  'kbn-plugin-helpers',
-  'kbn-pm',
-  'kbn-storybook',
-  'kbn-telemetry-tools',
-  'kbn-test',
-];
+const DEV_PACKAGES = packagePkgJsons.flatMap((path) => {
+  const pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
+  return pkg.kibana && pkg.kibana.devOnly ? Path.dirname(Path.basename(path)) : [];
+});
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [
@@ -275,12 +274,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: [
-        '**/*.{js,mjs,ts,tsx}',
-        '!plugins/**/*',
-        '!packages/elastic-datemath/**/*',
-        '!packages/elastic-eslint-config-kibana/**/*',
-      ],
+      files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -886,6 +880,18 @@ module.exports = {
         ],
       },
     },
+    {
+      // require explicit return types in route handlers for performance reasons
+      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowTypedFunctionExpressions: false,
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides
@@ -1477,6 +1483,10 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
       },
     },
     {
@@ -1621,28 +1631,6 @@ module.exports = {
     },
 
     /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
-    },
-    /**
-     * Enterprise Search Prettier override
-     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
-     */
-    {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
-      },
-    },
-
-    /**
      * Platform Security Team overrides
      */
     {
@@ -1754,6 +1742,35 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
+      },
+    },
+
+    {
+      files: ['packages/kbn-type-summarizer/**/*.ts'],
+      rules: {
+        'no-bitwise': 'off',
+      },
+    },
+
+    /**
+     * Prettier disables all conflicting rules, listing as last override so it takes precedence
+     */
+    {
+      files: ['**/*'],
+      rules: {
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
   ],

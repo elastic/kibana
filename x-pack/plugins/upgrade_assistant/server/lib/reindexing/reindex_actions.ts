@@ -212,9 +212,7 @@ export const reindexActionsFactory = (
 
       if (versionService.getMajorVersion() === 7) {
         // On 7.x, we need to get index settings with mapping type
-        flatSettings = await esClient.indices.get<{
-          [indexName: string]: FlatSettingsWithTypeName;
-        }>({
+        flatSettings = await esClient.indices.get({
           index: indexName,
           flat_settings: true,
           // This @ts-ignore is needed on master since the flag is deprecated on >7.x
@@ -222,19 +220,17 @@ export const reindexActionsFactory = (
           include_type_name: true,
         });
       } else {
-        flatSettings = await esClient.indices.get<{
-          [indexName: string]: FlatSettings;
-        }>({
+        flatSettings = await esClient.indices.get({
           index: indexName,
           flat_settings: true,
         });
       }
 
-      if (!flatSettings.body[indexName]) {
+      if (!flatSettings[indexName]) {
         return null;
       }
 
-      return flatSettings.body[indexName];
+      return flatSettings[indexName];
     },
   };
 };

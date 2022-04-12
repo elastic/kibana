@@ -4,7 +4,7 @@
   ],
   "description": "Identifies an Identity and Access Management (IAM) custom role creation in Google Cloud Platform (GCP). Custom roles are user-defined, and allow for the bundling of one or more supported permissions to meet specific needs. Custom roles will not be updated automatically and could lead to privilege creep if not carefully scrutinized.",
   "false_positives": [
-    "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Custom role creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "index": [
     "filebeat-*",
@@ -63,5 +63,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

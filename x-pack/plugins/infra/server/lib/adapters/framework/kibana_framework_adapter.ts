@@ -169,6 +169,7 @@ export class KibanaFramework {
         } as estypes.MsearchRequest);
         break;
       case 'fieldCaps':
+        // @ts-expect-error FieldCapsRequest.fields is not optional, CallWithRequestParams.fields is
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
           ...params,
         });
@@ -199,7 +200,7 @@ export class KibanaFramework {
         } as estypes.MlGetBucketsRequest);
         break;
     }
-    return apiResult ? (await apiResult).body : undefined;
+    return apiResult ? await apiResult : undefined;
   }
 
   public async getIndexPatternsServiceWithRequestContext(

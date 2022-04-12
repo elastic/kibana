@@ -23,6 +23,7 @@ import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_fo
 import { AddDomainLogic } from './components/add_domain/add_domain_logic';
 import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
+import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
@@ -214,5 +215,11 @@ describe('CrawlerOverview', () => {
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(wrapper.find(AddDomainFormErrors)).toHaveLength(1);
+  });
+
+  it('contains a modal to start a crawl with selected domains', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(CrawlSelectDomainsModal)).toHaveLength(1);
   });
 });

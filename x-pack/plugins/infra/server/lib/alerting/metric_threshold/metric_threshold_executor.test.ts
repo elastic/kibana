@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -14,7 +12,7 @@ import {
 // import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
   AlertInstanceMock,
-  AlertServicesMock,
+  RuleExecutorServicesMock,
   alertsMock,
 } from '../../../../../alerting/server/mocks';
 import { LifecycleAlertServices } from '../../../../../rule_registry/server';
@@ -779,48 +777,45 @@ const mockLibs: any = {
 
 const executor = createMetricThresholdExecutor(mockLibs);
 
-const alertsServices = alertsMock.createAlertServices();
-const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertContext, string> = {
+const alertsServices = alertsMock.createRuleExecutorServices();
+const services: RuleExecutorServicesMock &
+  LifecycleAlertServices<AlertState, AlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
-services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
-  const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
 
-  if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse(from);
+services.scopedClusterClient.asCurrentUser.search.mockResponseImplementation(
+  (params?: any): any => {
+    const from = params?.body.query.bool.filter[0]?.range['@timestamp'].gte;
 
-  if (params.index === 'empty-response') return mocks.emptyMetricResponse;
+    if (params.index === 'alternatebeat-*') return { body: mocks.changedSourceIdResponse(from) };
 
-  const metric = params?.body.query.bool.filter[1]?.exists.field;
-  if (metric === 'test.metric.3') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
-        ? mocks.emptyRateResponse
-        : mocks.emptyMetricResponse
-    );
-  }
-  if (params?.body.aggs.groupings) {
-    if (params?.body.aggs.groupings.composite.after) {
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.compositeEndResponse
-      );
+    if (params.index === 'empty-response') return { body: mocks.emptyMetricResponse };
+
+    const metric = params?.body.query.bool.filter[1]?.exists.field;
+    if (metric === 'test.metric.3') {
+      return {
+        body: params?.body.aggs.aggregatedIntervals?.aggregations.aggregatedValueMax
+          ? mocks.emptyRateResponse
+          : mocks.emptyMetricResponse,
+      };
+    }
+    if (params?.body.aggs.groupings) {
+      if (params?.body.aggs.groupings.composite.after) {
+        return { body: mocks.compositeEndResponse };
+      }
+      if (metric === 'test.metric.2') {
+        return { body: mocks.alternateCompositeResponse(from) };
+      }
+      return { body: mocks.basicCompositeResponse(from) };
     }
     if (metric === 'test.metric.2') {
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(
-        mocks.alternateCompositeResponse(from)
-      );
+      return { body: mocks.alternateMetricResponse() };
     }
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.basicCompositeResponse(from)
-    );
+    return { body: mocks.basicMetricResponse() };
   }
-  if (metric === 'test.metric.2') {
-    return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse()
-    );
-  }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());
-});
+);
+
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
     return {
@@ -840,9 +835,9 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
 });
 
 const alertInstances = new Map<string, AlertTestInstance>();
-services.alertInstanceFactory.mockImplementation((instanceID: string) => {
+services.alertFactory.create.mockImplementation((instanceID: string) => {
   const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertInstanceFactory(),
+    instance: alertsMock.createAlertFactory.create(),
     actionQueue: [],
     state: {},
   };
@@ -909,7 +904,9 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
+
       toBeNoDataAction(action?: Action): R;
+
       toBeErrorAction(action?: Action): R;
     }
   }

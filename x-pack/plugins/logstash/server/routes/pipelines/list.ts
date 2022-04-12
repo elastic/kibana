@@ -14,14 +14,13 @@ import { PipelineListItem } from '../../models/pipeline_list_item';
 import { checkLicense } from '../../lib/check_license';
 
 async function fetchPipelines(client: ElasticsearchClient) {
-  const { body } = await client.transport.request(
+  return await client.transport.request(
     {
       method: 'GET',
       path: '/_logstash/pipeline',
     },
     { ignore: [404] }
   );
-  return body;
 }
 
 export function registerPipelinesListRoute(router: LogstashPluginRouter) {

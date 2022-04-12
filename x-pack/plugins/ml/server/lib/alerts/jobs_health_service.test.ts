@@ -76,47 +76,39 @@ describe('JobsHealthService', () => {
         ];
       }
 
-      return Promise.resolve({
-        body: {
-          jobs,
-        },
-      });
+      return Promise.resolve({ jobs });
     }),
     getJobStats: jest.fn().mockImplementation(({ job_id: jobIdsStr }) => {
       const jobsIds = jobIdsStr.split(',');
       return Promise.resolve({
-        body: {
-          jobs: jobsIds.map((j: string) => {
-            return {
-              job_id: j,
-              state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
-              model_size_stats: {
-                memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
-                log_time: 1626935914540,
-                model_bytes: 1000000,
-                model_bytes_memory_limit: 800000,
-                peak_model_bytes: 1000000,
-                model_bytes_exceeded: 200000,
-              },
-            };
-          }) as MlJobStats,
-        },
+        jobs: jobsIds.map((j: string) => {
+          return {
+            job_id: j,
+            state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
+            model_size_stats: {
+              memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
+              log_time: 1626935914540,
+              model_bytes: 1000000,
+              model_bytes_memory_limit: 800000,
+              peak_model_bytes: 1000000,
+              model_bytes_exceeded: 200000,
+            },
+          };
+        }) as MlJobStats,
       });
     }),
     getDatafeedStats: jest.fn().mockImplementation(({ datafeed_id: datafeedIdsStr }) => {
       const datafeedIds = datafeedIdsStr.split(',');
       return Promise.resolve({
-        body: {
-          datafeeds: datafeedIds.map((d: string) => {
-            return {
-              datafeed_id: d,
-              state: d === 'test_datafeed_02' ? 'stopped' : 'started',
-              timing_stats: {
-                job_id: d.replace('datafeed', 'job'),
-              },
-            };
-          }) as MlJobStats,
-        },
+        datafeeds: datafeedIds.map((d: string) => {
+          return {
+            datafeed_id: d,
+            state: d === 'test_datafeed_02' ? 'stopped' : 'started',
+            timing_stats: {
+              job_id: d.replace('datafeed', 'job'),
+            },
+          };
+        }) as MlJobStats,
       });
     }),
   } as unknown as jest.Mocked<MlClient>;

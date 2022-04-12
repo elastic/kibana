@@ -67,13 +67,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
                       },
                     },
                   },
-                  observer: {
-                    properties: {
-                      version_major: {
-                        type: 'byte',
-                      },
-                    },
-                  },
                   processor: {
                     properties: {
                       event: {
@@ -97,9 +90,6 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
                 name: 'opbeans-java',
                 environment: 'production',
                 version: index + 1,
-              },
-              observer: {
-                version_major: 8,
               },
               processor: {
                 event: 'transaction',

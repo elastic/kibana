@@ -84,6 +84,7 @@ export class CollectConfigContainer extends React.Component<
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
         currentFilters={config.useCurrentFilters}
         keepRange={config.useCurrentDateRange}
+        openInNewTab={config.openInNewTab}
         isLoading={isLoading}
         error={error}
         onDashboardSelect={(dashboardId) => {
@@ -103,6 +104,12 @@ export class CollectConfigContainer extends React.Component<
           onConfig({
             ...config,
             useCurrentDateRange: !config.useCurrentDateRange,
+          })
+        }
+        onOpenInNewTab={() =>
+          onConfig({
+            ...config,
+            openInNewTab: !config.openInNewTab,
           })
         }
       />

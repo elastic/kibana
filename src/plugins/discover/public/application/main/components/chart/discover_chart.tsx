@@ -8,14 +8,16 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '../../../../../../data_views/public';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
@@ -25,6 +27,10 @@ import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import {
+  getVisualizeInformation,
+  triggerVisualizeActions,
+} from '../sidebar/lib/visualize_trigger_utils';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -35,7 +41,7 @@ export function DiscoverChart({
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
   stateContainer,
-  isTimeBased,
+  indexPattern,
   viewMode,
   setDiscoverViewMode,
   hideChart,
@@ -46,12 +52,13 @@ export function DiscoverChart({
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
   stateContainer: GetStateReturn;
-  isTimeBased: boolean;
+  indexPattern: DataView;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
   hideChart?: boolean;
   interval?: string;
 }) {
+  const isTimeBased = indexPattern.isTimeBased();
   const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -60,6 +67,24 @@ export function DiscoverChart({
     element: null,
     moveFocus: false,
   });
+
+  const timeField =
+    indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
+  const [canVisualize, setCanVisualize] = useState(false);
+
+  useEffect(() => {
+    if (!timeField) return;
+    getVisualizeInformation(timeField, indexPattern.id, savedSearch.columns || []).then((info) => {
+      setCanVisualize(Boolean(info));
+    });
+  }, [indexPattern, savedSearch.columns, timeField]);
+
+  const onEditVisualization = useCallback(() => {
+    if (!timeField) {
+      return;
+    }
+    triggerVisualizeActions(timeField, indexPattern.id, savedSearch.columns || []);
+  }, [indexPattern.id, savedSearch, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);
@@ -124,27 +149,55 @@ export function DiscoverChart({
           )}
           {isTimeBased && (
             <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-              <EuiPopover
-                id="dscChartOptions"
-                button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="gear"
-                    onClick={onShowChartOptions}
-                    data-test-subj="discoverChartOptionsToggle"
+              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                {canVisualize && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.translate('discover.editVisualizationButton', {
+                        defaultMessage: 'Edit visualization',
+                      })}
+                    >
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType="lensApp"
+                        onClick={onEditVisualization}
+                        data-test-subj="discoverEditVisualization"
+                        aria-label={i18n.translate('discover.editVisualizationButton', {
+                          defaultMessage: 'Edit visualization',
+                        })}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    id="dscChartOptions"
+                    button={
+                      <EuiToolTip
+                        content={i18n.translate('discover.chartOptionsButton', {
+                          defaultMessage: 'Chart options',
+                        })}
+                      >
+                        <EuiButtonIcon
+                          size="xs"
+                          iconType="gear"
+                          onClick={onShowChartOptions}
+                          data-test-subj="discoverChartOptionsToggle"
+                          aria-label={i18n.translate('discover.chartOptionsButton', {
+                            defaultMessage: 'Chart options',
+                          })}
+                        />
+                      </EuiToolTip>
+                    }
+                    isOpen={showChartOptionsPopover}
+                    closePopover={closeChartOptions}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
                   >
-                    {i18n.translate('discover.chartOptionsButton', {
-                      defaultMessage: 'Chart options',
-                    })}
-                  </EuiButtonEmpty>
-                }
-                isOpen={showChartOptionsPopover}
-                closePopover={closeChartOptions}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
+                    <EuiContextMenu initialPanelId={0} panels={panels} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

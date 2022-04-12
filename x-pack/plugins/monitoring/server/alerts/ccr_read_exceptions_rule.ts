@@ -21,17 +21,17 @@ import {
   CommonAlertFilter,
   CCRReadExceptionsStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_CCR_READ_EXCEPTIONS, RULE_DETAILS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { parseDuration } from '../../../alerting/common/parse_duration';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
+import { SanitizedRule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
 
 export class CCRReadExceptionsRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CCR_READ_EXCEPTIONS,
       name: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].label,
@@ -209,7 +209,7 @@ export class CCRReadExceptionsRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

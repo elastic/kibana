@@ -14,7 +14,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
+import { RuleExecutorOptions } from '../../../../../alerting/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -83,7 +83,7 @@ export const createMetricAnomalyExecutor =
         typical,
         influencers,
       } = first(data as MappedAnomalyHit[])!;
-      const alert = services.alertInstanceFactory(`${nodeType}-${metric}`);
+      const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
       alert.scheduleActions(FIRED_ACTIONS_ID, {
         alertState: stateToAlertMessage[AlertStates.ALERT],

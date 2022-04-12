@@ -7,6 +7,8 @@
 
 import { uniqBy } from 'lodash';
 
+import { FLEET_ELASTIC_AGENT_PACKAGE, FLEET_SERVER_PACKAGE, FLEET_SYSTEM_PACKAGE } from '.';
+
 import { autoUpdatePackages, autoUpgradePoliciesPackages } from './epm';
 
 // UUID v5 values require a namespace. We use UUID v5 for some of our preconfigured ID values.
@@ -28,9 +30,18 @@ export const AUTO_UPGRADE_POLICIES_PACKAGES = autoUpgradePoliciesPackages.map((n
   version: PRECONFIGURATION_LATEST_KEYWORD,
 }));
 
+export const FLEET_PACKAGES = [
+  FLEET_SYSTEM_PACKAGE,
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+].map((name) => ({
+  name,
+  version: PRECONFIGURATION_LATEST_KEYWORD,
+}));
+
 // Controls whether the `Keep Policies up to date` setting is exposed to the user
 export const KEEP_POLICIES_UP_TO_DATE_PACKAGES = uniqBy(
-  [...AUTO_UPGRADE_POLICIES_PACKAGES, ...AUTO_UPDATE_PACKAGES],
+  [...AUTO_UPGRADE_POLICIES_PACKAGES, ...FLEET_PACKAGES, ...AUTO_UPDATE_PACKAGES],
   ({ name }) => name
 );
 

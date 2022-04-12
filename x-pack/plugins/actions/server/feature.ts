@@ -13,6 +13,12 @@ import {
 } from './constants/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
+/**
+ * The order of appearance in the feature privilege page
+ * under the management section.
+ */
+const FEATURE_ORDER = 3000;
+
 export const ACTIONS_FEATURE = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
@@ -20,6 +26,7 @@ export const ACTIONS_FEATURE = {
   }),
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
+  order: FEATURE_ORDER,
   management: {
     insightsAndAlerting: ['triggersActions'],
   },

@@ -14,6 +14,7 @@ import {
   EventFilterValidator,
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreCreateItemServerExtension['callback'];
@@ -27,20 +28,41 @@ export const getExceptionsPreCreateItemHandler = (
 
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp(data)) {
-      return new TrustedAppValidator(endpointAppContext, request).validatePreCreateItem(data);
+      const trustedAppValidator = new TrustedAppValidator(endpointAppContext, request);
+      const validatedItem = await trustedAppValidator.validatePreCreateItem(data);
+      trustedAppValidator.notifyFeatureUsage(data, 'TRUSTED_APP_BY_POLICY');
+      return validatedItem;
     }
 
     // Validate event filter
     if (EventFilterValidator.isEventFilter(data)) {
-      return new EventFilterValidator(endpointAppContext, request).validatePreCreateItem(data);
+      const eventFilterValidator = new EventFilterValidator(endpointAppContext, request);
+      const validatedItem = await eventFilterValidator.validatePreCreateItem(data);
+      eventFilterValidator.notifyFeatureUsage(data, 'EVENT_FILTERS_BY_POLICY');
+      return validatedItem;
     }
 
     // Validate host isolation
     if (HostIsolationExceptionsValidator.isHostIsolationException(data)) {
-      return new HostIsolationExceptionsValidator(
+      const hostIsolationExceptionsValidator = new HostIsolationExceptionsValidator(
         endpointAppContext,
         request
-      ).validatePreCreateItem(data);
+      );
+      const validatedItem = await hostIsolationExceptionsValidator.validatePreCreateItem(data);
+      hostIsolationExceptionsValidator.notifyFeatureUsage(
+        data,
+        'HOST_ISOLATION_EXCEPTION_BY_POLICY'
+      );
+      hostIsolationExceptionsValidator.notifyFeatureUsage(data, 'HOST_ISOLATION_EXCEPTION');
+      return validatedItem;
+    }
+
+    // Validate blocklists
+    if (BlocklistValidator.isBlocklist(data)) {
+      const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
+      const validatedItem = await blocklistValidator.validatePreCreateItem(data);
+      blocklistValidator.notifyFeatureUsage(data, 'BLOCKLIST_BY_POLICY');
+      return validatedItem;
     }
 
     return data;

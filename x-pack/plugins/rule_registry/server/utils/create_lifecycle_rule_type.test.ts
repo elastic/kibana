@@ -13,11 +13,12 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { ISearchStartSearchSource } from '../../../../../src/plugins/data/common';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -66,10 +67,13 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
-  const alertInstanceFactory = () => {
-    return {
-      scheduleActions,
-    } as any;
+  const alertFactory = {
+    create: () => {
+      return {
+        scheduleActions,
+      } as any;
+    },
+    done: () => ({ getRecoveredAlerts: () => [] }),
   };
 
   return {
@@ -107,12 +111,14 @@ function createRule(shouldWriteAlerts: boolean = true) {
           updatedBy: 'updatedBy',
         },
         services: {
-          alertInstanceFactory,
+          alertFactory,
           savedObjectsClient: {} as any,
+          uiSettingsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
+          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
         },
         spaceId: 'spaceId',
         state,

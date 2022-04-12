@@ -123,9 +123,7 @@ describe('HTTPAuthenticationProvider', () => {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
         const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-          securityMock.createApiResponse({ body: user })
-        );
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
 

@@ -40,7 +40,8 @@
 /src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-vis-editors
-/src/plugins/chart_expressions/expression_pie/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_partition_vis/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_xy/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
@@ -56,8 +57,6 @@
 /examples/state_containers_examples/ @elastic/kibana-app-services
 /examples/ui_action_examples/ @elastic/kibana-app-services
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
-/examples/url_generators_examples/ @elastic/kibana-app-services
-/examples/url_generators_explorer/ @elastic/kibana-app-services
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
@@ -74,8 +73,6 @@
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/data_view_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
-/src/plugins/kibana_react/ @elastic/kibana-app-services
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
 /src/plugins/kibana_utils/ @elastic/kibana-app-services
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
@@ -122,7 +119,11 @@
 /x-pack/test/api_integration/apis/monitoring @elastic/infra-monitoring-ui
 
 # Fleet
+/fleet_packages.json @elastic/fleet
 /x-pack/plugins/fleet/ @elastic/fleet
+/x-pack/test/fleet_api_integration @elastic/fleet
+/x-pack/test/fleet_cypress @elastic/fleet
+/x-pack/test/fleet_functional @elastic/fleet
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -138,13 +139,11 @@
 # Uptime
 /x-pack/plugins/uptime @elastic/uptime
 /x-pack/plugins/ux @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -225,11 +224,15 @@
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
+/packages/kbn-type-summarizer/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
+/packages/kbn-bazel-packages/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
+/packages/kbn-generate/ @elastic/kibana-operations
+/packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
@@ -268,6 +271,7 @@
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
+/packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
@@ -345,11 +349,13 @@
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
-/docs/user/alerting/ @elastic/response-ops
-/docs/management/connectors/ @elastic/response-ops
+/docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
+/docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
 #CC# /x-pack/plugins/stack_alerts @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
+/x-pack/test/functional/services/cases/ @elastic/response-ops
+/x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -419,11 +425,17 @@ x-pack/plugins/security_solution/cypress/upgrade_integration @elastic/security-e
 x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
+## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/session_view @elastic/awp-platform
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
+
+# Cloud Security Posture
+/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
@@ -464,9 +476,12 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 # EUI design
-/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
+/src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/shared-ux
 
 # Application Experience
 
 ## Shared UX
-/src/plugins/shared_ux @elastic/shared-ux
+/src/plugins/shared_ux/ @elastic/shared-ux
+/packages/shared-ux-*/ @elastic/shared-ux
+/src/plugins/kibana_react/ @elastic/shared-ux
+/src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation

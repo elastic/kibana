@@ -15,6 +15,7 @@ import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { DashboardConstants } from '../..';
 import { ViewMode } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
+import { DataView } from '../../services/data_views';
 import { getNewDashboardTitle } from '../../dashboard_strings';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
@@ -30,7 +31,7 @@ import {
   tryDestroyDashboardContainer,
   syncDashboardContainerInput,
   savedObjectToDashboardState,
-  syncDashboardIndexPatterns,
+  syncDashboardDataViews,
   syncDashboardFilterState,
   loadSavedDashboardState,
   buildDashboardContainer,
@@ -81,7 +82,7 @@ export const useDashboardAppState = ({
     core,
     chrome,
     embeddable,
-    indexPatterns,
+    dataViews,
     usageCollection,
     savedDashboards,
     initializerContext,
@@ -121,7 +122,7 @@ export const useDashboardAppState = ({
       search,
       history,
       embeddable,
-      indexPatterns,
+      dataViews,
       notifications,
       kibanaVersion,
       savedDashboards,
@@ -158,10 +159,11 @@ export const useDashboardAppState = ({
           savedDashboard.id,
           savedDashboard.aliasId
         );
+        const aliasPurpose = savedDashboard.aliasPurpose;
         if (screenshotModeService?.isScreenshotMode()) {
           scopedHistory().replace(path);
         } else {
-          await spacesService?.ui.redirectLegacyUrl(path);
+          await spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
         }
         // Return so we don't run any more of the hook and let it rerun after the redirect that just happened
         return;
@@ -184,7 +186,7 @@ export const useDashboardAppState = ({
       // Backwards compatible way of detecting that we are taking a screenshot
       const legacyPrintLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
-        screenshotModeService.getScreenshotLayout() === 'print';
+        screenshotModeService.getScreenshotContext('layout') === 'print';
 
       const initialDashboardState = {
         ...savedDashboardState,
@@ -219,11 +221,7 @@ export const useDashboardAppState = ({
         savedDashboard,
         data,
         executionContext: {
-          type: 'application',
-          name: 'dashboard',
-          id: savedDashboard.id ?? 'unsaved_dashboard',
           description: savedDashboard.title,
-          url: history.location.pathname,
         },
       });
       if (canceled || !dashboardContainer) {
@@ -234,11 +232,15 @@ export const useDashboardAppState = ({
       /**
        * Start syncing index patterns between the Query Service and the Dashboard Container.
        */
-      const indexPatternsSubscription = syncDashboardIndexPatterns({
+      const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
-        indexPatterns: dashboardBuildContext.indexPatterns,
-        onUpdateIndexPatterns: (newIndexPatterns) =>
-          setDashboardAppState((s) => ({ ...s, indexPatterns: newIndexPatterns })),
+        dataViews: dashboardBuildContext.dataViews,
+        onUpdateDataViews: (newDataViews: DataView[]) => {
+          if (newDataViews.length > 0 && newDataViews[0].id) {
+            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
+          }
+          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews }));
+        },
       });
 
       /**
@@ -339,7 +341,7 @@ export const useDashboardAppState = ({
         stopWatchingAppStateInUrl();
         stopSyncingDashboardFilterState();
         lastSavedSubscription.unsubscribe();
-        indexPatternsSubscription.unsubscribe();
+        dataViewsSubscription.unsubscribe();
         tryDestroyDashboardContainer(dashboardContainer);
         setDashboardAppState((state) => ({
           ...state,
@@ -368,7 +370,7 @@ export const useDashboardAppState = ({
     usageCollection,
     scopedHistory,
     notifications,
-    indexPatterns,
+    dataViews,
     kibanaVersion,
     embeddable,
     docTitle,

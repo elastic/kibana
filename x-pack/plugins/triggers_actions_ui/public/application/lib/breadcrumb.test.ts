@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from './breadcrumb';
+import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from './breadcrumb';
 import { i18n } from '@kbn/i18n';
 import { routeToConnectors, routeToRules, routeToHome } from '../constants';
 
@@ -32,9 +32,9 @@ describe('getAlertingSectionBreadcrumb', () => {
   });
 });
 
-describe('getAlertDetailsBreadcrumb', () => {
+describe('getRuleDetailsBreadcrumb', () => {
   test('if select an alert should return proper breadcrumb title with alert name ', async () => {
-    expect(getAlertDetailsBreadcrumb('testId', 'testName')).toMatchObject({
+    expect(getRuleDetailsBreadcrumb('testId', 'testName')).toMatchObject({
       text: i18n.translate('xpack.triggersActionsUI.alertDetails.breadcrumbTitle', {
         defaultMessage: 'testName',
       }),

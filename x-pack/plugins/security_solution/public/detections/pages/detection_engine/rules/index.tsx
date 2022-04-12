@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -37,16 +37,16 @@ import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_c
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RulesTableContextProvider } from '../../../containers/detection_engine/rules/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
-
-type Func = () => Promise<void>;
+import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
+import { useInvalidateRules } from '../../../containers/detection_engine/rules/use_find_rules_query';
+import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 const RulesPageComponent: React.FC = () => {
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showValueListsModal, setShowValueListsModal] = useState(false);
-  const refreshRulesData = useRef<null | Func>(null);
+  const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
+  const [isValueListModalVisible, showValueListModal, hideValueListModal] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
+  const invalidateRules = useInvalidateRules();
 
   const [
     {
@@ -98,18 +98,12 @@ const RulesPageComponent: React.FC = () => {
   );
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
-  const handleRefreshRules = useCallback(async () => {
-    if (refreshRulesData.current != null) {
-      await refreshRulesData.current();
-    }
-  }, [refreshRulesData]);
-
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      return handleRefreshRules();
+      invalidateRules();
     }
-  }, [createPrePackagedRules, handleRefreshRules]);
+  }, [createPrePackagedRules, invalidateRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
@@ -118,10 +112,6 @@ const RulesPageComponent: React.FC = () => {
       return Promise.resolve();
     }
   }, [refetchPrePackagedRulesStatus]);
-
-  const handleSetRefreshRulesData = useCallback((refreshRule: Func) => {
-    refreshRulesData.current = refreshRule;
-  }, []);
 
   const goToNewRule = useCallback(
     (ev) => {
@@ -169,26 +159,24 @@ const RulesPageComponent: React.FC = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
-      <ValueListsModal
-        showModal={showValueListsModal}
-        onClose={() => setShowValueListsModal(false)}
-      />
+      <ValueListsModal showModal={isValueListModalVisible} onClose={hideValueListModal} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
-        closeModal={() => setShowImportModal(false)}
+        closeModal={hideImportModal}
         description={i18n.SELECT_RULE}
         errorMessage={i18n.IMPORT_FAILED}
         failedDetailed={i18n.IMPORT_FAILED_DETAILED}
-        importComplete={handleRefreshRules}
+        importComplete={invalidateRules}
         importData={importRules}
         successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
-        showModal={showImportModal}
+        showModal={isImportModalVisible}
         submitBtnText={i18n.IMPORT_RULE_BTN_TITLE}
         subtitle={i18n.INITIAL_PROMPT_TEXT}
         title={i18n.IMPORT_RULE}
         showExceptionsCheckBox
         showCheckBox
       />
+
       <RulesTableContextProvider
         refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
       >
@@ -206,8 +194,8 @@ const RulesPageComponent: React.FC = () => {
                   <EuiButton
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
-                    isDisabled={!canWriteListsIndex || loading}
-                    onClick={() => setShowValueListsModal(true)}
+                    isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
+                    onClick={showValueListModal}
                   >
                     {i18n.UPLOAD_VALUE_LISTS}
                   </EuiButton>
@@ -218,9 +206,7 @@ const RulesPageComponent: React.FC = () => {
                   data-test-subj="rules-import-modal-button"
                   iconType="importAction"
                   isDisabled={!userHasPermissions(canUserCRUD) || loading}
-                  onClick={() => {
-                    setShowImportModal(true);
-                  }}
+                  onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
                 </EuiButton>
@@ -259,7 +245,6 @@ const RulesPageComponent: React.FC = () => {
             rulesInstalled={rulesInstalled}
             rulesNotInstalled={rulesNotInstalled}
             rulesNotUpdated={rulesNotUpdated}
-            setRefreshRulesData={handleSetRefreshRulesData}
           />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

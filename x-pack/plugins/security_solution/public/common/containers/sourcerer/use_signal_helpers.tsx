@@ -64,7 +64,7 @@ export const useSignalHelpers = (): {
         ) {
           // first time signals is defined and validated in the sourcerer
           // redo indexFieldsSearch
-          indexFieldsSearch(response.defaultDataView.id);
+          indexFieldsSearch({ dataViewId: response.defaultDataView.id });
           dispatch(sourcererActions.setSourcererDataViews(response));
         }
       } catch (err) {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService } from '../../../../../../data/common';
-
+import { DataViewsService } from '../../../../../../data_views/common';
 import { from } from 'rxjs';
+
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
 import type { FieldSpec } from '../../../../../../data/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
@@ -56,7 +56,7 @@ describe('AbstractSearchStrategy', () => {
       {
         getDefault: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
-      } as unknown as IndexPatternsService,
+      } as unknown as DataViewsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
     );
 
@@ -76,6 +76,9 @@ describe('AbstractSearchStrategy', () => {
             isStored: true,
           },
         },
+        events: {
+          aborted$: from([]),
+        },
       } as unknown as VisTypeTimeseriesVisDataRequest,
       searches
     );
@@ -90,6 +93,7 @@ describe('AbstractSearchStrategy', () => {
         indexType: undefined,
       },
       {
+        abortSignal: new AbortController().signal,
         sessionId: '1',
         isRestore: false,
         isStored: true,

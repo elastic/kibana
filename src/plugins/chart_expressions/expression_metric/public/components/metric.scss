@@ -6,6 +6,7 @@
 //   mtrChart__legend-isLoading
 
 .mtrVis {
+  @include euiScrollBar;
   height: 100%;
   width: 100%;
   display: flex;
@@ -13,6 +14,7 @@
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  overflow: auto;
 }
 
 .mtrVis__value {
@@ -23,10 +25,22 @@
 .mtrVis__container {
   text-align: center;
   padding: $euiSize;
+  display: flex;
+  flex-direction: column;
 }
 
 .mtrVis__container--light {
   color: $euiColorEmptyShade;
+}
+
+.mtrVis__container-isfull {
+  min-height: 100%;
+  min-width: max-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1 0 100%;
 }
 
 .mtrVis__container-isFilterable {

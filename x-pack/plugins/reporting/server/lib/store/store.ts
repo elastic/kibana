@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
-import { LevelLogger, statuses } from '../';
-import { ReportingCore } from '../../';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
+import { statuses } from '../';
+import type { ReportingCore } from '../../';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
-import { ReportTaskParams } from '../tasks';
-import { IReport, Report, ReportDocument, SavedReport } from './';
+import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
+import type { ReportTaskParams } from '../tasks';
+import type { IReport, Report, ReportDocument } from './';
+import { SavedReport } from './';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
@@ -83,12 +85,12 @@ export class ReportingStore {
   private client?: ElasticsearchClient;
   private ilmPolicyManager?: IlmPolicyManager;
 
-  constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
+  constructor(private reportingCore: ReportingCore, private logger: Logger) {
     const config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
     this.indexInterval = config.get('queue', 'indexInterval');
-    this.logger = logger.clone(['store']);
+    this.logger = logger.get('store');
   }
 
   private async getClient() {
@@ -110,7 +112,7 @@ export class ReportingStore {
 
   private async createIndex(indexName: string) {
     const client = await this.getClient();
-    const { body: exists } = await client.indices.exists({ index: indexName });
+    const exists = await client.indices.exists({ index: indexName });
 
     if (exists) {
       return exists;
@@ -166,9 +168,7 @@ export class ReportingStore {
       },
     };
     const client = await this.getClient();
-    const { body } = await client.index(doc);
-
-    return body;
+    return await client.index(doc);
   }
 
   /*
@@ -239,7 +239,7 @@ export class ReportingStore {
 
     try {
       const client = await this.getClient();
-      const { body: document } = await client.get<ReportSource>({
+      const document = await client.get<ReportSource>({
         index: taskJson.index,
         id: taskJson.id,
       });
@@ -255,6 +255,7 @@ export class ReportingStore {
         created_by: document._source?.created_by,
         max_attempts: document._source?.max_attempts,
         meta: document._source?.meta,
+        metrics: document._source?.metrics,
         payload: document._source?.payload,
         process_expiration: document._source?.process_expiration,
         status: document._source?.status,
@@ -283,22 +284,23 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
 
-    this.reportingCore.getEventLogger(report).logClaimTask();
+    // log the amount of time the report waited in "pending" status
+    this.reportingCore.getEventLogger(report).logClaimTask({
+      queueDurationMs: moment.utc().valueOf() - moment.utc(report.created_at).valueOf(),
+    });
 
     return body;
   }
@@ -321,16 +323,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -358,16 +358,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -387,16 +385,14 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = (
-        await client.update<ReportDocument>({
-          id: report._id,
-          index: report._index,
-          if_seq_no: report._seq_no,
-          if_primary_term: report._primary_term,
-          refresh: true,
-          body: { doc },
-        })
-      ).body;
+      body = await client.update<unknown, unknown, ReportDocument>({
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        refresh: true,
+        body: { doc },
+      });
     } catch (err) {
       this.logError(`Error in clearing expiration and status for retry! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -430,7 +426,7 @@ export class ReportingStore {
       },
     };
 
-    const { body } = await client.search<ReportRecordTimeout['_source']>({
+    const body = await client.search<ReportRecordTimeout['_source']>({
       size: 1,
       index: this.indexPrefix + '-*',
       seq_no_primary_term: true,

@@ -36,6 +36,12 @@ export const mockAlertDetailsData = [
   },
   { category: 'agent', field: 'agent.version', values: ['7.10.0'], originalValue: '7.10.0' },
   {
+    category: 'agent',
+    field: 'agent.status',
+    values: ['inactive'],
+    originalValue: ['inactive'],
+  },
+  {
     category: 'winlog',
     field: 'winlog.computer_name',
     values: ['windows-native'],
@@ -470,6 +476,12 @@ export const mockAlertDetailsData = [
     field: 'kibana.alert.original_event.ingested',
     values: ['2020-11-25T15:36:40.924914552Z'],
     originalValue: '2020-11-25T15:36:40.924914552Z',
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.original_event.id',
+    values: ['f7bc2422-cb1e-4427-ba33-6f496ee8360c'],
+    originalValue: 'f7bc2422-cb1e-4427-ba33-6f496ee8360c',
   },
   {
     category: 'kibana',

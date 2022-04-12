@@ -25,20 +25,21 @@ import type {
 import type { CasesUiStart } from '../../cases/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { TimelinesUIStart } from '../../timelines/public';
+import type { SessionViewStart } from '../../session_view/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
-
+import type { OsqueryPluginStart } from '../../osquery/public';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Hosts } from './hosts';
+import type { Users } from './users';
 import type { Network } from './network';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import type { Ueba } from './ueba';
 import type { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
@@ -65,10 +66,12 @@ export interface StartPlugins {
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
+  sessionView: SessionViewStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  osquery?: OsqueryPluginStart;
 }
 
 export type StartServices = CoreStart &
@@ -96,8 +99,8 @@ export interface SubPlugins {
   exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
   hosts: Hosts;
+  users: Users;
   network: Network;
-  ueba: Ueba;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -110,8 +113,8 @@ export interface StartedSubPlugins {
   exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
+  users: ReturnType<Users['start']>;
   network: ReturnType<Network['start']>;
-  ueba: ReturnType<Ueba['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

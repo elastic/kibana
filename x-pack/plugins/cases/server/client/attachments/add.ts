@@ -10,62 +10,16 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  SavedObjectsClientContract,
-  Logger,
-  SavedObjectsUtils,
-} from '../../../../../../src/core/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
+import { SavedObjectsUtils } from '../../../../../../src/core/server';
 
-import {
-  Actions,
-  ActionTypes,
-  CaseResponse,
-  CommentRequest,
-  CommentRequestRt,
-  CommentType,
-  throwErrors,
-  User,
-} from '../../../common/api';
+import { CaseResponse, CommentRequest, CommentRequestRt, throwErrors } from '../../../common/api';
 
-import { AttachmentService, CasesService } from '../../services';
-import { CommentableCase } from '../../common/models';
+import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { createAlertUpdateRequest } from '../../common/utils';
-import { CasesClientArgs, CasesClientInternal } from '..';
+import { CasesClientArgs } from '..';
 
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
-
-async function createCommentableCase({
-  caseService,
-  attachmentService,
-  unsecuredSavedObjectsClient,
-  id,
-  logger,
-  lensEmbeddableFactory,
-}: {
-  caseService: CasesService;
-  attachmentService: AttachmentService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  id: string;
-  logger: Logger;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
-}): Promise<CommentableCase> {
-  const caseInfo = await caseService.getCase({
-    unsecuredSavedObjectsClient,
-    id,
-  });
-
-  return new CommentableCase({
-    logger,
-    caseInfo,
-    caseService,
-    attachmentService,
-    unsecuredSavedObjectsClient,
-    lensEmbeddableFactory,
-  });
-}
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -88,8 +42,7 @@ export interface AddArgs {
  */
 export const addComment = async (
   addArgs: AddArgs,
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
+  clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const { comment, caseId } = addArgs;
   const query = pipe(
@@ -97,17 +50,7 @@ export const addComment = async (
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  const {
-    unsecuredSavedObjectsClient,
-    caseService,
-    userActionService,
-    attachmentService,
-    user,
-    logger,
-    lensEmbeddableFactory,
-    authorization,
-    alertsService,
-  } = clientArgs;
+  const { logger, authorization } = clientArgs;
 
   decodeCommentRequest(comment);
   try {
@@ -120,53 +63,15 @@ export const addComment = async (
 
     const createdDate = new Date().toISOString();
 
-    const combinedCase = await createCommentableCase({
-      caseService,
-      attachmentService,
-      unsecuredSavedObjectsClient,
-      id: caseId,
-      logger,
-      lensEmbeddableFactory,
-    });
+    const model = await CaseCommentModel.create(caseId, clientArgs);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
-    const userInfo: User = {
-      username,
-      full_name,
-      email,
-    };
-
-    const { comment: newComment, commentableCase: updatedCase } = await combinedCase.createComment({
+    const updatedModel = await model.createComment({
       createdDate,
-      user: userInfo,
       commentReq: query,
       id: savedObjectID,
     });
 
-    if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
-      const alertsToUpdate = createAlertUpdateRequest({
-        comment: query,
-        status: updatedCase.status,
-      });
-
-      await alertsService.updateAlertsStatus(alertsToUpdate);
-    }
-
-    await userActionService.createUserAction({
-      type: ActionTypes.comment,
-      action: Actions.create,
-      unsecuredSavedObjectsClient,
-      caseId,
-      attachmentId: newComment.id,
-      payload: {
-        attachment: query,
-      },
-      user,
-      owner: newComment.attributes.owner,
-    });
-
-    return updatedCase.encode();
+    return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,

@@ -15,6 +15,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
    * function that is used to create the `type: render` object.
    */
   name: string;
+  namespace?: string;
 
   /**
    * A user friendly name of the renderer as will be displayed to user in UI.

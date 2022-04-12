@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { ReportingCore } from '../..';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
-import { getConditionalHeaders } from '.';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { ReportingCore } from '../../';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { getCustomLogo } from './get_custom_logo';
 
 let mockReportingPlugin: ReportingCore;
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 beforeEach(async () => {
   mockReportingPlugin = await createMockReportingCore(createMockConfigSchema());
 });
 
 test(`gets logo from uiSettings`, async () => {
-  const permittedHeaders = {
+  const headers = {
     foo: 'bar',
     baz: 'quix',
   };
@@ -40,17 +35,7 @@ test(`gets logo from uiSettings`, async () => {
     get: mockGet,
   });
 
-  const conditionalHeaders = getConditionalHeaders(
-    createMockConfig(createMockConfigSchema()),
-    permittedHeaders
-  );
-
-  const { logo } = await getCustomLogo(
-    mockReportingPlugin,
-    conditionalHeaders,
-    'spaceyMcSpaceIdFace',
-    logger
-  );
+  const { logo } = await getCustomLogo(mockReportingPlugin, headers, 'spaceyMcSpaceIdFace', logger);
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(logo).toBe('purple pony');

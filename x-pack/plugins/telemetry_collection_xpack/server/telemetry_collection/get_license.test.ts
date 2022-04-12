@@ -25,7 +25,7 @@ describe('getLicenseFromLocalOrMaster', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     // The local fetch succeeds
     // @ts-expect-error it's enough to test with minimal payload
-    esClient.license.get.mockResolvedValue({ body: { license: { type: 'basic' } } });
+    esClient.license.get.mockResponse({ license: { type: 'basic' } });
 
     const license = await getLicenseFromLocalOrMaster(esClient);
 
@@ -53,7 +53,7 @@ describe('getLicenseFromLocalOrMaster', () => {
     esClient.license.get.mockRejectedValueOnce(new Error('Something went terribly wrong'));
     // The master fetch succeeds
     // @ts-expect-error it's enough to test with minimal payload
-    esClient.license.get.mockResolvedValue({ body: { license: { type: 'basic' } } });
+    esClient.license.get.mockResolvedValue({ license: { type: 'basic' } });
 
     const license = await getLicenseFromLocalOrMaster(esClient);
 

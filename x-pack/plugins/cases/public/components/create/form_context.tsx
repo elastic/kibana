@@ -19,6 +19,7 @@ import { UsePostComment, usePostComment } from '../../containers/use_post_commen
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
+import { CaseAttachments } from '../../types';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -34,9 +35,15 @@ interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
+  attachments?: CaseAttachments;
 }
 
-export const FormContext: React.FC<Props> = ({ afterCaseCreated, children, onSuccess }) => {
+export const FormContext: React.FC<Props> = ({
+  afterCaseCreated,
+  children,
+  onSuccess,
+  attachments,
+}) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { owner } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
@@ -69,6 +76,19 @@ export const FormContext: React.FC<Props> = ({ afterCaseCreated, children, onSuc
           owner: selectedOwner ?? owner[0],
         });
 
+        // add attachments to the case
+        if (updatedCase && Array.isArray(attachments)) {
+          // TODO currently the API only supports to add a comment at the time
+          // once the API is updated we should use bulk post comment #124814
+          // this operation is intentionally made in sequence
+          for (const attachment of attachments) {
+            await postComment({
+              caseId: updatedCase.id,
+              data: attachment,
+            });
+          }
+        }
+
         if (afterCaseCreated && updatedCase) {
           await afterCaseCreated(updatedCase, postComment);
         }
@@ -92,6 +112,7 @@ export const FormContext: React.FC<Props> = ({ afterCaseCreated, children, onSuc
       owner,
       afterCaseCreated,
       onSuccess,
+      attachments,
       postComment,
       pushCaseToExternalService,
     ]

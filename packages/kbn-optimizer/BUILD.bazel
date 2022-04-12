@@ -4,7 +4,6 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 
 PKG_BASE_NAME = "kbn-optimizer"
 PKG_REQUIRE_NAME = "@kbn/optimizer"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__optimizer"
 
 SOURCE_FILES = glob(
   [
@@ -47,7 +46,6 @@ RUNTIME_DEPS = [
   "@npm//dedent",
   "@npm//del",
   "@npm//execa",
-  "@npm//jest-diff",
   "@npm//json-stable-stringify",
   "@npm//js-yaml",
   "@npm//lmdb-store",
@@ -77,7 +75,6 @@ TYPES_DEPS = [
   "@npm//cpy",
   "@npm//del",
   "@npm//execa",
-  "@npm//jest-diff",
   "@npm//lmdb-store",
   "@npm//pirates",
   "@npm//rxjs",
@@ -119,10 +116,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -154,7 +149,7 @@ pkg_npm_types(
   name = "npm_module_types",
   srcs = SRCS,
   deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
+  package_name = PKG_REQUIRE_NAME,
   tsconfig = ":tsconfig",
   visibility = ["//visibility:public"],
 )

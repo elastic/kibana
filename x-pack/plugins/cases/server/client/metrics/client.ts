@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
+import { CaseMetricsResponse, CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
 import { CasesClient } from '../client';
 
 import { CasesClientArgs } from '../types';
+import { getStatusTotalsByType } from './get_cases_metrics';
 
 import { getCaseMetrics, CaseMetricsParams } from './get_case_metrics';
 
@@ -17,6 +18,10 @@ import { getCaseMetrics, CaseMetricsParams } from './get_case_metrics';
  */
 export interface MetricsSubClient {
   getCaseMetrics(params: CaseMetricsParams): Promise<CaseMetricsResponse>;
+  /**
+   * Retrieves the total number of open, closed, and in-progress cases.
+   */
+  getStatusTotalsByType(params: CasesStatusRequest): Promise<CasesStatusResponse>;
 }
 
 /**
@@ -30,6 +35,8 @@ export const createMetricsSubClient = (
 ): MetricsSubClient => {
   const casesSubClient: MetricsSubClient = {
     getCaseMetrics: (params: CaseMetricsParams) => getCaseMetrics(params, casesClient, clientArgs),
+    getStatusTotalsByType: (params: CasesStatusRequest) =>
+      getStatusTotalsByType(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

@@ -144,7 +144,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
   columns: {
     col1: oneColumnLayer.columns.col1,
     col2: {
-      label: 'Top values of src',
+      label: 'Top 10 values of src',
       dataType: 'string',
       isBucketed: true,
       // Private
@@ -157,7 +157,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
       sourceField: 'src',
     } as TermsIndexPatternColumn,
     col3: {
-      label: 'Top values of dest',
+      label: 'Top 10 values of dest',
       dataType: 'string',
       isBucketed: true,
 
@@ -698,7 +698,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             'replace_duplicate_incompatible',
             'swap_incompatible',
           ],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -736,7 +736,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible'],
-          nextLabel: 'Unique count',
+          nextLabel: 'Minimum',
         });
       });
 
@@ -768,6 +768,41 @@ describe('IndexPatternDimensionEditorPanel', () => {
           })
         ).toEqual({
           dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'combine_compatible'],
+        });
+      });
+
+      it('returns no combine_compatible drop type if the target column uses rarity ordering', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                orderBy: { type: 'rare' },
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
         });
       });
 
@@ -1585,7 +1620,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             col1: testState.layers.first.columns.col1,
 
             col2: {
-              label: 'Top values of src',
+              label: 'Top 10 values of src',
               dataType: 'string',
               isBucketed: true,
 
@@ -2157,7 +2192,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col1,
                   col2: {
                     isBucketed: true,
-                    label: 'Top values of bytes',
+                    label: 'Top 10 values of bytes',
                     operationType: 'terms',
                     sourceField: 'bytes',
                     dataType: 'number',
@@ -2167,6 +2202,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                       },
                       orderDirection: 'desc',
                       size: 10,
+                      parentFormat: { id: 'terms' },
                     },
                   },
                   col3: testState.layers.first.columns.col3,
@@ -2248,7 +2284,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col1,
                   col2: {
                     isBucketed: true,
-                    label: 'Top values of bytes',
+                    label: 'Top 10 values of bytes',
                     operationType: 'terms',
                     sourceField: 'bytes',
                     dataType: 'number',
@@ -2257,6 +2293,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                         type: 'alphabetical',
                       },
                       orderDirection: 'desc',
+                      parentFormat: { id: 'terms' },
                       size: 10,
                     },
                   },
@@ -2267,8 +2304,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     filter: undefined,
                     operationType: 'unique_count',
                     sourceField: 'src',
+                    timeShift: undefined,
                     dataType: 'number',
-                    params: undefined,
+                    params: {
+                      emptyAsNull: true,
+                    },
                     scale: 'ratio',
                   },
                 },

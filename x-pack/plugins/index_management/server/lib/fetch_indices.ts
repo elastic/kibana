@@ -17,7 +17,7 @@ async function fetchIndicesCall(
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
-  const { body: indices } = await client.asCurrentUser.indices.get({
+  const indices = await client.asCurrentUser.indices.get({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     // only get specified index properties from ES to keep the response under 536MB
@@ -31,7 +31,6 @@ async function fetchIndicesCall(
       '*.data_stream',
     ],
     // for better performance only compute aliases and settings of indices but not mappings
-    // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
   });
 
@@ -39,9 +38,7 @@ async function fetchIndicesCall(
     return [];
   }
 
-  const {
-    body: { indices: indicesStats = {} },
-  } = await client.asCurrentUser.indices.stats({
+  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     forbid_closed_indices: false,
@@ -53,16 +50,16 @@ async function fetchIndicesCall(
     const indexStats = indicesStats[indexName];
     const aliases = Object.keys(indexData.aliases!);
     return {
-      // @ts-expect-error new property https://github.com/elastic/elasticsearch-specification/issues/1253
       health: indexStats?.health,
-      // @ts-expect-error new property https://github.com/elastic/elasticsearch-specification/issues/1253
       status: indexStats?.status,
       name: indexName,
       uuid: indexStats?.uuid,
       primary: indexData.settings?.index?.number_of_shards,
       replica: indexData.settings?.index?.number_of_replicas,
       documents: indexStats?.total?.docs?.count ?? 0,
+      documents_deleted: indexStats?.total?.docs?.deleted ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+      primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
       // @ts-expect-error
       isFrozen: indexData.settings?.index?.frozen === 'true',
       aliases: aliases.length ? aliases : 'none',

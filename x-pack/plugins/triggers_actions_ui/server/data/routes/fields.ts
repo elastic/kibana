@@ -101,7 +101,7 @@ async function getRawFields(esClient: ElasticsearchClient, indexes: string[]): P
     allow_no_indices: true,
   };
   const result = await esClient.fieldCaps(params);
-  return result.body as RawFields;
+  return result as RawFields;
 }
 
 function getFieldsFromRawFields(rawFields: RawFields): Field[] {

@@ -77,7 +77,7 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
           index: query.indexPatternTitle,
         });
         const indexPatternSettings = getIndexPatternSettings(
-          resp.body as unknown as Record<string, string | number | boolean>
+          resp as unknown as Record<string, string | number | boolean>
         );
         return response.ok({
           body: indexPatternSettings,

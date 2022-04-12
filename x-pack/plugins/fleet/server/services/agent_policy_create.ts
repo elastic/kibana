@@ -18,7 +18,7 @@ import {
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 import { agentPolicyService, packagePolicyService } from '.';
-import { incrementPackageName } from './package_policy';
+import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeysExists } from './setup';
 

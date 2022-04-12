@@ -10,6 +10,7 @@ import { DataViewFieldBase } from '@kbn/es-query';
 
 import {
   EXCEPTION_OPERATORS,
+  EVENT_FILTERS_OPERATORS,
   OperatorOption,
   doesNotExistOperator,
   existsOperator,
@@ -30,6 +31,8 @@ export const getOperators = (field: DataViewFieldBase | undefined): OperatorOpti
     return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
   } else if (field.type === 'nested') {
     return [isOperator];
+  } else if (field.name === 'file.path.text') {
+    return EVENT_FILTERS_OPERATORS;
   } else {
     return EXCEPTION_OPERATORS;
   }

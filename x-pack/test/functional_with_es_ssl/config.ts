@@ -17,7 +17,10 @@ const enabledActionTypes = [
   '.index',
   '.pagerduty',
   '.swimlane',
+  '.jira',
+  '.resilient',
   '.servicenow',
+  '.servicenow-sir',
   '.slack',
   '.webhook',
   'test.authorization',
@@ -45,9 +48,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/triggers_actions_ui'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
+      resolve(__dirname, './apps/cases'),
     ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
@@ -66,6 +71,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify(['internalAlertsTable'])}`,
+        `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
@@ -104,6 +111,30 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+        },
+        discover_alert: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+                discover: ['all'],
+                advancedSettings: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['search-source-alert', 'search-source-alert-output'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
         },
       },
       defaultRoles: ['superuser'],

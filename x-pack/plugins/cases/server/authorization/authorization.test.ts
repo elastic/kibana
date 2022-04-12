@@ -14,6 +14,7 @@ import { AuthorizationAuditLogger } from './audit_logger';
 import { KibanaRequest } from 'kibana/server';
 import { KibanaFeature } from '../../../../plugins/features/common';
 import { AuditLogger, SecurityPluginStart } from '../../../security/server';
+import { auditLoggerMock } from '../../../security/server/audit/mocks';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 
 describe('authorization', () => {
@@ -22,10 +23,7 @@ describe('authorization', () => {
 
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
-    mockLogger = {
-      log: jest.fn(),
-      enabled: true,
-    };
+    mockLogger = auditLoggerMock.create();
   });
 
   describe('create', () => {

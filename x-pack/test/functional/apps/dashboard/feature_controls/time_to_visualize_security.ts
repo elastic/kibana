@@ -103,8 +103,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.lens.saveAndReturn();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
-        expect(pieExists).to.be(true);
+        const partitionVisExists = await testSubjects.exists('partitionVisChart');
+        expect(partitionVisExists).to.be(true);
       });
 
       it('disables save to library button without visualize save permissions', async () => {
@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.switchToVisualization('lnsMetric');
 
-        await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.waitForVisualization('mtrVis');
         await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
         await PageObjects.header.waitUntilLoadingHasFinished();

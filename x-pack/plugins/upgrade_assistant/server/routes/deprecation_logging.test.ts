@@ -44,10 +44,8 @@ describe('deprecation logging API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .getSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {
-            cluster: { deprecation_indexing: { enabled: 'true' } },
-          },
+        defaults: {
+          cluster: { deprecation_indexing: { enabled: 'true' } },
         },
       });
 
@@ -83,11 +81,9 @@ describe('deprecation logging API', () => {
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
           .putSettings as jest.Mock
       ).mockResolvedValue({
-        body: {
-          defaults: {
-            logger: { deprecation: 'WARN' },
-            cluster: { deprecation_indexing: { enabled: 'true' } },
-          },
+        defaults: {
+          logger: { deprecation: 'WARN' },
+          cluster: { deprecation_indexing: { enabled: 'true' } },
         },
       });
 
@@ -122,14 +118,10 @@ describe('deprecation logging API', () => {
     it('returns count of deprecations', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
-      ).mockResolvedValue({
-        body: true,
-      });
+      ).mockResolvedValue(true);
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.count as jest.Mock
-      ).mockResolvedValue({
-        body: { count: 10 },
-      });
+      ).mockResolvedValue({ count: 10 });
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -147,9 +139,7 @@ describe('deprecation logging API', () => {
     it('returns zero matches when deprecation logs index is not created', async () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices.exists as jest.Mock
-      ).mockResolvedValue({
-        body: false,
-      });
+      ).mockResolvedValue(false);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -182,9 +172,7 @@ describe('deprecation logging API', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
-      ).mockResolvedValue({
-        body: 'ok',
-      });
+      ).mockResolvedValue('ok');
 
       const resp = await routeDependencies.router.getHandler({
         method: 'delete',

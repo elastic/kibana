@@ -7,7 +7,12 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+import { SerializableRecord } from '@kbn/utility-types';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -18,6 +23,9 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  VisState810,
+  VisState820,
+  CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
 import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
@@ -186,6 +194,96 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
   return newAttributes as LensDocShape810;
 };
 
+export const commonSetLastValueShowArrayValues = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (
+        column.operationType === 'last_value' &&
+        !(typeof column.params.showArrayValues === 'boolean')
+      ) {
+        column.params.showArrayValues = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
+export const commonEnhanceTableRowHeight = (
+  attributes: LensDocShape810<VisState810>
+): LensDocShape810<VisState820> => {
+  if (attributes.visualizationType !== 'lnsDatatable') {
+    return attributes;
+  }
+  const visState810 = attributes.state.visualization as VisState810;
+  const newAttributes = cloneDeep(attributes);
+  const vizState = newAttributes.state.visualization as VisState820;
+  vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
+  vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes;
+};
+
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
+const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
+  return (savedObject: { attributes: LensDocShape }) => {
+    if (savedObject.attributes.visualizationType !== id) return savedObject;
+    return {
+      ...savedObject,
+      attributes: {
+        ...savedObject.attributes,
+        state: {
+          ...savedObject.attributes.state,
+          visualization: migration(
+            savedObject.attributes.state.visualization as SerializableRecord
+          ),
+        },
+      },
+    };
+  };
+};
+
+/**
+ * This creates a migration map that applies custom visualization migrations
+ */
+export const getLensCustomVisualizationMigrations = (
+  customVisualizationMigrations: CustomVisualizationMigrations
+) => {
+  return Object.entries(customVisualizationMigrations)
+    .map(([id, migrationGetter]) => {
+      const migrationMap: MigrateFunctionsObject = {};
+      const currentMigrations = migrationGetter();
+      for (const version in currentMigrations) {
+        if (currentMigrations.hasOwnProperty(version)) {
+          migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
+            id,
+            currentMigrations[version]
+          );
+        }
+      }
+      return migrationMap;
+    })
+    .reduce(
+      (fullMigrationMap, currentVisualizationTypeMigrationMap) =>
+        mergeMigrationFunctionMaps(fullMigrationMap, currentVisualizationTypeMigrationMap),
+      {}
+    );
+};
+
 /**
  * This creates a migration map that applies filter migrations to Lens visualizations
  */
@@ -199,3 +297,34 @@ export const getLensFilterMigrations = (
       state: { ...lensDoc.attributes.state, filters: migrate(lensDoc.attributes.state.filters) },
     },
   }));
+
+export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
+  (newAttributes as LensDocShape810).state.datasourceStates.indexpattern.layers =
+    Object.fromEntries(
+      Object.entries(datasourceLayers).map(([layerId, layer]) => {
+        return [
+          layerId,
+          {
+            ...layer,
+            columns: Object.fromEntries(
+              Object.entries(layer.columns).map(([columnId, column]) => {
+                if (column.operationType === 'terms') {
+                  return [
+                    columnId,
+                    {
+                      ...column,
+                      params: { ...column.params, parentFormat: { id: 'terms' } },
+                    },
+                  ];
+                }
+                return [columnId, column];
+              })
+            ),
+          },
+        ];
+      })
+    );
+  return newAttributes as LensDocShape810;
+};

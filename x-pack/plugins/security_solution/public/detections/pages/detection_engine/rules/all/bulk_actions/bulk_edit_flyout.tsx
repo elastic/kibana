@@ -14,10 +14,11 @@ import {
 
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';
+import { TimelineTemplateForm } from './forms/timeline_template_form';
 
 interface BulkEditFlyoutProps {
   onClose: () => void;
-  onConfirm: (bulkactionEditPayload: BulkActionEditPayload) => void;
+  onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
   editAction: BulkActionEditType;
   rulesCount: number;
   tags: string[];
@@ -34,6 +35,9 @@ const BulkEditFlyoutComponent = ({ editAction, tags, ...props }: BulkEditFlyoutP
     case BulkActionEditType.delete_tags:
     case BulkActionEditType.set_tags:
       return <TagsForm {...props} editAction={editAction} tags={tags} />;
+
+    case BulkActionEditType.set_timeline:
+      return <TimelineTemplateForm {...props} />;
 
     default:
       return null;

@@ -25,8 +25,10 @@ import {
 import type { CustomPaletteState } from '../../../../charts/public';
 import { search } from '../../../../data/public';
 import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
-import type { DatatableColumn } from '../../../../expressions/public';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '../../../../visualizations/common/utils';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
@@ -116,17 +118,6 @@ function computeColorRanges(
   return { colors, ranges };
 }
 
-const getAccessor = (value: string | ExpressionValueVisDimension, columns: DatatableColumn[]) => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  const accessor = value.accessor;
-  if (typeof accessor === 'number') {
-    return columns[accessor].id;
-  }
-  return accessor.id;
-};
-
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
     data,
@@ -177,7 +168,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const table = data;
     const valueAccessor = args.valueAccessor
-      ? getAccessor(args.valueAccessor, table.columns)
+      ? getAccessorByDimension(args.valueAccessor, table.columns)
       : undefined;
     const minMaxByColumnId = useMemo(
       () => findMinMaxByColumnId([valueAccessor!], table),
@@ -185,8 +176,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     );
 
     const paletteParams = args.palette?.params;
-    const xAccessor = args.xAccessor ? getAccessor(args.xAccessor, table.columns) : undefined;
-    const yAccessor = args.yAccessor ? getAccessor(args.yAccessor, table.columns) : undefined;
+    const xAccessor = args.xAccessor
+      ? getAccessorByDimension(args.xAccessor, table.columns)
+      : undefined;
+    const yAccessor = args.yAccessor
+      ? getAccessorByDimension(args.yAccessor, table.columns)
+      : undefined;
 
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
     const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
@@ -194,13 +189,108 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xAxisColumn = table.columns[xAxisColumnIndex];
     const yAxisColumn = table.columns[yAxisColumnIndex];
     const valueColumn = table.columns.find((v) => v.id === valueAccessor);
+    const xAxisMeta = xAxisColumn?.meta;
+    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+
+    const onElementClick = useCallback(
+      (e: HeatmapElementEvent[]) => {
+        const cell = e[0][0];
+        const { x, y } = cell.datum;
+
+        const points = [
+          {
+            row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
+            column: xAxisColumnIndex,
+            value: x,
+          },
+          ...(yAxisColumn
+            ? [
+                {
+                  row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
+                  column: yAxisColumnIndex,
+                  value: y,
+                },
+              ]
+            : []),
+        ];
+
+        const context: FilterEvent['data'] = {
+          data: points.map((point) => ({
+            row: point.row,
+            column: point.column,
+            value: point.value,
+            table,
+          })),
+        };
+        onClickValue(context);
+      },
+      [onClickValue, table, xAxisColumn?.id, xAxisColumnIndex, yAxisColumn, yAxisColumnIndex]
+    );
+
+    const onBrushEnd = useCallback(
+      (e: HeatmapBrushEvent) => {
+        const { x, y } = e;
+
+        if (isTimeBasedSwimLane) {
+          const context: BrushEvent['data'] = {
+            range: x as number[],
+            table,
+            column: xAxisColumnIndex,
+          };
+          onSelectRange(context);
+        } else {
+          const points: Array<{ row: number; column: number; value: string | number }> = [];
+
+          if (yAxisColumn) {
+            (y as string[]).forEach((v) => {
+              points.push({
+                row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
+                column: yAxisColumnIndex,
+                value: v,
+              });
+            });
+          }
+          if (xAxisColumn) {
+            (x as string[]).forEach((v) => {
+              points.push({
+                row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
+                column: xAxisColumnIndex,
+                value: v,
+              });
+            });
+          }
+
+          const context: FilterEvent['data'] = {
+            data: points.map((point) => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
+          };
+          onClickValue(context);
+        }
+      },
+      [
+        isTimeBasedSwimLane,
+        onClickValue,
+        onSelectRange,
+        table,
+        xAxisColumn,
+        xAxisColumnIndex,
+        yAxisColumn,
+        yAxisColumnIndex,
+      ]
+    );
 
     if (!valueColumn) {
       // Chart is not ready
       return null;
     }
 
-    let chartData = table.rows.filter((v) => typeof v[valueAccessor!] === 'number');
+    let chartData = table.rows.filter(
+      (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
+    );
     if (!chartData || !chartData.length) {
       return <EmptyPlaceholder icon={HeatmapIcon} />;
     }
@@ -216,12 +306,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     }
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
-    const xAxisMeta = xAxisColumn?.meta;
     const xValuesFormatter = formatFactory(xAxisMeta?.params);
-    const metricFormatter = formatFactory(
-      typeof args.valueAccessor === 'string' ? valueColumn.meta.params : args?.valueAccessor?.format
-    );
-    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+    const metricFormatter = formatFactory(getFormatByAccessor(args.valueAccessor!, table.columns));
     const dateHistogramMeta = xAxisColumn
       ? search.aggs.getDateHistogramMetaDataByDatatableColumn(xAxisColumn)
       : undefined;
@@ -316,115 +402,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       };
     });
 
-    const onElementClick = useCallback(
-      (e: HeatmapElementEvent[]) => {
-        const cell = e[0][0];
-        const { x, y } = cell.datum;
-
-        const xAxisFieldName = xAxisColumn?.meta?.field;
-        const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-        const points = [
-          {
-            row: table.rows.findIndex((r) => r[xAxisColumn.id] === x),
-            column: xAxisColumnIndex,
-            value: x,
-          },
-          ...(yAxisColumn
-            ? [
-                {
-                  row: table.rows.findIndex((r) => r[yAxisColumn.id] === y),
-                  column: yAxisColumnIndex,
-                  value: y,
-                },
-              ]
-            : []),
-        ];
-
-        const context: FilterEvent['data'] = {
-          data: points.map((point) => ({
-            row: point.row,
-            column: point.column,
-            value: point.value,
-            table,
-          })),
-          timeFieldName,
-        };
-        onClickValue(context);
-      },
-      [
-        isTimeBasedSwimLane,
-        onClickValue,
-        table,
-        xAxisColumn?.id,
-        xAxisColumn?.meta?.field,
-        xAxisColumnIndex,
-        yAxisColumn,
-        yAxisColumnIndex,
-      ]
-    );
-
-    const onBrushEnd = useCallback(
-      (e: HeatmapBrushEvent) => {
-        const { x, y } = e;
-
-        const xAxisFieldName = xAxisColumn?.meta?.field;
-        const timeFieldName = isTimeBasedSwimLane ? xAxisFieldName : '';
-
-        if (isTimeBasedSwimLane) {
-          const context: BrushEvent['data'] = {
-            range: x as number[],
-            table,
-            column: xAxisColumnIndex,
-            timeFieldName,
-          };
-          onSelectRange(context);
-        } else {
-          const points: Array<{ row: number; column: number; value: string | number }> = [];
-
-          if (yAxisColumn) {
-            (y as string[]).forEach((v) => {
-              points.push({
-                row: table.rows.findIndex((r) => r[yAxisColumn.id] === v),
-                column: yAxisColumnIndex,
-                value: v,
-              });
-            });
-          }
-          if (xAxisColumn) {
-            (x as string[]).forEach((v) => {
-              points.push({
-                row: table.rows.findIndex((r) => r[xAxisColumn.id] === v),
-                column: xAxisColumnIndex,
-                value: v,
-              });
-            });
-          }
-
-          const context: FilterEvent['data'] = {
-            data: points.map((point) => ({
-              row: point.row,
-              column: point.column,
-              value: point.value,
-              table,
-            })),
-            timeFieldName,
-          };
-          onClickValue(context);
-        }
-      },
-      [
-        isTimeBasedSwimLane,
-        onClickValue,
-        onSelectRange,
-        table,
-        xAxisColumn,
-        xAxisColumnIndex,
-        yAxisColumn,
-        yAxisColumnIndex,
-      ]
-    );
-
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
@@ -506,6 +483,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
+              legendSize={args.legend.legendSize}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
@@ -521,6 +499,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                     : NaN,
               }}
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
             />
             <Heatmap
               id="heatmap"
@@ -542,10 +522,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               yAxisLabelName={yAxisColumn?.name}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
-              xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
+              xAxisLabelFormatter={(v) =>
+                args.gridConfig.isXAxisLabelVisible ? `${xValuesFormatter.convert(v)}` : ''
+              }
               yAxisLabelFormatter={
                 yAxisColumn
-                  ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                  ? (v) =>
+                      args.gridConfig.isYAxisLabelVisible
+                        ? `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                        : ''
                   : undefined
               }
             />

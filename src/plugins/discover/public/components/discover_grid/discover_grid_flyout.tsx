@@ -8,13 +8,14 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIconTip,
   EuiTitle,
   EuiButtonEmpty,
   EuiText,
@@ -147,7 +148,8 @@ export function DiscoverGridFlyout({
             </EuiHideFor>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                size="xs"
+                size="s"
+                iconSize="s"
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
@@ -159,19 +161,42 @@ export function DiscoverGridFlyout({
               </EuiButtonEmpty>
             </EuiFlexItem>
             {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="documents"
-                  flush="left"
-                  {...surrDocsProps}
-                  data-test-subj="docTableRowAction"
-                >
-                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple', {
-                    defaultMessage: 'Surrounding documents',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconSize="s"
+                    iconType="documents"
+                    flush="left"
+                    {...surrDocsProps}
+                    data-test-subj="docTableRowAction"
+                  >
+                    {i18n.translate(
+                      'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
+                      {
+                        defaultMessage: 'Surrounding documents',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'discover.grid.tableRow.viewSurroundingDocumentsHover',
+                      {
+                        defaultMessage:
+                          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+                      }
+                    )}
+                    type="questionInCircle"
+                    color="subdued"
+                    position="right"
+                    iconProps={{
+                      className: 'eui-alignTop',
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>

@@ -410,27 +410,35 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
             </FlyoutCheckboxesSection>
           </>
         )}
-      {updateError != null && (
-        <EuiFlyoutFooter>
-          <ErrorCallout
-            http={http}
-            errorInfo={updateError}
-            rule={maybeRule}
-            onCancel={onCancel}
-            onSuccess={handleDissasociationSuccess}
-            onError={handleDissasociationError}
-          />
-        </EuiFlyoutFooter>
-      )}
-      {hasVersionConflict && (
-        <EuiFlyoutFooter>
-          <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
-            <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
-          </EuiCallOut>
-        </EuiFlyoutFooter>
-      )}
-      {updateError == null && (
-        <EuiFlyoutFooter>
+
+      <EuiFlyoutFooter>
+        {hasVersionConflict && (
+          <>
+            <EuiCallOut
+              title={i18n.VERSION_CONFLICT_ERROR_TITLE}
+              color="danger"
+              iconType="alert"
+              data-test-subj="exceptionsFlyoutVersionConflict"
+            >
+              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {updateError != null && (
+          <>
+            <ErrorCallout
+              http={http}
+              errorInfo={updateError}
+              rule={maybeRule}
+              onCancel={onCancel}
+              onSuccess={handleDissasociationSuccess}
+              onError={handleDissasociationError}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {updateError === null && (
           <FlyoutFooterGroup justifyContent="spaceBetween">
             <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
               {i18n.CANCEL}
@@ -446,8 +454,8 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
               {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
             </EuiButton>
           </FlyoutFooterGroup>
-        </EuiFlyoutFooter>
-      )}
+        )}
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 });

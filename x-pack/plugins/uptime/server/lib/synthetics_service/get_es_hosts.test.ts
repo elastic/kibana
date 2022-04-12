@@ -26,7 +26,6 @@ describe('getEsHostsTest', () => {
     const esHosts = getEsHosts({
       cloud: cloudSetup,
       config: {
-        enabled: true,
         manifestUrl: 'https://testing.com',
       },
     });
@@ -39,7 +38,6 @@ describe('getEsHostsTest', () => {
   it('should return expected host from config', function () {
     const esHosts = getEsHosts({
       config: {
-        enabled: true,
         manifestUrl: 'https://testing.com',
         hosts: ['http://localhost:9200'],
       },
@@ -51,7 +49,6 @@ describe('getEsHostsTest', () => {
     const esHosts = getEsHosts({
       cloud: cloudSetup,
       config: {
-        enabled: true,
         manifestUrl: 'https://testing.com',
         hosts: ['http://localhost:9200'],
       },

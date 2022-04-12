@@ -63,6 +63,26 @@ describe('format_column', () => {
     });
   });
 
+  it('wraps in suffix formatter if provided', async () => {
+    datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      decimals: 5,
+      suffix: 'ABC',
+    });
+    expect(result.columns[0].meta.params).toEqual({
+      id: 'suffix',
+      params: {
+        suffixString: 'ABC',
+        id: 'number',
+        params: {
+          pattern: '0,0.00000',
+        },
+      },
+    });
+  });
+
   it('has special handling for 0 decimals', async () => {
     datatable.columns[0].meta.params = { id: 'myformatter', params: {} };
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
@@ -140,6 +160,32 @@ describe('format_column', () => {
       });
     });
 
+    it('double-nests suffix formatters', async () => {
+      datatable.columns[0].meta.params = {
+        id: 'suffix',
+        params: { suffixString: 'ABC', id: 'myformatter', params: { innerParam: 456 } },
+      };
+      const result = await fn(datatable, {
+        columnId: 'test',
+        format: '',
+        parentFormat: JSON.stringify({ id: 'suffix', params: { suffixString: 'DEF' } }),
+      });
+      expect(result.columns[0].meta.params).toEqual({
+        id: 'suffix',
+        params: {
+          suffixString: 'DEF',
+          id: 'suffix',
+          params: {
+            suffixString: 'ABC',
+            id: 'myformatter',
+            params: {
+              innerParam: 456,
+            },
+          },
+        },
+      });
+    });
+
     it('overwrites format with well known pattern including decimals', async () => {
       datatable.columns[0].meta.params = {
         id: 'previousWrapper',
@@ -159,6 +205,36 @@ describe('format_column', () => {
           params: {
             pattern: '0,0.00000',
           },
+          pattern: '0,0.00000',
+        },
+      });
+    });
+
+    it('should support multi-fields formatters', async () => {
+      datatable.columns[0].meta.params = {
+        id: 'previousWrapper',
+        params: { id: 'myMultiFieldFormatter', paramsPerField: [{ id: 'number' }] },
+      };
+      const result = await fn(datatable, {
+        columnId: 'test',
+        format: 'number',
+        decimals: 5,
+        parentFormat: JSON.stringify({ id: 'wrapper', params: { wrapperParam: 123 } }),
+      });
+      expect(result.columns[0].meta.params).toEqual({
+        id: 'wrapper',
+        params: {
+          wrapperParam: 123,
+          id: 'number',
+          paramsPerField: [
+            {
+              id: 'number',
+              params: {
+                pattern: '0,0.00000',
+              },
+              pattern: '0,0.00000',
+            },
+          ],
         },
       });
     });

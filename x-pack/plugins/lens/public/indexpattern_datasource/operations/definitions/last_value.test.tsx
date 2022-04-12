@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiComboBox } from '@elastic/eui';
+import { shallow, ShallowWrapper } from 'enzyme';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
@@ -16,6 +16,7 @@ import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
 import { TermsIndexPatternColumn } from './terms';
+import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -85,10 +86,34 @@ describe('last_value', () => {
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
+          function: 'aggTopMetrics',
           arguments: expect.objectContaining({
-            aggregate: ['concat'],
             field: ['a'],
             size: [1],
+            sortField: ['datefield'],
+            sortOrder: ['desc'],
+          }),
+        })
+      );
+    });
+
+    it('should use top-hit agg when param is set', () => {
+      const lastValueColumn = layer.columns.col2 as LastValueIndexPatternColumn;
+      const esAggsFn = lastValueOperation.toEsAggsFn(
+        { ...lastValueColumn, params: { ...lastValueColumn.params, showArrayValues: true } },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTopHit',
+          arguments: expect.objectContaining({
+            field: ['a'],
+            size: [1],
+            aggregate: ['concat'], // aggregate should only be present when using aggTopHit
             sortField: ['datefield'],
             sortOrder: ['desc'],
           }),
@@ -107,6 +132,7 @@ describe('last_value', () => {
         dataType: 'string',
         params: {
           sortField: 'datefield',
+          showArrayValues: false,
         },
       };
       const indexPattern = createMockedIndexPattern();
@@ -125,6 +151,73 @@ describe('last_value', () => {
       expect(column.label).toContain('bytes');
     });
 
+    it('should adjust filter if it is exists filter on the current field', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'source',
+        label: 'Last value of source',
+        isBucketed: true,
+        dataType: 'string',
+        filter: { language: 'kuery', query: 'source: *' },
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
+      const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
+
+      expect(column).toEqual(
+        expect.objectContaining({
+          filter: { language: 'kuery', query: 'bytes: *' },
+        })
+      );
+    });
+
+    it('should not adjust filter if it has some other filter', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'source',
+        label: 'Last value of source',
+        isBucketed: true,
+        dataType: 'string',
+        filter: { language: 'kuery', query: 'something_else: 123' },
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
+      const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
+
+      expect(column).toEqual(
+        expect.objectContaining({
+          filter: { language: 'kuery', query: 'something_else: 123' },
+        })
+      );
+    });
+
+    it('should not adjust filter if it is undefined', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'source',
+        label: 'Last value of source',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
+      const column = lastValueOperation.onFieldChange(oldColumn, newNumberField);
+
+      expect(column.filter).toBeFalsy();
+    });
+
     it('should remove numeric parameters when changing away from number', () => {
       const oldColumn: LastValueIndexPatternColumn = {
         operationType: 'last_value',
@@ -134,6 +227,7 @@ describe('last_value', () => {
         dataType: 'number',
         params: {
           sortField: 'datefield',
+          showArrayValues: false,
         },
       };
       const indexPattern = createMockedIndexPattern();
@@ -143,6 +237,50 @@ describe('last_value', () => {
       expect(column).toHaveProperty('dataType', 'string');
       expect(column).toHaveProperty('sourceField', 'source');
       expect(column.params.format).toBeUndefined();
+    });
+
+    it('should set show array values if field is scripted', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'scripted')!;
+
+      expect(
+        lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues
+      ).toBeTruthy();
+    });
+
+    it('should preserve show array values setting if field is not scripted', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'source')!;
+
+      expect(lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues).toBeFalsy();
+      expect(
+        lastValueOperation.onFieldChange(
+          { ...oldColumn, params: { ...oldColumn.params, showArrayValues: true } },
+          field
+        ).params.showArrayValues
+      ).toBeTruthy();
     });
   });
 
@@ -232,6 +370,21 @@ describe('last_value', () => {
       expect(lastValueColumn.dataType).toEqual('boolean');
     });
 
+    it('should set exists filter on field', () => {
+      const lastValueColumn = lastValueOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+      });
+      expect(lastValueColumn.filter).toEqual({ language: 'kuery', query: 'test: *' });
+    });
+
     it('should use indexPattern timeFieldName as a default sortField', () => {
       const lastValueColumn = lastValueOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
@@ -318,6 +471,54 @@ describe('last_value', () => {
         })
       );
     });
+
+    it('should set showArrayValues if field is scripted or comes from existing params', () => {
+      const indexPattern = createMockedIndexPattern();
+
+      const scriptedField = indexPattern.fields.find((field) => field.scripted);
+      const nonScriptedField = indexPattern.fields.find((field) => !field.scripted);
+
+      const localLayer = {
+        columns: {
+          col1: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+            sourceField: '___records___',
+            operationType: 'count',
+          },
+        },
+        columnOrder: [],
+        indexPatternId: '',
+      } as IndexPatternLayer;
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: scriptedField!,
+        }).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn(
+          {
+            indexPattern,
+            layer: localLayer,
+            field: nonScriptedField!,
+          },
+          { showArrayValues: true }
+        ).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: nonScriptedField!,
+        }).params.showArrayValues
+      ).toBeFalsy();
+    });
   });
 
   it('should return disabledStatus if indexPattern does contain date field', () => {
@@ -403,6 +604,51 @@ describe('last_value', () => {
   });
 
   describe('param editor', () => {
+    class Harness {
+      private _instance: ShallowWrapper;
+
+      constructor(instance: ShallowWrapper) {
+        this._instance = instance;
+      }
+
+      private get sortField() {
+        return this._instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
+      }
+
+      private get showArrayValuesSwitch() {
+        return this._instance
+          .find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
+          .find(EuiSwitch);
+      }
+
+      public get showingTopValuesWarning() {
+        return Boolean(
+          this._instance
+            .find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
+            .find(EuiFormRow)
+            .prop('isInvalid')
+        );
+      }
+
+      toggleShowArrayValues() {
+        this.showArrayValuesSwitch.prop('onChange')({} as EuiSwitchEvent);
+      }
+
+      public get showArrayValuesSwitchDisabled() {
+        return this.showArrayValuesSwitch.prop('disabled');
+      }
+
+      changeSortFieldOptions(options: Array<{ label: string; value: string }>) {
+        this.sortField.find(EuiComboBox).prop('onChange')!([
+          { label: 'datefield2', value: 'datefield2' },
+        ]);
+      }
+
+      public get currentSortFieldOptions() {
+        return this.sortField.prop('selectedOptions');
+      }
+    }
+
     it('should render current sortField', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
@@ -415,9 +661,9 @@ describe('last_value', () => {
         />
       );
 
-      const select = instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
+      const harness = new Harness(instance);
 
-      expect(select.prop('selectedOptions')).toEqual([{ label: 'datefield', value: 'datefield' }]);
+      expect(harness.currentSortFieldOptions).toEqual([{ label: 'datefield', value: 'datefield' }]);
     });
 
     it('should update state when changing sortField', () => {
@@ -432,10 +678,7 @@ describe('last_value', () => {
         />
       );
 
-      instance
-        .find('[data-test-subj="lns-indexPattern-lastValue-sortField"]')
-        .find(EuiComboBox)
-        .prop('onChange')!([{ label: 'datefield2', value: 'datefield2' }]);
+      new Harness(instance).changeSortFieldOptions([{ label: 'datefield2', value: 'datefield2' }]);
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -449,6 +692,95 @@ describe('last_value', () => {
             },
           },
         },
+      });
+    });
+
+    describe('toggling using top-hit agg', () => {
+      it('should toggle param when switch clicked', () => {
+        const updateLayerSpy = jest.fn();
+
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        const harness = new Harness(instance);
+
+        harness.toggleShowArrayValues();
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col2: {
+              ...layer.columns.col2,
+              params: {
+                ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
+                showArrayValues: true,
+              },
+            },
+          },
+        });
+
+        // have to do this manually, but it happens automatically in the app
+        const newLayer = updateLayerSpy.mock.calls[0][0];
+        instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
+
+        expect(harness.showingTopValuesWarning).toBeTruthy();
+      });
+
+      it('should not warn user when top-values not in use', () => {
+        const updateLayerSpy = jest.fn();
+        const localLayer = {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              operationType: 'min', // not terms
+            },
+          },
+        };
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={localLayer}
+            updateLayer={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        const harness = new Harness(instance);
+        harness.toggleShowArrayValues();
+
+        // have to do this manually, but it happens automatically in the app
+        const newLayer = updateLayerSpy.mock.calls[0][0];
+        instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
+
+        expect(harness.showingTopValuesWarning).toBeFalsy();
+      });
+
+      it('should set showArrayValues and disable switch when scripted field', () => {
+        (layer.columns.col2 as LastValueIndexPatternColumn).sourceField = 'scripted';
+
+        const updateLayerSpy = jest.fn();
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col2"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
       });
     });
   });
@@ -511,17 +843,18 @@ describe('last_value', () => {
       ]);
     });
     it('shows error message if the sourceField is of unsupported type', () => {
+      indexPattern.getFieldByName('start_date')!.type = 'unsupported_type';
       errorLayer = {
         ...errorLayer,
         columns: {
           col1: {
             ...errorLayer.columns.col1,
-            sourceField: 'timestamp',
+            sourceField: 'start_date',
           } as LastValueIndexPatternColumn,
         },
       };
       expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field timestamp is of the wrong type',
+        'Field start_date is of the wrong type',
       ]);
     });
     it('shows error message if the sortField is not date', () => {

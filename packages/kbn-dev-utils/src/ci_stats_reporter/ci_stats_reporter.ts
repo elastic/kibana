@@ -20,17 +20,9 @@ import httpAdapter from 'axios/lib/adapters/http';
 import { ToolingLog } from '../tooling_log';
 import { parseConfig, Config } from './ci_stats_config';
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
+import { CiStatsMetadata } from './ci_stats_metadata';
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
-
-/** Container for metadata that can be attached to different ci-stats objects */
-export interface CiStatsMetadata {
-  /**
-   * Arbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric
-   * objects stored in the ci-stats service
-   */
-  [key: string]: string | string[] | number | boolean | undefined;
-}
 
 /** A ci-stats metric record */
 export interface CiStatsMetric {
@@ -320,6 +312,10 @@ export class CiStatsReporter {
           data: body,
           params: query,
           adapter: httpAdapter,
+
+          // if it can be serialized into a string, send it
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
         });
 
         return resp.data;

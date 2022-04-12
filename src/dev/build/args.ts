@@ -22,6 +22,8 @@ export function readCliArgs(argv: string[]) {
       'skip-os-packages',
       'rpm',
       'deb',
+      'docker-context-use-local-artifact',
+      'docker-cross-compile',
       'docker-images',
       'docker-push',
       'skip-docker-contexts',
@@ -40,8 +42,8 @@ export function readCliArgs(argv: string[]) {
       'silent',
       'debug',
       'help',
-      'use-snapshot-epr',
     ],
+    string: ['epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
@@ -52,9 +54,12 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-context-use-local-artifact': null,
+      'docker-cross-compile': false,
       'docker-push': false,
       'docker-tag-qualifier': null,
       'version-qualifier': '',
+      'epr-registry': 'snapshot',
     },
     unknown: (flag) => {
       unknownFlags.push(flag);
@@ -96,9 +101,23 @@ export function readCliArgs(argv: string[]) {
     return Boolean(flags[name]);
   }
 
+  const eprRegistry = flags['epr-registry'];
+  if (eprRegistry !== 'snapshot' && eprRegistry !== 'production') {
+    log.error(
+      `Invalid value for --epr-registry, must be 'production' or 'snapshot', got ${eprRegistry}`
+    );
+    return {
+      log,
+      showHelp: true,
+      unknownFlags: [],
+    };
+  }
+
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerContextUseLocalArtifact: flags['docker-context-use-local-artifact'],
+    dockerCrossCompile: Boolean(flags['docker-cross-compile']),
     dockerPush: Boolean(flags['docker-push']),
     dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
@@ -116,7 +135,7 @@ export function readCliArgs(argv: string[]) {
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
-    useSnapshotEpr: Boolean(flags['use-snapshot-epr']),
+    eprRegistry: flags['epr-registry'],
   };
 
   return {

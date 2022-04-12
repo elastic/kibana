@@ -13,12 +13,12 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiText,
-  EuiToolTip,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -28,22 +28,36 @@ import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestRun } from '../test_now_mode/test_now_mode';
 
+import { monitorManagementListSelector } from '../../../state/selectors';
+
+import { kibanaService } from '../../../state/kibana_service';
+import { showSyncErrors } from '../show_sync_errors';
+
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
   isValid: boolean;
   testRun?: TestRun;
+  isTestRunInProgress: boolean;
   onSave?: () => void;
   onTestNow?: () => void;
 }
 
-export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: ActionBarProps) => {
+export const ActionBar = ({
+  monitor,
+  isValid,
+  onSave,
+  onTestNow,
+  testRun,
+  isTestRunInProgress,
+}: ActionBarProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { basePath } = useContext(UptimeSettingsContext);
+  const { locations } = useSelector(monitorManagementListSelector);
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { notifications } = useKibana();
+  const [isSuccessful, setIsSuccessful] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean | undefined>(undefined);
 
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
@@ -54,6 +68,9 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       id: monitorId ? Buffer.from(monitorId, 'base64').toString('utf8') : undefined,
     });
   }, [monitor, monitorId, isValid, isSaving]);
+
+  const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
+  const loading = status === FETCH_STATUS.LOADING;
 
   const handleOnSave = useCallback(() => {
     if (onSave) {
@@ -75,24 +92,24 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       setIsSaving(false);
     }
     if (status === FETCH_STATUS.FAILURE) {
-      notifications.toasts.danger({
-        title: <p data-test-subj="uptimeAddMonitorFailure">{MONITOR_FAILURE_LABEL}</p>,
+      kibanaService.toasts.addDanger({
+        title: MONITOR_FAILURE_LABEL,
         toastLifeTimeMs: 3000,
       });
-    } else if (status === FETCH_STATUS.SUCCESS) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeAddMonitorSuccess">
-            {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL}
-          </p>
-        ),
+    } else if (status === FETCH_STATUS.SUCCESS && !hasErrors && !loading) {
+      kibanaService.toasts.addSuccess({
+        title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
+      setIsSuccessful(true);
+    } else if (hasErrors && !loading) {
+      showSyncErrors(data.attributes.errors, locations);
+      setIsSuccessful(true);
     }
-  }, [data, status, notifications.toasts, isSaving, isValid, monitorId]);
+  }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
 
-  return status === FETCH_STATUS.SUCCESS ? (
-    <Redirect to={MONITOR_MANAGEMENT_ROUTE} />
+  return isSuccessful ? (
+    <Redirect to={MONITOR_MANAGEMENT_ROUTE + '/all'} />
   ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
@@ -100,34 +117,50 @@ export const ActionBar = ({ monitor, isValid, onSave, onTestNow, testRun }: Acti
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
-          {onTestNow && (
-            <EuiFlexItem grow={false} style={{ marginRight: 20 }}>
-              <EuiToolTip content={TEST_NOW_DESCRIPTION}>
-                <EuiButton
-                  fill
-                  size="s"
-                  color="success"
-                  iconType="play"
-                  onClick={() => onTestNow()}
-                  disabled={!isValid}
-                  data-test-subj={'monitorTestNowRunBtn'}
-                >
-                  {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="ghost"
               size="s"
-              iconType="cross"
               href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+
+          {onTestNow && (
+            <EuiFlexItem grow={false}>
+              {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
+              <EuiPopover
+                repositionOnScroll={true}
+                initialFocus={false}
+                button={
+                  <EuiButton
+                    css={{ width: '100%' }}
+                    fill
+                    size="s"
+                    color="success"
+                    iconType="play"
+                    disabled={!isValid || isTestRunInProgress}
+                    data-test-subj={'monitorTestNowRunBtn'}
+                    onClick={() => onTestNow()}
+                    onMouseEnter={() => {
+                      setIsPopoverOpen(true);
+                    }}
+                    onMouseLeave={() => {
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    {testRun ? RE_RUN_TEST_LABEL : RUN_TEST_LABEL}
+                  </EuiButton>
+                }
+                isOpen={isPopoverOpen}
+              >
+                <EuiText style={{ width: 260, outline: 'none' }}>
+                  <p>{TEST_NOW_DESCRIPTION}</p>
+                </EuiText>
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -191,7 +224,6 @@ const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
   }
 );
 
-// TODO: Discuss error states with product
 const MONITOR_FAILURE_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorFailureMessage',
   {

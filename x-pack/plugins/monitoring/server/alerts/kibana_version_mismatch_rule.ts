@@ -17,16 +17,16 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
+import { Alert } from '../../../alerting/server';
 import { RULE_KIBANA_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 export class KibanaVersionMismatchRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_KIBANA_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_KIBANA_VERSION_MISMATCH].label,
@@ -97,7 +97,7 @@ export class KibanaVersionMismatchRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

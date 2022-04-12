@@ -26,10 +26,13 @@ export const BuildKibanaExamplePlugins: Task = {
         .map((f) => Path.resolve(dir, f.name));
     };
 
+    // https://github.com/elastic/kibana/issues/127338
+    const skipExamples = ['alerting_example'];
+
     const folders = [
       ...getExampleFolders(Path.resolve(REPO_ROOT, 'examples')),
       ...getExampleFolders(Path.resolve(REPO_ROOT, 'x-pack/examples')),
-    ];
+    ].filter((p) => !skipExamples.includes(Path.basename(p)));
 
     for (const examplePlugin of folders) {
       try {

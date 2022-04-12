@@ -7,6 +7,7 @@
 
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
+import _ from 'lodash';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
@@ -28,6 +29,7 @@ import {
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../../config';
+import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '../';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
@@ -36,13 +38,18 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
+  defaultViewport: {
+    /** Size in pixels */
+    width?: number;
+    /** Size in pixels */
+    height?: number;
+  };
   openUrlTimeout: number;
 }
 
 interface CreatePageResult {
   driver: HeadlessChromiumDriver;
   unexpectedExit$: Rx.Observable<never>;
-  metrics$: Rx.Observable<PerformanceMetrics>;
   /**
    * Close the page and the browser.
    *
@@ -50,7 +57,11 @@ interface CreatePageResult {
    * have concluded. This ensures the browser is closed and gives the OS a chance
    * to reclaim resources like memory.
    */
-  close: () => Rx.Observable<void>;
+  close: () => Rx.Observable<ClosePageResult>;
+}
+
+interface ClosePageResult {
+  metrics?: PerformanceMetrics;
 }
 
 export const DEFAULT_VIEWPORT = {
@@ -91,15 +102,20 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
-  private userDataDir = fs.mkdtempSync(path.join(getDataPath(), 'chromium-'));
+  private userDataDir: string;
   type = 'chromium';
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
     private config: ConfigType,
     private logger: Logger,
-    private binaryPath: string
+    private binaryPath: string,
+    private basePath: string
   ) {
+    const dataDir = getDataPath();
+    fs.mkdirSync(dataDir, { recursive: true });
+    this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+
     if (this.config.browser.chromium.disableSandbox) {
       logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
     }
@@ -110,7 +126,7 @@ export class HeadlessChromiumDriverFactory {
       userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      viewport: DEFAULT_VIEWPORT,
+      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
     });
   }
 
@@ -118,7 +134,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     // FIXME: 'create' is deprecated
@@ -130,7 +146,6 @@ export class HeadlessChromiumDriverFactory {
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: Browser | undefined;
-
       try {
         browser = await puppeteer.launch({
           pipe: !this.config.browser.chromium.inspect,
@@ -139,12 +154,21 @@ export class HeadlessChromiumDriverFactory {
           ignoreHTTPSErrors: true,
           handleSIGHUP: false,
           args: chromiumArgs,
+
+          // We optionally set this at page creation to reduce the chances of
+          // browser reflow. In most cases only the height needs to be adjusted
+          // before taking a screenshot.
+          // NOTE: _.defaults assigns to the target object, so we copy it.
+          // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
+          defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
           env: {
             TZ: browserTimezone,
           },
         });
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser! ${err}`));
+        observer.error(
+          new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
+        );
         return;
       }
 
@@ -153,7 +177,6 @@ export class HeadlessChromiumDriverFactory {
 
       await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
       const startMetrics = await devTools.send('Performance.getMetrics');
-      const metrics$ = new Rx.Subject<PerformanceMetrics>();
 
       // Log version info for debugging / maintenance
       const versionInfo = await devTools.send('Browser.getVersion');
@@ -168,23 +191,25 @@ export class HeadlessChromiumDriverFactory {
       logger.debug(`Browser page driver created`);
 
       const childProcess = {
-        async kill(): Promise<void> {
-          if (page.isClosed()) return;
+        async kill(): Promise<ClosePageResult> {
+          if (page.isClosed()) {
+            return {};
+          }
+
+          let metrics: PerformanceMetrics | undefined;
+
           try {
             if (devTools && startMetrics) {
               const endMetrics = await devTools.send('Performance.getMetrics');
-              const metrics = getMetrics(startMetrics, endMetrics);
+              metrics = getMetrics(startMetrics, endMetrics);
               const { cpuInPercentage, memoryInMegabytes } = metrics;
 
-              metrics$.next(metrics);
               logger.debug(
                 `Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`
               );
             }
           } catch (error) {
             logger.error(error);
-          } finally {
-            metrics$.complete();
           }
 
           try {
@@ -195,6 +220,8 @@ export class HeadlessChromiumDriverFactory {
             // do not throw
             logger.error(err);
           }
+
+          return { metrics };
         },
       };
       const { terminate$ } = safeChildProcess(logger, childProcess);
@@ -223,7 +250,12 @@ export class HeadlessChromiumDriverFactory {
       this.getProcessLogger(browser, logger).subscribe();
 
       // HeadlessChromiumDriver: object to "drive" a browser page
-      const driver = new HeadlessChromiumDriver(this.screenshotMode, this.config, page);
+      const driver = new HeadlessChromiumDriver(
+        this.screenshotMode,
+        this.config,
+        this.basePath,
+        page
+      );
 
       // Rx.Observable<never>: stream to interrupt page capture
       const unexpectedExit$ = this.getPageExit(browser, page);
@@ -231,7 +263,6 @@ export class HeadlessChromiumDriverFactory {
       observer.next({
         driver,
         unexpectedExit$,
-        metrics$: metrics$.asObservable(),
         close: () => Rx.from(childProcess.kill()),
       });
 

@@ -72,7 +72,7 @@ interface CreateQueryOptions {
   dsDataset?: string;
   metricset?: string;
   filters?: any[];
-  clusterUuid: string;
+  clusterUuid?: string;
   uuid?: string;
   start?: number;
   end?: number;

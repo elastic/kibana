@@ -45,8 +45,8 @@ export async function termsAggSuggestions(
   );
 
   const buckets =
-    get(result.body, 'aggregations.suggestions.buckets') ||
-    get(result.body, 'aggregations.nestedSuggestions.suggestions.buckets');
+    get(result, 'aggregations.suggestions.buckets') ||
+    get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
   return map(buckets ?? [], 'key');
 }

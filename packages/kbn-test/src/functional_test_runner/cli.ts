@@ -46,6 +46,7 @@ export function runFtrCli() {
         {
           mochaOpts: {
             bail: flags.bail,
+            dryRun: flags['dry-run'],
             grep: flags.grep || undefined,
             invert: flags.invert,
           },
@@ -148,6 +149,7 @@ export function runFtrCli() {
           'u',
           'throttle',
           'headless',
+          'dry-run',
         ],
         default: {
           config: 'test/functional/config.js',
@@ -174,6 +176,7 @@ export function runFtrCli() {
           --kibana-install-dir  directory where the Kibana install being tested resides
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
+          --dry-run          report tests without executing them
         `,
       },
     }

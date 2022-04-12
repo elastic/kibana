@@ -35,8 +35,13 @@ import { TRANSFORM_STATES } from '../../../plugins/security_solution/common/cons
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const endpointTestResources = getService('endpointTestResources');
 
   describe('test metadata apis', () => {
+    before(async () => {
+      await endpointTestResources.setMetadataTransformFrequency('1s');
+    });
+
     describe('list endpoints GET route', () => {
       describe('with .metrics-endpoint.metadata_united_default index', () => {
         const numberOfHostsInFixture = 2;
@@ -58,17 +63,22 @@ export default function ({ getService }: FtrProviderContext) {
           const policyId = policy.integrationPolicies[0].policy_id;
           const currentTime = new Date().getTime();
 
+          const agentDocs = generateAgentDocs(currentTime, policyId);
+
           await Promise.all([
-            bulkIndex(getService, AGENTS_INDEX, generateAgentDocs(currentTime, policyId)),
+            bulkIndex(getService, AGENTS_INDEX, agentDocs),
             bulkIndex(getService, METADATA_DATASTREAM, generateMetadataDocs(currentTime)),
           ]);
 
-          // wait for latest metadata transform to run
-          await new Promise((r) => setTimeout(r, 30000));
+          await endpointTestResources.waitForEndpoints(
+            agentDocs.map((doc) => doc.agent.id),
+            60000
+          );
           await startTransform(getService, METADATA_UNITED_TRANSFORM);
-
-          // wait for united metadata transform to run
-          await new Promise((r) => setTimeout(r, 15000));
+          await endpointTestResources.waitForUnitedEndpoints(
+            agentDocs.map((doc) => doc.agent.id),
+            60000
+          );
         });
 
         after(async () => {
@@ -295,9 +305,14 @@ export default function ({ getService }: FtrProviderContext) {
             // otherwise it won't hit metrics-endpoint.metadata_current_default index
             await stopTransform(getService, `${METADATA_UNITED_TRANSFORM}*`);
             await deleteIndex(getService, METADATA_UNITED_INDEX);
-            await bulkIndex(getService, METADATA_DATASTREAM, generateMetadataDocs(timestamp));
-            // wait for transform
-            await new Promise((r) => setTimeout(r, 60000));
+
+            const metadataDocs = generateMetadataDocs(timestamp);
+            await bulkIndex(getService, METADATA_DATASTREAM, metadataDocs);
+
+            await endpointTestResources.waitForEndpoints(
+              Array.from(new Set(metadataDocs.map((doc) => doc.agent.id))),
+              60000
+            );
           });
           // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
           // to do it manually

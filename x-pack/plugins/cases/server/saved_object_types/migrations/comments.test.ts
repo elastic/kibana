@@ -36,7 +36,7 @@ import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
-    lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({})),
+    lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
   });
 
   const contextMock = savedObjectsServiceMock.createMigrationContext();

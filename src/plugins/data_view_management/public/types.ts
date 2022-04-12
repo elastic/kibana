@@ -8,12 +8,12 @@
 
 import {
   ChromeStart,
-  ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  ApplicationStart,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
@@ -23,10 +23,11 @@ import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/publi
 import { DataViewEditorStart } from '../../data_view_editor/public';
 import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { FieldFormatsStart } from '../../field_formats/public';
+import { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export interface IndexPatternManagmentContext {
-  chrome: ChromeStart;
   application: ApplicationStart;
+  chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;
@@ -40,6 +41,7 @@ export interface IndexPatternManagmentContext {
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type IndexPatternManagmentContextValue =

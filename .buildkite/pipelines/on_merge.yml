@@ -1,24 +1,29 @@
 env:
-  GITHUB_COMMIT_STATUS_ENABLED: 'true'
-  GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
+  REPORT_FAILED_TESTS_TO_GITHUB: 'false'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - wait
 
-  - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
-    label: Default Build and Metrics
+  - command: .buildkite/scripts/steps/test/jest.sh
+    label: 'Jest Tests'
+    parallelism: 16
     agents:
-      queue: c2-8
-    timeout_in_minutes: 60
-
-  - command: .buildkite/scripts/steps/on_merge_ts_refs_api_docs.sh
-    label: Build TS Refs and Check Public API Docs
-    agents:
-      queue: c2-4
-    timeout_in_minutes: 80
+      queue: n2-4-spot
+    timeout_in_minutes: 90
+    key: jest
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - wait: ~
     continue_on_failure: true
@@ -26,3 +31,5 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default

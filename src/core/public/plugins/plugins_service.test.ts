@@ -36,6 +36,7 @@ import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { themeServiceMock } from '../theme/theme_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -85,6 +86,7 @@ describe('PluginsService', () => {
     mockSetupDeps = {
       application: applicationServiceMock.createInternalSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+      executionContext: executionContextServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
@@ -100,6 +102,7 @@ describe('PluginsService', () => {
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
+      executionContext: executionContextServiceMock.createStartContract(),
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),
@@ -248,36 +251,6 @@ describe('PluginsService', () => {
       expect((contracts.get('pluginA')! as any).setupValue).toEqual(1);
       expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(2);
     });
-
-    describe('timeout', () => {
-      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
-      beforeAll(() => {
-        jest.useFakeTimers();
-      });
-      afterAll(() => {
-        jest.useRealTimers();
-      });
-
-      it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
-        mockPluginInitializers.set(
-          'pluginA',
-          jest.fn(() => ({
-            setup: jest.fn(() => new Promise((i) => i)),
-            start: jest.fn(() => ({ value: 1 })),
-            stop: jest.fn(),
-          }))
-        );
-        const pluginsService = new PluginsService(mockCoreContext, plugins);
-        const promise = pluginsService.setup(mockSetupDeps);
-
-        await flushPromises();
-        jest.runAllTimers(); // setup plugins
-
-        await expect(promise).rejects.toMatchInlineSnapshot(
-          `[Error: Setup lifecycle of "pluginA" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
-        );
-      });
-    });
   });
 
   describe('#start()', () => {
@@ -330,34 +303,6 @@ describe('PluginsService', () => {
       expect((contracts.get('pluginA')! as any).startValue).toEqual(2);
       expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(3);
     });
-    describe('timeout', () => {
-      beforeAll(() => {
-        jest.useFakeTimers();
-      });
-      afterAll(() => {
-        jest.useRealTimers();
-      });
-
-      it('throws timeout error if "start" was not completed in 30 sec.', async () => {
-        mockPluginInitializers.set(
-          'pluginA',
-          jest.fn(() => ({
-            setup: jest.fn(() => ({ value: 1 })),
-            start: jest.fn(() => new Promise((i) => i)),
-            stop: jest.fn(),
-          }))
-        );
-        const pluginsService = new PluginsService(mockCoreContext, plugins);
-        await pluginsService.setup(mockSetupDeps);
-
-        const promise = pluginsService.start(mockStartDeps);
-        jest.runAllTimers();
-
-        await expect(promise).rejects.toMatchInlineSnapshot(
-          `[Error: Start lifecycle of "pluginA" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
-        );
-      });
-    });
   });
 
   describe('#stop()', () => {
@@ -374,126 +319,6 @@ describe('PluginsService', () => {
       expect(pluginAInstance.stop).toHaveBeenCalled();
       expect(pluginBInstance.stop).toHaveBeenCalled();
       expect(pluginCInstance.stop).toHaveBeenCalled();
-    });
-  });
-
-  describe('asynchronous plugins', () => {
-    let consoleSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => undefined);
-    });
-
-    afterEach(() => {
-      consoleSpy.mockRestore();
-    });
-
-    const runScenario = async ({
-      production,
-      asyncSetup,
-      asyncStart,
-    }: {
-      production: boolean;
-      asyncSetup: boolean;
-      asyncStart: boolean;
-    }) => {
-      const coreContext = coreMock.createCoreContext({ production });
-
-      const syncPlugin = { id: 'sync-plugin', plugin: createManifest('sync-plugin') };
-      mockPluginInitializers.set(
-        'sync-plugin',
-        jest.fn(() => ({
-          setup: jest.fn(() => 'setup-sync'),
-          start: jest.fn(() => 'start-sync'),
-          stop: jest.fn(),
-        }))
-      );
-
-      const asyncPlugin = { id: 'async-plugin', plugin: createManifest('async-plugin') };
-      mockPluginInitializers.set(
-        'async-plugin',
-        jest.fn(() => ({
-          setup: jest.fn(() => (asyncSetup ? Promise.resolve('setup-async') : 'setup-sync')),
-          start: jest.fn(() => (asyncStart ? Promise.resolve('start-async') : 'start-sync')),
-          stop: jest.fn(),
-        }))
-      );
-
-      const pluginsService = new PluginsService(coreContext, [syncPlugin, asyncPlugin]);
-
-      await pluginsService.setup(mockSetupDeps);
-      await pluginsService.start(mockStartDeps);
-    };
-
-    it('logs a warning if a plugin returns a promise from its setup contract in dev mode', async () => {
-      await runScenario({
-        production: false,
-        asyncSetup: true,
-        asyncStart: false,
-      });
-
-      expect(consoleSpy.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
-          ],
-        ]
-      `);
-    });
-
-    it('does not log warnings if a plugin returns a promise from its setup contract in prod mode', async () => {
-      await runScenario({
-        production: true,
-        asyncSetup: true,
-        asyncStart: false,
-      });
-
-      expect(consoleSpy).not.toHaveBeenCalled();
-    });
-
-    it('logs a warning if a plugin returns a promise from its start contract in dev mode', async () => {
-      await runScenario({
-        production: false,
-        asyncSetup: false,
-        asyncStart: true,
-      });
-
-      expect(consoleSpy.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
-          ],
-        ]
-      `);
-    });
-
-    it('does not log warnings if a plugin returns a promise from its start contract  in prod mode', async () => {
-      await runScenario({
-        production: true,
-        asyncSetup: false,
-        asyncStart: true,
-      });
-
-      expect(consoleSpy).not.toHaveBeenCalled();
-    });
-
-    it('logs multiple warnings if both `setup` and `start` return promises', async () => {
-      await runScenario({
-        production: false,
-        asyncSetup: true,
-        asyncStart: true,
-      });
-
-      expect(consoleSpy.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
-          ],
-          Array [
-            "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
-          ],
-        ]
-      `);
     });
   });
 });

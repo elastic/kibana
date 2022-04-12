@@ -15,6 +15,7 @@ import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
 import { dataPluginMock } from '../../../plugins/data/public/mocks';
+import { dataViewPluginMocks } from '../../../plugins/data_views/public/mocks';
 import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
@@ -23,6 +24,7 @@ import { urlForwardingPluginMock } from '../../../plugins/url_forwarding/public/
 import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
 import { presentationUtilPluginMock } from '../../../plugins/presentation_util/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
+import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -50,10 +52,12 @@ const createInstance = async () => {
     inspector: inspectorPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
+    uiActions: uiActionsPluginMock.createSetupContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
@@ -67,6 +71,7 @@ const createInstance = async () => {
       navigation: navigationPluginMock.createStartContract(),
       presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
+      screenshotMode: screenshotModePluginMock.createStartContract(),
     });
 
   return {
