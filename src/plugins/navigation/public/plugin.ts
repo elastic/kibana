@@ -32,13 +32,13 @@ export class NavigationPublicPlugin
 
   public start(
     { i18n }: CoreStart,
-    { data }: NavigationPluginStartDependencies
+    { unifiedSearch }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     return {
       ui: {
-        TopNavMenu: createTopNav(data, extensions, i18n),
+        TopNavMenu: createTopNav(unifiedSearch, extensions, i18n),
       },
     };
   }

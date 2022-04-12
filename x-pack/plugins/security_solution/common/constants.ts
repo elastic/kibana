@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { TransformConfigSchema } from './transforms/types';
-
 /**
  * as const
  *
@@ -54,7 +52,6 @@ export const DEFAULT_INTERVAL_PAUSE = true as const;
 export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
-export const DEFAULT_TRANSFORMS = 'securitySolution:transforms' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
 export const GLOBAL_HEADER_HEIGHT = 96 as const; // px
 export const FILTERS_GLOBAL_HEIGHT = 109 as const; // px
@@ -79,7 +76,6 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  authentications = 'authentications',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
@@ -92,7 +88,6 @@ export enum SecurityPageName {
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
-  events = 'events',
   exceptions = 'exceptions',
   explore = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
@@ -100,6 +95,8 @@ export enum SecurityPageName {
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
+  hostsEvents = 'hosts-events',
+  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
   landing = 'get_started',
   network = 'network',
@@ -109,15 +106,19 @@ export enum SecurityPageName {
   networkHttp = 'network-http',
   networkTls = 'network-tls',
   overview = 'overview',
-  policies = 'policies',
+  policies = 'policy',
   rules = 'rules',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
   users = 'users',
+  usersAuthentications = 'users-authentications',
   usersAnomalies = 'users-anomalies',
   usersRisk = 'users-risk',
+  sessions = 'sessions',
+  usersEvents = 'users-events',
+  usersExternalAlerts = 'users-external_alerts',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;
@@ -199,38 +200,6 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
-/** The default settings for the transforms */
-export const defaultTransformsSetting: TransformConfigSchema = {
-  enabled: false,
-  auto_start: true,
-  auto_create: true,
-  query: {
-    range: {
-      '@timestamp': {
-        gte: 'now-1d/d',
-        format: 'strict_date_optional_time',
-      },
-    },
-  },
-  retention_policy: {
-    time: {
-      field: '@timestamp',
-      max_age: '1w',
-    },
-  },
-  max_page_search_size: 5000,
-  settings: [
-    {
-      prefix: 'all',
-      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      data_sources: [
-        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ],
-    },
-  ],
-};
-export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -266,6 +235,12 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
+export const DETECTION_ENGINE_RULES_BULK_DELETE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
+export const DETECTION_ENGINE_RULES_BULK_CREATE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
+export const DETECTION_ENGINE_RULES_BULK_UPDATE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
 /**
  * Internal detection engine routes
@@ -367,13 +342,6 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-/**
- * Used for transforms for metrics_entities. If the security_solutions pulls in
- * the metrics_entities plugin, then it should pull this constant from there rather
- * than use it from here.
- */
-export const ELASTIC_NAME = 'estc' as const;
-
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
 
 export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
@@ -439,4 +407,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  * we will need to update this constant with the corresponding version.
  */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.2';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';

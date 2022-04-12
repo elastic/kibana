@@ -174,8 +174,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id, false));
-
-    const layer = createLayerInstance(layerDescriptor);
+    const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
   };

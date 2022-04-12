@@ -6,7 +6,7 @@
  */
 import { min } from 'lodash';
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';

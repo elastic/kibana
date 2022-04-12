@@ -34,7 +34,9 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
           color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
     <div
@@ -85,7 +87,9 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
           color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -131,7 +135,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
           color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
     <div
@@ -182,7 +188,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
           color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -228,7 +236,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
           color="inherit"
           data-euiicon-type="arrowLeft"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
     <div
@@ -279,7 +289,9 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
           color="inherit"
           data-euiicon-type="arrowRight"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>

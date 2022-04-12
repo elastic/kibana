@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '../types';
 import { CoreStart } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
@@ -39,6 +40,12 @@ describe('useAnomalyChartsInputResolver', () => {
 
   const start = moment().subtract(1, 'years');
   const end = moment();
+
+  const renderCallbacks = {
+    onRenderComplete: jest.fn(),
+    onLoading: jest.fn(),
+    onError: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -108,45 +115,60 @@ describe('useAnomalyChartsInputResolver', () => {
     jest.clearAllMocks();
   });
 
-  test('should fetch jobs only when input job ids have been changed', async () => {
-    const { result } = renderHook(() =>
-      useAnomalyChartsInputResolver(
-        embeddableInput as Observable<AnomalyChartsEmbeddableInput>,
-        onInputChange,
-        refresh,
-        services,
-        1000,
-        0
-      )
-    );
+  test(
+    'should fetch jobs only when input job ids have been changed',
+    fakeSchedulers(async (advance) => {
+      const { result } = renderHook(() =>
+        useAnomalyChartsInputResolver(
+          embeddableInput as Observable<AnomalyChartsEmbeddableInput>,
+          onInputChange,
+          refresh,
+          services,
+          1000,
+          0,
+          renderCallbacks
+        )
+      );
 
-    expect(result.current.chartsData).toBe(undefined);
-    expect(result.current.error).toBe(undefined);
-    expect(result.current.isLoading).toBe(true);
+      expect(result.current.chartsData).toBe(undefined);
+      expect(result.current.error).toBe(undefined);
+      expect(result.current.isLoading).toBe(true);
+      expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(0);
 
-    jest.advanceTimersByTime(501);
+      advance(501);
 
-    const explorerServices = services[2];
+      expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(1);
 
-    expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
-    expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(1);
+      const explorerServices = services[2];
 
-    embeddableInput.next({
-      id: 'test-explorer-charts-embeddable',
-      jobIds: ['anotherJobId'],
-      filters: [],
-      query: { language: 'kuery', query: '' },
-      maxSeriesToPlot: 6,
-      timeRange: {
-        from: 'now-3y',
-        to: 'now',
-      },
-    });
-    jest.advanceTimersByTime(501);
+      expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
+      expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(1);
 
-    expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(2);
-  });
+      expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(1);
+
+      embeddableInput.next({
+        id: 'test-explorer-charts-embeddable',
+        jobIds: ['anotherJobId'],
+        filters: [],
+        query: { language: 'kuery', query: '' },
+        maxSeriesToPlot: 6,
+        timeRange: {
+          from: 'now-3y',
+          to: 'now',
+        },
+      });
+      advance(501);
+
+      expect(renderCallbacks.onLoading).toHaveBeenCalledTimes(2);
+
+      expect(explorerServices.anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
+      expect(explorerServices.anomalyExplorerService.getAnomalyData$).toHaveBeenCalledTimes(2);
+
+      expect(renderCallbacks.onRenderComplete).toHaveBeenCalledTimes(2);
+
+      expect(renderCallbacks.onError).toHaveBeenCalledTimes(0);
+    })
+  );
 
   test.skip('should not complete the observable on error', async () => {
     const { result } = renderHook(() =>
@@ -156,7 +178,8 @@ describe('useAnomalyChartsInputResolver', () => {
         refresh,
         services,
         1000,
-        1
+        1,
+        renderCallbacks
       )
     );
 
@@ -168,5 +191,6 @@ describe('useAnomalyChartsInputResolver', () => {
     } as Partial<AnomalyChartsEmbeddableInput>);
 
     expect(result.current.error).toBeDefined();
+    expect(renderCallbacks.onError).toHaveBeenCalledTimes(1);
   });
 });

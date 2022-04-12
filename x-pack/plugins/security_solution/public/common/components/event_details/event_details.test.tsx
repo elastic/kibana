@@ -140,5 +140,20 @@ describe('EventDetails', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
       expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
     });
+    it('does not render if readOnly prop is passed', async () => {
+      const newProps = { ...defaultProps, isReadOnly: true };
+      wrapper = mount(
+        <TestProviders>
+          <EventDetails {...newProps} />
+        </TestProviders>
+      ) as ReactWrapper;
+      alertsWrapper = mount(
+        <TestProviders>
+          <EventDetails {...{ ...alertsProps, ...newProps }} />
+        </TestProviders>
+      ) as ReactWrapper;
+      await waitFor(() => wrapper.update());
+      expect(alertsWrapper.find('[data-test-subj="threatIntelTab"]').exists()).toBeFalsy();
+    });
   });
 });

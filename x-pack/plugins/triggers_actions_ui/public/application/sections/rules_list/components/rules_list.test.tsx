@@ -14,8 +14,8 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
 import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
-  AlertExecutionStatusErrorReasons,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
 } from '../../../../../../alerting/common';
@@ -305,7 +305,7 @@ describe('rules_list component with items', () => {
         lastDuration: 122000,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },
@@ -331,7 +331,7 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.License,
+          reason: RuleExecutionStatusErrorReasons.License,
           message: 'test',
         },
       },
@@ -357,7 +357,7 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         warning: {
-          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: 'test',
         },
       },

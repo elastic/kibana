@@ -13,8 +13,8 @@ import { TestWrapper } from './waterfall_marker_test_helper';
 
 describe('<WaterfallMarkerIcon />', () => {
   it('renders a dot icon when `field` is an empty string', () => {
-    const { getByLabelText } = render(<WaterfallMarkerIcon field="" label="" />);
-    expect(getByLabelText('An icon indicating that this marker has no field associated with it'));
+    const { getByText } = render(<WaterfallMarkerIcon field="" label="" />);
+    expect(getByText('An icon indicating that this marker has no field associated with it'));
   });
 
   it('renders an embeddable when opened', async () => {

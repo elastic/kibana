@@ -26,8 +26,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/128225
-  describe.skip('getExecutionLog', () => {
+  describe('getExecutionLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -95,6 +94,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(0);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(0);
+        expect(log.num_scheduled_actions).to.equal(0);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(0);
 
@@ -108,7 +108,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ schedule: { interval: '15s' } }))
+        .send(getTestRuleData({ enabled: false, schedule: { interval: '15s' } }))
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -120,6 +120,32 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
       expect(response.status).to.eql(200);
 
+      expect(response.body.total).to.eql(0);
+      expect(response.body.data).to.eql([]);
+      expect(response.body.totalErrors).to.eql(0);
+      expect(response.body.errors).to.eql([]);
+    });
+
+    it('gets execution log for rule that is currently running', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ rule_type_id: 'test.longRunning', params: { delay: 120000 } }))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // wait for execute-start event that signals rule has started running
+      await waitForEvents(createdRule.id, 'alerting', new Map([['execute-start', { gte: 1 }]]));
+
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
+          createdRule.id
+        }/_execution_log?date_start=${dateStart}`
+      );
+
+      expect(response.status).to.eql(200);
+
+      // since these events should have been excluded from the agg, should return empty
       expect(response.body.total).to.eql(0);
       expect(response.body.data).to.eql([]);
       expect(response.body.totalErrors).to.eql(0);
@@ -169,6 +195,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(0);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(0);
+        expect(log.num_scheduled_actions).to.equal(0);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(0);
 
@@ -323,6 +350,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(1);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(1);
+        expect(log.num_scheduled_actions).to.equal(1);
         expect(log.num_succeeded_actions).to.equal(1);
         expect(log.num_errored_actions).to.equal(0);
       }
@@ -380,6 +408,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(1);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(1);
+        expect(log.num_scheduled_actions).to.equal(1);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(1);
       }

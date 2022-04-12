@@ -6,12 +6,17 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObject } from 'kibana/server';
-import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import {
+  MonitorFields,
+  SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
+import { formatSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -29,24 +34,25 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const newMonitor: SavedObject<SyntheticsMonitor> =
-      await savedObjectsClient.create<SyntheticsMonitor>(syntheticsMonitorType, {
-        ...monitor,
-        revision: 1,
-      });
+    const newMonitor: SavedObject<EncryptedSyntheticsMonitor> =
+      await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+        syntheticsMonitorType,
+        formatSecrets({
+          ...monitor,
+          revision: 1,
+        })
+      );
 
     const { syntheticsService } = server;
 
-    const errors = await syntheticsService.pushConfigs(request, [
-      {
-        ...newMonitor.attributes,
-        id: newMonitor.id,
-        fields: {
-          config_id: newMonitor.id,
-        },
-        fields_under_root: true,
+    const errors = await syntheticsService.addConfig({
+      ...monitor,
+      id: newMonitor.id,
+      fields: {
+        config_id: newMonitor.id,
       },
-    ]);
+      fields_under_root: true,
+    });
 
     sendTelemetryEvents(
       server.logger,
