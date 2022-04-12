@@ -21,6 +21,8 @@ import { Loading } from '..';
 
 import { policyHasFleetServer } from '../../services';
 
+import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
+
 import type { InstructionProps } from './types';
 
 import { ManagedSteps, StandaloneSteps } from './steps';
@@ -96,11 +98,7 @@ export const Instructions = (props: InstructionProps) => {
             />
           </EuiText>
           <EuiSpacer size="l" />
-          {/* {isFleetServerPolicySelected ? (
-            <FleetServerSteps {...props} />
-          ) : ( */}
-          <ManagedSteps {...props} />
-          {/* )} */}
+          {isFleetServerPolicySelected ? <AdvancedTab /> : <ManagedSteps {...props} />}
         </>
       );
     }
