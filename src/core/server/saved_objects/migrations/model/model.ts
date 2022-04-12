@@ -44,6 +44,7 @@ const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
   maxBatchSizeBytes: number;
 }) =>
   `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
+
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
   // responses. Each control state only triggers one action so each control
@@ -77,12 +78,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information`,
+          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
           logs: [
             ...stateP.logs,
             {
               level: 'error',
-              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
             },
           ],
         };
@@ -236,27 +237,38 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isLeft(res)) {
+      if (isLeftTypeof(res.left, 'index_not_yellow_timeout')) {
+        // index_not_yellow_timeout for the LEGACY_CREATE_REINDEX_TARGET source index:
+        // the cluster may have hit the low watermark for disk usage and could not create
+        // the index.
+
+        // Unless the disc space is addressed, the LEGACY_CREATE_TEINDEX_TARGET action will
+        // continue to timeout and eventually lead to a failed migration.
+        // to minimise downtime, the migration fails early with a clearly labeled error and
+        // a link to the online documentation that has more information on how to diagnose
+        // the error
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+            },
+          ],
+        };
+      } else {
+        return throwBadResponse(stateP, res.left);
+      }
+    }
     if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'LEGACY_REINDEX',
       };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
-            },
-          ],
-        };
-      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
@@ -356,18 +368,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-      };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+    if (Either.isLeft(res)) {
+      if (isLeftTypeof(res.left, 'index_not_yellow_timeout')) {
+        // index_not_yellow_timeout for the WAIT_FOR_YELLOW_SOURCE source index:
+        // the index status did not go yellow within the specified timeout period.
+        // Identifying the cause requires inspecting the ouput of the
+        // `_cluster/allocation/explain?index=${targetIndex}` API.
+
+        // Unless the root cause is identified and addressed, the request will
+        // continue to timeout and eventually lead to a failed migration.
+        // To minimise downtime, the migration fails early with a clearly labeled error and
+        // a link to the online documentation that has more information on how to diagnose
+        // the error
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow' Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
           logs: [
             ...stateP.logs,
             {
@@ -376,7 +392,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             },
           ],
         };
+      } else {
+        return throwBadResponse(stateP, res.left);
       }
+    }
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+      };
     } else {
       return throwBadResponse(stateP, res);
     }
@@ -456,24 +480,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+    if (Either.isLeft(res)) {
+      if (isLeftTypeof(res.left, 'index_not_yellow_timeout')) {
+        // index_not_yellow_timeout for the CREATE_REINDEX_TEMP target temp index:
+        // the index status did not go yellow within the specified timeout period.
+        // Identifying the cause requires inspecting the ouput of the
+        // `_cluster/allocation/explain?index=${targetIndex}` API.
+
+        // Unless the root cause is identified and addressed, the request will
+        // continue to timeout and eventually lead to a failed migration.
+        // To minimise downtime, the migration fails early with a clearly labeled error and
+        // a link to the online documentation that has more information on how to diagnose
+        // the error
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow' Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.tempIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
           logs: [
             ...stateP.logs,
             {
               level: 'error',
-              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+              message: `Timeout waiting for the status of the [${stateP.tempIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
             },
           ],
         };
+      } else {
+        return throwBadResponse(stateP, res.left);
       }
+    }
+    if (Either.isRight(res)) {
+      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
@@ -677,14 +713,32 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CLONE_TEMP_TO_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'REFRESH_TARGET',
-      };
-    } else {
+    if (Either.isLeft(res)) {
       const left = res.left;
-      if (isLeftTypeof(left, 'index_not_found_exception')) {
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // index_not_yellow_timeout for the CLONE_TEMP_TO_TARGET source -> target index:
+        // the target index status did not go yellow within the specified timeout period.
+        // Identifying the cause requires inspecting the ouput of the
+        // `_cluster/allocation/explain?index=${targetIndex}` API.
+
+        // Unless the root cause is identified and addressed, the request will
+        // continue to timeout and eventually lead to a failed migration.
+        // To minimise downtime, the migration fails early with a clearly labeled error and
+        // a link to the online documentation that has more information on how to diagnose
+        // the error
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+            },
+          ],
+        };
+      } else if (isLeftTypeof(left, 'index_not_found_exception')) {
         // index_not_found_exception means another instance already completed
         // the MARK_VERSION_INDEX_READY step and removed the temp index
         // We still perform the REFRESH_TARGET, OUTDATED_DOCUMENTS_* and
@@ -694,22 +748,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'REFRESH_TARGET',
         };
-      } else if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow' Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
-            },
-          ],
-        };
       } else {
-        throwBadResponse(stateP, left);
+        return throwBadResponse(stateP, left);
       }
+    }
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'REFRESH_TARGET',
+      };
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'REFRESH_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -947,27 +996,38 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // index_not_yellow_timeout for the CREATE_NEW_TARGET target index:
+        // the cluster may have hit the low watermark for disk usage and could not create
+        // the index.
+        // Unless the disc space is addressed, the LEGACY_CREATE_TEINDEX_TARGET action will
+        // continue to timeout and eventually lead to a failed migration.
+        // to minimise downtime, the migration fails early with a clearly labeled error and
+        // a link to the online documentation that has more information on how to diagnose
+        // the error
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `Timeout waiting for the status of the [${stateP.targetIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
+            },
+          ],
+        };
+      } else {
+        return throwBadResponse(stateP, left);
+      }
+    }
     if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'MARK_VERSION_INDEX_READY',
       };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow' Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${stateP.sourceIndex}] index to become 'yellow'. Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for more information.`,
-            },
-          ],
-        };
-      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
