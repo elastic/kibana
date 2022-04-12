@@ -19,8 +19,11 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
 
   const testFiles = [require.resolve('./tests/playwright')];
 
-  const testJobId = process.env.TEST_JOB_ID ?? uuid();
-  log.info(`👷 JOB ID ${testJobId}👷`);
+  const testBuildId = process.env.BUILDKITE_BUILD_ID ?? `local-${uuid()}`;
+  const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuid()}`;
+  const executionId = uuid();
+
+  log.info(` 👷‍♀️ BUILD ID ${testBuildId}\n 👷 JOB ID ${testJobId}\n 👷‍♂️ EXECUTION ID:${executionId}`);
 
   return {
     testFiles,
@@ -44,6 +47,17 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
+        // capture request body for both errors and request transactions
+        // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-body
+        ELASTIC_APM_CAPTURE_BODY: 'all',
+        // capture request headers
+        // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-headers
+        ELASTIC_APM_CAPTURE_HEADERS: true,
+        // request body with bigger size will be trimmed.
+        // 300_000 is the default of the APM server.
+        // for a body with larger size, we might need to reconfigure the APM server to increase the limit.
+        // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#long-field-max-length
+        ELASTIC_APM_LONG_FIELD_MAX_LENGTH: 300_000,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance/tests/config.playwright`,
           performancePhase: process.env.TEST_PERFORMANCE_PHASE,

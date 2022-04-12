@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from 'src/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
@@ -34,7 +34,7 @@ export class PdfMaker {
   private worker?: Worker;
   private pageCount: number = 0;
 
-  protected workerModulePath = path.resolve(__dirname, './worker.js');
+  protected workerModulePath: string;
 
   /**
    * The maximum heap size for old memory region of the worker thread.
@@ -65,10 +65,18 @@ export class PdfMaker {
   constructor(
     private readonly layout: Layout,
     private readonly logo: string | undefined,
+    { dist }: PackageInfo,
     private readonly logger: Logger
   ) {
     this.title = '';
     this.content = [];
+
+    // running in dist: `worker.ts` becomes `worker.js`
+    // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
+    this.workerModulePath = path.resolve(
+      __dirname,
+      dist ? './worker.js' : './worker_src_harness.js'
+    );
   }
 
   _addContents(contents: Content[]) {

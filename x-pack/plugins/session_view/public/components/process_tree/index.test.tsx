@@ -14,7 +14,6 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessImpl } from './hooks';
 import { ProcessTreeDeps, ProcessTree } from './index';
 
 describe('ProcessTree component', () => {
@@ -22,7 +21,6 @@ describe('ProcessTree component', () => {
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
   const sessionLeader = mockData[0].events![0];
-  const sessionLeaderVerboseTest = mockData[0].events![3];
   const props: ProcessTreeDeps = {
     sessionEntityId: sessionLeader.process!.entity_id!,
     data: mockData,
@@ -78,7 +76,11 @@ describe('ProcessTree component', () => {
         expect(process?.id).toBe(jumpToEvent.process!.entity_id!);
       });
       renderResult = mockedContext.render(
-        <ProcessTree {...props} jumpToEvent={jumpToEvent} onProcessSelected={onProcessSelected} />
+        <ProcessTree
+          {...props}
+          jumpToEntityId={jumpToEvent?.process?.entity_id}
+          onProcessSelected={onProcessSelected}
+        />
       );
       expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
@@ -100,50 +102,13 @@ describe('ProcessTree component', () => {
     });
 
     it('When Verbose mode is OFF, it should not show all childrens', () => {
-      renderResult = mockedContext.render(<ProcessTree {...props} verboseModeOn={false} />);
+      renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={false} />);
       expect(renderResult.queryByText('cat')).toBeFalsy();
-
-      const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
-      const result = selectionArea.map((a) => a?.getAttribute('data-id'));
-
-      expect(result.includes(sessionLeader.process!.entity_id!)).toBeTruthy();
-      expect(result.includes(sessionLeaderVerboseTest.process!.entity_id!)).toBeFalsy();
     });
 
     it('When Verbose mode is ON, it should show all childrens', () => {
-      renderResult = mockedContext.render(<ProcessTree {...props} verboseModeOn={true} />);
+      renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={true} />);
       expect(renderResult.queryByText('cat')).toBeTruthy();
-
-      const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
-      const result = selectionArea.map((a) => a?.getAttribute('data-id'));
-
-      expect(result.includes(sessionLeader.process!.entity_id!)).toBeTruthy();
-      expect(result.includes(sessionLeaderVerboseTest.process!.entity_id!)).toBeTruthy();
-    });
-
-    it('should insert a DOM element used to highlight a process when selectedProcess is set', () => {
-      const mockSelectedProcess = new ProcessImpl(mockData[0].events![0].process!.entity_id!);
-
-      renderResult = mockedContext.render(
-        <ProcessTree {...props} selectedProcess={mockSelectedProcess} />
-      );
-
-      expect(
-        renderResult
-          .queryByTestId('sessionView:processTreeSelectionArea')
-          ?.parentElement?.getAttribute('data-id')
-      ).toEqual(mockSelectedProcess.id);
-
-      // change the selected process
-      const mockSelectedProcess2 = new ProcessImpl(mockData[0].events![1].process!.entity_id!);
-
-      renderResult.rerender(<ProcessTree {...props} selectedProcess={mockSelectedProcess2} />);
-
-      expect(
-        renderResult
-          .queryByTestId('sessionView:processTreeSelectionArea')
-          ?.parentElement?.getAttribute('data-id')
-      ).toEqual(mockSelectedProcess2.id);
     });
   });
 });

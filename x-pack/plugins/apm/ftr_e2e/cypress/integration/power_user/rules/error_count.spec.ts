@@ -51,12 +51,14 @@ describe('Rules', () => {
           cy.contains('Alerts and rules').click();
           cy.contains('Create error count rule').click();
 
-          // Check for the existence of this element to make sure the form
+          // Check for the existence of these elements to make sure the form
           // has loaded.
           cy.contains('for the last');
+          cy.contains('Actions');
+          cy.contains('Save').should('not.be.disabled');
 
           // Save, with no actions
-          cy.contains('button:not(:disabled)', 'Save').click();
+          cy.contains('Save').click();
           cy.get(confirmModalButtonSelector).click();
 
           cy.contains(`Created rule "${ruleName}`);

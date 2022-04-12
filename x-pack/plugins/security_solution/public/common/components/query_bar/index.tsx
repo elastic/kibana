@@ -14,9 +14,10 @@ import {
   TimeHistory,
   TimeRange,
   SavedQuery,
-  SearchBar,
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { SearchBar } from '../../../../../../../src/plugins/unified_search/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface QueryBarComponentProps {
@@ -110,7 +111,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPatterns as DataView[]}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={filterQuery}

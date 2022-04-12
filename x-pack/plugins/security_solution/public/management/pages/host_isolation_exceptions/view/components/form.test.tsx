@@ -16,7 +16,7 @@ import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
 import { GetPolicyListResponse } from '../../../policy/types';
 import { createEmptyHostIsolationException } from '../../utils';
 import { HostIsolationExceptionsForm } from './form';

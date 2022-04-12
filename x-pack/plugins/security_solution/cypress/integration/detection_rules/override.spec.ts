@@ -53,11 +53,7 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
-  goToRuleDetails,
-} from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -68,7 +64,7 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getDetails } from '../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../urls/navigation';
@@ -79,8 +75,11 @@ describe('Detection rules, override', () => {
   const expectedTags = getNewOverrideRule().tags.join('');
   const expectedMitre = formatMitreAttackDescription(getNewOverrideRule().mitre);
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
     createTimeline(getNewOverrideRule().timeline).then((response) => {
       cy.wrap({
         ...getNewOverrideRule(),
@@ -93,7 +92,7 @@ describe('Detection rules, override', () => {
   });
 
   it('Creates and enables a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+    visitWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
@@ -101,18 +100,11 @@ describe('Detection rules, override', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo100();
-
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
     cy.get(RULE_NAME).should('have.text', this.rule.name);
     cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
     cy.get(SEVERITY).should('have.text', this.rule.severity);
