@@ -2,7 +2,10 @@
   "elasticsearch": {
     "cluster": [],
     "indices": [
-      { "names": [".alerts-security*", ".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
+      {
+        "names": [".alerts-security*", ".preview.alerts-security*", ".siem-signals-*"],
+        "privileges": ["read", "write", "maintenance"]
+      },
       {
         "names": [
           ".lists*",

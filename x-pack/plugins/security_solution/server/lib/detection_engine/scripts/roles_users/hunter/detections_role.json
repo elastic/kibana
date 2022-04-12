@@ -16,7 +16,7 @@
         "privileges": ["read", "write"]
       },
       {
-        "names": [".alerts-security*", ".siem-signals-*"],
+        "names": [".alerts-security*", ".preview.alerts-security*", ".siem-signals-*"],
         "privileges": ["read", "write"]
       },
       {

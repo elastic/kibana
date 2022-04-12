@@ -18,15 +18,11 @@
         "privileges": ["read", "write"]
       },
       {
-        "names": [".alerts-security*", ".siem-signals-*"],
+        "names": [".alerts-security*", ".preview.alerts-security*", ".siem-signals-*"],
         "privileges": ["read", "write", "manage"]
       },
       {
-        "names": [
-          "metrics-endpoint.metadata_current_*",
-          ".fleet-agents*",
-          ".fleet-actions*"
-        ],
+        "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
         "privileges": ["read"]
       }
     ]

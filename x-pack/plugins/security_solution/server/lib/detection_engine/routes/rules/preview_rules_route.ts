@@ -129,7 +129,7 @@ export const previewRulesRoute = async (
           .atSpace(spaceId, {
             elasticsearch: {
               index: {
-                [DEFAULT_PREVIEW_INDEX]: ['read'],
+                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
                 [`internal.${DEFAULT_PREVIEW_INDEX}`]: ['read'],
               },
               cluster: [],
@@ -142,7 +142,7 @@ export const previewRulesRoute = async (
               logs: [
                 {
                   errors: [
-                    'Missing "read" privileges for the ".preview.alerts-security.alerts" and "internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+                    'Missing "read" privileges for the ".preview.alerts-security.alerts" or "internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
                   ],
                   warnings: [],
                   duration: 0,
