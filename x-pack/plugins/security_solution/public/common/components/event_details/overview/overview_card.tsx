@@ -60,14 +60,14 @@ const OverviewPanel = euiStyled(EuiPanel)<{
 `;
 
 interface OverviewCardProps {
-  isPopoverVisible: boolean; // Prevent the hover actions from collapsing on each other when not directly hovered on
+  isPopoverVisible?: boolean; // Prevent the hover actions from collapsing on each other when not directly hovered on
   title: string;
 }
 
 export const OverviewCard: React.FC<OverviewCardProps> = ({
   title,
   children,
-  isPopoverVisible,
+  isPopoverVisible = false, // default to false as this behavior is only really necessary in the situation without an overflow
 }) => (
   <OverviewPanel
     borderRadius="none"
