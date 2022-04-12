@@ -550,34 +550,6 @@ describe('XYChart component', () => {
       });
     });
 
-    test('it does not allow positive lower bound for bar', () => {
-      const component = shallow(
-        <XYChart
-          {...defaultProps}
-          args={{
-            ...args,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'custom',
-              lowerBound: 123,
-              upperBound: 456,
-            },
-            layers: [
-              {
-                ...(args.layers[0] as DataLayerConfigResult),
-                seriesType: 'bar',
-              },
-            ],
-          }}
-        />
-      );
-      expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
-        fit: false,
-        min: NaN,
-        max: NaN,
-      });
-    });
-
     test('it does include referenceLine values when in full extent mode', () => {
       const { args: refArgs } = sampleArgsWithReferenceLine();
 

@@ -8,7 +8,6 @@
 
 import { FormatFactory } from '../types';
 import {
-  AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
   ExtendedYConfig,

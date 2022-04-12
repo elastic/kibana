@@ -310,35 +310,38 @@ export function XYChart({
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
     let min: number = NaN;
     let max: number = NaN;
-
-    const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
-      yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
-    );
-    if (!fit && axisHasReferenceLine) {
-      // Remove this once the chart will support automatic annotation fit for other type of charts
-      const { min: computedMin, max: computedMax } = computeOverallDataDomain(
-        layers,
-        axis.series.map(({ accessor }) => accessor)
+    if (extent.mode === 'custom') {
+      min = extent.lowerBound ?? NaN;
+      max = extent.upperBound ?? NaN;
+    } else {
+      const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
+        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
       );
+      if (!fit && axisHasReferenceLine) {
+        // Remove this once the chart will support automatic annotation fit for other type of charts
+        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
+          layers,
+          axis.series.map(({ accessor }) => accessor)
+        );
 
-      if (computedMin != null && computedMax != null) {
-        max = Math.max(computedMax, max || 0);
-        min = Math.min(computedMin, min || 0);
-      }
-      for (const { yConfig, table } of referenceLineLayers) {
-        for (const { axisMode, forAccessor } of yConfig || []) {
-          if (axis.groupId === axisMode) {
-            for (const row of table.rows) {
-              const value = row[forAccessor];
-              // keep the 0 in view
-              max = Math.max(value, max || 0, 0);
-              min = Math.min(value, min || 0, 0);
+        if (computedMin != null && computedMax != null) {
+          max = Math.max(computedMax, max || 0);
+          min = Math.min(computedMin, min || 0);
+        }
+        for (const { yConfig, table } of referenceLineLayers) {
+          for (const { axisMode, forAccessor } of yConfig || []) {
+            if (axis.groupId === axisMode) {
+              for (const row of table.rows) {
+                const value = row[forAccessor];
+                // keep the 0 in view
+                max = Math.max(value, max || 0, 0);
+                min = Math.min(value, min || 0, 0);
+              }
             }
           }
         }
       }
     }
-
     return { fit, min, max };
   };
 
