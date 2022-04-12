@@ -59,7 +59,7 @@ export const ControlGroupChainingSystems: {
     onChildChange: ({ childOutputChangedId, childOrder, recalculateFilters$, getChild }) => {
       if (childOutputChangedId === childOrder.lastChildId) {
         // the last control's output has updated, recalculate filters
-        recalculateFilters$.next();
+        recalculateFilters$.next(null);
         return;
       }
 
@@ -75,6 +75,6 @@ export const ControlGroupChainingSystems: {
   NONE: {
     getContainerSettings: () => undefined,
     getPrecedingFilters: () => undefined,
-    onChildChange: ({ recalculateFilters$ }) => recalculateFilters$.next(),
+    onChildChange: ({ recalculateFilters$ }) => recalculateFilters$.next(null),
   },
 };
