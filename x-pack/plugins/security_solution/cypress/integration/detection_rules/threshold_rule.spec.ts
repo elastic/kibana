@@ -23,8 +23,8 @@ import {
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
+  SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/alerts_detection_rules';
-import { PREVIEW_HEADER_SUBTITLE } from '../../screens/create_new_rule';
 import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
@@ -51,12 +51,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
-import {
-  goToCreateNewRule,
-  goToRuleDetails,
-  waitForRulesTableToBeLoaded,
-} from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -161,36 +156,30 @@ describe('Detection rules, threshold', () => {
     cy.get(ALERT_GRID_CELL).contains(rule.name);
   });
 
-  it.skip('Preview results of keyword using "host.name"', () => {
-    rule.index = [...rule.index, '.siem-signals*'];
+  it('Preview results of keyword using "host.name"', () => {
+    rule.index = [...rule.index, '.alerts-*'];
 
     createCustomRuleEnabled(getNewRule());
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
     selectThresholdRuleType();
     fillDefineThresholdRule(rule);
     previewResults();
 
-    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '3 unique hits');
+    cy.get(SERVER_SIDE_EVENT_COUNT).should('have.text', '1 alert');
   });
 
-  it.skip('Preview results of "ip" using "source.ip"', () => {
+  it('Preview results of "ip" using "source.ip"', () => {
     const previewRule: ThresholdRule = {
       ...rule,
       thresholdField: 'source.ip',
       threshold: '1',
     };
-    previewRule.index = [...previewRule.index, '.siem-signals*'];
+    previewRule.index = [...previewRule.index, '.alerts-*'];
 
     createCustomRuleEnabled(getNewRule());
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
     selectThresholdRuleType();
     fillDefineThresholdRule(previewRule);
     previewResults();
 
-    cy.get(PREVIEW_HEADER_SUBTITLE).should('have.text', '10 unique hits');
+    cy.get(SERVER_SIDE_EVENT_COUNT).should('have.text', '12 alerts');
   });
 });

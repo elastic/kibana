@@ -5,6 +5,22 @@
     "index": "auditbeat-2022",
     "source": {
       "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "source": {
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ]
+      },
       "host" : {
         "hostname" : "test.local",
         "architecture" : "x86_64",
