@@ -72,6 +72,10 @@ export interface WebhookActionParams {
   body?: string;
 }
 
+export interface CasesWebhookActionParams {
+  body?: string;
+}
+
 export interface EmailConfig {
   from: string;
   host: string;
@@ -131,6 +135,23 @@ export interface WebhookSecrets {
 }
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
+
+export interface CasesWebhookConfig {
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  hasAuth: boolean;
+}
+
+export interface CasesWebhookSecrets {
+  user: string;
+  password: string;
+}
+
+export type CasesWebhookActionConnector = UserConfiguredActionConnector<
+  CasesWebhookConfig,
+  CasesWebhookSecrets
+>;
 
 export enum XmattersSeverityOptions {
   CRITICAL = 'critical',
