@@ -39,9 +39,9 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       return {
         isMvt: () => {
           return false;
-        }
-      }
-    }
+        },
+      };
+    },
   };
   const customIcons = [];
   const properties = {
