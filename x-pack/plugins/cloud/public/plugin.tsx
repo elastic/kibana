@@ -329,9 +329,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         // Update the current context every time it changes
         map(({ name, page, id }) => ({
           pageName: `${compact([name, page]).join(':')}`,
-          app_id: name ?? 'unknown',
+          applicationId: name ?? 'unknown',
           page,
-          ent_id: id,
+          entityId: id,
         }))
       ),
       schema: {
@@ -343,11 +343,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
           type: 'keyword',
           _meta: { description: 'The current page', optional: true },
         },
-        app_id: {
+        applicationId: {
           type: 'keyword',
           _meta: { description: 'The id of the current application' },
         },
-        ent_id: {
+        entityId: {
           type: 'keyword',
           _meta: {
             description:

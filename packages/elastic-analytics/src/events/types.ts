@@ -26,24 +26,16 @@ export interface EventContext {
   version?: string;
   /**
    * The name of the current page.
-   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
    */
   pageName?: string;
   /**
-   * The current page.
-   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
-   */
-  page?: string;
-  /**
    * The current application ID.
-   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
    */
-  app_id?: string;
+  applicationId?: string;
   /**
-   * The current entity ID.
-   * @remarks We need to keep this for backwards compatibility because it was provided by previous implementations of FullStory.
+   * The current entity ID (dashboard ID, visualization ID, etc.).
    */
-  ent_id?: string;
+  entityId?: string;
   // TODO: Extend with known keys
   [key: string]: unknown;
 }

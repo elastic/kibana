@@ -56,6 +56,10 @@ export class FullStoryShipper implements IShipper {
 
     // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
     if (Object.keys(nonUserContext).length) {
+      // Keeping these fields for backwards compatibility.
+      if (nonUserContext.applicationId) nonUserContext.app_id = nonUserContext.applicationId;
+      if (nonUserContext.entityId) nonUserContext.ent_id = nonUserContext.entityId;
+
       this.initContext.logger.debug(
         `Calling FS.setVars with context ${JSON.stringify(nonUserContext)}`
       );
