@@ -1,0 +1,1726 @@
+{
+  "id": "@elastic/analytics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.createAnalytics",
+        "type": "Function",
+        "tags": [],
+        "label": "createAnalytics",
+        "description": [
+          "\nCreates an {@link AnalyticsClient}."
+        ],
+        "signature": [
+          "(initContext: ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.AnalyticsClientInitContext",
+            "text": "AnalyticsClientInitContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.IAnalyticsClient",
+            "text": "IAnalyticsClient"
+          }
+        ],
+        "path": "packages/elastic-analytics/src/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.createAnalytics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "initContext",
+            "description": [
+              "The initial context to create the client {@link AnalyticsClientInitContext }"
+            ],
+            "signature": [
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.AnalyticsClientInitContext",
+                "text": "AnalyticsClientInitContext"
+              }
+            ],
+            "path": "packages/elastic-analytics/src/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.AnalyticsClientInitContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalyticsClientInitContext",
+        "description": [
+          "\nGeneral settings of the analytics client"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.AnalyticsClientInitContext.isDev",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDev",
+            "description": [
+              "\nBoolean indicating if it's running in developer mode."
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.AnalyticsClientInitContext.sendTo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sendTo",
+            "description": [
+              "\nSpecify if the shippers should send their data to the production or staging environments."
+            ],
+            "signature": [
+              "\"staging\" | \"production\""
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.AnalyticsClientInitContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "\nApplication-provided logger."
+            ],
+            "signature": [
+              "Logger"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.ContextProviderOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContextProviderOpts",
+        "description": [
+          "\nDefinition of a context provider"
+        ],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.ContextProviderOpts",
+            "text": "ContextProviderOpts"
+          },
+          "<Context>"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.ContextProviderOpts.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of the provider."
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.ContextProviderOpts.context$",
+            "type": "Object",
+            "tags": [],
+            "label": "context$",
+            "description": [
+              "\nObservable that emits the custom context."
+            ],
+            "signature": [
+              "Observable",
+              "<Context>"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.ContextProviderOpts.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\nSchema declaring and documenting the expected output in the context$\n"
+            ],
+            "signature": [
+              "{ [Key in keyof Required<Context>]: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaValue",
+                "text": "SchemaValue"
+              },
+              "<Context[Key]>; }"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.Event",
+        "type": "Interface",
+        "tags": [],
+        "label": "Event",
+        "description": [
+          "\nDefinition of the full event structure"
+        ],
+        "path": "packages/elastic-analytics/src/events/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.Event.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [
+              "\nThe time the event was generated in ISO format."
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.Event.event_type",
+            "type": "string",
+            "tags": [],
+            "label": "event_type",
+            "description": [
+              "\nThe event type."
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.Event.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [
+              "\nThe specific properties of the event type."
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.Event.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "\nThe {@link EventContext} enriched during the processing pipeline."
+            ],
+            "signature": [
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.EventContext",
+                "text": "EventContext"
+              }
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.EventContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventContext",
+        "description": [],
+        "path": "packages/elastic-analytics/src/events/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.EventContext.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.EventTypeOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventTypeOpts",
+        "description": [
+          "\nDefinition of an Event Type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.EventTypeOpts",
+            "text": "EventTypeOpts"
+          },
+          "<EventTypeData>"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.EventTypeOpts.eventType",
+            "type": "string",
+            "tags": [],
+            "label": "eventType",
+            "description": [
+              "\nThe event type's unique name."
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.EventTypeOpts.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\nSchema declaring and documenting the expected structure of this event type.\n"
+            ],
+            "signature": [
+              "{ [Key in keyof Required<EventTypeData>]: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaValue",
+                "text": "SchemaValue"
+              },
+              "<EventTypeData[Key]>; }"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.IAnalyticsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IAnalyticsClient",
+        "description": [
+          "\nAnalytics client's public APIs"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.reportEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvent",
+            "description": [
+              "\nReports a telemetry event."
+            ],
+            "signature": [
+              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.reportEvent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [
+                  "The event type registered via the `registerEventType` API."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.reportEvent.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "eventData",
+                "description": [
+                  "The properties matching the schema declared in the `registerEventType` API."
+                ],
+                "signature": [
+                  "EventTypeData"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.registerEventType",
+            "type": "Function",
+            "tags": [],
+            "label": "registerEventType",
+            "description": [
+              "\nRegisters the event type that will be emitted via the reportEvent API."
+            ],
+            "signature": [
+              "<EventTypeData>(eventTypeOps: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.EventTypeOpts",
+                "text": "EventTypeOpts"
+              },
+              "<EventTypeData>) => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.registerEventType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "eventTypeOps",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.EventTypeOpts",
+                    "text": "EventTypeOpts"
+                  },
+                  "<EventTypeData>"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.registerShipper",
+            "type": "Function",
+            "tags": [],
+            "label": "registerShipper",
+            "description": [
+              "\nSet up the shipper that will be used to report the telemetry events."
+            ],
+            "signature": [
+              "<Shipper extends ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.IShipper",
+                "text": "IShipper"
+              },
+              ", ShipperConfig>(Shipper: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.ShipperClassConstructor",
+                "text": "ShipperClassConstructor"
+              },
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.RegisterShipperOpts",
+                "text": "RegisterShipperOpts"
+              },
+              " | undefined) => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.registerShipper.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "Shipper",
+                "description": [
+                  "The {@link IShipper } class to instantiate the shipper."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.ShipperClassConstructor",
+                    "text": "ShipperClassConstructor"
+                  },
+                  "<Shipper, ShipperConfig>"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.registerShipper.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "shipperConfig",
+                "description": [
+                  "The config specific to the Shipper to instantiate."
+                ],
+                "signature": [
+                  "ShipperConfig"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.registerShipper.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "Additional options to register the shipper {@link RegisterShipperOpts }."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.RegisterShipperOpts",
+                    "text": "RegisterShipperOpts"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\nUsed to control the user's consent to report the data.\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
+            ],
+            "signature": [
+              "(optInConfig: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.OptInConfig",
+                "text": "OptInConfig"
+              },
+              ") => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.optIn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "optInConfig",
+                "description": [
+                  "{@link OptInConfig }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.OptInConfig",
+                    "text": "OptInConfig"
+                  }
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.registerContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "registerContextProvider",
+            "description": [
+              "\nRegisters the context provider to enrich the any reported events."
+            ],
+            "signature": [
+              "<Context>(contextProviderOpts: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.ContextProviderOpts",
+                "text": "ContextProviderOpts"
+              },
+              "<Context>) => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.registerContextProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "contextProviderOpts",
+                "description": [
+                  "{@link ContextProviderOpts }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.ContextProviderOpts",
+                    "text": "ContextProviderOpts"
+                  },
+                  "<Context>"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.removeContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "removeContextProvider",
+            "description": [
+              "\nRemoves the context provider and stop enriching the events from its context."
+            ],
+            "signature": [
+              "(contextProviderName: string) => void"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IAnalyticsClient.removeContextProvider.$1",
+                "type": "string",
+                "tags": [],
+                "label": "contextProviderName",
+                "description": [
+                  "The name of the context provider to remove."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IAnalyticsClient.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "\nObservable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
+              ">"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.IShipper",
+        "type": "Interface",
+        "tags": [],
+        "label": "IShipper",
+        "description": [
+          "\nBasic structure of a Shipper"
+        ],
+        "path": "packages/elastic-analytics/src/shippers/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IShipper.reportEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvents",
+            "description": [
+              "\nAdapts and ships the event to the persisting/analytics solution."
+            ],
+            "signature": [
+              "(events: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.Event",
+                "text": "Event"
+              },
+              "[]) => void"
+            ],
+            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IShipper.reportEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [
+                  "batched events {@link Event }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.Event",
+                    "text": "Event"
+                  },
+                  "[]"
+                ],
+                "path": "packages/elastic-analytics/src/shippers/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IShipper.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
+            ],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
+            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IShipper.optIn.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOptedIn",
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/elastic-analytics/src/shippers/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IShipper.extendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "extendContext",
+            "description": [
+              "\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
+            ],
+            "signature": [
+              "((newContext: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.EventContext",
+                "text": "EventContext"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@elastic/analytics",
+                "id": "def-server.IShipper.extendContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@elastic/analytics",
+                    "scope": "server",
+                    "docId": "kibElasticAnalyticsPluginApi",
+                    "section": "def-server.EventContext",
+                    "text": "EventContext"
+                  }
+                ],
+                "path": "packages/elastic-analytics/src/shippers/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.IShipper.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "\nObservable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.OptInConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OptInConfig",
+        "description": [
+          "\n"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.OptInConfig.global",
+            "type": "Object",
+            "tags": [],
+            "label": "global",
+            "description": [
+              "\nControls the global enabled/disabled behaviour of the client and shippers."
+            ],
+            "signature": [
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.OptInConfigPerType",
+                "text": "OptInConfigPerType"
+              }
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.OptInConfig.event_types",
+            "type": "Object",
+            "tags": [],
+            "label": "event_types",
+            "description": [
+              "\nControls if an event type should be disabled for a specific type of shipper."
+            ],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.OptInConfigPerType",
+                "text": "OptInConfigPerType"
+              },
+              " | undefined> | undefined"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.OptInConfigPerType",
+        "type": "Interface",
+        "tags": [],
+        "label": "OptInConfigPerType",
+        "description": [
+          "\nSets whether a type of event is enabled/disabled globally or per shipper."
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.OptInConfigPerType.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nThe event type is globally enabled."
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.OptInConfigPerType.shippers",
+            "type": "Object",
+            "tags": [],
+            "label": "shippers",
+            "description": [
+              "\nControls if an event type should be disabled for a specific type of shipper."
+            ],
+            "signature": [
+              "Record<string, boolean | undefined> | undefined"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.RegisterShipperOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegisterShipperOpts",
+        "description": [
+          "\nOptional options to register a shipper"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.SchemaArray",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaArray",
+        "description": [
+          "\nSchema to represent an array"
+        ],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaArray",
+            "text": "SchemaArray"
+          },
+          "<Value, Base> extends ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaMeta",
+            "text": "SchemaMeta"
+          },
+          "<Base>"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.SchemaArray.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"array\""
+            ],
+            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.SchemaArray.items",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              "{ type: \"pass_through\"; _meta: { description: string; } & ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaMetaOptional",
+                "text": "SchemaMetaOptional"
+              },
+              "<Value>; } | (unknown extends Value ? ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaArray",
+                "text": "SchemaArray"
+              },
+              "<Value, Value> | ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaObject",
+                "text": "SchemaObject"
+              },
+              "<Value> | ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaChildValue",
+                "text": "SchemaChildValue"
+              },
+              "<Value> : NonNullable<Value> extends (infer U)[] ? ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaArray",
+                "text": "SchemaArray"
+              },
+              "<U, Value> : NonNullable<Value> extends object ? ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaObject",
+                "text": "SchemaObject"
+              },
+              "<Value> : ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaChildValue",
+                "text": "SchemaChildValue"
+              },
+              "<Value>)"
+            ],
+            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.SchemaChildValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaChildValue",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaChildValue",
+            "text": "SchemaChildValue"
+          },
+          "<Value>"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.SchemaChildValue.type",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "NonNullable<Value> extends string ? ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.AllowedSchemaStringTypes",
+                "text": "AllowedSchemaStringTypes"
+              },
+              " : NonNullable<Value> extends number ? ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.AllowedSchemaNumberTypes",
+                "text": "AllowedSchemaNumberTypes"
+              },
+              " : NonNullable<Value> extends boolean ? \"boolean\" : ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.AllowedSchemaTypes",
+                "text": "AllowedSchemaTypes"
+              }
+            ],
+            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.SchemaChildValue._meta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "{ description: string; } & ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaMetaOptional",
+                "text": "SchemaMetaOptional"
+              },
+              "<Value>"
+            ],
+            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.SchemaMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaMeta",
+        "description": [
+          "\nSchema meta with optional description"
+        ],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaMeta",
+            "text": "SchemaMeta"
+          },
+          "<Value>"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.SchemaMeta._meta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_meta",
+            "description": [],
+            "signature": [
+              "({ description?: string | undefined; } & ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaMetaOptional",
+                "text": "SchemaMetaOptional"
+              },
+              "<Value>) | undefined"
+            ],
+            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.SchemaObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaObject",
+        "description": [
+          "\nSchema to represent an object"
+        ],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaObject",
+            "text": "SchemaObject"
+          },
+          "<Value> extends ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaMeta",
+            "text": "SchemaMeta"
+          },
+          "<Value>"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.SchemaObject.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [],
+            "signature": [
+              "{ [Key in keyof Required<Value>]: ",
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.SchemaValue",
+                "text": "SchemaValue"
+              },
+              "<Value[Key]>; }"
+            ],
+            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.ShipperClassConstructor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShipperClassConstructor",
+        "description": [
+          "\nConstructor of a {@link IShipper}"
+        ],
+        "signature": [
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.ShipperClassConstructor",
+            "text": "ShipperClassConstructor"
+          },
+          "<Shipper, Config>"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.ShipperClassConstructor.shipperName",
+            "type": "string",
+            "tags": [],
+            "label": "shipperName",
+            "description": [
+              "\nThe shipper's unique name"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.ShipperClassConstructor.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\nThe constructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.TelemetryCounter",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryCounter",
+        "description": [
+          "\nShape of the events emitted by the telemetryCounter$ observable"
+        ],
+        "path": "packages/elastic-analytics/src/events/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.TelemetryCounter.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nIndicates if the event contains data about succeeded, failed or dropped events."
+            ],
+            "signature": [
+              {
+                "pluginId": "@elastic/analytics",
+                "scope": "server",
+                "docId": "kibElasticAnalyticsPluginApi",
+                "section": "def-server.TelemetryCounterType",
+                "text": "TelemetryCounterType"
+              }
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.TelemetryCounter.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\nWho emitted the event? It can be \"client\" or the name of the shipper."
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.TelemetryCounter.event_type",
+            "type": "string",
+            "tags": [],
+            "label": "event_type",
+            "description": [
+              "\nThe event type the success/failure/drop event refers to."
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.TelemetryCounter.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [
+              "\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@elastic/analytics",
+            "id": "def-server.TelemetryCounter.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\nThe number of events that this counter refers to."
+            ],
+            "path": "packages/elastic-analytics/src/events/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.TelemetryCounterType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
+        ],
+        "path": "packages/elastic-analytics/src/events/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.AllowedSchemaBooleanTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedSchemaBooleanTypes",
+        "description": [
+          "Types matching boolean values"
+        ],
+        "signature": [
+          "\"boolean\""
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.AllowedSchemaNumberTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedSchemaNumberTypes",
+        "description": [
+          "Types matching number values"
+        ],
+        "signature": [
+          "\"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.AllowedSchemaStringTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedSchemaStringTypes",
+        "description": [
+          "Types matching string values"
+        ],
+        "signature": [
+          "\"keyword\" | \"date\" | \"text\""
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.AllowedSchemaTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedSchemaTypes",
+        "description": [
+          "\nPossible type values in the schema"
+        ],
+        "signature": [
+          "\"boolean\" | \"keyword\" | \"date\" | \"text\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.EventType",
+        "type": "Type",
+        "tags": [],
+        "label": "EventType",
+        "description": [
+          "\nEvent Type used for indexed structures. Only used to improve the readability of the types"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "packages/elastic-analytics/src/events/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.PossibleSchemaTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "PossibleSchemaTypes",
+        "description": [
+          "\nHelper to ensure the declared types match the schema types"
+        ],
+        "signature": [
+          "Value extends string ? ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.AllowedSchemaStringTypes",
+            "text": "AllowedSchemaStringTypes"
+          },
+          " : Value extends number ? ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.AllowedSchemaNumberTypes",
+            "text": "AllowedSchemaNumberTypes"
+          },
+          " : Value extends boolean ? \"boolean\" : ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.AllowedSchemaTypes",
+            "text": "AllowedSchemaTypes"
+          }
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.RootSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "RootSchema",
+        "description": [
+          "\nSchema definition to match the structure of the properties provided.\n"
+        ],
+        "signature": [
+          "{ [Key in keyof Required<Base>]: ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaValue",
+            "text": "SchemaValue"
+          },
+          "<Base[Key]>; }"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.SchemaMetaOptional",
+        "type": "Type",
+        "tags": [],
+        "label": "SchemaMetaOptional",
+        "description": [
+          "\nEnforces { optional: true } if the value can be undefined"
+        ],
+        "signature": [
+          "unknown extends Value ? { optional?: boolean | undefined; } : undefined extends Value ? { optional: true; } : { optional?: false | undefined; }"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.SchemaValue",
+        "type": "Type",
+        "tags": [],
+        "label": "SchemaValue",
+        "description": [
+          "\nType that defines all the possible values that the  Schema accepts.\nThese types definitions are helping to identify earlier the possible missing `properties` nesting when\nmanually defining the schemas."
+        ],
+        "signature": [
+          "{ type: \"pass_through\"; _meta: { description: string; } & ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaMetaOptional",
+            "text": "SchemaMetaOptional"
+          },
+          "<Value>; } | (unknown extends Value ? ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaArray",
+            "text": "SchemaArray"
+          },
+          "<unknown, Value> | ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaObject",
+            "text": "SchemaObject"
+          },
+          "<Value> | ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaChildValue",
+            "text": "SchemaChildValue"
+          },
+          "<Value> : NonNullable<Value> extends (infer U)[] ? ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaArray",
+            "text": "SchemaArray"
+          },
+          "<U, Value> : NonNullable<Value> extends object ? ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaObject",
+            "text": "SchemaObject"
+          },
+          "<Value> : ",
+          {
+            "pluginId": "@elastic/analytics",
+            "scope": "server",
+            "docId": "kibElasticAnalyticsPluginApi",
+            "section": "def-server.SchemaChildValue",
+            "text": "SchemaChildValue"
+          },
+          "<Value>)"
+        ],
+        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@elastic/analytics",
+        "id": "def-server.ShipperName",
+        "type": "Type",
+        "tags": [],
+        "label": "ShipperName",
+        "description": [
+          "\nShipper Name used for indexed structures. Only used to improve the readability of the types"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

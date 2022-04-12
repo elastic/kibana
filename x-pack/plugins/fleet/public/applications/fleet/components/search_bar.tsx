@@ -10,7 +10,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { fromKueryExpression } from '@kbn/es-query';
 
 import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/unified_search/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
 
@@ -79,12 +80,12 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       disableLanguageSwitcher={true}
       indexPatterns={
         indexPatternFields
-          ? [
+          ? ([
               {
                 title: indexPattern,
                 fields: indexPatternFields,
               },
-            ]
+            ] as DataView[])
           : []
       }
       query={{

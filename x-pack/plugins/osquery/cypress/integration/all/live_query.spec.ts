@@ -21,10 +21,11 @@ import {
   RESULTS_TABLE_CELL_WRRAPER,
 } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
+import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
     navigateTo('/app/osquery');
   });
 

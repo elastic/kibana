@@ -13,7 +13,7 @@ import { useStyles } from './styles';
 
 interface DetailPanelCopyDeps {
   children: ReactNode;
-  textToCopy: string | number;
+  textToCopy: string | number | undefined;
   display?: 'inlineBlock' | 'block' | undefined;
 }
 

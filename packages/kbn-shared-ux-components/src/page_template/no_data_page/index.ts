@@ -9,3 +9,4 @@
 export { NoDataCard, ElasticAgentCard } from './no_data_card';
 export { NoDataPage } from './no_data_page';
 export type { NoDataPageProps } from './types';
+export { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_config_page';

@@ -37,7 +37,7 @@ import {
   TIMELINES_PINNED_EVENT_COUNT,
 } from '../../../screens/timelines';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   closeTimeline,
   deleteTimeline,
@@ -85,7 +85,8 @@ const event = {
 
 describe('Import timeline after upgrade', () => {
   before(() => {
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
     importTimeline(timeline);
     setKibanaTimezoneToUTC();
   });
