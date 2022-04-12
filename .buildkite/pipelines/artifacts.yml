@@ -7,32 +7,33 @@ steps:
 
   - wait
 
-  # - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
-  #   label: Package testing for deb
-  #   agents:
-  #     queue: n2-4-virt
-  #   timeout_in_minutes: 20
+  - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for deb
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 20
 
-  # - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
-  #   label: Package testing for rpm
-  #   agents:
-  #     queue: n2-4-virt
-  #   timeout_in_minutes: 20
+  - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for rpm
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 20
 
-  # - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
-  #   label: Package testing for docker
-  #   agents:
-  #     queue: n2-4-virt
-  #   timeout_in_minutes: 20
+  - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
+    label: Package testing for docker
+    agents:
+      queue: n2-4-virt
+    timeout_in_minutes: 20
 
-  # - command: .buildkite/scripts/steps/artifacts/docker_context.sh
-  #   label: 'Docker Build Context'
-  #   agents:
-  #     queue: n2-2
-  #   timeout_in_minutes: 20
+  - command: .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Build Context'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 20
 
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'FTR on Cloud'
     agents:
       queue: n2-2
     timeout_in_minutes: 60
+    if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
