@@ -339,7 +339,7 @@ describe('Field editor Preview panel', () => {
 
     test('should set the value returned by the painless _execute API', async () => {
       const scriptEmitResponse = 'Field emit() response';
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
 
       const {
         actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
@@ -374,7 +374,7 @@ describe('Field editor Preview panel', () => {
     });
 
     test('should display an updating indicator while fetching the preview', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
 
       const {
         exists,
@@ -393,7 +393,7 @@ describe('Field editor Preview panel', () => {
     });
 
     test('should not display the updating indicator when neither the type nor the script has changed', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
 
       const {
         exists,
