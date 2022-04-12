@@ -303,7 +303,7 @@ describe('migrations v2 model', () => {
 
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}. Refer to https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html for more information"`
+          `"[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}"`
         );
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
@@ -578,9 +578,15 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      // The createIndex action called by LEGACY_CREATE_REINDEX_TARGET never
-      // returns a left, it will always succeed or timeout. Since timeout
-      // failures are always retried we don't explicitly test this logic
+      test('LEGACY_CREATE_REINDEX_TARGET -> FATAL', () => {
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(legacyCreateReindexTargetState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason.startsWith('[index_not_yellow_timeout]')).toBe(true);
+      });
     });
 
     describe('LEGACY_REINDEX', () => {
@@ -713,6 +719,16 @@ describe('migrations v2 model', () => {
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
           sourceIndex: Option.some('.kibana_3'),
         });
+      });
+
+      test('WAIT_FOR_YELLOW_SOURCE -> FATAL', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.left({
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(waitForYellowSourceState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason.startsWith('[index_not_yellow_timeout]')).toBe(true);
       });
     });
 
@@ -906,6 +922,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      it('CREATE_REINDEX_TEMP -> FATAL', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.left({
+          type: 'index_not_yellow_timeout',
+          message: `Timeout waiting for the status of the ['.kibana_7.11.0_001'] index to become 'yellow'`,
+        });
+        const newState = model(state, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason.startsWith('[index_not_yellow_timeout]')).toBe(true);
       });
     });
 
@@ -1218,6 +1244,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
+      });
+      it('CLONE_TEMP_TO_TARGET -> FATAL', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.left({
+          type: 'index_not_yellow_timeout',
+          message: `Timeout waiting for the status of the ['.kibana_7.11.0_001'] index to become 'yellow'`,
+        });
+        const newState = model(state, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason.startsWith('[index_not_yellow_timeout]')).toBe(true);
       });
     });
 
@@ -1693,6 +1729,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_NEW_TARGET -> FATAL', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.left({
+          type: 'index_not_yellow_timeout',
+          message: `Timeout waiting for the status of the ['.kibana_7.11.0_001'] index to become 'yellow'`,
+        });
+        const newState = model(createNewTargetState, res) as FatalState;
+
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason.startsWith('[index_not_yellow_timeout]')).toBe(true);
       });
     });
 
