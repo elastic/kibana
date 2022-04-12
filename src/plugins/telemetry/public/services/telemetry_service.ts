@@ -113,7 +113,9 @@ export class TelemetryService {
    */
   public getUserShouldSeeOptInNotice(): boolean {
     return (
-      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      (!this.config.hidePrivacyStatement &&
+        this.config.telemetryNotifyUserAboutOptInDefault &&
+        this.config.userCanChangeSettings) ??
       false
     );
   }
