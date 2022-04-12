@@ -9,16 +9,22 @@
 import { pick } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SerializableRecord } from '@kbn/utility-types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
   ExpressionsService,
   setRenderersRegistry,
   setNotifications,
   setExpressionsService,
+  setUiActions,
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
 import type { IExpressionRenderer } from './render';
+
+interface StartDeps {
+  uiActions?: UiActionsStart;
+}
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}
@@ -34,7 +40,9 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
 }
 
-export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
+export class ExpressionsPublicPlugin
+  implements Plugin<ExpressionsSetup, ExpressionsStart, {}, StartDeps>
+{
   private readonly expressions: ExpressionsService = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
@@ -51,8 +59,11 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart): ExpressionsStart {
+  public start(core: CoreStart, { uiActions }: StartDeps): ExpressionsStart {
     setNotifications(core.notifications);
+    if (uiActions) {
+      setUiActions(uiActions);
+    }
 
     const { expressions } = this;
 

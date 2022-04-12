@@ -8,6 +8,7 @@
 
 import { NotificationsStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsService, ExpressionRendererRegistry } from '../../common';
 
 export const [getNotifications, setNotifications] =
@@ -18,5 +19,10 @@ export const [getRenderersRegistry, setRenderersRegistry] =
 
 export const [getExpressionsService, setExpressionsService] =
   createGetterSetter<ExpressionsService>('ExpressionsService');
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>(
+  'UiActionsService',
+  false
+);
 
 export * from './expressions_services';
