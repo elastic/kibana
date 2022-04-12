@@ -65,7 +65,7 @@ export function getLegacyIndexPattern({
   moduleType: INDEX_PATTERN_TYPES;
   ecsLegacyOnly?: boolean;
   config: MonitoringConfig;
-  ccs?: string[];
+  ccs?: string[] | string;
 }) {
   let indexPattern = '';
   switch (moduleType) {
@@ -104,7 +104,7 @@ export function getDsIndexPattern({
   moduleType: INDEX_PATTERN_TYPES;
   namespace?: string;
   config: MonitoringConfig;
-  ccs?: string[];
+  ccs?: string[] | string;
 }): string {
   let datasetsPattern = '';
   if (dataset) {
@@ -129,7 +129,7 @@ export function getNewIndexPatterns({
   type?: DS_INDEX_PATTERN_TYPES;
   dataset?: string;
   namespace?: string;
-  ccs?: string[];
+  ccs?: string[] | string;
   ecsLegacyOnly?: boolean;
 }): string {
   const legacyIndexPattern = getLegacyIndexPattern({ moduleType, ecsLegacyOnly, config, ccs });

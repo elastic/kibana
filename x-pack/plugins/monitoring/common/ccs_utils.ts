@@ -16,10 +16,15 @@ import { MonitoringConfig } from '../server/config';
  *
  * @param  {Object} config The Kibana configuration object.
  * @param  {String} indexPattern The index pattern name
- * @param  {Array} ccs The optional cluster-prefixes to prepend.
+ * @param  {Array|String} ccs The optional cluster-prefixes to prepend. An array when passed from config
+ * and a string when passed from a request
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config: MonitoringConfig, indexPattern: string, ccs?: string[]) {
+export function prefixIndexPattern(
+  config: MonitoringConfig,
+  indexPattern: string,
+  ccs?: string[] | string
+) {
   const ccsEnabled = config.ui.ccs.enabled;
   if (!ccsEnabled || !ccs) {
     return indexPattern;
@@ -33,9 +38,10 @@ export function prefixIndexPattern(config: MonitoringConfig, indexPattern: strin
     )
     .join(',');
 
-  // if a wildcard is used, then we also want to search the local indices
-  // since we don't allow the user to an array with a *, this would only be the default value we set [*]
+  // if a wildcard is used, then we also want to search the local indices.
   if (ccs.includes('*')) {
+    // this case is met when user does not set monitoring.ui.ccs.remotePatterns and uses default ([*])
+    // or user explicitly sets monitoring.ui.ccs to '*'
     return `${prefixedPattern},${indexPattern}`;
   }
   return prefixedPattern;
