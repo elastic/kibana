@@ -61,6 +61,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
         data-test-subj="kqlLanguageMenuItem"
         onClick={() => {
           onSelectLanguage('kuery');
+          setIsPopoverOpen(false);
         }}
       >
         KQL
@@ -71,6 +72,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
         data-test-subj="luceneLanguageMenuItem"
         onClick={() => {
           onSelectLanguage(nonKqlMode);
+          setIsPopoverOpen(false);
         }}
       >
         {toSentenceCase(nonKqlMode)}

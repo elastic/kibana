@@ -215,6 +215,7 @@ export function QueryBarMenuPanels({
       query: { query: fromUser(newQuery.query), language: newQuery.language },
       dateRange: getDateRange(),
     });
+    closePopover();
   };
 
   const luceneLabel = i18n.translate('unifiedSearch.query.queryBar.luceneLanguageName', {
