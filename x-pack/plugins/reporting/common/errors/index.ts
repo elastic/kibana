@@ -38,9 +38,9 @@ export abstract class ReportingError extends Error {
  * access token expired.
  */
 export class AuthenticationExpiredError extends ReportingError {
-  static tcode = 'authentication_expired_error' as const;
+  static code = 'authentication_expired_error' as const;
   public get code(): string {
-    return AuthenticationExpiredError.tcode;
+    return AuthenticationExpiredError.code;
   }
 }
 
