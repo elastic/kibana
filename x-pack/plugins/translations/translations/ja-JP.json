@@ -23727,7 +23727,6 @@
     "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel": "クイッククエリプレビュー",
     "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllErrors": "すべてのエラーを表示",
     "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllWarnings": "すべての警告を表示",
-    "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading": "...loading",
     "xpack.securitySolution.detectionEngine.queryPreview.queryThresholdGraphCountLabel": "累積しきい値数",
     "xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription": "{countError, plural, one {このタブ} other {これらのタブ}}に無効な入力があります：{tabHasError}",
     "xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription": "開始",
