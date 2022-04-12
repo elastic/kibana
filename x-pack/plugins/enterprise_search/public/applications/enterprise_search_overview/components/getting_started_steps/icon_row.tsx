@@ -85,9 +85,9 @@ export const IconRow: React.FC = () => {
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {icons.map((item) => {
+          {icons.map((item, index) => {
             return (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} key={index}>
                 <EuiToolTip
                   content={
                     <EuiText>

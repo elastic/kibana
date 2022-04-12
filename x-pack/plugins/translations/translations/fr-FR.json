@@ -9170,8 +9170,6 @@
     "xpack.enterpriseSearch.overview.productCard.launchButton": "Ouvrir {productName}",
     "xpack.enterpriseSearch.overview.productCard.setupButton": "Configurer {productName}",
     "xpack.enterpriseSearch.overview.setupCta.description": "Ajoutez des fonctions de recherche à votre application ou à votre organisation interne avec Elastic App Search et Workplace Search. Regardez la vidéo pour savoir ce qu'il est possible de faire lorsque la recherche est facilitée.",
-    "xpack.enterpriseSearch.overview.setupHeading": "Choisissez un produit à configurer et lancez-vous.",
-    "xpack.enterpriseSearch.overview.subheading": "Ajoutez une fonction de recherche à votre application ou à votre organisation.",
     "xpack.enterpriseSearch.productSelectorCalloutTitle": "Des fonctionnalités de niveau entreprise pour les grandes et petites équipes",
     "xpack.enterpriseSearch.readOnlyMode.warning": "Enterprise Search est en mode de lecture seule. Vous ne pourrez pas effectuer de changements tels que création, modification ou suppression.",
     "xpack.enterpriseSearch.roleMapping.addRoleMappingButtonLabel": "Ajouter un mapping",

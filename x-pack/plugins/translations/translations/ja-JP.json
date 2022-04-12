@@ -10677,8 +10677,6 @@
     "xpack.enterpriseSearch.overview.productCard.launchButton": "{productName}を開く",
     "xpack.enterpriseSearch.overview.productCard.setupButton": "{productName}をセットアップ",
     "xpack.enterpriseSearch.overview.setupCta.description": "Elastic App Search および Workplace Search を使用して、アプリまたは社内組織に検索を追加できます。検索が簡単になるとどのような利点があるのかについては、動画をご覧ください。",
-    "xpack.enterpriseSearch.overview.setupHeading": "セットアップする製品を選択し、開始してください。",
-    "xpack.enterpriseSearch.overview.subheading": "アプリまたは組織に検索機能を追加できます。",
     "xpack.enterpriseSearch.overview.productName": "Enterprise Search",
     "xpack.enterpriseSearch.productSelectorCalloutTitle": "あらゆる規模のチームに対応するエンタープライズ級の機能",
     "xpack.enterpriseSearch.readOnlyMode.warning": "エンタープライズ サーチは読み取り専用モードです。作成、編集、削除などの変更を実行できません。",

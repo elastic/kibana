@@ -9,8 +9,6 @@ import React from 'react';
 
 import { generatePath } from 'react-router-dom';
 
-import dedent from 'dedent';
-
 import {
   EuiImage,
   EuiFlexGroup,
@@ -50,15 +48,14 @@ export const AddContentEmptyPrompt: React.FC = () => {
               <EuiText grow={false}>
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
-                    defaultMessage: dedent`Data you add in Enterprise Search is called a Search index and
-                            it's searchable in both App and Workplace Search. Now you can use your connectors in
-                            App Search and your web crawlers in Workplace Search.`,
+                    defaultMessage:
+                      "Data you add in Enterprise Search is called a Search index and it's searchable in both App and Workplace Search. Now you can use your connectors in App Search and your web crawlers in Workplace Search.",
                   })}
                 </p>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" >
+              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiLinkTo
                     to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH)}

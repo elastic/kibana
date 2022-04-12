@@ -10696,8 +10696,6 @@
     "xpack.enterpriseSearch.overview.productCard.launchButton": "打开 {productName}",
     "xpack.enterpriseSearch.overview.productCard.setupButton": "设置 {productName}",
     "xpack.enterpriseSearch.overview.setupCta.description": "通过 Elastic App Search 和 Workplace Search，将搜索添加到您的应用或内部组织中。观看视频，了解方便易用的搜索功能可以帮您做些什么。",
-    "xpack.enterpriseSearch.overview.setupHeading": "选择产品进行设置并开始使用。",
-    "xpack.enterpriseSearch.overview.subheading": "将搜索功能添加到您的应用或组织。",
     "xpack.enterpriseSearch.overview.productName": "Enterprise Search",
     "xpack.enterpriseSearch.productSelectorCalloutTitle": "适用于大型和小型团队的企业级功能",
     "xpack.enterpriseSearch.readOnlyMode.warning": "企业搜索处于只读模式。您将无法执行更改，例如创建、编辑或删除。",

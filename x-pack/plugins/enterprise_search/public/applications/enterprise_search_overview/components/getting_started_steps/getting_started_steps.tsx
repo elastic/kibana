@@ -7,8 +7,6 @@
 
 import React, { useState } from 'react';
 
-import dedent from 'dedent';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -51,9 +49,8 @@ export const GettingStartedSteps: React.FC = () => {
                         {i18n.translate(
                           'xpack.enterpriseSearch.overview.gettingStartedSteps.addData.message',
                           {
-                            defaultMessage: dedent`Get started by adding your data to Enterprise Search.
-                            You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch
-                            indices or third party connectors like Google Drive, Microsoft Sharepoint and more.`,
+                            defaultMessage:
+                              'Get started by adding your data to Enterprise Search. You can use the Elastic Web Crawler, API endpoints, existing Elasticsearch indices or third party connectors like Google Drive, Microsoft Sharepoint and more.',
                           }
                         )}
                       </p>
@@ -76,9 +73,8 @@ export const GettingStartedSteps: React.FC = () => {
                         {i18n.translate(
                           'xpack.enterpriseSearch.overview.gettingStartedSteps.buildSearchExperience.message',
                           {
-                            defaultMessage: dedent`You can use Search Engines to build customized search experiences for
-                          your customers or internal teams with App Search or Workplace Search. Or you can use Search UI
-                          to connect directly to an Elasticsearch index to build client-side search experinces for your users.`,
+                            defaultMessage:
+                              'You can use Search Engines to build customized search experiences for your customers or internal teams with App Search or Workplace Search. Or you can use Search UI to connect directly to an Elasticsearch index to build client-side search experinces for your users.',
                           }
                         )}
                       </p>
@@ -88,7 +84,12 @@ export const GettingStartedSteps: React.FC = () => {
                       <EuiFlexItem grow={false}>
                         <EuiPopover
                           button={
-                            <EuiButton iconType="arrowDown" iconSide="right" fill>
+                            <EuiButton
+                              iconType="arrowDown"
+                              iconSide="right"
+                              fill
+                              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                            >
                               {i18n.translate(
                                 'xpack.enterpriseSearch.overview.gettingStartedSteps.createASearchEngineButton',
                                 { defaultMessage: 'Create a search engine' }
@@ -96,7 +97,7 @@ export const GettingStartedSteps: React.FC = () => {
                             </EuiButton>
                           }
                           isOpen={isPopoverOpen}
-                          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                          closePopover={() => setIsPopoverOpen(false)}
                         >
                           <EuiContextMenuPanel
                             items={[
@@ -164,8 +165,8 @@ export const GettingStartedSteps: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.overview.gettingStartedSteps.tuneSearchExperience.message',
                         {
-                          defaultMessage: dedent`Dive into analytics and tune the result settings to help your
-                          users find exactly what they're looking for`,
+                          defaultMessage:
+                            "Dive into analytics and tune the result settings to help your users find exactly what they're looking for",
                         }
                       )}
                     </p>
