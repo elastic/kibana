@@ -47,7 +47,9 @@ const TabNavigationItemComponent = ({
       isSelected={isSelected}
       href={appHref}
       onClick={handleClick}
-      append={isBeta && <EuiBetaBadge label={BETA} size="s" />}
+      append={
+        isBeta && <EuiBetaBadge label={BETA} size="s" />
+      }
     >
       {name}
     </EuiTab>

@@ -126,4 +126,15 @@ describe('Table Navigation', () => {
       `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
     );
   });
+
+  test('it renders a EuiBetaBadge on the sessions tab', () => {
+    const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+    wrapper.debug();
+
+    const betaBadge = wrapper.find(
+      `EuiTab[data-test-subj="navigation-${HostsTableType.sessions}"] EuiBetaBadge`
+    );
+
+    expect(betaBadge).toBeTruthy();
+  });
 });
