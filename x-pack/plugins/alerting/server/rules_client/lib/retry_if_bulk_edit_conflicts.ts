@@ -27,7 +27,7 @@ export const RetryForConflictsAttempts = 2;
 // make it harder to diagnose issues
 const RetryForConflictsDelay = 250;
 
-type BulkEditObjects = (filter: KueryNode) => Promise<{
+type BulkEditObjects = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
@@ -38,7 +38,7 @@ export const retryIfBulkEditConflicts = async (
   logger: Logger,
   name: string,
   bulkEditObjects: BulkEditObjects,
-  filter: KueryNode,
+  filter: KueryNode | null,
   retries: number = RetryForConflictsAttempts,
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],

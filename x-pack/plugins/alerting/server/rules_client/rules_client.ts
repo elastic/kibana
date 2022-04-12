@@ -1366,8 +1366,16 @@ export class RulesClient {
       );
     }
 
-    const filter = ids ? convertRuleIdsToKueryNode(ids) : queryFilter;
-    const qNodeFilter = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
+    let qNodeQueryFilter: null | KueryNode;
+    if (!queryFilter) {
+      qNodeQueryFilter = null;
+    } else if (typeof queryFilter === 'string') {
+      qNodeQueryFilter = fromKueryExpression(queryFilter);
+    } else {
+      qNodeQueryFilter = queryFilter;
+    }
+
+    const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -1384,15 +1392,16 @@ export class RulesClient {
       throw error;
     }
     const { filter: authorizationFilter } = authorizationTuple;
-    const qNodeFilterWithAuth = authorizationFilter
-      ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
-      : qNodeFilter;
+    const qNodeFilterWithAuth =
+      authorizationFilter && qNodeFilter
+        ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
+        : qNodeFilter;
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
       RuleBulkEditAggregation
     >({
-      filter: qNodeFilter,
+      filter: qNodeFilterWithAuth,
       page: 1,
       perPage: 0,
       type: 'alert',
@@ -1439,7 +1448,7 @@ export class RulesClient {
       `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
         options.paramsModifier ? '[Function]' : undefined
       }')`,
-      (filterKueryNode: KueryNode) =>
+      (filterKueryNode: KueryNode | null) =>
         this.bulkEditOcc({
           filter: filterKueryNode,
           operations: options.operations,
@@ -1474,7 +1483,7 @@ export class RulesClient {
     operations,
     paramsModifier,
   }: {
-    filter: KueryNode;
+    filter: KueryNode | null;
     operations: BulkEditOptions<Params>['operations'];
     paramsModifier: BulkEditOptions<Params>['paramsModifier'];
   }): Promise<{
