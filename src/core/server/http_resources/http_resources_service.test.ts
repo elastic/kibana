@@ -27,7 +27,7 @@ describe('HttpResources service', () => {
   let setupDeps: SetupDeps;
   let router: jest.Mocked<IRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
-  const context = { core: coreMock.createRequestHandlerContext() };
+  const context = { core: Promise.resolve(coreMock.createRequestHandlerContext()) };
   const apmConfig = { mockApmConfig: true };
 
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              context.core.uiSettings.client,
+              (await context.core).uiSettings.client,
               {
                 isAnonymousPage: false,
                 vars: {
@@ -117,7 +117,7 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              context.core.uiSettings.client,
+              (await context.core).uiSettings.client,
               {
                 isAnonymousPage: true,
                 vars: {

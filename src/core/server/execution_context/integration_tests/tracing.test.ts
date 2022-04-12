@@ -65,10 +65,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asInternalUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asInternalUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -90,10 +88,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -115,10 +111,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asInternalUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asInternalUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -136,10 +130,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -157,7 +149,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asInternalUser.ping(
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asInternalUser.ping(
           {},
           {
             opaqueId: 'new-opaque-id',
@@ -203,10 +196,8 @@ describe('trace', () => {
 
         const router = createRouter('');
         router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-          const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-            {},
-            { meta: true }
-          );
+          const esClient = (await context.core).elasticsearch.client;
+          const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
           return res.ok({ body: headers || {} });
         });
 
@@ -229,10 +220,8 @@ describe('trace', () => {
         const router = createRouter('');
         router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
           executionContext.set(parentContext);
-          const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-            {},
-            { meta: true }
-          );
+          const esClient = (await context.core).elasticsearch.client;
+          const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
           return res.ok({
             body: {
               context: executionContext.get()?.toJSON(),
@@ -345,10 +334,8 @@ describe('trace', () => {
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
         executionContext.set(parentContext);
         await delay(id-- * 100);
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -397,10 +384,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -487,10 +472,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -511,10 +494,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asInternalUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asInternalUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -535,10 +516,8 @@ describe('trace', () => {
 
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -561,10 +540,8 @@ describe('trace', () => {
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
         executionContext.set(parentContext);
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -593,10 +570,8 @@ describe('trace', () => {
       };
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
         executionContext.set(ctx);
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return res.ok({ body: headers || {} });
       });
 
@@ -663,9 +638,10 @@ describe('trace', () => {
           description: 'new-description',
         };
         router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-          const { headers } = await executionContext.withContext(newContext, () =>
-            context.core.elasticsearch.client.asCurrentUser.ping({}, { meta: true })
-          );
+          const esClient = (await context.core).elasticsearch.client;
+          const { headers } = await executionContext.withContext(newContext, () => {
+            return esClient.asCurrentUser.ping({}, { meta: true });
+          });
           return res.ok({ body: headers || {} });
         });
 
