@@ -43,6 +43,7 @@ import {
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
+const ALERT_LIMIT_MSG = `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -246,6 +247,16 @@ export class CaseCommentModel {
     }
 
     if (reqHasAlerts) {
+      /**
+       * This check is for optimization reasons.
+       * It saves one aggregation if the total number
+       * of alerts of the request is already greater than
+       * MAX_ALERTS_PER_CASE
+       */
+      if (totalAlertsInReq > MAX_ALERTS_PER_CASE) {
+        throw Boom.badRequest(ALERT_LIMIT_MSG);
+      }
+
       await this.validateAlertsLimitOnCase(totalAlertsInReq);
     }
   }
@@ -257,9 +268,7 @@ export class CaseCommentModel {
     });
 
     if (alertsValueCount + totalAlertsInReq > MAX_ALERTS_PER_CASE) {
-      throw Boom.badRequest(
-        `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`
-      );
+      throw Boom.badRequest(ALERT_LIMIT_MSG);
     }
   }
 
