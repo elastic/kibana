@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { pluginServices } from './services';
-import { PluginServiceRegistry } from '../../presentation_util/public';
+import React from 'react';
 import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
-import { CustomIntegrationsServices } from './services';
-import { providers } from './services/stub';
+import { CustomIntegrationsServicesProvider } from './services';
+import { servicesFactory } from './services/stub';
+import { coreMock } from '../../../core/public/mocks';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
   const mock: jest.Mocked<CustomIntegrationsSetup> = {
@@ -21,12 +21,14 @@ function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
 }
 
 function createCustomIntegrationsStart(): jest.Mocked<CustomIntegrationsStart> {
-  const registry = new PluginServiceRegistry<CustomIntegrationsServices>(providers);
-  pluginServices.setRegistry(registry.start({}));
-  const ContextProvider = pluginServices.getContextProvider();
+  const services = servicesFactory({ startPlugins: {}, coreStart: coreMock.createStart() });
 
   return {
-    ContextProvider: jest.fn(ContextProvider),
+    ContextProvider: jest.fn(({ children }) => (
+      <CustomIntegrationsServicesProvider {...services}>
+        {children}
+      </CustomIntegrationsServicesProvider>
+    )),
   };
 }
 
