@@ -90,8 +90,9 @@ export function registerStatsRoute({
 
       let extended;
       if (isExtended) {
-        const { asCurrentUser } = context.core.elasticsearch.client;
-        const savedObjectsClient = context.core.savedObjects.client;
+        const core = await context.core;
+        const { asCurrentUser } = core.elasticsearch.client;
+        const savedObjectsClient = core.savedObjects.client;
 
         const [usage, clusterUuid] = await Promise.all([
           shouldGetUsage

@@ -16,8 +16,9 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
       validate: {},
     },
     async (ctx, req, res) => {
-      const savedObjectsClient = ctx.core.savedObjects.client;
-      const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+      const core = await ctx.core;
+      const savedObjectsClient = core.savedObjects.client;
+      const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
       const dataViews = await getIndexPattern({
         esClient: elasticsearchClient,
         soClient: savedObjectsClient,

@@ -51,7 +51,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
 };
 const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
-  const { asCurrentUser } = context.core.elasticsearch.client;
+  const { asCurrentUser } = (await context.core).elasticsearch.client;
   const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
   const {
     pattern,
