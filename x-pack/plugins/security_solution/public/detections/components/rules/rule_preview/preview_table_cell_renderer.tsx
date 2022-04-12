@@ -89,6 +89,7 @@ export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
+
   return (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>

@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import {
   RULE_PREVIEW_FROM,
   RULE_PREVIEW_INTERVAL,

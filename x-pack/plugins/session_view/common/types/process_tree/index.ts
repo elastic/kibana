@@ -35,6 +35,7 @@ export interface Group {
 }
 
 export interface ProcessEventResults {
+  total?: number;
   events?: any[];
 }
 
@@ -75,6 +76,11 @@ export interface ProcessFields {
   end?: string;
   user?: User;
   group?: Group;
+  real_user?: User;
+  real_group?: Group;
+  saved_user?: User;
+  saved_group?: Group;
+  supplemental_groups?: Group[];
   exit_code?: number;
   entry_meta?: EntryMeta;
   tty?: Teletype;
@@ -121,7 +127,7 @@ export interface ProcessEventAlert {
   reason?: string;
   workflow_status?: string;
   status?: string;
-  original_time?: Date;
+  original_time?: string;
   original_event?: {
     action?: string;
   };
@@ -134,6 +140,7 @@ export interface ProcessEvent {
     kind?: EventKind;
     category?: string;
     action?: EventAction;
+    id?: string;
   };
   user?: User;
   group?: Group;
@@ -147,6 +154,7 @@ export interface ProcessEvent {
 export interface ProcessEventsPage {
   events?: ProcessEvent[];
   cursor?: string;
+  total?: number; // total count of all items across all pages (as reported by ES client)
 }
 
 export interface Process {
@@ -171,6 +179,9 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
+  isVerbose(): boolean;
+  getEndTime(): string;
+  isDescendantOf(process: Process): boolean;
 }
 
 export type ProcessMap = {

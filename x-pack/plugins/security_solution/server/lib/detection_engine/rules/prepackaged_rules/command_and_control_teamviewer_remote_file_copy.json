@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Remote File Copy via TeamViewer",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"creation\" and process.name : \"TeamViewer.exe\" and\n  file.extension : (\"exe\", \"dll\", \"scr\", \"com\", \"bat\", \"ps1\", \"vbs\", \"vbe\", \"js\", \"wsh\", \"hta\")\n",
   "references": [
     "https://blog.menasec.net/2019/11/hunting-for-suspicious-use-of.html"
@@ -50,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }
