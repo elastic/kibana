@@ -1327,6 +1327,7 @@ export const childProcessMock: Process = {
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
   getEndTime: () => '',
+  isDescendantOf: () => false,
 };
 
 export const processMock: Process = {
@@ -1392,6 +1393,14 @@ export const processMock: Process = {
         working_directory: '/home/vagrant',
         start: '2021-11-23T15:25:04.210Z',
         pid: 1,
+        user: {
+          id: '1000',
+          name: 'vagrant',
+        },
+        group: {
+          id: '1000',
+          name: 'vagrant',
+        },
         parent: {
           pid: 2442,
           user: {
@@ -1501,6 +1510,7 @@ export const processMock: Process = {
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
   getEndTime: () => '',
+  isDescendantOf: () => false,
 };
 
 export const sessionViewBasicProcessMock: Process = {
@@ -1548,6 +1558,7 @@ export const mockProcessMap = mockEvents.reduce(
       getMaxAlertLevel: () => null,
       isVerbose: () => true,
       getEndTime: () => '',
+      isDescendantOf: () => false,
     };
     return processMap;
   },

@@ -236,6 +236,20 @@ export class ProcessImpl implements Process {
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
     return filtered[filtered.length - 1] ?? {};
   });
+
+  isDescendantOf(process: Process) {
+    let parent = this.parent;
+
+    while (parent) {
+      if (parent === process) {
+        return true;
+      }
+
+      parent = parent.parent;
+    }
+
+    return false;
+  }
 }
 
 export const useProcessTree = ({

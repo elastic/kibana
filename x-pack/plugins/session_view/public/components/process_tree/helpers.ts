@@ -179,14 +179,14 @@ export const searchProcessTree = (
 
 // Iterate over all processes in processMap, and mark each process (and it's ancestors) for auto expansion if:
 // a) the process was "user entered" (aka an interactive group leader)
-// b) matches the plain text search above
+// b) we are jumping to a specific process
 // Returns the processMap with it's processes autoExpand bool set to true or false
 // process.autoExpand is read by process_tree_node to determine whether to auto expand it's child processes.
 export const autoExpandProcessTree = (processMap: ProcessMap, jumpToEntityId?: string) => {
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
-    if (process.searchMatched || process.isUserEntered() || jumpToEntityId === process.id) {
+    if (process.isUserEntered() || jumpToEntityId === process.id) {
       let { parent } = process;
       const parentIdSet = new Set<string>();
 

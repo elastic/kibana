@@ -180,6 +180,7 @@ export interface Process {
   getChildren(verboseMode: boolean): Process[];
   isVerbose(): boolean;
   getEndTime(): string;
+  isDescendantOf(process: Process): boolean;
 }
 
 export type ProcessMap = {

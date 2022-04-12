@@ -76,7 +76,7 @@ describe('process tree hook helpers tests', () => {
     processMap[SESSION_ENTITY_ID].children = childProcesses;
 
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeFalsy();
-    processMap = autoExpandProcessTree(processMap);
+    processMap = autoExpandProcessTree(processMap, SEARCH_RESULT_PROCESS_ID);
     // session leader should have autoExpand to be true
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeTruthy();
   });

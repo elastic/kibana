@@ -41,7 +41,7 @@ export interface ProcessDeps {
   onProcessSelected?: (process: Process) => void;
   jumpToEntityId?: string;
   investigatedAlertId?: string;
-  selectedProcessId?: string;
+  selectedProcess?: Process | null;
   showTimestamp: boolean;
   verboseMode: boolean;
   searchResults?: Process[];
@@ -62,7 +62,7 @@ export function ProcessTreeNode({
   onProcessSelected,
   jumpToEntityId,
   investigatedAlertId,
-  selectedProcessId,
+  selectedProcess,
   showTimestamp,
   verboseMode,
   searchResults,
@@ -74,9 +74,18 @@ export function ProcessTreeNode({
 }: ProcessDeps) {
   const textRef = useRef<HTMLSpanElement>(null);
 
-  const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader);
+  const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
+
+  // forces nodes to expand if the selected process is a descendant
+  useEffect(() => {
+    if (!childrenExpanded && selectedProcess) {
+      if (selectedProcess.isDescendantOf(process)) {
+        setChildrenExpanded(true);
+      }
+    }
+  }, [selectedProcess, process, childrenExpanded]);
 
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
@@ -90,7 +99,7 @@ export function ProcessTreeNode({
       ),
     [hasAlerts, alerts, investigatedAlertId]
   );
-  const isSelected = selectedProcessId === process.id;
+  const isSelected = selectedProcess?.id === process.id;
   const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
   const buttonStyles = useButtonStyles({});
 
@@ -198,7 +207,6 @@ export function ProcessTreeNode({
   }
 
   const id = process.id;
-  const { user } = processDetails;
   const {
     args,
     name,
@@ -206,12 +214,13 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     start,
+    user,
   } = processDetails.process;
 
-  const shouldRenderChildren = (process.autoExpand || childrenExpanded) && children?.length > 0;
+  const shouldRenderChildren = childrenExpanded && children?.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
+  const showUserEscalation = !isSessionLeader && !!user?.name && user.name !== parent?.user?.name;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
@@ -269,15 +278,11 @@ export function ProcessTreeNode({
                 id="xpack.sessionView.execUserChange"
                 defaultMessage="Exec user change: "
               />
-              <span css={buttonStyles.userChangedButtonUsername}>{user.name}</span>
+              <span>{user.name}</span>
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (
-            <ChildrenProcessesButton
-              disabled={process.autoExpand}
-              isExpanded={process.autoExpand || childrenExpanded}
-              onToggle={onChildrenToggle}
-            />
+            <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
           )}
           {alerts.length > 0 && (
             <AlertButton
@@ -293,7 +298,7 @@ export function ProcessTreeNode({
         <ProcessTreeAlerts
           alerts={alerts}
           investigatedAlertId={investigatedAlertId}
-          isProcessSelected={selectedProcessId === process.id}
+          isProcessSelected={selectedProcess?.id === process.id}
           onAlertSelected={onProcessClicked}
           onShowAlertDetails={onShowAlertDetails}
         />
@@ -311,7 +316,7 @@ export function ProcessTreeNode({
                 onProcessSelected={onProcessSelected}
                 jumpToEntityId={jumpToEntityId}
                 investigatedAlertId={investigatedAlertId}
-                selectedProcessId={selectedProcessId}
+                selectedProcess={selectedProcess}
                 showTimestamp={showTimestamp}
                 verboseMode={verboseMode}
                 searchResults={searchResults}
