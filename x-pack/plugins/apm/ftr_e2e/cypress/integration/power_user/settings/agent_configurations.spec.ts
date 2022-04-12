@@ -93,7 +93,7 @@ describe('Agent configuration', () => {
     cy.wait('@serviceEnvironmentApi');
 
     cy.get('[data-test-subj="serviceEnviromentComboBox"]')
-      .click()
+      .click({ force: true })
       .type('prod')
       .type('{enter}');
     cy.contains('production').realClick();
