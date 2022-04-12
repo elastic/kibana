@@ -1,10 +1,11 @@
-[[cases-api-set-default-connector]]
-== Set default connector for cases API
+[[cases-api-set-configuration]]
+== Set case configuration API
 ++++
-<titleabbrev>Set default connector</titleabbrev>
+<titleabbrev>Set configuration</titleabbrev>
 ++++
 
-Sets the default connector for cases.
+Sets external connection details, such as the closure type and
+default connector for cases.
 
 === {api-request-title}
 
@@ -17,17 +18,16 @@ Sets the default connector for cases.
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`owner` of the cases.
+`owner` of the case configuration.
 
 === {api-description-title}
 
-Connectors are used to interface with external systems. Before you can set the
-default connector for your cases, you must create it.
-//Refer to <<register-connector>>.
+Connectors are used to interface with external systems. You must create a
+connector before you can use it in your cases. Refer to <<add-case-connectors>>.
 
-If you do not set a default connector, you can simply provide the connector
-details when you <<cases-api-create,create>> or <<cases-api-update,update>> a
-case.
+If you set a default connector, it is automatically selected when you create
+cases in {kib}. If you use the <<cases-api-create,create case API>>, however,
+you must still specify all of the connector details.
 
 === {api-path-parms-title}
 
@@ -55,79 +55,11 @@ Valid values are:
 [%collapsible%open]
 ====
 `fields`::
-(Required, object) An object containing the connector fields.
+(Required, object) An object that contains the connector fields.
 +
 --
-If you do not want a default connector, specify `null` for this object. If you
-want to omit any individual field, specify `null` as its value.
-
-////
-NOTE: Fields can be set but are not being used by case configuration. You can set the fields of the connector at <<cases-api-create>>.
-////
-
-For {ibm-r} connectors, specify:
-
-`issueTypes`:::
-(Required, array of numbers) The type of the incident.
-
-`severityCode`:::
-(Required, number) The severity code of the incident.
-
-For {jira} connectors, specify:
-
-`issueType`:::
-(Required, string) The type of the issue.
-
-`parent`:::
-(Required, string) The key of the parent issue, when the issue type is `Sub-task`.
-
-`priority`:::
-(Required, string) The priority of the issue.
-
-For {sn-itsm} connectors, specify:
-
-`category`:::
-(Required, string) The category of the incident.
-
-`impact`:::
-(Required, string) The effect an incident had on business.
-
-`severity`:::
-(Required, string) The severity of the incident.
-
-`subcategory`:::
-(Required, string) The subcategory of the incident.
-
-`urgency`:::
-(Required, string) The extent to which the incident resolution can be delayed.
-
-For {sn-sir} connectors, specify:
-
-`category`:::
-(Required, string) The category of the incident.
-
-`destIp`:::
-(Required, string) A comma separated list of destination IPs.
-
-`malwareHash`:::
-(Required, string) A comma separated list of malware hashes.
-
-`malwareUrl`:::
-(Required, string) A comma separated list of malware URLs.
-
-`priority`:::
-(Required, string) The priority of the incident.
-
-`sourceIp`:::
-(Required, string) A comma separated list of source IPs.
-
-`subcategory`:::
-(Required, string) The subcategory of the incident.
-
-For {swimlane} connectors, specify:
-
-`caseId`:::
-(Required, string) The case ID.
+TIP: The fields specified in the case configuration are not used and are not
+propagated to individual cases, therefore it is recommended to set it to `null`.
 --
 
 `id`::
@@ -146,9 +78,9 @@ connector, use `none`. To retrieve connector names, use
 ====
 
 `owner`::
-(Required, string) The application that owns the cases. Valid values are:
-`cases`, `observability`, or `securitySolution`. This value affects
-whether you're setting the default connector for {stack-manage-app},
+(Required, string) The application that owns the case configuration. Valid
+values are: `cases`, `observability`, or `securitySolution`. This value affects
+whether you're setting case configuration details for {stack-manage-app},
 {observability}, or {security-app}.
 
 `settings`::
@@ -169,8 +101,7 @@ An object that contains the case settings.
 
 === {api-example-title}
 
-Sets a {sn-itsm} connector as the default connector for cases in
-{stack-manage-app}:
+Sets the closure type and default connector for cases in **{stack-manage-app}**:
 
 [source,sh]
 --------------------------------------------------

@@ -1,10 +1,11 @@
-[[cases-get-default-connector]]
-== Get default case connector API
+[[cases-get-configuration]]
+== Get case configuration API
 ++++
-<titleabbrev>Get default connector</titleabbrev>
+<titleabbrev>Get configuration</titleabbrev>
 ++++
 
-Retrieves information about the default connector for cases.
+Retrieves external connection details, such as the closure type and
+default connector for cases.
 
 === {api-request-title}
 
@@ -17,7 +18,7 @@ Retrieves information about the default connector for cases.
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`owner` of the cases.
+`owner` of the case configuration.
 
 === {api-path-parms-title}
 
@@ -29,10 +30,10 @@ default space is used.
 
 `owner`::
 (Optional, string or array of strings) A filter to limit the retrieved
-connector to a specific set of applications. Valid values are: `cases`,
+details to a specific set of applications. Valid values are: `cases`,
 `observability`, and `securitySolution`. If this parameter is omitted, the
-response contains the default connector for all applications that the user has
-access to read.
+response contains information for all applications that the user has access to
+read.
 
 === Response code
 
