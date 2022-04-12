@@ -57,18 +57,29 @@ CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]'
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
-trap 'echo "--- Shutdown deployment" && ecctl deployment shutdown --force --track --output json &> "$LOGS"' EXIT
+# NOTE: disabled pending log sanitization
+# echo "--- Setup FTR"
+# export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
+# export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
+# export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
+# export TEST_KIBANA_USERNAME=$CLOUD_DEPLOYMENT_USERNAME"
+# export TEST_KIBANA_PASS=$CLOUD_DEPLOYMENT_PASSWORD"
 
-echo "--- Run functional tests"
-# TODO
-# TEST_KIBANA_PROTOCOL=https
-# TEST_KIBANA_HOSTNAME=my-kibana-instance.internal.net
-# TEST_KIBANA_PORT=443
-# TEST_KIBANA_USER=kibana
-# TEST_KIBANA_PASS=<password>
+# export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
+# export TEST_ES_HOSTNAME==$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
+# export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
+# export TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
+# export TEST_ES_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
 
-# TEST_ES_PROTOCOL=https
-# TEST_ES_HOSTNAME=my-es-cluster.internal.net
-# TEST_ES_PORT=9200
-# TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
-# TEST_ES_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
+# Error: attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ConnectionError: self signed certificate in certificate chain
+# export NODE_TLS_REJECT_UNAUTHORIZED=0
+
+# echo "--- Run default functional tests"
+# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud
+
+# echo "--- Run x-pack functional tests"
+# cd x-pack
+# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud
+
+echo "--- Shutdown deployment"
+ecctl deployment shutdown --force --track --output json &> "$LOGS"'
