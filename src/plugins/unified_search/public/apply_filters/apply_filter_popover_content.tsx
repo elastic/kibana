@@ -21,11 +21,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import { getDisplayValueFromFilter, mapAndFlattenFilters } from '../../../data/public';
 import { FilterLabel } from '../filter_bar';
-import { Filter, IIndexPattern } from '../../../data/common';
+import { Filter } from '../../../data/common';
+import { DataView } from '../../../data_views/public';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }
