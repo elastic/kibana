@@ -20,6 +20,7 @@ import { TimelineId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { userNameExistsFilter } from './helpers';
+import { AuthenticationsQueryTabBody } from '../navigation';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -84,6 +85,9 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
 
     return (
       <Switch>
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
+          <AuthenticationsQueryTabBody {...tabProps} />
+        </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
         </Route>
