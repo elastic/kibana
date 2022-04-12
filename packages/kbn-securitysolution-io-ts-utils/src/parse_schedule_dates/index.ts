@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 
 export const parseScheduleDates = (time: string): moment.Moment | null => {
   const isValidDateString = !isNaN(Date.parse(time));

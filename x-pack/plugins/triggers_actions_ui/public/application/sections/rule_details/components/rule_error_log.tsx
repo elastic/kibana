@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import {
   EuiFlexItem,
   EuiFlexGroup,
