@@ -15,12 +15,21 @@ import {
 } from '../../common';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
+import type { CloudSetup } from '../../../cloud/server';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
+import * as errors from '../../common/errors';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import type { PngScreenshotOptions } from '../formats';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 import { Screenshots, ScreenshotOptions } from '.';
+
+jest.mock('os', () => {
+  return {
+    ...jest.requireActual('os'),
+    totalmem: () => 1 * Math.pow(1024, 3), // 1GB in bytes
+  };
+});
 
 /*
  * Tests
@@ -34,8 +43,13 @@ describe('Screenshot Observable Pipeline', () => {
   let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
   let screenshots: Screenshots;
+  let cloud: CloudSetup;
 
   beforeEach(async () => {
+    cloud = {
+      isCloudEnabled: false,
+      apm: {},
+    } as CloudSetup;
     driver = createMockBrowserDriver();
     driverFactory = createMockBrowserDriverFactory(driver);
     http = httpServiceMock.createSetupContract();
@@ -64,9 +78,16 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
-    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, {
-      poolSize: 1,
-    } as ConfigType);
+    screenshots = new Screenshots(
+      driverFactory,
+      logger,
+      packageInfo,
+      http,
+      {
+        poolSize: 1,
+      } as ConfigType,
+      cloud
+    );
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
@@ -467,6 +488,26 @@ describe('Screenshot Observable Pipeline', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('cloud', () => {
+    beforeEach(() => {
+      cloud.isCloudEnabled = true;
+    });
+
+    it('throws an error when OS memory is under 1GB on cloud', async () => {
+      await expect(
+        screenshots
+          .getScreenshots({
+            ...options,
+            expression: 'kibana',
+            input: 'something',
+          } as PngScreenshotOptions)
+          .toPromise()
+      ).rejects.toEqual(new errors.InsufficientMemoryAvailableOnCloudError());
+
+      expect(driver.open).toHaveBeenCalledTimes(0);
     });
   });
 });
