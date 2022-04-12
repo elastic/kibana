@@ -186,7 +186,7 @@ export const autoExpandProcessTree = (processMap: ProcessMap, jumpToEntityId?: s
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
-    if (process.isUserEntered() || jumpToEntityId === process.id) {
+    if (process.isUserEntered() || jumpToEntityId === process.id || process.hasAlerts()) {
       let { parent } = process;
       const parentIdSet = new Set<string>();
 
