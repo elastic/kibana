@@ -18,6 +18,7 @@ import {
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import type { DateRange } from '../../../common';
 import type { OperationSupportMatrix } from './operation_support';
 import type { OperationType } from '../indexpattern';
@@ -65,6 +66,7 @@ export interface ReferenceEditorProps {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   paramEditorCustomProps?: ParamEditorCustomProps;
 }
 

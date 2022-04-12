@@ -28,6 +28,9 @@ import { dataPluginMock } from '../../../data/public/mocks';
 import { stubIndexPattern } from '../../../data/public/stubs';
 import { KibanaContextProvider, withKibana } from '../../../kibana_react/public';
 
+import { setAutocomplete } from '../../../unified_search/public/services';
+import { unifiedSearchPluginMock } from '../../../unified_search/public/mocks';
+
 jest.useFakeTimers();
 
 const startMock = coreMock.createStart();
@@ -90,6 +93,11 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
 describe('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
   });
 
   it('Should render the given query', async () => {

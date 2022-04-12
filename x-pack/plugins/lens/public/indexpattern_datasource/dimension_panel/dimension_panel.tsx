@@ -10,6 +10,7 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';
 import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
@@ -31,6 +32,7 @@ export type IndexPatternDimensionEditorProps =
     layerId: string;
     http: HttpSetup;
     data: DataPublicPluginStart;
+    unifiedSearch: UnifiedSearchPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;
   };

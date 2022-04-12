@@ -8,8 +8,12 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
+} from 'src/plugins/unified_search/public';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
@@ -26,6 +30,7 @@ export interface InputControlSettings {
 export interface InputControlVisDependencies {
   core: InputControlVisCoreSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPluginSetup;
   getSettings: () => Promise<InputControlSettings>;
 }
 
@@ -34,6 +39,7 @@ export interface InputControlVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPluginSetup;
 }
 
 /** @internal */
@@ -50,15 +56,16 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
   public setup(
     core: InputControlVisCoreSetup,
-    { expressions, visualizations, data }: InputControlVisPluginSetupDependencies
+    { expressions, visualizations, unifiedSearch, data }: InputControlVisPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<InputControlVisDependencies> = {
       core,
-      data,
+      unifiedSearch,
       getSettings: async () => {
-        const { timeout, terminateAfter } = data.autocomplete.getAutocompleteSettings();
+        const { timeout, terminateAfter } = unifiedSearch.autocomplete.getAutocompleteSettings();
         return { autocompleteTimeout: timeout, autocompleteTerminateAfter: terminateAfter };
       },
+      data,
     };
 
     expressions.registerFunction(createInputControlVisFn);

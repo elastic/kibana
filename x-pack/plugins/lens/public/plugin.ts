@@ -16,6 +16,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
@@ -118,6 +119,7 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;

@@ -9,7 +9,8 @@
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
+import { KueryNode } from '../../../../../data/public';
+import { QuerySuggestionGetFnArgs } from '../../index';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 

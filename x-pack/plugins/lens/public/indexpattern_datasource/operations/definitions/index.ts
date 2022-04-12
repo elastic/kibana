@@ -45,6 +45,7 @@ import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types'
 import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../../../src/plugins/unified_search/public';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
@@ -158,6 +159,7 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;

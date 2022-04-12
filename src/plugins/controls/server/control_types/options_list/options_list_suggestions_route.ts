@@ -18,12 +18,12 @@ import {
 } from '../../../common/control_types/options_list/types';
 import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
 import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
-import { PluginSetup as DataPluginSetup } from '../../../../data/server';
+import { PluginSetup as UnifiedSearchPluginSetup } from '../../../../unified_search/server';
 import { FieldSpec, getFieldSubtypeNested } from '../../../../data_views/common';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
-  getAutocompleteSettings: DataPluginSetup['autocomplete']['getAutocompleteSettings']
+  getAutocompleteSettings: UnifiedSearchPluginSetup['autocomplete']['getAutocompleteSettings']
 ) => {
   const router = http.createRouter();
 

@@ -122,7 +122,7 @@ export const renderApp = (
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
     fieldFormats: deps.fieldFormats,
-    autocomplete: deps.data.autocomplete,
+    autocomplete: deps.unifiedSearch.autocomplete,
     config: coreStart.uiSettings!,
     chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,

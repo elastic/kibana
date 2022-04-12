@@ -19,6 +19,7 @@ import { take } from 'rxjs/operators';
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
@@ -54,6 +55,7 @@ import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
@@ -113,6 +115,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             charts: pluginsStart.charts,
             data: pluginsStart.data,
+            unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
             security: pluginsSetup.security,

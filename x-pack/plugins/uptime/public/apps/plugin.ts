@@ -32,6 +32,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
 
 import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
@@ -64,6 +65,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet?: FleetStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;

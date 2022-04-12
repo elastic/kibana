@@ -38,8 +38,8 @@ kibana_vars=(
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
-    data.autocomplete.valueSuggestions.terminateAfter
-    data.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.valueSuggestions.terminateAfter
+    unifiedSearch.autocomplete.valueSuggestions.timeout
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries

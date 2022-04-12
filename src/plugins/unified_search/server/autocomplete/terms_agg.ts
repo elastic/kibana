@@ -10,7 +10,7 @@ import { get, map } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConfigSchema } from '../../config';
-import { IFieldType, getFieldSubtypeNested } from '../../common';
+import { IFieldType, getFieldSubtypeNested } from '../../../data/common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 
 export async function termsAggSuggestions(

@@ -8,7 +8,7 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "fleet"],
-  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "navigation", "customIntegrations", "share", "spaces", "security"],
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "navigation", "customIntegrations", "share", "spaces", "security", "unifiedSearch"],
   "optionalPlugins": ["features", "cloud", "usageCollection", "home", "globalSearch", "telemetry"],
   "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaReact", "cloud", "esUiShared", "home", "infra", "kibanaUtils", "usageCollection", "unifiedSearch"]

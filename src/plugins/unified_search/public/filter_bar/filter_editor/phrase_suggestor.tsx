@@ -13,6 +13,7 @@ import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/pu
 import { IFieldType, UI_SETTINGS } from '../../../../data/common';
 import { DataView } from '../../../../data_views/common';
 import { IDataPluginServices } from '../../../../data/public';
+import { getAutocomplete } from '../../services';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -79,8 +80,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       return;
     }
     this.setState({ isLoading: true });
-
-    const suggestions = await this.services.data.autocomplete.getValueSuggestions({
+    const suggestions = await getAutocomplete().getValueSuggestions({
       indexPattern,
       field,
       query,

@@ -11,6 +11,7 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
@@ -25,6 +26,7 @@ const defaultProps = {
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {

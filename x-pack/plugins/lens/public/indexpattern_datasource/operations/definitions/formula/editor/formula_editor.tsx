@@ -89,7 +89,7 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  data,
+  unifiedSearch,
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
@@ -416,7 +416,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            data,
+            unifiedSearch,
             dateHistogramInterval: baseIntervalRef.current,
           });
         }
@@ -427,7 +427,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          data,
+          unifiedSearch,
           dateHistogramInterval: baseIntervalRef.current,
         });
       }
@@ -444,7 +444,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, data, baseIntervalRef]
+    [indexPattern, visibleOperationsMap, unifiedSearch, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(

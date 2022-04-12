@@ -69,6 +69,7 @@ import {
   KibanaThemeProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
@@ -118,6 +119,7 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  unifiedSearch,
   dataViews,
   fieldFormats,
   charts,
@@ -127,6 +129,7 @@ export function getIndexPatternDatasource({
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -373,6 +376,7 @@ export function getIndexPatternDatasource({
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
+                unifiedSearch={unifiedSearch}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />

@@ -9,12 +9,8 @@
 import { flatten } from 'lodash';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import {
-  IFieldType,
-  indexPatterns as indexPatternsUtils,
-  QuerySuggestionField,
-  QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+import { IFieldType, indexPatterns as indexPatternsUtils } from '../../../../../data/public';
+import { QuerySuggestionField, QuerySuggestionTypes } from '../../index';
 import { KqlQuerySuggestionProvider } from './types';
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {

@@ -13,6 +13,7 @@ import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -95,6 +96,7 @@ export const createStartServicesMock = (
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
   return {
     ...core,
@@ -105,6 +107,7 @@ export const createStartServicesMock = (
       getCreateCase: jest.fn(),
       getRecentCases: jest.fn(),
     },
+    unifiedSearch,
     data: {
       ...data,
       query: {

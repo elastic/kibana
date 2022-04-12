@@ -13,6 +13,7 @@ import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../../src/plugins/unified_search/public/mocks';
 import { rangeOperation } from '../index';
 import { RangeIndexPatternColumn } from './ranges';
 import {
@@ -51,6 +52,7 @@ jest.mock('lodash', () => {
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
+const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
@@ -84,6 +86,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataPluginMockValue,
+  unifiedSearch: unifiedSearchPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',

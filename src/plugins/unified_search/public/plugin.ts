@@ -11,7 +11,8 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Storage, IStorageWrapper } from '../../kibana_utils/public';
 import { ConfigSchema } from '../config';
-import { setIndexPatterns, setTheme, setOverlays } from './services';
+import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './services';
+import { AutocompleteService } from './autocomplete';
 import type { UsageCollectionSetup } from '../../usage_collection/public';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -25,22 +26,30 @@ export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
 {
   private readonly storage: IStorageWrapper;
+  private readonly autocomplete: AutocompleteService;
   private usageCollection: UsageCollectionSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.storage = new Storage(window.localStorage);
+
+    this.autocomplete = new AutocompleteService(initializerContext);
   }
 
   public setup(
-    core: CoreSetup,
-    { uiActions, data }: UnifiedSearchSetupDependencies
+    core: CoreSetup<UnifiedSearchStartDependencies, UnifiedSearchPublicPluginStart>,
+    { uiActions, data, usageCollection }: UnifiedSearchSetupDependencies
   ): UnifiedSearchPluginSetup {
     const { query } = data;
     uiActions.registerAction(
       createFilterAction(query.filterManager, query.timefilter.timefilter, core.theme)
     );
 
-    return {};
+    return {
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: query.timefilter,
+        usageCollection,
+      }),
+    };
   }
 
   public start(
@@ -50,6 +59,8 @@ export class UnifiedSearchPublicPlugin
     setTheme(core.theme);
     setOverlays(core.overlays);
     setIndexPatterns(dataViews);
+    const autocompleteStart = this.autocomplete.start();
+    setAutocomplete(autocompleteStart);
 
     const SearchBar = createSearchBar({
       core,
@@ -68,8 +79,11 @@ export class UnifiedSearchPublicPlugin
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
       },
+      autocomplete: autocompleteStart,
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.autocomplete.clearProviders();
+  }
 }

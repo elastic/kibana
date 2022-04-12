@@ -8,7 +8,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IFieldType } from '../../common';
+import { IFieldType } from '../../../data/common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 import { ConfigSchema } from '../../config';
 

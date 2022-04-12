@@ -38,6 +38,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -95,6 +96,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;

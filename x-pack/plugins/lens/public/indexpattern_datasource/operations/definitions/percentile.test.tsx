@@ -10,6 +10,7 @@ import { shallow, mount } from 'enzyme';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from './index';
 import { IndexPattern, IndexPatternLayer } from '../../types';
@@ -36,6 +37,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {
     ...createMockedIndexPattern(),

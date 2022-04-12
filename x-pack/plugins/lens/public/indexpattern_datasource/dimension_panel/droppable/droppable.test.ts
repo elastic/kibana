@@ -6,6 +6,7 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../../../src/plugins/unified_search/public';
 import { IndexPatternDimensionEditorProps } from '../dimension_panel';
 import { onDrop } from './on_drop_handler';
 import { getDropProps } from './get_drop_props';
@@ -317,6 +318,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           }),
         } as unknown as DataPublicPluginStart['fieldFormats'],
       } as unknown as DataPublicPluginStart,
+      unifiedSearch: {} as UnifiedSearchPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
       isFullscreen: false,

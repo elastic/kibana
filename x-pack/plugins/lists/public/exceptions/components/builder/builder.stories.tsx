@@ -9,7 +9,7 @@ import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
 import { HttpStart } from 'kibana/public';
 
-import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';

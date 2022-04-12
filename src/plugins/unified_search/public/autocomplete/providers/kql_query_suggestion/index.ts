@@ -14,12 +14,8 @@ import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
 import { setupGetConjunctionSuggestions } from './conjunction';
-import {
-  QuerySuggestion,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionGetFn,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../index';
+import { QuerySuggestion, QuerySuggestionGetFnArgs, QuerySuggestionGetFn } from '../../index';
 
 const cursorSymbol = '@kuery-cursor@';
 
@@ -29,7 +25,7 @@ const dedup = (suggestions: QuerySuggestion[]): QuerySuggestion[] =>
 export const KUERY_LANGUAGE_NAME = 'kuery';
 
 export const setupKqlQuerySuggestionProvider = (
-  core: CoreSetup<object, DataPublicPluginStart>
+  core: CoreSetup<object, UnifiedSearchPublicPluginStart>
 ): QuerySuggestionGetFn => {
   const providers = {
     field: setupGetFieldSuggestions(core),

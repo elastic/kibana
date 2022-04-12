@@ -22,6 +22,7 @@ import { dataServiceFactory } from './data';
 import { httpServiceFactory } from './http';
 import { optionsListServiceFactory } from './options_list';
 import { settingsServiceFactory } from './settings';
+import { unifiedSearchServiceFactory } from './unified_search';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
@@ -29,6 +30,7 @@ export const providers: PluginServiceProviders<
 > = {
   http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
+  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),

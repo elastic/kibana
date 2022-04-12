@@ -17,6 +17,7 @@ import {
 } from '../../embeddable/public';
 import { ControlInput } from '../common/types';
 import { DataPublicPluginStart } from '../../data/public';
+import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
 import { ControlsService } from './services/controls';
 import { DataView, DataViewsPublicPluginStart } from '../../data_views/public';
 
@@ -70,6 +71,7 @@ export interface ControlsPluginSetupDeps {
 }
 export interface ControlsPluginStartDeps {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
   dataViews: DataViewsPublicPluginStart;
 }

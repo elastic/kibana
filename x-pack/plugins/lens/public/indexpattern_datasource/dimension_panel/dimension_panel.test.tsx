@@ -17,6 +17,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { unifiedSearchPluginMock } from '../../../../../../src/plugins/unified_search/public/mocks';
+// import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
@@ -203,6 +205,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       data: {
         fieldFormats: {
           getType: jest.fn().mockReturnValue({

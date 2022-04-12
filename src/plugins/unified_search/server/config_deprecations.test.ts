@@ -36,14 +36,14 @@ const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
 };
 
 describe('Config Deprecations', () => {
-  it('does not report deprecations for default configuration', () => {
-    const defaultConfig = { data: { autocomplete: { valueSuggestions: {} } } };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
-    expect(migrated).toEqual(defaultConfig);
+  it('does not report deprecations for default configurationc', () => {
+    const configFirstStep = { data: { autocomplete: { valueSuggestions: {} } } };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(configFirstStep));
+    expect(migrated).toEqual(configFirstStep);
     expect(messages).toHaveLength(0);
   });
 
-  it('renames kibana.autocompleteTerminateAfter to data.autocomplete.valueSuggestions.terminateAfter', () => {
+  it('renames kibana.autocompleteTerminateAfter to unifiedSearch.autocomplete.valueSuggestions.terminateAfter', () => {
     const config = {
       kibana: {
         autocompleteTerminateAfter: 123,
@@ -51,15 +51,16 @@ describe('Config Deprecations', () => {
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.kibana?.autocompleteTerminateAfter).not.toBeDefined();
-    expect(migrated.data.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
+    expect(migrated.unifiedSearch.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"kibana.autocompleteTerminateAfter\\" has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
+        "Setting \\"data.autocomplete.valueSuggestions.terminateAfter\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.terminateAfter\\"",
       ]
     `);
   });
 
-  it('renames kibana.autocompleteTimeout to data.autocomplete.valueSuggestions.timeout', () => {
+  it('renames kibana.autocompleteTimeout to unifiedSearch.autocomplete.valueSuggestions.timeout', () => {
     const config = {
       kibana: {
         autocompleteTimeout: 123,
@@ -67,10 +68,11 @@ describe('Config Deprecations', () => {
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
     expect(migrated.kibana?.autocompleteTimeout).not.toBeDefined();
-    expect(migrated.data.autocomplete.valueSuggestions.timeout).toEqual(123);
+    expect(migrated.unifiedSearch.autocomplete.valueSuggestions.timeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"kibana.autocompleteTimeout\\" has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
+        "Setting \\"data.autocomplete.valueSuggestions.timeout\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.timeout\\"",
       ]
     `);
   });

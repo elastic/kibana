@@ -17,6 +17,7 @@ import type {
 } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../../src/plugins/unified_search/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
@@ -58,6 +59,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   // need to provide the terms operation as some helpers use operation specific features

@@ -5,20 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
-import { UnifiedSearchPublicPlugin } from './plugin';
-
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
-export type { UnifiedSearchPublicPluginStart } from './types';
+export type { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup } from './types';
 export { SearchBar } from './search_bar';
 export { FilterLabel, FilterItem } from './filter_bar';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
+
+/*
+ * Autocomplete query suggestions:
+ */
+export type {
+  QuerySuggestion,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  AutocompleteStart,
+} from './autocomplete';
+
+export { QuerySuggestionTypes } from './autocomplete';
+
+import { UnifiedSearchPublicPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

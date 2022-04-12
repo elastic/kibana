@@ -17,11 +17,13 @@ import {
   dataPluginMock,
   getCalculateAutoTimeExpression,
 } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';
 
 const dataStart = dataPluginMock.createStartContract();
+const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
   (path: string) => {
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
@@ -96,6 +98,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataStart,
+  unifiedSearch: unifiedSearchStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
   operationDefinitionMap: {},

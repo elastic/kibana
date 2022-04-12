@@ -20,6 +20,9 @@ import { KibanaContextProvider } from '../../../kibana_react/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '../../../data/public/stubs';
 import { UI_SETTINGS } from '../../../data/common';
+import { setAutocomplete } from '../../../unified_search/public/services';
+import { unifiedSearchPluginMock } from '../../../unified_search/public/mocks';
+
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
@@ -110,6 +113,11 @@ describe('QueryBarTopRowTopRow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
   });
 
   it('Should render query and time picker', () => {

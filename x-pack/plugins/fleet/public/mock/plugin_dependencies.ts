@@ -6,6 +6,7 @@
  */
 
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../src/plugins/unified_search/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
 import { cloudMock } from '../../../cloud/public/mocks';
 import { homePluginMock } from '../../../../../src/plugins/home/public/mocks';
@@ -27,6 +28,7 @@ export const createStartDepsMock = () => {
   return {
     licensing: licensingMock.createStart(),
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),
     share: sharePluginMock.createStartContract(),

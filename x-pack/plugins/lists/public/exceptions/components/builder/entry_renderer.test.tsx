@@ -25,7 +25,7 @@ import { useFindLists } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from 'src/plugins/data/common';
 
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
 
@@ -35,7 +35,7 @@ jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 
 describe('BuilderEntryItem', () => {
   let wrapper: ReactWrapper;

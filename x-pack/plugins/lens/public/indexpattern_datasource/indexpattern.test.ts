@@ -12,6 +12,7 @@ import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } 
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../src/plugins/unified_search/public/mocks';
 import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -184,6 +185,7 @@ describe('IndexPattern Data Source', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),

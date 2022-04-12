@@ -46,7 +46,7 @@ export interface AppContextTestRender {
   store: Store<State>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'unifiedSearch'>;
   startServices: StartServices;
   middlewareSpy: MiddlewareActionSpyHelper;
   /**

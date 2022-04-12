@@ -56,7 +56,7 @@ describe('ListItemComponent', () => {
   beforeAll(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
+        unifiedSearch: {
           autocomplete: {
             getValueSuggestions: getValueSuggestionsMock,
           },

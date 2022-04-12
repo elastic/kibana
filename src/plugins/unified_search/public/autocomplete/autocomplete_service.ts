@@ -8,7 +8,7 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 import moment from 'moment';
-import type { TimefilterSetup } from '../query';
+import type { TimefilterSetup } from '../../../data/public';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   getEmptyValueSuggestions,
@@ -23,7 +23,7 @@ import {
   KUERY_LANGUAGE_NAME,
   setupKqlQuerySuggestionProvider,
 } from './providers/kql_query_suggestion';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { UnifiedSearchPublicPluginStart, UnifiedSearchStartDependencies } from '../types';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];
@@ -50,7 +50,7 @@ export class AutocompleteService {
 
   /** @public **/
   public setup(
-    core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
+    core: CoreSetup<UnifiedSearchStartDependencies, UnifiedSearchPublicPluginStart>,
     {
       timefilter,
       usageCollection,

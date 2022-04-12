@@ -9,7 +9,7 @@ import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
 
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
@@ -20,7 +20,7 @@ import { getEmptyValue } from '../../../common/empty_value';
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;

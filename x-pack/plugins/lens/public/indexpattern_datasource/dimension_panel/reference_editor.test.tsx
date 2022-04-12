@@ -13,6 +13,7 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import { OperationMetadata } from '../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
@@ -54,6 +55,7 @@ describe('reference editor', () => {
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
+      unifiedSearch: {} as UnifiedSearchPublicPluginStart,
       dimensionGroups: [],
       isFullscreen: false,
       toggleFullscreen: jest.fn(),

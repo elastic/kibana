@@ -12,48 +12,48 @@ import { $Keys } from 'utility-types';
 import { flatten } from 'lodash';
 
 import { KqlQuerySuggestionProvider } from './types';
-import { QuerySuggestionTypes } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionTypes } from '../../index';
 
 const equalsText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.equalOperatorDescription.equalsText"
+    id="unifiedSearch.kueryAutocomplete.equalOperatorDescription.equalsText"
     defaultMessage="equals"
-    description="Part of data.kueryAutocomplete.equalOperatorDescription. Full text: 'equals some value'"
+    description="Part of unifiedSearch.kueryAutocomplete.equalOperatorDescription. Full text: 'equals some value'"
   />
 );
 const lessThanOrEqualToText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText"
+    id="unifiedSearch.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText"
     defaultMessage="less than or equal to"
-    description="Part of data.kueryAutocomplete.lessThanOrEqualOperatorDescription. Full text: 'is less than or equal to some value'"
+    description="Part of unifiedSearch.kueryAutocomplete.lessThanOrEqualOperatorDescription. Full text: 'is less than or equal to some value'"
   />
 );
 const greaterThanOrEqualToText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText"
+    id="unifiedSearch.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText"
     defaultMessage="greater than or equal to"
-    description="Part of data.kueryAutocomplete.greaterThanOrEqualOperatorDescription. Full text: 'is greater than or equal to some value'"
+    description="Part of unifiedSearch.kueryAutocomplete.greaterThanOrEqualOperatorDescription. Full text: 'is greater than or equal to some value'"
   />
 );
 const lessThanText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.lessThanOperatorDescription.lessThanText"
+    id="unifiedSearch.kueryAutocomplete.lessThanOperatorDescription.lessThanText"
     defaultMessage="less than"
-    description="Part of data.kueryAutocomplete.lessThanOperatorDescription. Full text: 'is less than some value'"
+    description="Part of unifiedSearch.kueryAutocomplete.lessThanOperatorDescription. Full text: 'is less than some value'"
   />
 );
 const greaterThanText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText"
+    id="unifiedSearch.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText"
     defaultMessage="greater than"
-    description="Part of data.kueryAutocomplete.greaterThanOperatorDescription. Full text: 'is greater than some value'"
+    description="Part of unifiedSearch.kueryAutocomplete.greaterThanOperatorDescription. Full text: 'is greater than some value'"
   />
 );
 const existsText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.existOperatorDescription.existsText"
+    id="unifiedSearch.kueryAutocomplete.existOperatorDescription.existsText"
     defaultMessage="exists"
-    description="Part of data.kueryAutocomplete.existOperatorDescription. Full text: 'exists in any form'"
+    description="Part of unifiedSearch.kueryAutocomplete.existOperatorDescription. Full text: 'exists in any form'"
   />
 );
 
@@ -61,11 +61,11 @@ const operators = {
   ':': {
     description: (
       <FormattedMessage
-        id="data.kueryAutocomplete.equalOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.equalOperatorDescription"
         defaultMessage="{equals} some value"
         values={{ equals: <span className="kbnSuggestionItem__callout">{equalsText}</span> }}
         description="Full text: 'equals some value'. See
-        'data.kueryAutocomplete.equalOperatorDescription.equalsText' for 'equals' part."
+        'unifiedSearch.kueryAutocomplete.equalOperatorDescription.equalsText' for 'equals' part."
       />
     ),
     fieldTypes: [
@@ -84,7 +84,7 @@ const operators = {
   '<=': {
     description: (
       <FormattedMessage
-        id="data.kueryAutocomplete.lessThanOrEqualOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.lessThanOrEqualOperatorDescription"
         defaultMessage="is {lessThanOrEqualTo} some value"
         values={{
           lessThanOrEqualTo: (
@@ -92,7 +92,7 @@ const operators = {
           ),
         }}
         description="Full text: 'is less than or equal to some value'. See
-        'data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
+        'unifiedSearch.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -100,7 +100,7 @@ const operators = {
   '>=': {
     description: (
       <FormattedMessage
-        id="data.kueryAutocomplete.greaterThanOrEqualOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.greaterThanOrEqualOperatorDescription"
         defaultMessage="is {greaterThanOrEqualTo} some value"
         values={{
           greaterThanOrEqualTo: (
@@ -108,7 +108,7 @@ const operators = {
           ),
         }}
         description="Full text: 'is greater than or equal to some value'. See
-        'data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
+        'unifiedSearch.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -116,11 +116,11 @@ const operators = {
   '<': {
     description: (
       <FormattedMessage
-        id="data.kueryAutocomplete.lessThanOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.lessThanOperatorDescription"
         defaultMessage="is {lessThan} some value"
         values={{ lessThan: <span className="kbnSuggestionItem__callout">{lessThanText}</span> }}
         description="Full text: 'is less than some value'. See
-        'data.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
+        'unifiedSearch.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -128,13 +128,13 @@ const operators = {
   '>': {
     description: (
       <FormattedMessage
-        id="data.kueryAutocomplete.greaterThanOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.greaterThanOperatorDescription"
         defaultMessage="is {greaterThan} some value"
         values={{
           greaterThan: <span className="kbnSuggestionItem__callout">{greaterThanText}</span>,
         }}
         description="Full text: 'is greater than some value'. See
-        'data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
+        'unifiedSearch.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -142,11 +142,11 @@ const operators = {
   ': *': {
     description: (
       <FormattedMessage
-        id="data.kueryAutocomplete.existOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.existOperatorDescription"
         defaultMessage="{exists} in any form"
         values={{ exists: <span className="kbnSuggestionItem__callout">{existsText}</span> }}
         description="Full text: 'exists in any form'. See
-        'data.kueryAutocomplete.existOperatorDescription.existsText' for 'exists' part."
+        'unifiedSearch.kueryAutocomplete.existOperatorDescription.existsText' for 'exists' part."
       />
     ),
     fieldTypes: undefined,

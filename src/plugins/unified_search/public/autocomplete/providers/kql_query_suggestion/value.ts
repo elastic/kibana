@@ -10,13 +10,9 @@ import { flatten } from 'lodash';
 import { CoreSetup } from 'kibana/public';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
-import {
-  DataPublicPluginStart,
-  IFieldType,
-  IIndexPattern,
-  QuerySuggestion,
-  QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+import { IFieldType, IIndexPattern } from '../../../../../data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../types';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../index';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values
@@ -29,7 +25,7 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
     }));
 
 export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
-  core: CoreSetup<object, DataPublicPluginStart>
+  core: CoreSetup<object, UnifiedSearchPublicPluginStart>
 ) => {
   const autoCompleteServicePromise = core
     .getStartServices()

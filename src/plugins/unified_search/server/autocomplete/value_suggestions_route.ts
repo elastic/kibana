@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { getRequestAbortedSignal } from '../lib';
+import { getRequestAbortedSignal } from '../../../data/server';
 import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
 import type { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';

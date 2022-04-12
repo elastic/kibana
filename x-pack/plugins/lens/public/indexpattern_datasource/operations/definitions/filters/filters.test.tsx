@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '../../../../../../../../src/plugins/unified_search/public/mocks';
 import type { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '../index';
 import type { IndexPatternLayer } from '../../../types';
@@ -25,6 +26,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},

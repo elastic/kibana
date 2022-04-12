@@ -135,7 +135,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onRuleChange,
   alertStatus,
 }: AddExceptionFlyoutProps) {
-  const { http, data } = useKibana().services;
+  const { http, unifiedSearch } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -503,7 +503,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 allowLargeValueLists:
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
                 httpService: http,
-                autocompleteService: data.autocomplete,
+                autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,
                 listType: exceptionListType,
                 osTypes: osTypesSelection,

@@ -20,7 +20,7 @@ import type {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
@@ -38,7 +38,7 @@ export interface DependencyCache {
   theme: ThemeServiceStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
   fieldFormats: FieldFormatsStart | null;
-  autocomplete: DataPublicPluginStart['autocomplete'] | null;
+  autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;

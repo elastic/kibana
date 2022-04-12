@@ -14,6 +14,8 @@ import { TestProviders, mockIndexPattern } from '../../mock';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { SearchBar } from '../../../../../../../src/plugins/unified_search/public';
 import { QueryBar, QueryBarComponentProps } from '.';
+import { setAutocomplete } from '../../../../../../../src/plugins/unified_search/public/services';
+import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -267,6 +269,11 @@ describe('QueryBar ', () => {
   });
 
   describe('#onSavedQueryUpdated', () => {
+    beforeEach(() => {
+      const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+      setAutocomplete(autocompleteStart.autocomplete);
+    });
+
     test('is only reference that changed when dataProviders props get updated', async () => {
       const wrapper = await getWrapper(
         <Proxy

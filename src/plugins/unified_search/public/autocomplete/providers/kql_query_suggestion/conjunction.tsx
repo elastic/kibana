@@ -10,24 +10,21 @@ import React from 'react';
 import { $Keys } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KqlQuerySuggestionProvider } from './types';
-import {
-  QuerySuggestion,
-  QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../index';
 
 const bothArgumentsText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
+    id="unifiedSearch.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
     defaultMessage="both arguments"
-    description="Part of data.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
+    description="Part of unifiedSearch.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
   />
 );
 
 const oneOrMoreArgumentsText = (
   <FormattedMessage
-    id="data.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
+    id="unifiedSearch.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
     defaultMessage="one or more arguments"
-    description="Part of data.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
+    description="Part of unifiedSearch.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
   />
 );
 
@@ -35,20 +32,20 @@ const conjunctions: Record<string, JSX.Element> = {
   and: (
     <p>
       <FormattedMessage
-        id="data.kueryAutocomplete.andOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.andOperatorDescription"
         defaultMessage="Requires {bothArguments} to be true"
         values={{
           bothArguments: <span className="kbnSuggestionItem__callout">{bothArgumentsText}</span>,
         }}
         description="Full text: ' Requires both arguments to be true'. See
-          'data.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
+          'unifiedSearch.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
       />
     </p>
   ),
   or: (
     <p>
       <FormattedMessage
-        id="data.kueryAutocomplete.orOperatorDescription"
+        id="unifiedSearch.kueryAutocomplete.orOperatorDescription"
         defaultMessage="Requires {oneOrMoreArguments} to be true"
         values={{
           oneOrMoreArguments: (
@@ -56,7 +53,7 @@ const conjunctions: Record<string, JSX.Element> = {
           ),
         }}
         description="Full text: 'Requires one or more arguments to be true'. See
-          'data.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
+          'unifiedSearch.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
       />
     </p>
   ),
