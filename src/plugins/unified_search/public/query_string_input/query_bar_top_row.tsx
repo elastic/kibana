@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
@@ -25,12 +25,12 @@ import {
 } from '@elastic/eui';
 import {
   IDataPluginServices,
-  IIndexPattern,
   TimeRange,
   TimeHistoryContract,
   Query,
   getQueryLog,
 } from '../../../data/public';
+import { DataView } from '../../../data_views/public';
 import type { PersistedLog } from '../../../data/public';
 import { useKibana, withKibana } from '../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
@@ -56,7 +56,7 @@ export interface QueryBarTopRowProps {
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<IIndexPattern | string>;
+  indexPatterns?: Array<DataView | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;

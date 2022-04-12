@@ -8,7 +8,7 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import {
   EuiButtonGroup,
   EuiButtonIcon,

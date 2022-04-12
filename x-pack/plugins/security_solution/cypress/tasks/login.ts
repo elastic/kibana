@@ -352,7 +352,7 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
 };
 
-export const visitUserDetailsPage = (userName = 'bob') => {
+export const visitUserDetailsPage = (userName = 'test') => {
   visit(userDetailsUrl(userName));
 };
 
