@@ -55,7 +55,7 @@
 /examples/field_formats_example/ @elastic/kibana-app-services
 /examples/partial_results_example/ @elastic/kibana-app-services
 /examples/search_examples/ @elastic/kibana-app-services
-/packages/elastic-datemath/ @elastic/kibana-app-services
+/packages/kbn-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
 /packages/kbn-es-query/ @elastic/kibana-app-services
@@ -324,6 +324,7 @@
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
+/test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/ @elastic/kibana-security
 /x-pack/plugins/security/ @elastic/kibana-security
@@ -393,7 +394,6 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/plugins/security_solution/ @elastic/security-solution
-/x-pack/plugins/metrics_entities/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
 /x-pack/test/lists_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution

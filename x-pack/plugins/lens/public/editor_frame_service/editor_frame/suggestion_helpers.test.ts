@@ -733,6 +733,41 @@ describe('suggestion helpers', () => {
       );
     });
 
+    it('should get the top non-hidden suggestion if there is no active visualization', () => {
+      defaultParams[0] = {
+        '1': {
+          getTableSpec: () => [],
+          datasourceId: '',
+          getOperationForColumnId: jest.fn(),
+          getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
+        },
+      };
+      defaultParams[3] = {
+        testVis: mockVisualization1,
+        vis2: mockVisualization2,
+      };
+      mockVisualization1.getSuggestions.mockReturnValue([]);
+      mockVisualization2.getSuggestions.mockReturnValue([
+        {
+          score: 0.3,
+          title: 'second suggestion',
+          state: { second: true },
+          previewIcon: 'empty',
+        },
+        {
+          score: 0.5,
+          title: 'mop suggestion',
+          state: { first: true },
+          previewIcon: 'empty',
+          hide: true,
+        },
+      ]);
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result!.title).toEqual('second suggestion');
+    });
+
     it('should return nothing if visualization does not produce suggestions', () => {
       mockVisualization1.getSuggestions.mockReturnValue([]);
       const result = getTopSuggestionForField(...defaultParams);

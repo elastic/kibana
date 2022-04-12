@@ -359,7 +359,7 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
- | The map attribution string. Provide attributions in markdown and use '|' to delimit attributions, for example: `"[attribution 1](https://www.attribution1)|[attribution 2](https://www.attribution2)"`.
+ | The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
 | [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
@@ -689,29 +689,29 @@ sources and images. When false, Vega can only get data from {es}. *Default: `fal
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
 | `xpack.ilm.ui.enabled`
-Set this value to false to disable the Index Lifecycle Policies UI.
+ | Set this value to false to disable the Index Lifecycle Policies UI.
 *Default: `true`*
 
 | `xpack.index_management.ui.enabled`
-Set this value to false to disable the Index Management UI.
+ | Set this value to false to disable the Index Management UI.
 *Default: `true`*
 
 | `xpack.license_management.ui.enabled`
-Set this value to false to disable the License Management UI.
+ | Set this value to false to disable the License Management UI.
 *Default: `true`*
 
 | `xpack.remote_clusters.ui.enabled`
-Set this value to false to disable the Remote Clusters UI.
+ | Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
 | `xpack.rollup.ui.enabled:`
-Set this value to false to disable the Rollup Jobs UI. *Default: true*
+ | Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
 | `xpack.snapshot_restore.ui.enabled:`
-Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+ | Set this value to false to disable the Snapshot and Restore UI. *Default: true*
 
 | `xpack.upgrade_assistant.ui.enabled:`
-Set this value to false to disable the Upgrade Assistant UI. *Default: true*
+ | Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.
