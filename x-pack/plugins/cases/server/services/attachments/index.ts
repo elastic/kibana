@@ -113,9 +113,7 @@ export class AttachmentService {
     };
   }
 
-  public async valueCountAlertsAttachedToCase(
-    params: AlertsAttachedToCaseArgs
-  ): Promise<number | undefined> {
+  public async valueCountAlertsAttachedToCase(params: AlertsAttachedToCaseArgs): Promise<number> {
     try {
       this.log.debug(`Attempting to value count alerts for case id ${params.caseId}`);
       const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
@@ -124,7 +122,7 @@ export class AttachmentService {
         aggregations: this.buildAlertsAggs('value_count'),
       });
 
-      return res?.alerts?.value;
+      return res?.alerts?.value ?? 0;
     } catch (error) {
       this.log.error(`Error while value counting alerts for case id ${params.caseId}: ${error}`);
       throw error;

@@ -25,7 +25,11 @@ import {
   ActionTypes,
   Actions,
 } from '../../../common/api';
-import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
 import { CasesClientArgs } from '../../client';
 import { createCaseError } from '../error';
 import {
@@ -222,15 +226,35 @@ export class CaseCommentModel {
   }
 
   private validateCreateCommentRequest(req: CommentRequest[]) {
-    if (
-      req.some((attachment) => attachment.type === CommentType.alert) &&
-      this.caseInfo.attributes.status === CaseStatuses.closed
-    ) {
+    const totalAlertsInReq = req.filter(
+      (attachment) => attachment.type === CommentType.alert
+    ).length;
+
+    const reqHasAlerts = totalAlertsInReq > 0;
+
+    if (reqHasAlerts && this.caseInfo.attributes.status === CaseStatuses.closed) {
       throw Boom.badRequest('Alert cannot be attached to a closed case');
     }
 
     if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
       throw Boom.badRequest('The owner field of the comment must match the case');
+    }
+
+    if (reqHasAlerts) {
+      this.validateAlertsLimitOnCase(totalAlertsInReq);
+    }
+  }
+
+  private async validateAlertsLimitOnCase(totalAlertsInReq: number) {
+    const alertsValueCount = await this.params.attachmentService.valueCountAlertsAttachedToCase({
+      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+      caseId: this.caseInfo.id,
+    });
+
+    if (alertsValueCount + totalAlertsInReq >= MAX_ALERTS_PER_CASE) {
+      throw Boom.badRequest(
+        `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`
+      );
     }
   }
 
