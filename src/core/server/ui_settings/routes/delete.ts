@@ -23,7 +23,7 @@ export function registerDeleteRoute(router: IRouter) {
     { path: '/api/kibana/settings/{key}', validate },
     async (context, request, response) => {
       try {
-        const uiSettingsClient = context.core.uiSettings.client;
+        const uiSettingsClient = (await context.core).uiSettings.client;
 
         await uiSettingsClient.remove(request.params.key);
 

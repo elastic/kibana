@@ -63,7 +63,7 @@ export const registerImportRoute = (
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
-      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
+      const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient

@@ -49,7 +49,8 @@ export const registerUpdateRoute = (router: IRouter, { coreUsageData }: RouteDep
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.update(type, id, attributes, options);
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.update(type, id, attributes, options);
       return res.ok({ body: result });
     })
   );

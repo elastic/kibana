@@ -46,13 +46,14 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
       const { field: fieldName, query, filters, fieldMeta, method } = request.body;
       const { index } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+      const { savedObjects, elasticsearch } = await context.core;
 
       try {
         const fn = method === 'terms_agg' ? termsAggSuggestions : termsEnumSuggestions;
         const body = await fn(
           config,
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
+          savedObjects.client,
+          elasticsearch.client.asCurrentUser,
           index,
           fieldName,
           query,

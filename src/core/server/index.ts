@@ -88,7 +88,6 @@ import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
 } from './analytics';
-import { TypeOf } from '../../../packages/kbn-config-schema/src';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
