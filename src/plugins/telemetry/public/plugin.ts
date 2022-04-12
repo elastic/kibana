@@ -109,6 +109,8 @@ export interface TelemetryPluginConfig {
   telemetryNotifyUserAboutOptInDefault?: boolean;
   /** Does the user have enough privileges to change the settings? **/
   userCanChangeSettings?: boolean;
+  /** Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud */
+  hidePrivacyStatement?: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -155,7 +157,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       await this.refreshConfig();
     });
 
-    if (home) {
+    if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
           this.telemetryNotifications?.setOptedInNoticeSeen();
