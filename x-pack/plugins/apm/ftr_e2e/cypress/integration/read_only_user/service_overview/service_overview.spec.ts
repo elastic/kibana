@@ -85,8 +85,7 @@ const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
 
 const aliasNames = [...aliasNamesNoComparison, ...aliasNamesWithComparison];
 
-// flaky test
-describe.skip('Service Overview', () => {
+describe('Service Overview', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -238,14 +237,11 @@ describe.skip('Service Overview', () => {
     });
 
     it('when selecting a different comparison window', () => {
-      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
       // selects another comparison type
-      cy.get('[data-test-subj="comparisonSelect"]').select('week');
-      cy.get('[data-test-subj="comparisonSelect"]').should(
-        'have.value',
-        'week'
-      );
+      cy.get('[data-test-subj="comparisonSelect"]').select('1w');
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNamesWithComparison,
         value: 'offset',
