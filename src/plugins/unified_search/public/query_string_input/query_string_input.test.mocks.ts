@@ -23,7 +23,7 @@ jest.mock('../../../data/public/query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 
-jest.mock('./fetch_index_patterns', () => ({
+jest.mock('./fetch_data_views', () => ({
   fetchDataViews: mockFetchDataViews,
 }));
 

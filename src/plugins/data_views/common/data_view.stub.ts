@@ -53,3 +53,5 @@ export function stubbedSavedObjectDataView(
     references: [],
   };
 }
+
+export const stubbedSavedObjectIndexPattern = stubbedSavedObjectDataView;
