@@ -6,10 +6,10 @@
  */
 
 import {
+  CustomRequestHandlerContext,
   ElasticsearchClient,
   IContextProvider,
   IRouter,
-  CustomRequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
