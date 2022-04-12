@@ -88,7 +88,6 @@
 ### Observability Plugins
 
 # Observability Shared
-/x-pack/plugins/observability/ @elastic/observability-ui
 /x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
 
 # Unified Observability
