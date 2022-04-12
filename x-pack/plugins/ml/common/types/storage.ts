@@ -15,6 +15,8 @@ export const ML_GETTING_STARTED_CALLOUT_DISMISSED = 'ml.gettingStarted.isDismiss
 
 export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 
+export const ML_ANOMALY_EXPLORER_PANELS = 'ml.anomalyExplorerPanels';
+
 export type PartitionFieldConfig =
   | {
       /**
@@ -42,11 +44,22 @@ export type PartitionFieldsConfig =
 
 export type ApplyTimeRangeConfig = boolean | undefined;
 
+export interface PanelState {
+  size: number;
+  isCollapsed: boolean;
+}
+
+export interface AnomalyExplorerPanelsState {
+  topInfluencers: PanelState;
+  mainPage: PanelState;
+}
+
 export type MlStorage = Partial<{
   [ML_ENTITY_FIELDS_CONFIG]: PartitionFieldsConfig;
   [ML_APPLY_TIME_RANGE_CONFIG]: ApplyTimeRangeConfig;
   [ML_GETTING_STARTED_CALLOUT_DISMISSED]: boolean | undefined;
   [ML_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';
+  [ML_ANOMALY_EXPLORER_PANELS]: AnomalyExplorerPanelsState | undefined;
 }> | null;
 
 export type MlStorageKey = keyof Exclude<MlStorage, null>;
