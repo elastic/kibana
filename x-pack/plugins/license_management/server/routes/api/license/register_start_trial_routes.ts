@@ -15,7 +15,7 @@ export function registerStartTrialRoutes({
   plugins: { licensing },
 }: RouteDependencies) {
   router.get({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { client } = ctx.core.elasticsearch;
+    const { client } = (await ctx.core).elasticsearch;
     try {
       return res.ok({ body: await canStartTrial(client) });
     } catch (error) {
@@ -24,7 +24,7 @@ export function registerStartTrialRoutes({
   });
 
   router.post({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { client } = ctx.core.elasticsearch;
+    const { client } = (await ctx.core).elasticsearch;
     try {
       return res.ok({
         body: await startTrial({ client, licensing }),
