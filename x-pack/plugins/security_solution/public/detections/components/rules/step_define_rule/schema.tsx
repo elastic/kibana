@@ -18,6 +18,7 @@ import {
 } from '../../../../common/components/threat_match/helpers';
 import {
   isEqlRule,
+  isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -480,5 +481,56 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  newTermsFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsLabel',
+      {
+        defaultMessage: 'Fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNewTermsFieldHelpText',
+      {
+        defaultMessage: 'Select fields check for new terms.',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsRequired',
+              {
+                defaultMessage: 'A minimum of one field is required.',
+              }
+            )
+          )(...args);
+        },
+      },
+    ],
+  },
+  historyWindowStart: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowStartLabel',
+      {
+        defaultMessage: 'History Window Size',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowStartHelpText',
+      {
+        defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
+      }
+    ),
   },
 };

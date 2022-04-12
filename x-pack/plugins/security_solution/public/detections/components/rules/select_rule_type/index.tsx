@@ -15,6 +15,7 @@ import {
   isEqlRule,
   isQueryRule,
   isThreatMatchRule,
+  isNewTermsRule,
 } from '../../../../../common/detection_engine/utils';
 import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -48,6 +49,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setQuery = useCallback(() => setType('query'), [setType]);
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
+  const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
   });
@@ -91,6 +93,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isSelected: isThreatMatchRule(ruleType),
     }),
     [ruleType, setThreatMatch]
+  );
+
+  const newTermsSelectableConfig = useMemo(
+    () => ({
+      onClick: setNewTerms,
+      isSelected: isNewTermsRule(ruleType),
+    }),
+    [ruleType, setNewTerms]
   );
 
   return (
@@ -168,6 +178,19 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="list" />}
               selectable={threatMatchSelectableConfig}
+              layout="horizontal"
+            />
+          </EuiFlexItem>
+        )}
+        {(!isUpdateView || newTermsSelectableConfig.isSelected) && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="newTermsRuleType"
+              title={i18n.NEW_TERMS_TYPE_TITLE}
+              titleSize="xs"
+              description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="alert" />}
+              selectable={newTermsSelectableConfig}
               layout="horizontal"
             />
           </EuiFlexItem>

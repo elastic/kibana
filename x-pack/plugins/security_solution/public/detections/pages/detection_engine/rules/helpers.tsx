@@ -111,7 +111,19 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
         }
       : {}),
   },
+  newTermsFields: rule.new_terms_fields ?? [],
+  historyWindowStart: rule.history_window_start
+    ? convertHistoryStartToSize(rule.history_window_start)
+    : '7d',
 });
+
+const convertHistoryStartToSize = (relativeTime: string) => {
+  if (relativeTime.startsWith('now-')) {
+    return relativeTime.substring(4);
+  } else {
+    return relativeTime;
+  }
+};
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const { interval, from } = rule;
@@ -343,6 +355,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return ['anomaly_threshold', 'machine_learning_job_id'];
     case 'threshold':
       return ['threshold', ...queryRuleParams];
+    case 'new_terms':
     case 'threat_match':
     case 'query':
     case 'saved_query':

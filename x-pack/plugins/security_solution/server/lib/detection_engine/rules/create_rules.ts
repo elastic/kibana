@@ -77,6 +77,8 @@ export const createRules = async ({
   actions,
   isRuleRegistryEnabled,
   id,
+  newTermsFields,
+  historyWindowStart,
 }: CreateRulesOptions): Promise<SanitizedRule<RuleTypeParams>> => {
   const rule = await rulesClient.create<RuleTypeParams>({
     options: {
@@ -139,6 +141,8 @@ export const createRules = async ({
         note,
         version,
         exceptionsList,
+        newTermsFields,
+        historyWindowStart,
       },
       schedule: { interval },
       enabled,

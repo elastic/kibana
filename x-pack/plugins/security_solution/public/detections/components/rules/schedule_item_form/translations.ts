@@ -28,6 +28,13 @@ export const HOURS = i18n.translate(
   }
 );
 
+export const DAYS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.daysOptionDescription',
+  {
+    defaultMessage: 'Days',
+  }
+);
+
 export const INVALID_TIME = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepScheduleRuleForm.invalidTimeMessageDescription',
   {

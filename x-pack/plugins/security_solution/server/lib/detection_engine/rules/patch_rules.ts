@@ -85,6 +85,8 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
+  newTermsFields,
+  historyWindowStart,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (rule == null) {
     return null;
@@ -136,6 +138,8 @@ export const patchRules = async ({
     exceptionsList,
     anomalyThreshold,
     machineLearningJobId,
+    newTermsFields,
+    historyWindowStart,
   });
 
   const nextParams = defaults(

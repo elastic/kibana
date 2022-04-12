@@ -50,10 +50,12 @@ import {
   createMlAlertType,
   createQueryAlertType,
   createThresholdAlertType,
+  createNewTermsAlertType,
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
+import { assertUnreachable } from '../../../../../common/utility_types';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 
@@ -336,6 +338,21 @@ export const previewRulesRoute = async (
               { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
             );
             break;
+          case 'new_terms':
+            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
+            await runExecutors(
+              newTermsAlertType.executor,
+              newTermsAlertType.id,
+              newTermsAlertType.name,
+              previewRuleParams,
+              () => true,
+              { create: alertInstanceFactoryStub, done: () => ({ getRecoveredAlerts: () => [] }) }
+            );
+            break;
+          case 'saved_query':
+            throw new Error('Preview unavailable for Saved Query rules');
+          default:
+            assertUnreachable(previewRuleParams);
         }
 
         // Refreshes alias to ensure index is able to be read before returning

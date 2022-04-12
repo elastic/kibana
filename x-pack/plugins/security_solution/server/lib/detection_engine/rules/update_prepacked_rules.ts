@@ -115,6 +115,8 @@ export const createPromises = (
       timeline_title: timelineTitle,
       machine_learning_job_id: machineLearningJobId,
       exceptions_list: exceptionsList,
+      new_terms_fields: newTermsFields,
+      history_window_start: historyWindowStart,
     } = rule;
 
     const existingRule = await readRules({
@@ -202,6 +204,8 @@ export const createPromises = (
         // the existing rule
         exceptionsList,
         actions: migratedRule.actions.map(transformAlertToRuleAction), // Actions come from the existing rule
+        newTermsFields,
+        historyWindowStart,
       })) as PartialRule<RuleParams>; // TODO: Replace AddPrepackagedRulesSchema with type specific rules schema so we can clean up these types
     } else {
       // Note: we do not pass down enabled as we do not want to suddenly disable
@@ -256,6 +260,8 @@ export const createPromises = (
         exceptionsList,
         throttle,
         actions: undefined,
+        newTermsFields,
+        historyWindowStart,
       });
     }
   });

@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
+  runtimeMappings?: estypes.MappingRuntimeFields;
   index: string[];
   from: string;
   to: string;
@@ -22,7 +23,7 @@ interface BuildEventsSearchQuery {
   trackTotalHits?: boolean;
 }
 
-const buildTimeRangeFilter = ({
+export const buildTimeRangeFilter = ({
   to,
   from,
   timestampOverride,
@@ -88,6 +89,7 @@ const buildTimeRangeFilter = ({
 
 export const buildEventsSearchQuery = ({
   aggregations,
+  runtimeMappings,
   index,
   from,
   to,
@@ -151,6 +153,7 @@ export const buildEventsSearchQuery = ({
         ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
+      runtimeMappings,
       sort,
     },
   };

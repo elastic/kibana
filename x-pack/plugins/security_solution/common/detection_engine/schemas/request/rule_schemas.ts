@@ -67,6 +67,8 @@ import {
   created_by,
   namespace,
   ruleExecutionSummary,
+  newTermsFields,
+  historyWindowStart,
 } from '../common';
 
 export const createSchema = <
@@ -336,6 +338,29 @@ const {
 
 export { machineLearningCreateParams };
 
+const newTermsRuleParams = {
+  required: {
+    type: t.literal('new_terms'),
+    query,
+    new_terms_fields: newTermsFields,
+    history_window_start: historyWindowStart,
+  },
+  optional: {
+    index,
+    filters,
+  },
+  defaultable: {
+    language: t.keyof({ kuery: null, lucene: null }),
+  },
+};
+const {
+  create: newTermsCreateParams,
+  patch: newTermsPatchParams,
+  response: newTermsResponseParams,
+} = buildAPISchemas(newTermsRuleParams);
+
+export { newTermsCreateParams };
+
 const createTypeSpecific = t.union([
   eqlCreateParams,
   threatMatchCreateParams,
@@ -343,6 +368,7 @@ const createTypeSpecific = t.union([
   savedQueryCreateParams,
   thresholdCreateParams,
   machineLearningCreateParams,
+  newTermsCreateParams,
 ]);
 export type CreateTypeSpecific = t.TypeOf<typeof createTypeSpecific>;
 
@@ -356,6 +382,7 @@ export type ThresholdCreateSchema = CreateSchema<t.TypeOf<typeof thresholdCreate
 export type MachineLearningCreateSchema = CreateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
+export type NewTermsCreateSchema = CreateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
@@ -375,6 +402,7 @@ export type ThresholdUpdateSchema = UpdateSchema<t.TypeOf<typeof thresholdCreate
 export type MachineLearningUpdateSchema = UpdateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
+export type NewTermsUpdateSchema = UpdateSchema<t.TypeOf<typeof newTermsCreateParams>>;
 
 const patchTypeSpecific = t.union([
   eqlPatchParams,
@@ -383,6 +411,7 @@ const patchTypeSpecific = t.union([
   savedQueryPatchParams,
   thresholdPatchParams,
   machineLearningPatchParams,
+  newTermsPatchParams,
 ]);
 
 const responseTypeSpecific = t.union([
@@ -392,6 +421,7 @@ const responseTypeSpecific = t.union([
   savedQueryResponseParams,
   thresholdResponseParams,
   machineLearningResponseParams,
+  newTermsResponseParams,
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 

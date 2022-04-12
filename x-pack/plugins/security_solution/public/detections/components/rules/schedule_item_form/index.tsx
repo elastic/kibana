@@ -27,12 +27,14 @@ interface ScheduleItemProps {
   idAria: string;
   isDisabled: boolean;
   minimumValue?: number;
+  timeTypes?: string[];
 }
 
 const timeTypeOptions = [
   { value: 's', text: I18n.SECONDS },
   { value: 'm', text: I18n.MINUTES },
   { value: 'h', text: I18n.HOURS },
+  { value: 'd', text: I18n.DAYS },
 ];
 
 // move optional label to the end of input
@@ -78,8 +80,9 @@ export const ScheduleItem = ({
   idAria,
   isDisabled,
   minimumValue = 0,
+  timeTypes = ['s', 'm', 'h'],
 }: ScheduleItemProps) => {
-  const [timeType, setTimeType] = useState('s');
+  const [timeType, setTimeType] = useState(timeTypes[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
@@ -116,13 +119,13 @@ export const ScheduleItem = ({
       if (
         !isEmpty(filterTimeType) &&
         filterTimeType != null &&
-        ['s', 'm', 'h'].includes(filterTimeType[0]) &&
+        timeTypes.includes(filterTimeType[0]) &&
         filterTimeType[0] !== timeType
       ) {
         setTimeType(filterTimeType[0]);
       }
     }
-  }, [timeType, timeVal, value]);
+  }, [timeType, timeTypes, timeVal, value]);
 
   // EUI missing some props
   const rest = { disabled: isDisabled };
@@ -154,7 +157,7 @@ export const ScheduleItem = ({
         append={
           <MyEuiSelect
             fullWidth={false}
-            options={timeTypeOptions}
+            options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             onChange={onChangeTimeType}
             value={timeType}
             data-test-subj="timeType"

@@ -54,6 +54,8 @@ import {
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
+  NewTermsFieldsOrUndefined,
+  HistoryWindowStartOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -129,6 +131,8 @@ export interface UpdateProperties {
   exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   namespace: NamespaceOrUndefined;
+  newTermsFields: NewTermsFieldsOrUndefined;
+  historyWindowStart: HistoryWindowStartOrUndefined;
 }
 
 export const calculateVersion = (

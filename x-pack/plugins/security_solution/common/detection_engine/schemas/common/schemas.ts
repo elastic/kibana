@@ -312,6 +312,18 @@ export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
+export const newTermsFields = t.array(t.string);
+export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
+
+export const newTermsFieldsOrUndefined = t.union([newTermsFields, t.undefined]);
+export type NewTermsFieldsOrUndefined = t.TypeOf<typeof newTermsFieldsOrUndefined>;
+
+export const historyWindowStart = t.string;
+export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
+
+export const historyWindowStartOrUndefined = t.union([historyWindowStart, t.undefined]);
+export type HistoryWindowStartOrUndefined = t.TypeOf<typeof historyWindowStartOrUndefined>;
+
 export const created_at = IsoDateString;
 
 export const updated_at = IsoDateString;

@@ -95,6 +95,7 @@ export const getFilter = async ({
   switch (type) {
     case 'threat_match':
     case 'threshold':
+    case 'new_terms':
     case 'query': {
       return queryFilter();
     }

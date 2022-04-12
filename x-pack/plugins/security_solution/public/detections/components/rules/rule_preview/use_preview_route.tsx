@@ -26,6 +26,8 @@ interface PreviewRouteParams {
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  newTermsFields: string[];
+  historyWindowStart: string;
 }
 
 export const usePreviewRoute = ({
@@ -40,6 +42,8 @@ export const usePreviewRoute = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  newTermsFields,
+  historyWindowStart,
 }: PreviewRouteParams) => {
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
@@ -80,6 +84,8 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    newTermsFields,
+    historyWindowStart,
   ]);
 
   useEffect(() => {
@@ -96,6 +102,8 @@ export const usePreviewRoute = ({
           threshold,
           machineLearningJobId,
           anomalyThreshold,
+          newTermsFields,
+          historyWindowStart,
         })
       );
     }
@@ -113,6 +121,8 @@ export const usePreviewRoute = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    newTermsFields,
+    historyWindowStart,
   ]);
 
   return {

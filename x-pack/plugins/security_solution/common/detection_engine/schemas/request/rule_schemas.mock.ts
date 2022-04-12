@@ -16,6 +16,8 @@ import {
   ThreatMatchCreateSchema,
   ThreatMatchUpdateSchema,
   ThresholdCreateSchema,
+  NewTermsCreateSchema,
+  NewTermsUpdateSchema,
 } from './rule_schemas';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
@@ -118,6 +120,26 @@ export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdC
   },
 });
 
+export const getCreateNewTermsRulesSchemaMock = (
+  ruleId = 'rule-1',
+  enabled = false
+): NewTermsCreateSchema => ({
+  description: 'Detecting root and admin users',
+  enabled,
+  index: ['auditbeat-*'],
+  name: 'Query with a rule id',
+  query: '*',
+  severity: 'high',
+  type: 'new_terms',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+  interval: '5m',
+  from: 'now-6m',
+  new_terms_fields: ['user.name'],
+  history_window_start: 'now-7d',
+});
+
 export const getUpdateRulesSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
 ): QueryUpdateSchema => ({
@@ -200,4 +222,22 @@ export const getUpdateMachineLearningSchemaMock = (
   type: 'machine_learning',
   anomaly_threshold: 58,
   machine_learning_job_id: 'typical-ml-job-id',
+});
+
+export const getUpdateNewTermsSchemaMock = (
+  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+): NewTermsUpdateSchema => ({
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*'],
+  name: 'Query with a rule id',
+  query: '*',
+  severity: 'high',
+  type: 'new_terms',
+  risk_score: 55,
+  language: 'kuery',
+  id,
+  interval: '5m',
+  from: 'now-6m',
+  new_terms_fields: ['user.name'],
+  history_window_start: 'now-7d',
 });

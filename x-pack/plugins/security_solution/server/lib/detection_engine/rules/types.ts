@@ -91,6 +91,8 @@ import {
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
+  NewTermsFieldsOrUndefined,
+  HistoryWindowStartOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
 import { RulesClient, PartialRule } from '../../../../../alerting/server';
@@ -195,6 +197,8 @@ export interface CreateRulesOptions {
   isRuleRegistryEnabled: boolean;
   namespace?: NamespaceOrUndefined;
   id?: string;
+  newTermsFields: NewTermsFieldsOrUndefined;
+  historyWindowStart: HistoryWindowStartOrUndefined;
 }
 
 export interface UpdateRulesOptions {
@@ -258,6 +262,8 @@ interface PatchRulesFieldsOptions {
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   namespace?: NamespaceOrUndefined;
+  newTermsFields: NewTermsFieldsOrUndefined;
+  historyWindowStart: HistoryWindowStartOrUndefined;
 }
 
 export interface ReadRuleOptions {

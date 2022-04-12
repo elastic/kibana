@@ -100,6 +100,8 @@ export const patchRulesRoute = (
         anomaly_threshold: anomalyThreshold,
         machine_learning_job_id: machineLearningJobId,
         exceptions_list: exceptionsList,
+        new_terms_fields: newTermsFields,
+        history_window_start: historyWindowStart,
       } = request.body;
       try {
         // TODO: Fix these either with an is conversion or by better typing them within io-ts

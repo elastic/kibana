@@ -61,6 +61,8 @@ import {
   rule_name_override,
   timestamp_override,
   event_category_override,
+  newTermsFields,
+  historyWindowStart,
 } from '../common/schemas';
 
 /**
@@ -118,6 +120,8 @@ export const patchRulesSchema = t.exact(
     threat_indicator_path,
     concurrent_searches,
     items_per_search,
+    new_terms_fields: newTermsFields,
+    history_window_start: historyWindowStart,
   })
 );
 

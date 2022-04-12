@@ -72,6 +72,8 @@ import {
   Author,
   event_category_override,
   namespace,
+  newTermsFields,
+  historyWindowStart,
 } from '../common/schemas';
 
 /**
@@ -138,6 +140,8 @@ export const addPrepackagedRulesSchema = t.intersection([
       concurrent_searches, // defaults to "undefined" if not set during decode
       items_per_search, // defaults to "undefined" if not set during decode
       namespace, // defaults to "undefined" if not set during decode
+      new_terms_fields: newTermsFields, // defaults to "undefined" if not set during decode
+      history_window_start: historyWindowStart, // defaults to "undefined" if not set during decode
     })
   ),
 ]);

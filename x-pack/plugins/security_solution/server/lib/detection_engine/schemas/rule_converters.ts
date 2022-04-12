@@ -119,6 +119,17 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
       };
     }
+    case 'new_terms': {
+      return {
+        type: params.type,
+        query: params.query,
+        newTermsFields: params.new_terms_fields,
+        historyWindowStart: params.history_window_start,
+        index: params.index,
+        filters: params.filters,
+        language: params.language ?? 'kuery',
+      };
+    }
     default: {
       return assertUnreachable(params);
     }
@@ -241,6 +252,17 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         type: params.type,
         anomaly_threshold: params.anomalyThreshold,
         machine_learning_job_id: params.machineLearningJobId,
+      };
+    }
+    case 'new_terms': {
+      return {
+        type: params.type,
+        query: params.query,
+        new_terms_fields: params.newTermsFields,
+        history_window_start: params.historyWindowStart,
+        index: params.index,
+        filters: params.filters,
+        language: params.language,
       };
     }
     default: {

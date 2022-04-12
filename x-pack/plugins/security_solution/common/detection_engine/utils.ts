@@ -43,6 +43,7 @@ export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+export const isNewTermsRule = (ruleType: Type | undefined): boolean => ruleType === 'new_terms';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined

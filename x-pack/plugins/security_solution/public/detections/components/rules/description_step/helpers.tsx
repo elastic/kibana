@@ -451,6 +451,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'new_terms': {
+      return [
+        {
+          title: label,
+          description: i18n.NEW_TERMS_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }
