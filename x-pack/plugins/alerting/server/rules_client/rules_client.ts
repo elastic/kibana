@@ -245,13 +245,13 @@ export type BulkEditOperation =
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
-  filter: string | KueryNode;
+  filter?: string | KueryNode;
   operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
 }
 
 export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
-  ids: string[];
+  ids?: string[];
   operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
 }
