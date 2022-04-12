@@ -217,13 +217,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
             const el = await elasticChart.getCanvas();
             await el.scrollIntoViewIfNecessary();
-            await browser
-              .getActions()
-              .move({ x: 100, y: 65, origin: el._webElement })
-              .click()
-              .perform();
-
             await retry.try(async () => {
+              await browser
+                .getActions()
+                .move({ x: 100, y: 65, origin: el._webElement })
+                .click()
+                .perform();
+              await common.sleep(2000);
               await testSubjects.click('applyFiltersPopoverButton');
               await testSubjects.missingOrFail('applyFiltersPopoverButton');
             });
