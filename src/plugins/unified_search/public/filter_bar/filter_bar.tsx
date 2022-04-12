@@ -26,14 +26,15 @@ import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../kibana_react/public';
-import { IIndexPattern, UI_SETTINGS } from '../../../data/common';
+import { UI_SETTINGS } from '../../../data/common';
 import { IDataPluginServices } from '../../../data/public';
+import { DataView } from '../../../data_views/public';
 
 export interface Props {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   intl: InjectedIntl;
   appName: string;
   timeRangeForSuggestionsOverride?: boolean;

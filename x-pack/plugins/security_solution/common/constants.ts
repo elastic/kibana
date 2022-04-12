@@ -235,6 +235,12 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
+export const DETECTION_ENGINE_RULES_BULK_DELETE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
+export const DETECTION_ENGINE_RULES_BULK_CREATE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
+export const DETECTION_ENGINE_RULES_BULK_UPDATE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
 /**
  * Internal detection engine routes

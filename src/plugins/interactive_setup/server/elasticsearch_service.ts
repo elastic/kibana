@@ -10,12 +10,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
-import { from, of, timer } from 'rxjs';
+import { firstValueFrom, from, of, timer } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
   exhaustMap,
-  first,
   map,
   shareReplay,
   takeWhile,
@@ -388,15 +387,15 @@ export class ElasticsearchService {
   }
 
   private async checkCompatibility(internalClient: ElasticsearchClient) {
-    return pollEsNodesVersion({
-      internalClient,
-      log: this.logger,
-      kibanaVersion: this.kibanaVersion,
-      ignoreVersionMismatch: false,
-      esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
-    })
-      .pipe(first())
-      .toPromise();
+    return firstValueFrom(
+      pollEsNodesVersion({
+        internalClient,
+        log: this.logger,
+        kibanaVersion: this.kibanaVersion,
+        ignoreVersionMismatch: false,
+        esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
+      })
+    );
   }
 
   private static fetchPeerCertificate(host: string, port: string | number) {
