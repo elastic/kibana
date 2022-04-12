@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, Subscription, Subject } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
+import { Observable, combineLatest, Subscription, Subject, firstValueFrom } from 'rxjs';
+import { map, distinctUntilChanged, shareReplay, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
@@ -65,7 +65,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     environment,
     coreUsageData,
   }: SetupDeps) {
-    const statusConfig = await this.config$.pipe(take(1)).toPromise();
+    const statusConfig = await firstValueFrom(this.config$);
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 

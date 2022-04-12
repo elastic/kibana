@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import type { ElasticsearchClient } from 'src/core/server';
 import type {
@@ -426,7 +426,7 @@ export function getSpacesUsageCollector(
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
       const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
-      const license = await licensing.license$.pipe(take(1)).toPromise();
+      const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
       const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
