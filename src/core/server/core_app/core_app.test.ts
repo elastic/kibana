@@ -106,9 +106,8 @@ describe('CoreApp', () => {
       expect(registerBundleRoutesMock).toHaveBeenCalledTimes(1);
       expect(registerBundleRoutesMock).toHaveBeenCalledWith({
         uiPlugins: prebootUIPlugins,
-        router: expect.any(Object),
+        http: internalCorePreboot.http,
         packageInfo: coreContext.env.packageInfo,
-        serverBasePath: internalCorePreboot.http.basePath.serverBasePath,
       });
     });
 
@@ -205,9 +204,8 @@ describe('CoreApp', () => {
     expect(registerBundleRoutesMock).toHaveBeenCalledTimes(1);
     expect(registerBundleRoutesMock).toHaveBeenCalledWith({
       uiPlugins,
-      router: expect.any(Object),
+      http: internalCoreSetup.http,
       packageInfo: coreContext.env.packageInfo,
-      serverBasePath: internalCoreSetup.http.basePath.serverBasePath,
     });
   });
 });
