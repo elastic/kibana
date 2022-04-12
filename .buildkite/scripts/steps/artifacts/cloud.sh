@@ -4,23 +4,17 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
-  VERSION="$(jq -r '.version' package.json)"
-  RELEASE_ARG="--release"
-else
-  VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
-  RELEASE_ARG=""
-fi
+source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Publish Cloud image"
 mkdir -p target
 cd target
 
-buildkite-agent artifact download "kibana-cloud-$VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-docker load --input kibana-cloud-$VERSION-docker-image.tar.gz
+buildkite-agent artifact download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+docker load --input kibana-cloud-$FULL_VERSION-docker-image.tar.gz
 
-TAG="$VERSION-$GIT_COMMIT"
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION"
+TAG="$FULL_VERSION-$GIT_COMMIT"
+KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"
 KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
 
 docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
@@ -42,10 +36,10 @@ DEPLOYMENT_SPEC=$(mktemp --suffix ".json")
 jq '
   .name = "'$CLOUD_DEPLOYMENT_NAME'" |
   .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_TEST_IMAGE'" |
-  .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
-  .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
-  .resources.enterprise_search[0].plan.enterprise_search.version = "'$VERSION'" |
-  .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'"
+  .resources.kibana[0].plan.kibana.version = "'$FULL_VERSION'" |
+  .resources.elasticsearch[0].plan.elasticsearch.version = "'$FULL_VERSION'" |
+  .resources.enterprise_search[0].plan.enterprise_search.version = "'$FULL_VERSION'" |
+  .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'"
   ' .buildkite/scripts/steps/cloud/deploy.json > "$DEPLOYMENT_SPEC"
 
 ecctl deployment create --track --output json --file "$DEPLOYMENT_SPEC" &> "$LOGS"
