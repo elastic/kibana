@@ -27,83 +27,81 @@ export default function ({ getService }: FtrProviderContext) {
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;
 
-      expect(mapUsage).eql({
-        geoShapeAggLayersCount: 1,
-        indexPatternsWithGeoFieldCount: 6,
-        indexPatternsWithGeoPointFieldCount: 4,
-        indexPatternsWithGeoShapeFieldCount: 2,
-        mapsTotalCount: 25,
-        basemaps: {},
-        joins: { term: { min: 1, max: 1, total: 3, avg: 0.12 } },
-        layerTypes: {
-          es_docs: { min: 1, max: 2, total: 17, avg: 0.68 },
-          es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.24 },
-          es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.04 },
-          es_top_hits: { min: 1, max: 1, total: 2, avg: 0.08 },
-          es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.04 },
-          kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.04 },
-          ems_basemap: { min: 1, max: 1, total: 1, avg: 0.04 },
-          ems_region: { min: 1, max: 1, total: 1, avg: 0.04 },
+      expect(mapUsage.geoShapeAggLayersCount).eql(1);
+      expect(mapUsage.indexPatternsWithGeoFieldCount).eql(6);
+      expect(mapUsage.indexPatternsWithGeoPointFieldCount).eql(4);
+      expect(mapUsage.indexPatternsWithGeoShapeFieldCount).eql(2);
+      expect(mapUsage.mapsTotalCount).eql(26);
+      expect(mapUsage.basemaps).eql({});
+      expect(mapUsage.joins).eql({ term: { min: 1, max: 1, total: 3, avg: 0.11538461538461539 } });
+      expect(mapUsage.layerTypes).eql({
+        es_docs: { min: 1, max: 2, total: 18, avg: 0.6923076923076923 },
+        es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.23076923076923078 },
+        es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.038461538461538464 },
+        es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07692307692307693 },
+        es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.038461538461538464 },
+        kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.038461538461538464 },
+        ems_basemap: { min: 1, max: 1, total: 1, avg: 0.038461538461538464 },
+        ems_region: { min: 1, max: 1, total: 1, avg: 0.038461538461538464 },
+      });
+      expect(mapUsage.resolutions).eql({
+        coarse: { min: 1, max: 1, total: 4, avg: 0.15384615384615385 },
+        super_fine: { min: 1, max: 1, total: 3, avg: 0.11538461538461539 },
+      });
+      expect(mapUsage.scalingOptions).eql({
+        limit: { min: 1, max: 2, total: 14, avg: 0.5384615384615384 },
+        clusters: { min: 1, max: 1, total: 1, avg: 0.038461538461538464 },
+        mvt: { min: 1, max: 1, total: 3, avg: 0.11538461538461539 },
+      });
+      expect(mapUsage.attributesPerMap).eql({
+        dataSourcesCount: {
+          avg: 1.1538461538461537,
+          max: 5,
+          min: 1,
         },
-        resolutions: {
-          coarse: { min: 1, max: 1, total: 4, avg: 0.16 },
-          super_fine: { min: 1, max: 1, total: 3, avg: 0.12 },
-        },
-        scalingOptions: {
-          limit: { min: 1, max: 2, total: 14, avg: 0.56 },
-          clusters: { min: 1, max: 1, total: 1, avg: 0.04 },
-          mvt: { min: 1, max: 1, total: 2, avg: 0.08 },
-        },
-        attributesPerMap: {
-          dataSourcesCount: {
-            avg: 1.16,
-            max: 5,
+        emsVectorLayersCount: {
+          idThatDoesNotExitForEMSFileSource: {
+            avg: 0.038461538461538464,
+            max: 1,
             min: 1,
           },
-          emsVectorLayersCount: {
-            idThatDoesNotExitForEMSFileSource: {
-              avg: 0.04,
-              max: 1,
-              min: 1,
-            },
-          },
-          layerTypesCount: {
-            BLENDED_VECTOR: {
-              avg: 0.04,
-              max: 1,
-              min: 1,
-            },
-            EMS_VECTOR_TILE: {
-              avg: 0.04,
-              max: 1,
-              min: 1,
-            },
-            GEOJSON_VECTOR: {
-              avg: 0.84,
-              max: 4,
-              min: 1,
-            },
-            HEATMAP: {
-              avg: 0.04,
-              max: 1,
-              min: 1,
-            },
-            MVT_VECTOR: {
-              avg: 0.2,
-              max: 1,
-              min: 1,
-            },
-            RASTER_TILE: {
-              avg: 0.04,
-              max: 1,
-              min: 1,
-            },
-          },
-          layersCount: {
-            avg: 1.2,
-            max: 6,
+        },
+        layerTypesCount: {
+          BLENDED_VECTOR: {
+            avg: 0.038461538461538464,
+            max: 1,
             min: 1,
           },
+          EMS_VECTOR_TILE: {
+            avg: 0.038461538461538464,
+            max: 1,
+            min: 1,
+          },
+          GEOJSON_VECTOR: {
+            avg: 0.8076923076923077,
+            max: 4,
+            min: 1,
+          },
+          HEATMAP: {
+            avg: 0.038461538461538464,
+            max: 1,
+            min: 1,
+          },
+          MVT_VECTOR: {
+            avg: 0.23076923076923078,
+            max: 1,
+            min: 1,
+          },
+          RASTER_TILE: {
+            avg: 0.038461538461538464,
+            max: 1,
+            min: 1,
+          },
+        },
+        layersCount: {
+          avg: 1.1923076923076923,
+          max: 6,
+          min: 1,
         },
       });
     });
