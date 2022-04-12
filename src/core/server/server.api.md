@@ -447,6 +447,30 @@ export interface CorePreboot {
     preboot: PrebootServicePreboot;
 }
 
+// @public (undocumented)
+export interface CoreRequestHandlerContext {
+    // (undocumented)
+    deprecations: {
+        client: DeprecationsClient;
+    };
+    // (undocumented)
+    elasticsearch: {
+        client: IScopedClusterClient;
+    };
+    // (undocumented)
+    savedObjects: {
+        client: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+        getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+        getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+    };
+    // (undocumented)
+    uiSettings: {
+        client: IUiSettingsClient;
+    };
+}
+
 // @internal
 export interface CoreServicesUsageData {
     // (undocumented)
@@ -841,6 +865,11 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
+// @public (undocumented)
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+    [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
@@ -1222,7 +1251,7 @@ export interface IContextContainer {
 }
 
 // @public
-export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => Promise<Context[ContextName]> | Context[ContextName];
+export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
 
 // @public
 export interface ICspConfig {
@@ -1843,24 +1872,7 @@ export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extend
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
-    core: {
-        savedObjects: {
-            client: SavedObjectsClientContract;
-            typeRegistry: ISavedObjectTypeRegistry;
-            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-        };
-        elasticsearch: {
-            client: IScopedClusterClient;
-        };
-        uiSettings: {
-            client: IUiSettingsClient;
-        };
-        deprecations: {
-            client: DeprecationsClient;
-        };
-    };
+    core: Promise<CoreRequestHandlerContext>;
 }
 
 // @public

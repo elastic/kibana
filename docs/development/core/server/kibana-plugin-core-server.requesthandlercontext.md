@@ -18,5 +18,5 @@ export interface RequestHandlerContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core](./kibana-plugin-core-server.requesthandlercontext.core.md) | { savedObjects: { client: SavedObjectsClientContract; typeRegistry: ISavedObjectTypeRegistry; getClient: (options?: SavedObjectsClientProviderOptions) =&gt; SavedObjectsClientContract; getExporter: (client: SavedObjectsClientContract) =&gt; ISavedObjectsExporter; getImporter: (client: SavedObjectsClientContract) =&gt; ISavedObjectsImporter; }; elasticsearch: { client: IScopedClusterClient; }; uiSettings: { client: IUiSettingsClient; }; deprecations: { client: DeprecationsClient; }; } |  |
+|  [core](./kibana-plugin-core-server.requesthandlercontext.core.md) | Promise&lt;CoreRequestHandlerContext&gt; |  |
 
