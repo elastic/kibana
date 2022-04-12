@@ -14,6 +14,7 @@ import {
   EuiPopover,
   useGeneratedHtmlId,
   EuiButtonIconProps,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
@@ -97,16 +98,17 @@ export function QueryBarMenu({
   });
 
   const button = (
-    <EuiButtonIcon
-      size="m"
-      display="base"
-      onClick={onButtonClick}
-      {...buttonProps}
-      iconType="filter"
-      aria-label={buttonLabel}
-      title={buttonLabel}
-      data-test-subj="showQueryBarMenu"
-    />
+    <EuiToolTip delay="long" content={buttonLabel}>
+      <EuiButtonIcon
+        size="m"
+        display="base"
+        onClick={onButtonClick}
+        {...buttonProps}
+        iconType="filter"
+        aria-label={buttonLabel}
+        data-test-subj="showQueryBarMenu"
+      />
+    </EuiToolTip>
   );
 
   const panels = QueryBarMenuPanels({
