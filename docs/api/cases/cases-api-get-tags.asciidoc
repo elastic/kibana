@@ -28,7 +28,9 @@ default space is used.
 === Query parameters
 
 `owner`::
-(Optional, string or array of strings) A filter to limit the retrieved tags to a specific set of applications. Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response contains tags from all cases that the user has access to read.
+(Optional, string or array of strings) A filter to limit the retrieved tags to a specific set of applications.
+Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response
+contains tags from all cases that the user has access to read.
 
 ==== Response code
 
