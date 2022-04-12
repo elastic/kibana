@@ -282,7 +282,7 @@ describe('stopDataRequest', () => {
     const data = { prop1: 'new data' };
     const newState = stopDataRequest(state, 'layer1', 'source', REQUEST_TOKEN, reponseMeta, data);
     // remove timestamp since it changes every run
-    delete newState.layerList[0].__dataRequests[0].dataRequestMeta.requestStopTime;
+    delete newState.layerList[0].__dataRequests![0].dataRequestMeta!.requestStopTime;
     expect(newState).toEqual({
       layerList: [
         {
