@@ -22,6 +22,7 @@ import sharePoint from './sharepoint.svg';
 import sharePointServer from './sharepoint_server.svg';
 import slack from './slack.svg';
 import zendesk from './zendesk.svg';
+import zoom from './zoom.svg';
 
 export const images = {
   box,
@@ -50,4 +51,5 @@ export const images = {
   sharePointServer,
   slack,
   zendesk,
+  zoom,
 } as { [key: string]: string };

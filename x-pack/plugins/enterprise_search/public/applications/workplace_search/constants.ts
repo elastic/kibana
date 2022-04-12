@@ -202,6 +202,9 @@ export const SOURCE_NAMES = {
   ZENDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zendesk', {
     defaultMessage: 'Zendesk',
   }),
+  ZOOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zoom', {
+    defaultMessage: 'Zoom',
+  }),
   CUSTOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.custom', {
     defaultMessage: 'Custom API Source',
   }),

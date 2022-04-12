@@ -588,7 +588,6 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: true,
     internalConnectorAvailable: true,
   },
-
   {
     name: SOURCE_NAMES.ZENDESK,
     iconName: SOURCE_NAMES.ZENDESK,
@@ -617,6 +616,25 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
     internalConnectorAvailable: true,
+  },
+  {
+    name: SOURCE_NAMES.ZOOM,
+    iconName: SOURCE_NAMES.ZOOM,
+    categories: [
+      // TODO update this when we define these
+    ],
+    serviceType: 'zoom', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-zoom-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
   },
 ];
 
