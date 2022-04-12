@@ -155,6 +155,16 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
+  async printA4Pdf(): Promise<Buffer> {
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+    });
+  }
+
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */

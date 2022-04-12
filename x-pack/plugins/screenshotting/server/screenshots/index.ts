@@ -26,6 +26,7 @@ import {
 } from 'rxjs/operators';
 import {
   LayoutParams,
+  LayoutTypes,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
