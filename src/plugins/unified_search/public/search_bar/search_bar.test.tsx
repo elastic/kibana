@@ -16,7 +16,7 @@ import { coreMock } from '../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { IIndexPattern } from '../../../data/public';
+import { DataView } from '../../../data_views/public';
 
 const mockTimeHistory = {
   get: () => {
@@ -66,7 +66,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as IIndexPattern;
+} as DataView;
 
 const kqlQuery = {
   query: 'response:200',

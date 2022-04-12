@@ -13,13 +13,14 @@ import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '../../../kibana_react/public';
 import { UI_SETTINGS } from '../../../data/common';
-import { IDataPluginServices, IIndexPattern } from '../../../data/public';
+import { IDataPluginServices } from '../../../data/public';
+import type { DataView } from '../../../data_views/public';
 import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
 interface AddFilterPopoverProps {
-  indexPatterns?: Array<IIndexPattern | string>;
+  indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -35,7 +36,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
   const { uiSettings, data, usageCollection, appName } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
-  const [dataViews, setDataviews] = useState<IIndexPattern[]>([]);
+  const [dataViews, setDataviews] = useState<DataView[]>([]);
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
   const [dataView] = dataViews;
   const index = dataView && dataView.id;
@@ -48,12 +49,12 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
       ) as string[];
       const objectPatterns = indexPatterns?.filter(
         (indexPattern) => typeof indexPattern !== 'string'
-      ) as IIndexPattern[];
+      ) as DataView[];
 
       const objectPatternsFromStrings = (await fetchIndexPatterns(
         data.dataViews,
         stringPatterns
-      )) as IIndexPattern[];
+      )) as DataView[];
       setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
     };
     if (indexPatterns) {
