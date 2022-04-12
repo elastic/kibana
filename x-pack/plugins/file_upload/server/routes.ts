@@ -102,11 +102,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const result = await analyzeFile(
-          context.core.elasticsearch.client,
-          request.body,
-          request.query
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const result = await analyzeFile(esClient, request.body, request.query);
         return response.ok({ body: result });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -142,6 +139,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;
+        const esClient = (await context.core).elasticsearch.client;
 
         // `id` being `undefined` tells us that this is a new import due to create a new index.
         // follow-up import calls to just add additional data will include the `id` of the created
@@ -151,7 +149,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         }
 
         const result = await importData(
-          context.core.elasticsearch.client,
+          esClient,
           id,
           index,
           settings,
@@ -182,9 +180,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const indexExists = await context.core.elasticsearch.client.asCurrentUser.indices.exists(
-          request.body
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const indexExists = await esClient.asCurrentUser.indices.exists(request.body);
         return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -225,8 +222,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     async (context, request, response) => {
       try {
         const { index, timeFieldName, query, runtimeMappings } = request.body;
+        const esClient = (await context.core).elasticsearch.client;
         const resp = await getTimeFieldRange(
-          context.core.elasticsearch.client,
+          esClient,
           index,
           timeFieldName,
           query,
