@@ -73,6 +73,16 @@ function validateFleetServerHosts(value: string[]) {
       },
     ];
   }
+  
+  if (!value) {
+    return [
+      {
+        message: i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
+          defaultMessage: 'Host URL is required',
+        }),
+      },
+    ];
+  }
 
   const res: Array<{ message: string; index: number }> = [];
   const hostIndexes: { [key: string]: number[] } = {};
