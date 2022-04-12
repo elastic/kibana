@@ -512,7 +512,8 @@ export class ListClient {
   };
 
   /**
-   * Imports list items to a stream
+   * Imports list items to a stream. If the list already exists, this will append the list items to the existing list.
+   * If the list does not exist, this will auto-create the list and then add the items to that list.
    * See {@link https://www.elastic.co/guide/en/security/current/lists-api-create-container.html}
    * for more information around formats of the deserializer and serializer.
    * @param options
