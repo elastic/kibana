@@ -104,7 +104,11 @@ describe('ADD remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ acknowledged: true });
@@ -161,7 +165,11 @@ describe('ADD remote clusters', () => {
         serverName: 'foobar',
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ acknowledged: true });
@@ -205,7 +213,11 @@ describe('ADD remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(409);
       expect(response.payload).toEqual({
@@ -222,7 +234,11 @@ describe('ADD remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(400);
       expect(response.payload).toEqual({

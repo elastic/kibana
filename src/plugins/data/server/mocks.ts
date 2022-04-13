@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '../../../core/server/mocks';
 import {
   createSearchSetupMock,
   createSearchStartMock,
@@ -17,7 +18,6 @@ import {
 } from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './data_views/mocks';
 import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
-import { DataRequestHandlerContext } from './search';
 import { AutocompleteSetup } from './autocomplete';
 
 const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
@@ -49,8 +49,9 @@ function createStartContract() {
 
 function createRequestHandlerContext() {
   return {
+    core: coreMock.createRequestHandlerContext(),
     search: createSearchRequestHandlerContext(),
-  } as unknown as jest.Mocked<DataRequestHandlerContext>;
+  };
 }
 
 export const dataPluginMock = {
