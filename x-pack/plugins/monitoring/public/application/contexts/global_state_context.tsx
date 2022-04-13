@@ -9,10 +9,12 @@ import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
+import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
 
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartServices['notifications']['toasts'];
+  uiSettings: MonitoringStartServices['uiSettings'];
 }
 
 export interface State {
@@ -27,7 +29,13 @@ export interface State {
 
 export const GlobalStateContext = createContext({} as State);
 
+const REFRESH_INTERVAL_OVERRIDE = {
+  pause: false,
+  value: 10000,
+};
+
 export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+  uiSettings,
   query,
   toasts,
   children,
@@ -43,18 +51,17 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     localState[key] = initialState[key];
   }
 
-  localState.refreshInterval = { value: 10000, pause: false };
-
   localState.save = () => {
     const newState = { ...localState };
     delete newState.save;
     state.setState(newState);
   };
 
-  const { value, pause } = Legacy.shims.timefilter.getRefreshInterval();
-  if (!value && pause) {
+  // default to an active refresh interval if it's not conflicting with user-defined values
+  if (shouldOverrideRefreshInterval(uiSettings, Legacy.shims.timefilter)) {
+    localState.refreshInterval = REFRESH_INTERVAL_OVERRIDE;
     Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
-    localState.save?.();
+    localState.save();
   }
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;

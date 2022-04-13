@@ -66,7 +66,6 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText?: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
@@ -87,11 +86,13 @@ export interface SourceDataItem {
   internalConnectorAvailable?: boolean;
   externalConnectorAvailable?: boolean;
   customConnectorAvailable?: boolean;
+  isBeta?: boolean;
 }
 
 export interface ContentSource {
   id: string;
   serviceType: string;
+  baseServiceType?: string;
   name: string;
 }
 
@@ -113,6 +114,8 @@ export interface ContentSourceDetails extends ContentSource {
   boost: number;
   activities: SourceActivity[];
   isOauth1: boolean;
+  altIcon?: string; // base64 encoded png
+  mainIcon?: string; // base64 encoded png
 }
 
 interface DescriptionList {

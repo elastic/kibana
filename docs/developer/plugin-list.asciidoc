@@ -94,6 +94,10 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
+|{kib-repo}blob/{branch}/src/plugins/event_annotation/README.md[eventAnnotation]
+|The Event Annotation service contains expressions for event annotations
+
+
 |{kib-repo}blob/{branch}/src/plugins/expression_error/README.md[expressionError]
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
@@ -158,6 +162,10 @@ for use in their own application.
 
 |{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_tagcloud/README.md[expressionTagcloud]
 |Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
+
+
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
+|Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
 
 
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
@@ -281,6 +289,10 @@ In general this plugin provides:
 - Emitting trigger events.
 - Executing actions attached to a given trigger.
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
+
+
+|{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
+|Contains all the components of Kibana's unified search experience. Specifically:
 
 
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
@@ -428,7 +440,7 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
-actitivies.
+activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
@@ -512,19 +524,17 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
-|This is the metrics and entities plugin where you add can add transforms for your project
-and group those transforms into modules. You can also re-use existing transforms in your
-newly created modules as well.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
 |This plugin provides access to the machine learning features provided by
 Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/monitoring[monitoring]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring/readme.md[monitoring]
+|This plugin provides the Stack Monitoring kibana application.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
+|This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]

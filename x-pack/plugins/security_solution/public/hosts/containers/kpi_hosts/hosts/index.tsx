@@ -10,7 +10,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -26,7 +25,7 @@ import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostsKpiHostsQuery';
+export const ID = 'hostsKpiHostsQuery';
 
 export interface HostsKpiHostsArgs extends Omit<HostsKpiHostsStrategyResponse, 'rawResponse'> {
   id: string;
@@ -57,7 +56,6 @@ export const useHostsKpiHosts = ({
   const [loading, setLoading] = useState(false);
   const [hostsKpiHostsRequest, setHostsKpiHostsRequest] =
     useState<HostsKpiHostsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -123,29 +121,23 @@ export const useHostsKpiHosts = ({
 
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiHosts,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);
@@ -154,6 +146,14 @@ export const useHostsKpiHosts = ({
       abortCtrl.current.abort();
     };
   }, [hostsKpiHostsRequest, hostsKpiHostsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, hostsKpiHostsResponse];
 };

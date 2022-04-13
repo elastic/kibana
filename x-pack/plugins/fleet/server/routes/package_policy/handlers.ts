@@ -139,7 +139,7 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  const body = { ...request.body };
+  const { force, ...body } = request.body;
   // removed fields not recognized by schema
   const packagePolicyInputs = packagePolicy.inputs.map((input) => {
     const newInput = {
@@ -180,7 +180,7 @@ export const updatePackagePolicyHandler: RequestHandler<
       esClient,
       request.params.packagePolicyId,
       newData,
-      { user },
+      { user, force },
       packagePolicy.package?.version
     );
     return response.ok({

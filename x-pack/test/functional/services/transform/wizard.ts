@@ -670,18 +670,39 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertDestinationIndexValue(destinationIndex);
     },
 
-    async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`transformCreateIndexPatternSwitch`, { allowHidden: true });
+    async assertCreateDataViewSwitchExists() {
+      await testSubjects.existOrFail(`transformCreateDataViewSwitch`, { allowHidden: true });
     },
 
-    async assertCreateIndexPatternSwitchCheckState(expectedCheckState: boolean) {
+    async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('transformCreateIndexPatternSwitch', 'aria-checked')) ===
+        (await testSubjects.getAttribute('transformCreateDataViewSwitch', 'aria-checked')) ===
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async assertDataViewTimeFieldInputExists() {
+      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
+    },
+
+    async assertDataViewTimeFieldValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        `transformDataViewTimeFieldSelect`,
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Data view time field should be ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async setDataViewTimeField(fieldName: string) {
+      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
+      await selectControl.type(fieldName);
+      await this.assertDataViewTimeFieldValue(fieldName);
     },
 
     async assertContinuousModeSwitchExists() {

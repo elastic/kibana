@@ -1,0 +1,27 @@
+get:
+  summary: Agents - Get incoming data
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      data:
+                        type: boolean
+  operationId: get-agent-data
+  parameters:
+    - schema:
+        type: array
+      name: agentsId
+      in: query
+      required: true

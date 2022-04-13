@@ -21,11 +21,11 @@ export default ({ getService }: FtrProviderContext) => {
   const dfaJobId = 'ihp_od';
 
   async function runRequest(user: USER, expectedStatusCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/saved_objects/initialize`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not initialize jobs if all jobs have spaces assigned', async () => {
       const body = await runRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
-      expect(body).to.eql({ datafeeds: [], jobs: [], success: true });
+      expect(body).to.eql({ datafeeds: [], jobs: [], trainedModels: [], success: true });
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', ['*']);
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', ['*']);
     });

@@ -7,7 +7,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   Chart,
   ElementClickListener,
@@ -29,7 +29,6 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
-  PaletteRegistry,
   useActiveCursor,
 } from '../../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
@@ -57,7 +56,7 @@ import {
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
-import { ChartSplitter } from './chart_splitter';
+import { ChartSplit } from './chart_split';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -338,12 +337,6 @@ const VisComponent = (props: VisComponentProps) => {
     [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
   );
 
-  const splitChartDimension = visParams.dimensions.splitColumn
-    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
-    : visParams.dimensions.splitRow
-    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
-    : undefined;
-
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -352,10 +345,9 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%" ref={chartRef}>
-        <ChartSplitter
+        <ChartSplit
           splitColumnAccessor={splitChartColumnAccessor}
           splitRowAccessor={splitChartRowAccessor}
-          splitDimension={splitChartDimension}
         />
         <XYSettings
           {...config}
@@ -364,6 +356,7 @@ const VisComponent = (props: VisComponentProps) => {
           showLegend={showLegend}
           onPointerUpdate={handleCursorUpdate}
           legendPosition={legendPosition}
+          legendSize={visParams.legendSize}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={legendColorPicker}

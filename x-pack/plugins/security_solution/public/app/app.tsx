@@ -15,11 +15,16 @@ import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/pub
 import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
+import {
+  KibanaContextProvider,
+  useGetUserCasesPermissions,
+  useKibana,
+  useUiSetting$,
+} from '../common/lib/kibana';
 import { State } from '../common/store';
 
 import { StartServices } from '../types';
@@ -48,9 +53,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const {
     i18n,
     application: { capabilities },
+    cases,
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-
+  const casesPermissions = useGetUserCasesPermissions();
+  const CasesContext = cases.ui.getCasesContext();
   return (
     <EuiErrorBoundary>
       <i18n.Context>
@@ -62,13 +69,18 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <PageRouter
-                          history={history}
-                          onAppLeave={onAppLeave}
-                          setHeaderActionMenu={setHeaderActionMenu}
+                        <CasesContext
+                          owner={[APP_ID]}
+                          userCanCrud={casesPermissions?.crud ?? false}
                         >
-                          {children}
-                        </PageRouter>
+                          <PageRouter
+                            history={history}
+                            onAppLeave={onAppLeave}
+                            setHeaderActionMenu={setHeaderActionMenu}
+                          >
+                            {children}
+                          </PageRouter>
+                        </CasesContext>
                       </ReactQueryClientProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>

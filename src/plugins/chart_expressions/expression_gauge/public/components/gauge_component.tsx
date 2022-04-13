@@ -8,7 +8,9 @@
 import React, { FC, memo, useCallback } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CustomPaletteState, PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import { FieldFormat } from '../../../../field_formats/common';
+import type { CustomPaletteState } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
 import { isVisDimension } from '../../../../visualizations/common/utils';
 import {
@@ -32,6 +34,8 @@ import {
 import './index.scss';
 import { GaugeCentralMajorMode } from '../../common/types';
 import { isBulletShape, isRoundShape } from '../../common/utils';
+
+import './gauge.scss';
 
 declare global {
   interface Window {
@@ -183,8 +187,23 @@ const calculateRealRangeValueMax = (
   return max;
 };
 
+const getPreviousSectionValue = (value: number, bands: number[]) => {
+  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
+  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
+
+  let prevSectionValue = value - 1;
+  const valueIndex = bands.indexOf(value);
+  const prevBand = bands[valueIndex - 1];
+  const curBand = bands[valueIndex];
+  if (valueIndex > 0) {
+    prevSectionValue = value - (curBand - prevBand) / 2;
+  }
+
+  return prevSectionValue;
+};
+
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, formatFactory, paletteService, chartsThemeService }) => {
+  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService }) => {
     const {
       shape: gaugeType,
       palette,
@@ -195,6 +214,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       centralMajor,
       centralMajorMode,
       ticksPosition,
+      commonLabel,
     } = args;
 
     const getColor = useCallback(
@@ -230,6 +250,34 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [paletteService]
     );
 
+    // Legacy chart was not formatting numbers, when was forming overrideColors.
+    // To support the behavior of the color overriding, it is required to skip all the formatting, except percent.
+    const overrideColor = useCallback(
+      (value: number, bands: number[], formatter?: FieldFormat) => {
+        const overrideColors = uiState?.get('vis.colors') ?? {};
+        const valueIndex = bands.findIndex((band, index, allBands) => {
+          if (index === allBands.length - 1) {
+            return false;
+          }
+
+          return value >= band && value < allBands[index + 1];
+        });
+
+        if (valueIndex < 0 || valueIndex === bands.length - 1) {
+          return undefined;
+        }
+        const curValue = bands[valueIndex];
+        const nextValue = bands[valueIndex + 1];
+
+        return overrideColors[
+          `${formatter?.convert(curValue) ?? curValue} - ${
+            formatter?.convert(nextValue) ?? nextValue
+          }`
+        ];
+      },
+      [uiState]
+    );
+
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);
 
@@ -256,8 +304,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
-    const min = getMinValue(row, accessors);
-    const max = getMaxValue(row, accessors);
+    const min = getMinValue(row, accessors, palette?.params, args.respectRanges);
+    const max = getMaxValue(row, accessors, palette?.params, args.respectRanges);
 
     if (min === max) {
       return (
@@ -333,46 +381,52 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       : {};
 
     return (
-      <Chart>
-        <Settings
-          debugState={window._echDebugStateFlag ?? false}
-          theme={[{ background: { color: 'transparent' } }, chartTheme]}
-          ariaLabel={args.ariaLabel}
-          ariaUseDefaultSummary={!args.ariaLabel}
-        />
-        <Goal
-          id="goal"
-          subtype={getSubtypeByGaugeType(gaugeType)}
-          base={bands[0]}
-          target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
-          actual={actualValue}
-          tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
-          tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
-          bands={bands}
-          ticks={ticks}
-          bandFillColor={
-            colorMode === GaugeColorModes.PALETTE
-              ? (val) => {
-                  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
-                  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
-                  let value = val.value - 1;
-                  const valueIndex = bands.indexOf(val.value);
-                  if (valueIndex > 0) {
-                    value = val.value - (bands[valueIndex] - bands[valueIndex - 1]) / 2;
-                  }
+      <div className="gauge__wrapper">
+        <Chart>
+          <Settings
+            debugState={window._echDebugStateFlag ?? false}
+            theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            ariaLabel={args.ariaLabel}
+            ariaUseDefaultSummary={!args.ariaLabel}
+          />
+          <Goal
+            id="goal"
+            subtype={getSubtypeByGaugeType(gaugeType)}
+            base={bands[0]}
+            target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
+            actual={actualValue}
+            tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
+            tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
+            bands={bands}
+            ticks={ticks}
+            bandFillColor={
+              colorMode === GaugeColorModes.PALETTE
+                ? (val) => {
+                    const value = getPreviousSectionValue(val.value, bands);
 
-                  return args.palette
-                    ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
-                    : TRANSPARENT;
-                }
-              : () => TRANSPARENT
-          }
-          labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
-          labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
-          {...extraTitles}
-          {...goalConfig}
-        />
-      </Chart>
+                    const overridedColor = overrideColor(
+                      value,
+                      args.percentageMode ? bands : args.palette?.params?.stops ?? [],
+                      args.percentageMode ? tickFormatter : undefined
+                    );
+
+                    if (overridedColor) {
+                      return overridedColor;
+                    }
+                    return args.palette
+                      ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
+                      : TRANSPARENT;
+                  }
+                : () => TRANSPARENT
+            }
+            labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
+            labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
+            {...extraTitles}
+            {...goalConfig}
+          />
+        </Chart>
+        {commonLabel && <div className="gauge__label">{commonLabel}</div>}
+      </div>
     );
   }
 );

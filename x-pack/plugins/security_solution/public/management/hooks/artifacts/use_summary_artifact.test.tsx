@@ -14,7 +14,7 @@ import {
   getFakeListDefinition,
   getFakeHttpService,
   renderQuery,
-} from './test_utils';
+} from '../test_utils';
 
 describe('Summary artifact hook', () => {
   let result: ReturnType<typeof useSummaryArtifact>;
@@ -52,7 +52,7 @@ describe('Summary artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useSummaryArtifact(instance, searchableFields, options, {
+        useSummaryArtifact(instance, options, searchableFields, {
           onSuccess: onSuccessMock,
           retry: false,
         }),
@@ -84,7 +84,7 @@ describe('Summary artifact hook', () => {
 
     result = await renderQuery(
       () =>
-        useSummaryArtifact(instance, searchableFields, options, {
+        useSummaryArtifact(instance, options, searchableFields, {
           onError: onErrorMock,
           retry: false,
         }),

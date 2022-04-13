@@ -5,7 +5,7 @@
 <titleabbrev>ServiceNow SecOps</titleabbrev>
 ++++
 
-The {sn} SecOps connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create {sn} security incidents.
+The {sn} SecOps connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} security incidents.
 
 [float]
 [[servicenow-sir-connector-prerequisites]]

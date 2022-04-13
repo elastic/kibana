@@ -20,20 +20,25 @@ import type { LensPublicStart } from '../../lens/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
-import { CommentRequestAlertType, CommentRequestUserType } from '../common/api';
+import {
+  CasesByAlertId,
+  CasesByAlertIDRequest,
+  CasesFindRequest,
+  CasesResponse,
+  CasesStatusRequest,
+  CasesStatusResponse,
+  CommentRequestAlertType,
+  CommentRequestUserType,
+} from '../common/api';
 import { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { CreateCaseFlyoutProps } from './components/create/flyout';
 import { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-
-import type {
-  CasesOwners,
-  GetAllCasesSelectorModalProps,
-  GetCasesProps,
-  GetCreateCaseFlyoutProps,
-  GetRecentCasesProps,
-} from './methods';
-import { GetCasesContextProps } from './methods/get_cases_context';
-import { getRuleIdFromEvent } from './methods/get_rule_id_from_event';
+import type { CasesOwners } from './client/helpers/can_use_cases';
+import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import type { GetCasesContextProps } from './client/ui/get_cases_context';
+import type { GetCasesProps } from './client/ui/get_cases';
+import { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
+import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
+import { GetRecentCasesProps } from './client/ui/get_recent_cases';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -71,55 +76,60 @@ export interface RenderAppProps {
 }
 
 export interface CasesUiStart {
-  /**
-   * Returns an object denoting the current user's ability to read and crud cases.
-   * If any owner(securitySolution, Observability) is found with crud or read capability respectively,
-   * then crud or read is set to true.
-   * Permissions for specific owners can be found by passing an owner array
-   * @param owners an array of CaseOwners that should be queried for permission
-   * @returns An object denoting the case permissions of the current user
-   */
-  canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
-  /**
-   * Get cases
-   * @param props GetCasesProps
-   * @return {ReactElement<GetCasesProps>}
-   */
-  getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
-  getCasesContext: () => (
-    props: GetCasesContextProps & { children: ReactNode }
-  ) => ReactElement<GetCasesContextProps>;
-  /**
-   * Modal to select a case in a list of all owner cases
-   * @param props GetAllCasesSelectorModalProps
-   * @returns A react component that is a modal for selecting a case
-   */
-  getAllCasesSelectorModal: (
-    props: GetAllCasesSelectorModalProps
-  ) => ReactElement<GetAllCasesSelectorModalProps>;
-  getAllCasesSelectorModalNoProvider: (
-    props: GetAllCasesSelectorModalProps
-  ) => ReactElement<GetAllCasesSelectorModalProps>;
-  /**
-   * Flyout with the form to create a case for the owner
-   * @param props GetCreateCaseFlyoutProps
-   * @returns A react component that is a flyout for creating a case
-   */
-  getCreateCaseFlyout: (props: GetCreateCaseFlyoutProps) => ReactElement<GetCreateCaseFlyoutProps>;
-  getCreateCaseFlyoutNoProvider: (
-    props: CreateCaseFlyoutProps
-  ) => ReactElement<CreateCaseFlyoutProps>;
-  /**
-   * Get the recent cases component
-   * @param props GetRecentCasesProps
-   * @returns A react component for showing recent cases
-   */
-  getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
+  api: {
+    getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
+    cases: {
+      find: (query: CasesFindRequest) => Promise<CasesResponse>;
+      getAllCasesMetrics: (query: CasesStatusRequest) => Promise<CasesStatusResponse>;
+    };
+  };
+  ui: {
+    /**
+     * Get cases
+     * @param props GetCasesProps
+     * @return {ReactElement<GetCasesProps>}
+     */
+    getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
+    getCasesContext: () => (
+      props: GetCasesContextProps & { children: ReactNode }
+    ) => ReactElement<GetCasesContextProps>;
+    /**
+     * Modal to select a case in a list of all owner cases
+     * @param props GetAllCasesSelectorModalProps
+     * @returns A react component that is a modal for selecting a case
+     */
+    getAllCasesSelectorModal: (
+      props: GetAllCasesSelectorModalProps
+    ) => ReactElement<GetAllCasesSelectorModalProps>;
+    /**
+     * Flyout with the form to create a case for the owner
+     * @param props GetCreateCaseFlyoutProps
+     * @returns A react component that is a flyout for creating a case
+     */
+    getCreateCaseFlyout: (
+      props: GetCreateCaseFlyoutProps
+    ) => ReactElement<GetCreateCaseFlyoutProps>;
+    /**
+     * Get the recent cases component
+     * @param props GetRecentCasesProps
+     * @returns A react component for showing recent cases
+     */
+    getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
+  };
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
+    /**
+     * Returns an object denoting the current user's ability to read and crud cases.
+     * If any owner(securitySolution, Observability) is found with crud or read capability respectively,
+     * then crud or read is set to true.
+     * Permissions for specific owners can be found by passing an owner array
+     * @param owners an array of CaseOwners that should be queried for permission
+     * @returns An object denoting the case permissions of the current user
+     */
+    canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
   };
 }

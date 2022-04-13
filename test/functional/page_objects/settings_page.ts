@@ -357,7 +357,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickIndexPatternByName(name: string) {
-    const indexLink = await this.find.byXPath(`//a[descendant::*[text()='${name}']]`);
+    const indexLink = await this.find.byXPath(`//a[text()='${name}']`);
     await indexLink.click();
   }
 
@@ -453,9 +453,9 @@ export class SettingsPageObject extends FtrService {
     await this.common.scrollKibanaBodyTop();
 
     // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
       return;
     }
 
@@ -463,9 +463,9 @@ export class SettingsPageObject extends FtrService {
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
     }
-    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView2 = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView2) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
     }
   }
 

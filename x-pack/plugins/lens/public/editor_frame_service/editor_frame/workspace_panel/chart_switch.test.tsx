@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   createMockVisualization,
   mockStoreDeps,
@@ -30,7 +31,6 @@ jest.mock('react-virtualized-auto-sizer', () => {
 
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { ChartSwitch } from './chart_switch';
-import { PaletteOutput } from 'src/plugins/charts/public';
 import { applyChanges } from '../../../state_management';
 
 describe('chart_switch', () => {
@@ -271,9 +271,9 @@ describe('chart_switch', () => {
       },
     ]);
     datasourceMap.testDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-      { columnId: 'col1' },
-      { columnId: 'col2' },
-      { columnId: 'col3' },
+      { columnId: 'col1', fields: [] },
+      { columnId: 'col2', fields: [] },
+      { columnId: 'col3', fields: [] },
     ]);
 
     const { instance } = await mountWithProvider(

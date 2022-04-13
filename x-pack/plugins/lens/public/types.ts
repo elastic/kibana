@@ -6,8 +6,8 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference } from 'kibana/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { CoreSetup, SavedObjectReference, SavedObjectsResolveResponse } from 'kibana/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
@@ -198,6 +198,12 @@ interface ChartSettings {
   };
 }
 
+export type GetDropProps<T = unknown> = DatasourceDimensionDropProps<T> & {
+  groupId: string;
+  dragging: DragContextState['dragging'];
+  prioritizedOperation?: string;
+};
+
 /**
  * Interface for the datasource registry
  */
@@ -227,10 +233,8 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     value: {
       columnId: string;
-      label: string;
-      dataType: string;
-      staticValue?: unknown;
       groupId: string;
+      staticValue?: unknown;
     }
   ) => T;
 
@@ -251,11 +255,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceLayerPanelProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
-    props: DatasourceDimensionDropProps<T> & {
-      groupId: string;
-      dragging: DragContextState['dragging'];
-      prioritizedOperation?: string;
-    }
+    props: GetDropProps<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   /**
@@ -296,14 +296,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (
-    state: T,
-    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>,
-    dateRange?: {
-      fromDate: string;
-      toDate: string;
-    }
-  ) =>
+  getErrorMessages: (state: T) =>
     | Array<{
         shortMessage: string;
         longMessage: React.ReactNode;
@@ -355,12 +348,26 @@ export interface DatasourceFixAction<T> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
-  getTableSpec: () => Array<{ columnId: string }>;
-  getOperationForColumnId: (columnId: string) => Operation | null;
+  getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
+  getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
    * Collect all default visual values given the current state
    */
   getVisualDefaults: () => Record<string, Record<string, unknown>>;
+  /**
+   * Retrieve the specific source id for the current state
+   */
+  getSourceId: () => string | undefined;
+  /**
+   * Collect all defined filters from all the operations in the layer
+   */
+  getFilters: (activeData?: FramePublicAPI['activeData']) => Record<
+    'enabled' | 'disabled',
+    {
+      kuery: Query[][];
+      lucene: Query[][];
+    }
+  >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -469,7 +476,13 @@ export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProp
   dropType: DropType;
 };
 
-export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
+export type FieldOnlyDataType =
+  | 'document'
+  | 'ip'
+  | 'histogram'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'murmur3';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information
@@ -498,8 +511,15 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
-
   isStaticValue?: boolean;
+}
+
+/**
+ * Specific type used to store some meta information on top of the Operation type
+ * Rather than populate the Operation type with optional types, it can leverage a super type
+ */
+export interface OperationDescriptor extends Operation {
+  hasTimeShift: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -564,6 +584,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
+  labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -616,6 +637,7 @@ export interface SuggestionRequest<T = unknown> {
    */
   state?: T;
   mainPalette?: PaletteOutput;
+  isFromContext?: boolean;
   /**
    * The visualization needs to know which table is being suggested
    */
@@ -624,6 +646,7 @@ export interface SuggestionRequest<T = unknown> {
    * Different suggestions can be generated for each subtype of the visualization
    */
   subVisualizationId?: string;
+  activeData?: Record<string, Datatable>;
 }
 
 /**
@@ -763,14 +786,13 @@ export interface Visualization<T = unknown> {
     type: LayerType;
     label: string;
     icon?: IconType;
+    noDatasource?: boolean;
     disabled?: boolean;
     toolTipContent?: string;
     initialDimensions?: Array<{
-      groupId: string;
       columnId: string;
-      dataType: string;
-      label: string;
-      staticValue: unknown;
+      groupId: string;
+      staticValue?: unknown;
     }>;
   }>;
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -835,7 +857,20 @@ export interface Visualization<T = unknown> {
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
-
+  /**
+   * Renders dimension trigger. Used only for noDatasource layers
+   */
+  renderDimensionTrigger?: (props: {
+    columnId: string;
+    label: string;
+    hideTooltip?: boolean;
+    invalid?: boolean;
+    invalidMessage?: string;
+  }) => JSX.Element | null;
+  /**
+   * Creates map of columns ids and unique lables. Used only for noDatasource layers
+   */
+  getUniqueLabels?: (state: T) => Record<string, string>;
   /**
    * The frame will call this function on all visualizations at different times. The
    * main use cases where visualization suggestions are requested are:
@@ -957,8 +992,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 

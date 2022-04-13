@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 
+import { identity, pickBy } from 'lodash';
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
@@ -29,7 +30,8 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '../../../../controls/public';
-import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
+
+import { getDefaultDashboardControlGroupInput } from '../../../common/embeddable/dashboard_control_group';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -89,7 +91,7 @@ export class DashboardContainerFactoryDefinition
     const controlGroup = await controlsGroupFactory?.create({
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultDashboardControlGroupInput(),
-      ...(controlGroupInput ?? {}),
+      ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
       timeRange,
       viewMode,
       filters,

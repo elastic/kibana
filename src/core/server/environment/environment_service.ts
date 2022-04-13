@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -49,9 +49,9 @@ export class EnvironmentService {
     // IMPORTANT: This code is based on the assumption that none of the configuration values used
     // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
-      this.configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
-      this.configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),
-      this.configService.atPath<PidConfigType>(pidConfigDef.path).pipe(take(1)).toPromise(),
+      firstValueFrom(this.configService.atPath<PathConfigType>(pathConfigDef.path)),
+      firstValueFrom(this.configService.atPath<HttpConfigType>(httpConfigDef.path)),
+      firstValueFrom(this.configService.atPath<PidConfigType>(pidConfigDef.path)),
     ]);
 
     // Log unhandled rejections so that we can fix them in preparation for https://github.com/elastic/kibana/issues/77469

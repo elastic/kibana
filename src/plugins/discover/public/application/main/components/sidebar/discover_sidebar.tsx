@@ -39,7 +39,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { DataViewField } from '../../../../../../data_views/common';
+import { DataViewField } from '../../../../../../data_views/public';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -196,16 +196,31 @@ export function DiscoverSidebarComponent({
     }
   }, [paginate, scrollContainer, unpopularFields]);
 
-  const fieldTypes = useMemo(() => {
+  const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
+    const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
       for (const field of fields) {
-        if (result.indexOf(field.type) === -1) {
-          result.push(field.type);
+        if (field.type !== '_source') {
+          // If it's a string type, we want to distinguish between keyword and text
+          // For this purpose we need the ES type
+          const type =
+            field.type === 'string' &&
+            field.esTypes &&
+            ['keyword', 'text'].includes(field.esTypes[0])
+              ? field.esTypes?.[0]
+              : field.type;
+          // _id and _index would map to string, that's why we don't add the string type here
+          if (type && type !== 'string') {
+            dataViewFieldTypes.add(type);
+          }
+          if (result.indexOf(field.type) === -1) {
+            result.push(field.type);
+          }
         }
       }
     }
-    return result;
+    return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
   }, [fields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
@@ -327,7 +342,7 @@ export function DiscoverSidebarComponent({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
               <DiscoverIndexPattern
                 selectedIndexPattern={selectedIndexPattern}
@@ -351,6 +366,7 @@ export function DiscoverSidebarComponent({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              presentFieldTypes={presentFieldTypes}
             />
           </form>
         </EuiFlexItem>

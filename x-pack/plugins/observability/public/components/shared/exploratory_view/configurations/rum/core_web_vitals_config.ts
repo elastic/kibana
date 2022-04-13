@@ -35,7 +35,7 @@ import {
 } from '../constants/elasticsearch_fieldnames';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from '../constants/labels';
 
-export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);
 
   return {
@@ -87,8 +87,8 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       URL_FULL,
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],

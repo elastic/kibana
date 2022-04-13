@@ -32,7 +32,6 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -60,9 +59,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  },
-  [DEFAULT_TRANSFORMS]: {
-    enabled: false,
   },
 };
 
@@ -138,6 +134,13 @@ export const createStartServicesMock = (
             error: jest.fn(),
             next: jest.fn(),
             unsubscribe: jest.fn(),
+          })),
+          pipe: jest.fn().mockImplementation(() => ({
+            subscribe: jest.fn().mockImplementation(() => ({
+              error: jest.fn(),
+              next: jest.fn(),
+              unsubscribe: jest.fn(),
+            })),
           })),
         })),
       },

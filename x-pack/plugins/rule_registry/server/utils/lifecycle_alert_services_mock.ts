@@ -18,7 +18,7 @@ class AlertsMockWrapper<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
   createAlertServices() {
-    return alertsMock.createAlertServices<InstanceState, InstanceContext>();
+    return alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>();
   }
 }
 
@@ -35,4 +35,5 @@ export const createLifecycleAlertServicesMock = <
   alertServices: AlertServices<InstanceState, InstanceContext>
 ): LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds> => ({
   alertWithLifecycle: ({ id }) => alertServices.alertFactory.create(id),
+  getAlertStartedDate: jest.fn((id: string) => null),
 });

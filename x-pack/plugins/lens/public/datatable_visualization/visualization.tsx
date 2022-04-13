@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
@@ -21,18 +21,21 @@ import type {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
-import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
-  fitRowToContent?: boolean;
+  rowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeightLines?: number;
+  headerRowHeightLines?: number;
   paging?: PagingState;
 }
 
@@ -400,7 +403,16 @@ export const getDatatableVisualization = ({
             }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
-            fitRowToContent: [state.fitRowToContent ?? false],
+            fitRowToContent: [state.rowHeight === 'auto'],
+            headerRowHeight: [state.headerRowHeight ?? 'single'],
+            rowHeightLines: [
+              !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
+            ],
+            headerRowHeightLines: [
+              !state.headerRowHeight || state.headerRowHeight === 'single'
+                ? 1
+                : state.headerRowHeightLines ?? 2,
+            ],
             pageSize: state.paging?.enabled ? [state.paging.size] : [],
           },
         },

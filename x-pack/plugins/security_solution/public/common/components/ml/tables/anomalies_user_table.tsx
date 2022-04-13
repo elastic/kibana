@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
@@ -23,6 +23,7 @@ import { Panel } from '../../panel';
 import { anomaliesTableDefaultEquality } from './default_equality';
 import { convertAnomaliesToUsers } from './convert_anomalies_to_users';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
+import { useQueryToggle } from '../../../containers/query_toggle';
 
 const sorting = {
   sort: {
@@ -40,10 +41,24 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
 }) => {
   const capabilities = useMlCapabilities();
 
+  const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesUserTable`);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
+
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
-    skip,
+    skip: querySkip,
     criteriaFields: getCriteriaFromUsersType(type, userName),
     filterQuery: {
       exists: { field: 'user.name' },
@@ -58,7 +73,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     initialPageSize: 10,
     totalItemCount: users.length,
     pageSizeOptions: [5, 10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   if (!hasMlUserPermissions(capabilities)) {
@@ -67,21 +82,27 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     return (
       <Panel loading={loading} data-test-subj="user-anomalies-tab">
         <HeaderSection
+          height={!toggleStatus ? 40 : undefined}
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}
           title={i18n.ANOMALIES}
+          toggleQuery={toggleQuery}
+          toggleStatus={toggleStatus}
           tooltip={i18n.TOOLTIP}
           isInspectDisabled={skip}
         />
 
-        <BasicTable
-          // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
-          columns={columns}
-          items={users}
-          pagination={pagination}
-          sorting={sorting}
-        />
+        {toggleStatus && (
+          <BasicTable
+            data-test-subj="user-anomalies-table"
+            // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
+            columns={columns}
+            items={users}
+            pagination={pagination}
+            sorting={sorting}
+          />
+        )}
 
         {loading && (
           <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />

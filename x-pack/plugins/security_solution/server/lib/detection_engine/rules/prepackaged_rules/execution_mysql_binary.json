@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies MySQL server abuse to break out from restricted environments by spawning an interactive system shell.The MySQL is an open source relational database management system and the activity of spawning shell is not a standard use of this binary for a user or system administrator.It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via the mysql command",
+  "query": "process where event.type == \"start\" and process.name in (\"bash\", \"sh\", \"dash\") and\n  process.parent.name == \"mysql\" and process.parent.args == \"-e\" and\n  process.parent.args : (\"\\\\!*sh\", \"\\\\!*bash\", \"\\\\!*dash\", \"\\\\!*/bin/sh\", \"\\\\!*/bin/bash\", \"\\\\!*/bin/dash\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/mysql/"
+  ],
+  "risk_score": 47,
+  "rule_id": "83b2c6e5-e0b2-42d7-8542-8f3af86a1acb",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

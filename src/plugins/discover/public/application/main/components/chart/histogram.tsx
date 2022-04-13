@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   Axis,
   BrushEndListener,
@@ -65,7 +65,7 @@ export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
 }: DiscoverHistogramProps) {
-  const { data, theme, uiSettings } = useDiscoverServices();
+  const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
 
@@ -207,7 +207,7 @@ export function DiscoverHistogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = data.fieldFormats.deserialize(chartData.yAxisFormat);
+  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 

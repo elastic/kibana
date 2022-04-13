@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data_views/public';
 import { isSortable } from './get_sort';
 import { SortOrder } from '../components/table_header/helpers';
 
@@ -16,9 +16,14 @@ import { SortOrder } from '../components/table_header/helpers';
  */
 export function getDefaultSort(
   indexPattern: DataView | undefined,
-  defaultSortOrder: string = 'desc'
+  defaultSortOrder: string = 'desc',
+  hidingTimeColumn: boolean = false
 ): SortOrder[] {
-  if (indexPattern?.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+  if (
+    indexPattern?.timeFieldName &&
+    isSortable(indexPattern.timeFieldName, indexPattern) &&
+    !hidingTimeColumn
+  ) {
     return [[indexPattern.timeFieldName, defaultSortOrder]];
   } else {
     return [];

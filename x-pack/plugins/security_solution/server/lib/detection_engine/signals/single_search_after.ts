@@ -9,7 +9,7 @@ import { performance } from 'perf_hooks';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
 import type { SignalSearchResponse, SignalSource } from './types';
@@ -25,7 +25,7 @@ interface SingleSearchAfterParams {
   index: string[];
   from: string;
   to: string;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
   sortOrder?: estypes.SortOrder;
@@ -72,8 +72,9 @@ export const singleSearchAfter = async ({
 
       const start = performance.now();
       const { body: nextSearchAfterResult } =
-        await services.search.asCurrentUser.search<SignalSource>(
-          searchAfterQuery as estypes.SearchRequest
+        await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
+          searchAfterQuery as estypes.SearchRequest,
+          { meta: true }
         );
       const end = performance.now();
 

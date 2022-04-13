@@ -6,7 +6,9 @@
  */
 
 import moment from 'moment';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { Datatable } from 'src/plugins/expressions/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { TimeRange } from 'src/plugins/data/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 

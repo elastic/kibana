@@ -14,8 +14,11 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { AGENTS_PREFIX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
+import { FleetUnauthorizedError } from '../../errors';
 
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
+
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
@@ -91,4 +94,78 @@ export async function getAgentStatusForAgentPolicy(
     /* @deprecated Agent events do not exists anymore */
     events: 0,
   };
+}
+export async function getIncomingDataByAgentsId(
+  esClient: ElasticsearchClient,
+  agentsIds: string[]
+) {
+  try {
+    const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+      body: {
+        index: [
+          {
+            names: [DATA_STREAM_INDEX_PATTERN],
+            privileges: ['read'],
+          },
+        ],
+      },
+    });
+    if (!hasAllPrivileges) {
+      throw new FleetUnauthorizedError('Missing permissions to read data streams indices');
+    }
+
+    const searchResult = await esClient.search({
+      index: DATA_STREAM_INDEX_PATTERN,
+      allow_partial_search_results: true,
+      _source: false,
+      timeout: '5s',
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'agent.id': agentsIds,
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          agent_ids: {
+            terms: {
+              field: 'agent.id',
+              size: agentsIds.length,
+            },
+          },
+        },
+      },
+    });
+
+    if (!searchResult.aggregations?.agent_ids) {
+      return agentsIds.map((id) => {
+        return { [id]: { data: false } };
+      });
+    }
+
+    // @ts-expect-error aggregation type is not specified
+    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
+      (bucket: any) => bucket.key as string
+    );
+
+    return agentsIds.map((id) =>
+      agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }
+    );
+  } catch (e) {
+    throw new Error(e);
+  }
 }

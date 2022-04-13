@@ -10,7 +10,6 @@ import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
 import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
@@ -83,7 +82,7 @@ interface DeleteObjectsOptions {
 
 async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
   if (arr.length) {
-    await lastValueFrom(
+    await Rx.lastValueFrom(
       Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
     );
   }
@@ -217,6 +216,25 @@ export class KbnClientSavedObjects {
     }
 
     this.log.success('deleted', deleted, 'objects');
+  }
+
+  public async cleanStandardList(options?: { space?: string }) {
+    // add types here
+    const types = [
+      'search',
+      'index-pattern',
+      'visualization',
+      'dashboard',
+      'lens',
+      'map',
+      'graph-workspace',
+      'query',
+      'tag',
+      'url',
+      'canvas-workpad',
+    ];
+    const newOptions = { types, space: options?.space };
+    await this.clean(newOptions);
   }
 
   public async bulkDelete(options: DeleteObjectsOptions) {

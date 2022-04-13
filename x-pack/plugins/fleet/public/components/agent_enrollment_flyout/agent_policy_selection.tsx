@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,10 +34,10 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 
 type Props = {
   agentPolicies: AgentPolicy[];
-  onAgentPolicyChange: (key?: string, policy?: AgentPolicy) => void;
+  selectedPolicy?: AgentPolicy;
+  setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
   onClickCreatePolicy: () => void;
-  selectedAgentPolicy?: string;
   isFleetServerPolicy?: boolean;
 } & (
   | {
@@ -63,44 +63,33 @@ const resolveAgentId = (
   return selectedAgentPolicyId;
 };
 
-export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
+export const AgentPolicySelection: React.FC<Props> = (props) => {
   const {
     agentPolicies,
-    onAgentPolicyChange,
+    selectedPolicy,
+    setSelectedPolicyId,
     excludeFleetServer,
     onClickCreatePolicy,
-    selectedAgentPolicy,
     isFleetServerPolicy,
   } = props;
-
-  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<undefined | string>(
-    () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
-  );
 
   const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   useEffect(
-    function triggerOnAgentPolicyChangeEffect() {
-      if (onAgentPolicyChange) {
-        onAgentPolicyChange(selectedAgentPolicyId);
-      }
-    },
-    [selectedAgentPolicyId, onAgentPolicyChange]
-  );
-
-  useEffect(
     function useDefaultAgentPolicyEffect() {
-      const resolvedId = resolveAgentId(agentPolicies, selectedAgentPolicyId);
-      if (resolvedId !== selectedAgentPolicyId) {
-        setSelectedAgentPolicyId(resolvedId);
+      const resolvedId = resolveAgentId(agentPolicies, selectedPolicy?.id);
+      // find AgentPolicy
+      if (resolvedId !== selectedPolicy?.id) {
+        setSelectedPolicyId(resolvedId);
       }
     },
-    [agentPolicies, selectedAgentPolicyId]
+    [agentPolicies, setSelectedPolicyId, selectedPolicy]
   );
 
-  useEffect(() => {
-    if (selectedAgentPolicy) setSelectedAgentPolicyId(selectedAgentPolicy);
-  }, [selectedAgentPolicy]);
+  const onChangeCallback = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    setSelectedPolicyId(value);
+  };
 
   return (
     <>
@@ -154,24 +143,24 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}
-          value={selectedAgentPolicyId}
-          onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
+          value={selectedPolicy?.id}
+          onChange={onChangeCallback}
           aria-label={i18n.translate(
             'xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel',
             {
               defaultMessage: 'Agent policy',
             }
           )}
-          hasNoInitialSelection={agentPolicies.length > 1}
+          hasNoInitialSelection={!selectedPolicy?.id}
           data-test-subj="agentPolicyDropdown"
-          isInvalid={!selectedAgentPolicyId}
+          isInvalid={!selectedPolicy?.id}
         />
       </AgentPolicyFormRow>
-      {selectedAgentPolicyId && !isFleetServerPolicy && (
+      {selectedPolicy?.id && !isFleetServerPolicy && (
         <>
           <EuiSpacer size="m" />
           <AgentPolicyPackageBadges
-            agentPolicyId={selectedAgentPolicyId}
+            agentPolicyId={selectedPolicy?.id}
             excludeFleetServer={excludeFleetServer}
           />
         </>
@@ -183,7 +172,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             selectedApiKeyId={props.selectedApiKeyId}
             onKeyChange={props.onKeyChange}
             initialAuthenticationSettingsOpen={!props.selectedApiKeyId}
-            agentPolicyId={selectedAgentPolicyId}
+            agentPolicyId={selectedPolicy?.id}
           />
         </>
       )}

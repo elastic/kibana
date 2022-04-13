@@ -31,7 +31,7 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import { ResolvedSanitizedRule, SanitizedRule } from '../../../../../alerting/common';
 import { transformTags } from '../routes/rules/utils';
 import {
   transformFromAlertThrottle,
@@ -283,7 +283,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 };
 
 export const internalRuleToAPIResponse = (
-  rule: SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams>,
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRuleActions | null
 ): FullResponseSchema => {
@@ -294,6 +294,7 @@ export const internalRuleToAPIResponse = (
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
     alias_target_id: isResolvedRule(rule) ? rule.alias_target_id : undefined,
+    alias_purpose: isResolvedRule(rule) ? rule.alias_purpose : undefined,
     // Alerting framework params
     id: rule.id,
     updated_at: rule.updatedAt.toISOString(),

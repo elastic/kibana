@@ -6,7 +6,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -148,7 +148,9 @@ export function getSuggestions({
             },
             currentVisualizationState,
             subVisualizationId,
-            palette
+            palette,
+            visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
+            activeData
           );
         });
     })
@@ -205,7 +207,9 @@ function getVisualizationSuggestions(
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
   subVisualizationId?: string,
-  mainPalette?: PaletteOutput
+  mainPalette?: PaletteOutput,
+  isFromContext?: boolean,
+  activeData?: Record<string, Datatable>
 ) {
   return visualization
     .getSuggestions({
@@ -214,6 +218,8 @@ function getVisualizationSuggestions(
       keptLayerIds: datasourceSuggestion.keptLayerIds,
       subVisualizationId,
       mainPalette,
+      isFromContext,
+      activeData,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,
@@ -283,5 +289,9 @@ export function getTopSuggestionForField(
     field,
     mainPalette,
   });
-  return suggestions.find((s) => s.visualizationId === visualization.activeId) || suggestions[0];
+  return (
+    suggestions.find((s) => s.visualizationId === visualization.activeId) ||
+    suggestions.filter((suggestion) => !suggestion.hide)[0] ||
+    suggestions[0]
+  );
 }

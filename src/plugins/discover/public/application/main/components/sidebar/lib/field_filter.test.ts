@@ -7,7 +7,7 @@
  */
 
 import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
-import { DataViewField } from '../../../../../../../data/common';
+import { DataViewField } from '../../../../../../../data_views/public';
 
 describe('field_filter', function () {
   it('getDefaultFieldFilter should return default filter state', function () {

@@ -28,7 +28,6 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
-import { UnknownError } from '../../../../common/errors';
 import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
@@ -805,6 +804,87 @@ it('can override ignoring frozen indices', async () => {
   );
 });
 
+it('will return partial data if the scroll or search fails', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() => {
+    throw new esErrors.ResponseError({
+      statusCode: 500,
+      meta: {} as any,
+      body: 'my error',
+      warnings: [],
+    });
+  });
+  const generateCsv = new CsvGenerator(
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+  await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "content_type": "text/csv",
+            "csv_contains_formulas": false,
+            "error_code": undefined,
+            "max_size_reached": false,
+            "metrics": Object {
+              "csv": Object {
+                "rows": 0,
+              },
+            },
+            "warnings": Array [
+              "Received a 500 response from Elasticsearch: my error",
+            ],
+          }
+        `);
+});
+
+it('handles unknown errors', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() => {
+    throw new Error('An unknown error');
+  });
+  const generateCsv = new CsvGenerator(
+    createMockJob({ columns: ['date', 'ip', 'message'] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+  await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "content_type": "text/csv",
+            "csv_contains_formulas": false,
+            "error_code": undefined,
+            "max_size_reached": false,
+            "metrics": Object {
+              "csv": Object {
+                "rows": 0,
+              },
+            },
+            "warnings": Array [
+              "Encountered an unknown error: An unknown error",
+            ],
+          }
+        `);
+});
+
 describe('error codes', () => {
   it('returns the expected error code when authentication expires', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>
@@ -847,34 +927,11 @@ describe('error codes', () => {
     );
 
     const { error_code: errorCode, warnings } = await generateCsv.generateData();
-    expect(errorCode).toBe('authentication_expired');
+    expect(errorCode).toBe('authentication_expired_error');
     expect(warnings).toMatchInlineSnapshot(`
       Array [
         "This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.",
       ]
     `);
-  });
-
-  it('throws for unknown errors', async () => {
-    mockDataClient.search = jest.fn().mockImplementation(() => {
-      throw new esErrors.ResponseError({ statusCode: 500, meta: {} as any, warnings: [] });
-    });
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      logger,
-      stream
-    );
-    await expect(generateCsv.generateData()).rejects.toBeInstanceOf(UnknownError);
   });
 });

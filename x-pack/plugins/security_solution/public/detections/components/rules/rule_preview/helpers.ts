@@ -8,7 +8,7 @@
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import type { Filter } from '@kbn/es-query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
@@ -209,6 +209,7 @@ export const getIsRulePreviewDisabled = ({
   threatIndex,
   threatMapping,
   machineLearningJobId,
+  queryBar,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
@@ -217,6 +218,7 @@ export const getIsRulePreviewDisabled = ({
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
+  queryBar: FieldValueQueryBar;
 }) => {
   if (!isQueryBarValid || index.length === 0) return true;
   if (ruleType === 'threat_match') {
@@ -231,6 +233,9 @@ export const getIsRulePreviewDisabled = ({
   }
   if (ruleType === 'machine_learning') {
     return machineLearningJobId.length === 0;
+  }
+  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
+    return queryBar.query.query.length === 0;
   }
   return false;
 };

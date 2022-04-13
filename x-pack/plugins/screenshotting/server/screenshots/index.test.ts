@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { of, throwError } from 'rxjs';
-import type { Logger } from 'src/core/server';
+import { lastValueFrom, of, throwError } from 'rxjs';
+import type { Logger, PackageInfo } from 'src/core/server';
+import { httpServiceMock } from 'src/core/server/mocks';
+import {
+  SCREENSHOTTING_APP_ID,
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+} from '../../common';
 import type { ConfigType } from '../config';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
+import type { PngScreenshotOptions } from '../formats';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 import { Screenshots, ScreenshotOptions } from '.';
 
@@ -21,20 +28,30 @@ import { Screenshots, ScreenshotOptions } from '.';
 describe('Screenshot Observable Pipeline', () => {
   let driver: ReturnType<typeof createMockBrowserDriver>;
   let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
+  let http: ReturnType<typeof httpServiceMock.createSetupContract>;
   let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
+  let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
   let screenshots: Screenshots;
 
   beforeEach(async () => {
     driver = createMockBrowserDriver();
     driverFactory = createMockBrowserDriverFactory(driver);
+    http = httpServiceMock.createSetupContract();
     layout = createMockLayout();
     logger = {
       debug: jest.fn(),
       error: jest.fn(),
       info: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
+    packageInfo = {
+      branch: 'screenshot-test',
+      buildNum: 567891011,
+      buildSha: 'screenshot-dfdfed0a',
+      dist: false,
+      version: '5000.0.0',
+    };
     options = {
       browserTimezone: 'UTC',
       headers: {},
@@ -47,7 +64,9 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
-    screenshots = new Screenshots(driverFactory, logger, { poolSize: 1 } as ConfigType);
+    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, {
+      poolSize: 1,
+    } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
@@ -59,7 +78,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await screenshots.getScreenshots(options).toPromise();
+    const result = await lastValueFrom(screenshots.getScreenshots(options as PngScreenshotOptions));
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -86,6 +105,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -115,12 +135,12 @@ describe('Screenshot Observable Pipeline', () => {
 
   it('pipelines multiple urls into', async () => {
     driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
-    const result = await screenshots
-      .getScreenshots({
+    const result = await lastValueFrom(
+      screenshots.getScreenshots({
         ...options,
         urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
-      })
-      .toPromise();
+      } as PngScreenshotOptions)
+    );
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -147,6 +167,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -198,6 +219,7 @@ describe('Screenshot Observable Pipeline', () => {
             },
           ],
           "error": undefined,
+          "renderErrors": undefined,
           "screenshots": Array [
             Object {
               "data": Object {
@@ -228,7 +250,7 @@ describe('Screenshot Observable Pipeline', () => {
           "timeRange": "Default GetTimeRange Result",
         },
       ]
-  `);
+    `);
 
     expect(driver.open).toHaveBeenCalledTimes(2);
     expect(driver.open).nthCalledWith(
@@ -245,20 +267,42 @@ describe('Screenshot Observable Pipeline', () => {
     );
   });
 
+  it('captures screenshot of an expression', async () => {
+    await screenshots
+      .getScreenshots({
+        ...options,
+        expression: 'kibana',
+        input: 'something',
+      } as PngScreenshotOptions)
+      .toPromise();
+
+    expect(driver.open).toHaveBeenCalledTimes(1);
+    expect(driver.open).toHaveBeenCalledWith(
+      expect.stringContaining(SCREENSHOTTING_APP_ID),
+      expect.objectContaining({
+        context: expect.objectContaining({
+          [SCREENSHOTTING_EXPRESSION]: 'kibana',
+          [SCREENSHOTTING_EXPRESSION_INPUT]: 'something',
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   describe('error handling', () => {
     it('recovers if waitForSelector fails', async () => {
       driver.waitForSelector.mockImplementation((selectorArg: string) => {
         throw new Error('Mock error!');
       });
-      const result = await screenshots
-        .getScreenshots({
+      const result = await lastValueFrom(
+        screenshots.getScreenshots({
           ...options,
           urls: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
-        })
-        .toPromise();
+        } as PngScreenshotOptions)
+      );
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
@@ -282,6 +326,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
@@ -324,6 +369,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {
@@ -371,7 +417,9 @@ describe('Screenshot Observable Pipeline', () => {
       );
 
       layout.getViewport = () => null;
-      const result = await screenshots.getScreenshots(options).toPromise();
+      const result = await lastValueFrom(
+        screenshots.getScreenshots(options as PngScreenshotOptions)
+      );
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
@@ -395,6 +443,7 @@ describe('Screenshot Observable Pipeline', () => {
               },
             ],
             "error": undefined,
+            "renderErrors": undefined,
             "screenshots": Array [
               Object {
                 "data": Object {

@@ -24,9 +24,10 @@ import { SpacesPluginStart } from '../../spaces/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
 } from '../common/constants';
 
@@ -44,6 +45,7 @@ import {
 
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { registerListRoute } from './routes/enterprise_search/indices';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -88,6 +90,12 @@ export class EnterpriseSearchPlugin implements Plugin {
   ) {
     const config = this.config;
     const log = this.logger;
+    const PLUGIN_IDS = [
+      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      APP_SEARCH_PLUGIN.ID,
+      WORKPLACE_SEARCH_PLUGIN.ID,
+    ];
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(http, customIntegrations);
@@ -106,17 +114,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      app: [
-        'kibana',
-        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        APP_SEARCH_PLUGIN.ID,
-        WORKPLACE_SEARCH_PLUGIN.ID,
-      ],
-      catalogue: [
-        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        APP_SEARCH_PLUGIN.ID,
-        WORKPLACE_SEARCH_PLUGIN.ID,
-      ],
+      app: ['kibana', ...PLUGIN_IDS],
+      catalogue: PLUGIN_IDS,
       privileges: null,
     });
 
@@ -129,16 +128,18 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, spaces, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
+      const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
 
       return {
         navLinks: {
-          enterpriseSearch: showEnterpriseSearchOverview,
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
-          enterpriseSearch: showEnterpriseSearchOverview,
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
@@ -155,6 +156,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
+    registerListRoute(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
@@ -179,11 +181,11 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register logs source configuration, used by LogStream components
      * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
-    infra.defineInternalSourceConfiguration(LOGS_SOURCE_ID, {
-      name: 'Enterprise Search Logs',
+    infra.defineInternalSourceConfiguration(ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID, {
+      name: 'Enterprise Search Search Relevance Logs',
       logIndices: {
         type: 'index_name',
-        indexName: '.ent-search-*',
+        indexName: 'logs-app_search.search_relevance_suggestions-*',
       },
     });
 

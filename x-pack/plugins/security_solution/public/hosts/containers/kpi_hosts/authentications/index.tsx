@@ -10,7 +10,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -26,7 +25,7 @@ import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostsKpiAuthenticationsQuery';
+export const ID = 'hostsKpiAuthenticationsQuery';
 
 export interface HostsKpiAuthenticationsArgs
   extends Omit<HostsKpiAuthenticationsStrategyResponse, 'rawResponse'> {
@@ -58,7 +57,6 @@ export const useHostsKpiAuthentications = ({
   const [loading, setLoading] = useState(false);
   const [hostsKpiAuthenticationsRequest, setHostsKpiAuthenticationsRequest] =
     useState<HostsKpiAuthenticationsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] =
     useState<HostsKpiAuthenticationsArgs>({
@@ -132,30 +130,24 @@ export const useHostsKpiAuthentications = ({
   );
 
   useEffect(() => {
-    const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-      factoryQueryType: HostsKpiQueries.kpiAuthentications,
-      indices: indexNames,
-      filterQuery,
-      timerange: {
-        interval: '12h',
-        from: startDate,
-        to: endDate,
-      },
-    });
     setHostsKpiAuthenticationsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
+        defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiAuthentications,
         filterQuery: createFilter(filterQuery),
-        timerange,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     hostsKpiAuthenticationsSearch(hostsKpiAuthenticationsRequest);
@@ -164,6 +156,14 @@ export const useHostsKpiAuthentications = ({
       abortCtrl.current.abort();
     };
   }, [hostsKpiAuthenticationsRequest, hostsKpiAuthenticationsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, hostsKpiAuthenticationsResponse];
 };

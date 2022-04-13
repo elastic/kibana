@@ -8,7 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
+import { Query } from '../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
 import { useDebouncedValue } from '../shared_components';
 
 export const QueryInput = ({
@@ -18,6 +19,7 @@ export const QueryInput = ({
   isInvalid,
   onSubmit,
   disableAutoFocus,
+  ['data-test-subj']: dataTestSubj,
 }: {
   value: Query;
   onChange: (input: Query) => void;
@@ -25,12 +27,13 @@ export const QueryInput = ({
   isInvalid: boolean;
   onSubmit: () => void;
   disableAutoFocus?: boolean;
+  'data-test-subj'?: string;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
 
   return (
     <QueryStringInput
-      dataTestSubj="indexPattern-filters-queryStringInput"
+      dataTestSubj={dataTestSubj ?? 'indexPattern-filters-queryStringInput'}
       size="s"
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}

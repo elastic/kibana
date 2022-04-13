@@ -7,8 +7,8 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
-import type { PaletteOutput, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -144,6 +144,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
   legendPosition: [layer.legendPosition || Position.Right],
   maxLegendLines: [layer.legendMaxLines ?? 1],
+  legendSize: layer.legendSize ? [layer.legendSize] : [],
   nestedLegend: [!!layer.nestedLegend],
   truncateLegend: [
     layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
@@ -254,7 +255,10 @@ function expressionHelper(
   const groups = getSortedGroups(datasource, layer);
 
   const operations = groups
-    .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
+    .map((columnId) => ({
+      columnId,
+      operation: datasource.getOperationForColumnId(columnId) as Operation | null,
+    }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
   if (!layer.metric || !operations.length) {

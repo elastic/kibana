@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Remote File Download via MpCmdRun",
-  "note": "## Triage and analysis\n\n### Investigating Remote File Download via MpCmdRun\nVerify details such as the parent process, URL reputation, and downloaded file details. Additionally, `MpCmdRun` logs this information in the Appdata Temp folder in `MpCmdRun.log`.",
+  "note": "## Triage and analysis\n\n### Investigating Remote File Download via MpCmdRun\nVerify details such as the parent process, URL reputation, and downloaded file details. Additionally, `MpCmdRun` logs this information in the Appdata Temp folder in `MpCmdRun.log`.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n  (process.name : \"MpCmdRun.exe\" or process.pe.original_file_name == \"MpCmdRun.exe\") and\n   process.args : \"-DownloadFile\" and process.args : \"-url\" and process.args : \"-path\"\n",
   "references": [
     "https://twitter.com/mohammadaskar2/status/1301263551638761477",
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

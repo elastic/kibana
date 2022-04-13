@@ -9,6 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const OptionsListStrings = {
+  getDisplayName: () =>
+    i18n.translate('controls.optionsList.displayName', {
+      defaultMessage: 'Options list',
+    }),
+  getDescription: () =>
+    i18n.translate('controls.optionsList.description', {
+      defaultMessage: 'Add a menu for selecting field values.',
+    }),
   summary: {
     getSeparator: () =>
       i18n.translate('controls.optionsList.summary.separator', {
@@ -20,10 +28,6 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getIndexPatternTitle: () =>
-      i18n.translate('controls.optionsList.editor.indexPatternTitle', {
-        defaultMessage: 'Index pattern',
-      }),
     getDataViewTitle: () =>
       i18n.translate('controls.optionsList.editor.dataViewTitle', {
         defaultMessage: 'Data view',

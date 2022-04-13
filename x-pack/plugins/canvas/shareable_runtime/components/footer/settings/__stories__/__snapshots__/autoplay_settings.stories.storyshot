@@ -48,12 +48,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -103,6 +107,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -212,12 +217,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -267,6 +276,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -376,12 +386,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -431,6 +445,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}

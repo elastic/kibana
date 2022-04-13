@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { DataView, DataViewField } from 'src/plugins/data_views/public';
 import { PanelData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
@@ -14,7 +14,6 @@ jest.mock('../../../services', () => {
   return {
     getDataStart: jest.fn(() => {
       return {
-        indexPatterns: jest.fn(),
         query: {
           timefilter: {
             timefilter: {
@@ -29,29 +28,30 @@ jest.mock('../../../services', () => {
         },
       };
     }),
+    getDataViewsStart: jest.fn(),
   };
 });
 
 describe('convert series to datatables', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   beforeEach(() => {
-    const fieldMap: Record<string, IndexPatternField> = {
-      test1: { name: 'test1', spec: { type: 'date', name: 'test1' } } as IndexPatternField,
+    const fieldMap: Record<string, DataViewField> = {
+      test1: { name: 'test1', spec: { type: 'date', name: 'test1' } } as DataViewField,
       test2: {
         name: 'test2',
         spec: { type: 'number', name: 'Average of test2' },
-      } as IndexPatternField,
-      test3: { name: 'test3', spec: { type: 'boolean', name: 'test3' } } as IndexPatternField,
+      } as DataViewField,
+      test3: { name: 'test3', spec: { type: 'boolean', name: 'test3' } } as DataViewField,
     };
 
-    const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap[name];
+    const getFieldByName = (name: string): DataViewField | undefined => fieldMap[name];
     indexPattern = {
       id: 'index1',
       title: 'index1',
       timeFieldName: 'timestamp',
       getFieldByName,
-    } as IndexPattern;
+    } as DataView;
   });
 
   describe('addMetaColumns()', () => {
@@ -200,14 +200,16 @@ describe('convert series to datatables', () => {
       expect(Object.keys(tables).sort()).toEqual([model.series[0].id].sort());
 
       expect(tables.series1.rows.length).toEqual(8);
-      const expected1 = series[0].data.map((d) => {
-        d.push(parseInt([series[0].label].flat()[0], 10));
-        return d;
-      });
-      const expected2 = series[1].data.map((d) => {
-        d.push(parseInt([series[1].label].flat()[0], 10));
-        return d;
-      });
+      const expected1 = series[0].data.map((d) => ({
+        '0': d[0],
+        '1': d[1],
+        '2': parseInt([series[0].label].flat()[0], 10),
+      }));
+      const expected2 = series[1].data.map((d) => ({
+        '0': d[0],
+        '1': d[1],
+        '2': parseInt([series[1].label].flat()[0], 10),
+      }));
       expect(tables.series1.rows).toEqual([...expected1, ...expected2]);
     });
 

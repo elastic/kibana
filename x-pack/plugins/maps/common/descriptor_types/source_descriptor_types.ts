@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import { SortDirection } from 'src/plugins/data/common/search';
 import {
@@ -158,6 +159,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
 
 export type InlineFieldDescriptor = {
   name: string;
+  label?: string;
   type: 'string' | 'number';
 };
 

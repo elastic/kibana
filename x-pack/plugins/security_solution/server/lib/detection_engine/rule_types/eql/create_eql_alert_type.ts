@@ -20,7 +20,6 @@ export const createEqlAlertType = (
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -50,15 +49,7 @@ export const createEqlAlertType = (
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: {
-          bulkCreate,
-          exceptionItems,
-          completeRule,
-          searchAfterSize,
-          tuple,
-          wrapHits,
-          wrapSequences,
-        },
+        runOpts: { bulkCreate, exceptionItems, completeRule, tuple, wrapHits, wrapSequences },
         services,
         state,
       } = execOptions;
@@ -69,7 +60,6 @@ export const createEqlAlertType = (
         experimentalFeatures,
         logger,
         completeRule,
-        searchAfterSize,
         services,
         tuple,
         version,

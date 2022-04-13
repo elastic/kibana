@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { ReactNode } from 'react';
 import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
 
 export type {
@@ -41,13 +42,15 @@ export interface BasicSettingRow {
   rowTitle?: string;
   rowDescription?: string;
   label?: string;
-  helpText?: string;
+  helpText?: ReactNode;
   placeholder?: string;
   labelAppend?: string;
+  labelAppendLink?: string;
+  labelAppendLinkText?: string;
+  dataTestSubj?: string;
   settings?: SettingsRow[];
   validation?: SettingValidation;
   required?: boolean;
-  readOnly?: boolean;
 }
 
 export type SettingsRow = BasicSettingRow | AdvancedSettingRow;

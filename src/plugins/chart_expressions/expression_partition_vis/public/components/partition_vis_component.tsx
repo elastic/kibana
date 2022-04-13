@@ -20,8 +20,10 @@ import {
   SeriesIdentifier,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendToggle, ChartsPluginSetup } from '../../../../charts/public';
 import type { PersistedState } from '../../../../visualizations/public';
+import { getColumnByAccessor } from '../../../../visualizations/common/utils';
 import {
   Datatable,
   DatatableColumn,
@@ -46,7 +48,6 @@ import {
   getPartitionTheme,
   getColumns,
   getSplitDimensionAccessor,
-  getColumnByAccessor,
   isLegendFlat,
   shouldShowLegend,
   generateFormatters,
@@ -126,9 +127,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   useEffect(() => {
     const legendShow = showLegendDefault();
-    setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+    const showLegendDef = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
+    if (showLegendDef !== legendShow) {
+      setShowLegend(legendShow);
+      props.uiState?.set('vis.legendOpen', legendShow);
+    }
+  }, [showLegendDefault, props.uiState, visParams.legendDisplay, visType, bucketColumns]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -224,9 +228,21 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { splitColumn, splitRow } = visParams.dimensions;
 
   const splitChartFormatter = splitColumn
-    ? getFormatter(splitColumn[0], formatters, defaultFormatter)
+    ? getFormatter(
+        typeof splitColumn[0] === 'string'
+          ? getColumnByAccessor(splitColumn[0], visData.columns)!
+          : splitColumn[0],
+        formatters,
+        defaultFormatter
+      )
     : splitRow
-    ? getFormatter(splitRow[0], formatters, defaultFormatter)
+    ? getFormatter(
+        typeof splitRow[0] === 'string'
+          ? getColumnByAccessor(splitRow[0], visData.columns)!
+          : splitRow[0],
+        formatters,
+        defaultFormatter
+      )
     : undefined;
 
   const percentFormatter = services.fieldFormats.deserialize({
@@ -298,9 +314,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     : undefined;
 
   const splitChartDimension = splitColumn
-    ? getColumnByAccessor(splitColumn[0].accessor, visData.columns)
+    ? getColumnByAccessor(splitColumn[0], visData.columns)
     : splitRow
-    ? getColumnByAccessor(splitRow[0].accessor, visData.columns)
+    ? getColumnByAccessor(splitRow[0], visData.columns)
     : undefined;
 
   /**
@@ -375,6 +391,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
                 }
                 legendPosition={legendPosition}
+                legendSize={visParams.legendSize}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
@@ -394,6 +411,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   getLegendActionEventData(visData),
                   handleLegendAction,
                   visParams,
+                  visData,
                   services.data.actions,
                   services.fieldFormats
                 )}

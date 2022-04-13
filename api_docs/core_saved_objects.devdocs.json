@@ -628,7 +628,7 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>"
+              "<T>>"
             ],
             "path": "src/core/public/saved_objects/saved_objects_client.ts",
             "deprecated": false,
@@ -789,6 +789,19 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.SimpleSavedObject.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/public/saved_objects/simple_saved_object.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.SimpleSavedObject.namespaces",
             "type": "Array",
             "tags": [],
@@ -840,7 +853,7 @@
                 "id": "def-public.SimpleSavedObject.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n      namespaces,\n    }",
+                "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n      namespaces,\n      updated_at: updatedAt,\n    }",
                 "description": [],
                 "signature": [
                   "SavedObject",
@@ -1055,7 +1068,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "src/core/public/saved_objects/types.ts",
             "deprecated": false
@@ -1067,10 +1080,25 @@
             "tags": [],
             "label": "alias_target_id",
             "description": [
-              "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
+              "\nThe ID of the object that the legacy URL alias points to.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/core/public/saved_objects/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResolvedSimpleSavedObject.alias_purpose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alias_purpose",
+            "description": [
+              "\nThe reason this alias was created.\n\nCurrently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias\nwas created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
+            ],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "src/core/public/saved_objects/types.ts",
             "deprecated": false
@@ -1609,7 +1637,7 @@
                 "section": "def-public.SavedObjectsBatchResponse",
                 "text": "SavedObjectsBatchResponse"
               },
-              "<unknown>>; }"
+              "<T>>; }"
             ],
             "path": "src/core/public/saved_objects/saved_objects_service.ts",
             "deprecated": false
@@ -1807,7 +1835,7 @@
             "section": "def-public.SavedObjectsBatchResponse",
             "text": "SavedObjectsBatchResponse"
           },
-          "<unknown>>; }"
+          "<T>>; }"
         ],
         "path": "src/core/public/saved_objects/saved_objects_client.ts",
         "deprecated": false,
@@ -8758,7 +8786,7 @@
               "\nGiven a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.\n"
             ],
             "signature": [
-              "(namespace: string, type: string, id: string) => string"
+              "(namespace: string | undefined, type: string, id: string) => string"
             ],
             "path": "src/core/server/saved_objects/serialization/serializer.ts",
             "deprecated": false,
@@ -8773,11 +8801,11 @@
                   "- The namespace of the saved object"
                 ],
                 "signature": [
-                  "string"
+                  "string | undefined"
                 ],
                 "path": "src/core/server/saved_objects/serialization/serializer.ts",
                 "deprecated": false,
-                "isRequired": true
+                "isRequired": false
               },
               {
                 "parentPluginId": "core",
@@ -12551,22 +12579,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.SavedObjectsImportFailure.title",
-            "type": "string",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/saved_objects/import/types.ts",
-            "deprecated": true,
-            "references": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.SavedObjectsImportFailure.meta",
             "type": "Object",
             "tags": [],
@@ -13468,6 +13480,7 @@
             ],
             "path": "src/core/server/saved_objects/migrations/core/migration_logger.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "lens",
@@ -14146,7 +14159,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -14158,10 +14171,25 @@
             "tags": [],
             "label": "alias_target_id",
             "description": [
-              "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
+              "\nThe ID of the object that the legacy URL alias points to.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsResolveResponse.alias_purpose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alias_purpose",
+            "description": [
+              "\nThe reason this alias was created.\n\nCurrently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias\nwas created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
+            ],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -16928,7 +16956,9 @@
         ],
         "signature": [
           "MappingProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }"
+          " & { dynamic?: false | \"strict\" | undefined; properties?: Record<string, ",
+          "MappingProperty",
+          "> | undefined; }"
         ],
         "path": "src/core/server/saved_objects/mappings/types.ts",
         "deprecated": false,

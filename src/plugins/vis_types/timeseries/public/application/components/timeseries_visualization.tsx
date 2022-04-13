@@ -14,8 +14,7 @@ import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
@@ -29,7 +28,7 @@ import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
-import { getCharts, getDataStart } from '../../services';
+import { getCharts, getDataViewsStart } from '../../services';
 
 interface TimeseriesVisualizationProps {
   getConfig: IUiSettingsClient['get'];
@@ -58,8 +57,8 @@ function TimeseriesVisualization({
   }, []);
 
   useEffect(() => {
-    fetchIndexPattern(model.index_pattern, getDataStart().indexPatterns).then(
-      (fetchedIndexPattern) => setIndexPattern(fetchedIndexPattern.indexPattern)
+    fetchIndexPattern(model.index_pattern, getDataViewsStart()).then((fetchedIndexPattern) =>
+      setIndexPattern(fetchedIndexPattern.indexPattern)
     );
   }, [model.index_pattern]);
 

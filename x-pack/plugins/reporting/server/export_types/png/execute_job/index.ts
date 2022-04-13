@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
-import { RunTaskFn, RunTaskFnFactory } from '../../../types';
+import { PngScreenshotOptions, RunTaskFn, RunTaskFnFactory } from '../../../types';
 import { decryptJobHeaders, getFullUrls, generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
@@ -37,7 +37,12 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
             headers,
             urls: [url],
             browserTimezone: job.browserTimezone,
-            layout: job.layout,
+            layout: {
+              ...job.layout,
+              // TODO: We do not do a runtime check for supported layout id types for now. But technically
+              // we should.
+              id: job.layout?.id as PngScreenshotOptions['layout']['id'],
+            },
           });
         }),
         tap(({ buffer }) => stream.write(buffer)),
@@ -51,6 +56,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       );
 
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

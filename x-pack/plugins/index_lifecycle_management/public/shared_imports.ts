@@ -12,7 +12,7 @@ export type {
   FormHook,
   FieldHook,
   FormData,
-  Props as UseFieldProps,
+  UseFieldProps,
   FieldConfig,
   OnFormUpdateArg,
   ValidationFunc,
@@ -48,6 +48,7 @@ export {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
+  useExecutionContext,
 } from '../../../../src/plugins/kibana_react/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';

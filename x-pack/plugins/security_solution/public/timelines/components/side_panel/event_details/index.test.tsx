@@ -137,7 +137,9 @@ describe('event details footer component', () => {
           get: jest.fn().mockReturnValue([]),
         },
         cases: {
-          getCasesContext: () => mockCasesContext,
+          ui: {
+            getCasesContext: () => mockCasesContext,
+          },
         },
       },
     });
@@ -164,5 +166,14 @@ describe('event details footer component', () => {
       </TestProviders>
     );
     expect(wrapper.getByTestId('side-panel-flyout-footer')).toBeTruthy();
+  });
+  test("it doesn't render the take action dropdown when readOnly prop is passed", () => {
+    const wrapper = render(
+      <TestProviders>
+        <EventDetailsPanel {...{ ...defaultProps, isReadOnly: true }} isFlyoutView={true} />
+      </TestProviders>
+    );
+    const element = wrapper.queryByTestId('side-panel-flyout-footer');
+    expect(element).toBeNull();
   });
 });

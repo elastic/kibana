@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type {
   NavigateToLensContext,
   VisualizeEditorLayersContext,
@@ -37,6 +37,11 @@ export const triggerTSVBtoLensConfiguration = async (
     return null;
   }
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
+  // get the active series number
+  let seriesNum = 0;
+  model.series.forEach((series) => {
+    if (!series.hidden) seriesNum++;
+  });
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -53,7 +58,7 @@ export const triggerTSVBtoLensConfiguration = async (
     const timeShift = layer.offset_time;
     // translate to Lens seriesType
     const layerChartType =
-      layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
+      layer.chart_type === 'line' && Number(layer.fill) > 0 ? 'area' : layer.chart_type;
     let chartType = layerChartType;
 
     if (layer.stacked !== 'none' && layer.stacked !== 'percent') {
@@ -64,7 +69,7 @@ export const triggerTSVBtoLensConfiguration = async (
     }
 
     // handle multiple metrics
-    let metricsArray = getSeries(layer.metrics);
+    let metricsArray = getSeries(layer.metrics, seriesNum);
     if (!metricsArray) {
       return null;
     }
@@ -145,6 +150,9 @@ export const triggerTSVBtoLensConfiguration = async (
       timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
+      dropPartialBuckets: layer.override_index_pattern
+        ? layer.series_drop_last_bucket > 0
+        : model.drop_last_bucket > 0,
     };
     layersConfiguration[layerIdx] = layerConfiguration;
   }

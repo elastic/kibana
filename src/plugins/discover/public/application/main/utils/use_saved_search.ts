@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { ISearchSource } from '../../../../../data/common';
+import { ISearchSource } from '../../../../../data/public';
 import { GetStateReturn } from '../services/discover_state';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
@@ -147,7 +147,6 @@ export const useSavedSearch = ({
    * Values that shouldn't trigger re-rendering when changed
    */
   const refs = useRef<{
-    abortController?: AbortController;
     autoRefreshDone?: AutoRefreshDoneFn;
   }>({});
 
@@ -172,6 +171,7 @@ export const useSavedSearch = ({
       searchSource,
       initialFetchStatus,
     });
+    let abortController: AbortController;
 
     const subscription = fetch$.subscribe(async (val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
@@ -179,12 +179,12 @@ export const useSavedSearch = ({
       }
       inspectorAdapters.requests.reset();
 
-      refs.current.abortController?.abort();
-      refs.current.abortController = new AbortController();
+      abortController?.abort();
+      abortController = new AbortController();
       const autoRefreshDone = refs.current.autoRefreshDone;
 
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
-        abortController: refs.current.abortController,
+        abortController,
         appStateContainer: stateContainer.appStateContainer,
         data,
         initialFetchStatus,
@@ -205,7 +205,10 @@ export const useSavedSearch = ({
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      abortController?.abort();
+      subscription.unsubscribe();
+    };
   }, [
     data,
     data.query.queryString,

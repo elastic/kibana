@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Process } from '../../../common/types/process_tree';
 import { useButtonStyles } from './use_button_styles';
 
 export const ChildrenProcessesButton = ({
@@ -17,7 +16,7 @@ export const ChildrenProcessesButton = ({
   onToggle: () => void;
   isExpanded: boolean;
 }) => {
-  const { button, buttonArrow, getExpandedIcon } = useButtonStyles();
+  const { button, buttonArrow, expandedIcon } = useButtonStyles({ isExpanded });
 
   return (
     <EuiButton
@@ -27,69 +26,23 @@ export const ChildrenProcessesButton = ({
       data-test-subj="sessionView:processTreeNodeChildProcessesButton"
     >
       <FormattedMessage id="xpack.sessionView.childProcesses" defaultMessage="Child processes" />
-      <EuiIcon css={buttonArrow} size="s" type={getExpandedIcon(isExpanded)} />
+      <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );
-};
-
-export const SessionLeaderButton = ({
-  process,
-  onClick,
-  showGroupLeadersOnly,
-  childCount,
-}: {
-  process: Process;
-  onClick: () => void;
-  showGroupLeadersOnly: boolean;
-  childCount: number;
-}) => {
-  const groupLeaderCount = process.getChildren(false).length;
-  const sameGroupCount = childCount - groupLeaderCount;
-  const { button, buttonArrow, getExpandedIcon } = useButtonStyles();
-
-  if (sameGroupCount > 0) {
-    return (
-      <EuiToolTip
-        key="samePgidTooltip"
-        position="top"
-        content={
-          <p>
-            <FormattedMessage
-              id="xpack.sessionView.groupLeaderTooltip"
-              defaultMessage="Hide or show other processes in the same 'process group' (pgid) as the session leader. This typically includes forks from bash builtins, auto completions and other shell startup activity."
-            />
-          </p>
-        }
-      >
-        <EuiButton
-          key="group-leaders-only-button"
-          css={button}
-          onClick={onClick}
-          data-test-subj="sessionView:processTreeNodeChildProcessesButton"
-        >
-          <FormattedMessage
-            id="xpack.sessionView.plusCountMore"
-            defaultMessage="+{count} more"
-            values={{
-              count: sameGroupCount,
-            }}
-          />
-          <EuiIcon css={buttonArrow} size="s" type={getExpandedIcon(showGroupLeadersOnly)} />
-        </EuiButton>
-      </EuiToolTip>
-    );
-  }
-  return null;
 };
 
 export const AlertButton = ({
   isExpanded,
   onToggle,
+  alertsCount,
 }: {
   isExpanded: boolean;
   onToggle: () => void;
+  alertsCount: number;
 }) => {
-  const { alertButton, buttonArrow, getExpandedIcon } = useButtonStyles();
+  const { alertButton, alertsCountNumber, buttonArrow, expandedIcon } = useButtonStyles({
+    isExpanded,
+  });
 
   return (
     <EuiButton
@@ -98,8 +51,15 @@ export const AlertButton = ({
       onClick={onToggle}
       data-test-subj="processTreeNodeAlertButton"
     >
-      <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
-      <EuiIcon css={buttonArrow} size="s" type={getExpandedIcon(isExpanded)} />
+      {alertsCount > 1 ? (
+        <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
+      ) : (
+        <FormattedMessage id="xpack.sessionView.alert" defaultMessage="Alert" />
+      )}
+      {alertsCount > 1 && (
+        <span css={alertsCountNumber}>({alertsCount > 99 ? '99+' : alertsCount})</span>
+      )}
+      <EuiIcon css={buttonArrow} size="s" type={expandedIcon} />
     </EuiButton>
   );
 };

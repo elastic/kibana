@@ -15,7 +15,8 @@ import type { Writable } from 'stream';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type {
-  ScreenshotOptions as BaseScreenshotOptions,
+  PngScreenshotOptions as BasePngScreenshotOptions,
+  PdfScreenshotOptions as BasePdfScreenshotOptions,
   ScreenshottingStart,
 } from '../../screenshotting/server';
 import type {
@@ -117,7 +118,11 @@ export interface ReportingRequestHandlerContext {
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
-export interface ScreenshotOptions extends Omit<BaseScreenshotOptions, 'timeouts' | 'urls'> {
+export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
+  urls: UrlOrUrlLocatorTuple[];
+}
+
+export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
 
