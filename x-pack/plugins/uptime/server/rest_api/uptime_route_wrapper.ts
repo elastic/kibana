@@ -47,7 +47,10 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
 
     server.uptimeEsClient = uptimeEsClient;
 
-    if (isInspectorEnabled || server.isDev) {
+    if (
+      (isInspectorEnabled || server.isDev) &&
+      server.config.service?.username !== 'localKibanaIntegrationTestsUser'
+    ) {
       inspectableEsQueriesMap.set(request, []);
     }
 
