@@ -10,6 +10,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { ChangeDataView } from './change_dataview';
@@ -90,7 +91,7 @@ describe('DataView component', () => {
   it('should not render the add runtime field menu if addField is not given', async () => {
     await act(async () => {
       const component = mount(wrapDataViewComponentInContext(props, true));
-      component.find('[data-test-subj="dataview-trigger"]').first().simulate('click');
+      findTestSubject(component, 'dataview-trigger').simulate('click');
       expect(component.find('[data-test-subj="indexPattern-add-field"]').length).toBe(0);
     });
   });
@@ -103,7 +104,7 @@ describe('DataView component', () => {
         false
       )
     );
-    component.find('[data-test-subj="dataview-trigger"]').first().simulate('click');
+    findTestSubject(component, 'dataview-trigger').simulate('click');
     expect(component.find('[data-test-subj="indexPattern-add-field"]').at(0).text()).toContain(
       'Add a field to this data view'
     );
@@ -114,7 +115,7 @@ describe('DataView component', () => {
   it('should not render the add datavuew menu if onDataViewCreated is not given', async () => {
     await act(async () => {
       const component = mount(wrapDataViewComponentInContext(props, true));
-      component.find('[data-test-subj="dataview-trigger"]').first().simulate('click');
+      findTestSubject(component, 'dataview-trigger').simulate('click');
       expect(component.find('[data-test-subj="idataview-create-new"]').length).toBe(0);
     });
   });
@@ -127,7 +128,7 @@ describe('DataView component', () => {
         false
       )
     );
-    component.find('[data-test-subj="dataview-trigger"]').first().simulate('click');
+    findTestSubject(component, 'dataview-trigger').simulate('click');
     expect(component.find('[data-test-subj="dataview-create-new"]').at(0).text()).toContain(
       'Create a data view'
     );

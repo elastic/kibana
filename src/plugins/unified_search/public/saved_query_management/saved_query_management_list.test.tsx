@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiSelectable } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
@@ -144,5 +145,12 @@ describe('Saved query management list component', () => {
         .first()
         .text()
     ).toBe('Replace with selected filter set');
+  });
+
+  it('should render the modal on delete', async () => {
+    const component = mount(wrapSavedQueriesListComponentInContext(props));
+    await flushEffect(component);
+    findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
+    expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
   });
 });
