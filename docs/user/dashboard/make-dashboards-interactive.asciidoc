@@ -196,7 +196,7 @@ image::images/drilldown_on_panel.png[Drilldown on data table that navigates to a
 [[url-drilldowns]]
 ==== Create URL drilldowns
 
-URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown.
+URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown. All panels that you create with the visualization editors support dashboard drilldowns.
 
 [role="screenshot"]
 image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
@@ -209,13 +209,6 @@ The <<url-template-variables,variables>> you use to create a <<url_templating-la
 * *Range selection* &mdash; A range of values in a panel.
 
 For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`.
-
-The panels you create using the following editors support dashboard drilldowns:
-
-* *Lens*
-* *Maps*
-* *TSVB*
-* *Aggregation-based* area chart, data table, heat map, horitizontal bar chart, line chart, pie chart, tag cloud, and vertical bar chart
 
 [float]
 ===== Create a URL drilldown
