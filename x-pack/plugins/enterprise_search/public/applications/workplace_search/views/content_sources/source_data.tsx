@@ -450,7 +450,6 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: false,
     internalConnectorAvailable: true,
   },
-
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
@@ -546,7 +545,6 @@ export const staticSourceData: SourceDataItem[] = [
         FeatureIds.SyncedItems,
       ],
     },
-
     accountContextOnly: false,
     internalConnectorAvailable: true,
     externalConnectorAvailable: true,
