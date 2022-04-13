@@ -74,7 +74,7 @@ export const createAppContextStartContractMock = (
 };
 
 export const createFleetRequestHandlerContextMock = (): jest.Mocked<
-  FleetRequestHandlerContext['fleet']
+  Awaited<FleetRequestHandlerContext['fleet']>
 > => {
   return {
     authz: createFleetAuthzMock(),
