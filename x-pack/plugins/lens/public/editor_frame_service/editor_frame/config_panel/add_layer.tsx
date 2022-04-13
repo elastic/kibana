@@ -108,13 +108,13 @@ export function AddLayerButton({
     >
       <EuiContextMenu
         initialPanelId={0}
-        className="lnsConfigPanel__addLayerMenu"
         panels={[
           {
             id: 0,
             title: i18n.translate('xpack.lens.configPanel.selectLayerType', {
               defaultMessage: 'Select layer type',
             }),
+            width: 300,
             items: supportedLayers.map(({ type, label, icon, disabled, toolTipContent }) => {
               return {
                 toolTipContent,
