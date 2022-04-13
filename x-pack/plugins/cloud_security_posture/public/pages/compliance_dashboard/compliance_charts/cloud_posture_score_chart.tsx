@@ -25,6 +25,7 @@ import { statusColors } from '../../../common/constants';
 import type { PostureTrend, Stats } from '../../../../common/types';
 import * as TEXT from '../translations';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
+import {RULE_FAILED, RULE_PASSED} from "../../../../common/constants";
 
 interface CloudPostureScoreChartProps {
   trend: PostureTrend[];
@@ -41,8 +42,8 @@ const ScoreChart = ({
   partitionOnElementClick,
 }: Omit<CloudPostureScoreChartProps, 'trend'>) => {
   const data = [
-    { label: TEXT.PASSED, value: totalPassed },
-    { label: TEXT.FAILED, value: totalFailed },
+    { label: RULE_PASSED, value: totalPassed },
+    { label: RULE_FAILED, value: totalFailed },
   ];
 
   return (
@@ -69,7 +70,7 @@ const ScoreChart = ({
             groupByRollup: (d: { label: string }) => d.label,
             shape: {
               fillColor: (d, index) =>
-                d.dataName === 'Passed' ? statusColors.success : statusColors.danger,
+                d.dataName === RULE_PASSED ? statusColors.success : statusColors.danger,
             },
           },
         ]}
