@@ -33,11 +33,11 @@ import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mo
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
-import { usePostComment } from '../../containers/use_post_comment';
+import { useBulkCreateAttachments } from '../../containers/use_bulk_create_attachments';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 
-jest.mock('../../containers/use_post_comment');
+jest.mock('../../containers/use_bulk_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
@@ -61,7 +61,7 @@ const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
-const usePostCommentMock = usePostComment as jest.Mock;
+const useBulkCreateAttachmentsMock = useBulkCreateAttachments as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -88,7 +88,10 @@ describe('AllCasesListGeneric', () => {
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
-  usePostCommentMock.mockReturnValue({ status: { isLoading: false }, postComment: jest.fn() });
+  useBulkCreateAttachmentsMock.mockReturnValue({
+    status: { isLoading: false },
+    bulkCreateAttachments: jest.fn(),
+  });
 
   const defaultGetCases = {
     ...useGetCasesMockState,

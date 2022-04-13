@@ -14,17 +14,17 @@ import { TestProviders } from '../../common/mock';
 
 import { CommentRequest, CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { usePostComment } from '../../containers/use_post_comment';
+import { useBulkCreateAttachments } from '../../containers/use_bulk_create_attachments';
 import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 
-jest.mock('../../containers/use_post_comment');
+jest.mock('../../containers/use_bulk_create_attachments');
 
-const usePostCommentMock = usePostComment as jest.Mock;
+const useBulkCreateAttachmentsMock = useBulkCreateAttachments as jest.Mock;
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
-const postComment = jest.fn();
+const bulkCreateAttachments = jest.fn();
 
 const addCommentProps: AddCommentProps = {
   id: 'newComment',
@@ -36,10 +36,10 @@ const addCommentProps: AddCommentProps = {
   statusActionButton: null,
 };
 
-const defaultPostComment = {
+const defaultResponse = {
   isLoading: false,
   isError: false,
-  postComment,
+  bulkCreateAttachments,
 };
 
 const sampleData: CommentRequest = {
@@ -51,7 +51,7 @@ const sampleData: CommentRequest = {
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    usePostCommentMock.mockImplementation(() => defaultPostComment);
+    useBulkCreateAttachmentsMock.mockImplementation(() => defaultResponse);
   });
 
   it('should post comment on submit click', async () => {
@@ -72,7 +72,7 @@ describe('AddComment ', () => {
     wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(postComment).toBeCalledWith({
+      expect(bulkCreateAttachments).toBeCalledWith({
         caseId: addCommentProps.caseId,
         data: sampleData,
         updateCase: onCommentPosted,
@@ -82,7 +82,10 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
+    useBulkCreateAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
     const wrapper = mount(
       <TestProviders>
         <AddComment {...{ ...addCommentProps, showLoading: true }} />
@@ -96,7 +99,10 @@ describe('AddComment ', () => {
   });
 
   it('should disable submit button when isLoading is true', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
+    useBulkCreateAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
     const wrapper = mount(
       <TestProviders>
         <AddComment {...addCommentProps} />
@@ -109,7 +115,10 @@ describe('AddComment ', () => {
   });
 
   it('should hide the component when the user does not have crud permissions', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
+    useBulkCreateAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
     const wrapper = mount(
       <TestProviders>
         <AddComment {...{ ...addCommentProps, userCanCrud: false }} />

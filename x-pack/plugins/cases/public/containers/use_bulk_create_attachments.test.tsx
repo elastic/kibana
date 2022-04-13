@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { CommentType } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { usePostComment, UsePostComment } from './use_post_comment';
+import { useBulkCreateAttachments, UseBulkCreateAttachments } from './use_bulk_create_attachments';
 import { basicCaseId } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
@@ -19,7 +19,7 @@ jest.mock('../common/lib/kibana');
 
 const useToastMock = useToasts as jest.Mock;
 
-describe('usePostComment', () => {
+describe('useBulkCreateAttachments', () => {
   const toastErrorMock = jest.fn();
   useToastMock.mockReturnValue({
     addError: toastErrorMock,
@@ -39,28 +39,28 @@ describe('usePostComment', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        postComment: result.current.postComment,
+        bulkCreateAttachments: result.current.bulkCreateAttachments,
       });
     });
   });
 
-  it('calls postComment with correct arguments - case', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'postComment');
+  it('calls bulkCreateAttachments with correct arguments - case', async () => {
+    const spyOnPostCase = jest.spyOn(api, 'bulkCreateAttachments');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
       );
       await waitForNextUpdate();
 
-      result.current.postComment({
+      result.current.bulkCreateAttachments({
         caseId: basicCaseId,
         data: samplePost,
         updateCase: updateCaseCallback,
@@ -73,11 +73,11 @@ describe('usePostComment', () => {
 
   it('post case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
       );
       await waitForNextUpdate();
-      result.current.postComment({
+      result.current.bulkCreateAttachments({
         caseId: basicCaseId,
         data: samplePost,
         updateCase: updateCaseCallback,
@@ -86,18 +86,18 @@ describe('usePostComment', () => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        postComment: result.current.postComment,
+        bulkCreateAttachments: result.current.bulkCreateAttachments,
       });
     });
   });
 
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
       );
       await waitForNextUpdate();
-      result.current.postComment({
+      result.current.bulkCreateAttachments({
         caseId: basicCaseId,
         data: samplePost,
         updateCase: updateCaseCallback,
@@ -108,17 +108,17 @@ describe('usePostComment', () => {
   });
 
   it('set isError true and shows a toast error when an error occurs', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'postComment');
+    const spyOnPostCase = jest.spyOn(api, 'bulkCreateAttachments');
     spyOnPostCase.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
       );
       await waitForNextUpdate();
-      result.current.postComment({
+      result.current.bulkCreateAttachments({
         caseId: basicCaseId,
         data: samplePost,
         updateCase: updateCaseCallback,
@@ -127,7 +127,7 @@ describe('usePostComment', () => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: true,
-        postComment: result.current.postComment,
+        bulkCreateAttachments: result.current.bulkCreateAttachments,
       });
 
       expect(toastErrorMock).toHaveBeenCalledWith(expect.any(Error), {
@@ -137,18 +137,18 @@ describe('usePostComment', () => {
   });
 
   it('throws an error when invoked with throwOnError true', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'postComment');
+    const spyOnPostCase = jest.spyOn(api, 'bulkCreateAttachments');
     spyOnPostCase.mockImplementation(() => {
       throw new Error('This is not possible');
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
       );
       await waitForNextUpdate();
       async function test() {
-        await result.current.postComment({
+        await result.current.bulkCreateAttachments({
           caseId: basicCaseId,
           data: samplePost,
           updateCase: updateCaseCallback,

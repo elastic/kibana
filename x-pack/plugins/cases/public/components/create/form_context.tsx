@@ -15,7 +15,10 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
-import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
+import {
+  UseBulkCreateAttachments,
+  useBulkCreateAttachments,
+} from '../../containers/use_bulk_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
@@ -32,7 +35,10 @@ const initialCaseValue: FormProps = {
 };
 
 interface Props {
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
+  afterCaseCreated?: (
+    theCase: Case,
+    bulkCreateAttachments: UseBulkCreateAttachments['bulkCreateAttachments']
+  ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachments;
@@ -48,7 +54,7 @@ export const FormContext: React.FC<Props> = ({
   const { owner } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
-  const { postComment } = usePostComment();
+  const { bulkCreateAttachments } = useBulkCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
 
   const submitCase = useCallback(
@@ -82,7 +88,7 @@ export const FormContext: React.FC<Props> = ({
           // once the API is updated we should use bulk post comment #124814
           // this operation is intentionally made in sequence
           for (const attachment of attachments) {
-            await postComment({
+            await bulkCreateAttachments({
               caseId: updatedCase.id,
               data: attachment,
             });
@@ -90,7 +96,7 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (afterCaseCreated && updatedCase) {
-          await afterCaseCreated(updatedCase, postComment);
+          await afterCaseCreated(updatedCase, bulkCreateAttachments);
         }
 
         if (updatedCase?.id && connectorToUpdate.id !== 'none') {
@@ -113,7 +119,7 @@ export const FormContext: React.FC<Props> = ({
       afterCaseCreated,
       onSuccess,
       attachments,
-      postComment,
+      bulkCreateAttachments,
       pushCaseToExternalService,
     ]
   );

@@ -14,7 +14,7 @@ import { CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
-import { usePostComment } from '../../containers/use_post_comment';
+import { useBulkCreateAttachments } from '../../containers/use_bulk_create_attachments';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -45,7 +45,7 @@ import { connectorsMock } from '../../common/mock/connectors';
 const sampleId = 'case-id';
 
 jest.mock('../../containers/use_post_case');
-jest.mock('../../containers/use_post_comment');
+jest.mock('../../containers/use_bulk_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
@@ -62,7 +62,7 @@ jest.mock('../../common/lib/kibana');
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
-const usePostCommentMock = usePostComment as jest.Mock;
+const useBulkCreateAttachmentsMock = useBulkCreateAttachments as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -132,7 +132,7 @@ describe('Create case', () => {
   const fetchTags = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
-  const postComment = jest.fn();
+  const bulkCreateAttachments = jest.fn();
   let onChoicesSuccess: (values: Choice[]) => void;
   let mockedContext: AppMockRenderer;
 
@@ -142,7 +142,7 @@ describe('Create case', () => {
       ...sampleData,
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
-    usePostCommentMock.mockImplementation(() => ({ postComment }));
+    useBulkCreateAttachmentsMock.mockImplementation(() => ({ bulkCreateAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
@@ -733,12 +733,12 @@ describe('Create case', () => {
           id: sampleId,
           ...sampleData,
         },
-        postComment
+        bulkCreateAttachments
       );
     });
   });
 
-  it('should call `postComment` with the attachments after the case is created', async () => {
+  it('should call `bulkCreateAttachments` with the attachments after the case is created', async () => {
     useConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       connectors: connectorsMock,
@@ -778,8 +778,8 @@ describe('Create case', () => {
     await act(async () => {
       userEvent.click(wrapper.getByTestId('create-case-submit'));
     });
-    expect(postComment).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[0] });
-    expect(postComment).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[1] });
+    expect(bulkCreateAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[0] });
+    expect(bulkCreateAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[1] });
   });
 
   it(`should call callbacks in correct order`, async () => {
@@ -826,14 +826,14 @@ describe('Create case', () => {
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
-      expect(postComment).toHaveBeenCalled();
+      expect(bulkCreateAttachments).toHaveBeenCalled();
       expect(afterCaseCreated).toHaveBeenCalled();
       expect(pushCaseToExternalService).toHaveBeenCalled();
       expect(onFormSubmitSuccess).toHaveBeenCalled();
     });
 
     const postCaseOrder = postCase.mock.invocationCallOrder[0];
-    const postCommentOrder = postComment.mock.invocationCallOrder[0];
+    const postCommentOrder = bulkCreateAttachments.mock.invocationCallOrder[0];
     const afterCaseOrder = afterCaseCreated.mock.invocationCallOrder[0];
     const pushCaseToExternalServiceOrder = pushCaseToExternalService.mock.invocationCallOrder[0];
     const onFormSubmitSuccessOrder = onFormSubmitSuccess.mock.invocationCallOrder[0];

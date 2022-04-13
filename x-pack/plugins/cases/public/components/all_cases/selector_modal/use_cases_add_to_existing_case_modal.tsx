@@ -14,7 +14,7 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { CaseAttachments } from '../../../types';
-import { usePostComment } from '../../../containers/use_post_comment';
+import { useBulkCreateAttachments } from '../../../containers/use_bulk_create_attachments';
 
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
@@ -39,7 +39,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
 
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
-  const { postComment } = usePostComment();
+  const { bulkCreateAttachments } = useBulkCreateAttachments();
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -67,7 +67,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
         const attachments = props.attachments;
         if (attachments !== undefined && attachments.length > 0) {
           for (const attachment of attachments) {
-            await postComment({
+            await bulkCreateAttachments({
               caseId: theCase.id,
               data: attachment,
               throwOnError: true,
@@ -82,14 +82,14 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
         }
       } catch (error) {
         // error toast is handled
-        // inside the postComment method
+        // inside the bulkCreateAttachments method
       }
 
       if (props.onRowClick) {
         props.onRowClick(theCase);
       }
     },
-    [casesToasts, closeModal, createNewCaseFlyout, postComment, props]
+    [casesToasts, closeModal, createNewCaseFlyout, bulkCreateAttachments, props]
   );
 
   const openModal = useCallback(() => {

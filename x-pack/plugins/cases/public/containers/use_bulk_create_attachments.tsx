@@ -47,11 +47,11 @@ export interface PostComment {
   updateCase?: (newCase: Case) => void;
   throwOnError?: boolean;
 }
-export interface UsePostComment extends NewCommentState {
-  postComment: (args: PostComment) => Promise<void>;
+export interface UseBulkCreateAttachments extends NewCommentState {
+  bulkCreateAttachments: (args: PostComment) => Promise<void>;
 }
 
-export const usePostComment = (): UsePostComment => {
+export const useBulkCreateAttachments = (): UseBulkCreateAttachments => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -60,7 +60,7 @@ export const usePostComment = (): UsePostComment => {
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
-  const postMyComment = useCallback(
+  const fetch = useCallback(
     async ({ caseId, data, updateCase, throwOnError }: PostComment) => {
       const attachments = Array.isArray(data) ? data : [data];
       try {
@@ -107,5 +107,5 @@ export const usePostComment = (): UsePostComment => {
     []
   );
 
-  return { ...state, postComment: postMyComment };
+  return { ...state, bulkCreateAttachments: fetch };
 };
