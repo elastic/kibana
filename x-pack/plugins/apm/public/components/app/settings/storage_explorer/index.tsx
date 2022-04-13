@@ -227,7 +227,7 @@ export function StorageExplorer() {
           id="treemap"
           data={items}
           layout={PartitionLayout.treemap}
-          valueAccessor={(d) => parseInt(d.size, 10)}
+          valueAccessor={(d) => d.size}
           valueGetter="percent"
           topGroove={0}
           layers={[

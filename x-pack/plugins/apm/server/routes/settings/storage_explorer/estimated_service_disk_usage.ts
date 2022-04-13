@@ -18,7 +18,7 @@ export function mergeServiceStats({
   totalIndexDiskUsage,
 }: {
   serviceStats: Array<
-    Omit<StorageExplorerItem, 'size'> & { serviceDocs: number }
+    Omit<StorageExplorerItem, 'size' | 'sampling'> & { serviceDocs: number }
   >;
   agentConfigs: AgentConfiguration[];
   totalDocs: number;

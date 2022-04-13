@@ -7,7 +7,6 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '../../../../common/processor_event';
-// import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
@@ -16,7 +15,12 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { listConfigurations } from '../agent_configuration/list_configurations';
+
+type ProcessorEventType =
+  | ProcessorEvent.transaction
+  | ProcessorEvent.span
+  | ProcessorEvent.error
+  | ProcessorEvent.metric;
 
 export async function getServiceStorageStats({
   searchAggregatedTransactions,
@@ -85,12 +89,20 @@ export async function getServiceStorageStats({
       ({ key }) => key as string
     );
     const docsCount = bucket.processor_event.buckets.reduce(
-      (acc: Record<string, number>, { key, doc_count: docCount }) => {
-        const bucketKey = key as string;
+      (
+        acc: Record<ProcessorEventType, number>,
+        { key, doc_count: docCount }
+      ) => {
+        const bucketKey = key as ProcessorEventType;
         acc[bucketKey] = docCount;
         return acc;
       },
-      {}
+      {
+        [ProcessorEvent.transaction]: 0,
+        [ProcessorEvent.span]: 0,
+        [ProcessorEvent.metric]: 0,
+        [ProcessorEvent.error]: 0,
+      }
     );
 
     return {
@@ -98,9 +110,7 @@ export async function getServiceStorageStats({
       serviceDocs,
       environments,
       ...docsCount,
-      size: 0,
       calls: 0,
-      sampling: 0,
     };
   });
 

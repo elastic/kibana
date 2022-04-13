@@ -8,11 +8,11 @@
 export interface StorageExplorerItem {
   service: string;
   environments: string[];
-  size: string;
-  calls: string;
+  size: number;
+  calls: number;
   sampling: string;
-  transaction: string;
-  span: string;
-  error: string;
-  metric: string;
+  transaction: number;
+  span: number;
+  error: number;
+  metric: number;
 }
