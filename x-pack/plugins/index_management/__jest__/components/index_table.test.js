@@ -19,7 +19,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl, stubWebWorker } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import { init as initHttpRequests } from '../client_integration/helpers/http_requests';
 
-import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
+import { BASE_PATH } from '../../common/constants';
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
 import { loadIndicesSuccess } from '../../public/application/store/actions';
@@ -186,7 +186,6 @@ describe('index table', () => {
     httpRequestsMockHelpers.setLoadIndicesResponse(indices);
     httpRequestsMockHelpers.setReloadIndicesResponse(indices);
   });
-
 
   test('should change pages when a pagination link is clicked on', async () => {
     const rendered = mountWithIntl(component);
