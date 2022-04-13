@@ -10,46 +10,19 @@ import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server'
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
-
-interface VisualizationPanel extends SavedDashboardPanel730ToLatest {
-  embeddableConfig: {
-    savedVis?: {
-      type?: string;
-    };
-  };
-}
-
-interface LensPanel extends SavedDashboardPanel730ToLatest {
-  embeddableConfig: {
-    attributes?: {
-      visualizationType?: string;
-      state?: {
-        visualization?: {
-          preferredSeriesType?: string;
-        };
-        datasourceStates?: {
-          indexpattern?: {
-            layers: Record<
-              string,
-              {
-                columns: Record<string, { operationType: string }>;
-              }
-            >;
-          };
-        };
-      };
-    };
-  };
-}
-
 export interface DashboardCollectorData {
   panels: number;
-  panelsByValue: number;
-  lensByValue: {
-    [key: string]: number;
+  panelsByValue: {
+    total: number;
+    by_type: {
+      [key: string]: number;
+    };
   };
-  visualizationByValue: {
-    [key: string]: number;
+  panelsByReference: {
+    total: number;
+    by_type: {
+      [key: string]: number;
+    };
   };
   embeddable: {
     [key: string]: number;
@@ -58,9 +31,14 @@ export interface DashboardCollectorData {
 
 export const getEmptyTelemetryData = (): DashboardCollectorData => ({
   panels: 0,
-  panelsByValue: 0,
-  lensByValue: {},
-  visualizationByValue: {},
+  panelsByValue: {
+    total: 0,
+    by_type: {},
+  },
+  panelsByReference: {
+    total: 0,
+    by_type: {},
+  },
   embeddable: {},
 });
 
@@ -69,77 +47,26 @@ type DashboardCollectorFunction = (
   collectorData: DashboardCollectorData
 ) => void;
 
-export const collectDashboardInfo: DashboardCollectorFunction = (panels, collectorData) => {
-  collectorData.panels += panels.length;
-  collectorData.panelsByValue += panels.filter((panel) => panel.id === undefined).length;
-};
-
-export const collectByValueVisualizationInfo: DashboardCollectorFunction = (
-  panels,
-  collectorData
-) => {
-  const byValueVisualizations = panels.filter(
-    (panel) => panel.id === undefined && panel.type === 'visualization'
-  );
-
-  for (const panel of byValueVisualizations) {
-    const visPanel = panel as VisualizationPanel;
-
-    if (
-      visPanel.embeddableConfig.savedVis !== undefined &&
-      visPanel.embeddableConfig.savedVis.type !== undefined
-    ) {
-      const type = visPanel.embeddableConfig.savedVis.type;
-
-      if (!collectorData.visualizationByValue[type]) {
-        collectorData.visualizationByValue[type] = 0;
-      }
-
-      collectorData.visualizationByValue[type] = collectorData.visualizationByValue[type] + 1;
+export const collectPanelsByType: DashboardCollectorFunction = (panels, collectorData) => {
+  let saveMethodKey: keyof DashboardCollectorData;
+  for (const panel of panels) {
+    const type = panel.type;
+    if (panel.id === undefined) {
+      saveMethodKey = 'panelsByValue';
+    } else {
+      saveMethodKey = 'panelsByReference';
     }
-  }
-};
-
-export const collectByValueLensInfo: DashboardCollectorFunction = (panels, collectorData) => {
-  const byValueLens = panels.filter((panel) => panel.id === undefined && panel.type === 'lens');
-
-  for (const panel of byValueLens) {
-    const lensPanel = panel as LensPanel;
-
-    if (lensPanel.embeddableConfig.attributes?.visualizationType !== undefined) {
-      let type = lensPanel.embeddableConfig.attributes.visualizationType;
-
-      if (type === 'lnsXY') {
-        type =
-          lensPanel.embeddableConfig.attributes.state?.visualization?.preferredSeriesType || type;
-      }
-
-      if (!collectorData.lensByValue[type]) {
-        collectorData.lensByValue[type] = 0;
-      }
-
-      collectorData.lensByValue[type] = collectorData.lensByValue[type] + 1;
-
-      const hasFormula = Object.values(
-        lensPanel.embeddableConfig.attributes.state?.datasourceStates?.indexpattern?.layers || {}
-      ).some((layer) =>
-        Object.values(layer.columns).some((column) => column.operationType === 'formula')
-      );
-
-      if (hasFormula && !collectorData.lensByValue.formula) {
-        collectorData.lensByValue.formula = 0;
-      }
-      if (hasFormula) {
-        collectorData.lensByValue.formula++;
-      }
+    if (!collectorData[saveMethodKey].by_type[type]) {
+      collectorData[saveMethodKey].by_type[type] = 0;
     }
+    collectorData[saveMethodKey].total += 1;
+    collectorData[saveMethodKey].by_type[type] += 1;
   }
 };
 
 export const collectForPanels: DashboardCollectorFunction = (panels, collectorData) => {
-  collectDashboardInfo(panels, collectorData);
-  collectByValueVisualizationInfo(panels, collectorData);
-  collectByValueLensInfo(panels, collectorData);
+  collectorData.panels += panels.length;
+  collectPanelsByType(panels, collectorData);
 };
 
 export const collectEmbeddableData = (

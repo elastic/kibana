@@ -6,24 +6,35 @@
           "type": "long"
         },
         "panelsByValue": {
-          "type": "long"
-        },
-        "lensByValue": {
           "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for Lens visualizations, which are added to dashboard by \"value\"."
+            "total": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics for different panel types which are added to dashboard by \"value\"."
+                  }
+                }
               }
             }
           }
         },
-        "visualizationByValue": {
+        "panelsByReference": {
           "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for visualizations, which are added to dashboard by \"value\"."
+            "total": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Collection of telemetry metrics for different panel types which are added to dashboard by \"reference\"."
+                  }
+                }
               }
             }
           }

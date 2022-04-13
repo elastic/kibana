@@ -23,22 +23,31 @@ export function registerDashboardUsageCollector(
     },
     schema: {
       panels: { type: 'long' },
-      panelsByValue: { type: 'long' },
-      lensByValue: {
-        DYNAMIC_KEY: {
+      panelsByValue: {
+        total: {
           type: 'long',
-          _meta: {
-            description:
-              'Collection of telemetry metrics for Lens visualizations, which are added to dashboard by "value".',
+        },
+        by_type: {
+          DYNAMIC_KEY: {
+            type: 'long',
+            _meta: {
+              description:
+                'Collection of telemetry metrics for different panel types which are added to dashboard by "value".',
+            },
           },
         },
       },
-      visualizationByValue: {
-        DYNAMIC_KEY: {
+      panelsByReference: {
+        total: {
           type: 'long',
-          _meta: {
-            description:
-              'Collection of telemetry metrics for visualizations, which are added to dashboard by "value".',
+        },
+        by_type: {
+          DYNAMIC_KEY: {
+            type: 'long',
+            _meta: {
+              description:
+                'Collection of telemetry metrics for different panel types which are added to dashboard by "reference".',
+            },
           },
         },
       },
