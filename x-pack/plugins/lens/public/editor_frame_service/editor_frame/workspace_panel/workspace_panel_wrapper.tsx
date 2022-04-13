@@ -110,6 +110,7 @@ export function WorkspacePanelWrapper({
           className={classNames('lnsWorkspacePanelWrapper__toolbar', {
             'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
           })}
+          responsive={false}
           wrap={true}
         >
           {!isFullscreen && (
@@ -153,11 +154,15 @@ export function WorkspacePanelWrapper({
                   <EuiButton
                     disabled={autoApplyEnabled || changesApplied}
                     fill
-                    className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+                    className={
+                      'lnsWorkspacePanelWrapper__applyButton ' +
+                      DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS
+                    }
                     iconType="checkInCircleFilled"
                     onClick={() => dispatchLens(applyChanges())}
                     size="m"
                     data-test-subj="lnsApplyChanges__toolbar"
+                    minWidth="auto"
                   >
                     <FormattedMessage
                       id="xpack.lens.editorFrame.applyChangesLabel"

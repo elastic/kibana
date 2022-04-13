@@ -99,6 +99,12 @@
   // }
 }
 
+.lnsWorkspacePanelWrapper__applyButton .euiButton__text {
+  @include euiBreakpoint('xs', 's', 'm') {
+    @include euiScreenReaderOnly;
+  }
+}
+
 .lnsWorkspacePanel__promptIllustration {
   overflow: visible; // Shows arrow animation when it gets out of bounds
   margin-top: 0;

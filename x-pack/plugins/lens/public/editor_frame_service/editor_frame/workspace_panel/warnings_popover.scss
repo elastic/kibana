@@ -1,5 +1,7 @@
-.lnsWorkspaceWarning__button {
-  color: $euiColorWarningText;
+.lnsWorkspaceWarning__buttonText {
+  @include euiBreakpoint('xs', 's', 'm') {
+    @include euiScreenReaderOnly;
+  }
 }
 
 .lnsWorkspaceWarningList {
