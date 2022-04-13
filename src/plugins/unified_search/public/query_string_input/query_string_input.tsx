@@ -45,7 +45,7 @@ import { onRaf } from '../utils';
 import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {
-  dataViews: Array<DataView | string>;
+  indexPatterns: Array<DataView | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -160,10 +160,10 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
   };
 
   private fetchDataViews = debounce(async () => {
-    const stringPatterns = this.props.dataViews.filter(
+    const stringPatterns = this.props.indexPatterns.filter(
       (dataView) => typeof dataView === 'string'
     ) as string[];
-    const objectPatterns = this.props.dataViews.filter(
+    const objectPatterns = this.props.indexPatterns.filter(
       (dataView) => typeof dataView !== 'string'
     ) as DataView[];
 
@@ -619,7 +619,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
     this.initPersistedLog();
 
-    if (!isEqual(prevProps.dataViews, this.props.dataViews)) {
+    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchDataViews();
     } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();

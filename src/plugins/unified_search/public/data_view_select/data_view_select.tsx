@@ -21,7 +21,7 @@ export type DataViewSelectProps = Required<
   'placeholder'
 > & {
   onChange: (dataViewId?: string) => void;
-  dataViewId: string;
+  indexPatternId: string;
   onNoDataViews?: () => void;
 };
 
@@ -61,12 +61,12 @@ export default class DataViewSelect extends Component<DataViewSelectInternalProp
   componentDidMount() {
     this.isMounted = true;
     this.fetchOptions('');
-    this.fetchSelectedDataView(this.props.dataViewId);
+    this.fetchSelectedDataView(this.props.indexPatternId);
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: DataViewSelectInternalProps) {
-    if (nextProps.dataViewId !== this.props.dataViewId) {
-      this.fetchSelectedDataView(nextProps.dataViewId);
+    if (nextProps.indexPatternId !== this.props.indexPatternId) {
+      this.fetchSelectedDataView(nextProps.indexPatternId);
     }
   }
 
@@ -140,7 +140,7 @@ export default class DataViewSelect extends Component<DataViewSelectInternalProp
   };
 
   render() {
-    const { onChange, dataViewId, placeholder, onNoDataViews, dataViewService, ...rest } =
+    const { onChange, indexPatternId, placeholder, onNoDataViews, dataViewService, ...rest } =
       this.props;
 
     return (
