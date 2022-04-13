@@ -78,6 +78,7 @@ export const AdvancedSettings: FC<Props> = ({
         onIndexNameValidationStart={() => {}}
         onIndexNameValidationEnd={() => {}}
         data-test-subj="dataVisualizerFileIndexNameInput"
+        disabled={initialized === true}
       />
 
       <EuiSpacer size="m" />
