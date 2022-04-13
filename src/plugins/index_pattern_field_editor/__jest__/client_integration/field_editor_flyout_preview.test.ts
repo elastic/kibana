@@ -342,13 +342,18 @@ describe('Field editor Preview panel', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [scriptEmitResponse] });
 
       const {
-        actions: { toggleFormRow, fields, waitForUpdates, getRenderedFieldsPreview },
+        actions: {
+          toggleFormRow,
+          fields,
+          getRenderedFieldsPreview,
+          waitForDocumentsAndPreviewUpdate,
+        },
       } = testBed;
 
       await toggleFormRow('value');
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
-      await waitForUpdates(); // Run validations
+      await waitForDocumentsAndPreviewUpdate();
 
       // Make sure the payload sent is correct
       const firstCall = server.post.mock.calls[0] as Array<{ body: any }>;
