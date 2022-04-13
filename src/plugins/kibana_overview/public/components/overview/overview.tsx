@@ -98,7 +98,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           defaultMessage:
             'Use Elastic Agent or Beats to collect data and build out Analytics solutions.',
         }),
-        'data-test-subj': "kbnOverviewAddIntegrations"
+        'data-test-subj': 'kbnOverviewAddIntegrations',
       },
     },
     docsLink: docLinks.links.kibana.guide,
