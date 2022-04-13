@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { enrichFilterWithAlertTypes } from './enrich_filter_with_alert_types'
+import { enrichFilterWithAlertTypes } from './enrich_filter_with_alert_types';
 
 import { BulkEditRulesOptions } from './types';
 
@@ -21,7 +21,6 @@ export const bulkEditRules = ({
     ids,
     operations,
     paramsModifier,
-    filter: enrichFilterWithAlertTypes(filter, isRuleRegistryEnabled),
+    ...(filter ? { filter: enrichFilterWithAlertTypes(filter, isRuleRegistryEnabled) } : {}),
   });
 };
-
