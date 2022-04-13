@@ -26,7 +26,7 @@ import * as utils from '../utils';
 
 // @ts-ignore
 import { populateContext } from './engine';
-import type { AutoCompleteContext, ConditionalTemplateType, ResultTerm } from './types';
+import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
 // @ts-ignore
 import { URL_PATH_END_MARKER } from './components/index';
 
@@ -349,42 +349,61 @@ export default function ({
     });
   }
 
-  function hasOneOf(value: unknown): value is { __one_of: ConditionalTemplateType[] } {
-    return typeof value === 'object' && value !== null && '__one_of' in value;
-  }
-
+  /**
+   * Get a different set of templates based on the value configured in the request.
+   * For example, when creating a snapshot repository of different types (`fs`, `url` etc),
+   * different properties are inserted in the textarea based on the type.
+   * E.g. https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides/snapshot.create_repository.json
+   */
   function getConditionalTemplate(
     name: string,
     autocompleteRules: Record<string, unknown> | null | undefined
   ) {
-    if (autocompleteRules && autocompleteRules[name]) {
-      const currentLineNumber = editor.getCurrentPosition().lineNumber;
-      const value = autocompleteRules[name];
+    const obj = autocompleteRules && autocompleteRules[name];
 
-      if (hasOneOf(value)) {
-        const startLine = getStartLineNumber(currentLineNumber, value.__one_of);
+    if (obj) {
+      const currentLineNumber = editor.getCurrentPosition().lineNumber;
+
+      if (hasOneOfIn(obj)) {
+        // Get the line number of value that should provide different templates based on that
+        const startLine = getStartLineNumber(currentLineNumber, obj.__one_of);
+        // Join line values from start to current line
         const lines = editor.getLines(startLine, currentLineNumber).join('\n');
-        const match = matchCondition(lines, value.__one_of);
-        if (match && match.__template) {
-          return match.__template;
+        // Get the correct template by comparing the autocomplete rules against the lines
+        const prop = getProperty(lines, obj.__one_of);
+        if (prop && prop.__template) {
+          return prop.__template;
         }
       }
     }
   }
 
-  function getStartLineNumber(currentLine: number, rules: ConditionalTemplateType[]): number {
+  /**
+   * Check if object has a property of '__one_of'
+   */
+  function hasOneOfIn(value: unknown): value is { __one_of: DataAutoCompleteRulesOneOf[] } {
+    return typeof value === 'object' && value !== null && '__one_of' in value;
+  }
+
+  /**
+   * Get the start line of value that matches the autocomplete rules condition
+   */
+  function getStartLineNumber(currentLine: number, rules: DataAutoCompleteRulesOneOf[]): number {
     if (currentLine === 1) {
       return currentLine;
     }
     const value = editor.getLineValue(currentLine);
-    const match = matchCondition(value, rules);
-    if (match) {
+    const prop = getProperty(value, rules);
+    if (prop) {
       return currentLine;
     }
     return getStartLineNumber(currentLine - 1, rules);
   }
 
-  function matchCondition(condition: string, rules: ConditionalTemplateType[]) {
+  /**
+   * Get the matching property based on the given condition
+   */
+  function getProperty(condition: string, rules: DataAutoCompleteRulesOneOf[]) {
     return rules.find((rule) => {
       if (rule.__condition && rule.__condition.lines_regex) {
         return new RegExp(rule.__condition.lines_regex, 'm').test(condition);
@@ -403,7 +422,6 @@ export default function ({
 
     if (context?.endpoint && term.value) {
       const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
-      // If term contains conditional definitions, it returns the correct template based on the value configured in the request.
       const template = getConditionalTemplate(term.value, autocompleteRules);
       if (template) {
         term.template = template;

@@ -15,7 +15,7 @@ export interface ResultTerm {
   value?: string;
 }
 
-export interface ConditionalTemplateType {
+export interface DataAutoCompleteRulesOneOf {
   __condition?: {
     lines_regex: string;
   };
