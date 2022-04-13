@@ -47,9 +47,9 @@ export const deleteRulesRoute = (
       try {
         const { id, rule_id: ruleId } = request.query;
 
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId });
         const migratedRule = await legacyMigrate({

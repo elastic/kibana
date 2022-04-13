@@ -60,9 +60,14 @@ export const deleteRulesBulkRoute = (
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);
-    const rulesClient = context.alerting.getRulesClient();
-    const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-    const savedObjectsClient = context.core.savedObjects.client;
+
+    const core = await context.core;
+    const securitySolution = await context.securitySolution;
+    const alerting = await context.alerting;
+
+    const rulesClient = alerting.getRulesClient();
+    const ruleExecutionLog = securitySolution.getRuleExecutionLog();
+    const savedObjectsClient = core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {

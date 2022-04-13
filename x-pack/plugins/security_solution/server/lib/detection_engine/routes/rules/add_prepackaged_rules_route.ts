@@ -54,10 +54,10 @@ export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => 
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
 
         const validated = await createPrepackagedRules(
-          context.securitySolution,
+          await context.securitySolution,
           rulesClient,
           undefined
         );

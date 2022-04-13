@@ -18,7 +18,7 @@ export async function getMetadataForEndpoints(
   requestHandlerContext: SecuritySolutionRequestHandlerContext
 ): Promise<HostMetadata[]> {
   const query = getESQueryHostMetadataByIDs(endpointIDs);
-  const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
+  const esClient = (await requestHandlerContext.core).elasticsearch.client.asCurrentUser;
   const { body } = await esClient.search<HostMetadata>(query as estypes.SearchRequest, {
     meta: true,
   });

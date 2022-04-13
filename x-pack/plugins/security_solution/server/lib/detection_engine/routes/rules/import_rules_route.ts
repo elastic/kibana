@@ -76,18 +76,25 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const actionsClient = context.actions.getActionsClient();
-        const esClient = context.core.elasticsearch.client;
-        const actionSOClient = context.core.savedObjects.getClient({
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+        const licensing = await context.licensing;
+        const alerting = await context.alerting;
+        const lists = await context.lists;
+        const actions = await context.actions;
+
+        const rulesClient = alerting.getRulesClient();
+        const actionsClient = actions.getActionsClient();
+        const esClient = core.elasticsearch.client;
+        const actionSOClient = core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
         });
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
-        const exceptionsClient = context.lists?.getExceptionListClient();
+        const savedObjectsClient = core.savedObjects.client;
+        const siemClient = securitySolution.getAppClient();
+        const exceptionsClient = lists?.getExceptionListClient();
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -172,7 +179,7 @@ export const importRulesRoute = (
           savedObjectsClient,
           exceptionsClient,
           isRuleRegistryEnabled,
-          spaceId: context.securitySolution.getSpaceId(),
+          spaceId: securitySolution.getSpaceId(),
           signalsIndex,
           existingLists: foundReferencedExceptionLists,
         });

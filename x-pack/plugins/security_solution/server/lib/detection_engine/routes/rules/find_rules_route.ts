@@ -49,9 +49,9 @@ export const findRulesRoute = (
 
       try {
         const { query } = request;
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const rules = await findRules({
           isRuleRegistryEnabled,

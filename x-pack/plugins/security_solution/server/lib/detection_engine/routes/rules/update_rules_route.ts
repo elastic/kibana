@@ -44,12 +44,17 @@ export const updateRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+        const licensing = await context.licensing;
+        const alerting = await context.alerting;
+
+        const rulesClient = alerting.getRulesClient();
+        const savedObjectsClient = core.savedObjects.client;
+        const siemClient = securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -76,7 +81,7 @@ export const updateRulesRoute = (
         });
 
         if (rule != null) {
-          const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
+          const ruleExecutionLog = securitySolution.getRuleExecutionLog();
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
           const [validated, errors] = transformValidate(
             rule,

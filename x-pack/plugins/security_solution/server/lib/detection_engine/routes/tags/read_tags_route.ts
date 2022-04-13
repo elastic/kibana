@@ -26,7 +26,7 @@ export const readTagsRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = (await context.alerting)?.getRulesClient();
 
       if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });

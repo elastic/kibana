@@ -35,9 +35,12 @@ export const deleteSignalsMigrationRoute = (
       const { migration_ids: migrationIds } = request.body;
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const soClient = context.core.savedObjects.client;
-        const appClient = context.securitySolution?.getAppClient();
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const soClient = core.savedObjects.client;
+        const appClient = securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }

@@ -84,7 +84,7 @@ const createFailedActionResponseEntry = async ({
   logger: Logger;
 }): Promise<void> => {
   // 8.0+ requires internal user to write to system indices
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
@@ -178,7 +178,7 @@ export const isolationRequestHandler = function (
     });
 
     // 8.0+ requires internal user to write to system indices
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     // if the new endpoint indices/data streams exists
     // write the action request to the new endpoint index

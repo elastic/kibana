@@ -35,12 +35,16 @@ export const finalizeSignalsMigrationRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const soClient = context.core.savedObjects.client;
+
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const soClient = core.savedObjects.client;
       const { migration_ids: migrationIds } = request.body;
 
       try {
-        const appClient = context.securitySolution?.getAppClient();
+        const appClient = securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
@@ -55,7 +59,7 @@ export const finalizeSignalsMigrationRoute = (
           soClient,
         });
 
-        const spaceId = context.securitySolution.getSpaceId();
+        const spaceId = securitySolution.getSpaceId();
         const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
         const finalizeResults = await Promise.all(
           migrations.map(async (migration) => {

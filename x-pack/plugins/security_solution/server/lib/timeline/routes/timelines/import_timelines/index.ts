@@ -46,7 +46,7 @@ export const importTimelinesRoute = (
     async (context, request, response) => {
       try {
         const siemResponse = buildSiemResponse(response);
-        const savedObjectsClient = context.core.savedObjects.client;
+        const savedObjectsClient = (await context.core).savedObjects.client;
         if (!savedObjectsClient) {
           return siemResponse.error({ statusCode: 404 });
         }

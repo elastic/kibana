@@ -48,13 +48,18 @@ export const updateRulesBulkRoute = (
 
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting.getRulesClient();
-      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution.getAppClient();
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+      const licensing = await context.licensing;
+      const alerting = await context.alerting;
+
+      const rulesClient = alerting.getRulesClient();
+      const ruleExecutionLog = securitySolution.getRuleExecutionLog();
+      const savedObjectsClient = core.savedObjects.client;
+      const siemClient = securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: licensing.license,
         ml,
         request,
         savedObjectsClient,

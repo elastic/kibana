@@ -12,7 +12,7 @@ import { Fetcher } from './utils/fetch';
 
 export function handleTree(): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
   return async (context, req, res) => {
-    const client = context.core.elasticsearch.client;
+    const client = (await context.core).elasticsearch.client;
     const fetcher = new Fetcher(client);
     const body = await fetcher.tree(req.body);
     return res.ok({

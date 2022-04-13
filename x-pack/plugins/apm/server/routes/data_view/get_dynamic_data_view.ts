@@ -26,14 +26,15 @@ export const getDynamicDataView = ({
   logger,
 }: Pick<APMRouteHandlerResources, 'logger' | 'config' | 'context'>) => {
   return withApmSpan('get_dynamic_data_view', async () => {
+    const coreContext = await context.core;
     const apmIndicies = await getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
+      savedObjectsClient: coreContext.savedObjects.client,
       config,
     });
     const dataViewTitle = getApmDataViewTitle(apmIndicies);
 
     const DataViewsFetcher = new IndexPatternsFetcher(
-      context.core.elasticsearch.client.asCurrentUser
+      coreContext.elasticsearch.client.asCurrentUser
     );
 
     // Since `getDynamicDataView` is called in setup_request (and thus by every endpoint)
