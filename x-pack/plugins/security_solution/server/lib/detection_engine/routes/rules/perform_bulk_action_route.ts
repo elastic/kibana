@@ -13,7 +13,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 
 import { RuleAlertType } from '../../rules/types';
 
-import type { RulesClient } from '../../../../../../alerting/server';
+import type { RulesClient, BulkEditError } from '../../../../../../alerting/server';
 import { SanitizedRule } from '../../../../../../alerting/common';
 
 import {
@@ -23,6 +23,7 @@ import {
 } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -39,7 +40,12 @@ import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
 import { patchRules } from '../../rules/patch_rules';
-import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
+import {
+  applyBulkActionEditToRule,
+  operationAdapterForRulesClient,
+  splitBulkEditActions,
+  ruleParamsModifier,
+} from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
@@ -60,18 +66,32 @@ interface NormalizedRuleError {
   }>;
 }
 
-const normalizeErrorResponse = (
-  errors: Array<PromisePoolError<string> | PromisePoolError<RuleAlertType>>
-): NormalizedRuleError[] => {
+type BulkActionError = PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError;
+
+const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[] => {
   const errorsMap = new Map();
 
-  errors.forEach(({ error, item }) => {
-    const { message, statusCode } =
-      error instanceof Error ? transformError(error) : { message: String(error), statusCode: 500 };
-    // The promise pool item is either a rule ID string or a rule object. We have
-    // string IDs when we fail to fetch rules. Rule objects come from other
-    // situations when we found a rule but failed somewhere else.
-    const rule = typeof item === 'string' ? { id: item } : { id: item.id, name: item.name };
+  errors.forEach((errorObj) => {
+    let message;
+    let statusCode;
+    let rule;
+    if ('rule' in errorObj) {
+      rule = errorObj.rule;
+      message = errorObj.message;
+    } else {
+      const { error, item } = errorObj;
+      const transformedError =
+        error instanceof Error
+          ? transformError(error)
+          : { message: String(error), statusCode: 500 };
+
+      message = transformedError.message;
+      statusCode = transformedError.statusCode;
+      // The promise pool item is either a rule ID string or a rule object. We have
+      // string IDs when we fail to fetch rules. Rule objects come from other
+      // situations when we found a rule but failed somewhere else.
+      rule = typeof item === 'string' ? { id: item } : { id: item.id, name: item.name };
+    }
 
     if (errorsMap.has(message)) {
       errorsMap.get(message).rules.push(rule);
@@ -85,6 +105,62 @@ const normalizeErrorResponse = (
   });
 
   return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
+};
+
+const buildBulkResponsePOC = (
+  response: KibanaResponseFactory,
+  {
+    errors = [],
+    updated = [],
+    created = [],
+    deleted = [],
+  }: {
+    //  errors?: Awaited<ReturnType<RulesClient['bulkEdit']>>['errors'];
+    errors?: BulkActionError[];
+    updated?: RuleAlertType[];
+    created?: RuleAlertType[];
+    deleted?: RuleAlertType[];
+  }
+) => {
+  // const errors = [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors];
+  const succeeded = updated.length + created.length + deleted.length;
+  const summary = {
+    failed: errors.length,
+    succeeded,
+    total: succeeded + errors.length,
+  };
+
+  const results = {
+    updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
+    created: created.map((rule) => internalRuleToAPIResponse(rule)),
+    deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
+  };
+
+  if (errors.length > 0) {
+    return response.custom({
+      headers: { 'content-type': 'application/json' },
+      body: Buffer.from(
+        JSON.stringify({
+          message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+          status_code: 500,
+          attributes: {
+            errors: normalizeErrorResponse(errors),
+            results,
+            summary,
+          },
+        })
+      ),
+      statusCode: 500,
+    });
+  }
+
+  return response.ok({
+    body: {
+      success: true,
+      rules_count: summary.total,
+      attributes: { results, summary },
+    },
+  });
 };
 
 const buildBulkResponse = (
@@ -248,7 +324,7 @@ export const performBulkActionRoute = (
       },
     },
     async (context, request, response) => {
-      const { body } = request;
+      const body = request.body;
       const siemResponse = buildSiemResponse(response);
 
       if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
@@ -270,9 +346,8 @@ export const performBulkActionRoute = (
       // subscribing to completed$, because it handles both cases when request was completed and aborted.
       // when route is finished by timeout, aborted$ is not getting fired
       request.events.completed$.subscribe(() => abortController.abort());
-
       try {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient: RulesClient = context.alerting.getRulesClient();
         const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const exceptionsClient = context.lists?.getExceptionListClient();
         const savedObjectsClient = context.core.savedObjects.client;
@@ -284,16 +359,40 @@ export const performBulkActionRoute = (
           savedObjectsClient,
         });
 
+        const query = body.query !== '' ? body.query : undefined;
+
+        if (body.action === BulkAction.edit) {
+          const { rulesClientOperations, ruleParamsModifierActions } = splitBulkEditActions(
+            body.edit
+          );
+
+          const { rules, errors } = await rulesClient.bulkEdit({
+            filter: query,
+            ...(body.ids ? { ids: body.ids ?? [] } : {}),
+            operations: rulesClientOperations.map(operationAdapterForRulesClient),
+            paramsModifier: async (ruleParams: RuleAlertType['params']) => {
+              throwAuthzError(await mlAuthz.validateRuleType(ruleParams.type));
+
+              return ruleParamsModifier(ruleParams, ruleParamsModifierActions);
+            },
+          });
+
+          return buildBulkResponsePOC(response, { updated: rules, errors });
+        }
+
         const fetchRulesOutcome = await fetchRulesByQueryOrIds({
           isRuleRegistryEnabled,
           rulesClient,
-          query: body.query,
+          query,
           ids: body.ids,
           abortSignal: abortController.signal,
         });
 
         const rules = fetchRulesOutcome.results.map(({ result }) => result);
         let bulkActionOutcome: PromisePoolOutcome<RuleAlertType, RuleAlertType | null>;
+        let updated: RuleAlertType[] = [];
+        let created: RuleAlertType[] = [];
+        let deleted: RuleAlertType[] = [];
 
         switch (body.action) {
           case BulkAction.enable:
@@ -319,6 +418,9 @@ export const performBulkActionRoute = (
               },
               abortSignal: abortController.signal,
             });
+            updated = bulkActionOutcome.results
+              .map(({ result }) => result)
+              .filter((rule): rule is RuleAlertType => rule !== null);
             break;
           case BulkAction.disable:
             bulkActionOutcome = await initPromisePool({
@@ -343,6 +445,9 @@ export const performBulkActionRoute = (
               },
               abortSignal: abortController.signal,
             });
+            updated = bulkActionOutcome.results
+              .map(({ result }) => result)
+              .filter((rule): rule is RuleAlertType => rule !== null);
             break;
           case BulkAction.delete:
             bulkActionOutcome = await initPromisePool({
@@ -365,6 +470,9 @@ export const performBulkActionRoute = (
               },
               abortSignal: abortController.signal,
             });
+            deleted = bulkActionOutcome.results
+              .map(({ item }) => item)
+              .filter((rule): rule is RuleAlertType => rule !== null);
             break;
           case BulkAction.duplicate:
             bulkActionOutcome = await initPromisePool({
@@ -387,6 +495,9 @@ export const performBulkActionRoute = (
               },
               abortSignal: abortController.signal,
             });
+            created = bulkActionOutcome.results
+              .map(({ item }) => item)
+              .filter((rule): rule is RuleAlertType => rule !== null);
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
@@ -407,52 +518,18 @@ export const performBulkActionRoute = (
               },
               body: responseBody,
             });
-          case BulkAction.edit:
-            bulkActionOutcome = await initPromisePool({
-              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-              items: rules,
-              executor: async (rule) => {
-                if (rule.params.immutable) {
-                  throw new BadRequestError('Elastic rule can`t be edited');
-                }
-
-                throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
-
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
-                const editedRule = body[BulkAction.edit].reduce(
-                  (acc, action) => applyBulkActionEditToRule(acc, action),
-                  migratedRule
-                );
-
-                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
-
-                await patchRules({
-                  rulesClient,
-                  rule: migratedRule,
-                  tags,
-                  index,
-                  timelineTitle,
-                  timelineId,
-                });
-
-                return editedRule;
-              },
-              abortSignal: abortController.signal,
-            });
-            break;
         }
 
         if (abortController.signal.aborted === true) {
           throw new AbortError('Bulk action was aborted');
         }
 
-        return buildBulkResponse(response, fetchRulesOutcome, bulkActionOutcome);
+        return buildBulkResponsePOC(response, {
+          updated,
+          deleted,
+          created,
+          errors: [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors],
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

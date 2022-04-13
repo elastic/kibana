@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BulkEditOperation } from '../../../../../alerting/server';
+
 import { RuleAlertType } from './types';
 
 import {
@@ -87,4 +89,116 @@ export const applyBulkActionEditToRule = (
   }
 
   return rule;
+};
+
+export const applyBulkActionEditToRuleParams = (
+  existingRuleParams: RuleAlertType['params'],
+  action: BulkActionEditPayload
+): RuleAlertType['params'] => {
+  let ruleParams = { ...existingRuleParams };
+
+  switch (action.type) {
+    // index_patterns actions
+    // index pattern is not present in machine learning rule type, so we throw error on it
+    case BulkActionEditType.add_index_patterns:
+      invariant(
+        ruleParams.type !== 'machine_learning',
+        "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+      );
+
+      ruleParams.index = addItemsToArray(ruleParams.index ?? [], action.value);
+      break;
+
+    case BulkActionEditType.delete_index_patterns:
+      invariant(
+        ruleParams.type !== 'machine_learning',
+        "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+      );
+
+      ruleParams.index = deleteItemsFromArray(ruleParams.index ?? [], action.value);
+      break;
+
+    case BulkActionEditType.set_index_patterns:
+      invariant(
+        ruleParams.type !== 'machine_learning',
+        "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+
+      ruleParams.index = action.value;
+      break;
+
+    // timeline actions
+    case BulkActionEditType.set_timeline:
+      ruleParams = {
+        ...ruleParams,
+        timelineId: action.value.timeline_id,
+        timelineTitle: action.value.timeline_title,
+      };
+  }
+
+  return ruleParams;
+};
+
+export const ruleParamsModifier = (
+  existingRuleParams: RuleAlertType['params'],
+  actions: BulkActionEditPayload[]
+) => {
+  return actions.reduce(
+    (acc, action) => ({ ...acc, ...applyBulkActionEditToRuleParams(acc, action) }),
+    existingRuleParams
+  );
+};
+
+export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
+  const splitActions: {
+    ruleParamsModifierActions: BulkActionEditPayload[];
+    rulesClientOperations: BulkActionEditPayload[];
+  } = {
+    ruleParamsModifierActions: [],
+    rulesClientOperations: [],
+  };
+
+  return actions.reduce((acc, action) => {
+    switch (action.type) {
+      case BulkActionEditType.add_tags:
+      case BulkActionEditType.set_tags:
+      case BulkActionEditType.delete_tags:
+        acc.rulesClientOperations.push(action);
+        break;
+      default:
+        acc.ruleParamsModifierActions.push(action);
+    }
+
+    return acc;
+  }, splitActions);
+};
+
+export const operationAdapterForRulesClient = (
+  action: BulkActionEditPayload
+): BulkEditOperation => {
+  switch (action.type) {
+    // tags actions
+    case BulkActionEditType.add_tags:
+      return {
+        field: 'tags',
+        operation: 'add',
+        value: action.value,
+      };
+
+    case BulkActionEditType.delete_tags:
+      return {
+        field: 'tags',
+        operation: 'delete',
+        value: action.value,
+      };
+
+    case BulkActionEditType.set_tags:
+      return {
+        field: 'tags',
+        operation: 'set',
+        value: action.value,
+      };
+  }
+
+  throw Error('No action match');
 };
