@@ -203,6 +203,7 @@ export const getInfoHandler: FleetRequestHandler<
       savedObjectsClient,
       pkgName,
       pkgVersion: pkgVersion || '',
+      skipArchive: true,
     });
     const body: GetInfoResponse = {
       item: res,

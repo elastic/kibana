@@ -99,13 +99,18 @@ export async function getPackageSavedObjects(
 
 export const getInstallations = getPackageSavedObjects;
 
-export async function getPackageInfo(options: {
+export async function getPackageInfo({
+  savedObjectsClient,
+  pkgName,
+  pkgVersion,
+  skipArchive = false,
+}: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
+  /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
+  skipArchive?: boolean;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName),
@@ -121,12 +126,12 @@ export async function getPackageInfo(options: {
       ? pkgVersion
       : savedObject?.attributes.install_version ?? latestPackage!.version;
 
-  // If same version is available in registry, use the info from the registry (faster), otherwise build it from the archive
+  // If same version is available in registry and skipArchive is true, use the info from the registry (faster),
+  // otherwise build it from the archive
   let paths: string[];
-  let packageInfo: RegistryPackage | ArchivePackage | undefined = await Registry.fetchInfo(
-    pkgName,
-    pkgVersion
-  ).catch(() => undefined);
+  let packageInfo: RegistryPackage | ArchivePackage | undefined = skipArchive
+    ? await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined)
+    : undefined;
 
   if (packageInfo) {
     // Fix the paths
