@@ -34,7 +34,7 @@ const ServiceGroupsTitle = i18n.translate(
  * The array of route definitions to be used when the application
  * creates the routes.
  */
-const apmRoutes = {
+export const apmRoutes = {
   '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
     params: t.intersection([

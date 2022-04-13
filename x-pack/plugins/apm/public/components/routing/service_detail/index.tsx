@@ -96,6 +96,8 @@ export const serviceDetail = {
         environment: ENVIRONMENT_ALL.value,
         serviceGroup: '',
         latencyAggregationType: LatencyAggregationType.avg,
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
       },
     },
     children: {
@@ -119,6 +121,7 @@ export const serviceDetail = {
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
           }),
         }),
+        locatorPageId: 'serviceOverview' as const,
       },
       '/services/{serviceName}/transactions': {
         ...page({
@@ -156,6 +159,12 @@ export const serviceDetail = {
                 offsetRt,
               ]),
             }),
+            locatorPageId: 'serviceTransactionsOverview' as const,
+            defaults: {
+              query: {
+                transactionName: '',
+              },
+            },
           },
           '/services/{serviceName}/transactions': {
             element: <TransactionOverview />,
@@ -205,13 +214,16 @@ export const serviceDetail = {
           },
         },
       },
-      '/services/{serviceName}/metrics': page({
-        tab: 'metrics',
-        title: i18n.translate('xpack.apm.views.metrics.title', {
-          defaultMessage: 'Metrics',
+      '/services/{serviceName}/metrics': {
+        ...page({
+          tab: 'metrics',
+          title: i18n.translate('xpack.apm.views.metrics.title', {
+            defaultMessage: 'Metrics',
+          }),
+          element: <ServiceMetrics />,
         }),
-        element: <ServiceMetrics />,
-      }),
+        locatorPageId: 'serviceMetricsOverview' as const,
+      },
       '/services/{serviceName}/nodes': {
         ...page({
           tab: 'nodes',
@@ -252,16 +264,19 @@ export const serviceDetail = {
           hidden: true,
         },
       }),
-      '/services/{serviceName}/logs': page({
-        tab: 'logs',
-        title: i18n.translate('xpack.apm.views.logs.title', {
-          defaultMessage: 'Logs',
+      '/services/{serviceName}/logs': {
+        ...page({
+          tab: 'logs',
+          title: i18n.translate('xpack.apm.views.logs.title', {
+            defaultMessage: 'Logs',
+          }),
+          element: <ServiceLogs />,
+          searchBarOptions: {
+            showKueryBar: false,
+          },
         }),
-        element: <ServiceLogs />,
-        searchBarOptions: {
-          showKueryBar: false,
-        },
-      }),
+        locatorPageId: 'serviceLogsOverview' as const,
+      },
       '/services/{serviceName}/profiling': page({
         tab: 'profiling',
         title: i18n.translate('xpack.apm.views.serviceProfiling.title', {

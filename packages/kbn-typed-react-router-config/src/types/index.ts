@@ -29,6 +29,7 @@ export interface Route {
   params?: t.Type<any>;
   defaults?: Record<string, Record<string, string>>;
   pre?: ReactElement;
+  locatorPageId?: string;
 }
 
 export interface RouteWithPath extends Route {

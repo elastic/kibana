@@ -56,7 +56,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ConfigSchema } from '.';
-import { APMLocatorDefinition } from '../common/locator';
+import { APMLocatorDefinition } from './locator/locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
