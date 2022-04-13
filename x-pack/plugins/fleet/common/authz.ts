@@ -29,6 +29,15 @@ export interface FleetAuthz {
   };
 }
 
+export interface FleetPackageAuthz {
+  packageName: string;
+  packageActions: string[];
+  manageAgentPolicy: boolean; // or manageAll to be equivalent of legacy fleet.all
+  managePackagePolicy: boolean;
+  executePackageAction: boolean;
+  readPackageActionResult: boolean;
+}
+
 interface CalculateParams {
   fleet: {
     all: boolean;
@@ -69,6 +78,8 @@ export const calculateAuthz = ({
     writePackageSettings: fleet.all && integrations.all,
 
     readIntegrationPolicies: fleet.all && (integrations.all || integrations.read),
+
+    // manage_all || manage_package_policy || manage_agent_policy
     writeIntegrationPolicies: fleet.all && integrations.all,
   },
 });

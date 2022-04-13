@@ -28,7 +28,11 @@ export type {
   GrantAPIKeyResult,
   AuthenticationServiceStart,
 } from './authentication';
-export type { CheckPrivilegesPayload, CasesSupportedOperations } from './authorization';
+export type {
+  CheckPrivilegesPayload,
+  CasesSupportedOperations,
+  HasPrivilegesResponse,
+} from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
 export type { AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };

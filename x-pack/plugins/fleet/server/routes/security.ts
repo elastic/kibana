@@ -15,7 +15,9 @@ import type {
   OnPostAuthHandler,
 } from 'src/core/server';
 
-import type { FleetAuthz } from '../../common';
+import type { HasPrivilegesResponse } from '../../../security/server';
+
+import type { FleetAuthz, FleetPackageAuthz } from '../../common';
 import { calculateAuthz, INTEGRATIONS_PLUGIN_ID } from '../../common';
 
 import { appContextService } from '../services';
@@ -137,6 +139,10 @@ type DeepPartialTruthy<T> = {
 
 type FleetAuthzRequirements = DeepPartialTruthy<FleetAuthz>;
 
+type FleetPackageAuthzRequirements = DeepPartialTruthy<FleetPackageAuthz> & {
+  getPackageFromRequest?: (req: any) => string | undefined;
+};
+
 type FleetAuthzRouteRegistrar<
   Method extends RouteMethod,
   Context extends RequestHandlerContext = RequestHandlerContext
@@ -145,8 +151,9 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-interface FleetAuthzRouteConfig {
+export interface FleetAuthzRouteConfig {
   fleetAuthz?: FleetAuthzRequirements;
+  fleetPackageAuthz?: FleetPackageAuthzRequirements;
 }
 
 type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> &
@@ -242,6 +249,9 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
   }
 
   const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
+    // instead of doing authz check here, using hasRoutePrivileges in a route handler wrapper to get hold of req params
+    return toolkit.next();
+
     if (!shouldHandlePostAuthRequest(req)) {
       return toolkit.next();
     }
@@ -277,3 +287,104 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
 
   return { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler };
 }
+
+export const hasRoutePrivileges = async (
+  req: any,
+  fleetAuthzConfig: FleetAuthzRouteConfig,
+  spaceId: string
+): Promise<boolean> => {
+  const packageAuthz = fleetAuthzConfig.fleetPackageAuthz?.getPackageFromRequest
+    ? {
+        ...fleetAuthzConfig.fleetPackageAuthz,
+        packageName:
+          fleetAuthzConfig.fleetPackageAuthz.getPackageFromRequest(req) ||
+          fleetAuthzConfig.fleetPackageAuthz.packageName,
+      }
+    : fleetAuthzConfig.fleetPackageAuthz;
+
+  const packagePrivileges = [];
+  if (packageAuthz?.executePackageAction) {
+    packagePrivileges.push('execute_package_action');
+  }
+  if (packageAuthz?.managePackagePolicy) {
+    packagePrivileges.push('manage_package_policy');
+  }
+  if (packageAuthz?.manageAgentPolicy) {
+    packagePrivileges.push('manage_agent_policy');
+  }
+  if (packageAuthz?.readPackageActionResult) {
+    packagePrivileges.push('read_package_action_result');
+  }
+
+  // this is working
+  const hasPrivilegesResponse: HasPrivilegesResponse = await appContextService
+    .getClusterClient()
+    .asScoped(req)
+    .asCurrentUser.security.hasPrivileges({
+      body: {
+        application: [
+          // convert fleet authz to es application privileges
+          {
+            application: 'kibana-.kibana',
+            resources: ['*'],
+            privileges: [
+              // "feature_fleetv2.all",
+              'feature_fleet.all',
+            ],
+          },
+          ...(packagePrivileges.length > 0
+            ? [
+                {
+                  application: 'kibana-.kibana',
+                  // specific actions from packageAuthz?.packageActions
+                  // which privilege indicates "package:endpoint:action:*" ?,
+                  resources: [
+                    'package:' + packageAuthz?.packageName + ':*',
+                    spaceId ? 'space:' + spaceId : 'space:*',
+                  ],
+                  privileges: packagePrivileges,
+                },
+              ]
+            : []),
+        ],
+      },
+    });
+  appContextService.getLogger().warn(JSON.stringify(hasPrivilegesResponse, null, 2));
+
+  // checks if user has at least one of legacy or new privileges
+
+  const hasLegacyPrivilege = Object.values(
+    hasPrivilegesResponse.application['kibana-.kibana']['*']
+  ).every((val) => val === true);
+
+  // space:* works automatically if queried for space:teamA
+  const hasNewPrivilege = Object.keys(hasPrivilegesResponse.application['kibana-.kibana'])
+    .filter((res) => res !== '*')
+    .every((res) =>
+      Object.values(hasPrivilegesResponse.application['kibana-.kibana'][res]).every(
+        (val) => val === true
+      )
+    );
+
+  // console.log(hasLegacyPrivilege);
+  // console.log(hasNewPrivilege);
+  return hasLegacyPrivilege || hasNewPrivilege;
+};
+
+async function authHandler(
+  fleetAuthzConfig: FleetAuthzRouteConfig,
+  nextHandler,
+  context,
+  request,
+  response
+) {
+  if (!(await hasRoutePrivileges(request, fleetAuthzConfig, context.fleet.spaceId))) {
+    return response.forbidden();
+  }
+  // return response.forbidden();
+
+  return nextHandler(context, request, response);
+}
+
+export const authzHandlerWrapper = (fleetAuthzConfig, nextHandler) =>
+  authHandler.bind(null, fleetAuthzConfig, nextHandler);
