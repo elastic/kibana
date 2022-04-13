@@ -18,6 +18,7 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
+  hidePrivacyStatement: schema.boolean({ defaultValue: false }),
   optIn: schema.conditional(
     schema.siblingRef('allowChangingOptInStatus'),
     schema.literal(false),
@@ -50,5 +51,6 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     optIn: true,
     sendUsageFrom: true,
     sendUsageTo: true,
+    hidePrivacyStatement: true,
   },
 };

@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import { Filter as DataFilter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/common';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
